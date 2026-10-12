@@ -355,6 +355,10 @@ body {
   border: 1px solid var(--border);
   overflow: hidden;
 }
+#productTableContainer {
+  overflow-x: auto;
+  width: 100%;
+}
 .tbl {
   width: 100%;
   border-collapse: collapse;
@@ -377,10 +381,25 @@ body {
 .tbl tbody tr:hover {
   background: #f8fafc;
 }
+/* Dòng tổng hợp (Summary row) chuẩn phong cách KiotViet */
+.tbl tr.summary-row,
+.tbl thead tr.summary-row,
 .tbl tbody tr.summary-row {
   background-color: #fafbfc;
-  font-weight: 700;
+}
+.tbl tr.summary-row td,
+.tbl thead tr.summary-row td,
+.tbl tbody tr.summary-row td {
+  padding: 11px 12px;
+  font-size: 13px;
+  background-color: #fafbfc;
   border-bottom: 2px solid #e5e7eb;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.tbl tr.summary-row:hover td,
+.tbl thead tr.summary-row:hover td {
+  background-color: #fafbfc;
 }
 .num {
   text-align: right;

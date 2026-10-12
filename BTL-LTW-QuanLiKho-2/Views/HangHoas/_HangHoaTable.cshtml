@@ -19,15 +19,15 @@
         </tr>
         <!-- Dòng tổng hợp (Summary row) chuẩn như ảnh KiotViet -->
         <tr class="summary-row">
-            <td></td>
-            <td></td>
-            <td></td>
+            <td class="text-center"></td>
+            <td class="text-center"></td>
+            <td class="text-center"></td>
             <td></td>
             <td></td>
             <td class="num"></td>
             <td class="num"></td>
             <td class="num fw-bold text-dark">@Model.TotalStockSum.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</td>
-            <td class="num fw-bold text-dark">@Model.TotalKhachDatSum</td>
+            <td class="num fw-bold text-dark">@Model.TotalKhachDatSum.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</td>
             <td class="text-muted">---</td>
             <td class="text-muted">---</td>
         </tr>
