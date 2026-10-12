@@ -46,6 +46,9 @@ public class HangHoaForm
     [Required, StringLength(20)]
     [Display(Name = "Trạng thái")]
     public string TrangThai { get; set; } = "DANG_BAN";
+
+    public string? HinhAnhBase64 { get; set; }
+    public bool XoaHinhAnh { get; set; }
 }
 
 public class HangHoaItemVM
@@ -64,6 +67,10 @@ public class HangHoaItemVM
     public string? QuyCach { get; set; }
     public string TrangThai { get; set; } = "DANG_BAN";
     public bool IsFavorite { get; set; }
+    public bool HasImage { get; set; }
+    public DateTime? NgayTao { get; set; }
+    public int KhachDat { get; set; } = 0;
+    public string DuKienHetHang { get; set; } = "---";
 }
 
 public class HangHoaIndexVM
@@ -82,6 +89,7 @@ public class HangHoaIndexVM
     public int ActiveCount { get; set; }
     public decimal TotalStockSum { get; set; }
     public decimal TotalValueSum { get; set; }
+    public int TotalKhachDatSum { get; set; } = 0;
 
     public List<NhomHang> NhomHangs { get; set; } = new();
     public List<DonViTinh> DonViTinhs { get; set; } = new();

@@ -3,19 +3,33 @@
 <table class="tbl" id="productTable">
     <thead>
         <tr>
-            <th style="width: 36px;" class="text-center">
+            <th style="width: 34px;" class="text-center">
                 <input class="form-check-input" type="checkbox" id="selectAllRows" />
             </th>
-            <th style="width: 34px;" class="text-center">☆</th>
-            <th style="width: 120px;">Mã hàng</th>
+            <th style="width: 30px;" class="text-center text-muted">☆</th>
+            <th style="width: 44px;" class="text-center">Ảnh</th>
+            <th style="width: 130px;">Mã hàng</th>
             <th>Tên hàng</th>
-            <th class="num" style="width: 120px;">Giá bán</th>
-            <th class="num" style="width: 120px;">Giá vốn</th>
-            <th class="num" style="width: 100px;">Tồn kho</th>
-            <th style="width: 90px;">ĐVT</th>
-            <th style="width: 140px;">Nhóm hàng</th>
-            <th style="width: 110px;">Trạng thái</th>
-            <th style="width: 100px;" class="text-end">Thao tác</th>
+            <th class="num" style="width: 110px;">Giá bán</th>
+            <th class="num" style="width: 110px;">Giá vốn</th>
+            <th class="num" style="width: 90px;">Tồn kho</th>
+            <th class="num" style="width: 90px;">Khách đặt</th>
+            <th style="width: 135px;">Thời gian tạo</th>
+            <th style="width: 120px;">Dự kiến hết hàng</th>
+        </tr>
+        <!-- Dòng tổng hợp (Summary row) chuẩn như ảnh KiotViet -->
+        <tr class="summary-row">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="num"></td>
+            <td class="num"></td>
+            <td class="num fw-bold text-dark">@Model.TotalStockSum.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</td>
+            <td class="num fw-bold text-dark">@Model.TotalKhachDatSum</td>
+            <td class="text-muted">---</td>
+            <td class="text-muted">---</td>
         </tr>
     </thead>
     <tbody>
@@ -28,8 +42,19 @@
                         <input class="form-check-input row-select" type="checkbox" value="@item.MaHang" />
                     </td>
                     <td class="text-center text-muted" style="cursor: pointer;">☆</td>
+                    <td class="text-center p-1">
+                        <div class="product-img-wrapper" title="@item.TenHang">
+                            <img src="/HangHoas/GetImage/@item.MaHang" class="product-thumb-img" alt="@item.TenHang" />
+                            @if (item.HasImage)
+                            {
+                                <div class="product-img-popover">
+                                    <img src="/HangHoas/GetImage/@item.MaHang" alt="@item.TenHang" />
+                                </div>
+                            }
+                        </div>
+                    </td>
                     <td>
-                        <a href="javascript:void(0)" class="fw-bold text-decoration-none btn-edit-product" data-id="@item.MaHang">
+                        <a href="javascript:void(0)" class="fw-semibold text-primary text-decoration-none btn-edit-product" data-id="@item.MaHang">
                             @item.MaHangNoiBo
                         </a>
                     </td>
@@ -40,61 +65,39 @@
                             <small class="text-muted d-block">@item.QuyCach</small>
                         }
                     </td>
-                    <td class="num fw-semibold text-dark">
-                        @item.GiaBan.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) đ
+                    <td class="num text-dark">
+                        @item.GiaBan.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))
                     </td>
                     <td class="num text-muted">
-                        @item.GiaVon.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) đ
+                        @item.GiaVon.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))
                     </td>
                     <td class="num">
                         @if (item.TonKho <= 0)
                         {
-                            <span class="badge-soft b-danger fw-bold">0</span>
+                            <span class="text-danger fw-bold">0</span>
                         }
                         else if (item.TonToiThieu.HasValue && item.TonKho < item.TonToiThieu.Value)
                         {
-                            <span class="badge-soft b-danger fw-bold" title="Dưới định mức tối thiểu (@item.TonToiThieu)">
+                            <span class="text-danger fw-bold" title="Dưới định mức tồn">
                                 @item.TonKho.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ⚠️
                             </span>
                         }
                         else
                         {
-                            <span class="fw-bold text-primary">
-                                @item.TonKho.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))
-                            </span>
+                            <span>@item.TonKho.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</span>
                         }
                     </td>
-                    <td>@item.TenDvt</td>
-                    <td><span class="badge bg-light text-dark border">@item.TenNhom</span></td>
-                    <td>
-                        @if (item.TrangThai == "DANG_BAN")
-                        {
-                            <span class="badge-soft b-ok">Đang bán</span>
-                        }
-                        else
-                        {
-                            <span class="badge-soft b-draft">Ngừng bán</span>
-                        }
+                    <td class="num text-muted">
+                        @item.KhachDat
                     </td>
-                    <td class="text-end">
-                        <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 btn-edit-product" data-id="@item.MaHang" title="Sửa">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 btn-delete-product" data-id="@item.MaHang" data-name="@item.TenHang" title="Xóa">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                    <td class="text-muted small">
+                        @(item.NgayTao?.ToString("dd/MM/yyyy HH:mm") ?? "---")
+                    </td>
+                    <td class="text-muted small">
+                        @item.DuKienHetHang
                     </td>
                 </tr>
             }
-
-            <!-- Dòng tổng kết -->
-            <tr class="summary-row">
-                <td colspan="4" class="fw-bold text-end">Tổng cộng (@Model.TotalCount mặt hàng):</td>
-                <td class="num fw-bold">---</td>
-                <td class="num fw-bold">---</td>
-                <td class="num fw-bold text-primary">@Model.TotalStockSum.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</td>
-                <td colspan="4"></td>
-            </tr>
         }
         else
         {
@@ -111,7 +114,7 @@
     </tbody>
 </table>
 
-<!-- Phân trang -->
+<!-- Phân trang đáy bảng -->
 <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light">
     <div class="text-muted small">
         Hiển thị <strong>@Model.Items.Count</strong> / <strong>@Model.TotalCount</strong> hàng hóa · Trang <strong>@Model.Page</strong> / <strong>@Model.TotalPages</strong>

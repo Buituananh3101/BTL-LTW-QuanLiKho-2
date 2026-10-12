@@ -39,6 +39,34 @@ public class HangHoasController : Controller
         return PartialView("_HangHoaTable", vm);
     }
 
+    // Lấy ảnh trực tiếp từ CSDL
+    [HttpGet]
+    [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Client)]
+    public async Task<IActionResult> GetImage(int id)
+    {
+        var item = await _context.HangHoas.AsNoTracking().FirstOrDefaultAsync(x => x.MaHang == id);
+        if (item?.HinhAnh == null || item.HinhAnh.Length == 0)
+        {
+            return File(GetDefaultPlaceholderSvg(), "image/svg+xml");
+        }
+
+        string mime = "image/jpeg";
+        if (item.HinhAnh.Length > 4 && item.HinhAnh[0] == 0x89 && item.HinhAnh[1] == 0x50 && item.HinhAnh[2] == 0x4E && item.HinhAnh[3] == 0x47)
+        {
+            mime = "image/png";
+        }
+        else if (item.HinhAnh.Length > 2 && item.HinhAnh[0] == 0x47 && item.HinhAnh[1] == 0x49)
+        {
+            mime = "image/gif";
+        }
+        else if (item.HinhAnh.Length > 12 && item.HinhAnh[8] == 0x57 && item.HinhAnh[9] == 0x45 && item.HinhAnh[10] == 0x42 && item.HinhAnh[11] == 0x50)
+        {
+            mime = "image/webp";
+        }
+
+        return File(item.HinhAnh, mime);
+    }
+
     private async Task<HangHoaIndexVM> BuildIndexVM(string? q, int? nhom, string? trangThai, string tonKhoFilter, int page)
     {
         int whId = GetCurrentWarehouseId();
@@ -99,7 +127,11 @@ public class HangHoasController : Controller
                 TonKho = stock,
                 TonToiThieu = nguong?.TonToiThieu,
                 QuyCach = x.QuyCach,
-                TrangThai = x.TrangThai
+                TrangThai = x.TrangThai,
+                HasImage = x.HinhAnh != null && x.HinhAnh.Length > 0,
+                NgayTao = x.NgayTao,
+                KhachDat = 0,
+                DuKienHetHang = "---"
             };
         }).ToList();
 
@@ -143,6 +175,7 @@ public class HangHoasController : Controller
             ActiveCount = allItems.Count(x => x.TrangThai == "DANG_BAN"),
             TotalStockSum = allItems.Sum(x => x.TonKho),
             TotalValueSum = allItems.Sum(x => x.TonKho * x.GiaBan),
+            TotalKhachDatSum = 0,
             NhomHangs = nhomList,
             DonViTinhs = dvtList
         };
@@ -174,6 +207,12 @@ public class HangHoasController : Controller
 
         var nguong = item.NguongTonKhos.FirstOrDefault();
 
+        string? imgBase64 = null;
+        if (item.HinhAnh != null && item.HinhAnh.Length > 0)
+        {
+            imgBase64 = "data:image/jpeg;base64," + Convert.ToBase64String(item.HinhAnh);
+        }
+
         return Json(new
         {
             maHang = item.MaHang,
@@ -186,7 +225,8 @@ public class HangHoasController : Controller
             giaVon = cost,
             tonKhoBanDau = stock,
             tonToiThieu = nguong?.TonToiThieu ?? 0,
-            trangThai = item.TrangThai
+            trangThai = item.TrangThai,
+            hinhAnhBase64 = imgBase64
         });
     }
 
@@ -238,6 +278,14 @@ public class HangHoasController : Controller
 
         var item = new HangHoa();
         Copy(model, item);
+        item.NgayTao = DateTime.Now;
+
+        // Lưu ảnh trực tiếp vào CSDL nếu có
+        if (!string.IsNullOrWhiteSpace(model.HinhAnhBase64))
+        {
+            item.HinhAnh = ParseBase64Image(model.HinhAnhBase64);
+        }
+
         _context.HangHoas.Add(item);
         await _context.SaveChangesAsync();
 
@@ -293,7 +341,8 @@ public class HangHoasController : Controller
     [HttpPost]
     public async Task<IActionResult> Edit(int id, [FromBody] HangHoaForm model)
     {
-        if (model == null || id != model.MaHang) return BadRequest(new { message = "Dữ liệu không khớp." });
+        if (model == null) return BadRequest(new { message = "Dữ liệu không hợp lệ." });
+        model.MaHang = id;
 
         var item = await _context.HangHoas.FindAsync(id);
         if (item == null) return NotFound(new { message = "Không tìm thấy hàng hóa." });
@@ -307,6 +356,17 @@ public class HangHoasController : Controller
         }
 
         Copy(model, item);
+
+        // Xử lý ảnh: cập nhật hoặc xóa
+        if (model.XoaHinhAnh)
+        {
+            item.HinhAnh = null;
+        }
+        else if (!string.IsNullOrWhiteSpace(model.HinhAnhBase64))
+        {
+            item.HinhAnh = ParseBase64Image(model.HinhAnhBase64);
+        }
+
         await _context.SaveChangesAsync();
 
         int whId = GetCurrentWarehouseId();
@@ -351,7 +411,6 @@ public class HangHoasController : Controller
             return BadRequest(new { message = "Hàng hóa này đã phát sinh giao dịch/chứng từ trong hệ thống, không thể xóa. Bạn có thể chuyển sang trạng thái 'Ngừng bán'." });
         }
 
-        // Xóa ngưỡng tồn nếu có
         var nguongs = await _context.NguongTonKhos.Where(x => x.MaHang == id).ToListAsync();
         _context.NguongTonKhos.RemoveRange(nguongs);
 
@@ -359,6 +418,31 @@ public class HangHoasController : Controller
         await _context.SaveChangesAsync();
 
         return Json(new { success = true, message = $"Đã xóa hàng hóa {item.TenHang} thành công." });
+    }
+
+    private static byte[]? ParseBase64Image(string? base64)
+    {
+        if (string.IsNullOrWhiteSpace(base64)) return null;
+        try
+        {
+            int commaIdx = base64.IndexOf(',');
+            string clean = commaIdx >= 0 ? base64.Substring(commaIdx + 1) : base64;
+            return Convert.FromBase64String(clean.Trim());
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static byte[] GetDefaultPlaceholderSvg()
+    {
+        string svg = @"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 40 40"" width=""40"" height=""40"">
+            <rect width=""40"" height=""40"" rx=""6"" fill=""#eef2f6""/>
+            <path d=""M10 28l7-9 5 6 6-8 6 11H10z"" fill=""#94a3b8""/>
+            <circle cx=""15"" cy=""14"" r=""2.5"" fill=""#94a3b8""/>
+        </svg>";
+        return System.Text.Encoding.UTF8.GetBytes(svg);
     }
 
     private async Task ValidateAndPrepareForm(HangHoaForm m)
@@ -369,7 +453,6 @@ public class HangHoasController : Controller
             ModelState.AddModelError("TenHang", "Tên hàng hóa không được để trống.");
         }
 
-        // Tự động sinh mã hàng nếu chưa nhập
         if (string.IsNullOrWhiteSpace(m.MaHangNoiBo))
         {
             int maxId = await _context.HangHoas.MaxAsync(x => (int?)x.MaHang) ?? 0;

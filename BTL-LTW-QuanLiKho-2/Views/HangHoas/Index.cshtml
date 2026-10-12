@@ -3,46 +3,24 @@
     ViewData["Title"] = "Hàng hóa";
 }
 
-<main class="page">
-    <!-- Header của trang: Tiêu đề + Ô tìm kiếm + Các nút thao tác -->
-    <div class="page-head">
-        <h1>Hàng hóa</h1>
-
-        <div class="search">
-            <i class="bi bi-search"></i>
-            <input id="keywordSearch" class="form-control" placeholder="Theo mã, tên hàng... (F3)" value="@Model.Q" autocomplete="off" />
-            <i class="bi bi-sliders" title="Tìm kiếm nâng cao"></i>
+<div class="kiot-container">
+    <!-- CỘT BÊN TRÁI: TIÊU ĐỀ "HÀNG HÓA" + BỘ LỌC -->
+    <aside class="kiot-sidebar-col">
+        <div class="kiot-sidebar-title">
+            Hàng hóa
         </div>
 
-        <div class="actions">
-            <button type="button" class="btn btn-brand" id="btnOpenCreateModal">
-                <i class="bi bi-plus-lg me-1"></i>+ Thêm mới
-            </button>
-            <button type="button" class="btn btn-tool" onclick="alert('Tính năng xuất danh sách Excel');">
-                <i class="bi bi-box-arrow-up me-1"></i>Xuất file <i class="bi bi-chevron-down small"></i>
-            </button>
-            <button type="button" class="btn btn-tool" title="Tải lại bảng" id="btnReloadTable">
-                <i class="bi bi-arrow-clockwise"></i>
-            </button>
-            <button type="button" class="btn btn-tool" title="Trợ giúp" onclick="alert('Hệ thống quản lý danh mục hàng hóa KiotViet');">
-                <i class="bi bi-question-circle"></i>
-            </button>
-        </div>
-    </div>
-
-    <div class="cols">
-        <!-- Cột lọc bên trái (KiotViet filter sidebar) -->
-        <aside class="filter">
+        <div class="kiot-filter-box">
             <!-- Nhóm hàng -->
-            <div class="block">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6>Nhóm hàng</h6>
-                    <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 text-muted" id="btnResetFilter">
+            <div class="f-block">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="mb-0">Nhóm hàng</h6>
+                    <a href="javascript:void(0)" class="small text-primary text-decoration-none fw-semibold" id="btnSidebarResetGroup">
                         Đặt lại
-                    </button>
+                    </a>
                 </div>
-                <select class="form-select filter-change" id="filterNhomHang" name="nhom">
-                    <option value="">-- Tất cả nhóm hàng --</option>
+                <select class="form-select filter-change" id="filterNhomHang">
+                    <option value="">Chọn nhóm hàng</option>
                     @foreach (var g in Model.NhomHangs)
                     {
                         <option value="@g.MaNhom" selected="@(Model.Nhom == g.MaNhom)">@g.TenNhom</option>
@@ -51,64 +29,132 @@
             </div>
 
             <!-- Tồn kho -->
-            <div class="block">
+            <div class="f-block">
                 <h6>Tồn kho</h6>
-                <div class="form-check mb-2">
-                    <input class="form-check-input filter-radio" type="radio" name="tonKhoFilter" id="tkAll" value="ALL" @(Model.TonKhoFilter == "ALL" ? "checked" : "") />
-                    <label class="form-check-label" for="tkAll">Tất cả</label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input filter-radio" type="radio" name="tonKhoFilter" id="tkCon" value="CON_HANG" @(Model.TonKhoFilter == "CON_HANG" ? "checked" : "") />
-                    <label class="form-check-label" for="tkCon">Còn hàng trong kho</label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input filter-radio" type="radio" name="tonKhoFilter" id="tkHet" value="HET_HANG" @(Model.TonKhoFilter == "HET_HANG" ? "checked" : "") />
-                    <label class="form-check-label" for="tkHet">Hết hàng trong kho</label>
+                <div class="text-muted small mb-1">Tiêu chí tồn</div>
+                <select class="form-select filter-change" id="filterTonKho">
+                    <option value="ALL" selected="@(Model.TonKhoFilter == "ALL")">Tất cả</option>
+                    <option value="CON_HANG" selected="@(Model.TonKhoFilter == "CON_HANG")">Còn hàng trong kho</option>
+                    <option value="HET_HANG" selected="@(Model.TonKhoFilter == "HET_HANG")">Hết hàng trong kho</option>
+                    <option value="DUOI_DINH_MUC" selected="@(Model.TonKhoFilter == "DUOI_DINH_MUC")">Dưới định mức tồn ⚠️</option>
+                </select>
+            </div>
+
+            <!-- Dự kiến hết hàng -->
+            <div class="f-block">
+                <h6>Dự kiến hết hàng</h6>
+                <div class="form-check mb-1">
+                    <input class="form-check-input" type="radio" name="duKienFilter" id="dkAll" checked />
+                    <label class="form-check-label d-flex justify-content-between align-items-center" for="dkAll">
+                        <span>Toàn thời gian</span>
+                        <i class="bi bi-chevron-right text-muted small"></i>
+                    </label>
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input filter-radio" type="radio" name="tonKhoFilter" id="tkDuoi" value="DUOI_DINH_MUC" @(Model.TonKhoFilter == "DUOI_DINH_MUC" ? "checked" : "") />
-                    <label class="form-check-label text-danger" for="tkDuoi">Dưới định mức tồn ⚠️</label>
+                    <input class="form-check-input" type="radio" name="duKienFilter" id="dkCustom" />
+                    <label class="form-check-label d-flex justify-content-between align-items-center" for="dkCustom">
+                        <span>Tùy chỉnh</span>
+                        <i class="bi bi-calendar3 text-muted small"></i>
+                    </label>
                 </div>
             </div>
 
-            <!-- Trạng thái -->
-            <div class="block">
-                <h6>Trạng thái hàng hóa</h6>
-                <div class="form-check mb-2">
-                    <input class="form-check-input filter-status" type="radio" name="trangThaiFilter" id="ttAll" value="" @(string.IsNullOrEmpty(Model.TrangThai) ? "checked" : "") />
-                    <label class="form-check-label" for="ttAll">Tất cả</label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input filter-status" type="radio" name="trangThaiFilter" id="ttDangBan" value="DANG_BAN" @(Model.TrangThai == "DANG_BAN" ? "checked" : "") />
-                    <label class="form-check-label" for="ttDangBan">Đang bán</label>
+            <!-- Thời gian tạo -->
+            <div class="f-block">
+                <h6>Thời gian tạo</h6>
+                <div class="form-check mb-1">
+                    <input class="form-check-input" type="radio" name="tgTaoFilter" id="tgtAll" checked />
+                    <label class="form-check-label d-flex justify-content-between align-items-center" for="tgtAll">
+                        <span>Toàn thời gian</span>
+                        <i class="bi bi-chevron-right text-muted small"></i>
+                    </label>
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input filter-status" type="radio" name="trangThaiFilter" id="ttNgungBan" value="NGUNG_BAN" @(Model.TrangThai == "NGUNG_BAN" ? "checked" : "") />
-                    <label class="form-check-label" for="ttNgungBan">Ngừng bán</label>
+                    <input class="form-check-input" type="radio" name="tgTaoFilter" id="tgtCustom" />
+                    <label class="form-check-label d-flex justify-content-between align-items-center" for="tgtCustom">
+                        <span>Tùy chỉnh</span>
+                        <i class="bi bi-calendar3 text-muted small"></i>
+                    </label>
                 </div>
             </div>
 
-            <!-- Thông tin kho hiện tại -->
-            <div class="block">
-                <h6>Kho đang chọn</h6>
-                <div class="p-2 rounded bg-light border text-muted small">
-                    <i class="bi bi-buildings me-1 text-primary"></i>
-                    <strong>@Model.CurrentWarehouseName</strong>
-                </div>
+            <!-- Nhà cung cấp -->
+            <div class="f-block">
+                <h6>Nhà cung cấp</h6>
+                <input type="text" class="form-control" placeholder="Chọn nhà cung cấp" />
             </div>
-        </aside>
 
-        <!-- Khu vực hiển thị bảng hàng hóa -->
+            <!-- Vị trí -->
+            <div class="f-block">
+                <h6>Vị trí</h6>
+                <input type="text" class="form-control" placeholder="Chọn vị trí" />
+            </div>
+
+            <!-- Loại hàng -->
+            <div class="f-block">
+                <h6>Loại hàng</h6>
+                <input type="text" class="form-control" placeholder="Chọn loại hàng" />
+            </div>
+        </div>
+    </aside>
+
+    <!-- CỘT BÊN PHẢI: THANH TÌM KIẾM THẲNG HÀNG VỚI DANH SÁCH + BẢNG HÀNG HÓA -->
+    <main class="kiot-main-col">
+        <!-- Toolbar trên cùng: Thanh tìm kiếm thẳng hàng với list bảng bên dưới -->
+        <div class="kiot-toolbar-row">
+            <div class="kiot-search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã, tên hàng" value="@Model.Q" autocomplete="off" />
+                <i class="bi bi-arrow-left-right" title="Tìm kiếm nâng cao"></i>
+            </div>
+
+            <div class="kiot-actions-group">
+                <!-- Dropdown + Tạo mới -->
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="btnDropdownCreate" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-plus-lg me-1"></i>Tạo mới
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="btnDropdownCreate">
+                        <li>
+                            <a class="dropdown-item py-2" href="javascript:void(0)" id="btnOpenCreateModal">
+                                <i class="bi bi-box-seam me-2 text-primary"></i>Thêm hàng hóa
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Nút Import & Xuất file -->
+                <button type="button" class="btn btn-tool" onclick="alert('Tính năng Import file Excel');">
+                    <i class="bi bi-box-arrow-in-down me-1"></i>Import file
+                </button>
+                <button type="button" class="btn btn-tool" onclick="alert('Tính năng xuất danh sách Excel');">
+                    <i class="bi bi-box-arrow-up me-1"></i>Xuất file
+                </button>
+
+                <!-- 3 icon phụ của KiotViet -->
+                <button type="button" class="btn btn-tool" title="Xem cột hiển thị" id="btnReloadTable">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+                <button type="button" class="btn btn-tool" title="Cài đặt">
+                    <i class="bi bi-gear"></i>
+                </button>
+                <button type="button" class="btn btn-tool" title="Trợ giúp" onclick="alert('Hướng dẫn sử dụng Quản lý Hàng hóa');">
+                    <i class="bi bi-question-circle"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách hàng hóa -->
         <section id="content">
             <div id="productTableContainer">
                 <partial name="_HangHoaTable" model="Model" />
             </div>
         </section>
-    </div>
-</main>
+    </main>
+</div>
 
 <!-- ========================================================================
-     MODAL KIOTVIET: THÊM MỚI / CẬP NHẬT HÀNG HÓA
+     MODAL KIOTVIET: THÊM MỚI / CẬP NHẬT HÀNG HÓA (ĐẦY ĐỦ CHỨC NĂNG ẢNH CSDL)
      ======================================================================== -->
 <div class="modal fade modal-kiot" id="hangHoaModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
@@ -135,6 +181,11 @@
 
                 <form id="hangHoaForm">
                     <input type="hidden" id="formMaHang" name="MaHang" value="0" />
+                    <input type="hidden" id="formHinhAnhBase64" name="HinhAnhBase64" value="" />
+                    <input type="hidden" id="formXoaHinhAnh" name="XoaHinhAnh" value="false" />
+
+                    <!-- Input file ẩn để chọn ảnh -->
+                    <input type="file" id="fileUploadInput" accept="image/*" style="display: none;" />
 
                     <div class="tab-content" id="productModalTabContent">
                         <!-- TAB 1: THÔNG TIN -->
@@ -183,14 +234,25 @@
                                         </div>
                                     </div>
 
-                                    <!-- Vùng ảnh thumbnail -->
+                                    <!-- VÙNG ẢNH SẢN PHẨM HOÀN THIỆN: LƯU TRỰC TIẾP VÀO CSDL -->
                                     <div class="col-md-4 text-center">
-                                        <div class="p-3 border rounded bg-light d-flex flex-column align-items-center justify-content-center" style="height: 100%; min-height: 140px;">
-                                            <i class="bi bi-image text-muted fs-1 mb-2"></i>
-                                            <span class="small text-muted">Ảnh hàng hóa</span>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2 py-0 px-2" onclick="alert('Tính năng tải ảnh lên');">
-                                                <i class="bi bi-upload me-1"></i>Chọn ảnh
-                                            </button>
+                                        <div class="p-3 border rounded bg-light d-flex flex-column align-items-center justify-content-center position-relative" style="min-height: 170px;">
+                                            <div id="imagePlaceholder" class="d-flex flex-column align-items-center justify-content-center">
+                                                <i class="bi bi-image text-muted fs-1 mb-2"></i>
+                                                <span class="small text-muted">Chưa có ảnh</span>
+                                            </div>
+
+                                            <img id="imagePreview" src="" alt="Ảnh sản phẩm" class="rounded mb-2" style="display: none; max-width: 120px; max-height: 120px; object-fit: contain; border: 1px solid #d9dee5;" />
+
+                                            <div class="d-flex gap-1 mt-2">
+                                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" id="btnSelectImage">
+                                                    <i class="bi bi-upload me-1"></i>Chọn ảnh
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" id="btnRemoveImage" style="display: none;">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                            <small class="text-muted d-block mt-1" style="font-size: 11px;">Hỗ trợ JPG, PNG, WebP</small>
                                         </div>
                                     </div>
                                 </div>
@@ -318,13 +380,53 @@ $(document).ready(function () {
         hangHoaModal.show();
     });
 
+    // Xử lý chọn ảnh từ máy tính
+    $('#btnSelectImage').on('click', function () {
+        $('#fileUploadInput').click();
+    });
+
+    $('#fileUploadInput').on('change', function () {
+        const file = this.files[0];
+        if (file) {
+            // Giới hạn 5MB
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Dung lượng ảnh tối đa là 5MB.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const base64Data = e.target.result;
+                $('#formHinhAnhBase64').val(base64Data);
+                $('#formXoaHinhAnh').val('false');
+
+                // Hiển thị ảnh preview
+                $('#imagePreview').attr('src', base64Data).show();
+                $('#imagePlaceholder').hide();
+                $('#btnRemoveImage').show();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Xử lý xóa ảnh trong modal
+    $('#btnRemoveImage').on('click', function () {
+        $('#fileUploadInput').val('');
+        $('#formHinhAnhBase64').val('');
+        $('#formXoaHinhAnh').val('true');
+
+        $('#imagePreview').attr('src', '').hide();
+        $('#imagePlaceholder').show();
+        $('#btnRemoveImage').hide();
+    });
+
     // Mở modal Sửa hàng hóa
     $(document).on('click', '.btn-edit-product', function () {
         const id = $(this).data('id');
         resetModalForm();
         $('#modalTitle').text('Cập nhật hàng hóa');
         $('#formMaHang').val(id);
-        $('#boxInitialStock').hide(); // Đang sửa thì không nhập lại tồn ban đầu
+        $('#boxInitialStock').hide();
 
         $.ajax({
             url: '/HangHoas/GetItem/' + id,
@@ -338,6 +440,16 @@ $(document).ready(function () {
                 $('#formGiaVon').val(res.giaVon);
                 $('#formGiaBan').val(res.giaBanThamKhao);
                 $('#formTonToiThieu').val(res.tonToiThieu);
+
+                if (res.hinhAnhBase64) {
+                    $('#imagePreview').attr('src', res.hinhAnhBase64).show();
+                    $('#imagePlaceholder').hide();
+                    $('#btnRemoveImage').show();
+                } else {
+                    $('#imagePreview').hide();
+                    $('#imagePlaceholder').show();
+                    $('#btnRemoveImage').hide();
+                }
 
                 if (res.trangThai === 'DANG_BAN') {
                     $('#statusActive').prop('checked', true);
@@ -399,7 +511,9 @@ $(document).ready(function () {
             giaBanThamKhao: giaBan,
             tonKhoBanDau: parseFloat($('#formTonKhoBanDau').val()) || 0,
             tonToiThieu: parseFloat($('#formTonToiThieu').val()) || 0,
-            trangThai: $('input[name="TrangThai"]:checked').val()
+            trangThai: $('input[name="TrangThai"]:checked').val(),
+            hinhAnhBase64: $('#formHinhAnhBase64').val(),
+            xoaHinhAnh: $('#formXoaHinhAnh').val() === 'true'
         };
 
         const url = maHang > 0 ? ('/HangHoas/Edit/' + maHang) : '/HangHoas/Create';
@@ -458,6 +572,13 @@ $(document).ready(function () {
 
     function resetModalForm() {
         $('#hangHoaForm')[0].reset();
+        $('#fileUploadInput').val('');
+        $('#formHinhAnhBase64').val('');
+        $('#formXoaHinhAnh').val('false');
+        $('#imagePreview').attr('src', '').hide();
+        $('#imagePlaceholder').show();
+        $('#btnRemoveImage').hide();
+
         $('#formMaHang').val(0);
         $('#statusActive').prop('checked', true);
         $('#tab-info-btn').tab('show');
@@ -473,7 +594,7 @@ $(document).ready(function () {
         }, 300);
     });
 
-    $('.filter-change, .filter-radio, .filter-status').on('change', function () {
+    $('.filter-change').on('change', function () {
         currentPage = 1;
         loadTable();
     });
@@ -482,11 +603,8 @@ $(document).ready(function () {
         loadTable();
     });
 
-    $('#btnResetFilter').on('click', function () {
+    $('#btnSidebarResetGroup').on('click', function () {
         $('#filterNhomHang').val('');
-        $('#tkAll').prop('checked', true);
-        $('#ttAll').prop('checked', true);
-        $('#keywordSearch').val('');
         currentPage = 1;
         loadTable();
     });
@@ -509,8 +627,7 @@ $(document).ready(function () {
     function loadTable() {
         const q = $('#keywordSearch').val();
         const nhom = $('#filterNhomHang').val();
-        const tonKho = $('input[name="tonKhoFilter"]:checked').val() || 'ALL';
-        const trangThai = $('input[name="trangThaiFilter"]:checked').val() || '';
+        const tonKho = $('#filterTonKho').val() || 'ALL';
 
         $.ajax({
             url: '/HangHoas/Filter',
@@ -519,7 +636,6 @@ $(document).ready(function () {
                 q: q,
                 nhom: nhom,
                 tonKhoFilter: tonKho,
-                trangThai: trangThai,
                 page: currentPage
             },
             beforeSend: function () {

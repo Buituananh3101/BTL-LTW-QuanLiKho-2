@@ -23,6 +23,10 @@ public partial class HangHoa
 
     public string TrangThai { get; set; } = null!;
 
+    public byte[]? HinhAnh { get; set; }
+
+    public DateTime? NgayTao { get; set; }
+
     public virtual ICollection<ChiTietDonBan> ChiTietDonBans { get; set; } = new List<ChiTietDonBan>();
 
     public virtual ICollection<ChiTietPhieuChuyenKho> ChiTietPhieuChuyenKhos { get; set; } = new List<ChiTietPhieuChuyenKho>();

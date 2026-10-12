@@ -286,6 +286,8 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasDefaultValue("DANG_BAN", "DF_HangHoa_TrangThai");
+            entity.Property(e => e.HinhAnh).HasColumnType("varbinary(max)");
+            entity.Property(e => e.NgayTao).HasColumnType("datetime");
 
             entity.HasOne(d => d.MaDvtNavigation).WithMany(p => p.HangHoas)
                 .HasForeignKey(d => d.MaDvt)
