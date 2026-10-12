@@ -26,16 +26,26 @@ public class HangHoasController : Controller
         return defaultId;
     }
 
-    public async Task<IActionResult> Index(string? q, int? nhom, string? trangThai, string tonKhoFilter = "ALL", int page = 1)
+    public async Task<IActionResult> Index(
+        string? q, int? nhom, string? trangThai, string tonKhoFilter = "ALL",
+        string? nhaCungCap = null, string? loaiHang = null, string? viTri = null,
+        string duKienFilter = "ALL", string tgTaoFilter = "ALL",
+        DateTime? tgTaoFrom = null, DateTime? tgTaoTo = null,
+        int page = 1)
     {
-        var vm = await BuildIndexVM(q, nhom, trangThai, tonKhoFilter, page);
+        var vm = await BuildIndexVM(q, nhom, trangThai, tonKhoFilter, nhaCungCap, loaiHang, viTri, duKienFilter, tgTaoFilter, tgTaoFrom, tgTaoTo, page);
         return View(vm);
     }
 
     // AJAX Action trả về Partial View danh sách bảng
-    public async Task<IActionResult> Filter(string? q, int? nhom, string? trangThai, string tonKhoFilter = "ALL", int page = 1)
+    public async Task<IActionResult> Filter(
+        string? q, int? nhom, string? trangThai, string tonKhoFilter = "ALL",
+        string? nhaCungCap = null, string? loaiHang = null, string? viTri = null,
+        string duKienFilter = "ALL", string tgTaoFilter = "ALL",
+        DateTime? tgTaoFrom = null, DateTime? tgTaoTo = null,
+        int page = 1)
     {
-        var vm = await BuildIndexVM(q, nhom, trangThai, tonKhoFilter, page);
+        var vm = await BuildIndexVM(q, nhom, trangThai, tonKhoFilter, nhaCungCap, loaiHang, viTri, duKienFilter, tgTaoFilter, tgTaoFrom, tgTaoTo, page);
         return PartialView("_HangHoaTable", vm);
     }
 
@@ -67,7 +77,12 @@ public class HangHoasController : Controller
         return File(item.HinhAnh, mime);
     }
 
-    private async Task<HangHoaIndexVM> BuildIndexVM(string? q, int? nhom, string? trangThai, string tonKhoFilter, int page)
+    private async Task<HangHoaIndexVM> BuildIndexVM(
+        string? q, int? nhom, string? trangThai, string tonKhoFilter,
+        string? nhaCungCap, string? loaiHang, string? viTri,
+        string duKienFilter, string tgTaoFilter,
+        DateTime? tgTaoFrom, DateTime? tgTaoTo,
+        int page)
     {
         int whId = GetCurrentWarehouseId();
         var wh = await _context.Khos.FindAsync(whId);
@@ -78,20 +93,107 @@ public class HangHoasController : Controller
             .Include(x => x.NguongTonKhos.Where(n => n.MaKho == whId))
             .AsQueryable();
 
+        // 1. Tìm kiếm theo mã hoặc tên hoặc quy cách
         q = q?.Trim();
         if (!string.IsNullOrEmpty(q))
         {
             query = query.Where(x => x.TenHang.Contains(q) || x.MaHangNoiBo.Contains(q) || (x.QuyCach != null && x.QuyCach.Contains(q)));
         }
 
+        // 2. Lọc theo Nhóm hàng
         if (nhom.HasValue && nhom.Value > 0)
         {
             query = query.Where(x => x.MaNhom == nhom.Value);
         }
 
+        // 3. Lọc theo Trạng thái
         if (!string.IsNullOrEmpty(trangThai))
         {
             query = query.Where(x => x.TrangThai == trangThai);
+        }
+
+        // 4. Lọc theo Nhà cung cấp
+        if (!string.IsNullOrWhiteSpace(nhaCungCap))
+        {
+            var ncc = nhaCungCap.Trim();
+            var matchedHangIds = await _context.ChiTietPhieuNhaps
+                .Where(ct => ct.MaPhieuNhapNavigation.MaDonViCapHangNavigation != null &&
+                             ct.MaPhieuNhapNavigation.MaDonViCapHangNavigation.TenDonVi.Contains(ncc))
+                .Select(ct => ct.MaHang)
+                .Distinct()
+                .ToListAsync();
+
+            query = query.Where(x => matchedHangIds.Contains(x.MaHang));
+        }
+
+        // 5. Lọc theo Loại hàng
+        if (!string.IsNullOrWhiteSpace(loaiHang) && loaiHang != "Tất cả")
+        {
+            var lh = loaiHang.Trim();
+            if (lh == "Dịch vụ" || lh == "Combo - đóng gói")
+            {
+                query = query.Where(x => (x.QuyCach != null && x.QuyCach.Contains(lh)) || x.TenHang.Contains(lh));
+            }
+            else if (lh == "Hàng hóa")
+            {
+                query = query.Where(x => (x.QuyCach == null || (!x.QuyCach.Contains("Dịch vụ") && !x.QuyCach.Contains("Combo")))
+                                      && !x.TenHang.Contains("Dịch vụ") && !x.TenHang.Contains("Combo"));
+            }
+        }
+
+        // 6. Lọc theo Vị trí
+        if (!string.IsNullOrWhiteSpace(viTri) && viTri != "Tất cả")
+        {
+            var vt = viTri.Trim();
+            query = query.Where(x => x.QuyCach != null && x.QuyCach.Contains(vt));
+        }
+
+        // 7. Lọc theo Thời gian tạo
+        var today = DateTime.Today;
+        if (tgTaoFilter == "HOM_NAY")
+        {
+            query = query.Where(x => x.NgayTao >= today);
+        }
+        else if (tgTaoFilter == "HOM_QUA")
+        {
+            query = query.Where(x => x.NgayTao >= today.AddDays(-1) && x.NgayTao < today);
+        }
+        else if (tgTaoFilter == "TUAN_NAY")
+        {
+            int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+            var startOfWeek = today.AddDays(-diff);
+            query = query.Where(x => x.NgayTao >= startOfWeek);
+        }
+        else if (tgTaoFilter == "TUAN_TRUOC")
+        {
+            int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+            var startOfWeek = today.AddDays(-diff);
+            var startOfLastWeek = startOfWeek.AddDays(-7);
+            query = query.Where(x => x.NgayTao >= startOfLastWeek && x.NgayTao < startOfWeek);
+        }
+        else if (tgTaoFilter == "7_NGAY")
+        {
+            query = query.Where(x => x.NgayTao >= today.AddDays(-7));
+        }
+        else if (tgTaoFilter == "THANG_NAY")
+        {
+            var startOfMonth = new DateTime(today.Year, today.Month, 1);
+            query = query.Where(x => x.NgayTao >= startOfMonth);
+        }
+        else if (tgTaoFilter == "THANG_TRUOC")
+        {
+            var startOfThisMonth = new DateTime(today.Year, today.Month, 1);
+            var startOfLastMonth = startOfThisMonth.AddMonths(-1);
+            query = query.Where(x => x.NgayTao >= startOfLastMonth && x.NgayTao < startOfThisMonth);
+        }
+        else if (tgTaoFilter == "30_NGAY")
+        {
+            query = query.Where(x => x.NgayTao >= today.AddDays(-30));
+        }
+        else if (tgTaoFrom.HasValue || tgTaoTo.HasValue)
+        {
+            if (tgTaoFrom.HasValue) query = query.Where(x => x.NgayTao >= tgTaoFrom.Value);
+            if (tgTaoTo.HasValue) query = query.Where(x => x.NgayTao <= tgTaoTo.Value.AddDays(1));
         }
 
         // Tồn kho theo kho hiện tại
@@ -131,11 +233,14 @@ public class HangHoasController : Controller
                 HasImage = x.HinhAnh != null && x.HinhAnh.Length > 0,
                 NgayTao = x.NgayTao,
                 KhachDat = 0,
-                DuKienHetHang = "---"
+                DuKienHetHang = stock <= 0 ? "Đã hết hàng" :
+                                (nguong != null && stock <= nguong.TonToiThieu) ? "Trong 3 ngày tới" :
+                                stock <= 10 ? "Trong 7 ngày tới" :
+                                stock <= 30 ? "Trong tháng này" : "> 30 ngày"
             };
         }).ToList();
 
-        // Lọc theo tồn kho
+        // 8. Lọc theo Tồn kho
         if (tonKhoFilter == "DUOI_DINH_MUC")
         {
             allItems = allItems.Where(x => x.TonToiThieu.HasValue && x.TonKho < x.TonToiThieu.Value).ToList();
@@ -149,6 +254,35 @@ public class HangHoasController : Controller
             allItems = allItems.Where(x => x.TonKho <= 0).ToList();
         }
 
+        // 9. Lọc theo Dự kiến hết hàng
+        if (duKienFilter != "ALL" && !string.IsNullOrWhiteSpace(duKienFilter))
+        {
+            if (duKienFilter == "NGAY_MAI")
+            {
+                allItems = allItems.Where(x => x.TonKho <= 5).ToList();
+            }
+            else if (duKienFilter == "NGAY_KIA" || duKienFilter == "3_NGAY")
+            {
+                allItems = allItems.Where(x => x.TonKho <= 15).ToList();
+            }
+            else if (duKienFilter == "5_NGAY" || duKienFilter == "7_NGAY" || duKienFilter == "TUAN_NAY")
+            {
+                allItems = allItems.Where(x => x.TonKho <= 30).ToList();
+            }
+            else if (duKienFilter == "TUAN_TOI" || duKienFilter == "2_TUAN")
+            {
+                allItems = allItems.Where(x => x.TonKho <= 50).ToList();
+            }
+            else if (duKienFilter == "THANG_NAY" || duKienFilter == "THANG_TOI" || duKienFilter == "30_NGAY" || duKienFilter == "2_THANG" || duKienFilter == "3_THANG")
+            {
+                allItems = allItems.Where(x => x.TonKho <= 100).ToList();
+            }
+            else
+            {
+                allItems = allItems.Where(x => x.TonKho <= 20 || (x.TonToiThieu.HasValue && x.TonKho <= x.TonToiThieu.Value)).ToList();
+            }
+        }
+
         const int pageSize = 15;
         int totalCount = allItems.Count;
         int totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
@@ -158,6 +292,7 @@ public class HangHoasController : Controller
 
         var nhomList = await _context.NhomHangs.AsNoTracking().OrderBy(x => x.TenNhom).ToListAsync();
         var dvtList = await _context.DonViTinhs.AsNoTracking().OrderBy(x => x.TenDvt).ToListAsync();
+        var supplierList = await _context.DonViCapHangs.AsNoTracking().Where(s => s.TrangThai == "HOAT_DONG").OrderBy(s => s.TenDonVi).ToListAsync();
 
         return new HangHoaIndexVM
         {
@@ -176,9 +311,26 @@ public class HangHoasController : Controller
             TotalStockSum = allItems.Sum(x => x.TonKho),
             TotalValueSum = allItems.Sum(x => x.TonKho * x.GiaBan),
             TotalKhachDatSum = 0,
+            NhaCungCap = nhaCungCap,
+            LoaiHang = loaiHang,
+            ViTri = viTri,
+            DuKienFilter = duKienFilter,
+            TgTaoFilter = tgTaoFilter,
             NhomHangs = nhomList,
-            DonViTinhs = dvtList
+            DonViTinhs = dvtList,
+            DonViCapHangs = supplierList
         };
+    }
+
+    // Tạo nhanh nhóm hàng từ nút Tạo mới ở sidebar
+    [HttpPost]
+    public async Task<IActionResult> CreateGroupQuick([FromBody] QuickGroupRequest req)
+    {
+        if (string.IsNullOrWhiteSpace(req?.TenNhom)) return BadRequest(new { message = "Vui lòng nhập tên nhóm hàng." });
+        var group = new NhomHang { TenNhom = req.TenNhom.Trim() };
+        _context.NhomHangs.Add(group);
+        await _context.SaveChangesAsync();
+        return Json(new { success = true, maNhom = group.MaNhom, tenNhom = group.TenNhom });
     }
 
     // Lấy thông tin 1 hàng hóa qua JSON cho Modal Sửa
@@ -505,4 +657,9 @@ public class HangHoasController : Controller
             new SelectListItem("Ngừng bán", "NGUNG_BAN")
         };
     }
+}
+
+public class QuickGroupRequest
+{
+    public string TenNhom { get; set; } = "";
 }

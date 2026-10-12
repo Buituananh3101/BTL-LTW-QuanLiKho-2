@@ -91,6 +91,13 @@ public class HangHoaIndexVM
     public decimal TotalValueSum { get; set; }
     public int TotalKhachDatSum { get; set; } = 0;
 
+    public string? NhaCungCap { get; set; }
+    public string? LoaiHang { get; set; }
+    public string? ViTri { get; set; }
+    public string DuKienFilter { get; set; } = "ALL";
+    public string TgTaoFilter { get; set; } = "ALL";
+
     public List<NhomHang> NhomHangs { get; set; } = new();
     public List<DonViTinh> DonViTinhs { get; set; } = new();
+    public List<DonViCapHang> DonViCapHangs { get; set; } = new();
 }
