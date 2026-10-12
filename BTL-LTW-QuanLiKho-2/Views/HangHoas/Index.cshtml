@@ -3,14 +3,9 @@
     ViewData["Title"] = "Hàng hóa";
 }
 
-<div class="kiot-container position-relative">
-    <!-- CỘT BÊN TRÁI: TIÊU ĐỀ "HÀNG HÓA" + BỘ LỌC + NÚT THU GỌN -->
+<div class="kiot-container position-relative" id="kiotContainer">
+    <!-- CỘT BÊN TRÁI: TIÊU ĐỀ "HÀNG HÓA" + BỘ LỌC -->
     <aside class="kiot-sidebar-col" id="sidebarFilterCol">
-        <!-- Nút tròn thu gọn / mở rộng ở mép phải của sidebar -->
-        <button type="button" class="kiot-sidebar-toggle-btn" id="btnToggleSidebar" title="Thu gọn / Mở rộng">
-            <span id="sidebarToggleIcon">❮</span>
-        </button>
-
         <div class="kiot-sidebar-title">
             Hàng hóa
         </div>
@@ -269,6 +264,11 @@
             </div>
         </div>
     </aside>
+
+    <!-- Nút tròn thu gọn / mở rộng ở ranh giới giữa sidebar và bảng (KiotViet style) -->
+    <button type="button" class="kiot-sidebar-toggle-btn" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
+        <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
+    </button>
 
     <!-- CỘT BÊN PHẢI: THANH TÌM KIẾM THẲNG HÀNG VỚI DANH SÁCH + BẢNG HÀNG HÓA -->
     <main class="kiot-main-col">
@@ -558,14 +558,103 @@ $(document).ready(function () {
     const hangHoaModal = new bootstrap.Modal(modalEl);
     const groupModal = new bootstrap.Modal(document.getElementById('quickGroupModal'));
 
-    // 1. Thu gọn / Mở rộng sidebar bên trái
-    $('#btnToggleSidebar').on('click', function () {
-        const sidebar = $('#sidebarFilterCol');
-        sidebar.toggleClass('collapsed');
-        if (sidebar.hasClass('collapsed')) {
-            $('#sidebarToggleIcon').text('❯');
+    // 1. Thu gọn / Mở rộng (Kéo vào / Kéo ra) sidebar bên trái
+    function toggleSidebar(forceState) {
+        const container = $('#kiotContainer');
+        const isCollapsed = container.hasClass('sidebar-collapsed');
+        const shouldCollapse = (typeof forceState === 'boolean') ? forceState : !isCollapsed;
+
+        if (shouldCollapse) {
+            // Kéo vào (Collapse)
+            container.addClass('sidebar-collapsed');
+            $('#sidebarFilterCol').css('width', '');
+            $('#btnToggleSidebar').css('left', '');
+            $('#sidebarToggleIcon').removeClass('bi-chevron-left').addClass('bi-chevron-right');
+            $('#btnToggleSidebar').attr('title', 'Mở rộng bộ lọc (F4)');
+            localStorage.setItem('kiot_sidebar_state', 'collapsed');
         } else {
-            $('#sidebarToggleIcon').text('❮');
+            // Kéo ra (Expand)
+            container.removeClass('sidebar-collapsed');
+            $('#sidebarFilterCol').css('width', '');
+            $('#btnToggleSidebar').css('left', '');
+            $('#sidebarToggleIcon').removeClass('bi-chevron-right').addClass('bi-chevron-left');
+            $('#btnToggleSidebar').attr('title', 'Thu gọn bộ lọc (F4)');
+            localStorage.setItem('kiot_sidebar_state', 'expanded');
+        }
+    }
+
+    // Khôi phục trạng thái thu gọn / mở rộng nếu có lưu
+    if (localStorage.getItem('kiot_sidebar_state') === 'collapsed') {
+        toggleSidebar(true);
+    }
+
+    // Kéo thả (Drag to resize) hoặc Click nút để kéo vào / kéo ra
+    let isDraggingSidebar = false;
+    let hasDraggedSidebar = false;
+    let dragStartX = 0;
+    let sidebarStartWidth = 250;
+
+    $('#btnToggleSidebar').on('mousedown', function (e) {
+        if (e.which !== 1) return;
+        isDraggingSidebar = true;
+        hasDraggedSidebar = false;
+        dragStartX = e.pageX;
+        sidebarStartWidth = $('#sidebarFilterCol').outerWidth() || 250;
+        $('body').addClass('sidebar-resizing');
+    });
+
+    $(document).on('mousemove', function (e) {
+        if (!isDraggingSidebar) return;
+        const diff = e.pageX - dragStartX;
+        if (Math.abs(diff) > 4) {
+            hasDraggedSidebar = true;
+        }
+
+        let newWidth = sidebarStartWidth + diff;
+        if (newWidth < 90) {
+            // Kéo vào sát mép trái -> tự thu gọn
+            $('#kiotContainer').addClass('sidebar-collapsed');
+            $('#sidebarFilterCol').css('width', '');
+            $('#btnToggleSidebar').css('left', '');
+            $('#sidebarToggleIcon').removeClass('bi-chevron-left').addClass('bi-chevron-right');
+        } else {
+            // Kéo ra -> mở rộng linh hoạt từ 180px đến 450px
+            newWidth = Math.min(Math.max(newWidth, 180), 450);
+            $('#kiotContainer').removeClass('sidebar-collapsed');
+            $('#sidebarFilterCol').css({ 'width': newWidth + 'px', 'flex': '0 0 ' + newWidth + 'px' });
+            $('#btnToggleSidebar').css('left', (newWidth + 10) + 'px');
+            $('#sidebarToggleIcon').removeClass('bi-chevron-right').addClass('bi-chevron-left');
+        }
+    });
+
+    $(document).on('mouseup', function () {
+        if (isDraggingSidebar) {
+            isDraggingSidebar = false;
+            $('body').removeClass('sidebar-resizing');
+            if (hasDraggedSidebar) {
+                if ($('#kiotContainer').hasClass('sidebar-collapsed')) {
+                    localStorage.setItem('kiot_sidebar_state', 'collapsed');
+                } else {
+                    localStorage.setItem('kiot_sidebar_state', 'expanded');
+                }
+            }
+        }
+    });
+
+    // Bấm click nút (nếu không kéo thả)
+    $('#btnToggleSidebar').on('click', function () {
+        if (hasDraggedSidebar) {
+            hasDraggedSidebar = false;
+            return;
+        }
+        toggleSidebar();
+    });
+
+    // Phím tắt F4 để kéo vào / kéo ra
+    $(document).on('keydown', function (e) {
+        if (e.key === 'F4') {
+            e.preventDefault();
+            toggleSidebar();
         }
     });
 
