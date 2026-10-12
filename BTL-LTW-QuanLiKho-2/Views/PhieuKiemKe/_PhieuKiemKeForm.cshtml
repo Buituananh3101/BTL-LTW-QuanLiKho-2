@@ -1,0 +1,347 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.PhieuKiemKeFormVM
+
+<link href="~/css/kiem-kho.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="container-fluid py-3 px-3">
+    <div class="row g-3">
+        <!-- VÙNG TRÁI: Nhập & Kiểm đếm hàng hóa -->
+        <div class="col-lg-9" id="formLeftCol">
+            <div class="kk-form-left shadow-sm">
+                <!-- Header vùng trái: Nút quay lại + Tiêu đề -->
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-sm" title="Quay lại danh sách">
+                            ←
+                        </a>
+                        <h5 class="mb-0 fw-bold">
+                            @(Model.IsReadOnly ? "Chi tiết phiếu kiểm kho" : (Model.MaPhieuKiemKe > 0 ? "Sửa phiếu kiểm kho" : "Lập phiếu kiểm kho"))
+                        </h5>
+                        <span class="badge bg-light text-dark border ms-2">
+                            Kho: <strong>@Model.TenKho</strong>
+                        </span>
+                    </div>
+
+                    @if (Model.IsReadOnly)
+                    {
+                        <span class="badge badge-status badge-status-balanced fs-6">
+                            Đã cân bằng kho
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-status badge-status-draft fs-6">
+                            Phiếu tạm
+                        </span>
+                    }
+                </div>
+
+                @if (!Model.IsReadOnly)
+                {
+                    <!-- Ô tìm kiếm F3 và công cụ -->
+                    <div class="kk-search-wrapper">
+                        <div class="position-relative">
+                            <input type="text" id="productSearchInput" class="form-control kk-search-input" 
+                                   placeholder="Tìm hàng hóa theo mã hoặc tên (F3)..." autocomplete="off" />
+                            <span class="kk-f3-badge">F3</span>
+                            <div class="kk-search-tools">
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="btnGroupModal" title="Chọn hàng theo nhóm (Lưới)">
+                                    ⊞ Nhóm hàng
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Autocomplete gợi ý hàng hóa -->
+                        <div class="kk-autocomplete-list" id="autocompleteDropdown" style="display: none;"></div>
+                    </div>
+                }
+
+                <!-- 4 Tabs lọc hiển thị danh sách kiểm -->
+                <div class="kk-tabs-nav">
+                    <button type="button" class="kk-tab-btn active" data-tab="ALL">
+                        Tất cả <span class="kk-tab-count" id="countAll">@Model.CountAll</span>
+                    </button>
+                    <button type="button" class="kk-tab-btn" data-tab="KHOP">
+                        Khớp <span class="kk-tab-count text-success" id="countKhop">@Model.CountKhop</span>
+                    </button>
+                    <button type="button" class="kk-tab-btn" data-tab="LECH">
+                        Lệch <span class="kk-tab-count text-danger" id="countLech">@Model.CountLech</span>
+                    </button>
+                    <button type="button" class="kk-tab-btn" data-tab="CHUA_KIEM">
+                        Chưa kiểm <span class="kk-tab-count text-muted" id="countChuaKiem">@Model.CountChuaKiem</span>
+                    </button>
+                </div>
+
+                <!-- Bảng chi tiết hàng hóa kiểm kê -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="stockTakeTable">
+                        <thead class="table-light">
+                            <tr>
+                                @if (!Model.IsReadOnly)
+                                {
+                                    <th style="width: 36px;"></th>
+                                }
+                                <th style="width: 45px;" class="text-center">STT</th>
+                                <th style="width: 120px;">Mã hàng</th>
+                                <th>Tên hàng</th>
+                                <th style="width: 80px;">ĐVT</th>
+                                <th class="text-end" style="width: 90px;">Tồn kho</th>
+                                <th class="text-end" style="width: 110px;">Thực tế</th>
+                                <th class="text-end" style="width: 90px;">SL lệch</th>
+                                <th class="text-end" style="width: 110px;">Giá trị lệch</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockTakeTableBody">
+                            @if (!Model.Lines.Any())
+                            {
+                                <tr id="emptyTableRow">
+                                    <td colspan="@(Model.IsReadOnly ? 8 : 9)" class="text-center py-5 text-muted">
+                                        <p class="mb-1">Chưa có hàng hóa nào trong phiếu kiểm.</p>
+                                        <small>Gõ mã hoặc tên vào ô tìm kiếm (F3) hoặc bấm "Nhóm hàng" để thêm.</small>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                int stt = 1;
+                                foreach (var line in Model.Lines)
+                                {
+                                    <tr class="stock-take-row" data-id="@line.MaHang" data-cost="@line.DonGia" data-system="@line.SoLuongTheoSo">
+                                        @if (!Model.IsReadOnly)
+                                        {
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-link text-danger p-0 btn-remove-row" title="Xóa dòng">🗑</button>
+                                            </td>
+                                        }
+                                        <td class="text-center row-stt">@stt</td>
+                                        <td><span class="fw-bold text-primary">@line.MaHangNoiBo</span></td>
+                                        <td>
+                                            <div class="fw-semibold text-dark">@line.TenHang</div>
+                                            <small class="text-muted">@line.TenNhom</small>
+                                        </td>
+                                        <td>@line.TenDvt</td>
+                                        <td class="text-end fw-semibold">@line.SoLuongTheoSo.ToString("N0")</td>
+                                        <td class="text-end">
+                                            @if (Model.IsReadOnly)
+                                            {
+                                                <span class="fw-bold">@(line.SoLuongThucTe?.ToString("N0") ?? "---")</span>
+                                            }
+                                            else
+                                            {
+                                                <input type="number" min="0" step="1" class="form-control form-control-sm kk-input-actual text-end d-inline-block row-actual-input" 
+                                                       value="@(line.SoLuongThucTe?.ToString() ?? "")" placeholder="---" />
+                                            }
+                                        </td>
+                                        <td class="text-end fw-bold row-diff-qty">
+                                            @if (line.SlChenhLech.HasValue)
+                                            {
+                                                <span class="@(line.SlChenhLech > 0 ? "text-success" : (line.SlChenhLech < 0 ? "text-danger" : "text-muted"))">
+                                                    @(line.SlChenhLech > 0 ? "+" : "")@line.SlChenhLech.Value.ToString("N0")
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">---</span>
+                                            }
+                                        </td>
+                                        <td class="text-end fw-bold row-diff-amount">
+                                            @if (line.GiaTriLech.HasValue)
+                                            {
+                                                <span class="@(line.GiaTriLech > 0 ? "text-success" : (line.GiaTriLech < 0 ? "text-danger" : "text-muted"))">
+                                                    @(line.GiaTriLech > 0 ? "+" : "")@line.GiaTriLech.Value.ToString("N0")
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">---</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                    stt++;
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- VÙNG PHẢI: Panel Thông tin phiếu kiểm -->
+        <div class="col-lg-3" id="formRightCol">
+            <div class="kk-form-right shadow-sm">
+                <!-- Nút thu gọn panel phải -->
+                <button type="button" class="kk-filter-toggle-btn" id="toggleRightPanelBtn" style="left: -13px; right: auto;" title="Thu gọn panel">
+                    <span id="toggleRightIcon">▶</span>
+                </button>
+
+                <h6 class="fw-bold text-uppercase small text-muted border-bottom pb-2 mb-3">Thông tin phiếu kiểm</h6>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted mb-1">Người tạo</label>
+                    <input type="text" class="form-control form-control-sm bg-light" value="@Model.TenNguoiLap" readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted mb-1">Ngày giờ kiểm</label>
+                    <input type="datetime-local" class="form-control form-control-sm" id="pkkDateInput" 
+                           value="@Model.ThoiDiemChot.ToString("yyyy-MM-ddTHH:mm")" @(Model.IsReadOnly ? "readonly" : "") />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted mb-1">Mã kiểm kho</label>
+                    <input type="text" class="form-control form-control-sm bg-light" value="@Model.MaPhieuHienThi" readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted mb-1">Trạng thái</label>
+                    <div>
+                        @if (Model.IsReadOnly)
+                        {
+                            <span class="badge badge-status badge-status-balanced">Đã cân bằng kho</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-status badge-status-draft">Phiếu tạm</span>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.IsReadOnly && Model.NgayCanBang.HasValue)
+                {
+                    <div class="mb-3">
+                        <label class="form-label small text-muted mb-1">Ngày cân bằng</label>
+                        <input type="text" class="form-control form-control-sm bg-light" value="@Model.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm")" readonly />
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.TenNguoiCanBang))
+                    {
+                        <div class="mb-3">
+                            <label class="form-label small text-muted mb-1">Người cân bằng</label>
+                            <input type="text" class="form-control form-control-sm bg-light" value="@Model.TenNguoiCanBang" readonly />
+                        </div>
+                    }
+                }
+
+                <div class="mb-3 p-2 bg-light rounded border">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="small text-muted">Tổng SL thực tế:</span>
+                        <strong class="fs-5 text-primary" id="lblTotalActual">@Model.TongThucTe.ToString("N0")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="small text-muted">Tổng chênh lệch:</span>
+                        <strong class="small @(Model.TongChenhLech > 0 ? "text-success" : (Model.TongChenhLech < 0 ? "text-danger" : "text-muted"))" id="lblTotalDiff">
+                            @(Model.TongChenhLech > 0 ? "+" : "")@Model.TongChenhLech.ToString("N0")
+                        </strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="small text-muted">Tổng giá trị lệch:</span>
+                        <strong class="small" id="lblTotalDiffAmount">@Model.TongGiaTriLech.ToString("N0") đ</strong>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted mb-1">Ghi chú</label>
+                    <textarea class="form-control form-control-sm" id="pkkNote" rows="3" placeholder="Ghi chú kiểm kho..." @(Model.IsReadOnly ? "readonly" : "")>@Model.GhiChu</textarea>
+                </div>
+
+                <!-- Hộp "Kiểm gần đây" (Recent activity) -->
+                <div class="kk-recent-box">
+                    <div class="kk-recent-title">
+                        <span>Kiểm gần đây</span>
+                        <span class="badge bg-secondary" id="recentLogCount">0</span>
+                    </div>
+                    <div id="recentLogList">
+                        <div class="text-muted small text-center py-2" id="emptyRecentLog">Chưa có thao tác nào</div>
+                    </div>
+                </div>
+
+                <!-- Các nút hành động chính -->
+                <div class="mt-4 d-grid gap-2">
+                    @if (!Model.IsReadOnly)
+                    {
+                        <button type="button" class="btn kk-btn-primary py-2 fw-bold" id="btnSaveDraft">
+                            💾 Lưu tạm
+                        </button>
+                        <button type="button" class="btn kk-btn-success py-2 fw-bold" id="btnComplete">
+                            ✔ Hoàn thành
+                        </button>
+                    }
+                    else
+                    {
+                        <a asp-action="Create" class="btn kk-btn-primary py-2 fw-bold">
+                            + Kiểm kho mới
+                        </a>
+                        <button type="button" class="btn btn-outline-secondary py-2" onclick="window.print();">
+                            🖨 In phiếu
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-dark py-2">
+                            Quay lại danh sách
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal chọn hàng theo nhóm (Nút Lưới) -->
+<div class="modal fade" id="groupModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Chọn hàng theo nhóm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                <p class="text-muted small">Tất cả hàng hóa trong nhóm được chọn sẽ được nạp vào phiếu ở trạng thái <strong>Chưa kiểm</strong>.</p>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Nhóm hàng</label>
+                    <select class="form-select" id="selectGroup">
+                        <option value="0">-- Tất cả nhóm hàng --</option>
+                        @if (ViewBag.NhomHangs != null)
+                        {
+                            foreach (var g in ViewBag.NhomHangs)
+                            {
+                                <option value="@g.MaNhom">@g.TenNhom</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Bỏ qua</button>
+                <button type="button" class="btn kk-btn-primary btn-sm" id="btnConfirmLoadGroup">Nạp vào phiếu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal xác nhận Hoàn thành cân bằng kho -->
+<div class="modal fade" id="confirmCompleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-success fw-bold">Xác nhận Cân bằng kho</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                <p class="mb-2">Hệ thống sẽ thực hiện cân bằng kho theo số lượng thực tế đã kiểm.</p>
+                <div id="uncountedWarning" class="alert alert-warning py-2 small" style="display: none;">
+                    ⚠ Phiếu còn <strong id="uncountedCount">0</strong> hàng chưa kiểm. Hệ thống sẽ <strong>giữ nguyên tồn kho</strong> cho các mặt hàng này.
+                </div>
+                <p class="mb-0 text-muted small">Sau khi hoàn thành, phiếu sẽ được khóa và không thể chỉnh sửa hay hủy.</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn kk-btn-success btn-sm" id="btnExecuteComplete">Đồng ý Cân bằng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+window.stockTakeData = {
+    maPhieuKiemKe: @Model.MaPhieuKiemKe,
+    maKho: @Model.MaKho,
+    maNvlap: @Model.MaNvlap,
+    isReadOnly: @(Model.IsReadOnly ? "true" : "false")
+};
+</script>

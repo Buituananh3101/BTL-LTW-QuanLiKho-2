@@ -1,0 +1,407 @@
+/* kiem-kho.css - KiotViet theme for Stock Take */
+:root {
+    --kk-blue: #0070ba;
+    --kk-blue-hover: #005a96;
+    --kk-green: #28a745;
+    --kk-green-hover: #218838;
+    --kk-orange: #fd7e14;
+    --kk-red: #dc3545;
+    --kk-gray-bg: #f4f6f8;
+    --kk-border: #e2e8f0;
+    --kk-text: #2d3748;
+    --kk-subtext: #718096;
+}
+
+body {
+    background-color: var(--kk-gray-bg);
+    color: var(--kk-text);
+    font-size: 14px;
+}
+
+/* Header & Top Bar */
+.kk-header-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a202c;
+}
+
+.kk-btn-primary {
+    background-color: var(--kk-blue);
+    color: #fff;
+    border: none;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 4px;
+}
+.kk-btn-primary:hover {
+    background-color: var(--kk-blue-hover);
+    color: #fff;
+}
+
+.kk-btn-success {
+    background-color: var(--kk-green);
+    color: #fff;
+    border: none;
+    font-weight: 500;
+    padding: 8px 18px;
+    border-radius: 4px;
+}
+.kk-btn-success:hover {
+    background-color: var(--kk-green-hover);
+    color: #fff;
+}
+
+/* Filter Sidebar (Cột lọc trái) */
+.kk-sidebar-filter {
+    background: #fff;
+    border-right: 1px solid var(--kk-border);
+    padding: 16px;
+    min-height: calc(100vh - 56px);
+    position: relative;
+    transition: all 0.25s ease;
+}
+.kk-sidebar-filter.collapsed {
+    width: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-right: none;
+}
+.kk-filter-toggle-btn {
+    position: absolute;
+    right: -13px;
+    top: 60px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #cbd5e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 11px;
+    color: #4a5568;
+}
+.kk-filter-toggle-btn:hover {
+    background: #f7fafc;
+    color: var(--kk-blue);
+}
+
+.kk-filter-group {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #edf2f7;
+    padding-bottom: 15px;
+}
+.kk-filter-group:last-child {
+    border-bottom: none;
+}
+.kk-filter-title {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 10px;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.kk-filter-dot {
+    width: 7px;
+    height: 7px;
+    background-color: var(--kk-blue);
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 6px;
+}
+
+/* Quick Date Range Picker Modal / Dropdown */
+.kk-quick-date-dropdown {
+    min-width: 280px;
+    padding: 10px;
+    border-radius: 6px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+}
+.kk-date-group-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #a0aec0;
+    margin-top: 8px;
+    margin-bottom: 4px;
+}
+.kk-date-option {
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #2d3748;
+}
+.kk-date-option:hover {
+    background-color: #ebf8ff;
+    color: var(--kk-blue);
+}
+.kk-date-option.active {
+    background-color: #bee3f8;
+    color: var(--kk-blue);
+    font-weight: 600;
+}
+
+/* Table Style */
+.kk-table-container {
+    background: #fff;
+    border-radius: 6px;
+    border: 1px solid var(--kk-border);
+    overflow: hidden;
+}
+.kk-table {
+    margin-bottom: 0;
+}
+.kk-table thead th {
+    background-color: #f7fafc;
+    color: #4a5568;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--kk-border);
+    padding: 10px 12px;
+    vertical-align: middle;
+}
+.kk-table tbody td {
+    padding: 10px 12px;
+    vertical-align: middle;
+    font-size: 13px;
+    border-bottom: 1px solid #edf2f7;
+}
+.kk-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Badge styles */
+.badge-status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+}
+.badge-status-draft {
+    background-color: #e2e8f0;
+    color: #4a5568;
+}
+.badge-status-balanced {
+    background-color: #c6f6d5;
+    color: #22543d;
+}
+.badge-status-cancelled {
+    background-color: #fed7d7;
+    color: #742a2a;
+}
+
+/* Empty State */
+.kk-empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--kk-subtext);
+}
+.kk-empty-state i, .kk-empty-state svg {
+    width: 64px;
+    height: 64px;
+    color: #cbd5e0;
+    margin-bottom: 15px;
+}
+
+/* Form 2 Cột (Kiểm kho Create / Edit) */
+.kk-create-container {
+    padding: 15px;
+}
+.kk-form-left {
+    background: #fff;
+    border-radius: 6px;
+    border: 1px solid var(--kk-border);
+    padding: 16px;
+    min-height: calc(100vh - 90px);
+}
+.kk-form-right {
+    background: #fff;
+    border-radius: 6px;
+    border: 1px solid var(--kk-border);
+    padding: 16px;
+    min-height: calc(100vh - 90px);
+    position: relative;
+    transition: all 0.25s ease;
+}
+.kk-form-right.collapsed {
+    display: none;
+}
+
+/* Search bar F3 */
+.kk-search-wrapper {
+    position: relative;
+    margin-bottom: 15px;
+}
+.kk-search-input {
+    padding-left: 38px;
+    padding-right: 90px;
+    height: 40px;
+    border-radius: 4px;
+    border: 1px solid #cbd5e0;
+}
+.kk-search-input:focus {
+    border-color: var(--kk-blue);
+    box-shadow: 0 0 0 3px rgba(0, 112, 186, 0.15);
+}
+.kk-f3-badge {
+    position: absolute;
+    right: 50px;
+    top: 9px;
+    background: #edf2f7;
+    color: #718096;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid #e2e8f0;
+}
+.kk-search-tools {
+    position: absolute;
+    right: 8px;
+    top: 5px;
+    display: flex;
+    gap: 4px;
+}
+
+/* Autocomplete suggestion dropdown */
+.kk-autocomplete-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background: #fff;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    max-height: 380px;
+    overflow-y: auto;
+    margin-top: 4px;
+}
+.kk-autocomplete-item {
+    padding: 10px 14px;
+    border-bottom: 1px solid #edf2f7;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.kk-autocomplete-item:hover, .kk-autocomplete-item.active {
+    background-color: #ebf8ff;
+}
+.kk-item-thumb {
+    width: 36px;
+    height: 36px;
+    background: #edf2f7;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #a0aec0;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+/* 4 Tabs Filter */
+.kk-tabs-nav {
+    display: flex;
+    border-bottom: 2px solid #edf2f7;
+    margin-bottom: 15px;
+    gap: 10px;
+}
+.kk-tab-btn {
+    padding: 8px 14px;
+    border: none;
+    background: none;
+    font-weight: 500;
+    color: #718096;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.kk-tab-btn:hover {
+    color: var(--kk-blue);
+}
+.kk-tab-btn.active {
+    color: var(--kk-blue);
+    border-bottom-color: var(--kk-blue);
+    font-weight: 600;
+}
+.kk-tab-count {
+    background: #edf2f7;
+    color: #4a5568;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 11px;
+}
+.kk-tab-btn.active .kk-tab-count {
+    background: #bee3f8;
+    color: var(--kk-blue);
+}
+
+/* Input thực tế */
+.kk-input-actual {
+    width: 80px;
+    text-align: right;
+    padding: 4px 6px;
+    border-radius: 4px;
+    border: 1px solid #cbd5e0;
+    font-weight: 600;
+}
+.kk-input-actual:focus {
+    border-color: var(--kk-blue);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 112, 186, 0.15);
+}
+
+/* Row highlight when updated */
+@keyframes kkHighlight {
+    0% { background-color: #feebc8; }
+    100% { background-color: transparent; }
+}
+.kk-row-updated {
+    animation: kkHighlight 1.5s ease-out;
+}
+
+/* Recent Activity Box (Kiểm gần đây) */
+.kk-recent-box {
+    background: #f7fafc;
+    border: 1px solid #edf2f7;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 15px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+.kk-recent-title {
+    font-weight: 600;
+    font-size: 12px;
+    color: #4a5568;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.kk-recent-item {
+    font-size: 12px;
+    color: #4a5568;
+    padding: 4px 0;
+    border-bottom: 1px dashed #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.kk-recent-item:last-child {
+    border-bottom: none;
+}

@@ -1,0 +1,62 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.PhieuKiemKeFormVM
+@{
+    ViewData["Title"] = "Chi tiết phiếu kiểm kho " + Model.MaPhieuHienThi;
+    Layout = "~/Views/Shared/MyLayout.cshtml";
+}
+
+<partial name="_PhieuKiemKeForm" model="Model" />
+
+@section Scripts {
+<script>
+$(document).ready(function () {
+    // 4 Tabs click handler cho màn hình Details
+    $('.kk-tab-btn').on('click', function () {
+        $('.kk-tab-btn').removeClass('active');
+        $(this).addClass('active');
+
+        const activeTab = $(this).data('tab');
+        $('#stockTakeTableBody tr.stock-take-row').each(function () {
+            const systemStock = parseFloat($(this).data('system')) || 0;
+            const diffText = $(this).find('.row-diff-qty').text().trim();
+
+            if (activeTab === 'ALL') {
+                $(this).show();
+            } else if (activeTab === 'KHOP') {
+                if (diffText === '0' || diffText === '+0' || diffText === '-0') {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            } else if (activeTab === 'LECH') {
+                if (diffText !== '0' && diffText !== '---') {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            } else if (activeTab === 'CHUA_KIEM') {
+                if (diffText === '---') {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            }
+        });
+    });
+
+    // Toggle thu gọn panel phải
+    $('#toggleRightPanelBtn').on('click', function () {
+        const rightCol = $('#formRightCol');
+        const leftCol = $('#formLeftCol');
+
+        rightCol.toggleClass('collapsed');
+        if (rightCol.hasClass('collapsed')) {
+            leftCol.removeClass('col-lg-9').addClass('col-12');
+            $('#toggleRightIcon').text('◀');
+        } else {
+            leftCol.removeClass('col-12').addClass('col-lg-9');
+            $('#toggleRightIcon').text('▶');
+        }
+    });
+});
+</script>
+}

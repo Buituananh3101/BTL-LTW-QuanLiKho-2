@@ -1,0 +1,11 @@
+@{ var controller = ViewContext.RouteData.Values["controller"]?.ToString(); }
+<div id="layoutSidenav_nav"><nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion"><div class="sb-sidenav-menu"><div class="nav">
+<div class="sb-sidenav-menu-heading">Quản lý kho</div>
+<a class="nav-link @(controller == "PhieuKiemKe" ? "active text-white fw-bold" : "")" asp-controller="PhieuKiemKe" asp-action="Index">
+    <span class="sb-nav-link-icon me-2">📋</span>Kiểm kho
+</a>
+<div class="sb-sidenav-menu-heading">Danh mục</div>
+<a class="nav-link @(controller == "HangHoas" ? "active text-white fw-bold" : "")" asp-controller="HangHoas" asp-action="Index" aria-current="@(controller == "HangHoas" ? "page" : null)">
+    <span class="sb-nav-link-icon me-2">📦</span>Hàng hóa
+</a>
+</div></div><div class="sb-sidenav-footer"><div class="small">Chi nhánh</div>Phú Quốc</div></nav></div>

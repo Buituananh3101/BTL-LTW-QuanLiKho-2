@@ -1,0 +1,138 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.PhieuKiemKeIndexVM
+
+<div class="kk-table-container">
+    @if (!Model.Items.Any())
+    {
+        <div class="kk-empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16">
+                <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2zm3.564 1.426L5.596 5 8 5.961 14.154 3.5zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/>
+            </svg>
+            <h5>Không tìm thấy kết quả</h5>
+            <p class="text-muted">Không có phiếu kiểm kho nào phù hợp với bộ lọc đã chọn.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover kk-table align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 30px;"><input type="checkbox" class="form-check-input" id="selectAllRows" /></th>
+                        <th style="width: 120px;">Mã kiểm kho</th>
+                        <th style="width: 140px;">Thời gian</th>
+                        <th style="width: 140px;">Ngày cân bằng</th>
+                        <th>Kho</th>
+                        <th>Người tạo</th>
+                        <th class="text-end" style="width: 100px;">Tổng thực tế</th>
+                        <th class="text-end" style="width: 110px;">Tổng lệch</th>
+                        <th class="text-end" style="width: 90px;">Lệch tăng</th>
+                        <th class="text-end" style="width: 90px;">Lệch giảm</th>
+                        <th style="width: 130px;" class="text-center">Trạng thái</th>
+                        <th style="width: 90px;" class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td><input type="checkbox" class="form-check-input row-select" value="@item.MaPhieuKiemKe" /></td>
+                            <td>
+                                @if (item.TrangThai == "NHAP")
+                                {
+                                    <a asp-action="Edit" asp-route-id="@item.MaPhieuKiemKe" class="fw-bold text-primary text-decoration-none">
+                                        @item.MaPhieuHienThi
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a asp-action="Details" asp-route-id="@item.MaPhieuKiemKe" class="fw-bold text-primary text-decoration-none">
+                                        @item.MaPhieuHienThi
+                                    </a>
+                                }
+                            </td>
+                            <td>@item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@(item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "---")</td>
+                            <td><span class="text-truncate d-inline-block" style="max-width: 130px;" title="@item.TenKho">@item.TenKho</span></td>
+                            <td>@item.TenNguoiLap</td>
+                            <td class="text-end fw-bold">@item.TongThucTe.ToString("N0")</td>
+                            <td class="text-end fw-bold @(item.TongChenhLech > 0 ? "text-success" : (item.TongChenhLech < 0 ? "text-danger" : "text-muted"))">
+                                @(item.TongChenhLech > 0 ? "+" : "")@item.TongChenhLech.ToString("N0")
+                            </td>
+                            <td class="text-end text-success">
+                                @(item.SlLechTang > 0 ? "+" + item.SlLechTang.ToString("N0") : "0")
+                            </td>
+                            <td class="text-end text-danger">
+                                @(item.SlLechGiam > 0 ? "-" + item.SlLechGiam.ToString("N0") : "0")
+                            </td>
+                            <td class="text-center">
+                                @if (item.TrangThai == "NHAP")
+                                {
+                                    <span class="badge badge-status badge-status-draft">Phiếu tạm</span>
+                                }
+                                else if (item.TrangThai == "DA_DIEU_CHINH")
+                                {
+                                    <span class="badge badge-status badge-status-balanced">Đã cân bằng</span>
+                                }
+                                else if (item.TrangThai == "HUY")
+                                {
+                                    <span class="badge badge-status badge-status-cancelled">Đã hủy</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-status bg-info text-white">@item.TenTrangThai</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    @if (item.TrangThai == "NHAP")
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.MaPhieuKiemKe" class="btn btn-outline-primary btn-sm" title="Sửa phiếu tạm">
+                                            ✏
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger btn-sm btn-delete-draft" data-id="@item.MaPhieuKiemKe" data-code="@item.MaPhieuHienThi" title="Xóa phiếu tạm">
+                                            🗑
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <a asp-action="Details" asp-route-id="@item.MaPhieuKiemKe" class="btn btn-outline-secondary btn-sm" title="Xem chi tiết">
+                                            👁
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light">
+            <div class="text-muted small">
+                Hiển thị <strong>@(((Model.Filter.Page - 1) * Model.Filter.PageSize) + 1)</strong> - 
+                <strong>@(Math.Min(Model.Filter.Page * Model.Filter.PageSize, Model.TotalCount))</strong> 
+                trên tổng số <strong>@Model.TotalCount</strong> phiếu kiểm
+            </div>
+            @if (Model.TotalPages > 1)
+            {
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(Model.Filter.Page <= 1 ? "disabled" : "")">
+                            <a class="page-link page-ajax" href="#" data-page="@(Model.Filter.Page - 1)">«</a>
+                        </li>
+                        @for (int p = 1; p <= Model.TotalPages; p++)
+                        {
+                            <li class="page-item @(p == Model.Filter.Page ? "active" : "")">
+                                <a class="page-link page-ajax" href="#" data-page="@p">@p</a>
+                            </li>
+                        }
+                        <li class="page-item @(Model.Filter.Page >= Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link page-ajax" href="#" data-page="@(Model.Filter.Page + 1)">»</a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </div>
+    }
+</div>

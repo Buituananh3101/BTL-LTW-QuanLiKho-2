@@ -1,0 +1,8 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.HangHoaForm
+@{ ViewData["Title"] = "Thêm hàng hóa"; }
+<main class="goods-page container-fluid px-4"><a asp-action="Index" class="goods-back">← Danh sách hàng hóa</a><div class="goods-heading"><div><h1>Thêm hàng hóa</h1><p>Tạo mặt hàng mới trong danh mục.</p></div></div>
+<div class="card goods-card goods-form"><div class="card-header">Thông tin hàng hóa</div><form asp-action="Create" asp-route-id="@Model.MaHang" method="post" class="card-body p-4">
+<input type="hidden" asp-for="MaHang" /><partial name="_Form" model="Model" />
+<div class="goods-form-footer"><a asp-action="Index" class="btn btn-outline-secondary">Hủy</a><button type="submit" class="btn btn-primary">Lưu hàng hóa</button></div>
+</form></div></main>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

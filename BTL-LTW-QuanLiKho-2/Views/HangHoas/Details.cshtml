@@ -1,0 +1,4 @@
+@model BTL_LTW_QuanLiKho_2.Models.HangHoa
+@{ ViewData["Title"] = "Chi tiết hàng hóa"; }
+<main class="goods-page container-fluid px-4"><a asp-action="Index" class="goods-back">← Danh sách hàng hóa</a><div class="goods-heading"><div><h1>Chi tiết hàng hóa</h1><p>@Model.MaHangNoiBo · @Model.TenHang</p></div></div>
+<div class="card goods-card goods-form"><div class="card-header">Thông tin hàng hóa</div><div class="card-body p-4"><partial name="_Info" model="Model" /><div class="goods-form-footer"><a asp-action="Index" class="btn btn-outline-secondary">Quay lại</a><a asp-action="Edit" asp-route-id="@Model.MaHang" class="btn btn-primary">Sửa hàng hóa</a></div></div></div></main>
