@@ -1,0 +1,89 @@
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<nav class="mainnav">
+  <ul>
+    <li class="@(controller == "Home" ? "active" : "")">
+      <a asp-controller="Home" asp-action="Index">Tổng quan</a>
+    </li>
+
+    <li class="@(controller == "HangHoas" || controller == "PhieuKiemKe" ? "active" : "")">
+      <a asp-controller="HangHoas" asp-action="Index">Hàng hóa</a>
+      <div class="mega">
+        <div class="mega-col">
+          <div class="mega-title">Hàng hóa</div>
+          <a asp-controller="HangHoas" asp-action="Index">Danh sách hàng hóa</a>
+          <a asp-controller="HangHoas" asp-action="Index" asp-route-tab="nhom">Nhóm hàng</a>
+        </div>
+        <div class="mega-col">
+          <div class="mega-title">Kho hàng</div>
+          <a asp-controller="HangHoas" asp-action="Index">Tồn kho</a>
+          <a asp-controller="PhieuKiemKe" asp-action="Index">Kiểm kho</a>
+          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Chuyển kho</a>
+          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Xuất dùng nội bộ</a>
+          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Xuất hủy</a>
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <a href="#" onclick="return false;">Mua hàng</a>
+      <div class="mega">
+        <div class="mega-col">
+          <div class="mega-title">Nhà cung cấp</div>
+          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Nhà cung cấp</a>
+        </div>
+        <div class="mega-col">
+          <div class="mega-title">Mua hàng</div>
+          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Nhập hàng</a>
+          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Trả hàng nhập</a>
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <a href="#" onclick="return false;">Đơn hàng</a>
+      <div class="mega">
+        <div class="mega-col">
+          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Hóa đơn</a>
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <a href="#" onclick="return false;">Khách hàng</a>
+      <div class="mega">
+        <div class="mega-col">
+          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Khách hàng</a>
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <a href="#" onclick="return false;">Báo cáo</a>
+      <div class="mega">
+        <div class="mega-col">
+          <div class="mega-title">Kho</div>
+          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Tồn kho theo kho</a>
+          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Nhập - Xuất - Tồn</a>
+          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Hàng dưới định mức</a>
+          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Thẻ kho</a>
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <a href="#" onclick="return false;">Thiết lập</a>
+      <div class="mega">
+        <div class="mega-col">
+          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Kho</a>
+          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Người dùng</a>
+          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Nhật ký thao tác</a>
+        </div>
+      </div>
+    </li>
+  </ul>
+  <button class="btn-sell" onclick="alert('Màn hình Bán hàng / POS');"><i class="bi bi-cart3"></i>Bán hàng</button>
+</nav>

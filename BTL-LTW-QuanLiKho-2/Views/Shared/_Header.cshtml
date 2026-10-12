@@ -1,0 +1,60 @@
+@inject BTL_LTW_QuanLiKho_2.Models.QuanLyKhoPhuQuocLtwContext dbContext
+@{
+    var currentWhId = Context.Session.GetInt32("CurrentWarehouseId") ?? 1;
+    var warehouses = dbContext.Khos.Where(k => k.TrangThai == "HOAT_DONG").OrderBy(k => k.MaKho).ToList();
+    var currentWh = warehouses.FirstOrDefault(w => w.MaKho == currentWhId) ?? warehouses.FirstOrDefault();
+}
+
+<header class="topbar">
+  <div class="d-flex align-items-center gap-3">
+    <a class="brand" asp-controller="HangHoas" asp-action="Index">
+      <span class="brand-logo"><i class="bi bi-box-seam"></i></span>
+      <span>KhoPro</span>
+    </a>
+
+    <!-- Warehouse Switcher -->
+    <div class="dropdown ms-2">
+      <button class="wh-switcher-btn dropdown-toggle" type="button" id="whSwitcherBtn" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-buildings"></i>
+        <span>@(currentWh?.TenKho ?? "Chọn kho")</span>
+      </button>
+      <ul class="dropdown-menu shadow-sm" aria-labelledby="whSwitcherBtn">
+        <li class="dropdown-header small text-uppercase fw-bold text-muted">Kho làm việc</li>
+        @foreach (var wh in warehouses)
+        {
+          <li>
+            <a class="dropdown-item d-flex justify-content-between align-items-center py-2 @(wh.MaKho == currentWhId ? "active fw-bold" : "")" 
+               href="#" onclick="switchWorkingWarehouse(@wh.MaKho); return false;">
+              <span>@wh.TenKho</span>
+              @if (wh.MaKho == currentWhId)
+              {
+                <i class="bi bi-check2"></i>
+              }
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <a href="#" title="Hỗ trợ"><i class="bi bi-chat-left-text"></i>Hỗ trợ</a>
+    <a href="#" title="Góp ý"><i class="bi bi-pencil-square"></i>Góp ý</a>
+    <a href="#" class="bell" title="Thông báo">
+      <i class="bi bi-bell-fill fs-5"></i>
+      <span class="dot">2</span>
+    </a>
+    <a href="#" title="Cài đặt"><i class="bi bi-gear-fill fs-5"></i></a>
+    <div class="d-flex align-items-center gap-2">
+      <span class="avatar"><i class="bi bi-person-fill"></i></span>
+      <span class="fw-semibold small d-none d-md-inline">Trần Thị Kho</span>
+    </div>
+  </div>
+</header>
+
+<script>
+function switchWorkingWarehouse(whId) {
+    fetch('/PhieuKiemKe/SwitchWarehouse?warehouseId=' + whId, { method: 'POST' })
+        .then(() => window.location.reload());
+}
+</script>

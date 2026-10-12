@@ -1,26 +1,539 @@
-@model IEnumerable<BTL_LTW_QuanLiKho_2.Models.HangHoa>
-@{ ViewData["Title"] = "Hàng hóa"; }
-<main class="goods-page container-fluid px-4">
-    <div class="goods-heading"><div><div class="goods-eyebrow">DANH MỤC / HÀNG HÓA</div><h1>Quản lý hàng hóa</h1><p>Tra cứu và quản lý danh mục hàng hóa của chi nhánh.</p></div><a class="btn btn-primary" asp-action="Create">+ Thêm hàng hóa</a></div>
-    <div class="goods-stats"><div><span>Tổng mặt hàng</span><strong>@ViewBag.Total</strong></div><div><span>Đang bán</span><strong class="text-success">@ViewBag.Active</strong></div><div><span>Kết quả tìm kiếm</span><strong class="text-primary">@ViewBag.Count</strong></div></div>
-    @if (TempData["Success"] is string message) { <div class="alert alert-success" role="status">@message</div> }
-    <section class="card goods-card">
-        <div class="card-header">Danh sách hàng hóa</div>
-        <form method="get" asp-action="Index" class="goods-filters">
-            <div class="goods-search"><label for="q">Tìm hàng hóa</label><input id="q" name="q" value="@ViewBag.Q" class="form-control" placeholder="Nhập mã hoặc tên hàng…" /></div>
-            <div><label for="nhom">Nhóm hàng</label><select id="nhom" name="nhom" class="form-select"><option value="">Tất cả nhóm</option>@foreach (var x in (Microsoft.AspNetCore.Mvc.Rendering.SelectList)ViewBag.NhomHang) { <option value="@x.Value" selected="@(x.Value == Convert.ToString(ViewBag.Nhom))">@x.Text</option> }</select></div>
-            <div><label for="trangThai">Trạng thái</label><select id="trangThai" name="trangThai" class="form-select"><option value="">Tất cả trạng thái</option>@foreach (var x in (IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.States) { <option value="@x.Value" selected="@(x.Value == (string?)ViewBag.TrangThai)">@x.Text</option> }</select></div>
-            <button class="btn btn-primary" type="submit">Lọc</button><a class="btn btn-outline-secondary" asp-action="Index">Đặt lại</a>
-        </form>
-        <div class="table-responsive"><table class="table goods-table align-middle mb-0"><thead><tr><th>Mã hàng</th><th>Hàng hóa</th><th>Nhóm hàng</th><th>Đơn vị</th><th class="text-end">Giá tham khảo</th><th>Trạng thái</th><th class="text-end">Thao tác</th></tr></thead><tbody>
-        @foreach (var item in Model) {
-            <tr><td><span class="goods-code">@item.MaHangNoiBo</span></td><td><a class="goods-name" asp-action="Details" asp-route-id="@item.MaHang">@item.TenHang</a><small class="d-block text-muted">@(string.IsNullOrWhiteSpace(item.QuyCach) ? "—" : item.QuyCach)</small></td><td>@item.MaNhomNavigation?.TenNhom</td><td>@item.MaDvtNavigation?.TenDvt</td><td class="text-end text-nowrap">@item.GiaBanThamKhao.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫</td><td><span class="goods-status @(item.TrangThai == "DANG_BAN" ? "is-active" : "is-inactive")">@(item.TrangThai == "DANG_BAN" ? "Đang bán" : item.TrangThai == "NGUNG_BAN" ? "Ngừng bán" : item.TrangThai)</span></td><td><div class="goods-actions"><a asp-action="Details" asp-route-id="@item.MaHang" class="btn btn-sm btn-outline-secondary">Xem</a><a asp-action="Edit" asp-route-id="@item.MaHang" class="btn btn-sm btn-outline-primary">Sửa</a><a asp-action="Delete" asp-route-id="@item.MaHang" class="btn btn-sm btn-outline-danger">Xóa</a></div></td></tr>
-        }
-        @if (!Model.Any()) { <tr><td colspan="7" class="text-center py-5 text-muted">Không tìm thấy hàng hóa. Thử đổi bộ lọc hoặc thêm hàng hóa mới.</td></tr> }
-        </tbody></table></div>
-        <div class="goods-pagination"><span>@ViewBag.Count kết quả · Trang @ViewBag.Page / @ViewBag.Pages</span><div>
-        @if (ViewBag.Page > 1) { <a class="btn btn-sm btn-outline-secondary" asp-action="Index" asp-route-page="@(ViewBag.Page - 1)" asp-route-q="@ViewBag.Q" asp-route-nhom="@ViewBag.Nhom" asp-route-trangThai="@ViewBag.TrangThai">← Trước</a> }
-        @if (ViewBag.Page < ViewBag.Pages) { <a class="btn btn-sm btn-outline-primary" asp-action="Index" asp-route-page="@(ViewBag.Page + 1)" asp-route-q="@ViewBag.Q" asp-route-nhom="@ViewBag.Nhom" asp-route-trangThai="@ViewBag.TrangThai">Sau →</a> }
-        </div></div>
-    </section>
+@model BTL_LTW_QuanLiKho_2.ViewModels.HangHoaIndexVM
+@{
+    ViewData["Title"] = "Hàng hóa";
+}
+
+<main class="page">
+    <!-- Header của trang: Tiêu đề + Ô tìm kiếm + Các nút thao tác -->
+    <div class="page-head">
+        <h1>Hàng hóa</h1>
+
+        <div class="search">
+            <i class="bi bi-search"></i>
+            <input id="keywordSearch" class="form-control" placeholder="Theo mã, tên hàng... (F3)" value="@Model.Q" autocomplete="off" />
+            <i class="bi bi-sliders" title="Tìm kiếm nâng cao"></i>
+        </div>
+
+        <div class="actions">
+            <button type="button" class="btn btn-brand" id="btnOpenCreateModal">
+                <i class="bi bi-plus-lg me-1"></i>+ Thêm mới
+            </button>
+            <button type="button" class="btn btn-tool" onclick="alert('Tính năng xuất danh sách Excel');">
+                <i class="bi bi-box-arrow-up me-1"></i>Xuất file <i class="bi bi-chevron-down small"></i>
+            </button>
+            <button type="button" class="btn btn-tool" title="Tải lại bảng" id="btnReloadTable">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+            <button type="button" class="btn btn-tool" title="Trợ giúp" onclick="alert('Hệ thống quản lý danh mục hàng hóa KiotViet');">
+                <i class="bi bi-question-circle"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="cols">
+        <!-- Cột lọc bên trái (KiotViet filter sidebar) -->
+        <aside class="filter">
+            <!-- Nhóm hàng -->
+            <div class="block">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6>Nhóm hàng</h6>
+                    <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 text-muted" id="btnResetFilter">
+                        Đặt lại
+                    </button>
+                </div>
+                <select class="form-select filter-change" id="filterNhomHang" name="nhom">
+                    <option value="">-- Tất cả nhóm hàng --</option>
+                    @foreach (var g in Model.NhomHangs)
+                    {
+                        <option value="@g.MaNhom" selected="@(Model.Nhom == g.MaNhom)">@g.TenNhom</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Tồn kho -->
+            <div class="block">
+                <h6>Tồn kho</h6>
+                <div class="form-check mb-2">
+                    <input class="form-check-input filter-radio" type="radio" name="tonKhoFilter" id="tkAll" value="ALL" @(Model.TonKhoFilter == "ALL" ? "checked" : "") />
+                    <label class="form-check-label" for="tkAll">Tất cả</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input filter-radio" type="radio" name="tonKhoFilter" id="tkCon" value="CON_HANG" @(Model.TonKhoFilter == "CON_HANG" ? "checked" : "") />
+                    <label class="form-check-label" for="tkCon">Còn hàng trong kho</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input filter-radio" type="radio" name="tonKhoFilter" id="tkHet" value="HET_HANG" @(Model.TonKhoFilter == "HET_HANG" ? "checked" : "") />
+                    <label class="form-check-label" for="tkHet">Hết hàng trong kho</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input filter-radio" type="radio" name="tonKhoFilter" id="tkDuoi" value="DUOI_DINH_MUC" @(Model.TonKhoFilter == "DUOI_DINH_MUC" ? "checked" : "") />
+                    <label class="form-check-label text-danger" for="tkDuoi">Dưới định mức tồn ⚠️</label>
+                </div>
+            </div>
+
+            <!-- Trạng thái -->
+            <div class="block">
+                <h6>Trạng thái hàng hóa</h6>
+                <div class="form-check mb-2">
+                    <input class="form-check-input filter-status" type="radio" name="trangThaiFilter" id="ttAll" value="" @(string.IsNullOrEmpty(Model.TrangThai) ? "checked" : "") />
+                    <label class="form-check-label" for="ttAll">Tất cả</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input filter-status" type="radio" name="trangThaiFilter" id="ttDangBan" value="DANG_BAN" @(Model.TrangThai == "DANG_BAN" ? "checked" : "") />
+                    <label class="form-check-label" for="ttDangBan">Đang bán</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input filter-status" type="radio" name="trangThaiFilter" id="ttNgungBan" value="NGUNG_BAN" @(Model.TrangThai == "NGUNG_BAN" ? "checked" : "") />
+                    <label class="form-check-label" for="ttNgungBan">Ngừng bán</label>
+                </div>
+            </div>
+
+            <!-- Thông tin kho hiện tại -->
+            <div class="block">
+                <h6>Kho đang chọn</h6>
+                <div class="p-2 rounded bg-light border text-muted small">
+                    <i class="bi bi-buildings me-1 text-primary"></i>
+                    <strong>@Model.CurrentWarehouseName</strong>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Khu vực hiển thị bảng hàng hóa -->
+        <section id="content">
+            <div id="productTableContainer">
+                <partial name="_HangHoaTable" model="Model" />
+            </div>
+        </section>
+    </div>
 </main>
+
+<!-- ========================================================================
+     MODAL KIOTVIET: THÊM MỚI / CẬP NHẬT HÀNG HÓA
+     ======================================================================== -->
+<div class="modal fade modal-kiot" id="hangHoaModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Thêm mới hàng hóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-3">
+                <!-- Nav Tabs -->
+                <ul class="nav nav-tabs mb-3" id="productModalTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-semibold" id="tab-info-btn" data-bs-toggle="tab" data-bs-target="#tab-info" type="button" role="tab">
+                            Thông tin
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="tab-desc-btn" data-bs-toggle="tab" data-bs-target="#tab-desc" type="button" role="tab">
+                            Mô tả chi tiết
+                        </button>
+                    </li>
+                </ul>
+
+                <form id="hangHoaForm">
+                    <input type="hidden" id="formMaHang" name="MaHang" value="0" />
+
+                    <div class="tab-content" id="productModalTabContent">
+                        <!-- TAB 1: THÔNG TIN -->
+                        <div class="tab-pane fade show active" id="tab-info" role="tabpanel">
+                            <div class="modal-card-section">
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <div class="row g-2">
+                                            <!-- Mã hàng -->
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold text-muted mb-1">Mã hàng</label>
+                                                <input type="text" class="form-control form-control-sm" id="formMaHangNoiBo" name="MaHangNoiBo" placeholder="Mã hàng tự động" />
+                                            </div>
+                                            <!-- Mã vạch / Quy cách -->
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold text-muted mb-1">Mã vạch / Quy cách</label>
+                                                <input type="text" class="form-control form-control-sm" id="formQuyCach" name="QuyCach" placeholder="Barcode, quy cách…" />
+                                            </div>
+                                            <!-- Tên hàng (*) -->
+                                            <div class="col-md-12">
+                                                <label class="form-label small fw-bold text-muted mb-1">Tên hàng hóa <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" id="formTenHang" name="TenHang" required placeholder="Nhập tên hàng hóa…" />
+                                            </div>
+                                            <!-- Nhóm hàng (*) -->
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold text-muted mb-1">Nhóm hàng <span class="text-danger">*</span></label>
+                                                <select class="form-select form-select-sm" id="formMaNhom" name="MaNhom" required>
+                                                    <option value="">-- Chọn nhóm hàng --</option>
+                                                    @foreach (var g in Model.NhomHangs)
+                                                    {
+                                                        <option value="@g.MaNhom">@g.TenNhom</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                            <!-- Đơn vị tính (*) -->
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold text-muted mb-1">Đơn vị tính <span class="text-danger">*</span></label>
+                                                <select class="form-select form-select-sm" id="formMaDvt" name="MaDvt" required>
+                                                    <option value="">-- Chọn ĐVT --</option>
+                                                    @foreach (var u in Model.DonViTinhs)
+                                                    {
+                                                        <option value="@u.MaDvt">@u.TenDvt</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Vùng ảnh thumbnail -->
+                                    <div class="col-md-4 text-center">
+                                        <div class="p-3 border rounded bg-light d-flex flex-column align-items-center justify-content-center" style="height: 100%; min-height: 140px;">
+                                            <i class="bi bi-image text-muted fs-1 mb-2"></i>
+                                            <span class="small text-muted">Ảnh hàng hóa</span>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2 py-0 px-2" onclick="alert('Tính năng tải ảnh lên');">
+                                                <i class="bi bi-upload me-1"></i>Chọn ảnh
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Giá vốn, giá bán -->
+                            <div class="modal-card-section">
+                                <div class="modal-card-title">
+                                    <span>Giá vốn &amp; Giá bán</span>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold text-muted mb-1">Giá vốn (VNĐ)</label>
+                                        <input type="number" step="1000" min="0" class="form-control form-control-sm text-end" id="formGiaVon" name="GiaVon" value="0" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold text-muted mb-1">Giá bán tham khảo (VNĐ) <span class="text-danger">*</span></label>
+                                        <input type="number" step="1000" min="0" class="form-control form-control-sm text-end fw-bold text-primary" id="formGiaBan" name="GiaBanThamKhao" value="0" required />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Tồn kho & Định mức -->
+                            <div class="modal-card-section">
+                                <div class="modal-card-title">
+                                    <span>Tồn kho &amp; Định mức</span>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6" id="boxInitialStock">
+                                        <label class="form-label small fw-bold text-muted mb-1">Tồn kho ban đầu</label>
+                                        <input type="number" step="1" min="0" class="form-control form-control-sm text-end" id="formTonKhoBanDau" name="TonKhoBanDau" value="0" />
+                                        <small class="text-muted d-block mt-1">Số lượng tồn ghi nhận vào kho hiện tại</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold text-muted mb-1">Định mức tồn nhỏ nhất (Tồn tối thiểu)</label>
+                                        <input type="number" step="1" min="0" class="form-control form-control-sm text-end" id="formTonToiThieu" name="TonToiThieu" value="0" />
+                                        <small class="text-muted d-block mt-1">Cảnh báo khi tồn kho giảm xuống dưới ngưỡng này</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Trạng thái kinh doanh -->
+                            <div class="modal-card-section mb-0">
+                                <div class="modal-card-title">
+                                    <span>Trạng thái kinh doanh</span>
+                                </div>
+                                <div class="d-flex gap-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="TrangThai" id="statusActive" value="DANG_BAN" checked />
+                                        <label class="form-check-label text-success fw-semibold" for="statusActive">Đang bán</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="TrangThai" id="statusInactive" value="NGUNG_BAN" />
+                                        <label class="form-check-label text-muted fw-semibold" for="statusInactive">Ngừng bán</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 2: MÔ TẢ CHI TIẾT -->
+                        <div class="tab-pane fade" id="tab-desc" role="tabpanel">
+                            <div class="modal-card-section">
+                                <label class="form-label small fw-bold text-muted mb-1">Mô tả sản phẩm</label>
+                                <textarea class="form-control" id="formMoTa" rows="6" placeholder="Nhập đặc điểm, bảo quản, ghi chú…"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Bỏ qua</button>
+                <button type="button" class="btn btn-outline-primary" id="btnSaveAndAddMore">Lưu &amp; Tạo thêm hàng</button>
+                <button type="button" class="btn btn-brand" id="btnSaveProduct">
+                    <i class="bi bi-check-lg me-1"></i>Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================
+     MODAL XÁC NHẬN XÓA HÀNG HÓA
+     ======================================================================== -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-danger">Xóa hàng hóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                Bạn có chắc chắn muốn xóa hàng hóa <strong id="deleteTargetName"></strong>? Thao tác này chỉ thực hiện được nếu hàng hóa chưa phát sinh giao dịch.
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Bỏ qua</button>
+                <button type="button" class="btn btn-danger btn-sm" id="btnExecuteDelete">Đồng ý xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+$(document).ready(function () {
+    let currentPage = @Model.Page;
+    let deleteId = 0;
+    const modalEl = document.getElementById('hangHoaModal');
+    const hangHoaModal = new bootstrap.Modal(modalEl);
+
+    // Phím tắt F3: focus ô tìm kiếm
+    $(document).on('keydown', function (e) {
+        if (e.key === 'F3') {
+            e.preventDefault();
+            $('#keywordSearch').focus().select();
+        }
+    });
+
+    // Mở modal Thêm mới hàng hóa
+    $('#btnOpenCreateModal').on('click', function () {
+        resetModalForm();
+        $('#modalTitle').text('Thêm mới hàng hóa');
+        $('#formMaHang').val(0);
+        $('#boxInitialStock').show();
+        hangHoaModal.show();
+    });
+
+    // Mở modal Sửa hàng hóa
+    $(document).on('click', '.btn-edit-product', function () {
+        const id = $(this).data('id');
+        resetModalForm();
+        $('#modalTitle').text('Cập nhật hàng hóa');
+        $('#formMaHang').val(id);
+        $('#boxInitialStock').hide(); // Đang sửa thì không nhập lại tồn ban đầu
+
+        $.ajax({
+            url: '/HangHoas/GetItem/' + id,
+            type: 'GET',
+            success: function (res) {
+                $('#formMaHangNoiBo').val(res.maHangNoiBo);
+                $('#formQuyCach').val(res.quyCach);
+                $('#formTenHang').val(res.tenHang);
+                $('#formMaNhom').val(res.maNhom);
+                $('#formMaDvt').val(res.maDvt);
+                $('#formGiaVon').val(res.giaVon);
+                $('#formGiaBan').val(res.giaBanThamKhao);
+                $('#formTonToiThieu').val(res.tonToiThieu);
+
+                if (res.trangThai === 'DANG_BAN') {
+                    $('#statusActive').prop('checked', true);
+                } else {
+                    $('#statusInactive').prop('checked', true);
+                }
+
+                hangHoaModal.show();
+            },
+            error: function (xhr) {
+                alert('Không thể tải thông tin hàng hóa: ' + (xhr.responseJSON?.message || 'Lỗi kết nối'));
+            }
+        });
+    });
+
+    // Lưu hàng hóa (Nút Lưu)
+    $('#btnSaveProduct').on('click', function () {
+        saveProduct(false);
+    });
+
+    // Nút Lưu & Thêm mới
+    $('#btnSaveAndAddMore').on('click', function () {
+        saveProduct(true);
+    });
+
+    function saveProduct(addMore) {
+        const maHang = parseInt($('#formMaHang').val()) || 0;
+        const tenHang = $('#formTenHang').val().trim();
+        const maNhom = parseInt($('#formMaNhom').val()) || 0;
+        const maDvt = parseInt($('#formMaDvt').val()) || 0;
+        const giaBan = parseFloat($('#formGiaBan').val()) || 0;
+
+        if (!tenHang) {
+            alert('Vui lòng nhập tên hàng hóa.');
+            $('#formTenHang').focus();
+            return;
+        }
+
+        if (maNhom <= 0) {
+            alert('Vui lòng chọn nhóm hàng.');
+            $('#formMaNhom').focus();
+            return;
+        }
+
+        if (maDvt <= 0) {
+            alert('Vui lòng chọn đơn vị tính.');
+            $('#formMaDvt').focus();
+            return;
+        }
+
+        const payload = {
+            maHang: maHang,
+            maHangNoiBo: $('#formMaHangNoiBo').val().trim(),
+            quyCach: $('#formQuyCach').val().trim(),
+            tenHang: tenHang,
+            maNhom: maNhom,
+            maDvt: maDvt,
+            giaVon: parseFloat($('#formGiaVon').val()) || 0,
+            giaBanThamKhao: giaBan,
+            tonKhoBanDau: parseFloat($('#formTonKhoBanDau').val()) || 0,
+            tonToiThieu: parseFloat($('#formTonToiThieu').val()) || 0,
+            trangThai: $('input[name="TrangThai"]:checked').val()
+        };
+
+        const url = maHang > 0 ? ('/HangHoas/Edit/' + maHang) : '/HangHoas/Create';
+        const saveBtn = $('#btnSaveProduct');
+        saveBtn.prop('disabled', true).text('Đang lưu...');
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (res) {
+                saveBtn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i>Lưu');
+                if (addMore) {
+                    resetModalForm();
+                    $('#modalTitle').text('Thêm mới hàng hóa');
+                    $('#formMaHang').val(0);
+                    $('#boxInitialStock').show();
+                    $('#formTenHang').focus();
+                    loadTable();
+                } else {
+                    hangHoaModal.hide();
+                    loadTable();
+                }
+            },
+            error: function (xhr) {
+                saveBtn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i>Lưu');
+                alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể lưu hàng hóa.'));
+            }
+        });
+    }
+
+    // Modal Xóa hàng hóa
+    $(document).on('click', '.btn-delete-product', function () {
+        deleteId = $(this).data('id');
+        $('#deleteTargetName').text($(this).data('name'));
+        const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+        modal.show();
+    });
+
+    $('#btnExecuteDelete').on('click', function () {
+        if (deleteId > 0) {
+            $.ajax({
+                url: '/HangHoas/Delete/' + deleteId,
+                type: 'POST',
+                success: function (res) {
+                    $('#deleteConfirmModal').modal('hide');
+                    loadTable();
+                },
+                error: function (xhr) {
+                    alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể xóa hàng hóa.'));
+                }
+            });
+        }
+    });
+
+    function resetModalForm() {
+        $('#hangHoaForm')[0].reset();
+        $('#formMaHang').val(0);
+        $('#statusActive').prop('checked', true);
+        $('#tab-info-btn').tab('show');
+    }
+
+    // Bộ lọc AJAX
+    let searchTimeout = null;
+    $('#keywordSearch').on('input', function () {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function () {
+            currentPage = 1;
+            loadTable();
+        }, 300);
+    });
+
+    $('.filter-change, .filter-radio, .filter-status').on('change', function () {
+        currentPage = 1;
+        loadTable();
+    });
+
+    $('#btnReloadTable').on('click', function () {
+        loadTable();
+    });
+
+    $('#btnResetFilter').on('click', function () {
+        $('#filterNhomHang').val('');
+        $('#tkAll').prop('checked', true);
+        $('#ttAll').prop('checked', true);
+        $('#keywordSearch').val('');
+        currentPage = 1;
+        loadTable();
+    });
+
+    // Phân trang AJAX
+    $(document).on('click', '.page-ajax', function (e) {
+        e.preventDefault();
+        const p = $(this).data('page');
+        if (p && p > 0) {
+            currentPage = p;
+            loadTable();
+        }
+    });
+
+    // Checkbox chọn tất cả
+    $(document).on('change', '#selectAllRows', function () {
+        $('.row-select').prop('checked', $(this).is(':checked'));
+    });
+
+    function loadTable() {
+        const q = $('#keywordSearch').val();
+        const nhom = $('#filterNhomHang').val();
+        const tonKho = $('input[name="tonKhoFilter"]:checked').val() || 'ALL';
+        const trangThai = $('input[name="trangThaiFilter"]:checked').val() || '';
+
+        $.ajax({
+            url: '/HangHoas/Filter',
+            type: 'GET',
+            data: {
+                q: q,
+                nhom: nhom,
+                tonKhoFilter: tonKho,
+                trangThai: trangThai,
+                page: currentPage
+            },
+            beforeSend: function () {
+                $('#productTableContainer').css('opacity', '0.6');
+            },
+            success: function (html) {
+                $('#productTableContainer').html(html).css('opacity', '1');
+            },
+            error: function () {
+                $('#productTableContainer').css('opacity', '1');
+                alert('Có lỗi khi tải danh sách hàng hóa.');
+            }
+        });
+    }
+});
+</script>
+}
