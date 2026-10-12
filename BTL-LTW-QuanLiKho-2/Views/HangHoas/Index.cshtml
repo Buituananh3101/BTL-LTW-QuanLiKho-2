@@ -1260,6 +1260,95 @@ $(document).ready(function () {
         $('.row-select').prop('checked', $(this).is(':checked'));
     });
 
+    // Toggle mở/đóng chi tiết hàng hóa (KiotViet Inline Accordion)
+    $(document).on('click', '.product-row', function (e) {
+        // Không mở khi click vào checkbox, star, hoặc nút thao tác
+        if ($(e.target).closest('input[type="checkbox"], .star-btn, button, a.btn-delete-product').length) {
+            return;
+        }
+
+        const id = $(this).data('id');
+        const $detailRow = $('#detail-' + id);
+        const $wrap = $detailRow.find('.product-detail-panel-wrap');
+        const isCurrentlyOpen = $detailRow.is(':visible');
+
+        // Đóng các dòng chi tiết khác đang mở (dạng accordion như KiotViet)
+        $('.product-detail-row').not($detailRow).each(function () {
+            const $other = $(this);
+            $other.find('.product-detail-panel-wrap').slideUp(150, function () {
+                $other.hide();
+            });
+        });
+        $('.product-row').not(this).removeClass('selected');
+
+        if (isCurrentlyOpen) {
+            $wrap.slideUp(150, function () {
+                $detailRow.hide();
+            });
+            $(this).removeClass('selected');
+        } else {
+            $(this).addClass('selected');
+            $detailRow.show();
+            $wrap.hide().slideDown(150);
+        }
+    });
+
+    // Chuyển Tab bên trong chi tiết hàng hóa
+    $(document).on('click', '.product-detail-tab-btn', function (e) {
+        e.stopPropagation();
+        const tabName = $(this).data('tab');
+        const $panel = $(this).closest('.product-detail-panel');
+
+        $panel.find('.product-detail-tab-btn').removeClass('active');
+        $(this).addClass('active');
+
+        $panel.find('.tab-pane-content').hide();
+        $panel.find('.tab-' + tabName).fadeIn(120);
+    });
+
+    // Sao chép hàng hóa
+    $(document).on('click', '.btn-copy-product', function (e) {
+        e.stopPropagation();
+        const id = $(this).data('id');
+        $.ajax({
+            url: '/HangHoas/GetItem/' + id,
+            type: 'GET',
+            success: function (res) {
+                resetModalForm();
+                $('#modalTitle').text('Thêm mới hàng hóa (Sao chép)');
+                $('#formMaHang').val(0); // 0 để tạo mới
+                $('#formMaHangNoiBo').val(res.maHangNoiBo ? res.maHangNoiBo + '_CP' : '');
+                $('#formTenHang').val((res.tenHang || '') + ' (Copy)');
+                $('#formMaNhom').val(res.maNhom);
+                $('#formMaDvt').val(res.maDvt);
+                $('#formQuyCach').val(res.quyCach || '');
+                $('#formGiaBan').val(res.giaBanThamKhao || 0);
+                $('#formGiaVon').val(res.giaVon || 0);
+                $('#formTonToiThieu').val(res.tonToiThieu || 0);
+                $('#formTonKhoBanDau').val(0);
+                $('#boxInitialStock').show();
+
+                if (res.hinhAnhBase64) {
+                    $('#imagePreview').attr('src', res.hinhAnhBase64).show();
+                    $('#imagePlaceholder').hide();
+                    $('#btnRemoveImage').show();
+                    $('#formHinhAnhBase64').val(res.hinhAnhBase64);
+                }
+
+                if (res.trangThai === 'DANG_BAN') {
+                    $('#statusActive').prop('checked', true);
+                } else {
+                    $('#statusInactive').prop('checked', true);
+                }
+
+                hangHoaModal.show();
+            },
+            error: function () {
+                alert('Không thể tải thông tin hàng hóa để sao chép.');
+            }
+        });
+    });
+
     function loadTable() {
         const q = $('#keywordSearch').val()?.trim() || '';
         const nhom = $('#filterNhomHang').val() || '';

@@ -933,3 +933,158 @@ body {
   cursor: default;
   color: #d1d5db;
 }
+
+/* ==========================================================================
+   KIOTVIET PRODUCT ROW EXPANSION & DETAIL TABS
+   ========================================================================== */
+tr.product-row {
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+tr.product-row:hover > td {
+  background-color: #f8fafc;
+}
+tr.product-row.selected > td {
+  background-color: #f0f7ff !important;
+  border-top: 2px solid #0070f3 !important;
+  border-bottom: 1px solid #dbeafe !important;
+}
+tr.product-row.selected > td:first-child {
+  border-left: 2px solid #0070f3 !important;
+}
+tr.product-row.selected > td:last-child {
+  border-right: 2px solid #0070f3 !important;
+}
+
+.product-detail-panel {
+  background-color: #ffffff;
+  border-left: 2px solid #0070f3;
+  border-right: 2px solid #0070f3;
+  border-bottom: 2px solid #0070f3;
+  border-top: none;
+  box-shadow: 0 6px 18px rgba(0, 112, 243, 0.08);
+  margin-bottom: 6px;
+}
+
+/* Tabs Bar */
+.product-detail-tabs {
+  display: flex;
+  gap: 24px;
+  padding: 0 24px;
+  border-bottom: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+.product-detail-tab-btn {
+  padding: 12px 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  position: relative;
+  bottom: -1px;
+  transition: all 0.15s ease-in-out;
+}
+.product-detail-tab-btn:hover {
+  color: #0070f3;
+}
+.product-detail-tab-btn.active {
+  color: #0070f3;
+  font-weight: 600;
+  border-bottom: 2px solid #0070f3;
+}
+
+/* Tab Panes */
+.product-detail-tab-content {
+  padding: 20px 24px;
+}
+
+/* Image box */
+.product-detail-img-box {
+  width: 96px;
+  height: 96px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 4px;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.product-detail-img-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.product-detail-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.badge-kiot-tag {
+  display: inline-block;
+  font-size: 11.5px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background-color: #f1f5f9;
+  color: #475569;
+  font-weight: 500;
+}
+.badge-kiot-warning {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+/* 4-Columns Attributes Grid */
+.product-attr-grid .attr-item {
+  margin-bottom: 12px;
+}
+.product-attr-grid .attr-label {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+.product-attr-grid .attr-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.supplier-box {
+  background-color: #f8fafc;
+  border: 1px solid #eef2f6;
+}
+
+/* Sub tables: Thẻ kho & Tồn kho */
+.thekho-table, .tonkho-table {
+  width: 100%;
+  font-size: 13px;
+  border-collapse: collapse;
+}
+.thekho-table th, .tonkho-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 9px 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.thekho-table td, .tonkho-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+.thekho-table tr:hover td, .tonkho-table tr:hover td {
+  background-color: #f8fafc;
+}
+.tonkho-table tr.tonkho-summary td {
+  background-color: #f8fafc;
+  font-weight: 700;
+  border-bottom: 2px solid #e2e8f0;
+}
