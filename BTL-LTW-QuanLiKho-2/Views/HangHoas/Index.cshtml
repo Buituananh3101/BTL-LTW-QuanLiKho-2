@@ -565,18 +565,14 @@ $(document).ready(function () {
         const shouldCollapse = (typeof forceState === 'boolean') ? forceState : !isCollapsed;
 
         if (shouldCollapse) {
-            // Kéo vào (Collapse)
+            // Kéo vào (Thu gọn)
             container.addClass('sidebar-collapsed');
-            $('#sidebarFilterCol').css('width', '');
-            $('#btnToggleSidebar').css('left', '');
             $('#sidebarToggleIcon').removeClass('bi-chevron-left').addClass('bi-chevron-right');
             $('#btnToggleSidebar').attr('title', 'Mở rộng bộ lọc (F4)');
             localStorage.setItem('kiot_sidebar_state', 'collapsed');
         } else {
-            // Kéo ra (Expand)
+            // Kéo ra (Mở rộng)
             container.removeClass('sidebar-collapsed');
-            $('#sidebarFilterCol').css('width', '');
-            $('#btnToggleSidebar').css('left', '');
             $('#sidebarToggleIcon').removeClass('bi-chevron-right').addClass('bi-chevron-left');
             $('#btnToggleSidebar').attr('title', 'Thu gọn bộ lọc (F4)');
             localStorage.setItem('kiot_sidebar_state', 'expanded');
@@ -588,65 +584,10 @@ $(document).ready(function () {
         toggleSidebar(true);
     }
 
-    // Kéo thả (Drag to resize) hoặc Click nút để kéo vào / kéo ra
-    let isDraggingSidebar = false;
-    let hasDraggedSidebar = false;
-    let dragStartX = 0;
-    let sidebarStartWidth = 250;
-
-    $('#btnToggleSidebar').on('mousedown', function (e) {
-        if (e.which !== 1) return;
-        isDraggingSidebar = true;
-        hasDraggedSidebar = false;
-        dragStartX = e.pageX;
-        sidebarStartWidth = $('#sidebarFilterCol').outerWidth() || 250;
-        $('body').addClass('sidebar-resizing');
-    });
-
-    $(document).on('mousemove', function (e) {
-        if (!isDraggingSidebar) return;
-        const diff = e.pageX - dragStartX;
-        if (Math.abs(diff) > 4) {
-            hasDraggedSidebar = true;
-        }
-
-        let newWidth = sidebarStartWidth + diff;
-        if (newWidth < 90) {
-            // Kéo vào sát mép trái -> tự thu gọn
-            $('#kiotContainer').addClass('sidebar-collapsed');
-            $('#sidebarFilterCol').css('width', '');
-            $('#btnToggleSidebar').css('left', '');
-            $('#sidebarToggleIcon').removeClass('bi-chevron-left').addClass('bi-chevron-right');
-        } else {
-            // Kéo ra -> mở rộng linh hoạt từ 180px đến 450px
-            newWidth = Math.min(Math.max(newWidth, 180), 450);
-            $('#kiotContainer').removeClass('sidebar-collapsed');
-            $('#sidebarFilterCol').css({ 'width': newWidth + 'px', 'flex': '0 0 ' + newWidth + 'px' });
-            $('#btnToggleSidebar').css('left', (newWidth + 10) + 'px');
-            $('#sidebarToggleIcon').removeClass('bi-chevron-right').addClass('bi-chevron-left');
-        }
-    });
-
-    $(document).on('mouseup', function () {
-        if (isDraggingSidebar) {
-            isDraggingSidebar = false;
-            $('body').removeClass('sidebar-resizing');
-            if (hasDraggedSidebar) {
-                if ($('#kiotContainer').hasClass('sidebar-collapsed')) {
-                    localStorage.setItem('kiot_sidebar_state', 'collapsed');
-                } else {
-                    localStorage.setItem('kiot_sidebar_state', 'expanded');
-                }
-            }
-        }
-    });
-
-    // Bấm click nút (nếu không kéo thả)
-    $('#btnToggleSidebar').on('click', function () {
-        if (hasDraggedSidebar) {
-            hasDraggedSidebar = false;
-            return;
-        }
+    // Bấm nút kéo mở / thu gọn - phản hồi tức thì và tin cậy 100%
+    $('#btnToggleSidebar').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
         toggleSidebar();
     });
 
