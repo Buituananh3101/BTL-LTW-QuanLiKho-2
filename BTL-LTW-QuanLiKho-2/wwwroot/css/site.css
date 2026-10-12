@@ -434,13 +434,13 @@ body {
   padding: 14px 20px 80px;
   align-items: flex-start;
   position: relative;
-  transition: gap 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: gap 0.4s cubic-bezier(0.25, 1, 0.35, 1);
 }
 .kiot-sidebar-col {
   width: 250px;
   flex: 0 0 250px;
   position: relative;
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, margin 0.25s ease;
+  transition: width 0.4s cubic-bezier(0.25, 1, 0.35, 1), opacity 0.35s cubic-bezier(0.25, 1, 0.35, 1), margin 0.4s cubic-bezier(0.25, 1, 0.35, 1);
 }
 .kiot-sidebar-title {
   font-size: 22px;
@@ -640,7 +640,7 @@ body {
   box-shadow: 0 2px 8px rgba(10, 102, 232, 0.25);
   color: var(--brand);
   font-size: 13px;
-  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  transition: left 0.4s cubic-bezier(0.25, 1, 0.35, 1), background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   user-select: none;
   outline: none;
 }
@@ -651,6 +651,12 @@ body {
 }
 .kiot-sidebar-toggle-btn:active {
   transform: scale(0.95);
+}
+
+/* Đang chuyển động hoặc đã thu gọn: khóa tràn nội dung để không bị giật chữ */
+.kiot-container.sidebar-animating .kiot-sidebar-col,
+.kiot-container.sidebar-collapsed .kiot-sidebar-col {
+  overflow: hidden !important;
 }
 
 /* Khi thu gọn (Kéo vào) */
@@ -678,7 +684,7 @@ body {
 .kiot-main-col {
   flex: 1;
   min-width: 0;
-  transition: padding-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: padding-left 0.4s cubic-bezier(0.25, 1, 0.35, 1);
 }
 
 /* Quick Date Picker popup (3 columns like Screenshot 3) */

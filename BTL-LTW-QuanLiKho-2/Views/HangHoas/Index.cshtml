@@ -559,10 +559,18 @@ $(document).ready(function () {
     const groupModal = new bootstrap.Modal(document.getElementById('quickGroupModal'));
 
     // 1. Thu gọn / Mở rộng (Kéo vào / Kéo ra) sidebar bên trái
+    let animTimer = null;
     function toggleSidebar(forceState) {
         const container = $('#kiotContainer');
         const isCollapsed = container.hasClass('sidebar-collapsed');
         const shouldCollapse = (typeof forceState === 'boolean') ? forceState : !isCollapsed;
+
+        // Bật trạng thái đang chuyển động để khóa tràn nội dung, chuyển động êm ái
+        clearTimeout(animTimer);
+        container.addClass('sidebar-animating');
+        animTimer = setTimeout(() => {
+            container.removeClass('sidebar-animating');
+        }, 420);
 
         if (shouldCollapse) {
             // Kéo vào (Thu gọn)
