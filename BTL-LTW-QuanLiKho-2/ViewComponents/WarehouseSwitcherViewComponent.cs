@@ -62,7 +62,7 @@ public class WarehouseSwitcherViewComponent : ViewComponent
             {
                 var khoDauTien = await _context.Khos
                     .Where(k => k.TrangThai == "HOAT_DONG")
-                    .OrderBy(k => k.MaKho)
+                    .OrderBy(k => k.MaKho)  
                     .Select(k => new KhoItemVM
                     {
                         MaKho = k.MaKho,
