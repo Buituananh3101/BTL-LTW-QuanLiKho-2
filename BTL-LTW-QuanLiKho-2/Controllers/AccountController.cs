@@ -152,4 +152,15 @@ public class AccountController : Controller
     {
         return View();
     }
+
+    [HttpPost]
+    public IActionResult SwitchWarehouse(int warehouseId)
+    {
+        if (warehouseId > 0)
+        {
+            HttpContext.Session.SetInt32("CurrentWarehouseId", warehouseId);
+        }
+        return Ok(new { success = true, warehouseId });
+    }
 }
+

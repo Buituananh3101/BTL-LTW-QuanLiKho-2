@@ -37,16 +37,20 @@ Hệ thống sử dụng **duy nhất một Layout chính** cho toàn bộ các 
 - Vị trí: [`Views/Shared/_Header.cshtml`](../../BTL-LTW-QuanLiKho-2/Views/Shared/_Header.cshtml).
 - Gồm có: Logo thương hiệu **KhoPro**, ô dropdown chuyển đổi kho làm việc, chuông thông báo, menu cài đặt và thông tin người dùng đang đăng nhập.
 
-### 2.1. Cơ chế hoạt động của Warehouse Switcher:
-1. Header đọc kho đang chọn từ `Context.Session.GetInt32("CurrentWarehouseId")`.
-2. Khi người dùng click chọn kho khác:
+### 2.1. Cơ chế hoạt động của Warehouse Switcher (ViewComponent):
+1. **Triển khai qua ViewComponent**: `WarehouseSwitcherViewComponent` (`ViewComponents/WarehouseSwitcherViewComponent.cs`), render qua `Views/Shared/Components/WarehouseSwitcher/Default.cshtml`.
+2. Tự động kiểm tra quyền kho:
+   - Nếu là Quản lý hoặc chưa đăng nhập: Nạp tất cả kho đang hoạt động (`HOAT_DONG`).
+   - Nếu là Nhân viên: Chỉ nạp các kho được cấp quyền trong bảng `TaiKhoanKho`.
+3. Đọc kho đang chọn từ `Context.Session.GetInt32("CurrentWarehouseId")`.
+4. Khi người dùng click chọn kho khác:
    ```javascript
    function switchWorkingWarehouse(whId) {
-       fetch('/PhieuKiemKe/SwitchWarehouse?warehouseId=' + whId, { method: 'POST' })
+       fetch('/Account/SwitchWarehouse?warehouseId=' + whId, { method: 'POST' })
            .then(() => window.location.reload());
    }
    ```
-3. Mọi Controller đọc kho hiện tại qua hàm tiện ích nội bộ:
+5. Mọi Controller đọc kho hiện tại qua hàm tiện ích nội bộ:
    ```csharp
    private int GetCurrentWarehouseId()
    {
@@ -85,7 +89,7 @@ Hệ thống sử dụng **duy nhất một Layout chính** cho toàn bộ các 
 | Thành phần | Khi nào sử dụng | Ví dụ trong dự án |
 |---|---|---|
 | **Partial View** | Thành phần giao diện dùng chung hoặc tách khối HTML cho gọn, nhận model từ view cha. | `_Header.cshtml`, `_MainMenu.cshtml`, `_HangHoaTable.cshtml`, `_PhieuKiemKeTable.cshtml`, `_PhieuKiemKeForm.cshtml` |
-| **ViewComponent** | Phần giao diện cần truy vấn CSDL độc lập, logic phức tạp, không muốn làm cồng kềnh Controller cha. | Menu phân quyền động theo Role (dự kiến khi làm Auth) |
+| **ViewComponent** | Phần giao diện cần truy vấn CSDL độc lập, logic phức tạp, không muốn làm cồng kềnh Controller cha. | `WarehouseSwitcherViewComponent` (Dropdown chọn kho theo quyền tài khoản) |
 | **`@section Scripts`** | Toàn bộ code JavaScript, jQuery, xử lý AJAX, phím tắt (F3...) của từng màn hình riêng. | Khối `@section Scripts { ... }` ở cuối file `Create.cshtml`, `Index.cshtml` |
 
 ---

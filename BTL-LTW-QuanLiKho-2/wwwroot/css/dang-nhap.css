@@ -1,0 +1,268 @@
+:root {
+  --blue: #0070f4;
+  --blue-dark: #005fd0;
+  --green: #00b63e;
+  --green-dark: #009a35;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --border: #d1d5db;
+  --danger: #dc2626;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+
+body {
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  /* Lớp tối phủ lên ảnh; nếu ảnh chưa có thì chỉ thấy nền gradient phía sau */
+  background:
+    linear-gradient(rgba(0,0,0,.62), rgba(0,0,0,.62)),
+    url('../images/login-bg.jpg') center / cover no-repeat,
+    linear-gradient(135deg, #0f2744, #0b3d2e);
+  background-attachment: fixed;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 550px;
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.45);
+}
+
+.login-body {
+  padding: 36px 30px 28px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 38px;
+}
+
+.brand-mark {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.brand-name {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0b2447;
+  letter-spacing: -.5px;
+}
+
+.field {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.field input[type=text],
+.field input[type=password] {
+  width: 100%;
+  height: 50px;
+  padding: 0 46px 0 20px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  outline: none;
+  background: #fff;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.field input::placeholder {
+  color: #9ca3af;
+}
+
+.field input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(0,112,244,.15);
+}
+
+.field.invalid input {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(220,38,38,.12);
+}
+
+.toggle-pw {
+  position: absolute;
+  top: 0;
+  right: 4px;
+  height: 50px;
+  width: 42px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-pw:hover {
+  color: var(--blue);
+}
+
+.toggle-pw svg {
+  width: 22px;
+  height: 22px;
+}
+
+.error-box {
+  display: none;
+  margin: -6px 0 16px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--danger);
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+}
+
+.error-box.show {
+  display: block;
+}
+
+.error-box ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.options {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.options input[type=checkbox] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+
+.options .sep {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+}
+
+.options a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+.options a:hover {
+  text-decoration: underline;
+}
+
+.demo-hint {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.demo-hint-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #374151;
+}
+
+.demo-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.demo-tag {
+  cursor: pointer;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.demo-tag:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.actions {
+  display: flex;
+}
+
+.actions button {
+  flex: 1;
+  height: 68px;
+  border: 0;
+  cursor: pointer;
+  color: #fff;
+  font-family: inherit;
+  font-size: 19px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background .15s, opacity .15s;
+}
+
+.actions svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+.btn-manage {
+  background: var(--blue);
+}
+
+.btn-manage:hover {
+  background: var(--blue-dark);
+}
+
+.actions button:disabled {
+  opacity: .65;
+  cursor: wait;
+}
+
+@media (max-width: 480px) {
+  .login-body {
+    padding: 28px 18px 22px;
+  }
+  .actions button {
+    font-size: 16px;
+    height: 60px;
+  }
+}

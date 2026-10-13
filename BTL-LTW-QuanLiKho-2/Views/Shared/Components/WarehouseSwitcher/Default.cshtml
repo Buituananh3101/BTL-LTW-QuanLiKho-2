@@ -1,0 +1,24 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.WarehouseSwitcherVM
+
+<div class="dropdown ms-2">
+  <button class="wh-switcher-btn dropdown-toggle" type="button" id="whSwitcherBtn" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-buildings"></i>
+    <span>@Model.CurrentWarehouseName</span>
+  </button>
+  <ul class="dropdown-menu shadow-sm" aria-labelledby="whSwitcherBtn">
+    <li class="dropdown-header small text-uppercase fw-bold text-muted">Kho làm việc</li>
+    @foreach (var wh in Model.DanhSachKho)
+    {
+      <li>
+        <a class="dropdown-item d-flex justify-content-between align-items-center py-2 @(wh.MaKho == Model.CurrentWarehouseId ? "active fw-bold" : "")" 
+           href="#" onclick="switchWorkingWarehouse(@wh.MaKho); return false;">
+          <span>@wh.TenKho</span>
+          @if (wh.MaKho == Model.CurrentWarehouseId)
+          {
+            <i class="bi bi-check2"></i>
+          }
+        </a>
+      </li>
+    }
+  </ul>
+</div>
