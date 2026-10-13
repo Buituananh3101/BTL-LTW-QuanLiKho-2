@@ -8,38 +8,20 @@ using BTL_LTW_QuanLiKho_2.Services;
 namespace BTL_LTW_QuanLiKho_2.Controllers;
 
 [Authorize]
-public class PhieuKiemKeController : Controller
+public class PhieuKiemKeController : BaseKhoController
 {
-    private readonly QuanLyKhoPhuQuocLtwContext _context;
     private readonly ITonKhoService _tonKhoService;
+    private readonly INhatKyThaoTacService _nhatKyService;
 
-    public PhieuKiemKeController(QuanLyKhoPhuQuocLtwContext context, ITonKhoService tonKhoService)
+    public PhieuKiemKeController(
+        QuanLyKhoPhuQuocLtwContext context, 
+        ITonKhoService tonKhoService,
+        INhatKyThaoTacService nhatKyService) : base(context)
     {
-        _context = context;
         _tonKhoService = tonKhoService;
+        _nhatKyService = nhatKyService;
     }
 
-    private int GetCurrentWarehouseId()
-    {
-        var whId = HttpContext.Session.GetInt32("CurrentWarehouseId");
-        if (!whId.HasValue || whId.Value <= 0)
-        {
-            var firstWh = _context.Khos.OrderBy(k => k.MaKho).FirstOrDefault();
-            whId = firstWh?.MaKho ?? 1;
-            HttpContext.Session.SetInt32("CurrentWarehouseId", whId.Value);
-        }
-        return whId.Value;
-    }
-
-    private int GetCurrentUserId()
-    {
-        return User.GetMaNv();
-    }
-
-    private int GetCurrentAccountId()
-    {
-        return User.GetMaTaiKhoan();
-    }
 
     private (DateTime fromDate, DateTime toDate) ResolveDateRange(string filterType, DateTime? customFrom, DateTime? customTo)
     {
@@ -429,7 +411,7 @@ public class PhieuKiemKeController : Controller
             {
                 success = true,
                 id = pkk.MaPhieuKiemKe,
-                code = $"PKK{pkk.MaPhieuKiemKe:D6}",
+                code = MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe),
                 message = "Lưu tạm phiếu kiểm kho thành công!"
             });
         }
@@ -544,7 +526,7 @@ public class PhieuKiemKeController : Controller
                     NgayLap = pkk.ThoiDiemChot,
                     NgayDuyet = DateTime.Now,
                     TrangThai = "DA_DUYET",
-                    GhiChu = $"Cân bằng kho từ phiếu kiểm PKK{pkk.MaPhieuKiemKe:D6}"
+                    GhiChu = $"Cân bằng kho từ phiếu kiểm {MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe)}"
                 };
                 _context.PhieuDieuChinhs.Add(pdc);
                 await _context.SaveChangesAsync();
@@ -563,25 +545,13 @@ public class PhieuKiemKeController : Controller
                 await _context.SaveChangesAsync();
             }
 
-            // Ghi nhật ký thao tác
-            try
-            {
-                var audit = new NhatKyThaoTac
-                {
-                    MaTaiKhoan = GetCurrentAccountId(),
-                    ThoiDiem = DateTime.Now,
-                    ThaoTac = "Cân bằng kho",
-                    LoaiDoiTuong = "PhieuKiemKe",
-                    MaDoiTuong = pkk.MaPhieuKiemKe.ToString(),
-                    NoiDung = $"Cân bằng kho #{pkk.MaPhieuKiemKe} tại Kho {pkk.MaKho}, số dòng: {createdDetails.Count}, dòng chênh lệch: {diffDetails.Count}"
-                };
-                _context.NhatKyThaoTacs.Add(audit);
-                await _context.SaveChangesAsync();
-            }
-            catch
-            {
-                // Không chặn thao tác chính nếu log gặp lỗi
-            }
+            // Ghi nhật ký thao tác qua Service
+            await _nhatKyService.GhiNhatKyAsync(
+                CurrentUserId,
+                "Cân bằng kho",
+                "PhieuKiemKe",
+                pkk.MaPhieuKiemKe.ToString(),
+                $"Cân bằng kho #{pkk.MaPhieuKiemKe} tại Kho {pkk.MaKho}, số dòng: {createdDetails.Count}, dòng chênh lệch: {diffDetails.Count}");
 
             await trans.CommitAsync();
 
@@ -589,7 +559,7 @@ public class PhieuKiemKeController : Controller
             {
                 success = true,
                 id = pkk.MaPhieuKiemKe,
-                code = $"PKK{pkk.MaPhieuKiemKe:D6}",
+                code = MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe),
                 message = "Cân bằng kho thành công! Số lượng tồn kho đã được cập nhật chính xác."
             });
         }

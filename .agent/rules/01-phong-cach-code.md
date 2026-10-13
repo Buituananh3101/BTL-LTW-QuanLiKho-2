@@ -20,22 +20,28 @@
 
 ---
 
-## 2. Cấu trúc Controller
+## 2. Cấu trúc Controller & BaseKhoController
 
-Mọi Controller đều inject `QuanLyKhoPhuQuocLtwContext` qua constructor và kế thừa từ `Controller`:
+Mọi Controller nghiệp vụ kho đều kế thừa từ `BaseKhoController` để dùng chung tiện ích Session kho, thông tin người dùng và phân quyền:
 
 ```csharp
 namespace BTL_LTW_QuanLiKho_2.Controllers;
 
-public class PhieuKiemKeController : Controller
+[Authorize]
+public class PhieuNhapController : BaseKhoController
 {
-    private readonly QuanLyKhoPhuQuocLtwContext _context;
+    private readonly ITonKhoService _tonKhoService;
+    private readonly INhatKyThaoTacService _nhatKyService;
 
-    public PhieuKiemKeController(QuanLyKhoPhuQuocLtwContext context)
+    public PhieuNhapController(
+        QuanLyKhoPhuQuocLtwContext context,
+        ITonKhoService tonKhoService,
+        INhatKyThaoTacService nhatKyService) : base(context)
     {
-        _context = context;
+        _tonKhoService = tonKhoService;
+        _nhatKyService = nhatKyService;
     }
-    // ...
+    // Dùng sẵn: CurrentWarehouseId, CurrentUserId, CurrentNhanVienId, CurrentUserRole, IsQuanLy
 }
 ```
 
@@ -69,8 +75,15 @@ public async Task<IActionResult> Filter(PhieuKiemKeFilterVM filter)
 
 ## 3. Cấu trúc ViewModel & Form Validation
 
-### 3.1. Phân loại ViewModel (đặt trong thư mục `ViewModels/`)
-- **IndexVM**: Chứa danh sách dữ liệu hiển thị trên trang, thông tin kho hiện tại, các danh mục phục vụ bộ lọc (ví dụ: `HangHoaIndexVM`, `PhieuKiemKeIndexVM`).
+### 3.1. Phân loại ViewModel (đặt theo thư mục con trong `ViewModels/`)
+- `ViewModels/Common/`: Các ViewModel dùng chung (`ApiResponse.cs`, `PagingFilterVM.cs`...).
+- `ViewModels/HangHoa/`: Dành cho phân hệ Hàng hóa (`HangHoaForm.cs`, `HangHoaIndexVM.cs`...).
+- `ViewModels/KiemKho/`: Dành cho phân hệ Kiểm kho (`KiemKhoViewModels.cs`...).
+- `ViewModels/NhapKho/`: Dành cho phân hệ Nhập kho (`NhapKhoIndexVM.cs`, `NhapKhoFormRequest.cs`...).
+- `ViewModels/Account/`: Dành cho phân hệ Tài khoản & Đăng nhập (`AccountViewModels.cs`...).
+- `ViewModels/Components/`: Dành cho các ViewComponent (`WarehouseSwitcherVM.cs`...).
+
+- **IndexVM**: Chứa danh sách dữ liệu hiển thị trên trang, thông tin kho hiện tại, các danh mục phục vụ bộ lọc.
 - **FilterVM**: Chứa các tiêu chí lọc (từ khóa `Q`, ngày bắt đầu, ngày kết thúc, trạng thái, người tạo, phân trang).
 - **FormVM / Request**: Chứa dữ liệu form thêm/sửa, có gắn Data Annotations để kiểm tra dữ liệu.
 - **LineVM / ItemVM**: Đại diện cho một dòng chi tiết trong bảng hoặc chứng từ.
@@ -124,3 +137,13 @@ Toàn bộ Action AJAX trả về dữ liệu JSON phải tuân thủ khuôn m�
       </script>
   }
   ```
+
+---
+
+## 5. Dịch vụ & Helper dùng chung (Shared Domain Services)
+
+- **`BaseKhoController`**: Lớp Controller cơ sở quản lý kho, cung cấp `CurrentWarehouseId`, `CurrentUserId`, `CurrentNhanVienId`, `CurrentUserRole`, `IsQuanLy`.
+- **`MaChungTuHelper`** (`Services/MaChungTuHelper.cs`): Format chuẩn mã KiotViet (`FormatMaKiemKe`, `FormatMaNhapKho`, `FormatMaXuatKho`, `FormatMaHang`...).
+- **`INhatKyThaoTacService`** (`Services/INhatKyThaoTacService.cs`): Tự động ghi nhật ký kiểm toán thao tác hệ thống không làm chặn transaction chính.
+- **`f3-product-search.js`** (`wwwroot/js/components/f3-product-search.js`): Component Autocomplete tìm kiếm hàng hóa chuẩn KiotViet phím F3 dùng chung cho Nhập, Xuất, Kiểm kho.
+

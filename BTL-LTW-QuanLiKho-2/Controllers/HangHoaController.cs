@@ -9,25 +9,12 @@ using BTL_LTW_QuanLiKho_2.Services;
 namespace BTL_LTW_QuanLiKho_2.Controllers;
 
 [Authorize]
-public class HangHoaController : Controller
+public class HangHoaController : BaseKhoController
 {
-    private readonly QuanLyKhoPhuQuocLtwContext _context;
-
-    public HangHoaController(QuanLyKhoPhuQuocLtwContext context)
+    public HangHoaController(QuanLyKhoPhuQuocLtwContext context) : base(context)
     {
-        _context = context;
     }
 
-    private int GetCurrentWarehouseId()
-    {
-        var whId = HttpContext.Session.GetInt32("CurrentWarehouseId");
-        if (whId.HasValue && whId.Value > 0) return whId.Value;
-
-        var firstWh = _context.Khos.FirstOrDefault(k => k.TrangThai == "HOAT_DONG");
-        int defaultId = firstWh?.MaKho ?? 1;
-        HttpContext.Session.SetInt32("CurrentWarehouseId", defaultId);
-        return defaultId;
-    }
 
     public async Task<IActionResult> Index(
         string? q, string? nhom = null, string? trangThai = null, string tonKhoFilter = "ALL",
@@ -785,7 +772,7 @@ public class HangHoaController : Controller
         int maxId = await _context.HangHoas.MaxAsync(x => (int?)x.MaHang) ?? 0;
         int nextNum = Math.Max(maxNum, maxId) + 1;
 
-        return "HH" + nextNum.ToString("D6");
+        return MaChungTuHelper.FormatMaHang(nextNum);
     }
 
     private async Task ValidateAndPrepareForm(HangHoaForm m)
@@ -848,7 +835,49 @@ public class HangHoaController : Controller
             new SelectListItem("Ngừng bán", "NGUNG_BAN")
         };
     }
+
+    // GET: HangHoa/SearchForDoc (Dùng chung cho Autocomplete trên các màn hình chứng từ Nhập, Xuất, Kiểm)
+    [HttpGet]
+    public async Task<IActionResult> SearchForDoc(string? q, int warehouseId = 0)
+    {
+        warehouseId = warehouseId > 0 ? warehouseId : CurrentWarehouseId;
+
+        if (string.IsNullOrWhiteSpace(q))
+        {
+            return Json(new List<object>());
+        }
+
+        q = q.Trim().ToLower();
+
+        var stockMap = await _context.VwTonKhoHienTais
+            .Where(s => s.MaKho == warehouseId)
+            .ToDictionaryAsync(s => s.MaHang, s => s.SoLuongTon ?? 0);
+
+        var query = _context.HangHoas
+            .AsNoTracking()
+            .Include(h => h.MaDvtNavigation)
+            .Include(h => h.MaNhomNavigation)
+            .Where(h => h.TrangThai == "DANG_BAN")
+            .Where(h => h.MaHangNoiBo.ToLower().Contains(q) || h.TenHang.ToLower().Contains(q))
+            .Take(20);
+
+        var products = await query.ToListAsync();
+
+        var result = products.Select(h => new
+        {
+            MaHang = h.MaHang,
+            MaHangNoiBo = h.MaHangNoiBo,
+            TenHang = h.TenHang,
+            TenDvt = h.MaDvtNavigation?.TenDvt ?? "",
+            TenNhom = h.MaNhomNavigation?.TenNhom ?? "",
+            Gia = h.GiaVon > 0 ? h.GiaVon : h.GiaBanThamKhao,
+            TonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0
+        }).ToList();
+
+        return Json(result);
+    }
 }
+
 
 public class QuickGroupRequest
 {
