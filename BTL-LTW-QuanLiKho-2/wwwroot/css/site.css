@@ -478,7 +478,7 @@ body {
 .tbl tbody tr:hover {
   background: #f8fafc;
 }
-/* Dòng tổng hợp (Summary row) chuẩn phong cách KiotViet */
+/* Dòng tổng hợp (Summary row) chuẩn phong cách KiotViet - cuộn tự nhiên cùng bảng */
 .tbl tr.summary-row,
 .tbl thead tr.summary-row,
 .tbl tbody tr.summary-row {
@@ -487,9 +487,6 @@ body {
 .tbl tr.summary-row td,
 .tbl thead tr.summary-row td,
 .tbl tbody tr.summary-row td {
-  position: sticky;
-  top: 40px;
-  z-index: 19;
   background-color: #fafbfc;
   padding: 10px 12px;
   height: 38px;

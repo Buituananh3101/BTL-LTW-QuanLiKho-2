@@ -26,7 +26,9 @@
             <th style="width: 135px;">Thời gian tạo</th>
             <th style="width: 120px;">Dự kiến hết hàng</th>
         </tr>
-        <!-- Dòng tổng hợp (Summary row) chuẩn như ảnh KiotViet -->
+    </thead>
+    <tbody>
+        <!-- Dòng tổng hợp (Summary row) cuộn tự nhiên cùng nội dung bảng -->
         <tr class="summary-row">
             <td class="text-center"></td>
             <td class="text-center"></td>
@@ -40,8 +42,6 @@
             <td class="text-muted">---</td>
             <td class="text-muted">---</td>
         </tr>
-    </thead>
-    <tbody>
         @if (Model.Items.Any())
         {
             @foreach (var item in Model.Items)
