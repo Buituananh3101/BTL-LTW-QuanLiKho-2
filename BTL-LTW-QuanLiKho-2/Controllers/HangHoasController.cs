@@ -31,9 +31,10 @@ public class HangHoasController : Controller
         string? nhaCungCap = null, string? loaiHang = null, string? viTri = null,
         string duKienFilter = "ALL", string tgTaoFilter = "ALL",
         DateTime? tgTaoFrom = null, DateTime? tgTaoTo = null,
+        bool daDanhDau = false,
         int page = 1)
     {
-        var vm = await BuildIndexVM(q, nhom, trangThai, tonKhoFilter, nhaCungCap, loaiHang, viTri, duKienFilter, tgTaoFilter, tgTaoFrom, tgTaoTo, page);
+        var vm = await BuildIndexVM(q, nhom, trangThai, tonKhoFilter, nhaCungCap, loaiHang, viTri, duKienFilter, tgTaoFilter, tgTaoFrom, tgTaoTo, daDanhDau, page);
         return View(vm);
     }
 
@@ -43,10 +44,27 @@ public class HangHoasController : Controller
         string? nhaCungCap = null, string? loaiHang = null, string? viTri = null,
         string duKienFilter = "ALL", string tgTaoFilter = "ALL",
         DateTime? tgTaoFrom = null, DateTime? tgTaoTo = null,
+        bool daDanhDau = false,
         int page = 1)
     {
-        var vm = await BuildIndexVM(q, nhom, trangThai, tonKhoFilter, nhaCungCap, loaiHang, viTri, duKienFilter, tgTaoFilter, tgTaoFrom, tgTaoTo, page);
+        var vm = await BuildIndexVM(q, nhom, trangThai, tonKhoFilter, nhaCungCap, loaiHang, viTri, duKienFilter, tgTaoFilter, tgTaoFrom, tgTaoTo, daDanhDau, page);
         return PartialView("_HangHoaTable", vm);
+    }
+
+    // AJAX Action bật/tắt đánh dấu sao (sản phẩm yêu thích)
+    [HttpPost]
+    public async Task<IActionResult> ToggleFavorite(int id)
+    {
+        var item = await _context.HangHoas.FindAsync(id);
+        if (item == null)
+        {
+            return NotFound(new { success = false, message = "Không tìm thấy hàng hóa." });
+        }
+
+        item.DaDanhDau = !item.DaDanhDau;
+        await _context.SaveChangesAsync();
+
+        return Json(new { success = true, isFavorite = item.DaDanhDau, maHang = item.MaHang });
     }
 
     // Lấy ảnh trực tiếp từ CSDL
@@ -82,6 +100,7 @@ public class HangHoasController : Controller
         string? nhaCungCap, string? loaiHang, string? viTri,
         string duKienFilter, string tgTaoFilter,
         DateTime? tgTaoFrom, DateTime? tgTaoTo,
+        bool daDanhDau,
         int page)
     {
         int whId = GetCurrentWarehouseId();
@@ -92,6 +111,12 @@ public class HangHoasController : Controller
             .Include(x => x.MaDvtNavigation)
             .Include(x => x.NguongTonKhos.Where(n => n.MaKho == whId))
             .AsQueryable();
+
+        // Lọc theo đánh dấu sao (Favorite)
+        if (daDanhDau)
+        {
+            query = query.Where(x => x.DaDanhDau);
+        }
 
         // 1. Tìm kiếm theo mã hoặc tên hoặc quy cách
         q = q?.Trim();
@@ -230,6 +255,8 @@ public class HangHoasController : Controller
                 TonToiThieu = nguong?.TonToiThieu,
                 QuyCach = x.QuyCach,
                 TrangThai = x.TrangThai,
+                IsFavorite = x.DaDanhDau,
+                DaDanhDau = x.DaDanhDau,
                 HasImage = x.HinhAnh != null && x.HinhAnh.Length > 0,
                 NgayTao = x.NgayTao,
                 KhachDat = 0,
@@ -316,6 +343,7 @@ public class HangHoasController : Controller
             ViTri = viTri,
             DuKienFilter = duKienFilter,
             TgTaoFilter = tgTaoFilter,
+            DaDanhDauFilter = daDanhDau,
             NhomHangs = nhomList,
             DonViTinhs = dvtList,
             DonViCapHangs = supplierList

@@ -11,7 +11,11 @@
             <th style="width: 34px;" class="text-center">
                 <input class="form-check-input" type="checkbox" id="selectAllRows" />
             </th>
-            <th style="width: 30px;" class="text-center text-muted">☆</th>
+            <th style="width: 30px;" class="text-center">
+                <span class="star-btn star-header-filter @(Model.DaDanhDauFilter ? "starred" : "")" id="starHeaderFilter" title="@(Model.DaDanhDauFilter ? "Bỏ lọc sao (Hiển thị tất cả)" : "Lọc danh sách hàng được đánh dấu sao")">
+                    <i class="bi @(Model.DaDanhDauFilter ? "bi-star-fill" : "bi-star")"></i>
+                </span>
+            </th>
             <th style="width: 44px;" class="text-center">Ảnh</th>
             <th style="width: 130px;">Mã hàng</th>
             <th>Tên hàng</th>
@@ -46,7 +50,11 @@
                     <td class="text-center" onclick="event.stopPropagation();">
                         <input class="form-check-input row-select" type="checkbox" value="@item.MaHang" />
                     </td>
-                    <td class="text-center text-muted" style="cursor: pointer;" onclick="event.stopPropagation();">☆</td>
+                    <td class="text-center" onclick="event.stopPropagation();">
+                        <span class="star-btn @(item.IsFavorite ? "starred" : "")" data-id="@item.MaHang" title="@(item.IsFavorite ? "Bỏ đánh dấu sao" : "Đánh dấu sao")">
+                            <i class="bi @(item.IsFavorite ? "bi-star-fill" : "bi-star")"></i>
+                        </span>
+                    </td>
                     <td class="text-center p-1" onclick="event.stopPropagation();">
                         <div class="product-img-wrapper" title="@item.TenHang">
                             <img src="/HangHoas/GetImage/@item.MaHang" class="product-thumb-img" alt="@item.TenHang" />

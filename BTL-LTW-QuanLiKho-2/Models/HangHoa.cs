@@ -28,6 +28,8 @@ public partial class HangHoa
     public byte[]? HinhAnh { get; set; }
 
     public DateTime? NgayTao { get; set; }
+ 
+    public bool DaDanhDau { get; set; }
 
     public virtual ICollection<ChiTietDonBan> ChiTietDonBans { get; set; } = new List<ChiTietDonBan>();
 

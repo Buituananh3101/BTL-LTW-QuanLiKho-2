@@ -220,5 +220,20 @@ FROM BienDong
 GROUP BY MaKho, MaHang;
 GO
 
+-- -----------------------------------------------------------------------------------------
+-- 5. BẢNG HANGHOA: Bổ sung cột DaDanhDau (Đánh dấu sao / Sản phẩm yêu thích)
+-- Lý do: Hỗ trợ chức năng đánh dấu sao và lọc danh sách hàng hóa được đánh dấu sao KiotViet
+-- -----------------------------------------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'HangHoa') AND name = N'DaDanhDau')
+BEGIN
+    ALTER TABLE HangHoa ADD DaDanhDau BIT NOT NULL CONSTRAINT DF_HangHoa_DaDanhDau DEFAULT (0);
+    PRINT N'[OK] Đã thêm cột DaDanhDau vào bảng HangHoa (DEFAULT 0).';
+END
+ELSE
+BEGIN
+    PRINT N'[SKIP] Cột DaDanhDau đã tồn tại trong bảng HangHoa.';
+END
+GO
+
 PRINT N'=== HOÀN TẤT NÂNG CẤP CƠ SỞ DỮ LIỆU THÀNH CÔNG ===';
 GO

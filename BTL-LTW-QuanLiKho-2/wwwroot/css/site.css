@@ -470,6 +470,42 @@ body {
   text-align: right;
 }
 
+/* Star bookmark button (KiotViet style) */
+.star-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  border-radius: 4px;
+  color: #9ca3af;
+  font-size: 15px;
+  line-height: 1;
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease;
+  user-select: none;
+  vertical-align: middle;
+}
+.star-btn:hover {
+  transform: scale(1.22);
+  color: #f97316;
+}
+.star-btn.starred {
+  color: #f97316 !important;
+}
+.star-btn.starred:hover {
+  color: #ea580c !important;
+}
+.star-btn.star-header-filter {
+  cursor: pointer;
+}
+.star-btn.star-header-filter:hover {
+  background-color: rgba(249, 115, 22, 0.08);
+}
+.star-btn.star-header-filter.starred {
+  background-color: rgba(249, 115, 22, 0.12);
+}
+
 /* Thumbnail icon & image for products */
 .product-img-wrapper {
   position: relative;

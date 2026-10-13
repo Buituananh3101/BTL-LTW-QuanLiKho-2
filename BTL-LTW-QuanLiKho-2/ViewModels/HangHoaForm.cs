@@ -67,6 +67,7 @@ public class HangHoaItemVM
     public string? QuyCach { get; set; }
     public string TrangThai { get; set; } = "DANG_BAN";
     public bool IsFavorite { get; set; }
+    public bool DaDanhDau { get; set; }
     public bool HasImage { get; set; }
     public DateTime? NgayTao { get; set; }
     public int KhachDat { get; set; } = 0;
@@ -96,6 +97,7 @@ public class HangHoaIndexVM
     public string? ViTri { get; set; }
     public string DuKienFilter { get; set; } = "ALL";
     public string TgTaoFilter { get; set; } = "ALL";
+    public bool DaDanhDauFilter { get; set; } = false;
 
     public List<NhomHang> NhomHangs { get; set; } = new();
     public List<DonViTinh> DonViTinhs { get; set; } = new();
