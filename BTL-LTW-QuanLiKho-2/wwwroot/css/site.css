@@ -1546,8 +1546,3 @@ tr.product-detail-row > td {
   cursor: pointer;
   pointer-events: none;
 }
-.kiot-ms-item.select-all {
-  border-bottom: 1px dashed #e5e7eb;
-  font-weight: 500;
-  color: #6b7280;
-}

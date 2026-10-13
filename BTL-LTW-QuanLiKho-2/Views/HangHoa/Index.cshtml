@@ -27,10 +27,6 @@
                         <div class="kiot-ms-search">
                             <input type="text" placeholder="Tìm kiếm nhóm hàng..." autocomplete="off" />
                         </div>
-                        <div class="kiot-ms-item select-all" data-val="">
-                            <input type="checkbox" class="form-check-input" />
-                            <span>-- Tất cả nhóm hàng --</span>
-                        </div>
                         @foreach (var g in Model.NhomHangs)
                         {
                             <div class="kiot-ms-item" data-val="@g.MaNhom" data-name="@g.TenNhom">
@@ -238,10 +234,6 @@
                         <div class="kiot-ms-search">
                             <input type="text" placeholder="Tìm nhà cung cấp..." autocomplete="off" />
                         </div>
-                        <div class="kiot-ms-item select-all" data-val="">
-                            <input type="checkbox" class="form-check-input" />
-                            <span>-- Tất cả nhà cung cấp --</span>
-                        </div>
                         @foreach (var s in Model.DonViCapHangs)
                         {
                             <div class="kiot-ms-item" data-val="@s.TenDonVi" data-name="@s.TenDonVi">
@@ -261,10 +253,6 @@
                         <span class="kiot-ms-placeholder">Chọn vị trí</span>
                     </div>
                     <div class="kiot-ms-dropdown shadow" id="dropdownViTri">
-                        <div class="kiot-ms-item select-all" data-val="">
-                            <input type="checkbox" class="form-check-input" />
-                            <span>-- Tất cả vị trí --</span>
-                        </div>
                         <div class="kiot-ms-item" data-val="Kho trung tâm" data-name="Kho trung tâm">
                             <input type="checkbox" class="form-check-input" />
                             <span>Kho trung tâm</span>
@@ -297,10 +285,6 @@
                         <span class="kiot-ms-placeholder">Chọn loại hàng</span>
                     </div>
                     <div class="kiot-ms-dropdown shadow" id="dropdownLoaiHang">
-                        <div class="kiot-ms-item select-all" data-val="">
-                            <input type="checkbox" class="form-check-input" />
-                            <span>-- Tất cả loại hàng --</span>
-                        </div>
                         <div class="kiot-ms-item" data-val="Hàng hóa" data-name="Hàng hóa">
                             <input type="checkbox" class="form-check-input" />
                             <span>Hàng hóa</span>
@@ -1095,13 +1079,12 @@ $(document).ready(function () {
         dot.css('display', selected.length > 0 ? 'inline-block' : 'none');
 
         // Cập nhật trạng thái checkbox & selected trong dropdown
-        dropdown.find('.kiot-ms-item').not('.select-all').each(function () {
+        dropdown.find('.kiot-ms-item').each(function () {
             const val = String($(this).data('val'));
             const isSel = selected.some(x => String(x.val) === val);
             $(this).toggleClass('selected', isSel);
             $(this).find('input[type="checkbox"]').prop('checked', isSel);
         });
-        dropdown.find('.kiot-ms-item.select-all').find('input[type="checkbox"]').prop('checked', selected.length === 0);
 
         // Chưa chọn mục nào: hiển thị placeholder
         if (selected.length === 0) {
@@ -1182,15 +1165,6 @@ $(document).ready(function () {
         // Click item trong dropdown: chọn/bỏ chọn
         dropdown.on('click', '.kiot-ms-item', function (e) {
             e.stopPropagation();
-            if ($(this).hasClass('select-all')) {
-                filterState[key] = [];
-                renderMultiSelectBox(key);
-                dropdown.removeClass('show');
-                box.removeClass('open');
-                currentPage = 1;
-                loadTable();
-                return;
-            }
 
             const val = String($(this).data('val'));
             const name = $(this).data('name') || $(this).text().trim();
@@ -1211,7 +1185,7 @@ $(document).ready(function () {
         dropdown.find('.kiot-ms-search input').on('input', function (e) {
             e.stopPropagation();
             const term = $(this).val().trim().toLowerCase();
-            dropdown.find('.kiot-ms-item').not('.select-all').each(function () {
+            dropdown.find('.kiot-ms-item').each(function () {
                 const text = ($(this).data('name') || $(this).text()).toLowerCase();
                 if (!term || text.includes(term)) {
                     $(this).show();
