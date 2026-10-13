@@ -80,7 +80,7 @@ public class HangHoaIndexVM
     public int CurrentWarehouseId { get; set; }
     public string CurrentWarehouseName { get; set; } = "";
     public string? Q { get; set; }
-    public int? Nhom { get; set; }
+    public string? Nhom { get; set; }
     public string? TrangThai { get; set; }
     public string TonKhoFilter { get; set; } = "ALL"; // ALL, DUOI_DINH_MUC, CON_HANG, HET_HANG
     public int Page { get; set; } = 1;

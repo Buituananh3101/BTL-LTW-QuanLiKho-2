@@ -12,7 +12,7 @@
 
         <div class="kiot-filter-box">
             <!-- 1. Nhóm hàng -->
-            <div class="f-block">
+            <div class="f-block position-relative">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <h6 class="mb-0">Nhóm hàng <span class="filter-dot" id="dotNhomHang"></span></h6>
                     <a href="javascript:void(0)" class="small text-primary text-decoration-none fw-semibold" id="btnOpenQuickGroupModal">
@@ -20,13 +20,25 @@
                     </a>
                 </div>
                 <div class="position-relative">
-                    <select class="form-select filter-change" id="filterNhomHang">
-                        <option value="">Chọn nhóm hàng</option>
+                    <div class="kiot-multiselect-box" id="boxNhomHang" data-filter="nhom">
+                        <span class="kiot-ms-placeholder">Chọn nhóm hàng</span>
+                    </div>
+                    <div class="kiot-ms-dropdown shadow" id="dropdownNhomHang">
+                        <div class="kiot-ms-search">
+                            <input type="text" placeholder="Tìm kiếm nhóm hàng..." autocomplete="off" />
+                        </div>
+                        <div class="kiot-ms-item select-all" data-val="">
+                            <input type="checkbox" class="form-check-input" />
+                            <span>-- Tất cả nhóm hàng --</span>
+                        </div>
                         @foreach (var g in Model.NhomHangs)
                         {
-                            <option value="@g.MaNhom" selected="@(Model.Nhom == g.MaNhom)">@g.TenNhom</option>
+                            <div class="kiot-ms-item" data-val="@g.MaNhom" data-name="@g.TenNhom">
+                                <input type="checkbox" class="form-check-input" />
+                                <span>@g.TenNhom</span>
+                            </div>
                         }
-                    </select>
+                    </div>
                 </div>
             </div>
 
@@ -215,17 +227,27 @@
                 </div>
             </div>
 
-            <!-- 5. Nhà cung cấp (Screenshot 1) -->
+            <!-- 5. Nhà cung cấp -->
             <div class="f-block position-relative">
                 <h6>Nhà cung cấp <span class="filter-dot" id="dotNcc"></span></h6>
                 <div class="position-relative">
-                    <input type="text" class="form-control pe-4" id="inputNhaCungCap" placeholder="Chọn nhà cung cấp" autocomplete="off" />
-                    <button type="button" class="btn-clear-suggest" data-target="#inputNhaCungCap" title="Bỏ chọn">&times;</button>
-                    <div class="kiot-suggest-dropdown shadow" id="dropdownNhaCungCap">
-                        <div class="kiot-suggest-item active" data-id="" data-name="">-- Tất cả nhà cung cấp --</div>
+                    <div class="kiot-multiselect-box" id="boxNcc" data-filter="ncc">
+                        <span class="kiot-ms-placeholder">Chọn nhà cung cấp</span>
+                    </div>
+                    <div class="kiot-ms-dropdown shadow" id="dropdownNcc">
+                        <div class="kiot-ms-search">
+                            <input type="text" placeholder="Tìm nhà cung cấp..." autocomplete="off" />
+                        </div>
+                        <div class="kiot-ms-item select-all" data-val="">
+                            <input type="checkbox" class="form-check-input" />
+                            <span>-- Tất cả nhà cung cấp --</span>
+                        </div>
                         @foreach (var s in Model.DonViCapHangs)
                         {
-                            <div class="kiot-suggest-item" data-id="@s.MaDonViCapHang" data-name="@s.TenDonVi">@s.TenDonVi</div>
+                            <div class="kiot-ms-item" data-val="@s.TenDonVi" data-name="@s.TenDonVi">
+                                <input type="checkbox" class="form-check-input" />
+                                <span>@s.TenDonVi</span>
+                            </div>
                         }
                     </div>
                 </div>
@@ -235,30 +257,62 @@
             <div class="f-block position-relative">
                 <h6>Vị trí <span class="filter-dot" id="dotViTri"></span></h6>
                 <div class="position-relative">
-                    <input type="text" class="form-control pe-4" id="inputViTri" placeholder="Chọn vị trí" autocomplete="off" />
-                    <button type="button" class="btn-clear-suggest" data-target="#inputViTri" title="Bỏ chọn">&times;</button>
-                    <div class="kiot-suggest-dropdown shadow" id="dropdownViTri">
-                        <div class="kiot-suggest-item active" data-name="">-- Tất cả vị trí --</div>
-                        <div class="kiot-suggest-item" data-name="Kho trung tâm">Kho trung tâm</div>
-                        <div class="kiot-suggest-item" data-name="Kệ A1 - Tầng 1">Kệ A1 - Tầng 1</div>
-                        <div class="kiot-suggest-item" data-name="Kệ A2 - Tầng 2">Kệ A2 - Tầng 2</div>
-                        <div class="kiot-suggest-item" data-name="Khu vực đóng gói">Khu vực đóng gói</div>
-                        <div class="kiot-suggest-item" data-name="Kho mát">Kho mát</div>
+                    <div class="kiot-multiselect-box" id="boxViTri" data-filter="vitri">
+                        <span class="kiot-ms-placeholder">Chọn vị trí</span>
+                    </div>
+                    <div class="kiot-ms-dropdown shadow" id="dropdownViTri">
+                        <div class="kiot-ms-item select-all" data-val="">
+                            <input type="checkbox" class="form-check-input" />
+                            <span>-- Tất cả vị trí --</span>
+                        </div>
+                        <div class="kiot-ms-item" data-val="Kho trung tâm" data-name="Kho trung tâm">
+                            <input type="checkbox" class="form-check-input" />
+                            <span>Kho trung tâm</span>
+                        </div>
+                        <div class="kiot-ms-item" data-val="Kệ A1 - Tầng 1" data-name="Kệ A1 - Tầng 1">
+                            <input type="checkbox" class="form-check-input" />
+                            <span>Kệ A1 - Tầng 1</span>
+                        </div>
+                        <div class="kiot-ms-item" data-val="Kệ A2 - Tầng 2" data-name="Kệ A2 - Tầng 2">
+                            <input type="checkbox" class="form-check-input" />
+                            <span>Kệ A2 - Tầng 2</span>
+                        </div>
+                        <div class="kiot-ms-item" data-val="Khu vực đóng gói" data-name="Khu vực đóng gói">
+                            <input type="checkbox" class="form-check-input" />
+                            <span>Khu vực đóng gói</span>
+                        </div>
+                        <div class="kiot-ms-item" data-val="Kho mát" data-name="Kho mát">
+                            <input type="checkbox" class="form-check-input" />
+                            <span>Kho mát</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 7. Loại hàng (Screenshot 4) -->
+            <!-- 7. Loại hàng -->
             <div class="f-block position-relative">
                 <h6>Loại hàng <span class="filter-dot" id="dotLoaiHang"></span></h6>
                 <div class="position-relative">
-                    <input type="text" class="form-control pe-4" id="inputLoaiHang" placeholder="Chọn loại hàng" autocomplete="off" />
-                    <button type="button" class="btn-clear-suggest" data-target="#inputLoaiHang" title="Bỏ chọn">&times;</button>
-                    <div class="kiot-suggest-dropdown shadow" id="dropdownLoaiHang">
-                        <div class="kiot-suggest-item active" data-name="">-- Tất cả loại hàng --</div>
-                        <div class="kiot-suggest-item" data-name="Hàng hóa">Hàng hóa</div>
-                        <div class="kiot-suggest-item" data-name="Dịch vụ">Dịch vụ</div>
-                        <div class="kiot-suggest-item" data-name="Combo - đóng gói">Combo - đóng gói</div>
+                    <div class="kiot-multiselect-box" id="boxLoaiHang" data-filter="loaihang">
+                        <span class="kiot-ms-placeholder">Chọn loại hàng</span>
+                    </div>
+                    <div class="kiot-ms-dropdown shadow" id="dropdownLoaiHang">
+                        <div class="kiot-ms-item select-all" data-val="">
+                            <input type="checkbox" class="form-check-input" />
+                            <span>-- Tất cả loại hàng --</span>
+                        </div>
+                        <div class="kiot-ms-item" data-val="Hàng hóa" data-name="Hàng hóa">
+                            <input type="checkbox" class="form-check-input" />
+                            <span>Hàng hóa</span>
+                        </div>
+                        <div class="kiot-ms-item" data-val="Dịch vụ" data-name="Dịch vụ">
+                            <input type="checkbox" class="form-check-input" />
+                            <span>Dịch vụ</span>
+                        </div>
+                        <div class="kiot-ms-item" data-val="Combo - đóng gói" data-name="Combo - đóng gói">
+                            <input type="checkbox" class="form-check-input" />
+                            <span>Combo - đóng gói</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -745,7 +799,6 @@ $(document).ready(function () {
     // Init dual calendars
     renderDualCalendar('tgt');
     renderDualCalendar('dk');
-    $('#dotNhomHang').css('display', $('#filterNhomHang').val() ? 'inline-block' : 'none');
     $('#dotTonKho').css('display', $('#filterTonKho').val() !== 'ALL' ? 'inline-block' : 'none');
 
     // Click on calendar day
@@ -939,83 +992,201 @@ $(document).ready(function () {
         $('.dual-calendar-popup').hide();
     });
 
-    // 3. Dropdown gợi ý cho Nhà cung cấp, Vị trí, Loại hàng với tìm kiếm & nút xóa x
-    function setupSuggestDropdown(inputId, dropdownId) {
-        const input = $(inputId);
-        const dropdown = $(dropdownId);
-        const clearBtn = input.siblings('.btn-clear-suggest');
+    // 3. Multi-select Tags Dropdown cho Nhóm hàng, Nhà cung cấp, Vị trí, Loại hàng (KiotViet style)
+    const filterState = {
+        nhom: [],     // array of { val: '1', name: 'Bánh' }
+        ncc: [],      // array of { val: 'Công ty Pharmedic', name: 'Công ty Pharmedic' }
+        vitri: [],    // array of { val: 'Kho trung tâm', name: 'Kho trung tâm' }
+        loaihang: []  // array of { val: 'Hàng hóa', name: 'Hàng hóa' }
+    };
 
-        function updateClearBtn() {
-            if (input.val().trim()) {
-                clearBtn.show();
-            } else {
-                clearBtn.hide();
-            }
+    function escapeHtml(text) {
+        if (!text) return '';
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    const filterPlaceholders = {
+        nhom: 'Chọn nhóm hàng',
+        ncc: 'Chọn nhà cung cấp',
+        vitri: 'Chọn vị trí',
+        loaihang: 'Chọn loại hàng'
+    };
+
+    const filterDotSelectors = {
+        nhom: '#dotNhomHang',
+        ncc: '#dotNcc',
+        vitri: '#dotViTri',
+        loaihang: '#dotLoaiHang'
+    };
+
+    function renderMultiSelectBox(key) {
+        const boxId = key === 'nhom' ? '#boxNhomHang' :
+                      key === 'ncc' ? '#boxNcc' :
+                      key === 'vitri' ? '#boxViTri' : '#boxLoaiHang';
+        const dropdownId = key === 'nhom' ? '#dropdownNhomHang' :
+                           key === 'ncc' ? '#dropdownNcc' :
+                           key === 'vitri' ? '#dropdownViTri' : '#dropdownLoaiHang';
+
+        const box = $(boxId);
+        const dropdown = $(dropdownId);
+        const selected = filterState[key] || [];
+        const placeholder = filterPlaceholders[key];
+        const dot = $(filterDotSelectors[key]);
+
+        // Cập nhật chấm xanh indicator
+        dot.css('display', selected.length > 0 ? 'inline-block' : 'none');
+
+        // Cập nhật trạng thái checkbox & selected trong dropdown
+        dropdown.find('.kiot-ms-item').not('.select-all').each(function () {
+            const val = String($(this).data('val'));
+            const isSel = selected.some(x => String(x.val) === val);
+            $(this).toggleClass('selected', isSel);
+            $(this).find('input[type="checkbox"]').prop('checked', isSel);
+        });
+        dropdown.find('.kiot-ms-item.select-all').find('input[type="checkbox"]').prop('checked', selected.length === 0);
+
+        // Chưa chọn mục nào: hiển thị placeholder
+        if (selected.length === 0) {
+            box.html(`<span class="kiot-ms-placeholder">${placeholder}</span>`);
+            return;
         }
 
-        input.on('focus click', function (e) {
+        // Đã chọn: hiển thị tối đa 3 thẻ, nếu quá 3 thẻ thì thẻ thứ 4 là "+n khác"
+        let html = '';
+        const maxVisible = 3;
+
+        if (selected.length <= maxVisible) {
+            selected.forEach(item => {
+                html += `
+                    <span class="kiot-pill-tag" data-val="${escapeHtml(item.val)}">
+                        <span class="tag-text">${escapeHtml(item.name)}</span>
+                        <span class="tag-remove" title="Bỏ chọn">&times;</span>
+                    </span>
+                `;
+            });
+        } else {
+            for (let i = 0; i < maxVisible; i++) {
+                const item = selected[i];
+                html += `
+                    <span class="kiot-pill-tag" data-val="${escapeHtml(item.val)}">
+                        <span class="tag-text">${escapeHtml(item.name)}</span>
+                        <span class="tag-remove" title="Bỏ chọn">&times;</span>
+                    </span>
+                `;
+            }
+            const remaining = selected.length - maxVisible;
+            const otherNames = selected.slice(maxVisible).map(x => x.name).join(', ');
+            html += `
+                <span class="kiot-pill-more" title="${escapeHtml(otherNames)}">+${remaining} khác</span>
+            `;
+        }
+
+        box.html(html);
+    }
+
+    function setupMultiSelect(boxId, dropdownId, key) {
+        const box = $(boxId);
+        const dropdown = $(dropdownId);
+
+        // Click box: mở/đóng dropdown
+        box.on('click', function (e) {
+            if ($(e.target).closest('.tag-remove').length) return;
             e.stopPropagation();
-            $('.kiot-suggest-dropdown').not(dropdown).hide();
-            dropdown.show();
-            filterDropdown();
+            $('.kiot-ms-dropdown').not(dropdown).removeClass('show');
+            $('.kiot-multiselect-box').not(box).removeClass('open');
+            $('.quick-date-popup, .dual-calendar-popup').hide();
+
+            dropdown.toggleClass('show');
+            box.toggleClass('open', dropdown.hasClass('show'));
+            if (dropdown.hasClass('show')) {
+                dropdown.find('.kiot-ms-search input').focus();
+            }
         });
 
-        input.on('input', function () {
-            updateClearBtn();
-            filterDropdown();
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(function () {
+        // Click nút x trên pill tag: gỡ bỏ item
+        box.on('click', '.tag-remove', function (e) {
+            e.stopPropagation();
+            const val = String($(this).closest('.kiot-pill-tag').data('val'));
+            filterState[key] = (filterState[key] || []).filter(x => String(x.val) !== val);
+            renderMultiSelectBox(key);
+            currentPage = 1;
+            loadTable();
+        });
+
+        // Click vào badge +n khác: mở dropdown
+        box.on('click', '.kiot-pill-more', function (e) {
+            e.stopPropagation();
+            $('.kiot-ms-dropdown').not(dropdown).removeClass('show');
+            dropdown.addClass('show');
+            box.addClass('open');
+        });
+
+        // Click item trong dropdown: chọn/bỏ chọn
+        dropdown.on('click', '.kiot-ms-item', function (e) {
+            e.stopPropagation();
+            if ($(this).hasClass('select-all')) {
+                filterState[key] = [];
+                renderMultiSelectBox(key);
+                dropdown.removeClass('show');
+                box.removeClass('open');
                 currentPage = 1;
                 loadTable();
-            }, 350);
+                return;
+            }
+
+            const val = String($(this).data('val'));
+            const name = $(this).data('name') || $(this).text().trim();
+            const idx = (filterState[key] || []).findIndex(x => String(x.val) === val);
+
+            if (idx >= 0) {
+                filterState[key].splice(idx, 1);
+            } else {
+                filterState[key].push({ val: val, name: name });
+            }
+
+            renderMultiSelectBox(key);
+            currentPage = 1;
+            loadTable();
         });
 
-        function filterDropdown() {
-            const val = input.val().trim().toLowerCase();
-            dropdown.find('.kiot-suggest-item').each(function () {
-                const name = ($(this).data('name') || '').toLowerCase();
-                if (!val || name.includes(val) || !$(this).data('name')) {
+        // Tìm kiếm nhanh trong dropdown
+        dropdown.find('.kiot-ms-search input').on('input', function (e) {
+            e.stopPropagation();
+            const term = $(this).val().trim().toLowerCase();
+            dropdown.find('.kiot-ms-item').not('.select-all').each(function () {
+                const text = ($(this).data('name') || $(this).text()).toLowerCase();
+                if (!term || text.includes(term)) {
                     $(this).show();
                 } else {
                     $(this).hide();
                 }
             });
-        }
-
-        dropdown.on('click', '.kiot-suggest-item', function () {
-            const name = $(this).data('name') || '';
-            input.val(name);
-            dropdown.find('.kiot-suggest-item').removeClass('active');
-            $(this).addClass('active');
-            dropdown.hide();
-            updateClearBtn();
-            currentPage = 1;
-            loadTable();
         });
-
-        clearBtn.on('click', function (e) {
-            e.stopPropagation();
-            input.val('');
-            dropdown.find('.kiot-suggest-item').removeClass('active');
-            dropdown.find('.kiot-suggest-item[data-name=""]').addClass('active');
-            updateClearBtn();
-            currentPage = 1;
-            loadTable();
-        });
-
-        updateClearBtn();
     }
 
-    setupSuggestDropdown('#inputNhaCungCap', '#dropdownNhaCungCap');
-    setupSuggestDropdown('#inputViTri', '#dropdownViTri');
-    setupSuggestDropdown('#inputLoaiHang', '#dropdownLoaiHang');
+    setupMultiSelect('#boxNhomHang', '#dropdownNhomHang', 'nhom');
+    setupMultiSelect('#boxNcc', '#dropdownNcc', 'ncc');
+    setupMultiSelect('#boxViTri', '#dropdownViTri', 'vitri');
+    setupMultiSelect('#boxLoaiHang', '#dropdownLoaiHang', 'loaihang');
+
+    // Khởi tạo hiển thị các box ban đầu
+    renderMultiSelectBox('nhom');
+    renderMultiSelectBox('ncc');
+    renderMultiSelectBox('vitri');
+    renderMultiSelectBox('loaihang');
 
     // Đóng tất cả popup và dropdown khi click ra ngoài
     $(document).on('click', function (e) {
         if (!$(e.target).closest('.f-block, .dual-calendar-popup, .quick-date-popup').length) {
             $('.quick-date-popup').hide();
             $('.dual-calendar-popup').hide();
-            $('.kiot-suggest-dropdown').hide();
+            $('.kiot-ms-dropdown').removeClass('show');
+            $('.kiot-multiselect-box').removeClass('open');
         }
     });
 
@@ -1040,10 +1211,18 @@ $(document).ready(function () {
             data: JSON.stringify({ tenNhom: name }),
             success: function (res) {
                 groupModal.hide();
-                // Bổ sung vào cả 2 dropdown nhóm hàng
-                const newOption = `<option value="${res.maNhom}" selected>${res.tenNhom}</option>`;
-                $('#filterNhomHang').append(newOption);
-                $('#formMaNhom').append(newOption);
+                // Bổ sung vào modal form Thêm/Sửa
+                $('#formMaNhom').append(`<option value="${res.maNhom}">${res.tenNhom}</option>`);
+
+                // Bổ sung vào dropdown nhóm hàng & tự động chọn
+                const itemHtml = `<div class="kiot-ms-item selected" data-val="${res.maNhom}" data-name="${res.tenNhom}">
+                    <input type="checkbox" class="form-check-input" checked />
+                    <span>${res.tenNhom}</span>
+                </div>`;
+                $('#dropdownNhomHang').append(itemHtml);
+
+                filterState.nhom.push({ val: String(res.maNhom), name: res.tenNhom });
+                renderMultiSelectBox('nhom');
                 currentPage = 1;
                 loadTable();
             },
@@ -1471,11 +1650,11 @@ $(document).ready(function () {
 
     function loadTable() {
         const q = $('#keywordSearch').val()?.trim() || '';
-        const nhom = $('#filterNhomHang').val() || '';
+        const nhom = (filterState.nhom || []).map(x => x.val).join(',');
         const tonKho = $('#filterTonKho').val() || 'ALL';
-        const nhaCungCap = $('#inputNhaCungCap').val()?.trim() || '';
-        const viTri = $('#inputViTri').val()?.trim() || '';
-        const loaiHang = $('#inputLoaiHang').val()?.trim() || '';
+        const nhaCungCap = (filterState.ncc || []).map(x => x.val).join(';');
+        const viTri = (filterState.vitri || []).map(x => x.val).join(';');
+        const loaiHang = (filterState.loaihang || []).map(x => x.val).join(';');
 
         let duKien = activeDuKienVal || 'ALL';
         if ($('#dkCustom').is(':checked') && duKien === 'ALL') {
@@ -1492,13 +1671,13 @@ $(document).ready(function () {
         }
 
         // Cập nhật chấm xanh indicator (inline-block nằm cùng hàng tiêu đề)
-        $('#dotNhomHang').css('display', nhom ? 'inline-block' : 'none');
+        $('#dotNhomHang').css('display', filterState.nhom.length > 0 ? 'inline-block' : 'none');
         $('#dotTonKho').css('display', tonKho !== 'ALL' ? 'inline-block' : 'none');
         $('#dotDuKien').css('display', duKien !== 'ALL' ? 'inline-block' : 'none');
         $('#dotTgTao').css('display', tgTao !== 'ALL' ? 'inline-block' : 'none');
-        $('#dotNcc').css('display', nhaCungCap ? 'inline-block' : 'none');
-        $('#dotViTri').css('display', viTri ? 'inline-block' : 'none');
-        $('#dotLoaiHang').css('display', loaiHang ? 'inline-block' : 'none');
+        $('#dotNcc').css('display', filterState.ncc.length > 0 ? 'inline-block' : 'none');
+        $('#dotViTri').css('display', filterState.vitri.length > 0 ? 'inline-block' : 'none');
+        $('#dotLoaiHang').css('display', filterState.loaihang.length > 0 ? 'inline-block' : 'none');
 
         $.ajax({
             url: '/HangHoa/Filter',

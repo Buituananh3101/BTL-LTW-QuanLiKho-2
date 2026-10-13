@@ -1322,3 +1322,160 @@ tr.product-detail-row > td {
   font-weight: 700;
   border-bottom: 2px solid #e2e8f0;
 }
+
+/* Multi-select filter box (KiotViet style) */
+.kiot-multiselect-box {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-height: 40px;
+  padding: 5px 8px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: center;
+  position: relative;
+  transition: border-color .15s, box-shadow .15s;
+}
+.kiot-multiselect-box:hover {
+  border-color: #9ca3af;
+}
+.kiot-multiselect-box.is-active,
+.kiot-multiselect-box.open {
+  border-color: var(--blue, #0070f4);
+  box-shadow: 0 0 0 3px rgba(0, 112, 244, 0.12);
+}
+.kiot-ms-placeholder {
+  color: #9ca3af;
+  font-size: 13px;
+  user-select: none;
+  line-height: 1.5;
+  padding: 2px 2px;
+}
+
+/* Tag Pill */
+.kiot-pill-tag {
+  background-color: #0070f4;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.3;
+  user-select: none;
+  max-width: 100%;
+}
+.kiot-pill-tag .tag-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kiot-pill-tag .tag-remove {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  opacity: 0.85;
+  font-size: 14px;
+  font-weight: 700;
+  transition: opacity .15s;
+  padding: 0 1px;
+}
+.kiot-pill-tag .tag-remove:hover {
+  opacity: 1;
+}
+
+/* +N khác Badge */
+.kiot-pill-more {
+  background-color: #e0f2fe;
+  color: #0070f4;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+  user-select: none;
+  cursor: pointer;
+  transition: background .15s;
+}
+.kiot-pill-more:hover {
+  background-color: #bae6fd;
+}
+
+/* Dropdown list */
+.kiot-ms-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  z-index: 1050;
+  display: none;
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.kiot-ms-dropdown.show {
+  display: block;
+}
+.kiot-ms-search {
+  padding: 6px 8px;
+  border-bottom: 1px solid #f3f4f6;
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 2;
+}
+.kiot-ms-search input {
+  width: 100%;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 8px;
+  font-size: 12px;
+  outline: none;
+}
+.kiot-ms-search input:focus {
+  border-color: #0070f4;
+}
+.kiot-ms-item {
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.1s;
+  user-select: none;
+}
+.kiot-ms-item:hover {
+  background-color: #f3f4f6;
+}
+.kiot-ms-item.selected {
+  background-color: #eff6ff;
+  color: #0070f4;
+  font-weight: 600;
+}
+.kiot-ms-item input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: #0070f4;
+  cursor: pointer;
+  pointer-events: none;
+}
+.kiot-ms-item.select-all {
+  border-bottom: 1px dashed #e5e7eb;
+  font-weight: 500;
+  color: #6b7280;
+}

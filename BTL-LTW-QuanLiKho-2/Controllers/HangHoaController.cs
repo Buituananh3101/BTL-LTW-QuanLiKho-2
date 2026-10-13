@@ -30,7 +30,7 @@ public class HangHoaController : Controller
     }
 
     public async Task<IActionResult> Index(
-        string? q, int? nhom, string? trangThai, string tonKhoFilter = "ALL",
+        string? q, string? nhom = null, string? trangThai = null, string tonKhoFilter = "ALL",
         string? nhaCungCap = null, string? loaiHang = null, string? viTri = null,
         string duKienFilter = "ALL", string tgTaoFilter = "ALL",
         DateTime? tgTaoFrom = null, DateTime? tgTaoTo = null,
@@ -43,7 +43,7 @@ public class HangHoaController : Controller
 
     // AJAX Action trả về Partial View danh sách bảng
     public async Task<IActionResult> Filter(
-        string? q, int? nhom, string? trangThai, string tonKhoFilter = "ALL",
+        string? q, string? nhom = null, string? trangThai = null, string tonKhoFilter = "ALL",
         string? nhaCungCap = null, string? loaiHang = null, string? viTri = null,
         string duKienFilter = "ALL", string tgTaoFilter = "ALL",
         DateTime? tgTaoFrom = null, DateTime? tgTaoTo = null,
@@ -99,7 +99,7 @@ public class HangHoaController : Controller
     }
 
     private async Task<HangHoaIndexVM> BuildIndexVM(
-        string? q, int? nhom, string? trangThai, string tonKhoFilter,
+        string? q, string? nhom, string? trangThai, string tonKhoFilter,
         string? nhaCungCap, string? loaiHang, string? viTri,
         string duKienFilter, string tgTaoFilter,
         DateTime? tgTaoFrom, DateTime? tgTaoTo,
@@ -128,10 +128,18 @@ public class HangHoaController : Controller
             query = query.Where(x => x.TenHang.Contains(q) || x.MaHangNoiBo.Contains(q) || (x.QuyCach != null && x.QuyCach.Contains(q)));
         }
 
-        // 2. Lọc theo Nhóm hàng
-        if (nhom.HasValue && nhom.Value > 0)
+        // 2. Lọc theo Nhóm hàng (hỗ trợ chọn nhiều nhóm hàng)
+        if (!string.IsNullOrWhiteSpace(nhom))
         {
-            query = query.Where(x => x.MaNhom == nhom.Value);
+            var nhomIds = nhom.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => int.TryParse(s.Trim(), out int id) ? id : 0)
+                .Where(id => id > 0)
+                .ToList();
+
+            if (nhomIds.Any())
+            {
+                query = query.Where(x => nhomIds.Contains(x.MaNhom));
+            }
         }
 
         // 3. Lọc theo Trạng thái
@@ -140,40 +148,105 @@ public class HangHoaController : Controller
             query = query.Where(x => x.TrangThai == trangThai);
         }
 
-        // 4. Lọc theo Nhà cung cấp
+        // 4. Lọc theo Nhà cung cấp (hỗ trợ chọn nhiều nhà cung cấp)
         if (!string.IsNullOrWhiteSpace(nhaCungCap))
         {
-            var ncc = nhaCungCap.Trim();
-            var matchedHangIds = await _context.ChiTietPhieuNhaps
-                .Where(ct => ct.MaPhieuNhapNavigation.MaDonViCapHangNavigation != null &&
-                             ct.MaPhieuNhapNavigation.MaDonViCapHangNavigation.TenDonVi.Contains(ncc))
-                .Select(ct => ct.MaHang)
-                .Distinct()
-                .ToListAsync();
+            var nccList = nhaCungCap.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrEmpty(s) && s != "Tất cả")
+                .ToList();
 
-            query = query.Where(x => matchedHangIds.Contains(x.MaHang));
+            if (nccList.Any())
+            {
+                var matchedHangIds = await _context.ChiTietPhieuNhaps
+                    .Where(ct => ct.MaPhieuNhapNavigation.MaDonViCapHangNavigation != null &&
+                                 nccList.Contains(ct.MaPhieuNhapNavigation.MaDonViCapHangNavigation.TenDonVi))
+                    .Select(ct => ct.MaHang)
+                    .Distinct()
+                    .ToListAsync();
+
+                query = query.Where(x => matchedHangIds.Contains(x.MaHang));
+            }
         }
 
-        // 5. Lọc theo Loại hàng
+        // 5. Lọc theo Loại hàng (hỗ trợ chọn nhiều: Hàng hóa, Dịch vụ, Combo - đóng gói)
         if (!string.IsNullOrWhiteSpace(loaiHang) && loaiHang != "Tất cả")
         {
-            var lh = loaiHang.Trim();
-            if (lh == "Dịch vụ" || lh == "Combo - đóng gói")
+            var lhList = loaiHang.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrEmpty(s) && s != "Tất cả")
+                .ToList();
+
+            if (lhList.Any() && lhList.Count < 3)
             {
-                query = query.Where(x => (x.QuyCach != null && x.QuyCach.Contains(lh)) || x.TenHang.Contains(lh));
-            }
-            else if (lh == "Hàng hóa")
-            {
-                query = query.Where(x => (x.QuyCach == null || (!x.QuyCach.Contains("Dịch vụ") && !x.QuyCach.Contains("Combo")))
-                                      && !x.TenHang.Contains("Dịch vụ") && !x.TenHang.Contains("Combo"));
+                bool hasDichVu = lhList.Contains("Dịch vụ");
+                bool hasCombo = lhList.Contains("Combo - đóng gói");
+                bool hasHangHoa = lhList.Contains("Hàng hóa");
+
+                if (hasHangHoa && !hasDichVu && !hasCombo)
+                {
+                    query = query.Where(x => (x.QuyCach == null || (!x.QuyCach.Contains("Dịch vụ") && !x.QuyCach.Contains("Combo")))
+                                          && !x.TenHang.Contains("Dịch vụ") && !x.TenHang.Contains("Combo"));
+                }
+                else if (!hasHangHoa)
+                {
+                    if (hasDichVu && hasCombo)
+                    {
+                        query = query.Where(x => (x.QuyCach != null && (x.QuyCach.Contains("Dịch vụ") || x.QuyCach.Contains("Combo")))
+                                              || x.TenHang.Contains("Dịch vụ") || x.TenHang.Contains("Combo"));
+                    }
+                    else if (hasDichVu)
+                    {
+                        query = query.Where(x => (x.QuyCach != null && x.QuyCach.Contains("Dịch vụ")) || x.TenHang.Contains("Dịch vụ"));
+                    }
+                    else if (hasCombo)
+                    {
+                        query = query.Where(x => (x.QuyCach != null && x.QuyCach.Contains("Combo")) || x.TenHang.Contains("Combo"));
+                    }
+                }
+                else
+                {
+                    if (hasDichVu && !hasCombo)
+                    {
+                        query = query.Where(x => (x.QuyCach == null || !x.QuyCach.Contains("Combo")) && !x.TenHang.Contains("Combo"));
+                    }
+                    else if (!hasDichVu && hasCombo)
+                    {
+                        query = query.Where(x => (x.QuyCach == null || !x.QuyCach.Contains("Dịch vụ")) && !x.TenHang.Contains("Dịch vụ"));
+                    }
+                }
             }
         }
 
-        // 6. Lọc theo Vị trí
+        // 6. Lọc theo Vị trí (hỗ trợ chọn nhiều vị trí)
         if (!string.IsNullOrWhiteSpace(viTri) && viTri != "Tất cả")
         {
-            var vt = viTri.Trim();
-            query = query.Where(x => x.QuyCach != null && x.QuyCach.Contains(vt));
+            var vtList = viTri.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrEmpty(s) && s != "Tất cả")
+                .ToList();
+
+            if (vtList.Any())
+            {
+                var parameter = System.Linq.Expressions.Expression.Parameter(typeof(HangHoa), "x");
+                var quyCachProp = System.Linq.Expressions.Expression.Property(parameter, nameof(HangHoa.QuyCach));
+                var notNull = System.Linq.Expressions.Expression.NotEqual(quyCachProp, System.Linq.Expressions.Expression.Constant(null, typeof(string)));
+                var containsMethod = typeof(string).GetMethod(nameof(string.Contains), new[] { typeof(string) })!;
+
+                System.Linq.Expressions.Expression? orExpr = null;
+                foreach (var vt in vtList)
+                {
+                    var call = System.Linq.Expressions.Expression.Call(quyCachProp, containsMethod, System.Linq.Expressions.Expression.Constant(vt));
+                    orExpr = orExpr == null ? call : System.Linq.Expressions.Expression.OrElse(orExpr, call);
+                }
+
+                if (orExpr != null)
+                {
+                    var finalBody = System.Linq.Expressions.Expression.AndAlso(notNull, orExpr);
+                    var lambda = System.Linq.Expressions.Expression.Lambda<Func<HangHoa, bool>>(finalBody, parameter);
+                    query = query.Where(lambda);
+                }
+            }
         }
 
         // 7. Lọc theo Thời gian tạo
