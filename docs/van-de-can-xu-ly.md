@@ -28,9 +28,9 @@
   - *Hiện trạng*: `query.OrderBy(...).ToListAsync()` nạp toàn bộ entity `HangHoa` gồm mảng byte ảnh `HinhAnh` vào RAM server trước khi phân trang.
   - *Giải pháp đã xử lý*: Dùng LINQ Projection `.Select(...)` chỉ lấy cờ `HasImage = x.HinhAnh != null`, loại bỏ triệt để việc đọc và chuyển dữ liệu mảng byte `VARBINARY(MAX)` qua RAM khi lấy danh sách. Giảm 99% dung lượng bộ nhớ server.
 
-- [ ] **[ISSUE-05] Luồng Bán hàng (POS) đứt gãy với biến động tồn kho**
+- [x] **[ISSUE-05] Luồng Bán hàng (POS) đứt gãy với biến động tồn kho**
   - *Hiện trạng*: View tồn chỉ trừ kho theo `PhieuXuat`, không trừ theo `DonBan`. Nếu bán tại quầy mà không tự sinh `PhieuXuat` thì kho không giảm.
-  - *Giải pháp*: Quy định rõ: Đơn bán tại quầy (POS) tự động sinh kèm 1 `PhieuXuat` trạng thái `DA_XAC_NHAN` trong cùng 1 transaction.
+  - *Giải pháp đã xử lý*: Ban hành luật nghiệp vụ bắt buộc tại `.agent/rules/02-nghiep-vu-kho.md`. Xây dựng `IBanHangService` / `BanHangService` đóng gói các phương thức `TaoDonBanVaXuatKhoAsync`, `XuatKhoChoDonBanAsync`, `HuyDonBanVaPhieuXuatAsync`. Đảm bảo bán hàng tại quầy (POS) tự động sinh kèm 1 `PhieuXuat` trạng thái `DA_XAC_NHAN` (`XUAT_BAN`) trong cùng 1 transaction, kiểm tra chặn tồn âm qua `TonKhoService.KiemTraXuatKhoAsync`, và tự động hoàn trả tồn kho khi hủy đơn.
 
 ---
 

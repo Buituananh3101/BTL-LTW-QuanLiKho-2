@@ -12,6 +12,7 @@ builder.Services.AddDbContext<QuanLyKhoPhuQuocLtwContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("QuanLyKhoPhuQuocLtwContext")));
 
 builder.Services.AddScoped<BTL_LTW_QuanLiKho_2.Services.ITonKhoService, BTL_LTW_QuanLiKho_2.Services.TonKhoService>();
+builder.Services.AddScoped<BTL_LTW_QuanLiKho_2.Services.IBanHangService, BTL_LTW_QuanLiKho_2.Services.BanHangService>();
 
 builder.Services.AddSession(options =>
 {

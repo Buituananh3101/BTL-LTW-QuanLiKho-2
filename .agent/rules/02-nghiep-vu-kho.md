@@ -66,5 +66,11 @@ Các chứng từ trong hệ thống dùng mã chuỗi tiếng Việt không d�
    - Trước khi xác nhận xuất kho hoặc chuyển kho, hệ thống phải kiểm tra số lượng tồn hiện thời tại kho nguồn qua `vw_TonKhoHienTai`. Nếu `SoLuongTon < SoLuongXuat`, phải báo lỗi tiếng Việt rõ ràng và hủy giao dịch.
 7. **Luôn ghi `NhatKyThaoTac`**:
    - Mọi thao tác quan trọng (Hoàn thành phiếu, Cân bằng kho, Hủy phiếu, Xóa phiếu tạm) đều phải ghi một bản ghi vào bảng [`NhatKyThaoTac`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/NhatKyThaoTac.cs) với đầy đủ thông tin: Mã tài khoản, thời điểm, đối tượng, nội dung thao tác.
-8. **Định hướng `InventoryService`**:
-   - Khi dự án mở rộng, các thao tác đọc tồn kho và tạo chứng từ biến động phải được đóng gói vào Service dùng chung (`InventoryService`) thay vì viết lặp lại các câu lệnh LINQ thô trong Controller.
+8. **Đóng gói tầng Dịch vụ (`TonKhoService`, `BanHangService`)**:
+   - Các thao tác đọc tồn kho, kiểm tra chặn âm kho và tạo chứng từ biến động phải được đóng gói vào Service dùng chung (`ITonKhoService`, `IBanHangService`) thay vì viết lặp lại các câu lệnh LINQ thô trong Controller.
+9. **Quy tắc bắt buộc khi Bán hàng (POS / Đơn bán) [ISSUE-05]**:
+   - Do `vw_TonKhoHienTai` chỉ trừ kho qua `PhieuXuat`, khi tạo hoặc thanh toán đơn bán tại quầy (`DonBan`), hệ thống **bắt buộc tự động sinh kèm một `PhieuXuat`** có `TrangThai = 'DA_XAC_NHAN'`, `LoaiPhieuXuat = 'XUAT_BAN'`, `MaKho = donBan.MaKho`, liên kết `MaDonBan`, và sao chép đầy đủ chi tiết sang `ChiTietPhieuXuat` (`MaHang`, `SoLuongXuat`, `DonGiaXuat`, `MaCTDonBan`).
+   - Toàn bộ quy trình phải nằm trong một transaction (`BeginTransactionAsync`).
+   - Bắt buộc kiểm tra tồn kho trước khi xuất bằng `ITonKhoService.KiemTraXuatKhoAsync(...)` để chặn đứng việc xuất âm kho.
+   - Thao tác bán hàng POS và xuất kho tự động được đóng gói chuẩn mực trong `IBanHangService` ([`BanHangService.cs`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Services/BanHangService.cs)).
+   - Khi hủy đơn bán (`TrangThai = 'HUY'`), phiếu xuất đi kèm cũng được chuyển sang `'HUY'`, `vw_BienDongKho` sẽ tự động loại bỏ phiếu xuất này, giúp tồn kho được hoàn trả ngay lập tức.
