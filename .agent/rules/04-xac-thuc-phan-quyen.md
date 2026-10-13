@@ -4,7 +4,7 @@
 
 Hệ thống sử dụng **Cookie Authentication tự viết** trên các bảng CSDL có sẵn (`TaiKhoan`, `NhanVien`, `VaiTro`), **không dùng ASP.NET Core Identity** để giữ cấu trúc tinh gọn theo đúng phạm vi bài tập lớn.
 
-### 1.1. Cấu hình dự kiến trong `Program.cs`:
+### 1.1. Cấu hình đã triển khai trong `Program.cs`:
 ```csharp
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -22,7 +22,7 @@ app.UseAuthorization();
 ```
 
 ### 1.2. Mật khẩu & Bảo mật:
-- Mật khẩu phải được băm an toàn (dùng thư viện nhẹ như `BCrypt.Net-Next` hoặc `PasswordHasher<TaiKhoan>`).
+- Mật khẩu được băm an toàn qua helper [`PasswordHelper.cs`](../../BTL-LTW-QuanLiKho-2/Services/PasswordHelper.cs) sử dụng thuật toán `SHA256` (không dùng gói bên ngoài theo Rule 11).
 - Tuyệt đối không lưu hoặc so sánh mật khẩu ở dạng văn bản thô (plain text).
 
 ---
@@ -55,11 +55,11 @@ Khi đăng nhập thành công qua `AccountController.Login`, hệ thống nạp
 
 ## 4. Phân quyền theo Kho làm việc
 
-### 4.1. Bảng phân quyền dự kiến nâng cấp (`TaiKhoan_Kho`):
-Để kiểm soát nhân viên nào được phép làm việc tại những kho nào, hệ thống sẽ sử dụng bảng trung gian:
+### 4.1. Bảng phân quyền đã triển khai ([`TaiKhoanKho`](../../BTL-LTW-QuanLiKho-2/Models/TaiKhoanKho.cs)):
+Để kiểm soát nhân viên nào được phép làm việc tại những kho nào, hệ thống sử dụng bảng trung gian:
 - Khóa chính kép: `(MaTaiKhoan, MaKho)`
 - Admin: Mặc định có quyền truy cập vào tất cả các kho.
-- Các vai trò khác: Chỉ được chọn và thao tác trên những kho có trong bảng `TaiKhoan_Kho`.
+- Các vai trò khác: Chỉ được chọn và thao tác trên những kho có trong bảng `TaiKhoanKho`.
 
 ### 4.2. Cơ chế cách ly dữ liệu theo Kho (Warehouse Scoping):
 - Mọi truy vấn danh sách, tồn kho, tạo phiếu mới đều phải gắn chặt với kho đang làm việc (`CurrentWarehouseId`).

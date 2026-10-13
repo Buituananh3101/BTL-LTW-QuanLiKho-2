@@ -202,7 +202,7 @@ public class PhieuKiemKeController : BaseKhoController
     {
         int whId = warehouseId ?? GetCurrentWarehouseId();
         var kho = await _context.Khos.FindAsync(whId);
-        int userId = GetCurrentUserId();
+        int userId = CurrentNhanVienId;
         var user = await _context.NhanViens.FindAsync(userId);
 
         var model = new PhieuKiemKeFormVM
@@ -375,7 +375,7 @@ public class PhieuKiemKeController : BaseKhoController
                 pkk = new PhieuKiemKe
                 {
                     MaKho = req.MaKho,
-                    MaNvlap = req.MaNvlap > 0 ? req.MaNvlap : GetCurrentUserId(),
+                    MaNvlap = req.MaNvlap > 0 ? req.MaNvlap : CurrentNhanVienId,
                     ThoiDiemChot = req.ThoiDiemChot,
                     TrangThai = "NHAP",
                     GhiChu = req.GhiChu
@@ -470,7 +470,7 @@ public class PhieuKiemKeController : BaseKhoController
                 pkk = new PhieuKiemKe
                 {
                     MaKho = req.MaKho,
-                    MaNvlap = req.MaNvlap > 0 ? req.MaNvlap : GetCurrentUserId(),
+                    MaNvlap = req.MaNvlap > 0 ? req.MaNvlap : CurrentNhanVienId,
                     ThoiDiemChot = req.ThoiDiemChot,
                     TrangThai = "DA_DIEU_CHINH",
                     GhiChu = req.GhiChu
@@ -666,15 +666,5 @@ public class PhieuKiemKeController : BaseKhoController
 
         return Json(result);
     }
-
-    // POST: PhieuKiemKe/SwitchWarehouse
-    [HttpPost]
-    public IActionResult SwitchWarehouse(int warehouseId)
-    {
-        if (warehouseId > 0)
-        {
-            HttpContext.Session.SetInt32("CurrentWarehouseId", warehouseId);
-        }
-        return Ok(new { success = true, warehouseId });
-    }
 }
+

@@ -587,49 +587,60 @@ public class HangHoaController : BaseKhoController
             return BadRequest(new { message = "Không thể sinh mã hàng tự động do đụng độ hệ thống. Vui lòng thử lại." });
         }
 
-        int whId = GetCurrentWarehouseId();
+        int whId = CurrentWarehouseId;
 
-        // Lưu ngưỡng tồn kho
-        if (model.TonToiThieu.HasValue && model.TonToiThieu.Value > 0)
+        using var trans = await _context.Database.BeginTransactionAsync();
+        try
         {
-            var nguong = new NguongTonKho
+            // Lưu ngưỡng tồn kho
+            if (model.TonToiThieu.HasValue && model.TonToiThieu.Value > 0)
             {
-                MaHang = item.MaHang,
-                MaKho = whId,
-                TonToiThieu = model.TonToiThieu.Value
-            };
-            _context.NguongTonKhos.Add(nguong);
-            await _context.SaveChangesAsync();
+                var nguong = new NguongTonKho
+                {
+                    MaHang = item.MaHang,
+                    MaKho = whId,
+                    TonToiThieu = model.TonToiThieu.Value
+                };
+                _context.NguongTonKhos.Add(nguong);
+                await _context.SaveChangesAsync();
+            }
+
+            // Tạo tồn kho ban đầu nếu có nhập số lượng > 0
+            if (model.TonKhoBanDau.HasValue && model.TonKhoBanDau.Value > 0)
+            {
+                int nvId = CurrentNhanVienId;
+
+                var phieuNhap = new PhieuNhap
+                {
+                    MaKho = whId,
+                    MaNvlap = nvId,
+                    MaNvxacNhan = nvId,
+                    NgayLap = DateTime.Now,
+                    NgayXacNhan = DateTime.Now,
+                    LoaiPhieuNhap = "DAU_KY",
+                    TrangThai = "DA_XAC_NHAN",
+                    GhiChu = "Tồn kho đầu kỳ khi tạo hàng " + item.MaHangNoiBo
+                };
+                _context.PhieuNhaps.Add(phieuNhap);
+                await _context.SaveChangesAsync();
+
+                var ctpn = new ChiTietPhieuNhap
+                {
+                    MaPhieuNhap = phieuNhap.MaPhieuNhap,
+                    MaHang = item.MaHang,
+                    SoLuong = model.TonKhoBanDau.Value,
+                    DonGiaNhap = model.GiaVon > 0 ? model.GiaVon : model.GiaBanThamKhao
+                };
+                _context.ChiTietPhieuNhaps.Add(ctpn);
+                await _context.SaveChangesAsync();
+            }
+
+            await trans.CommitAsync();
         }
-
-        // Tạo tồn kho ban đầu nếu có nhập số lượng > 0
-        if (model.TonKhoBanDau.HasValue && model.TonKhoBanDau.Value > 0)
+        catch (Exception ex)
         {
-            int nvId = User.GetMaNv();
-
-            var phieuNhap = new PhieuNhap
-            {
-                MaKho = whId,
-                MaNvlap = nvId,
-                MaNvxacNhan = nvId,
-                NgayLap = DateTime.Now,
-                NgayXacNhan = DateTime.Now,
-                LoaiPhieuNhap = "DAU_KY",
-                TrangThai = "DA_XAC_NHAN",
-                GhiChu = "Tồn kho đầu kỳ khi tạo hàng " + item.MaHangNoiBo
-            };
-            _context.PhieuNhaps.Add(phieuNhap);
-            await _context.SaveChangesAsync();
-
-            var ctpn = new ChiTietPhieuNhap
-            {
-                MaPhieuNhap = phieuNhap.MaPhieuNhap,
-                MaHang = item.MaHang,
-                SoLuong = model.TonKhoBanDau.Value,
-                DonGiaNhap = model.GiaVon > 0 ? model.GiaVon : model.GiaBanThamKhao
-            };
-            _context.ChiTietPhieuNhaps.Add(ctpn);
-            await _context.SaveChangesAsync();
+            await trans.RollbackAsync();
+            return BadRequest(new { message = "Lỗi khi lưu cấu hình tồn kho ban đầu: " + ex.Message });
         }
 
         return Json(new { success = true, id = item.MaHang, message = $"Đã thêm hàng hóa {item.TenHang} thành công." });
@@ -835,51 +846,4 @@ public class HangHoaController : BaseKhoController
             new SelectListItem("Ngừng bán", "NGUNG_BAN")
         };
     }
-
-    // GET: HangHoa/SearchForDoc (Dùng chung cho Autocomplete trên các màn hình chứng từ Nhập, Xuất, Kiểm)
-    [HttpGet]
-    public async Task<IActionResult> SearchForDoc(string? q, int warehouseId = 0)
-    {
-        warehouseId = warehouseId > 0 ? warehouseId : CurrentWarehouseId;
-
-        if (string.IsNullOrWhiteSpace(q))
-        {
-            return Json(new List<object>());
-        }
-
-        q = q.Trim().ToLower();
-
-        var stockMap = await _context.VwTonKhoHienTais
-            .Where(s => s.MaKho == warehouseId)
-            .ToDictionaryAsync(s => s.MaHang, s => s.SoLuongTon ?? 0);
-
-        var query = _context.HangHoas
-            .AsNoTracking()
-            .Include(h => h.MaDvtNavigation)
-            .Include(h => h.MaNhomNavigation)
-            .Where(h => h.TrangThai == "DANG_BAN")
-            .Where(h => h.MaHangNoiBo.ToLower().Contains(q) || h.TenHang.ToLower().Contains(q))
-            .Take(20);
-
-        var products = await query.ToListAsync();
-
-        var result = products.Select(h => new
-        {
-            MaHang = h.MaHang,
-            MaHangNoiBo = h.MaHangNoiBo,
-            TenHang = h.TenHang,
-            TenDvt = h.MaDvtNavigation?.TenDvt ?? "",
-            TenNhom = h.MaNhomNavigation?.TenNhom ?? "",
-            Gia = h.GiaVon > 0 ? h.GiaVon : h.GiaBanThamKhao,
-            TonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0
-        }).ToList();
-
-        return Json(result);
-    }
-}
-
-
-public class QuickGroupRequest
-{
-    public string TenNhom { get; set; } = "";
 }

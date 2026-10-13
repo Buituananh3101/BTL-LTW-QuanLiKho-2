@@ -8,12 +8,12 @@
 
 ### 1.1. Bản đồ File liên quan (File Map)
 Khi cần sửa đổi chức năng này, mở chính xác các file sau:
-- **Controller chính**: `Controllers/HangHoaController.cs` (Xử lý `Index`, lọc AJAX `Filter`, thêm `Create`, sửa `Edit`, lấy chi tiết `GetItem`, đổi sao `ToggleStar`, xóa `Delete`, ảnh `GetImage`).
-- **ViewModel**: `ViewModels/HangHoaForm.cs` (Chứa `HangHoaIndexVM`, `HangHoaItemVM`, `HangHoaForm`).
+- **Controller chính**: `Controllers/HangHoaController.cs` (Xử lý `Index`, lọc AJAX `Filter`, thêm `Create`, sửa `Edit`, lấy chi tiết `GetItem`, đổi sao `ToggleFavorite`, xóa `Delete`, ảnh `GetImage`).
+- **ViewModel**: `ViewModels/HangHoa/HangHoaForm.cs` (Chứa `HangHoaIndexVM`, `HangHoaItemVM`, `HangHoaForm`).
 - **Giao diện khung & JS**: `Views/HangHoa/Index.cshtml` (Search bar, 7 khối lọc sidebar, modal thêm/sửa, toàn bộ logic JS gom tham số và gọi AJAX).
 - **Bảng dữ liệu AJAX**: `Views/HangHoa/_HangHoaTable.cshtml` (Partial View bảng sản phẩm, badge trạng thái, icon sao, phân trang AJAX).
 - **Service tồn kho**: `Services/ITonKhoService.cs`, `Services/TonKhoService.cs` (Kiểm tra và tính toán tồn kho).
-- **DbContext & Entity**: `Data/QuanLyKhoPhuQuocLtwContext.cs`, các Model trong `Models/` (`HangHoa.cs`, `NhomHang.cs`, `DonViTinh.cs`, `NguongTonKho.cs`, `VwTonKhoHienTai.cs`).
+- **DbContext & Entity**: `Models/QuanLyKhoPhuQuocLtwContext.cs`, các Model trong `Models/` (`HangHoa.cs`, `NhomHang.cs`, `DonViTinh.cs`, `NguongTonKho.cs`, `VwTonKhoHienTai.cs`).
 
 ### 1.2. Bảng CSDL tham gia:
 - `HangHoa`: Bảng thực thể chính (`MaHang`, `MaHangNoiBo`, `TenHang`, `MaNhom`, `MaDvt`, `QuyCach`, `GiaBanThamKhao`, `GiaVon`, `HinhAnh VARBINARY(MAX)`, `TrangThai: DANG_BAN / NGUNG_BAN`, `NgayTao`, `DaDanhDau`).
@@ -34,7 +34,7 @@ Khi cần sửa đổi chức năng này, mở chính xác các file sau:
 | **Thêm mới hàng** | Bấm "+ Thêm mới", điền form modal, bấm "Lưu" | JS gom form + ảnh Base64 ➜ AJAX `POST /HangHoa/Create` (`[FromBody] HangHoaForm`) | `HangHoaController.Create(...)` validate dữ liệu, tự sinh `MaHangNoiBo` (kèm retry 3 lần) | Lưu `HangHoa`, `NguongTonKho`. Nếu có tồn đầu kỳ thì tạo `PhieuNhap` ➜ Trả JSON `{ success: true }` ➜ JS đóng modal, gọi lại `Filter` |
 | **Mở form Sửa** | Click icon bút chì trên dòng sản phẩm | JS lấy ID ➜ AJAX `GET /HangHoa/GetItem?id=X` | `HangHoaController.GetItem(id)` đọc thông tin hàng & ngưỡng tồn | Trả JSON chi tiết hàng hóa ➜ JS điền dữ liệu vào các ô input và mở modal sửa |
 | **Lưu Sửa hàng** | Sửa thông tin trong modal, bấm "Cập nhật" | JS gom form ➜ AJAX `POST /HangHoa/Edit?id=X` | `HangHoaController.Edit(id, form)` kiểm tra và cập nhật | Cập nhật `HangHoa`, `NguongTonKho` ➜ Trả JSON `{ success: true }` ➜ JS đóng modal, reload bảng |
-| **Đánh dấu sao** | Click icon ngôi sao trên dòng sản phẩm | JS bắt click ➜ AJAX `POST /HangHoa/ToggleStar?id=X` | `HangHoaController.ToggleStar(id)` đảo cờ `DaDanhDau` | Lưu DB ➜ Trả JSON `{ success: true, isStarred }` ➜ JS toggle class vàng cho icon tức thì |
+| **Đánh dấu sao** | Click icon ngôi sao trên dòng sản phẩm | JS bắt click ➜ AJAX `POST /HangHoa/ToggleFavorite?id=X` | `HangHoaController.ToggleFavorite(id)` đảo cờ `DaDanhDau` | Lưu DB ➜ Trả JSON `{ success: true, isFavorite, maHang }` ➜ JS toggle class vàng cho icon tức thì |
 | **Xóa hàng hóa** | Click nút Xóa ➜ Xác nhận modal | JS gọi AJAX `POST /HangHoa/Delete?id=X` | `HangHoaController.Delete(id)` kiểm tra ràng buộc giao dịch | Nếu có giao dịch: trả lỗi từ chối. Nếu chưa: xóa DB ➜ Trả JSON `{ success: true }` ➜ reload bảng |
 | **Hiển thị ảnh** | Bảng hiển thị thẻ `<img>` | Thẻ `<img>` gọi `src="/HangHoa/GetImage?id=X"` | `HangHoaController.GetImage(id)` đọc byte ảnh từ DB | Trả file ảnh (kèm cache trình duyệt) hoặc icon SVG mặc định. **Tuyệt đối không SELECT HinhAnh ở bảng** |
 

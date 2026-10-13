@@ -65,10 +65,5 @@ public abstract class BaseKhoController : Controller
     /// Hàm tiện ích tương thích ngược lấy mã nhân viên hiện tại.
     /// </summary>
     protected int GetCurrentEmployeeId() => CurrentNhanVienId;
-
-    /// <summary>
-    /// Hàm tiện ích tương thích ngược lấy mã nhân viên (như code cũ PhieuKiemKe).
-    /// </summary>
-    protected int GetCurrentUserId() => CurrentNhanVienId;
 }
 

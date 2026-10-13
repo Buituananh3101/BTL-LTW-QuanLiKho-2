@@ -53,7 +53,7 @@ Các chứng từ trong hệ thống dùng mã chuỗi tiếng Việt không d�
 1. **Hiệu lực tồn kho**: CHỈ những chứng từ ở trạng thái `DA_XAC_NHAN`, `DA_NHAN`, `DA_DUYET` mới làm thay đổi số lượng tồn trong `vw_TonKhoHienTai`. Phiếu tạm (`NHAP`) **không ảnh hưởng đến tồn kho**.
 2. **Quyền sửa & xóa chứng từ**:
    - **Phiếu tạm (`NHAP`)**: Được phép chỉnh sửa số lượng, thêm/bớt mặt hàng hoặc xóa phiếu.
-   - **Phiếu đã hoàn thành**: Tuyệt đối **không được sửa hoặc xóa** để bảo đảm tính toàn vẹn sổ sách. Chỉ được thực hiện thao tác **Hủy** (sinh bút toán đảo ngược hoặc chuyển trạng thái sang `'HUY'`).
+   - **Phiếu đã hoàn thành**: Tuyệt đối **không được sửa hoặc xóa** để bảo đảm tính toàn vẹn sổ sách. Chỉ được thực hiện thao tác **Hủy** (cập nhật `TrangThai = 'HUY'`, View SQL tự động loại trừ phiếu đã hủy).
 3. **NGOẠI LỆ ĐẶC BIỆT: Phiếu kiểm kho đã cân bằng KHÔNG ĐƯỢC HỦY**:
    - Khi một `PhieuKiemKe` đã chuyển sang trạng thái `'DA_DIEU_CHINH'` (đã sinh `PhieuDieuChinh` có `DA_DUYET`), phiếu này bị **khóa vĩnh viễn, không được hủy**.
    - **Lý do**: Sau khi cân bằng, kho đã phát sinh các giao dịch bán hàng, chuyển kho dựa trên mốc tồn mới. Hủy phiếu kiểm cũ sẽ làm sai lệch toàn bộ chuỗi giao dịch tiếp theo. Nếu phát hiện kiểm sai, bắt buộc phải lập một phiếu kiểm mới.

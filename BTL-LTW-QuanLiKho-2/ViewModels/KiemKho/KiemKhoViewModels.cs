@@ -1,11 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using BTL_LTW_QuanLiKho_2.Services;
 
 namespace BTL_LTW_QuanLiKho_2.ViewModels;
 
 public class PhieuKiemKeListItemVM
 {
     public int MaPhieuKiemKe { get; set; }
-    public string MaPhieuHienThi => $"PKK{MaPhieuKiemKe:D6}";
+    public string MaPhieuHienThi => MaChungTuHelper.FormatMaKiemKe(MaPhieuKiemKe);
     public DateTime ThoiDiemChot { get; set; }
     public DateTime? NgayCanBang { get; set; }
     public string TrangThai { get; set; } = "NHAP";
@@ -80,7 +81,7 @@ public class CreatorItemVM
 public class PhieuKiemKeFormVM
 {
     public int MaPhieuKiemKe { get; set; }
-    public string MaPhieuHienThi => MaPhieuKiemKe > 0 ? $"PKK{MaPhieuKiemKe:D6}" : "Mã phiếu tự động";
+    public string MaPhieuHienThi => MaPhieuKiemKe > 0 ? MaChungTuHelper.FormatMaKiemKe(MaPhieuKiemKe) : "Mã phiếu tự động";
 
     [Required(ErrorMessage = "Vui lòng chọn kho")]
     public int MaKho { get; set; }

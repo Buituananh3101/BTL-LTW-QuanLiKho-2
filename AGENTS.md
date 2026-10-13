@@ -31,7 +31,7 @@
 
 ## 4. 12 Luật cốt lõi không được vi phạm
 1. **Tên tiếng Việt trong code**: Toàn bộ Model, DbContext, Controller, Action, View, ViewModel, Bảng, Cột phải dùng tiếng Việt không dấu PascalCase (`HangHoa`, `MaKho`, `SoLuong`). Cấm tự ý dùng tiếng Anh.
-2. **Chỉ một Layout chính**: Dùng duy nhất `Views/Shared/_Layout.cshtml` qua `_ViewStart.cshtml`. Không dùng và cấm khôi phục các file lab cũ (`MyLayout.cshtml`, `LeftMenu.cshtml`...).
+2. **Chỉ một Layout chính**: Dùng duy nhất `Views/Shared/_Layout.cshtml` qua `_ViewStart.cshtml` (ngoại lệ: `_LoginLayout.cshtml` cho trang Đăng nhập). Không dùng và cấm khôi phục các file lab cũ (`MyLayout.cshtml`, `LeftMenu.cshtml`...).
 3. **Quản lý biến động kho tập trung**: Mọi biến động tồn kho (nhập, xuất, chuyển, cân bằng) phải tuân theo quy tắc trong `.agent/rules/02-nghiep-vu-kho.md`.
 4. **Tồn kho thực tế tính qua `vw_TonKhoHienTai`**: Tồn kho sổ sách hiện thời tính từ View `vw_TonKhoHienTai` (dựa trên phiếu nhập, xuất, chuyển, điều chỉnh), không tạo bảng tồn kho tĩnh.
 5. **Cấm sửa/xóa chứng từ đã hoàn thành**: Phiếu tạm (`NHAP`) được sửa/xóa. Phiếu đã xong (`DA_XAC_NHAN`, `DA_DIEU_CHINH`, `DA_NHAN`) **tuyệt đối không được sửa hay xóa**.
