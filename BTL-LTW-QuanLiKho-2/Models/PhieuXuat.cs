@@ -7,7 +7,11 @@ public partial class PhieuXuat
 {
     public int MaPhieuXuat { get; set; }
 
-    public int MaDonBan { get; set; }
+    public int? MaDonBan { get; set; }
+
+    public string LoaiPhieuXuat { get; set; } = "XUAT_BAN";
+
+    public int? MaKho { get; set; }
 
     public int MaNvlap { get; set; }
 
@@ -23,7 +27,9 @@ public partial class PhieuXuat
 
     public virtual ICollection<ChiTietPhieuXuat> ChiTietPhieuXuats { get; set; } = new List<ChiTietPhieuXuat>();
 
-    public virtual DonBan MaDonBanNavigation { get; set; } = null!;
+    public virtual DonBan? MaDonBanNavigation { get; set; }
+
+    public virtual Kho? MaKhoNavigation { get; set; }
 
     public virtual NhanVien MaNvlapNavigation { get; set; } = null!;
 

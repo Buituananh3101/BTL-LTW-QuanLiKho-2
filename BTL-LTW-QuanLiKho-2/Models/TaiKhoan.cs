@@ -24,4 +24,6 @@ public partial class TaiKhoan
     public virtual VaiTro MaVaiTroNavigation { get; set; } = null!;
 
     public virtual ICollection<NhatKyThaoTac> NhatKyThaoTacs { get; set; } = new List<NhatKyThaoTac>();
+
+    public virtual ICollection<TaiKhoanKho> TaiKhoanKhos { get; set; } = new List<TaiKhoanKho>();
 }

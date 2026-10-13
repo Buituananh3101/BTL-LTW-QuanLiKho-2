@@ -57,6 +57,8 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
 
     public virtual DbSet<TaiKhoan> TaiKhoans { get; set; }
 
+    public virtual DbSet<TaiKhoanKho> TaiKhoanKhos { get; set; }
+
     public virtual DbSet<VaiTro> VaiTros { get; set; }
 
     public virtual DbSet<VwTonKhoHienTai> VwTonKhoHienTais { get; set; }
@@ -189,11 +191,17 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
             entity.Property(e => e.MaCtphieuXuat).HasColumnName("MaCTPhieuXuat");
             entity.Property(e => e.MaCtdonBan).HasColumnName("MaCTDonBan");
             entity.Property(e => e.SoLuongXuat).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.DonGiaXuat)
+                .HasColumnType("decimal(18, 2)")
+                .HasDefaultValue(0m, "DF_CTPX_DonGia");
 
             entity.HasOne(d => d.MaCtdonBanNavigation).WithOne(p => p.ChiTietPhieuXuat)
                 .HasForeignKey<ChiTietPhieuXuat>(d => d.MaCtdonBan)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_CTPX_CTDonBan");
+
+            entity.HasOne(d => d.MaHangNavigation).WithMany(p => p.ChiTietPhieuXuats)
+                .HasForeignKey(d => d.MaHang)
+                .HasConstraintName("FK_CTPX_HangHoa");
 
             entity.HasOne(d => d.MaPhieuXuatNavigation).WithMany(p => p.ChiTietPhieuXuats)
                 .HasForeignKey(d => d.MaPhieuXuat)
@@ -276,6 +284,9 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
             entity.HasIndex(e => e.MaHangNoiBo, "UQ__HangHoa__65D2FAF85F8CB84A").IsUnique();
 
             entity.Property(e => e.GiaBanThamKhao).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.GiaVon)
+                .HasColumnType("decimal(18, 2)")
+                .HasDefaultValue(0m, "DF_HangHoa_GiaVon");
             entity.Property(e => e.MaDvt).HasColumnName("MaDVT");
             entity.Property(e => e.MaHangNoiBo)
                 .HasMaxLength(30)
@@ -600,6 +611,10 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
             entity.HasIndex(e => e.MaDonBan, "UQ__PhieuXua__CDB61EB51063B35E").IsUnique();
 
             entity.Property(e => e.GhiChu).HasMaxLength(500);
+            entity.Property(e => e.LoaiPhieuXuat)
+                .HasMaxLength(30)
+                .IsUnicode(false)
+                .HasDefaultValue("XUAT_BAN", "DF_PhieuXuat_Loai");
             entity.Property(e => e.MaNvlap).HasColumnName("MaNVLap");
             entity.Property(e => e.MaNvxacNhan).HasColumnName("MaNVXacNhan");
             entity.Property(e => e.NgayLap).HasDefaultValueSql("(sysdatetime())", "DF_PhieuXuat_NgayLap");
@@ -610,8 +625,11 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
 
             entity.HasOne(d => d.MaDonBanNavigation).WithOne(p => p.PhieuXuat)
                 .HasForeignKey<PhieuXuat>(d => d.MaDonBan)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PhieuXuat_DonBan");
+
+            entity.HasOne(d => d.MaKhoNavigation).WithMany(p => p.PhieuXuats)
+                .HasForeignKey(d => d.MaKho)
+                .HasConstraintName("FK_PhieuXuat_Kho");
 
             entity.HasOne(d => d.MaNvlapNavigation).WithMany(p => p.PhieuXuatMaNvlapNavigations)
                 .HasForeignKey(d => d.MaNvlap)
@@ -666,6 +684,25 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
 
             entity.Property(e => e.MoTa).HasMaxLength(255);
             entity.Property(e => e.TenVaiTro).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<TaiKhoanKho>(entity =>
+        {
+            entity.HasKey(e => new { e.MaTaiKhoan, e.MaKho }).HasName("PK_TaiKhoan_Kho");
+
+            entity.ToTable("TaiKhoan_Kho");
+
+            entity.Property(e => e.NgayPhanCong)
+                .HasDefaultValueSql("(sysdatetime())", "DF_TaiKhoan_Kho_NgayPhanCong");
+            entity.Property(e => e.GhiChu).HasMaxLength(255);
+
+            entity.HasOne(d => d.MaKhoNavigation).WithMany(p => p.TaiKhoanKhos)
+                .HasForeignKey(d => d.MaKho)
+                .HasConstraintName("FK_TaiKhoanKho_Kho");
+
+            entity.HasOne(d => d.MaTaiKhoanNavigation).WithMany(p => p.TaiKhoanKhos)
+                .HasForeignKey(d => d.MaTaiKhoan)
+                .HasConstraintName("FK_TaiKhoanKho_TaiKhoan");
         });
 
         modelBuilder.Entity<VwTonKhoHienTai>(entity =>

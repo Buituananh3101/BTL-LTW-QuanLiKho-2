@@ -26,4 +26,8 @@ public partial class Kho
     public virtual ICollection<PhieuKiemKe> PhieuKiemKes { get; set; } = new List<PhieuKiemKe>();
 
     public virtual ICollection<PhieuNhap> PhieuNhaps { get; set; } = new List<PhieuNhap>();
+
+    public virtual ICollection<PhieuXuat> PhieuXuats { get; set; } = new List<PhieuXuat>();
+
+    public virtual ICollection<TaiKhoanKho> TaiKhoanKhos { get; set; } = new List<TaiKhoanKho>();
 }

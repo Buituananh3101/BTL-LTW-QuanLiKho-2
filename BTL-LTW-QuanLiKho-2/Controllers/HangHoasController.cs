@@ -212,7 +212,7 @@ public class HangHoasController : Controller
         var allItems = rawList.Select(x =>
         {
             decimal stock = tonKhoDict.TryGetValue(x.MaHang, out var s) ? s : 0;
-            decimal cost = latestCosts.TryGetValue(x.MaHang, out var c) && c > 0 ? c : x.GiaBanThamKhao;
+            decimal cost = x.GiaVon > 0 ? x.GiaVon : (latestCosts.TryGetValue(x.MaHang, out var c) && c > 0 ? c : x.GiaBanThamKhao);
             var nguong = x.NguongTonKhos.FirstOrDefault();
 
             return new HangHoaItemVM
@@ -349,7 +349,7 @@ public class HangHoasController : Controller
             .Select(t => t.SoLuongTon ?? 0)
             .FirstOrDefaultAsync();
 
-        decimal cost = await _context.ChiTietPhieuNhaps
+        decimal cost = item.GiaVon > 0 ? item.GiaVon : await _context.ChiTietPhieuNhaps
             .Where(c => c.MaHang == id)
             .OrderByDescending(c => c.MaCtphieuNhap)
             .Select(c => c.DonGiaNhap)
@@ -644,6 +644,7 @@ public class HangHoasController : Controller
         x.MaDvt = m.MaDvt;
         x.QuyCach = m.QuyCach?.Trim();
         x.GiaBanThamKhao = m.GiaBanThamKhao;
+        x.GiaVon = m.GiaVon;
         x.TrangThai = m.TrangThai;
     }
 

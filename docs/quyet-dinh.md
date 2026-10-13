@@ -13,3 +13,4 @@
 - **2026-10-13** – Tạm giữ nguyên tên `HangHoasController` (dạng số nhiều) và ghi vào Nợ kỹ thuật – Tuân thủ quy tắc không tự ý đổi tên các file C# đang chạy ổn định của dự án.
 - **2026-10-13** – Chuẩn hóa nghiệp vụ tính tồn kho dựa trên View `vw_TonKhoHienTai` thật của CSDL – Đồng bộ code và CSDL thực tế, loại bỏ phụ thuộc vào các bảng `Inventory` và `StockCard` ảo trong tài liệu cũ.
 - **2026-10-13** – Áp dụng 3 "Nguyên tắc vàng" khi AI sửa/nâng cấp CSDL – Đảm bảo CSDL có thể mở rộng linh hoạt theo tính năng mới nhưng luôn tuân thủ nguyên tắc "Chỉ cộng, không phá", đồng bộ script SQL tức thì và báo cáo trước khi sửa.
+- **2026-10-13** – Nâng cấp CSDL Schema đợt 1 (GiaVon, PhieuXuat, TaiKhoan_Kho) qua file `docs/database_update.sql` – Mở rộng tính năng định giá vốn cho hàng hóa, cho phép xuất kho nội bộ/hủy không phụ thuộc đơn bán, phân quyền kho theo tài khoản và cập nhật View tồn kho tương thích.

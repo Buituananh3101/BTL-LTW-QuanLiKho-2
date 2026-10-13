@@ -21,6 +21,8 @@ public partial class HangHoa
 
     public decimal GiaBanThamKhao { get; set; }
 
+    public decimal GiaVon { get; set; }
+
     public string TrangThai { get; set; } = null!;
 
     public byte[]? HinhAnh { get; set; }
@@ -34,6 +36,8 @@ public partial class HangHoa
     public virtual ICollection<ChiTietPhieuKiemKe> ChiTietPhieuKiemKes { get; set; } = new List<ChiTietPhieuKiemKe>();
 
     public virtual ICollection<ChiTietPhieuNhap> ChiTietPhieuNhaps { get; set; } = new List<ChiTietPhieuNhap>();
+ 
+    public virtual ICollection<ChiTietPhieuXuat> ChiTietPhieuXuats { get; set; } = new List<ChiTietPhieuXuat>();
 
     public virtual DonViTinh MaDvtNavigation { get; set; } = null!;
 

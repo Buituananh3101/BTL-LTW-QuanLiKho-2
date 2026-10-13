@@ -275,7 +275,7 @@ public class PhieuKiemKeController : Controller
                 TenNhom = ct.MaHangNavigation?.MaNhomNavigation?.TenNhom ?? "",
                 SoLuongTheoSo = ct.SoLuongTheoSo,
                 SoLuongThucTe = ct.SoLuongThucTe,
-                DonGia = ct.MaHangNavigation?.GiaBanThamKhao ?? 0
+                DonGia = (ct.MaHangNavigation != null && ct.MaHangNavigation.GiaVon > 0) ? ct.MaHangNavigation.GiaVon : (ct.MaHangNavigation?.GiaBanThamKhao ?? 0)
             };
         }).ToList();
 
@@ -324,7 +324,7 @@ public class PhieuKiemKeController : Controller
             TenNhom = ct.MaHangNavigation?.MaNhomNavigation?.TenNhom ?? "",
             SoLuongTheoSo = ct.SoLuongTheoSo,
             SoLuongThucTe = ct.SoLuongThucTe,
-            DonGia = ct.MaHangNavigation?.GiaBanThamKhao ?? 0
+            DonGia = (ct.MaHangNavigation != null && ct.MaHangNavigation.GiaVon > 0) ? ct.MaHangNavigation.GiaVon : (ct.MaHangNavigation?.GiaBanThamKhao ?? 0)
         }).ToList();
 
         var model = new PhieuKiemKeFormVM
@@ -626,7 +626,7 @@ public class PhieuKiemKeController : Controller
             TenHang = h.TenHang,
             TenDvt = h.MaDvtNavigation?.TenDvt ?? "",
             TenNhom = h.MaNhomNavigation?.TenNhom ?? "",
-            Gia = h.GiaBanThamKhao,
+            Gia = h.GiaVon > 0 ? h.GiaVon : h.GiaBanThamKhao,
             TonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0
         }).ToList();
 
@@ -663,7 +663,7 @@ public class PhieuKiemKeController : Controller
             TenHang = h.TenHang,
             TenDvt = h.MaDvtNavigation?.TenDvt ?? "",
             TenNhom = h.MaNhomNavigation?.TenNhom ?? "",
-            Gia = h.GiaBanThamKhao,
+            Gia = h.GiaVon > 0 ? h.GiaVon : h.GiaBanThamKhao,
             TonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0
         }).ToList();
 
