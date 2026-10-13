@@ -61,13 +61,21 @@ public class AccountController : Controller
             return View(model);
         }
 
+        // Chuẩn hóa tên vai trò tiếng Việt có dấu
+        string rawRole = taiKhoan.MaVaiTroNavigation?.TenVaiTro ?? "";
+        string vaiTro = "Nhân viên";
+        if (rawRole.Contains("Qu") || rawRole.Contains("qu")) vaiTro = "Quản lý";
+        else if (rawRole.Contains("kho") || rawRole.Contains("Kho")) vaiTro = "Nhân viên kho";
+        else if (rawRole.Contains("b") || rawRole.Contains("B")) vaiTro = "Nhân viên bán hàng";
+        else if (!string.IsNullOrWhiteSpace(rawRole)) vaiTro = rawRole;
+
         // Tạo Claims
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, taiKhoan.MaTaiKhoan.ToString()),
             new(ClaimTypes.Name, taiKhoan.TenDangNhap),
             new(ClaimTypes.GivenName, taiKhoan.MaNvNavigation?.HoTen ?? taiKhoan.TenDangNhap),
-            new(ClaimTypes.Role, taiKhoan.MaVaiTroNavigation?.TenVaiTro ?? "Nhân viên"),
+            new(ClaimTypes.Role, vaiTro),
             new(ClaimTypes.UserData, taiKhoan.MaNv.ToString())
         };
 

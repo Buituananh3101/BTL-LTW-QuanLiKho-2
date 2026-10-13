@@ -101,6 +101,43 @@ body {
   place-items: center;
   font-size: 15px;
 }
+.user-btn {
+  color: #374151 !important;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none !important;
+}
+.user-btn:hover,
+.user-btn:focus {
+  color: var(--brand) !important;
+}
+.user-btn .user-name {
+  color: #374151;
+}
+.user-btn:hover .user-name {
+  color: var(--brand);
+}
+.user-btn::after {
+  color: #6b7280;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+.user-login-link {
+  color: #374151 !important;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none !important;
+  transition: color 0.15s ease;
+}
+.user-login-link:hover {
+  color: var(--brand) !important;
+}
+.user-login-link .user-name {
+  color: #374151;
+}
+.user-login-link:hover .user-name {
+  color: var(--brand);
+}
 .bell {
   position: relative;
 }

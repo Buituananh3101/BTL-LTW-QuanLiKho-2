@@ -1,6 +1,6 @@
--- =====================================================================================
+﻿-- =====================================================================================
 -- KHO PRO - SCRIPT DỮ LIỆU MẪU ĐẦY ĐỦ (DEMO SEED DATA)
--- File: migrations/sql/05_dulieumau_seed.sql / docs/DuLieuMau.sql
+-- File: docs/DuLieuMau.sql (Đồng bộ với migrations/sql/05_dulieumau_seed.sql)
 -- Mô tả: Cung cấp toàn bộ dữ liệu mẫu chuẩn cho hệ thống Quản lý kho hàng nhiều kho
 -- Tài khoản mặc định:
 --   1. quanly  / 123456 (Vai trò: Quản lý - Toàn quyền)
@@ -18,28 +18,32 @@ PRINT N'==> BẮT ĐẦU NẠP DỮ LIỆU MẪU CHO HỆ THỐNG KHO PRO...';
 -- -------------------------------------------------------------------------------------
 -- 1. BẢNG VAI TRÒ (VaiTro)
 -- -------------------------------------------------------------------------------------
-IF NOT EXISTS (SELECT 1 FROM VaiTro WHERE TenVaiTro = N'Quản lý')
+IF NOT EXISTS (SELECT 1 FROM VaiTro WHERE MaVaiTro = 1)
 BEGIN
     SET IDENTITY_INSERT VaiTro ON;
     INSERT INTO VaiTro (MaVaiTro, TenVaiTro, MoTa) VALUES (1, N'Quản lý', N'Quản lý toàn chi nhánh và toàn bộ các kho');
     SET IDENTITY_INSERT VaiTro OFF;
 END
 ELSE
-    UPDATE VaiTro SET MoTa = N'Quản lý toàn chi nhánh và toàn bộ các kho' WHERE TenVaiTro = N'Quản lý';
+    UPDATE VaiTro SET TenVaiTro = N'Quản lý', MoTa = N'Quản lý toàn chi nhánh và toàn bộ các kho' WHERE MaVaiTro = 1;
 
-IF NOT EXISTS (SELECT 1 FROM VaiTro WHERE TenVaiTro = N'Nhân viên kho')
+IF NOT EXISTS (SELECT 1 FROM VaiTro WHERE MaVaiTro = 2)
 BEGIN
     SET IDENTITY_INSERT VaiTro ON;
     INSERT INTO VaiTro (MaVaiTro, TenVaiTro, MoTa) VALUES (2, N'Nhân viên kho', N'Nhập, xuất, chuyển kho và kiểm kê');
     SET IDENTITY_INSERT VaiTro OFF;
 END
+ELSE
+    UPDATE VaiTro SET TenVaiTro = N'Nhân viên kho', MoTa = N'Nhập, xuất, chuyển kho và kiểm kê' WHERE MaVaiTro = 2;
 
-IF NOT EXISTS (SELECT 1 FROM VaiTro WHERE TenVaiTro = N'Nhân viên bán hàng')
+IF NOT EXISTS (SELECT 1 FROM VaiTro WHERE MaVaiTro = 3)
 BEGIN
     SET IDENTITY_INSERT VaiTro ON;
     INSERT INTO VaiTro (MaVaiTro, TenVaiTro, MoTa) VALUES (3, N'Nhân viên bán hàng', N'Lập đơn bán và thu tiền');
     SET IDENTITY_INSERT VaiTro OFF;
 END
+ELSE
+    UPDATE VaiTro SET TenVaiTro = N'Nhân viên bán hàng', MoTa = N'Lập đơn bán và thu tiền' WHERE MaVaiTro = 3;
 
 PRINT N'   [1/10] Đã đồng bộ bảng VaiTro.';
 
