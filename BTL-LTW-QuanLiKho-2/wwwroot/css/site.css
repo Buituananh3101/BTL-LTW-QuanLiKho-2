@@ -944,26 +944,33 @@ tr.product-row {
 tr.product-row:hover > td {
   background-color: #f8fafc;
 }
+/* Dòng sản phẩm được chọn: Viền 2 bên đậm (3px), viền trên mảnh nhẹ (1px) */
 tr.product-row.selected > td {
-  background-color: #f0f7ff !important;
-  border-top: 2px solid #0070f3 !important;
-  border-bottom: 1px solid #dbeafe !important;
+  background-color: #ffffff !important;
+  border-top: 1px solid #93c5fd !important; /* Viền trên mảnh */
+  border-bottom: 1px solid #f1f5f9 !important; /* Phân cách nhẹ với bảng chi tiết */
 }
 tr.product-row.selected > td:first-child {
-  border-left: 2px solid #0070f3 !important;
+  border-left: 3px solid #0070f3 !important; /* Viền bên trái ĐẬM */
 }
 tr.product-row.selected > td:last-child {
-  border-right: 2px solid #0070f3 !important;
+  border-right: 3px solid #0070f3 !important; /* Viền bên phải ĐẬM */
+}
+
+/* Dòng chi tiết mở rộng: Viền 2 bên đậm (3px), viền dưới mảnh (1px) */
+tr.product-detail-row > td {
+  background-color: #ffffff !important;
+  padding: 0 !important;
+  border-top: none !important;
+  border-bottom: 1px solid #93c5fd !important; /* Viền dưới mảnh */
+  border-left: 3px solid #0070f3 !important; /* Viền bên trái ĐẬM */
+  border-right: 3px solid #0070f3 !important; /* Viền bên phải ĐẬM */
 }
 
 .product-detail-panel {
   background-color: #ffffff;
-  border-left: 2px solid #0070f3;
-  border-right: 2px solid #0070f3;
-  border-bottom: 2px solid #0070f3;
-  border-top: none;
-  box-shadow: 0 6px 18px rgba(0, 112, 243, 0.08);
-  margin-bottom: 6px;
+  border: none; /* Đã có viền 3px từ thẻ td */
+  margin-bottom: 0;
 }
 
 /* Tabs Bar */
@@ -972,7 +979,7 @@ tr.product-row.selected > td:last-child {
   gap: 24px;
   padding: 0 24px;
   border-bottom: 1px solid #e2e8f0;
-  background-color: #f8fafc;
+  background-color: #ffffff;
 }
 .product-detail-tab-btn {
   padding: 12px 2px;
