@@ -97,7 +97,7 @@
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="duKienFilter" id="dkCustom" />
                     <label class="form-check-label d-flex justify-content-between align-items-center" for="dkCustom" style="cursor: pointer;">
-                        <span>Tùy chỉnh</span>
+                        <span id="textDkCustom">Tùy chỉnh</span>
                         <i class="bi bi-calendar3 text-muted small" id="btnOpenDkCalendar"></i>
                     </label>
                 </div>
@@ -181,7 +181,7 @@
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="tgTaoFilter" id="tgtCustom" />
                     <label class="form-check-label d-flex justify-content-between align-items-center" for="tgtCustom" style="cursor: pointer;">
-                        <span>Tùy chỉnh</span>
+                        <span id="textTgtCustom">Tùy chỉnh</span>
                         <i class="bi bi-calendar3 text-muted small" id="btnOpenTgtCalendar"></i>
                     </label>
                 </div>
@@ -802,7 +802,10 @@ $(document).ready(function () {
     $('#dotTonKho').css('display', $('#filterTonKho').val() !== 'ALL' ? 'inline-block' : 'none');
 
     // Click on calendar day
-    $(document).on('click', '.cal-day', function () {
+    $(document).on('click', '.cal-day', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         const target = $(this).data('target');
         const iso = $(this).data('iso');
         const clicked = new Date(iso + 'T00:00:00');
@@ -821,7 +824,10 @@ $(document).ready(function () {
     });
 
     // Calendar month navigation
-    $(document).on('click', '.btn-cal-prev', function () {
+    $(document).on('click', '.btn-cal-prev', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         const target = $(this).data('target');
         calState[target].currentMonth--;
         if (calState[target].currentMonth < 0) {
@@ -831,7 +837,10 @@ $(document).ready(function () {
         renderDualCalendar(target);
     });
 
-    $(document).on('click', '.btn-cal-next', function () {
+    $(document).on('click', '.btn-cal-next', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         const target = $(this).data('target');
         calState[target].currentMonth++;
         if (calState[target].currentMonth > 11) {
@@ -842,7 +851,10 @@ $(document).ready(function () {
     });
 
     // Calendar "Hôm nay"
-    $(document).on('click', '.btn-cal-today', function () {
+    $(document).on('click', '.btn-cal-today', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         const target = $(this).data('target');
         const t = new Date();
         calState[target].currentYear = t.getFullYear();
@@ -853,24 +865,29 @@ $(document).ready(function () {
     });
 
     // Calendar "Áp dụng"
-    $(document).on('click', '.btn-apply-calendar', function () {
+    $(document).on('click', '.btn-apply-calendar', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         const target = $(this).data('target');
         const s = calState[target].start || new Date();
-        const e = calState[target].end || s;
-        const rangeText = `${formatDateVN(s)} - ${formatDateVN(e)}`;
+        const eDate = calState[target].end || s;
+        const rangeText = `${formatDateVN(s)} - ${formatDateVN(eDate)}`;
 
         if (target === 'tgt') {
             $('#popupTgtCalendar').hide();
             $('#tgtCustom').prop('checked', true);
             activeTgTaoVal = 'CUSTOM';
             activeTgTaoFrom = formatDateISO(s);
-            activeTgTaoTo = formatDateISO(e);
+            activeTgTaoTo = formatDateISO(eDate);
             $('#textTgtRange').text(rangeText);
+            $('#textTgtCustom').text(rangeText);
         } else {
             $('#popupDkCalendar').hide();
             $('#dkCustom').prop('checked', true);
             activeDuKienVal = 'CUSTOM';
             $('#textDkRange').text(rangeText);
+            $('#textDkCustom').text(rangeText);
         }
         currentPage = 1;
         loadTable();
@@ -911,25 +928,53 @@ $(document).ready(function () {
     }
 
     // 2. Mở Quick Date Popups cho Dự kiến & Thời gian tạo (Nổi fixed không bị che bởi scroll)
-    $('#btnOpenDkQuick, #labelDkAll').on('click', function (e) {
+    $('#btnOpenDkQuick').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#dkAll').prop('checked', true);
+        toggleFloatingPopup(this, '#popupDkQuick');
+    });
+
+    $('#labelDkAll').on('click', function (e) {
+        if ($(e.target).closest('#btnOpenDkQuick').length) return;
         e.stopPropagation();
         toggleFloatingPopup(this, '#popupDkQuick');
     });
 
-    $('#btnOpenDkCalendar, #dkCustom').on('click', function (e) {
+    $('#btnOpenDkCalendar').on('click', function (e) {
+        e.preventDefault();
         e.stopPropagation();
         $('#dkCustom').prop('checked', true);
         toggleFloatingPopup(this, '#popupDkCalendar');
     });
 
-    $('#btnOpenTgtQuick, #labelTgtAll').on('click', function (e) {
+    $('#dkCustom').on('click', function (e) {
+        e.stopPropagation();
+        toggleFloatingPopup(this, '#popupDkCalendar');
+    });
+
+    $('#btnOpenTgtQuick').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#tgtAll').prop('checked', true);
+        toggleFloatingPopup(this, '#popupTgtQuick');
+    });
+
+    $('#labelTgtAll').on('click', function (e) {
+        if ($(e.target).closest('#btnOpenTgtQuick').length) return;
         e.stopPropagation();
         toggleFloatingPopup(this, '#popupTgtQuick');
     });
 
-    $('#btnOpenTgtCalendar, #tgtCustom').on('click', function (e) {
+    $('#btnOpenTgtCalendar').on('click', function (e) {
+        e.preventDefault();
         e.stopPropagation();
         $('#tgtCustom').prop('checked', true);
+        toggleFloatingPopup(this, '#popupTgtCalendar');
+    });
+
+    $('#tgtCustom').on('click', function (e) {
+        e.stopPropagation();
         toggleFloatingPopup(this, '#popupTgtCalendar');
     });
 
@@ -943,6 +988,7 @@ $(document).ready(function () {
         if ($(this).is(':checked')) {
             activeDuKienVal = 'ALL';
             $('#textDkRange').text('Toàn thời gian');
+            $('#textDkCustom').text('Tùy chỉnh');
             $('#popupDkQuick .quick-date-btn, #popupDkQuick .quick-date-pill-all').removeClass('active');
             currentPage = 1;
             loadTable();
@@ -955,6 +1001,7 @@ $(document).ready(function () {
             activeTgTaoFrom = '';
             activeTgTaoTo = '';
             $('#textTgtRange').text('Toàn thời gian');
+            $('#textTgtCustom').text('Tùy chỉnh');
             $('#popupTgtQuick .quick-date-btn, #popupTgtQuick .quick-date-pill-all').removeClass('active');
             currentPage = 1;
             loadTable();
@@ -962,7 +1009,10 @@ $(document).ready(function () {
     });
 
     // Chọn option trong Quick Date Popup
-    $('.quick-date-btn, .quick-date-pill-all').on('click', function () {
+    $(document).on('click', '.quick-date-btn, .quick-date-pill-all', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         const target = $(this).data('target');
         const val = $(this).data('val');
         const text = $(this).text();
@@ -988,7 +1038,10 @@ $(document).ready(function () {
     });
 
     // Đóng popup lịch khi bấm Bỏ qua
-    $('.btn-close-popup').on('click', function () {
+    $(document).on('click', '.btn-close-popup', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         $('.dual-calendar-popup').hide();
     });
 
@@ -1182,11 +1235,25 @@ $(document).ready(function () {
 
     // Đóng tất cả popup và dropdown khi click ra ngoài
     $(document).on('click', function (e) {
-        if (!$(e.target).closest('.f-block, .dual-calendar-popup, .quick-date-popup').length) {
+        // 1. Bỏ qua nếu phần tử click đã bị gỡ khỏi DOM (do re-render động khi click ngày/lọc)
+        if (!document.contains(e.target)) return;
+
+        // 2. Bỏ qua nếu click bên trong popup lịch hoặc quick-date
+        if ($(e.target).closest('.dual-calendar-popup, .quick-date-popup').length) return;
+
+        // 3. Nếu click ra ngoài f-block của popup đang mở, đóng các popup nổi
+        const $targetBlock = $(e.target).closest('.f-block');
+        if (!$targetBlock.length) {
             $('.quick-date-popup').hide();
             $('.dual-calendar-popup').hide();
             $('.kiot-ms-dropdown').removeClass('show');
             $('.kiot-multiselect-box').removeClass('open');
+        } else {
+            // Click vào f-block khác -> đóng popup/dropdown của các f-block khác
+            $('.dual-calendar-popup').not($targetBlock.find('.dual-calendar-popup')).hide();
+            $('.quick-date-popup').not($targetBlock.find('.quick-date-popup')).hide();
+            $('.kiot-ms-dropdown').not($targetBlock.find('.kiot-ms-dropdown')).removeClass('show');
+            $('.kiot-multiselect-box').not($targetBlock.find('.kiot-multiselect-box')).removeClass('open');
         }
     });
 
