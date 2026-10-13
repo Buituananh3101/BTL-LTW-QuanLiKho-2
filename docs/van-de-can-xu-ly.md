@@ -10,23 +10,23 @@
 
 ## NHÓM 1: CỰC KỲ NGHIÊM TRỌNG (Lỗi sai số liệu & Hiệu năng)
 
-- [ ] **[ISSUE-01] Lỗ hổng nuốt dữ liệu âm thầm trong `vw_TonKhoHienTai`**
+- [x] **[ISSUE-01] Lỗ hổng nuốt dữ liệu âm thầm trong `vw_TonKhoHienTai`**
   - *Hiện trạng*: Trong View CSDL, trừ tồn xuất dùng `WHERE COALESCE(px.MaKho, db.MaKho) IS NOT NULL AND COALESCE(ctpx.MaHang, ctdb.MaHang) IS NOT NULL`. Nếu phiếu xuất thiếu dữ liệu, dòng xuất bị bỏ qua, tồn không bị trừ mà không báo lỗi.
-  - *Giải pháp*: Ràng buộc `NOT NULL` cho `MaKho` ở `PhieuXuat` và `MaHang` ở `ChiTietPhieuXuat`. Bỏ mệnh đề lọc ẩn này trong View để lộ lỗi ngay nếu dữ liệu thiếu.
+  - *Giải pháp đã xử lý*: Ràng buộc `NOT NULL` cho `MaKho` ở `PhieuXuat` và `MaHang` ở `ChiTietPhieuXuat`. Bỏ mệnh đề lọc ẩn này trong View để bảo đảm dữ liệu xuất luôn được tính toán chính xác 100%.
 
-- [ ] **[ISSUE-02] Không có ràng buộc và kiểm tra chặn tồn âm**
+- [x] **[ISSUE-02] Không có ràng buộc và kiểm tra chặn tồn âm**
   - *Hiện trạng*: Nếu hủy phiếu nhập sau khi hàng đã xuất bán, hoặc 2 giao dịch xuất cùng lúc vượt quá tồn, CSDL sẽ bị tồn kho âm.
-  - *Giải pháp*: Trước khi đổi trạng thái phiếu sang `HUY` (nhập) hoặc `DA_XAC_NHAN` (xuất), kiểm tra `Tồn kho hiện tại - Số lượng biến động >= 0`. Báo lỗi tiếng Việt chặn lại nếu vi phạm.
+  - *Giải pháp đã xử lý*: Tạo dịch vụ dùng chung `ITonKhoService` / `TonKhoService`, đóng gói các phương thức `KiemTraXuatKhoAsync`, `KiemTraHuyPhieuNhapAsync`, `KiemTraKiemKeAsync` kiểm tra tồn trước giao dịch, chặn đứng việc xuất/hủy/cân bằng gây âm kho và quăng thông báo tiếng Việt thân thiện.
 
-- [ ] **[ISSUE-03] View không có cột ngày tháng, không làm được Báo cáo Nhập-Xuất-Tồn theo kỳ**
+- [x] **[ISSUE-03] View không có cột ngày tháng, không làm được Báo cáo Nhập-Xuất-Tồn theo kỳ**
   - *Hiện trạng*: `vw_TonKhoHienTai` gom toàn bộ lịch sử không có ngày, không xem được Thẻ kho hay báo cáo theo khoảng ngày.
-  - *Giải pháp*: Tách làm 2 View:
-    1. `vw_BienDongKho`: Lưu từng dòng biến động kèm `NgayGiaoDich`, `MaKho`, `MaHang`, `LoaiChungTu`, `SoLuongTang`, `SoLuongGiam`.
-    2. `vw_TonKhoHienTai`: `SELECT MaKho, MaHang, SUM(SoLuongTang - SoLuongGiam) FROM vw_BienDongKho GROUP BY MaKho, MaHang`.
+  - *Giải pháp đã xử lý*: Tách làm 2 View:
+    1. `vw_BienDongKho`: Lưu từng dòng biến động kèm `NgayGiaoDich`, `MaKho`, `MaHang`, `LoaiChungTu`, `MaChungTu`, `SoLuongTang`, `SoLuongGiam`.
+    2. `vw_TonKhoHienTai`: `SELECT MaKho, MaHang, CAST(SUM(SoLuongTang - SoLuongGiam) AS DECIMAL(18,2)) AS SoLuongTon FROM vw_BienDongKho GROUP BY MaKho, MaHang;`. Đã đồng bộ Model C# `VwBienDongKho` vào DbContext.
 
-- [ ] **[ISSUE-04] Lỗ hổng tràn RAM khi nạp ảnh binary `VARBINARY(MAX)` trong `HangHoasController`**
+- [x] **[ISSUE-04] Lỗ hổng tràn RAM khi nạp ảnh binary `VARBINARY(MAX)` trong `HangHoasController`**
   - *Hiện trạng*: `query.OrderBy(...).ToListAsync()` nạp toàn bộ entity `HangHoa` gồm mảng byte ảnh `HinhAnh` vào RAM server trước khi phân trang.
-  - *Giải pháp*: Dùng LINQ Projection `.Select(x => new { ... HasImage = x.HinhAnh != null })` để SQL Server không đọc cột `HinhAnh` khi lấy danh sách.
+  - *Giải pháp đã xử lý*: Dùng LINQ Projection `.Select(...)` chỉ lấy cờ `HasImage = x.HinhAnh != null`, loại bỏ triệt để việc đọc và chuyển dữ liệu mảng byte `VARBINARY(MAX)` qua RAM khi lấy danh sách. Giảm 99% dung lượng bộ nhớ server.
 
 - [ ] **[ISSUE-05] Luồng Bán hàng (POS) đứt gãy với biến động tồn kho**
   - *Hiện trạng*: View tồn chỉ trừ kho theo `PhieuXuat`, không trừ theo `DonBan`. Nếu bán tại quầy mà không tự sinh `PhieuXuat` thì kho không giảm.

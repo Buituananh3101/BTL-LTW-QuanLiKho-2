@@ -11,7 +11,7 @@ public partial class ChiTietPhieuXuat
 
     public int? MaCtdonBan { get; set; }
 
-    public int? MaHang { get; set; }
+    public int MaHang { get; set; }
 
     public decimal SoLuongXuat { get; set; }
 

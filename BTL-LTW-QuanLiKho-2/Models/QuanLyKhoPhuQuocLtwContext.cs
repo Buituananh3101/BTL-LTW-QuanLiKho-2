@@ -62,6 +62,7 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
     public virtual DbSet<VaiTro> VaiTros { get; set; }
 
     public virtual DbSet<VwTonKhoHienTai> VwTonKhoHienTais { get; set; }
+    public virtual DbSet<VwBienDongKho> VwBienDongKhos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -714,6 +715,20 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
                 .ToView("vw_TonKhoHienTai");
 
             entity.Property(e => e.SoLuongTon).HasColumnType("decimal(18, 2)");
+        });
+
+        modelBuilder.Entity<VwBienDongKho>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("vw_BienDongKho");
+
+            entity.Property(e => e.LoaiChungTu)
+                .HasMaxLength(30)
+                .IsUnicode(false);
+            entity.Property(e => e.SoLuongTang).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.SoLuongGiam).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.NgayGiaoDich).HasColumnType("datetime");
         });
 
         OnModelCreatingPartial(modelBuilder);

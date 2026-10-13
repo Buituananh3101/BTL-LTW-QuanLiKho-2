@@ -163,60 +163,87 @@ END
 GO
 
 -- -----------------------------------------------------------------------------------------
--- 4. CẬP NHẬT VIEW vw_TonKhoHienTai: Tương thích phiếu xuất mở rộng
--- Lý do: Đảm bảo cả xuất bán theo đơn lẫn xuất nội bộ/hủy đều trừ tồn kho chính xác
+-- 4. VIEW BIẾN ĐỘNG KHO (vw_BienDongKho) & VIEW TỒN HIỆN TẠI (vw_TonKhoHienTai)
+-- Lý do ([ISSUE-01], [ISSUE-03]):
+-- 1. vw_BienDongKho: Lưu từng giao dịch kèm ngày tháng, mã chứng từ -> phục vụ Thẻ kho & Báo cáo Nhập-Xuất-Tồn theo kỳ.
+-- 2. vw_TonKhoHienTai: Tổng hợp từ vw_BienDongKho, loại bỏ hoàn toàn mệnh đề WHERE COALESCE(...) IS NOT NULL (chống nuốt lỗi âm thầm).
 -- -----------------------------------------------------------------------------------------
+CREATE OR ALTER VIEW vw_BienDongKho
+AS
+-- 1. Nhập kho đã xác nhận: Tăng tồn tại MaKho
+SELECT CAST(ISNULL(pn.NgayXacNhan, pn.NgayLap) AS DATETIME) AS NgayGiaoDich,
+       pn.MaKho,
+       ct.MaHang,
+       CAST('PHIEU_NHAP' AS VARCHAR(30)) AS LoaiChungTu,
+       pn.MaPhieuNhap AS MaChungTu,
+       ct.SoLuong AS SoLuongTang,
+       CAST(0 AS DECIMAL(18,2)) AS SoLuongGiam
+FROM PhieuNhap pn
+JOIN ChiTietPhieuNhap ct ON ct.MaPhieuNhap = pn.MaPhieuNhap
+WHERE pn.TrangThai = 'DA_XAC_NHAN'
+
+UNION ALL
+-- 2. Xuất kho đã xác nhận (Bao gồm xuất bán, xuất nội bộ, xuất hủy): Giảm tồn
+SELECT CAST(ISNULL(px.NgayXacNhan, px.NgayLap) AS DATETIME) AS NgayGiaoDich,
+       px.MaKho,
+       ctpx.MaHang,
+       CAST(px.LoaiPhieuXuat AS VARCHAR(30)) AS LoaiChungTu,
+       px.MaPhieuXuat AS MaChungTu,
+       CAST(0 AS DECIMAL(18,2)) AS SoLuongTang,
+       ctpx.SoLuongXuat AS SoLuongGiam
+FROM PhieuXuat px
+JOIN ChiTietPhieuXuat ctpx ON ctpx.MaPhieuXuat = px.MaPhieuXuat
+WHERE px.TrangThai = 'DA_XAC_NHAN'
+
+UNION ALL
+-- 3. Chuyển kho đã xuất / đã nhận: Trừ tồn kho nguồn
+SELECT CAST(ISNULL(pc.ThoiDiemXuat, pc.NgayLap) AS DATETIME) AS NgayGiaoDich,
+       pc.MaKhoNguon AS MaKho,
+       ct.MaHang,
+       CAST('CHUYEN_XUAT' AS VARCHAR(30)) AS LoaiChungTu,
+       pc.MaPhieuChuyen AS MaChungTu,
+       CAST(0 AS DECIMAL(18,2)) AS SoLuongTang,
+       ct.SoLuong AS SoLuongGiam
+FROM PhieuChuyenKho pc
+JOIN ChiTietPhieuChuyenKho ct ON ct.MaPhieuChuyen = pc.MaPhieuChuyen
+WHERE pc.TrangThai IN ('DA_XUAT', 'DA_NHAN')
+
+UNION ALL
+-- 4. Chuyển kho đã nhận: Cộng tồn kho đích
+SELECT CAST(ISNULL(pc.ThoiDiemNhan, ISNULL(pc.ThoiDiemXuat, pc.NgayLap)) AS DATETIME) AS NgayGiaoDich,
+       pc.MaKhoDich AS MaKho,
+       ct.MaHang,
+       CAST('CHUYEN_NHAP' AS VARCHAR(30)) AS LoaiChungTu,
+       pc.MaPhieuChuyen AS MaChungTu,
+       ct.SoLuong AS SoLuongTang,
+       CAST(0 AS DECIMAL(18,2)) AS SoLuongGiam
+FROM PhieuChuyenKho pc
+JOIN ChiTietPhieuChuyenKho ct ON ct.MaPhieuChuyen = pc.MaPhieuChuyen
+WHERE pc.TrangThai = 'DA_NHAN'
+
+UNION ALL
+-- 5. Cân bằng kiểm kê: Tăng hoặc giảm theo số lượng điều chỉnh
+SELECT CAST(ISNULL(pdc.NgayDuyet, pdc.NgayLap) AS DATETIME) AS NgayGiaoDich,
+       pkk.MaKho,
+       ctpkk.MaHang,
+       CAST('KIEM_KE' AS VARCHAR(30)) AS LoaiChungTu,
+       pkk.MaPhieuKiemKe AS MaChungTu,
+       CASE WHEN ctpdc.SoLuongDieuChinh > 0 THEN ctpdc.SoLuongDieuChinh ELSE CAST(0 AS DECIMAL(18,2)) END AS SoLuongTang,
+       CASE WHEN ctpdc.SoLuongDieuChinh < 0 THEN -ctpdc.SoLuongDieuChinh ELSE CAST(0 AS DECIMAL(18,2)) END AS SoLuongGiam
+FROM PhieuDieuChinh pdc
+JOIN PhieuKiemKe pkk ON pkk.MaPhieuKiemKe = pdc.MaPhieuKiemKe
+JOIN ChiTietPhieuDieuChinh ctpdc ON ctpdc.MaPhieuDieuChinh = pdc.MaPhieuDieuChinh
+JOIN ChiTietPhieuKiemKe ctpkk ON ctpkk.MaCTKiemKe = ctpdc.MaCTKiemKe
+WHERE pdc.TrangThai = 'DA_DUYET';
+GO
+
+-- 4.2. View Tồn kho hiện tại tổng hợp
 CREATE OR ALTER VIEW vw_TonKhoHienTai
 AS
-WITH BienDong AS (
-    -- 1. Nhập kho đã xác nhận: Tăng tồn tại MaKho
-    SELECT pn.MaKho, ct.MaHang, ct.SoLuong AS SoLuongTang, CAST(0 AS DECIMAL(18,2)) AS SoLuongGiam
-    FROM PhieuNhap pn
-    JOIN ChiTietPhieuNhap ct ON ct.MaPhieuNhap = pn.MaPhieuNhap
-    WHERE pn.TrangThai = 'DA_XAC_NHAN'
-
-    UNION ALL
-    -- 2. Xuất kho đã xác nhận (bao gồm cả Xuất bán qua DonBan và Xuất nội bộ/hủy có MaKho trực tiếp): Giảm tồn
-    SELECT COALESCE(px.MaKho, db.MaKho) AS MaKho,
-           COALESCE(ctpx.MaHang, ctdb.MaHang) AS MaHang,
-           CAST(0 AS DECIMAL(18,2)) AS SoLuongTang,
-           ctpx.SoLuongXuat AS SoLuongGiam
-    FROM PhieuXuat px
-    LEFT JOIN DonBan db ON db.MaDonBan = px.MaDonBan
-    JOIN ChiTietPhieuXuat ctpx ON ctpx.MaPhieuXuat = px.MaPhieuXuat
-    LEFT JOIN ChiTietDonBan ctdb ON ctdb.MaCTDonBan = ctpx.MaCTDonBan
-    WHERE px.TrangThai = 'DA_XAC_NHAN'
-      AND COALESCE(px.MaKho, db.MaKho) IS NOT NULL
-      AND COALESCE(ctpx.MaHang, ctdb.MaHang) IS NOT NULL
-
-    UNION ALL
-    -- 3. Chuyển kho đã xuất / đã nhận: Trừ tồn kho nguồn
-    SELECT pc.MaKhoNguon, ct.MaHang, CAST(0 AS DECIMAL(18,2)), ct.SoLuong
-    FROM PhieuChuyenKho pc
-    JOIN ChiTietPhieuChuyenKho ct ON ct.MaPhieuChuyen = pc.MaPhieuChuyen
-    WHERE pc.TrangThai IN ('DA_XUAT', 'DA_NHAN')
-
-    UNION ALL
-    -- 4. Chuyển kho đã nhận: Cộng tồn kho đích
-    SELECT pc.MaKhoDich, ct.MaHang, ct.SoLuong, CAST(0 AS DECIMAL(18,2))
-    FROM PhieuChuyenKho pc
-    JOIN ChiTietPhieuChuyenKho ct ON ct.MaPhieuChuyen = pc.MaPhieuChuyen
-    WHERE pc.TrangThai = 'DA_NHAN'
-
-    UNION ALL
-    -- 5. Cân bằng kiểm kê: Tăng hoặc giảm theo số lượng điều chỉnh
-    SELECT pkk.MaKho, ctpkk.MaHang,
-           CASE WHEN ctpdc.SoLuongDieuChinh > 0 THEN ctpdc.SoLuongDieuChinh ELSE CAST(0 AS DECIMAL(18,2)) END,
-           CASE WHEN ctpdc.SoLuongDieuChinh < 0 THEN -ctpdc.SoLuongDieuChinh ELSE CAST(0 AS DECIMAL(18,2)) END
-    FROM PhieuDieuChinh pdc
-    JOIN PhieuKiemKe pkk ON pkk.MaPhieuKiemKe = pdc.MaPhieuKiemKe
-    JOIN ChiTietPhieuDieuChinh ctpdc ON ctpdc.MaPhieuDieuChinh = pdc.MaPhieuDieuChinh
-    JOIN ChiTietPhieuKiemKe ctpkk ON ctpkk.MaCTKiemKe = ctpdc.MaCTKiemKe
-    WHERE pdc.TrangThai = 'DA_DUYET'
-)
-SELECT MaKho, MaHang,
+SELECT MaKho,
+       MaHang,
        CAST(SUM(SoLuongTang - SoLuongGiam) AS DECIMAL(18,2)) AS SoLuongTon
-FROM BienDong
+FROM vw_BienDongKho
 GROUP BY MaKho, MaHang;
 GO
 

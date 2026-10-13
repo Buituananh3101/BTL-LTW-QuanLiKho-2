@@ -11,7 +11,7 @@ public partial class PhieuXuat
 
     public string LoaiPhieuXuat { get; set; } = "XUAT_BAN";
 
-    public int? MaKho { get; set; }
+    public int MaKho { get; set; }
 
     public int MaNvlap { get; set; }
 

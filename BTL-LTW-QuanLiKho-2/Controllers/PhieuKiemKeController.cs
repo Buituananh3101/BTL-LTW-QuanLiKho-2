@@ -2,16 +2,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BTL_LTW_QuanLiKho_2.Models;
 using BTL_LTW_QuanLiKho_2.ViewModels;
+using BTL_LTW_QuanLiKho_2.Services;
 
 namespace BTL_LTW_QuanLiKho_2.Controllers;
 
 public class PhieuKiemKeController : Controller
 {
     private readonly QuanLyKhoPhuQuocLtwContext _context;
+    private readonly ITonKhoService _tonKhoService;
 
-    public PhieuKiemKeController(QuanLyKhoPhuQuocLtwContext context)
+    public PhieuKiemKeController(QuanLyKhoPhuQuocLtwContext context, ITonKhoService tonKhoService)
     {
         _context = context;
+        _tonKhoService = tonKhoService;
     }
 
     private int GetCurrentWarehouseId()
@@ -439,6 +442,13 @@ public class PhieuKiemKeController : Controller
         if (req.MaKho <= 0)
         {
             req.MaKho = GetCurrentWarehouseId();
+        }
+
+        // Chặn tồn âm nghiệp vụ kiểm kho ([ISSUE-02])
+        var kiemTra = await _tonKhoService.KiemTraKiemKeAsync(req.MaKho, req.Lines.Select(l => (l.MaHang, l.SoLuongThucTe)));
+        if (!kiemTra.HopLe)
+        {
+            return BadRequest(new { success = false, message = kiemTra.ThongBaoLoi });
         }
 
         using var trans = await _context.Database.BeginTransactionAsync();

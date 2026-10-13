@@ -232,13 +232,33 @@ public class HangHoasController : Controller
             .Select(g => new { MaHang = g.Key, DonGia = g.OrderByDescending(x => x.MaCtphieuNhap).Select(x => x.DonGiaNhap).FirstOrDefault() })
             .ToDictionaryAsync(x => x.MaHang, x => x.DonGia);
 
-        var rawList = await query.OrderBy(x => x.MaHangNoiBo).ToListAsync();
+        // [ISSUE-04] Dùng Projection để không tải mảng byte VARBINARY(MAX) HinhAnh vào RAM server
+        var rawList = await query
+            .OrderBy(x => x.MaHangNoiBo)
+            .Select(x => new
+            {
+                x.MaHang,
+                x.MaHangNoiBo,
+                x.TenHang,
+                x.MaNhom,
+                TenNhom = x.MaNhomNavigation != null ? x.MaNhomNavigation.TenNhom : "---",
+                x.MaDvt,
+                TenDvt = x.MaDvtNavigation != null ? x.MaDvtNavigation.TenDvt : "---",
+                x.GiaBanThamKhao,
+                x.GiaVon,
+                TonToiThieu = x.NguongTonKhos.Where(n => n.MaKho == whId).Select(n => (decimal?)n.TonToiThieu).FirstOrDefault(),
+                x.QuyCach,
+                x.TrangThai,
+                x.DaDanhDau,
+                HasImage = x.HinhAnh != null,
+                x.NgayTao
+            })
+            .ToListAsync();
 
         var allItems = rawList.Select(x =>
         {
             decimal stock = tonKhoDict.TryGetValue(x.MaHang, out var s) ? s : 0;
             decimal cost = x.GiaVon > 0 ? x.GiaVon : (latestCosts.TryGetValue(x.MaHang, out var c) && c > 0 ? c : x.GiaBanThamKhao);
-            var nguong = x.NguongTonKhos.FirstOrDefault();
 
             return new HangHoaItemVM
             {
@@ -246,22 +266,22 @@ public class HangHoasController : Controller
                 MaHangNoiBo = x.MaHangNoiBo,
                 TenHang = x.TenHang,
                 MaNhom = x.MaNhom,
-                TenNhom = x.MaNhomNavigation?.TenNhom ?? "---",
+                TenNhom = x.TenNhom,
                 MaDvt = x.MaDvt,
-                TenDvt = x.MaDvtNavigation?.TenDvt ?? "---",
+                TenDvt = x.TenDvt,
                 GiaBan = x.GiaBanThamKhao,
                 GiaVon = cost,
                 TonKho = stock,
-                TonToiThieu = nguong?.TonToiThieu,
+                TonToiThieu = x.TonToiThieu,
                 QuyCach = x.QuyCach,
                 TrangThai = x.TrangThai,
                 IsFavorite = x.DaDanhDau,
                 DaDanhDau = x.DaDanhDau,
-                HasImage = x.HinhAnh != null && x.HinhAnh.Length > 0,
+                HasImage = x.HasImage,
                 NgayTao = x.NgayTao,
                 KhachDat = 0,
                 DuKienHetHang = stock <= 0 ? "Đã hết hàng" :
-                                (nguong != null && stock <= nguong.TonToiThieu) ? "Trong 3 ngày tới" :
+                                (x.TonToiThieu.HasValue && stock <= x.TonToiThieu.Value) ? "Trong 3 ngày tới" :
                                 stock <= 10 ? "Trong 7 ngày tới" :
                                 stock <= 30 ? "Trong tháng này" : "> 30 ngày"
             };
