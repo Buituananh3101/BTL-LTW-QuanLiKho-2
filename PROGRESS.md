@@ -38,6 +38,9 @@ Cập nhật lần cuối: 2026-10-13 – Hoàn thiện giao diện Đăng nhậ
 ---
 
 ## Nhật ký phiên
+- **2026-10-13 (Phiên 9 - Chiều)**:
+  - Cập nhật chuẩn hóa toàn diện đặc tả [`docs/specs/danh-sach-hang-hoa.md`](./docs/specs/danh-sach-hang-hoa.md): bổ sung Bản đồ File liên quan (File Map) chỉ rõ từng file phụ trách và Bảng luồng tương tác chi tiết 4 bước (Sequence Matrix) giữa Frontend - Backend - DB.
+  - Cài đặt quy tắc bắt buộc "Đồng bộ đặc tả chức năng" vào Mục 3 (Quy trình cuối phiên) và Luật 12 trong [`AGENTS.md`](./AGENTS.md), đảm bảo mọi AI ở các phiên sau khi sửa code sẽ tự động cập nhật đặc tả tương ứng. Tinh gọn `AGENTS.md` về mức 7.524 ký tự (< 8.000 ký tự).
 - **2026-10-13 (Phiên 8 - Trưa)**:
   - Triển khai giao diện Đăng nhập chuẩn theo prototype `prototype-dangnhap.html`:
     - Tạo `wwwroot/images/login-bg.jpg` (ảnh nền kho chuyên nghiệp 1920px, kích thước 391 KB < 500 KB).

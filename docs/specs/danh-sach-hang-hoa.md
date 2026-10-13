@@ -4,87 +4,70 @@
 
 ---
 
-## 1. Các bảng CSDL & ViewModel liên quan
+## 1. Kiến trúc File & Bảng CSDL liên quan
 
-### 1.1. Bảng CSDL tham gia:
+### 1.1. Bản đồ File liên quan (File Map)
+Khi cần sửa đổi chức năng này, mở chính xác các file sau:
+- **Controller chính**: `Controllers/HangHoaController.cs` (Xử lý `Index`, lọc AJAX `Filter`, thêm `Create`, sửa `Edit`, lấy chi tiết `GetItem`, đổi sao `ToggleStar`, xóa `Delete`, ảnh `GetImage`).
+- **ViewModel**: `ViewModels/HangHoaForm.cs` (Chứa `HangHoaIndexVM`, `HangHoaItemVM`, `HangHoaForm`).
+- **Giao diện khung & JS**: `Views/HangHoa/Index.cshtml` (Search bar, 7 khối lọc sidebar, modal thêm/sửa, toàn bộ logic JS gom tham số và gọi AJAX).
+- **Bảng dữ liệu AJAX**: `Views/HangHoa/_HangHoaTable.cshtml` (Partial View bảng sản phẩm, badge trạng thái, icon sao, phân trang AJAX).
+- **Service tồn kho**: `Services/ITonKhoService.cs`, `Services/TonKhoService.cs` (Kiểm tra và tính toán tồn kho).
+- **DbContext & Entity**: `Data/QuanLyKhoPhuQuocLtwContext.cs`, các Model trong `Models/` (`HangHoa.cs`, `NhomHang.cs`, `DonViTinh.cs`, `NguongTonKho.cs`, `VwTonKhoHienTai.cs`).
+
+### 1.2. Bảng CSDL tham gia:
 - `HangHoa`: Bảng thực thể chính (`MaHang`, `MaHangNoiBo`, `TenHang`, `MaNhom`, `MaDvt`, `QuyCach`, `GiaBanThamKhao`, `GiaVon`, `HinhAnh VARBINARY(MAX)`, `TrangThai: DANG_BAN / NGUNG_BAN`, `NgayTao`, `DaDanhDau`).
 - `NhomHang`: Phân loại hàng hóa (`MaNhom`, `TenNhom`).
-- `DonViTinh`: Đơn vị tính cơ bản (`MaDvt`, `TenDvt`). Hệ thống áp dụng quy tắc **1 đơn vị tính cơ bản duy nhất**.
-- `NguongTonKho`: Định mức tồn Min/Max cho từng mặt hàng tại từng kho (`MaNguong`, `MaHang`, `MaKho`, `TonToiThieu`, `TonToiDa`).
+- `DonViTinh`: Đơn vị tính cơ bản (`MaDvt`, `TenDvt`). Áp dụng quy tắc **1 đơn vị tính cơ bản duy nhất**.
+- `NguongTonKho`: Định mức tồn Min/Max theo từng kho (`MaNguong`, `MaHang`, `MaKho`, `TonToiThieu`, `TonToiDa`).
 - `vw_TonKhoHienTai`: View tính tồn kho động hiện thời theo `(MaKho, MaHang)`.
 
-### 1.2. ViewModels sử dụng (`ViewModels/HangHoaForm.cs`):
-- `HangHoaIndexVM`: Dữ liệu cho trang danh sách toàn trang (chứa danh sách `Items`, tổng tồn kho, tổng giá trị, các danh mục nạp vào dropdown bộ lọc).
-- `HangHoaItemVM`: Một dòng dữ liệu hiển thị trên bảng (Mã, Tên, ĐVT, Nhóm, Giá bán, Giá vốn, Tồn kho hiện tại, Tồn tối thiểu, Dự kiến hết hàng, Cờ `HasImage`, Cờ `DaDanhDau`).
-- `HangHoaForm`: Model dùng cho form/modal Thêm mới và Chỉnh sửa (hỗ trợ Data Annotations kiểm tra hợp lệ bằng tiếng Việt).
+---
+
+## 2. Bảng Luồng Tương tác Chi tiết (4 Bước)
+
+| Tên Luồng | 1. Tương tác Người dùng | 2. Frontend (View / JS) | 3. Backend (Controller / Action) | 4. CSDL & Dữ liệu phản hồi |
+|---|---|---|---|---|
+| **Load trang ban đầu** | Bấm menu Hàng hóa (`/HangHoa`) | Trình duyệt gửi GET `/HangHoa` | `HangHoaController.Index()` lấy danh mục, kho làm việc | Nạp dropdown & bảng trang 1 vào `HangHoaIndexVM` ➜ Render `Views/HangHoa/Index.cshtml` |
+| **Tìm kiếm & Lọc** | Gõ ô tìm kiếm / Tích chọn lọc ở cột trái / Lọc sao | JS trong `Index.cshtml` bắt sự kiện (debounce 300ms), gom params ➜ AJAX `GET /HangHoa/Filter?...` | `HangHoaController.Filter(...)` nhận param, query LINQ kết hợp view `vw_TonKhoHienTai` | Render Partial `_HangHoaTable.cshtml` ➜ JS thay thế nội dung vùng `#contentTable` (không reload toàn trang) |
+| **Phân trang AJAX** | Click số trang (2, 3...) hoặc nút Trước/Sau | JS bắt click `.page-link`, giữ nguyên bộ lọc, gán `pageIndex` ➜ gửi AJAX `GET /HangHoa/Filter` | `HangHoaController.Filter(...)` thực hiện `.Skip().Take()` theo trang | Trả về Partial `_HangHoaTable.cshtml` ➜ JS cập nhật bảng và thanh phân trang |
+| **Thêm mới hàng** | Bấm "+ Thêm mới", điền form modal, bấm "Lưu" | JS gom form + ảnh Base64 ➜ AJAX `POST /HangHoa/Create` (`[FromBody] HangHoaForm`) | `HangHoaController.Create(...)` validate dữ liệu, tự sinh `MaHangNoiBo` (kèm retry 3 lần) | Lưu `HangHoa`, `NguongTonKho`. Nếu có tồn đầu kỳ thì tạo `PhieuNhap` ➜ Trả JSON `{ success: true }` ➜ JS đóng modal, gọi lại `Filter` |
+| **Mở form Sửa** | Click icon bút chì trên dòng sản phẩm | JS lấy ID ➜ AJAX `GET /HangHoa/GetItem?id=X` | `HangHoaController.GetItem(id)` đọc thông tin hàng & ngưỡng tồn | Trả JSON chi tiết hàng hóa ➜ JS điền dữ liệu vào các ô input và mở modal sửa |
+| **Lưu Sửa hàng** | Sửa thông tin trong modal, bấm "Cập nhật" | JS gom form ➜ AJAX `POST /HangHoa/Edit?id=X` | `HangHoaController.Edit(id, form)` kiểm tra và cập nhật | Cập nhật `HangHoa`, `NguongTonKho` ➜ Trả JSON `{ success: true }` ➜ JS đóng modal, reload bảng |
+| **Đánh dấu sao** | Click icon ngôi sao trên dòng sản phẩm | JS bắt click ➜ AJAX `POST /HangHoa/ToggleStar?id=X` | `HangHoaController.ToggleStar(id)` đảo cờ `DaDanhDau` | Lưu DB ➜ Trả JSON `{ success: true, isStarred }` ➜ JS toggle class vàng cho icon tức thì |
+| **Xóa hàng hóa** | Click nút Xóa ➜ Xác nhận modal | JS gọi AJAX `POST /HangHoa/Delete?id=X` | `HangHoaController.Delete(id)` kiểm tra ràng buộc giao dịch | Nếu có giao dịch: trả lỗi từ chối. Nếu chưa: xóa DB ➜ Trả JSON `{ success: true }` ➜ reload bảng |
+| **Hiển thị ảnh** | Bảng hiển thị thẻ `<img>` | Thẻ `<img>` gọi `src="/HangHoa/GetImage?id=X"` | `HangHoaController.GetImage(id)` đọc byte ảnh từ DB | Trả file ảnh (kèm cache trình duyệt) hoặc icon SVG mặc định. **Tuyệt đối không SELECT HinhAnh ở bảng** |
 
 ---
 
-## 2. Luồng màn hình & Giao diện (Chuẩn KiotViet)
+## 3. Quy chuẩn Giao diện & 7 Bộ lọc Sidebar
 
-### 2.1. Cột lọc bên trái (Sidebar Filter)
-Chứa 7 khối tiêu chí lọc kết hợp:
-1. **Nhóm hàng**: Danh sách nhóm hàng + nút "Tạo mới" nhóm nhanh qua modal.
+### 3.1. Cột lọc bên trái (Sidebar Filter):
+1. **Nhóm hàng**: Radio/Checkbox danh sách nhóm + nút tạo nhanh nhóm.
 2. **Tồn kho**: Tất cả / Còn hàng trong kho / Hết hàng trong kho / Dưới định mức tồn (⚠️).
-3. **Dự kiến hết hàng**: Khoảng thời gian dự báo (Hôm nay, 3 ngày tới, 7 ngày tới, Trong tháng này, > 30 ngày).
-4. **Nhà cung cấp**: Lọc các mặt hàng từng nhập từ nhà cung cấp tương ứng.
+3. **Dự kiến hết hàng**: Hôm nay, 3 ngày tới, 7 ngày tới, Trong tháng này, > 30 ngày.
+4. **Nhà cung cấp**: Lọc hàng từng nhập từ nhà cung cấp tương ứng.
 5. **Loại hàng**: Hàng hóa / Dịch vụ / Combo đóng gói.
-6. **Vị trí**: Lọc theo chuỗi vị trí trong kho (lưu trong `QuyCach`).
-7. **Thời gian tạo**: Hôm nay, Tuần này, Tháng này, hoặc khoảng ngày tùy chọn.
+6. **Vị trí**: Tìm theo chuỗi vị trí trong kho (`QuyCach`).
+7. **Thời gian tạo**: Hôm nay, Tuần này, Tháng này, hoặc tùy chọn ngày.
 
-### 2.2. Thanh công cụ trên (Action Bar)
-- Ô tìm kiếm từ khóa (tìm theo Tên hàng, Mã nội bộ hoặc Mã vạch/Quy cách).
-- Bộ lọc Đánh dấu sao (`DaDanhDau`): Lọc nhanh các mặt hàng được gắn sao ưu tiên.
-- Nút **"Thêm mới"**: Mở Modal thêm nhanh hàng hóa (không reload toàn trang).
-- Nút Import/Export Excel và tùy chọn hiển thị cột bảng.
-
-### 2.3. Bảng dữ liệu chính & Phân trang AJAX
-- **Hiển thị bảng**: Tách thành Partial View `_HangHoaTable.cshtml`.
-- **Cơ chế lọc & chuyển trang mượt mà**:
-  - Khi người dùng đổi bất kỳ tiêu chí lọc nào hoặc click số trang:
-  - JavaScript gom các tham số lọc, gửi request `GET /HangHoa/Filter?...`
-  - Controller xử lý lọc và chỉ trả về Partial View `_HangHoaTable.cshtml`.
-  - JavaScript thay thế nội dung vùng `#contentTable` mà **không reload toàn trang**.
+### 3.2. Thanh công cụ trên (Action Bar):
+- Ô tìm kiếm từ khóa (Tên, Mã nội bộ, Mã vạch).
+- Nút lọc nhanh hàng Đánh dấu sao (`DaDanhDau`).
+- Nút "+ Thêm mới" mở modal; nút Import/Export Excel.
 
 ---
 
-## 3. Cơ chế Thêm, Sửa & Tối ưu Dữ liệu
-
-### 3.1. Thêm mới & Cập nhật qua JSON API (Modal):
-- **Thêm mới (`POST /HangHoa/Create`)**: Nhận JSON qua `[FromBody] HangHoaForm`:
-  - Tự động sinh mã `MaHangNoiBo` nếu để trống (`HH` + 6 chữ số tự tăng).
-  - Có cơ chế **Retry tự động 3 lần** nếu gặp tranh chấp chỉ mục duy nhất `UQ_HangHoa_MaHangNoiBo`.
-  - Tự động lưu bản ghi `NguongTonKho` theo `CurrentWarehouseId` nếu có nhập tồn tối thiểu.
-  - Nếu có nhập "Tồn kho ban đầu > 0", tự động tạo 1 `PhieuNhap` đầu kỳ trạng thái `DA_XAC_NHAN` để tồn kho vào đúng sổ sách kế toán.
-  - Trả về JSON `{ success = true, id = item.MaHang, message = "..." }`.
-- **Chỉnh sửa (`GET /HangHoa/GetItem?id=X` và `POST /HangHoa/Edit?id=X`)**:
-  - `GetItem`: Trả về dữ liệu JSON để điền tự động vào modal sửa.
-  - `Edit`: Nhận JSON cập nhật thuộc tính và ngưỡng tồn kho.
-
-### 3.2. Cơ chế xử lý Hình ảnh (Chống tràn RAM):
-- Ảnh được tải lên từ client dưới dạng chuỗi Base64 và lưu vào cột `HinhAnh VARBINARY(MAX)` của bảng `HangHoa`.
-- **Nguyên tắc chống tràn RAM (Quan trọng)**: Khi truy vấn danh sách, **tuyệt đối không `SELECT HinhAnh`**. Dùng LINQ Projection lấy cờ boolean `HasImage = x.HinhAnh != null`.
-- Khi hiển thị ảnh trên bảng: Thẻ `<img>` gọi riêng `src="/HangHoa/GetImage?id=X"` có cache trình duyệt.
-
-### 3.3. Tính năng Đánh dấu sao (`DaDanhDau`):
-- Cho phép người dùng click icon ngôi sao trực tiếp trên từng dòng của bảng để bật/tắt ưu tiên (`POST /HangHoa/ToggleStar?id=X`).
-- Trả về JSON `{ success = true, isStarred = boolean }` cập nhật giao diện tức thì.
-
----
-
-## 4. Các quy tắc nghiệp vụ bất biến
+## 4. Các Quy tắc Nghiệp vụ Bất biến
 
 1. **QUY TẮC BẢO TOÀN DỮ LIỆU (CẤM XÓA KHI ĐÃ CÓ GIAO DỊCH)**:
-   - Trước khi xóa một mặt hàng (`POST /HangHoa/Delete`), hệ thống bắt buộc kiểm tra xem mặt hàng đó đã từng xuất hiện trong các bảng chi tiết giao dịch hay chưa:
+   - Trước khi xóa (`POST /HangHoa/Delete`), hệ thống kiểm tra sự tồn tại trong các bảng:
      - `ChiTietDonBan`
      - `ChiTietPhieuNhap`
      - `ChiTietPhieuChuyenKho`
      - `ChiTietPhieuKiemKe`
-   - **Nếu đã có ít nhất 1 giao dịch**: Bắt buộc chặn lại và trả về thông báo lỗi: *"Hàng hóa này đã phát sinh giao dịch/chứng từ trong hệ thống, không thể xóa. Bạn có thể chuyển sang trạng thái 'Ngừng bán'."*
-   - Chỉ cho phép xóa cứng khi hàng hóa hoàn toàn chưa có bất kỳ giao dịch nào.
-2. **Quy tắc Mã nội bộ**: Mã hàng nội bộ là duy nhất (`UNIQUE`), định dạng chuẩn `HH` + 6 số tự tăng, có cơ chế retry chống Race Condition.
-3. **Quy tắc Tồn kho theo kho làm việc**:
-   - Số lượng tồn hiển thị trên bảng luôn lấy theo kho đang làm việc (`CurrentWarehouseId`) từ View `vw_TonKhoHienTai`. Đổi kho ở Header thì số tồn tự động đổi theo.
-4. **Quy tắc Trạng thái kinh doanh**:
-   - `DANG_BAN`: Xuất hiện trong các dropdown tìm kiếm của phiếu nhập, xuất, kiểm, bán.
-   - `NGUNG_BAN`: Không xuất hiện khi lập chứng từ mới, nhưng vẫn giữ nguyên trong lịch sử các chứng từ cũ.
+   - **Nếu đã có ít nhất 1 chứng từ**: Chặn lại và trả lỗi: *"Hàng hóa này đã phát sinh giao dịch trong hệ thống, không thể xóa. Bạn có thể chuyển sang trạng thái 'Ngừng bán'."*
+   - Chỉ cho phép xóa khi hàng hoàn toàn chưa phát sinh bất kỳ giao dịch nào.
+2. **Quy tắc Mã nội bộ & Retry**: Mã định dạng `HH` + 6 số tự tăng (`HH000001`), bắt buộc Unique, có cơ chế retry tự động 3 lần chống Race Condition.
+3. **Quy tắc Tồn kho theo kho làm việc**: Tồn kho sổ sách hiển thị trên bảng lấy động từ View `vw_TonKhoHienTai` theo `CurrentWarehouseId`. Đổi kho ở Header thì tồn kho tự động đổi theo.
+4. **Quy tắc Tối ưu RAM ảnh**: Tuyệt đối không `SELECT HinhAnh` khi truy vấn danh sách (tránh nạp `VARBINARY(MAX)` vào RAM). Dùng LINQ Projection lấy `HasImage = x.HinhAnh != null`.
