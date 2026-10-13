@@ -6,7 +6,13 @@
 <div class="kiot-container position-relative" id="kiotContainer">
     <!-- CỘT BÊN TRÁI: TIÊU ĐỀ "HÀNG HÓA" + BỘ LỌC -->
     <aside class="kiot-sidebar-col" id="sidebarFilterCol">
-        <div class="kiot-sidebar-title">
+        <!-- Header cho sidebar khi mở ở chế độ mobile/zoom in -->
+        <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+            <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc hàng hóa</div>
+            <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
+        </div>
+
+        <div class="kiot-sidebar-title d-none d-lg-flex">
             Hàng hóa
         </div>
 
@@ -303,8 +309,11 @@
         </div>
     </aside>
 
-    <!-- Nút tròn thu gọn / mở rộng ở ranh giới giữa sidebar và bảng (KiotViet style) -->
-    <button type="button" class="kiot-sidebar-toggle-btn" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
+    <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
+    <div class="kiot-sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Nút tròn thu gọn / mở rộng ở ranh giới giữa sidebar và bảng (KiotViet style - chỉ dùng cho desktop) -->
+    <button type="button" class="kiot-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
         <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
     </button>
 
@@ -312,6 +321,14 @@
     <main class="kiot-main-col">
         <!-- Toolbar trên cùng: Thanh tìm kiếm thẳng hàng với list bảng bên dưới -->
         <div class="kiot-toolbar-row">
+            <!-- Tiêu đề + Nút phễu bộ lọc trên mobile / zoom in (chuẩn theo ảnh mẫu KiotViet) -->
+            <div class="kiot-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
+                <span class="kiot-mobile-title fw-bold fs-6 text-dark">Hàng hóa</span>
+                <button type="button" class="btn btn-sm btn-outline-primary kiot-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc hàng hóa">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+
             <div class="kiot-search-box">
                 <i class="bi bi-search"></i>
                 <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã, tên hàng" value="@Model.Q" autocomplete="off" />
@@ -321,8 +338,8 @@
             <div class="kiot-actions-group">
                 <!-- Dropdown + Tạo mới -->
                 <div class="dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="btnDropdownCreate" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-plus-lg me-1"></i>Tạo mới
+                    <button class="btn btn-primary dropdown-toggle kiot-btn-create" type="button" id="btnDropdownCreate" data-bs-toggle="dropdown" aria-expanded="false" title="Thêm mới hàng hóa">
+                        <i class="bi bi-plus-lg"></i><span class="d-none d-md-inline ms-1">Tạo mới</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="btnDropdownCreate">
                         <li>
@@ -333,16 +350,35 @@
                     </ul>
                 </div>
 
-                <!-- Nút Import & Xuất file -->
-                <button type="button" class="btn btn-tool" onclick="alert('Tính năng Import file Excel');">
+                <!-- Nút Import & Xuất file cho Desktop -->
+                <button type="button" class="btn btn-tool d-none d-md-inline-flex" onclick="alert('Tính năng Import file Excel');">
                     <i class="bi bi-box-arrow-in-down me-1"></i>Import file
                 </button>
-                <button type="button" class="btn btn-tool" onclick="alert('Tính năng xuất danh sách Excel');">
+                <button type="button" class="btn btn-tool d-none d-md-inline-flex" onclick="alert('Tính năng xuất danh sách Excel');">
                     <i class="bi bi-box-arrow-up me-1"></i>Xuất file
                 </button>
 
+                <!-- Dropdown gom Import/Xuất trên Mobile/Zoom in (Icon bảng tính y hệt ảnh) -->
+                <div class="dropdown d-inline-block d-md-none">
+                    <button class="btn btn-tool" type="button" id="btnDropdownExcelMobile" data-bs-toggle="dropdown" aria-expanded="false" title="Nhập / Xuất Excel">
+                        <i class="bi bi-table"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="btnDropdownExcelMobile">
+                        <li>
+                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="alert('Tính năng Import file Excel');">
+                                <i class="bi bi-box-arrow-in-down me-2 text-primary"></i>Import file
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="alert('Tính năng xuất danh sách Excel');">
+                                <i class="bi bi-box-arrow-up me-2 text-success"></i>Xuất file
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
                 <!-- 3 icon phụ của KiotViet -->
-                <button type="button" class="btn btn-tool" title="Tải lại bảng" id="btnReloadTable">
+                <button type="button" class="btn btn-tool d-none d-sm-inline-flex" title="Tải lại bảng" id="btnReloadTable">
                     <i class="bi bi-arrow-clockwise"></i>
                 </button>
                 <button type="button" class="btn btn-tool" title="Cài đặt">
@@ -657,6 +693,24 @@ $(document).ready(function () {
             e.preventDefault();
             toggleSidebar();
         }
+    });
+
+    // Mở / đóng bộ lọc dạng drawer trên Mobile / Zoom in
+    $('#btnMobileFilter').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#sidebarFilterCol').addClass('show-mobile');
+        $('#sidebarBackdrop').addClass('show');
+    });
+
+    function closeMobileSidebar() {
+        $('#sidebarFilterCol').removeClass('show-mobile');
+        $('#sidebarBackdrop').removeClass('show');
+    }
+
+    $('#btnCloseSidebarMobile, #sidebarBackdrop').on('click', function (e) {
+        e.preventDefault();
+        closeMobileSidebar();
     });
 
     // Filter states
@@ -1719,6 +1773,9 @@ $(document).ready(function () {
         $('#dotNcc').css('display', filterState.ncc.length > 0 ? 'inline-block' : 'none');
         $('#dotViTri').css('display', filterState.vitri.length > 0 ? 'inline-block' : 'none');
         $('#dotLoaiHang').css('display', filterState.loaihang.length > 0 ? 'inline-block' : 'none');
+
+        const hasAnyActiveFilter = filterState.nhom.length > 0 || tonKho !== 'ALL' || duKien !== 'ALL' || tgTao !== 'ALL' || filterState.ncc.length > 0 || filterState.vitri.length > 0 || filterState.loaihang.length > 0;
+        $('#btnMobileFilter').toggleClass('has-filter', hasAnyActiveFilter);
 
         $.ajax({
             url: '/HangHoa/Filter',

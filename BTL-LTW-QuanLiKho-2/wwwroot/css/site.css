@@ -452,6 +452,7 @@ body {
 }
 .tbl {
   width: 100%;
+  min-width: 980px;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
@@ -1545,4 +1546,172 @@ tr.product-detail-row > td {
   accent-color: #0070f4;
   cursor: pointer;
   pointer-events: none;
+}
+
+/* ==========================================================================
+   RESPONSIVE: ZOOM IN / MÀN HÌNH NHỎ (< 992px) & ZOOM OUT / MÀN HÌNH RỘNG
+   ========================================================================== */
+
+/* Nút phễu lọc mobile */
+.kiot-btn-funnel {
+  width: 32px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: #0a66e8;
+  border: 1px solid #0a66e8;
+  background: #fff;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+.kiot-btn-funnel:hover,
+.kiot-btn-funnel.has-filter {
+  background: #0a66e8;
+  color: #fff;
+}
+.kiot-mobile-title {
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #111827;
+}
+
+/* Offcanvas mobile drawer */
+.kiot-mobile-nav {
+  z-index: 1070;
+}
+.kiot-mobile-nav-list .list-group-item {
+  border-left: none;
+  border-right: none;
+  font-size: 13.5px;
+  color: #374151;
+  transition: background 0.15s ease;
+}
+.kiot-mobile-nav-list .list-group-item:hover {
+  background: #f3f7ff;
+  color: var(--brand);
+}
+
+@media (max-width: 991.98px) {
+  /* 1. Thanh menu chính xanh: Ẩn hoàn toàn khi phóng to / màn hình hẹp */
+  .mainnav {
+    display: none !important;
+  }
+  .app-main-body {
+    height: calc(100vh - 44px) !important;
+  }
+  .topbar {
+    padding: 0 10px;
+    height: 44px;
+  }
+  .topbar-right {
+    gap: 8px;
+  }
+
+  /* 2. Layout Container */
+  .kiot-container {
+    padding: 8px 10px 10px;
+    gap: 0;
+  }
+  .kiot-sidebar-toggle-btn {
+    display: none !important;
+  }
+
+  /* 3. Cột Sidebar bộ lọc chuyển sang dạng Offcanvas Drawer */
+  .kiot-sidebar-col {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 290px;
+    max-width: 86vw;
+    height: 100vh;
+    z-index: 1060;
+    background: #fff;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.35, 1);
+    padding: 14px;
+    margin: 0 !important;
+    overflow: hidden;
+  }
+  .kiot-sidebar-col.show-mobile {
+    transform: translateX(0);
+  }
+  .kiot-sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1055;
+    display: none;
+    backdrop-filter: blur(1px);
+  }
+  .kiot-sidebar-backdrop.show {
+    display: block;
+  }
+  .kiot-filter-box {
+    border: none;
+    padding: 0;
+    min-width: 0;
+  }
+
+  /* 4. Toolbar trên cùng: Hàng hóa + Phễu + Tìm kiếm + Nhóm nút */
+  .kiot-toolbar-row {
+    gap: 8px;
+    height: auto;
+    margin-bottom: 8px;
+  }
+  .kiot-mobile-title-wrap {
+    flex-shrink: 0;
+  }
+  .kiot-search-box {
+    flex: 1 1 auto;
+    max-width: none;
+    min-width: 100px;
+  }
+  .kiot-actions-group {
+    gap: 5px;
+    flex-shrink: 0;
+  }
+  .kiot-actions-group .btn {
+    padding: 2px 8px;
+    height: 30px;
+  }
+}
+
+/* Màn hình điện thoại nhỏ (< 576px) */
+@media (max-width: 575.98px) {
+  .kiot-mobile-title {
+    font-size: 15px !important;
+  }
+  .kiot-search-box input {
+    font-size: 12px;
+    padding-left: 26px;
+    padding-right: 24px;
+  }
+  .kiot-search-box .bi-search {
+    left: 7px;
+  }
+  .kiot-search-box .bi-arrow-left-right {
+    right: 7px;
+  }
+}
+
+/* Widescreen / Zoom out (>= 1400px) */
+@media (min-width: 1400px) {
+  .kiot-container {
+    max-width: 100%;
+    width: 100%;
+  }
+  .kiot-main-col {
+    width: 100%;
+  }
+  .tbl {
+    width: 100%;
+  }
 }

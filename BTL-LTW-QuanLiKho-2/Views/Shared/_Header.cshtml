@@ -1,28 +1,35 @@
 <header class="topbar">
-  <div class="d-flex align-items-center gap-3">
+  <div class="d-flex align-items-center gap-2">
+    <!-- Nút Hamburger cho Mobile / Phóng to (chuẩn KiotViet) -->
+    <button class="btn btn-link text-primary p-0 border-0 d-lg-none kiot-hamburger-btn me-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileNavDrawer" aria-controls="mobileNavDrawer" title="Menu điều hướng" style="font-size: 24px; line-height: 1; text-decoration: none;">
+      <i class="bi bi-list"></i>
+    </button>
+
     <a class="brand" asp-controller="HangHoa" asp-action="Index">
       <span class="brand-logo"><i class="bi bi-box-seam"></i></span>
       <span>KhoPro</span>
     </a>
 
-    <!-- Warehouse Switcher (ViewComponent) -->
-    @await Component.InvokeAsync("WarehouseSwitcher")
+    <!-- Warehouse Switcher (Ẩn trên màn hình nhỏ/phóng to, có sẵn trong Drawer) -->
+    <div class="d-none d-md-block topbar-wh-desktop">
+      @await Component.InvokeAsync("WarehouseSwitcher")
+    </div>
   </div>
 
   <div class="topbar-right">
-    <a href="#" title="Hỗ trợ"><i class="bi bi-chat-left-text"></i>Hỗ trợ</a>
-    <a href="#" title="Góp ý"><i class="bi bi-pencil-square"></i>Góp ý</a>
-    <a href="#" class="bell" title="Thông báo">
+    <a href="#" title="Hỗ trợ" class="d-none d-lg-flex"><i class="bi bi-chat-left-text"></i>Hỗ trợ</a>
+    <a href="#" title="Góp ý" class="d-none d-lg-flex"><i class="bi bi-pencil-square"></i>Góp ý</a>
+    <a href="#" class="bell d-none d-lg-flex" title="Thông báo">
       <i class="bi bi-bell-fill fs-6"></i>
       <span class="dot">2</span>
     </a>
-    <a href="#" title="Cài đặt"><i class="bi bi-gear-fill fs-6"></i></a>
+    <a href="#" title="Cài đặt" class="d-none d-lg-flex"><i class="bi bi-gear-fill fs-6"></i></a>
     @if (User.Identity?.IsAuthenticated == true)
     {
       <div class="dropdown">
         <button class="btn btn-link text-decoration-none dropdown-toggle d-flex align-items-center gap-2 p-0 user-btn" type="button" id="userMenuBtn" data-bs-toggle="dropdown" aria-expanded="false">
           <span class="avatar"><i class="bi bi-person-fill"></i></span>
-          <span class="fw-semibold small user-name">@User.GetTenHienThi()</span>
+          <span class="fw-semibold small user-name d-none d-md-inline">@User.GetTenHienThi()</span>
         </button>
         <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userMenuBtn">
           <li class="px-3 py-2 border-bottom">
@@ -41,11 +48,114 @@
     {
       <a asp-controller="Account" asp-action="Login" class="user-login-link text-decoration-none d-flex align-items-center gap-2" title="Đăng nhập">
         <span class="avatar"><i class="bi bi-person"></i></span>
-        <span class="fw-semibold small user-name">Đăng nhập</span>
+        <span class="fw-semibold small user-name d-none d-md-inline">Đăng nhập</span>
       </a>
     }
   </div>
 </header>
+
+<!-- Offcanvas Menu Điều Hướng Mobile / Phóng To -->
+<div class="offcanvas offcanvas-start kiot-mobile-nav" tabindex="-1" id="mobileNavDrawer" aria-labelledby="mobileNavDrawerLabel" style="width: 290px;">
+  <div class="offcanvas-header border-bottom py-2">
+    <div class="d-flex align-items-center gap-2">
+      <span class="brand-logo"><i class="bi bi-box-seam"></i></span>
+      <span class="fw-bold fs-5 text-dark">KhoPro</span>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body p-0 d-flex flex-column">
+    <!-- Chọn kho trên mobile -->
+    <div class="p-3 bg-light border-bottom">
+      <div class="small text-muted mb-1 fw-semibold"><i class="bi bi-building me-1"></i>Kho đang làm việc:</div>
+      @await Component.InvokeAsync("WarehouseSwitcher")
+    </div>
+
+    <!-- Danh sách Menu -->
+    <div class="list-group list-group-flush kiot-mobile-nav-list flex-grow-1 overflow-auto">
+      <a asp-controller="Home" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2">
+        <i class="bi bi-speedometer2 text-primary fs-5"></i>
+        <span>Tổng quan</span>
+      </a>
+
+      <!-- Hàng hóa -->
+      <div class="list-group-item bg-light fw-bold text-uppercase small text-muted py-1 ps-3" style="font-size: 11px;">Hàng hóa</div>
+      <a asp-controller="HangHoa" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 ps-4">
+        <i class="bi bi-box-seam text-secondary"></i>
+        <span>Danh sách hàng hóa</span>
+      </a>
+      <a asp-controller="HangHoa" asp-action="Index" asp-route-tab="nhom" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 ps-4">
+        <i class="bi bi-collection text-secondary"></i>
+        <span>Nhóm hàng</span>
+      </a>
+
+      <!-- Kho hàng -->
+      <div class="list-group-item bg-light fw-bold text-uppercase small text-muted py-1 ps-3" style="font-size: 11px;">Kho hàng</div>
+      <a asp-controller="HangHoa" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 ps-4">
+        <i class="bi bi-boxes text-secondary"></i>
+        <span>Tồn kho</span>
+      </a>
+      <a asp-controller="PhieuKiemKe" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 ps-4">
+        <i class="bi bi-clipboard-check text-secondary"></i>
+        <span>Kiểm kho</span>
+      </a>
+
+      <!-- Giao dịch -->
+      <div class="list-group-item bg-light fw-bold text-uppercase small text-muted py-1 ps-3" style="font-size: 11px;">Giao dịch</div>
+      <a href="#" onclick="alert('Tính năng đang phát triển'); return false;" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 ps-4">
+        <i class="bi bi-truck text-secondary"></i>
+        <span>Nhà cung cấp</span>
+      </a>
+      <a href="#" onclick="alert('Tính năng đang phát triển'); return false;" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 ps-4">
+        <i class="bi bi-arrow-down-left-square text-secondary"></i>
+        <span>Nhập hàng</span>
+      </a>
+      <a href="#" onclick="alert('Tính năng đang phát triển'); return false;" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 ps-4">
+        <i class="bi bi-people text-secondary"></i>
+        <span>Khách hàng</span>
+      </a>
+      <a href="#" onclick="alert('Tính năng đang phát triển'); return false;" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 ps-4">
+        <i class="bi bi-receipt text-secondary"></i>
+        <span>Hóa đơn</span>
+      </a>
+
+      <!-- Báo cáo & Thiết lập -->
+      <div class="list-group-item bg-light fw-bold text-uppercase small text-muted py-1 ps-3" style="font-size: 11px;">Báo cáo & Thiết lập</div>
+      <a href="#" onclick="alert('Tính năng đang phát triển'); return false;" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 ps-4">
+        <i class="bi bi-bar-chart-line text-secondary"></i>
+        <span>Báo cáo tồn kho</span>
+      </a>
+      <a href="#" onclick="alert('Tính năng đang phát triển'); return false;" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 ps-4">
+        <i class="bi bi-gear text-secondary"></i>
+        <span>Thiết lập hệ thống</span>
+      </a>
+    </div>
+
+    <!-- Thông tin người dùng cuối drawer -->
+    <div class="p-3 border-top bg-white">
+      @if (User.Identity?.IsAuthenticated == true)
+      {
+        <div class="d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <span class="avatar"><i class="bi bi-person-fill"></i></span>
+            <div>
+              <div class="fw-bold small text-dark">@User.GetTenHienThi()</div>
+              <div class="text-muted smaller" style="font-size: 11px;">@User.GetVaiTro()</div>
+            </div>
+          </div>
+          <a class="btn btn-outline-danger btn-sm py-1 px-2" asp-controller="Account" asp-action="LogoutGet" title="Đăng xuất">
+            <i class="bi bi-box-arrow-right"></i>
+          </a>
+        </div>
+      }
+      else
+      {
+        <a class="btn btn-primary btn-sm w-100" asp-controller="Account" asp-action="Login">
+          <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập
+        </a>
+      }
+    </div>
+  </div>
+</div>
 
 <script>
 function switchWorkingWarehouse(whId) {

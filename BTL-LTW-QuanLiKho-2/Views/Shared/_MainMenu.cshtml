@@ -3,7 +3,7 @@
     var action = ViewContext.RouteData.Values["action"]?.ToString();
 }
 
-<nav class="mainnav">
+<nav class="mainnav d-none d-lg-flex">
   <ul>
     <li class="@(controller == "Home" ? "active" : "")">
       <a asp-controller="Home" asp-action="Index">Tổng quan</a>
