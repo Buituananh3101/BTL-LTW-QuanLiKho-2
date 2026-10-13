@@ -454,6 +454,7 @@ body {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
+  table-layout: fixed;
 }
 .tbl thead th {
   position: sticky;
@@ -469,11 +470,36 @@ body {
   color: #1e3a8a;
   border-bottom: 1px solid var(--border);
 }
+.col-product-name {
+  min-width: 180px;
+}
+.cell-product-name {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  white-space: normal;
+  vertical-align: middle;
+}
+.product-name-text {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  white-space: normal;
+  line-height: 1.35;
+}
+.product-spec-text {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  white-space: normal;
+}
 .tbl tbody td {
   padding: 11px 12px;
   border-bottom: 1px solid #f3f4f6;
   font-size: 13px;
   vertical-align: middle;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .tbl tbody tr:hover {
   background: #f8fafc;
@@ -1191,10 +1217,19 @@ tr.product-detail-row > td {
   border-right: 3px solid #0070f3 !important; /* Viền bên phải ĐẬM */
 }
 
+.product-detail-panel-wrap {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 .product-detail-panel {
   background-color: #ffffff;
   border: none; /* Đã có viền 3px từ thẻ td */
   margin-bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Tabs Bar */
@@ -1204,6 +1239,10 @@ tr.product-detail-row > td {
   padding: 0 24px;
   border-bottom: 1px solid #e2e8f0;
   background-color: #ffffff;
+  position: sticky;
+  left: 0;
+  width: max-content;
+  max-width: 100%;
 }
 .product-detail-tab-btn {
   padding: 12px 2px;
@@ -1256,6 +1295,36 @@ tr.product-detail-row > td {
   font-size: 17px;
   font-weight: 700;
   color: #1e293b;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.product-detail-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.product-detail-footer-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  position: sticky;
+  left: 24px;
+}
+.product-detail-footer-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  position: sticky;
+  right: 24px;
+  margin-left: auto;
 }
 
 .badge-kiot-tag {
@@ -1290,6 +1359,12 @@ tr.product-detail-row > td {
 .supplier-box {
   background-color: #f8fafc;
   border: 1px solid #eef2f6;
+}
+.supplier-names {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  white-space: normal;
 }
 
 /* Sub tables: Thẻ kho & Tồn kho */
