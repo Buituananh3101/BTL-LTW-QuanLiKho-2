@@ -806,31 +806,66 @@ $(document).ready(function () {
         loadTable();
     });
 
-    // 2. Mở Quick Date Popups cho Dự kiến & Thời gian tạo
+    function toggleFloatingPopup(triggerElement, popupSelector) {
+        const popup = $(popupSelector);
+        if (popup.is(':visible')) {
+            popup.hide();
+            return;
+        }
+        $('.quick-date-popup, .dual-calendar-popup').hide();
+
+        const trigger = $(triggerElement);
+        const rect = trigger[0].getBoundingClientRect();
+        const popupWidth = popup.outerWidth() || (popupSelector.includes('Calendar') ? 540 : 330);
+        
+        let left = rect.left;
+        let top = rect.bottom + 6;
+
+        const maxRight = $(window).width() - 10;
+        if (left + popupWidth > maxRight) {
+            left = maxRight - popupWidth;
+        }
+        if (left < 10) left = 10;
+
+        const popupHeight = popup.outerHeight() || 300;
+        if (top + popupHeight > $(window).height() - 10) {
+            top = Math.max(10, rect.top - popupHeight - 6);
+        }
+
+        popup.css({
+            position: 'fixed',
+            top: top + 'px',
+            left: left + 'px',
+            zIndex: 1060
+        }).show();
+    }
+
+    // 2. Mở Quick Date Popups cho Dự kiến & Thời gian tạo (Nổi fixed không bị che bởi scroll)
     $('#btnOpenDkQuick, #labelDkAll').on('click', function (e) {
         e.stopPropagation();
-        $('#popupDkCalendar, #popupTgtCalendar, #popupTgtQuick').hide();
-        $('#popupDkQuick').toggle();
+        toggleFloatingPopup(this, '#popupDkQuick');
     });
 
     $('#btnOpenDkCalendar, #dkCustom').on('click', function (e) {
         e.stopPropagation();
-        $('#popupDkQuick, #popupTgtCalendar, #popupTgtQuick').hide();
         $('#dkCustom').prop('checked', true);
-        $('#popupDkCalendar').toggle();
+        toggleFloatingPopup(this, '#popupDkCalendar');
     });
 
     $('#btnOpenTgtQuick, #labelTgtAll').on('click', function (e) {
         e.stopPropagation();
-        $('#popupDkQuick, #popupDkCalendar, #popupTgtCalendar').hide();
-        $('#popupTgtQuick').toggle();
+        toggleFloatingPopup(this, '#popupTgtQuick');
     });
 
     $('#btnOpenTgtCalendar, #tgtCustom').on('click', function (e) {
         e.stopPropagation();
-        $('#popupTgtQuick, #popupDkQuick, #popupDkCalendar').hide();
         $('#tgtCustom').prop('checked', true);
-        $('#popupTgtCalendar').toggle();
+        toggleFloatingPopup(this, '#popupTgtCalendar');
+    });
+
+    // Tự động đóng popup ngày khi cuộn bộ lọc bên trái
+    $('.kiot-filter-box').on('scroll', function () {
+        $('.quick-date-popup, .dual-calendar-popup').hide();
     });
 
     // Reset khi click radio "Toàn thời gian"

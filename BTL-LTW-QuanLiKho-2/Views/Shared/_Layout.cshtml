@@ -10,18 +10,18 @@
     <link href="~/css/site.css" rel="stylesheet" asp-append-version="true" />
 </head>
 <body>
-    <!-- Header trên cùng: Brand + Chọn kho + User -->
-    <partial name="_Header" />
-
-    <!-- Menu chính xanh dương đậm (KiotViet) -->
-    <partial name="_MainMenu" />
+    <!-- Header trên cùng: Brand + Chọn kho + User + Menu chính (Cố định không cuộn) -->
+    <header class="app-header-fixed">
+        <partial name="_Header" />
+        <partial name="_MainMenu" />
+    </header>
 
     <!-- Nội dung chính của View -->
-    <main role="main">
+    <main role="main" class="app-main-body">
         @RenderBody()
     </main>
 
-    <!-- Nút hotline nổi -->z
+    <!-- Nút hotline nổi -->
     <partial name="_FloatingHelp" />
 
     <!-- Scripts -->

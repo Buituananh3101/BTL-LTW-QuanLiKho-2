@@ -10,13 +10,39 @@
   --border: #d9dee5;
 }
 
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Cố định trang, không cuộn window/body */
+}
+
 body {
+  display: flex;
+  flex-direction: column;
   background: var(--page-bg);
   color: var(--text);
   font-family: Inter, "Segoe UI", system-ui, sans-serif;
   font-size: 14px;
-  margin: 0;
-  padding: 0;
+}
+
+/* Header trên cùng cố định (Topbar 56px + Mainnav 52px = 108px) */
+.app-header-fixed {
+  flex-shrink: 0;
+  z-index: 1020;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+}
+
+/* Vùng thân trang chiếm toàn bộ chiều cao còn lại (Không cuộn chung) */
+.app-main-body {
+  flex: 1;
+  min-height: 0;
+  height: calc(100vh - 108px);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ---------- Header (partial _Header) ---------- */
@@ -349,25 +375,57 @@ body {
 
 #content {
   flex: 1;
+  min-height: 0;
   background: #fff;
   border-radius: 8px;
-  min-height: 580px;
   border: 1px solid var(--border);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 #productTableContainer {
-  overflow-x: auto;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   width: 100%;
+  position: relative;
+}
+.kiot-table-scroll-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+  position: relative;
+  width: 100%;
+}
+.kiot-table-pagination {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  background: #f8fafc;
+  z-index: 25;
 }
 .tbl {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 .tbl thead th {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   background: var(--brand-soft);
   font-weight: 600;
   font-size: 13px;
-  padding: 11px 12px;
+  padding: 10px 12px;
+  height: 40px;
+  box-sizing: border-box;
   white-space: nowrap;
   color: #1e3a8a;
   border-bottom: 1px solid var(--border);
@@ -390,9 +448,14 @@ body {
 .tbl tr.summary-row td,
 .tbl thead tr.summary-row td,
 .tbl tbody tr.summary-row td {
-  padding: 11px 12px;
-  font-size: 13px;
+  position: sticky;
+  top: 40px;
+  z-index: 19;
   background-color: #fafbfc;
+  padding: 10px 12px;
+  height: 38px;
+  box-sizing: border-box;
+  font-size: 13px;
   border-bottom: 2px solid #e5e7eb;
   vertical-align: middle;
   white-space: nowrap;
@@ -448,17 +511,26 @@ body {
 
 /* KiotViet layout aligned directly above the goods list */
 .kiot-container {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
   display: flex;
   gap: 16px;
-  padding: 14px 20px 80px;
-  align-items: flex-start;
+  padding: 12px 20px 14px;
+  align-items: stretch;
   position: relative;
+  overflow: hidden;
   transition: gap 0.4s cubic-bezier(0.25, 1, 0.35, 1);
 }
 .kiot-sidebar-col {
   width: 250px;
   flex: 0 0 250px;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   position: relative;
+  overflow: hidden;
   transition: width 0.4s cubic-bezier(0.25, 1, 0.35, 1), opacity 0.35s cubic-bezier(0.25, 1, 0.35, 1), margin 0.4s cubic-bezier(0.25, 1, 0.35, 1);
 }
 .kiot-sidebar-title {
@@ -467,16 +539,40 @@ body {
   margin-bottom: 12px;
   color: #111827;
   height: 38px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   white-space: nowrap;
 }
 .kiot-filter-box {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: #fff;
   border-radius: 8px;
   border: 1px solid var(--border);
   padding: 16px;
   min-width: 250px;
+}
+/* Thanh cuộn mảnh đẹp cho bộ lọc & bảng hàng hóa */
+.kiot-filter-box::-webkit-scrollbar,
+.kiot-table-scroll-body::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.kiot-filter-box::-webkit-scrollbar-track,
+.kiot-table-scroll-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.kiot-filter-box::-webkit-scrollbar-thumb,
+.kiot-table-scroll-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.kiot-filter-box::-webkit-scrollbar-thumb:hover,
+.kiot-table-scroll-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 .kiot-filter-box h6 {
   font-weight: 700;
@@ -499,6 +595,12 @@ body {
 .kiot-main-col {
   flex: 1;
   min-width: 0;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: padding-left 0.4s cubic-bezier(0.25, 1, 0.35, 1);
 }
 .kiot-toolbar-row {
   display: flex;
@@ -507,6 +609,7 @@ body {
   gap: 16px;
   margin-bottom: 12px;
   height: 38px;
+  flex-shrink: 0;
 }
 .kiot-search-box {
   flex: 0 1 450px;
@@ -700,18 +803,10 @@ body {
 .kiot-container.sidebar-collapsed .kiot-main-col {
   padding-left: 28px;
 }
-.kiot-main-col {
-  flex: 1;
-  min-width: 0;
-  transition: padding-left 0.4s cubic-bezier(0.25, 1, 0.35, 1);
-}
-
 /* Quick Date Picker popup (3 columns like Screenshot 3) */
 .quick-date-popup {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 1050;
+  position: fixed;
+  z-index: 1060;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.18);
@@ -775,10 +870,8 @@ body {
 
 /* Dual Calendar popup (Screenshot 2) */
 .dual-calendar-popup {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 1050;
+  position: fixed;
+  z-index: 1060;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 12px 35px rgba(0,0,0,0.2);

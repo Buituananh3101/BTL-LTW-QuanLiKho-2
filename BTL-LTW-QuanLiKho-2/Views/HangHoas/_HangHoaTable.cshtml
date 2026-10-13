@@ -4,6 +4,7 @@
     var viCulture = CultureInfo.GetCultureInfo("vi-VN");
 }
 
+<div class="kiot-table-scroll-body">
 <table class="tbl" id="productTable">
     <thead>
         <tr>
@@ -354,9 +355,10 @@
         }
     </tbody>
 </table>
+</div>
 
 <!-- Phân trang đáy bảng -->
-<div class="d-flex justify-content-between align-items-center p-3 border-top bg-light">
+<div class="kiot-table-pagination d-flex justify-content-between align-items-center">
     <div class="text-muted small">
         Hiển thị <strong>@Model.Items.Count</strong> / <strong>@Model.TotalCount</strong> hàng hóa · Trang <strong>@Model.Page</strong> / <strong>@Model.TotalPages</strong>
     </div>
