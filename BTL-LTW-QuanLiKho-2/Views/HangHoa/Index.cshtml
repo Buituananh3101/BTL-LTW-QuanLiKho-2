@@ -745,6 +745,8 @@ $(document).ready(function () {
     // Init dual calendars
     renderDualCalendar('tgt');
     renderDualCalendar('dk');
+    $('#dotNhomHang').css('display', $('#filterNhomHang').val() ? 'inline-block' : 'none');
+    $('#dotTonKho').css('display', $('#filterTonKho').val() !== 'ALL' ? 'inline-block' : 'none');
 
     // Click on calendar day
     $(document).on('click', '.cal-day', function () {
@@ -1489,14 +1491,14 @@ $(document).ready(function () {
             tgTaoTo = activeTgTaoTo;
         }
 
-        // Cập nhật chấm xanh indicator
-        $('#dotNhomHang').toggle(!!nhom);
-        $('#dotTonKho').toggle(tonKho !== 'ALL');
-        $('#dotDuKien').toggle(duKien !== 'ALL');
-        $('#dotTgTao').toggle(tgTao !== 'ALL');
-        $('#dotNcc').toggle(!!nhaCungCap);
-        $('#dotViTri').toggle(!!viTri);
-        $('#dotLoaiHang').toggle(!!loaiHang);
+        // Cập nhật chấm xanh indicator (inline-block nằm cùng hàng tiêu đề)
+        $('#dotNhomHang').css('display', nhom ? 'inline-block' : 'none');
+        $('#dotTonKho').css('display', tonKho !== 'ALL' ? 'inline-block' : 'none');
+        $('#dotDuKien').css('display', duKien !== 'ALL' ? 'inline-block' : 'none');
+        $('#dotTgTao').css('display', tgTao !== 'ALL' ? 'inline-block' : 'none');
+        $('#dotNcc').css('display', nhaCungCap ? 'inline-block' : 'none');
+        $('#dotViTri').css('display', viTri ? 'inline-block' : 'none');
+        $('#dotLoaiHang').css('display', loaiHang ? 'inline-block' : 'none');
 
         $.ajax({
             url: '/HangHoa/Filter',

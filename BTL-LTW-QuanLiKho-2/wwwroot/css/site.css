@@ -677,6 +677,8 @@ body {
   font-size: 13px;
   margin: 0 0 8px;
   color: #1f2937;
+  display: flex;
+  align-items: center;
 }
 .kiot-filter-box .f-block + .f-block {
   margin-top: 14px;
@@ -1128,6 +1130,12 @@ body {
   border-radius: 50%;
   margin-left: 6px;
   vertical-align: middle;
+  flex-shrink: 0;
+}
+.filter-dot.active,
+.filter-dot[style*="display: block"],
+.filter-dot[style*="display: inline"] {
+  display: inline-block !important;
 }
 
 /* Calendar styling enhancement */
