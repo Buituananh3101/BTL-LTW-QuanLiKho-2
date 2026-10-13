@@ -3,8 +3,8 @@
 ## 1. Cấu trúc Layout chuẩn KiotViet
 
 Hệ thống sử dụng **duy nhất một Layout chính** cho toàn bộ các màn hình nghiệp vụ:
-- Đường dẫn: [`Views/Shared/_Layout.cshtml`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Views/Shared/_Layout.cshtml)
-- Cấu hình toàn cục tại: [`Views/_ViewStart.cshtml`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Views/_ViewStart.cshtml) (`@{ Layout = "_Layout"; }`).
+- Đường dẫn: [`Views/Shared/_Layout.cshtml`](../../BTL-LTW-QuanLiKho-2/Views/Shared/_Layout.cshtml)
+- Cấu hình toàn cục tại: [`Views/_ViewStart.cshtml`](../../BTL-LTW-QuanLiKho-2/Views/_ViewStart.cshtml) (`@{ Layout = "_Layout"; }`).
 - Các View con **tuyệt đối không khai báo lại `Layout = ...`**.
 
 ### 1.1. Khung trang trong `_Layout.cshtml`:
@@ -34,7 +34,7 @@ Hệ thống sử dụng **duy nhất một Layout chính** cho toàn bộ các 
 
 ## 2. Thành phần Header & Bộ chọn Kho làm việc (`WarehouseSwitcher`)
 
-- Vị trí: [`Views/Shared/_Header.cshtml`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Views/Shared/_Header.cshtml).
+- Vị trí: [`Views/Shared/_Header.cshtml`](../../BTL-LTW-QuanLiKho-2/Views/Shared/_Header.cshtml).
 - Gồm có: Logo thương hiệu **KhoPro**, ô dropdown chuyển đổi kho làm việc, chuông thông báo, menu cài đặt và thông tin người dùng đang đăng nhập.
 
 ### 2.1. Cơ chế hoạt động của Warehouse Switcher:
@@ -67,7 +67,7 @@ Hệ thống sử dụng **duy nhất một Layout chính** cho toàn bộ các 
 
 ## 3. Mega-Menu ngang (`_MainMenu.cshtml`)
 
-- Vị trí: [`Views/Shared/_MainMenu.cshtml`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Views/Shared/_MainMenu.cshtml).
+- Vị trí: [`Views/Shared/_MainMenu.cshtml`](../../BTL-LTW-QuanLiKho-2/Views/Shared/_MainMenu.cshtml).
 - Cấu trúc thanh menu ngang phong cách KiotViet:
   1. **Tổng quan** (`/Home/Index`)
   2. **Hàng hóa**: Danh sách hàng hóa (`/HangHoas/Index`), Nhóm hàng, Tồn kho, Kiểm kho (`/PhieuKiemKe/Index`), Chuyển kho, Xuất dùng nội bộ, Xuất hủy.

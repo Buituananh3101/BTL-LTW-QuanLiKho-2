@@ -2,7 +2,7 @@
 
 ## 1. Cơ chế tính toán Tồn kho (`vw_TonKhoHienTai`)
 
-Trong hệ thống, tồn kho **không lưu thành bảng số lượng tĩnh** để tránh lệch số liệu giữa tồn kho và chứng từ lịch sử. Tồn kho của từng mặt hàng tại từng kho được tính toán động thông qua View CSDL **`vw_TonKhoHienTai`** ([`VwTonKhoHienTai`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/VwTonKhoHienTai.cs)):
+Trong hệ thống, tồn kho **không lưu thành bảng số lượng tĩnh** để tránh lệch số liệu giữa tồn kho và chứng từ lịch sử. Tồn kho của từng mặt hàng tại từng kho được tính toán động thông qua View CSDL **`vw_TonKhoHienTai`** ([`VwTonKhoHienTai`](../../BTL-LTW-QuanLiKho-2/Models/VwTonKhoHienTai.cs)):
 
 ```
 Tồn kho = (Tổng Nhập đã xác nhận + Chuyển đến đã nhận + Điều chỉnh tăng)
@@ -10,12 +10,12 @@ Tồn kho = (Tổng Nhập đã xác nhận + Chuyển đến đã nhận + Đi�
 ```
 
 ### Các nguồn biến động tồn kho:
-1. **Nhập kho ([`PhieuNhap`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/PhieuNhap.cs))**: Trạng thái `TrangThai = 'DA_XAC_NHAN'` → Cộng tồn tại `MaKho`.
-2. **Xuất kho ([`PhieuXuat`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/PhieuXuat.cs))**: Trạng thái `TrangThai = 'DA_XAC_NHAN'` → Trừ tồn tại `MaKho` của đơn hàng.
-3. **Chuyển kho ([`PhieuChuyenKho`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/PhieuChuyenKho.cs))**:
+1. **Nhập kho ([`PhieuNhap`](../../BTL-LTW-QuanLiKho-2/Models/PhieuNhap.cs))**: Trạng thái `TrangThai = 'DA_XAC_NHAN'` → Cộng tồn tại `MaKho`.
+2. **Xuất kho ([`PhieuXuat`](../../BTL-LTW-QuanLiKho-2/Models/PhieuXuat.cs))**: Trạng thái `TrangThai = 'DA_XAC_NHAN'` → Trừ tồn tại `MaKho` của đơn hàng.
+3. **Chuyển kho ([`PhieuChuyenKho`](../../BTL-LTW-QuanLiKho-2/Models/PhieuChuyenKho.cs))**:
    - Trạng thái `'DA_XUAT'` hoặc `'DA_NHAN'` → Trừ tồn tại kho nguồn (`MaKhoNguon`).
    - Trạng thái `'DA_NHAN'` → Cộng tồn tại kho đích (`MaKhoDich`).
-4. **Kiểm kho & Điều chỉnh ([`PhieuDieuChinh`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/PhieuDieuChinh.cs))**:
+4. **Kiểm kho & Điều chỉnh ([`PhieuDieuChinh`](../../BTL-LTW-QuanLiKho-2/Models/PhieuDieuChinh.cs))**:
    - Trạng thái `TrangThai = 'DA_DUYET'`.
    - `ChiTietPhieuDieuChinh.SoLuongDieuChinh > 0` → Tăng tồn kho tương ứng.
    - `ChiTietPhieuDieuChinh.SoLuongDieuChinh < 0` → Giảm tồn kho tương ứng.
@@ -65,12 +65,16 @@ Các chứng từ trong hệ thống dùng mã chuỗi tiếng Việt không d�
 6. **Chặn tồn âm**:
    - Trước khi xác nhận xuất kho hoặc chuyển kho, hệ thống phải kiểm tra số lượng tồn hiện thời tại kho nguồn qua `vw_TonKhoHienTai`. Nếu `SoLuongTon < SoLuongXuat`, phải báo lỗi tiếng Việt rõ ràng và hủy giao dịch.
 7. **Luôn ghi `NhatKyThaoTac`**:
-   - Mọi thao tác quan trọng (Hoàn thành phiếu, Cân bằng kho, Hủy phiếu, Xóa phiếu tạm) đều phải ghi một bản ghi vào bảng [`NhatKyThaoTac`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/NhatKyThaoTac.cs) với đầy đủ thông tin: Mã tài khoản, thời điểm, đối tượng, nội dung thao tác.
+   - Mọi thao tác quan trọng (Hoàn thành phiếu, Cân bằng kho, Hủy phiếu, Xóa phiếu tạm) đều phải ghi một bản ghi vào bảng [`NhatKyThaoTac`](../../BTL-LTW-QuanLiKho-2/Models/NhatKyThaoTac.cs) với đầy đủ thông tin: Mã tài khoản, thời điểm, đối tượng, nội dung thao tác.
 8. **Đóng gói tầng Dịch vụ (`TonKhoService`, `BanHangService`)**:
    - Các thao tác đọc tồn kho, kiểm tra chặn âm kho và tạo chứng từ biến động phải được đóng gói vào Service dùng chung (`ITonKhoService`, `IBanHangService`) thay vì viết lặp lại các câu lệnh LINQ thô trong Controller.
 9. **Quy tắc bắt buộc khi Bán hàng (POS / Đơn bán) [ISSUE-05]**:
    - Do `vw_TonKhoHienTai` chỉ trừ kho qua `PhieuXuat`, khi tạo hoặc thanh toán đơn bán tại quầy (`DonBan`), hệ thống **bắt buộc tự động sinh kèm một `PhieuXuat`** có `TrangThai = 'DA_XAC_NHAN'`, `LoaiPhieuXuat = 'XUAT_BAN'`, `MaKho = donBan.MaKho`, liên kết `MaDonBan`, và sao chép đầy đủ chi tiết sang `ChiTietPhieuXuat` (`MaHang`, `SoLuongXuat`, `DonGiaXuat`, `MaCTDonBan`).
    - Toàn bộ quy trình phải nằm trong một transaction (`BeginTransactionAsync`).
    - Bắt buộc kiểm tra tồn kho trước khi xuất bằng `ITonKhoService.KiemTraXuatKhoAsync(...)` để chặn đứng việc xuất âm kho.
-   - Thao tác bán hàng POS và xuất kho tự động được đóng gói chuẩn mực trong `IBanHangService` ([`BanHangService.cs`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Services/BanHangService.cs)).
+   - Thao tác bán hàng POS và xuất kho tự động được đóng gói chuẩn mực trong `IBanHangService` ([`BanHangService.cs`](../../BTL-LTW-QuanLiKho-2/Services/BanHangService.cs)).
    - Khi hủy đơn bán (`TrangThai = 'HUY'`), phiếu xuất đi kèm cũng được chuyển sang `'HUY'`, `vw_BienDongKho` sẽ tự động loại bỏ phiếu xuất này, giúp tồn kho được hoàn trả ngay lập tức.
+10. **Quy tắc Đơn vị tính cơ bản duy nhất [ISSUE-10]**:
+   - Toàn bộ hệ thống chỉ quản lý tồn kho theo **1 Đơn vị tính cơ bản duy nhất** cho mỗi mặt hàng (`HangHoa.MaDvt`).
+   - Mọi chứng từ (Nhập, Xuất, Chuyển, Kiểm, Bán) chỉ ghi nhận theo ĐVT cơ bản, không dùng ĐVT phụ hay hệ số quy đổi.
+

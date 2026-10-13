@@ -146,6 +146,9 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
             entity.Property(e => e.MaCtkiemKe).HasColumnName("MaCTKiemKe");
             entity.Property(e => e.SoLuongTheoSo).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.SoLuongThucTe).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.DonGia)
+                .HasColumnType("decimal(18, 2)")
+                .HasDefaultValue(0m, "DF_CTPKK_DonGia");
 
             entity.HasOne(d => d.MaHangNavigation).WithMany(p => p.ChiTietPhieuKiemKes)
                 .HasForeignKey(d => d.MaHang)
@@ -693,7 +696,7 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
         {
             entity.HasKey(e => new { e.MaTaiKhoan, e.MaKho }).HasName("PK_TaiKhoan_Kho");
 
-            entity.ToTable("TaiKhoan_Kho");
+            entity.ToTable("TaiKhoanKho");
 
             entity.Property(e => e.NgayPhanCong)
                 .HasDefaultValueSql("(sysdatetime())", "DF_TaiKhoan_Kho_NgayPhanCong");

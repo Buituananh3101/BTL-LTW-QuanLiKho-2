@@ -260,6 +260,27 @@ ELSE
 BEGIN
     PRINT N'[SKIP] Cột DaDanhDau đã tồn tại trong bảng HangHoa.';
 END
+-- -----------------------------------------------------------------------------------------
+-- 6. BẢNG CHITIETPHIEUKIEMKE: Bổ sung cột DonGia (Đơn giá chốt tại thời điểm kiểm kho)
+-- Lý do ([ISSUE-07]): Đóng băng giá trị chênh lệch kiểm kê tại thời điểm kiểm, không bị nhảy theo giá mới tương lai
+-- -----------------------------------------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'ChiTietPhieuKiemKe') AND name = N'DonGia')
+BEGIN
+    ALTER TABLE ChiTietPhieuKiemKe ADD DonGia DECIMAL(18, 2) NOT NULL CONSTRAINT DF_CTPKK_DonGia DEFAULT (0);
+    PRINT N'[OK] Đã thêm cột DonGia vào bảng ChiTietPhieuKiemKe (DEFAULT 0).';
+END
+ELSE
+BEGIN
+    PRINT N'[SKIP] Cột DonGia đã tồn tại trong bảng ChiTietPhieuKiemKe.';
+END
+GO
+
+-- Đồng bộ đơn giá chốt cho các dòng kiểm kê lịch sử từ GiaVon (hoặc GiaBanThamKhao)
+UPDATE ctpkk
+SET ctpkk.DonGia = ISNULL(NULLIF(h.GiaVon, 0), h.GiaBanThamKhao)
+FROM ChiTietPhieuKiemKe ctpkk
+JOIN HangHoa h ON h.MaHang = ctpkk.MaHang
+WHERE ctpkk.DonGia = 0;
 GO
 
 PRINT N'=== HOÀN TẤT NÂNG CẤP CƠ SỞ DỮ LIỆU THÀNH CÔNG ===';

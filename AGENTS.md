@@ -48,12 +48,14 @@
 
 | Đường dẫn file | Nội dung tóm tắt | Khi nào đọc file này |
 |---|---|---|
-| [`.agent/rules/01-phong-cach-code.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/.agent/rules/01-phong-cach-code.md) | Quy ước đặt tên, cấu trúc Controller/View/ViewModel | Khi tạo hoặc sửa Controller, View, ViewModel mới |
-| [`.agent/rules/02-nghiep-vu-kho.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/.agent/rules/02-nghiep-vu-kho.md) | Nghiệp vụ tồn kho, trạng thái chứng từ, View tồn kho | Khi code các chức năng liên quan đến nhập, xuất, chuyển, kiểm kho |
-| [`.agent/rules/03-giao-dien-layout.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/.agent/rules/03-giao-dien-layout.md) | Chuẩn giao diện KiotViet, `_Layout`, Header, Menu, Modal | Khi dựng giao diện màn hình mới hoặc sửa menu/topbar |
-| [`.agent/rules/04-xac-thuc-phan-quyen.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/.agent/rules/04-xac-thuc-phan-quyen.md) | Phân quyền vai trò, quản lý Kho qua Session/Claim | Khi làm tính năng đăng nhập, bảo vệ Controller, chọn kho |
-| [`.agent/rules/05-co-so-du-lieu.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/.agent/rules/05-co-so-du-lieu.md) | Quy tắc Code First, DbContext, 3 Nguyên tắc vàng sửa CSDL | Khi cần thêm bảng, thêm cột hoặc cấu hình Entity |
-| [`docs/specs/kiem-kho.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/docs/specs/kiem-kho.md) | Đặc tả chuẩn chức năng Kiểm kho (chức năng mẫu) | Khi tham khảo khuôn mẫu làm form chứng từ nhiều dòng |
-| [`docs/specs/_mau-dac-ta.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/docs/specs/_mau-dac-ta.md) | Mẫu khung tài liệu đặc tả chức năng mới | Khi bắt đầu thiết kế chức năng mới chưa có tài liệu |
-| [`docs/quyet-dinh.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/docs/quyet-dinh.md) | Sổ ghi chép các quyết định kỹ thuật & nghiệp vụ đã chốt | Khi cần tra cứu lý do tại sao dự án chọn cách làm hiện tại |
-| [`PROGRESS.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/PROGRESS.md) | Bảng theo dõi tiến độ, nợ kỹ thuật, việc cần làm kế tiếp | Đọc ở đầu mọi phiên làm việc và cập nhật cuối phiên |
+| [`.agent/rules/01-phong-cach-code.md`](./.agent/rules/01-phong-cach-code.md) | Quy ước đặt tên, cấu trúc Controller/View/ViewModel | Khi tạo hoặc sửa Controller, View, ViewModel mới |
+| [`.agent/rules/02-nghiep-vu-kho.md`](./.agent/rules/02-nghiep-vu-kho.md) | Nghiệp vụ tồn kho, trạng thái chứng từ, View tồn kho | Khi code các chức năng liên quan đến nhập, xuất, chuyển, kiểm kho |
+| [`.agent/rules/03-giao-dien-layout.md`](./.agent/rules/03-giao-dien-layout.md) | Chuẩn giao diện KiotViet, `_Layout`, Header, Menu, Modal | Khi dựng giao diện màn hình mới hoặc sửa menu/topbar |
+| [`.agent/rules/04-xac-thuc-phan-quyen.md`](./.agent/rules/04-xac-thuc-phan-quyen.md) | Phân quyền vai trò, quản lý Kho qua Session/Claim | Khi làm tính năng đăng nhập, bảo vệ Controller, chọn kho |
+| [`.agent/rules/05-co-so-du-lieu.md`](./.agent/rules/05-co-so-du-lieu.md) | Quy tắc Database First, DbContext, 3 Nguyên tắc vàng sửa CSDL | Khi cần thêm bảng, thêm cột hoặc cấu hình Entity |
+| [`docs/specs/danh-sach-hang-hoa.md`](./docs/specs/danh-sach-hang-hoa.md) | Đặc tả Quản lý Hàng hóa (Khuôn mẫu cho Danh mục CRUD) | Khi tham khảo khuôn mẫu làm các danh mục Kho, NCC, Khách hàng |
+| [`docs/specs/kiem-kho.md`](./docs/specs/kiem-kho.md) | Đặc tả Kiểm kho (Khuôn mẫu cho Chứng từ nhiều dòng) | Khi tham khảo khuôn mẫu làm form Nhập hàng, Xuất kho, Chuyển kho |
+| [`docs/specs/_mau-dac-ta.md`](./docs/specs/_mau-dac-ta.md) | Mẫu khung tài liệu đặc tả chức năng mới | Khi bắt đầu thiết kế chức năng mới chưa có tài liệu |
+| [`docs/quyet-dinh.md`](./docs/quyet-dinh.md) | Sổ ghi chép các quyết định kỹ thuật & nghiệp vụ đã chốt | Khi cần tra cứu lý do tại sao dự án chọn cách làm hiện tại |
+| [`docs/van-de-can-xu-ly.md`](./docs/van-de-can-xu-ly.md) | Danh sách 19 vấn đề & nợ kỹ thuật cần xử lý (Backlog) | Khi nhận nhiệm vụ sửa lỗi hoặc dọn nợ kỹ thuật |
+| [`PROGRESS.md`](./PROGRESS.md) | Bảng theo dõi tiến độ, nợ kỹ thuật, việc cần làm kế tiếp | Đọc ở đầu mọi phiên làm việc và cập nhật cuối phiên |

@@ -4,8 +4,8 @@
 
 - **Hệ quản trị CSDL**: Microsoft SQL Server.
 - **Tên CSDL**: `QuanLyKhoPhuQuocLTW`.
-- **DbContext**: [`QuanLyKhoPhuQuocLtwContext`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/QuanLyKhoPhuQuocLtwContext.cs) (kế thừa `DbContext`).
-- **Chuỗi kết nối**: Khai báo trong [`appsettings.json`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/appsettings.json):
+- **DbContext**: [`QuanLyKhoPhuQuocLtwContext`](../../BTL-LTW-QuanLiKho-2/Models/QuanLyKhoPhuQuocLtwContext.cs) (kế thừa `DbContext`).
+- **Chuỗi kết nối**: Khai báo trong [`appsettings.json`](../../BTL-LTW-QuanLiKho-2/appsettings.json):
   ```json
   "ConnectionStrings": {
     "QuanLyKhoPhuQuocLtwContext": "Server=.\\SQLEXPRESS;Database=QuanLyKhoPhuQuocLTW;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
@@ -22,9 +22,12 @@ Khi hệ thống cần thêm tính năng mới dẫn đến thay đổi CSDL, AI
 - Chỉ được phép **thêm bảng mới** (`CREATE TABLE`) hoặc **thêm cột mới** (`ALTER TABLE ADD ... NULL / DEFAULT`).
 - **Tuyệt đối KHÔNG** xóa bảng (`DROP TABLE`), không xóa cột (`DROP COLUMN`) và không đổi tên cột cũ đang có dữ liệu để tránh làm hỏng dữ liệu mẫu và các truy vấn hiện hữu.
 
-### 🌟 Nguyên tắc 2: "Đồng bộ tức thì" (Synchronous script)
-- Mỗi khi bổ sung thuộc tính trong C# Model hoặc cấu hình trong `QuanLyKhoPhuQuocLtwContext.cs`, AI **bắt buộc phải xuất ra câu lệnh SQL tương ứng** vào file cập nhật `docs/database_update.sql`.
-- Người dùng chỉ cần copy script SQL này chạy trong SQL Server Management Studio (SSMS) là CSDL đồng bộ 100% với Code.
+### 🌟 Nguyên tắc 2: "Đồng bộ tức thì & Quản lý Script có version" (Synchronous versioned script)
+- Hệ thống áp dụng mô hình **Database First có kiểm soát**. Toàn bộ script DDL được quản lý tập trung và đánh số theo phiên bản trong thư mục `migrations/sql/`:
+  - `01_init_schema.sql`: Script khởi tạo schema nền tảng của hệ thống.
+  - `02_update_schema.sql`: Script cập nhật đợt 1 (GiaVon, PhieuXuat, TaiKhoan_Kho, DaDanhDau, View 2 tầng).
+  - `03_...sql`: Các lần nâng cấp tiếp theo được đánh số liên tục.
+- Mỗi khi bổ sung thuộc tính trong C# Model hoặc cấu hình trong `QuanLyKhoPhuQuocLtwContext.cs`, AI **bắt buộc phải xuất ra câu lệnh SQL tương ứng** vào file migration đánh số mới trong `migrations/sql/` và đồng bộ vào `docs/database_update.sql`. Người dùng chỉ cần chạy script trong SSMS là CSDL đồng bộ 100% với Code.
 
 ### 🌟 Nguyên tắc 3: "Báo cáo trước khi chạm CSDL"
 - Trước khi thêm cột hoặc bảng mới, AI phải giải thích rõ ràng trong phiên:
@@ -44,9 +47,9 @@ Toàn bộ ràng buộc nâng cao được cấu hình tập trung trong `OnMode
    entity.ToTable("HangHoa");
    entity.HasKey(e => e.MaHang);
    ```
-2. **Khóa kép (Bảng phân quyền `TaiKhoan_Kho`)**:
+2. **Khóa kép (Bảng phân quyền `TaiKhoanKho`)**:
    ```csharp
-   entity.ToTable("TaiKhoan_Kho");
+   entity.ToTable("TaiKhoanKho");
    entity.HasKey(e => new { e.MaTaiKhoan, e.MaKho });
    ```
 3. **Chỉ mục duy nhất (Unique Index)**:

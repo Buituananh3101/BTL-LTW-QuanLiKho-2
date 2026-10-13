@@ -7,17 +7,17 @@
 ## 1. Các bảng CSDL & ViewModel liên quan
 
 ### 1.1. Bảng CSDL tham gia:
-- [`PhieuKiemKe`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/PhieuKiemKe.cs): Lưu thông tin chung của phiếu (`MaPhieuKiemKe`, `MaKho`, `MaNVLap`, `ThoiDiemChot`, `TrangThai: NHAP / DA_DIEU_CHINH / HUY`, `GhiChu`).
-- [`ChiTietPhieuKiemKe`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/ChiTietPhieuKiemKe.cs): Lưu từng mặt hàng kiểm (`MaCTKiemKe`, `MaPhieuKiemKe`, `MaHang`, `SoLuongTheoSo`, `SoLuongThucTe`).
-- [`PhieuDieuChinh`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/PhieuDieuChinh.cs): Sinh tự động khi cân bằng kho (`MaPhieuDieuChinh`, `MaPhieuKiemKe`, `NgayDuyet`, `TrangThai: DA_DUYET`).
-- [`ChiTietPhieuDieuChinh`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/ChiTietPhieuDieuChinh.cs): Chứa số lượng chênh lệch (`SoLuongDieuChinh = ThucTe - SoSach`).
-- [`NhatKyThaoTac`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/NhatKyThaoTac.cs): Lưu vết hành động cân bằng kho.
+- [`PhieuKiemKe`](../../BTL-LTW-QuanLiKho-2/Models/PhieuKiemKe.cs): Lưu thông tin chung của phiếu (`MaPhieuKiemKe`, `MaKho`, `MaNVLap`, `ThoiDiemChot`, `TrangThai: NHAP / DA_DIEU_CHINH / HUY`, `GhiChu`).
+- [`ChiTietPhieuKiemKe`](../../BTL-LTW-QuanLiKho-2/Models/ChiTietPhieuKiemKe.cs): Lưu từng mặt hàng kiểm (`MaCTKiemKe`, `MaPhieuKiemKe`, `MaHang`, `SoLuongTheoSo`, `SoLuongThucTe`).
+- [`PhieuDieuChinh`](../../BTL-LTW-QuanLiKho-2/Models/PhieuDieuChinh.cs): Sinh tự động khi cân bằng kho (`MaPhieuDieuChinh`, `MaPhieuKiemKe`, `NgayDuyet`, `TrangThai: DA_DUYET`).
+- [`ChiTietPhieuDieuChinh`](../../BTL-LTW-QuanLiKho-2/Models/ChiTietPhieuDieuChinh.cs): Chứa số lượng chênh lệch (`SoLuongDieuChinh = ThucTe - SoSach`).
+- [`NhatKyThaoTac`](../../BTL-LTW-QuanLiKho-2/Models/NhatKyThaoTac.cs): Lưu vết hành động cân bằng kho.
 
 ### 1.2. ViewModels sử dụng:
-- [`PhieuKiemKeIndexVM`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/ViewModels/KiemKhoViewModels.cs): Dữ liệu trang danh sách.
-- [`PhieuKiemKeFormVM`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/ViewModels/KiemKhoViewModels.cs): Dữ liệu form lập/sửa phiếu.
-- [`PhieuKiemKeLineVM`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/ViewModels/KiemKhoViewModels.cs): Một dòng hàng hóa kiểm trong bảng chi tiết.
-- [`SaveStockTakeRequest`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/ViewModels/KiemKhoViewModels.cs): Dữ liệu JSON gửi lên server khi bấm Lưu tạm hoặc Cân bằng kho.
+- [`PhieuKiemKeIndexVM`](../../BTL-LTW-QuanLiKho-2/ViewModels/KiemKhoViewModels.cs): Dữ liệu trang danh sách.
+- [`PhieuKiemKeFormVM`](../../BTL-LTW-QuanLiKho-2/ViewModels/KiemKhoViewModels.cs): Dữ liệu form lập/sửa phiếu.
+- [`PhieuKiemKeLineVM`](../../BTL-LTW-QuanLiKho-2/ViewModels/KiemKhoViewModels.cs): Một dòng hàng hóa kiểm trong bảng chi tiết.
+- [`SaveStockTakeRequest`](../../BTL-LTW-QuanLiKho-2/ViewModels/KiemKhoViewModels.cs): Dữ liệu JSON gửi lên server khi bấm Lưu tạm hoặc Cân bằng kho.
 
 ---
 
@@ -64,8 +64,8 @@ Khi người dùng nhấn nút **"Cân bằng kho"**:
 3. Chuyển trạng thái phiếu kiểm sang `'DA_DIEU_CHINH'`.
 4. Lưu danh sách chi tiết kiểm kê (`ChiTietPhieuKiemKe`).
 5. Lọc những mặt hàng có chênh lệch thực tế (`SoLuongThucTe.HasValue && (SoLuongThucTe - SoLuongTheoSo != 0)`):
-   - Tạo một bản ghi [`PhieuDieuChinh`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/PhieuDieuChinh.cs) với trạng thái `'DA_DUYET'`.
-   - Tạo các dòng [`ChiTietPhieuDieuChinh`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/ChiTietPhieuDieuChinh.cs) tương ứng với `SoLuongDieuChinh = SoLuongThucTe - SoLuongTheoSo`.
-6. Ghi nhật ký vào [`NhatKyThaoTac`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/NhatKyThaoTac.cs).
+   - Tạo một bản ghi [`PhieuDieuChinh`](../../BTL-LTW-QuanLiKho-2/Models/PhieuDieuChinh.cs) với trạng thái `'DA_DUYET'`.
+   - Tạo các dòng [`ChiTietPhieuDieuChinh`](../../BTL-LTW-QuanLiKho-2/Models/ChiTietPhieuDieuChinh.cs) tương ứng với `SoLuongDieuChinh = SoLuongThucTe - SoLuongTheoSo`.
+6. Ghi nhật ký vào [`NhatKyThaoTac`](../../BTL-LTW-QuanLiKho-2/Models/NhatKyThaoTac.cs).
 7. Commit giao dịch: `await trans.CommitAsync();`.
 8. **Khóa phiếu**: Phiếu kiểm đã cân bằng không được phép sửa, không được phép xóa và **không được phép hủy**.

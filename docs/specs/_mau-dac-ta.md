@@ -48,7 +48,7 @@
   - Có kiểm tra tồn kho âm trước khi thực hiện không? (Bắt buộc kiểm tra khi xuất kho).
 - **Quy tắc sửa / hủy**:
   - Phiếu tạm được sửa/xóa.
-  - Phiếu đã hoàn thành không được sửa/xóa, chỉ được Hủy (kèm bút toán đảo).
+  - Phiếu đã hoàn thành không được sửa/xóa; chỉ được Hủy (chuyển trạng thái chứng từ sang 'HUY' và kiểm tra chặn tồn âm nếu hủy phiếu nhập). Do tồn kho được tính toán động từ View `vw_TonKhoHienTai`, chứng từ ở trạng thái 'HUY' sẽ tự động không còn tính vào tồn kho mà không cần sinh bút toán đảo.
 - **Giao dịch**: Bọc toàn bộ quá trình lưu trong `BeginTransactionAsync()`.
 - **Nhật ký**: Ghi 1 dòng vào `NhatKyThaoTac`.
 

@@ -1032,7 +1032,7 @@ $(document).ready(function () {
         }
 
         $.ajax({
-            url: '/HangHoas/CreateGroupQuick',
+            url: '/HangHoa/CreateGroupQuick',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ tenNhom: name }),
@@ -1115,7 +1115,7 @@ $(document).ready(function () {
         $('#boxInitialStock').hide();
 
         $.ajax({
-            url: '/HangHoas/GetItem/' + id,
+            url: '/HangHoa/GetItem/' + id,
             type: 'GET',
             success: function (res) {
                 $('#formMaHangNoiBo').val(res.maHangNoiBo);
@@ -1201,7 +1201,7 @@ $(document).ready(function () {
             xoaHinhAnh: $('#formXoaHinhAnh').val() === 'true'
         };
 
-        const url = maHang > 0 ? ('/HangHoas/Edit/' + maHang) : '/HangHoas/Create';
+        const url = maHang > 0 ? ('/HangHoa/Edit/' + maHang) : '/HangHoa/Create';
         const saveBtn = $('#btnSaveProduct');
         saveBtn.prop('disabled', true).text('Đang lưu...');
 
@@ -1242,7 +1242,7 @@ $(document).ready(function () {
     $('#btnExecuteDelete').on('click', function () {
         if (deleteId > 0) {
             $.ajax({
-                url: '/HangHoas/Delete/' + deleteId,
+                url: '/HangHoa/Delete/' + deleteId,
                 type: 'POST',
                 success: function (res) {
                     $('#deleteConfirmModal').modal('hide');
@@ -1361,7 +1361,7 @@ $(document).ready(function () {
         e.stopPropagation();
         const id = $(this).data('id');
         $.ajax({
-            url: '/HangHoas/GetItem/' + id,
+            url: '/HangHoa/GetItem/' + id,
             type: 'GET',
             success: function (res) {
                 resetModalForm();
@@ -1410,7 +1410,7 @@ $(document).ready(function () {
         if (!$btn.length || !id) return;
 
         $.ajax({
-            url: '/HangHoas/ToggleFavorite',
+            url: '/HangHoa/ToggleFavorite',
             type: 'POST',
             data: { id: id },
             success: function (res) {
@@ -1499,7 +1499,7 @@ $(document).ready(function () {
         $('#dotLoaiHang').toggle(!!loaiHang);
 
         $.ajax({
-            url: '/HangHoas/Filter',
+            url: '/HangHoa/Filter',
             type: 'GET',
             data: {
                 q: q,

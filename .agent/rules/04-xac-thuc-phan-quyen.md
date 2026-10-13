@@ -30,9 +30,9 @@ app.UseAuthorization();
 ## 2. Mô hình Người dùng & Vai trò trong CSDL
 
 Hệ thống tách biệt thông tin con người và tài khoản đăng nhập:
-1. **[`NhanVien`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/NhanVien.cs)**: Lưu thông tin cá nhân (`MaNV`, `HoTen`, `DienThoai`, `Email`, `NgayVaoLam`, `TrangThai: DANG_LAM / NGHI_VIEC`).
-2. **[`TaiKhoan`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/TaiKhoan.cs)**: Lưu thông tin đăng nhập (`MaTaiKhoan`, `MaNV`, `MaVaiTro`, `TenDangNhap`, `MatKhauHash`, `TrangThai: HOAT_DONG / KHOA`).
-3. **[`VaiTro`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Models/VaiTro.cs)**: Lưu vai trò trong hệ thống (`MaVaiTro`, `TenVaiTro`, `MoTa`).
+1. **[`NhanVien`](../../BTL-LTW-QuanLiKho-2/Models/NhanVien.cs)**: Lưu thông tin cá nhân (`MaNV`, `HoTen`, `DienThoai`, `Email`, `NgayVaoLam`, `TrangThai: DANG_LAM / NGHI_VIEC`).
+2. **[`TaiKhoan`](../../BTL-LTW-QuanLiKho-2/Models/TaiKhoan.cs)**: Lưu thông tin đăng nhập (`MaTaiKhoan`, `MaNV`, `MaVaiTro`, `TenDangNhap`, `MatKhauHash`, `TrangThai: HOAT_DONG / KHOA`).
+3. **[`VaiTro`](../../BTL-LTW-QuanLiKho-2/Models/VaiTro.cs)**: Lưu vai trò trong hệ thống (`MaVaiTro`, `TenVaiTro`, `MoTa`).
 
 ### Các vai trò nghiệp vụ chuẩn:
 - **Quản trị viên / Admin**: Toàn quyền cấu hình hệ thống, quản lý người dùng, xem được tất cả các kho và duyệt mọi chứng từ.

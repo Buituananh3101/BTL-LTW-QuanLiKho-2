@@ -14,6 +14,16 @@ builder.Services.AddDbContext<QuanLyKhoPhuQuocLtwContext>(options =>
 builder.Services.AddScoped<BTL_LTW_QuanLiKho_2.Services.ITonKhoService, BTL_LTW_QuanLiKho_2.Services.TonKhoService>();
 builder.Services.AddScoped<BTL_LTW_QuanLiKho_2.Services.IBanHangService, BTL_LTW_QuanLiKho_2.Services.BanHangService>();
 
+builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+    });
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromHours(4);
@@ -35,6 +45,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseSession();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

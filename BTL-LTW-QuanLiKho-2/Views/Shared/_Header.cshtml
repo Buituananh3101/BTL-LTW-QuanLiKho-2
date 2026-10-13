@@ -7,7 +7,7 @@
 
 <header class="topbar">
   <div class="d-flex align-items-center gap-3">
-    <a class="brand" asp-controller="HangHoas" asp-action="Index">
+    <a class="brand" asp-controller="HangHoa" asp-action="Index">
       <span class="brand-logo"><i class="bi bi-box-seam"></i></span>
       <span>KhoPro</span>
     </a>
@@ -45,9 +45,33 @@
       <span class="dot">2</span>
     </a>
     <a href="#" title="Cài đặt"><i class="bi bi-gear-fill fs-6"></i></a>
-    <div class="d-flex align-items-center gap-2">
-      <span class="avatar"><i class="bi bi-person-fill"></i></span>
-      <span class="fw-semibold small d-none d-md-inline">Trần Thị Kho</span>
+    <div class="dropdown">
+      <button class="btn btn-link text-white text-decoration-none dropdown-toggle d-flex align-items-center gap-2 p-0" type="button" id="userMenuBtn" data-bs-toggle="dropdown" aria-expanded="false">
+        <span class="avatar"><i class="bi bi-person-fill"></i></span>
+        <span class="fw-semibold small d-none d-md-inline">@(User.Identity?.IsAuthenticated == true ? (User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ?? User.Identity.Name) : "Khách")</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userMenuBtn">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+          <li class="px-3 py-2 border-bottom">
+            <div class="fw-bold small text-dark">@(User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ?? User.Identity.Name)</div>
+            <div class="text-muted smaller" style="font-size: 11px;">@(User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "Nhân viên")</div>
+          </li>
+          <li>
+            <a class="dropdown-item small text-danger py-2" asp-controller="Account" asp-action="LogoutGet">
+              <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+            </a>
+          </li>
+        }
+        else
+        {
+          <li>
+            <a class="dropdown-item small py-2" asp-controller="Account" asp-action="Login">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
+            </a>
+          </li>
+        }
+      </ul>
     </div>
   </div>
 </header>

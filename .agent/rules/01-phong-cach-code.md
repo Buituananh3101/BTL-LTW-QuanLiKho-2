@@ -96,6 +96,12 @@ public class HangHoaForm
 }
 ```
 
+### 3.3. Chuẩn hóa Phản hồi JSON (`ApiResponse` [ISSUE-16])
+Toàn bộ Action AJAX trả về dữ liệu JSON phải tuân thủ khuôn mẫu từ [`ApiResponse`](../../BTL-LTW-QuanLiKho-2/ViewModels/ApiResponse.cs):
+- Cấu trúc: `{ success: true/false, message: "...", data: ... }`
+- Thành công: `Ok(ApiResponse.Ok("Thông báo thành công", data))`
+- Thất bại: `BadRequest(ApiResponse.Fail("Thông báo lỗi"))` hoặc `NotFound(ApiResponse.Fail("Không tìm thấy"))`
+
 ---
 
 ## 4. Cấu trúc View & Razor
@@ -103,7 +109,7 @@ public class HangHoaForm
 - **Layout mặc định**: Khai báo tại `Views/_ViewStart.cshtml` (`Layout = "_Layout";`). Trong các View con **không viết lại dòng `Layout = ...`**.
 - **Tiêu đề trang**: Mỗi view luôn đặt `ViewData["Title"] = "Tên trang";` ở đầu file.
 - **Sử dụng Tag Helper chuẩn**:
-  - Link/Nút: `<a asp-controller="HangHoas" asp-action="Index">Danh sách</a>`
+  - Link/Nút: `<a asp-controller="HangHoa" asp-action="Index">Danh sách</a>`
   - Form: `<form asp-action="Create" method="post">`
   - Input/Select: `<input asp-for="TenHang" class="form-control" />`
   - Validation: `<span asp-validation-for="TenHang" class="text-danger"></span>`

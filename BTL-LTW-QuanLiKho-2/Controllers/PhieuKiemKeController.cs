@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BTL_LTW_QuanLiKho_2.Models;
@@ -6,6 +7,7 @@ using BTL_LTW_QuanLiKho_2.Services;
 
 namespace BTL_LTW_QuanLiKho_2.Controllers;
 
+[Authorize]
 public class PhieuKiemKeController : Controller
 {
     private readonly QuanLyKhoPhuQuocLtwContext _context;
@@ -31,14 +33,12 @@ public class PhieuKiemKeController : Controller
 
     private int GetCurrentUserId()
     {
-        var userId = HttpContext.Session.GetInt32("CurrentUserId");
-        if (!userId.HasValue || userId.Value <= 0)
-        {
-            // Mặc định là Thủ kho (MaNV = 2) hoặc Quản lý (MaNV = 1)
-            userId = 2;
-            HttpContext.Session.SetInt32("CurrentUserId", userId.Value);
-        }
-        return userId.Value;
+        return User.GetMaNv();
+    }
+
+    private int GetCurrentAccountId()
+    {
+        return User.GetMaTaiKhoan();
     }
 
     private (DateTime fromDate, DateTime toDate) ResolveDateRange(string filterType, DateTime? customFrom, DateTime? customTo)
@@ -165,6 +165,8 @@ public class PhieuKiemKeController : Controller
                                     .Sum(d => d.SoLuongThucTe!.Value - d.SoLuongTheoSo);
             var slLechGiam = details.Where(d => d.SoLuongThucTe.HasValue && d.SoLuongThucTe.Value < d.SoLuongTheoSo)
                                     .Sum(d => d.SoLuongTheoSo - d.SoLuongThucTe!.Value);
+            var tongGiaTriLech = details.Where(d => d.SoLuongThucTe.HasValue)
+                                    .Sum(d => (d.SoLuongThucTe!.Value - d.SoLuongTheoSo) * (d.DonGia > 0 ? d.DonGia : ((d.MaHangNavigation != null && d.MaHangNavigation.GiaVon > 0) ? d.MaHangNavigation.GiaVon : (d.MaHangNavigation?.GiaBanThamKhao ?? 0))));
 
             DateTime? ngayCanBang = p.PhieuDieuChinh?.NgayDuyet ?? (p.TrangThai == "DA_DIEU_CHINH" ? p.ThoiDiemChot : null);
 
@@ -182,7 +184,8 @@ public class PhieuKiemKeController : Controller
                 TongThucTe = tongThucTe,
                 TongSoLuongSo = tongSoLuongSo,
                 SlLechTang = slLechTang,
-                SlLechGiam = slLechGiam
+                SlLechGiam = slLechGiam,
+                TongGiaTriLech = tongGiaTriLech
             };
         }).ToList();
 
@@ -278,7 +281,7 @@ public class PhieuKiemKeController : Controller
                 TenNhom = ct.MaHangNavigation?.MaNhomNavigation?.TenNhom ?? "",
                 SoLuongTheoSo = ct.SoLuongTheoSo,
                 SoLuongThucTe = ct.SoLuongThucTe,
-                DonGia = (ct.MaHangNavigation != null && ct.MaHangNavigation.GiaVon > 0) ? ct.MaHangNavigation.GiaVon : (ct.MaHangNavigation?.GiaBanThamKhao ?? 0)
+                DonGia = ct.DonGia > 0 ? ct.DonGia : ((ct.MaHangNavigation != null && ct.MaHangNavigation.GiaVon > 0) ? ct.MaHangNavigation.GiaVon : (ct.MaHangNavigation?.GiaBanThamKhao ?? 0))
             };
         }).ToList();
 
@@ -327,7 +330,7 @@ public class PhieuKiemKeController : Controller
             TenNhom = ct.MaHangNavigation?.MaNhomNavigation?.TenNhom ?? "",
             SoLuongTheoSo = ct.SoLuongTheoSo,
             SoLuongThucTe = ct.SoLuongThucTe,
-            DonGia = (ct.MaHangNavigation != null && ct.MaHangNavigation.GiaVon > 0) ? ct.MaHangNavigation.GiaVon : (ct.MaHangNavigation?.GiaBanThamKhao ?? 0)
+            DonGia = ct.DonGia > 0 ? ct.DonGia : ((ct.MaHangNavigation != null && ct.MaHangNavigation.GiaVon > 0) ? ct.MaHangNavigation.GiaVon : (ct.MaHangNavigation?.GiaBanThamKhao ?? 0))
         }).ToList();
 
         var model = new PhieuKiemKeFormVM
@@ -399,15 +402,22 @@ public class PhieuKiemKeController : Controller
                 await _context.SaveChangesAsync();
             }
 
-            // Thêm chi tiết
+            // Thêm chi tiết và đóng băng đơn giá chốt
+            var hangIds = req.Lines.Select(l => l.MaHang).Distinct().ToList();
+            var hangMap = await _context.HangHoas
+                .Where(h => hangIds.Contains(h.MaHang))
+                .ToDictionaryAsync(h => h.MaHang, h => h.GiaVon > 0 ? h.GiaVon : h.GiaBanThamKhao);
+
             foreach (var line in req.Lines)
             {
+                decimal donGia = line.DonGia > 0 ? line.DonGia : (hangMap.TryGetValue(line.MaHang, out var g) ? g : 0m);
                 var ct = new ChiTietPhieuKiemKe
                 {
                     MaPhieuKiemKe = pkk.MaPhieuKiemKe,
                     MaHang = line.MaHang,
                     SoLuongTheoSo = line.SoLuongTheoSo,
-                    SoLuongThucTe = line.SoLuongThucTe
+                    SoLuongThucTe = line.SoLuongThucTe,
+                    DonGia = donGia
                 };
                 _context.ChiTietPhieuKiemKes.Add(ct);
             }
@@ -492,19 +502,26 @@ public class PhieuKiemKeController : Controller
                 .Where(s => s.MaKho == pkk.MaKho)
                 .ToDictionaryAsync(s => s.MaHang, s => s.SoLuongTon ?? 0);
 
+            var hangIds = req.Lines.Select(l => l.MaHang).Distinct().ToList();
+            var hangMap = await _context.HangHoas
+                .Where(h => hangIds.Contains(h.MaHang))
+                .ToDictionaryAsync(h => h.MaHang, h => h.GiaVon > 0 ? h.GiaVon : h.GiaBanThamKhao);
+
             var createdDetails = new List<ChiTietPhieuKiemKe>();
 
             foreach (var line in req.Lines)
             {
                 // Tồn kho sổ sách được chốt lại tại thời điểm cân bằng
                 var currentSystemStock = stockMap.TryGetValue(line.MaHang, out var stock) ? stock : line.SoLuongTheoSo;
+                decimal donGia = line.DonGia > 0 ? line.DonGia : (hangMap.TryGetValue(line.MaHang, out var g) ? g : 0m);
 
                 var ct = new ChiTietPhieuKiemKe
                 {
                     MaPhieuKiemKe = pkk.MaPhieuKiemKe,
                     MaHang = line.MaHang,
                     SoLuongTheoSo = currentSystemStock,
-                    SoLuongThucTe = line.SoLuongThucTe
+                    SoLuongThucTe = line.SoLuongThucTe,
+                    DonGia = donGia
                 };
                 _context.ChiTietPhieuKiemKes.Add(ct);
                 createdDetails.Add(ct);
@@ -551,7 +568,7 @@ public class PhieuKiemKeController : Controller
             {
                 var audit = new NhatKyThaoTac
                 {
-                    MaTaiKhoan = 1, // Quản lý
+                    MaTaiKhoan = GetCurrentAccountId(),
                     ThoiDiem = DateTime.Now,
                     ThaoTac = "Cân bằng kho",
                     LoaiDoiTuong = "PhieuKiemKe",

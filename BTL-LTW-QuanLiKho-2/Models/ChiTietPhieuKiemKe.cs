@@ -15,6 +15,8 @@ public partial class ChiTietPhieuKiemKe
 
     public decimal? SoLuongThucTe { get; set; }
 
+    public decimal DonGia { get; set; }
+
     public virtual ChiTietPhieuDieuChinh? ChiTietPhieuDieuChinh { get; set; }
 
     public virtual HangHoa MaHangNavigation { get; set; } = null!;

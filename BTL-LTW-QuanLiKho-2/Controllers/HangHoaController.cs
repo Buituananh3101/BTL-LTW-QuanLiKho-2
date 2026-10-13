@@ -1,16 +1,19 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BTL_LTW_QuanLiKho_2.Models;
 using BTL_LTW_QuanLiKho_2.ViewModels;
+using BTL_LTW_QuanLiKho_2.Services;
 
 namespace BTL_LTW_QuanLiKho_2.Controllers;
 
-public class HangHoasController : Controller
+[Authorize]
+public class HangHoaController : Controller
 {
     private readonly QuanLyKhoPhuQuocLtwContext _context;
 
-    public HangHoasController(QuanLyKhoPhuQuocLtwContext context)
+    public HangHoaController(QuanLyKhoPhuQuocLtwContext context)
     {
         _context = context;
     }
@@ -486,8 +489,43 @@ public class HangHoasController : Controller
             item.HinhAnh = ParseBase64Image(model.HinhAnhBase64);
         }
 
-        _context.HangHoas.Add(item);
-        await _context.SaveChangesAsync();
+        bool isAutoCode = string.IsNullOrWhiteSpace(model.MaHangNoiBo);
+        int retry = 0;
+        bool saved = false;
+
+        while (retry < 3 && !saved)
+        {
+            try
+            {
+                if (isAutoCode && retry > 0)
+                {
+                    item.MaHangNoiBo = await SinhMaHangNoiBoTuDongAsync();
+                }
+
+                _context.HangHoas.Add(item);
+                await _context.SaveChangesAsync();
+                saved = true;
+            }
+            catch (DbUpdateException ex)
+            {
+                _context.HangHoas.Remove(item);
+                if (ex.InnerException?.Message.Contains("UQ_HangHoa_MaHangNoiBo") == true)
+                {
+                    if (isAutoCode)
+                    {
+                        retry++;
+                        continue;
+                    }
+                    return BadRequest(new { message = $"Mã hàng nội bộ '{model.MaHangNoiBo}' đã bị trùng lặp trong hệ thống." });
+                }
+                return BadRequest(new { message = "Lỗi khi lưu dữ liệu hàng hóa: " + ex.Message });
+            }
+        }
+
+        if (!saved)
+        {
+            return BadRequest(new { message = "Không thể sinh mã hàng tự động do đụng độ hệ thống. Vui lòng thử lại." });
+        }
 
         int whId = GetCurrentWarehouseId();
 
@@ -507,8 +545,7 @@ public class HangHoasController : Controller
         // Tạo tồn kho ban đầu nếu có nhập số lượng > 0
         if (model.TonKhoBanDau.HasValue && model.TonKhoBanDau.Value > 0)
         {
-            var firstNv = await _context.NhanViens.FirstOrDefaultAsync();
-            int nvId = firstNv?.MaNv ?? 1;
+            int nvId = User.GetMaNv();
 
             var phieuNhap = new PhieuNhap
             {
@@ -567,7 +604,18 @@ public class HangHoasController : Controller
             item.HinhAnh = ParseBase64Image(model.HinhAnhBase64);
         }
 
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex)
+        {
+            if (ex.InnerException?.Message.Contains("UQ_HangHoa_MaHangNoiBo") == true)
+            {
+                return BadRequest(new { message = $"Mã hàng nội bộ '{model.MaHangNoiBo}' đã bị trùng lặp trong hệ thống." });
+            }
+            return BadRequest(new { message = "Lỗi khi lưu dữ liệu hàng hóa: " + ex.Message });
+        }
 
         int whId = GetCurrentWarehouseId();
 
@@ -645,6 +693,28 @@ public class HangHoasController : Controller
         return System.Text.Encoding.UTF8.GetBytes(svg);
     }
 
+    private async Task<string> SinhMaHangNoiBoTuDongAsync()
+    {
+        var existingCodes = await _context.HangHoas
+            .Where(x => x.MaHangNoiBo.StartsWith("HH"))
+            .Select(x => x.MaHangNoiBo)
+            .ToListAsync();
+
+        int maxNum = 0;
+        foreach (var code in existingCodes)
+        {
+            if (code.Length > 2 && int.TryParse(code[2..], out int num))
+            {
+                if (num > maxNum) maxNum = num;
+            }
+        }
+
+        int maxId = await _context.HangHoas.MaxAsync(x => (int?)x.MaHang) ?? 0;
+        int nextNum = Math.Max(maxNum, maxId) + 1;
+
+        return "HH" + nextNum.ToString("D6");
+    }
+
     private async Task ValidateAndPrepareForm(HangHoaForm m)
     {
         m.TenHang = m.TenHang?.Trim() ?? "";
@@ -655,8 +725,7 @@ public class HangHoasController : Controller
 
         if (string.IsNullOrWhiteSpace(m.MaHangNoiBo))
         {
-            int maxId = await _context.HangHoas.MaxAsync(x => (int?)x.MaHang) ?? 0;
-            m.MaHangNoiBo = "HH" + (maxId + 1).ToString("D6");
+            m.MaHangNoiBo = await SinhMaHangNoiBoTuDongAsync();
         }
         else
         {

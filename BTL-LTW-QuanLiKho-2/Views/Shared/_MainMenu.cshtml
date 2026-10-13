@@ -9,17 +9,17 @@
       <a asp-controller="Home" asp-action="Index">Tổng quan</a>
     </li>
 
-    <li class="@(controller == "HangHoas" || controller == "PhieuKiemKe" ? "active" : "")">
+    <li class="@(controller == "HangHoa" || controller == "PhieuKiemKe" ? "active" : "")">
       <a href="javascript:void(0)" onclick="return false;">Hàng hóa</a>
       <div class="mega">
         <div class="mega-col">
           <div class="mega-title">Hàng hóa</div>
-          <a asp-controller="HangHoas" asp-action="Index">Danh sách hàng hóa</a>
-          <a asp-controller="HangHoas" asp-action="Index" asp-route-tab="nhom">Nhóm hàng</a>
+          <a asp-controller="HangHoa" asp-action="Index">Danh sách hàng hóa</a>
+          <a asp-controller="HangHoa" asp-action="Index" asp-route-tab="nhom">Nhóm hàng</a>
         </div>
         <div class="mega-col">
           <div class="mega-title">Kho hàng</div>
-          <a asp-controller="HangHoas" asp-action="Index">Tồn kho</a>
+          <a asp-controller="HangHoa" asp-action="Index">Tồn kho</a>
           <a asp-controller="PhieuKiemKe" asp-action="Index">Kiểm kho</a>
           <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Chuyển kho</a>
           <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Xuất dùng nội bộ</a>
