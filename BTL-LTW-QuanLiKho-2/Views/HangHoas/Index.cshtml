@@ -1399,38 +1399,34 @@ $(document).ready(function () {
         });
     });
 
-    // Xử lý bấm đánh dấu sao ở từng dòng hàng hóa (AJAX)
-    $(document).on('click', '.star-btn:not(#starHeaderFilter)', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const starBtn = $(this);
-        const id = starBtn.data('id');
-        if (!id) return;
-
-        starBtn.css('transform', 'scale(1.35)');
+    // Hàm toàn cục xử lý bấm đánh dấu sao ở từng dòng hàng hóa (AJAX)
+    window.toggleFavoriteProduct = function (e, id, el) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        const $cell = $(el);
+        const $btn = $cell.hasClass('star-btn') ? $cell : $cell.find('.star-btn');
+        if (!$btn.length || !id) return;
 
         $.ajax({
             url: '/HangHoas/ToggleFavorite',
             type: 'POST',
             data: { id: id },
             success: function (res) {
-                setTimeout(function () {
-                    starBtn.css('transform', '');
-                }, 150);
-
-                if (res.success) {
+                if (res && res.success) {
                     if (res.isFavorite) {
-                        starBtn.addClass('starred')
+                        $btn.addClass('starred')
                             .attr('title', 'Bỏ đánh dấu sao')
                             .html('<i class="bi bi-star-fill"></i>');
                     } else {
-                        starBtn.removeClass('starred')
+                        $btn.removeClass('starred')
                             .attr('title', 'Đánh dấu sao')
                             .html('<i class="bi bi-star"></i>');
 
                         // Nếu đang lọc chỉ xem hàng có sao, bỏ sao sẽ ẩn dòng này đi
                         if (isStarredFilterActive) {
-                            const $tr = starBtn.closest('tr');
+                            const $tr = $btn.closest('tr');
                             const $detail = $('#detail-' + id);
                             $detail.remove();
                             $tr.fadeOut(250, function () {
@@ -1443,20 +1439,32 @@ $(document).ready(function () {
                     }
                 }
             },
-            error: function () {
-                starBtn.css('transform', '');
+            error: function (xhr) {
+                console.error('Lỗi khi cập nhật đánh dấu sao:', xhr);
                 alert('Có lỗi khi cập nhật đánh dấu sao.');
             }
         });
-    });
+    };
 
-    // Xử lý bấm ngôi sao ở Header để lọc nhanh hàng được đánh dấu sao
-    $(document).on('click', '#starHeaderFilter', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
+    // Hàm toàn cục xử lý bấm ngôi sao ở Header để lọc nhanh hàng được đánh dấu sao
+    window.toggleStarHeaderFilter = function (e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
         isStarredFilterActive = !isStarredFilterActive;
         currentPage = 1;
         loadTable();
+    };
+
+    // Bắt thêm sự kiện click trực tiếp làm dự phòng (delegated listener)
+    $(document).on('click', '.star-btn:not(#starHeaderFilter)', function (e) {
+        const id = $(this).data('id');
+        window.toggleFavoriteProduct(e, id, this);
+    });
+
+    $(document).on('click', '#starHeaderFilter', function (e) {
+        window.toggleStarHeaderFilter(e);
     });
 
     function loadTable() {

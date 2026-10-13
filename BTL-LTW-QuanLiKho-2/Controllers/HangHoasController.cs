@@ -52,7 +52,7 @@ public class HangHoasController : Controller
     }
 
     // AJAX Action bật/tắt đánh dấu sao (sản phẩm yêu thích)
-    [HttpPost]
+    [AcceptVerbs("GET", "POST")]
     public async Task<IActionResult> ToggleFavorite(int id)
     {
         var item = await _context.HangHoas.FindAsync(id);

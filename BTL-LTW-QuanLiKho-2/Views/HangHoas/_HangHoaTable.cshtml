@@ -11,7 +11,7 @@
             <th style="width: 34px;" class="text-center">
                 <input class="form-check-input" type="checkbox" id="selectAllRows" />
             </th>
-            <th style="width: 30px;" class="text-center">
+            <th style="width: 30px;" class="text-center" style="cursor: pointer;" onclick="toggleStarHeaderFilter(event)">
                 <span class="star-btn star-header-filter @(Model.DaDanhDauFilter ? "starred" : "")" id="starHeaderFilter" title="@(Model.DaDanhDauFilter ? "Bỏ lọc sao (Hiển thị tất cả)" : "Lọc danh sách hàng được đánh dấu sao")">
                     <i class="bi @(Model.DaDanhDauFilter ? "bi-star-fill" : "bi-star")"></i>
                 </span>
@@ -50,7 +50,7 @@
                     <td class="text-center" onclick="event.stopPropagation();">
                         <input class="form-check-input row-select" type="checkbox" value="@item.MaHang" />
                     </td>
-                    <td class="text-center" onclick="event.stopPropagation();">
+                    <td class="text-center cell-star" style="cursor: pointer;" onclick="toggleFavoriteProduct(event, @item.MaHang, this)">
                         <span class="star-btn @(item.IsFavorite ? "starred" : "")" data-id="@item.MaHang" title="@(item.IsFavorite ? "Bỏ đánh dấu sao" : "Đánh dấu sao")">
                             <i class="bi @(item.IsFavorite ? "bi-star-fill" : "bi-star")"></i>
                         </span>
