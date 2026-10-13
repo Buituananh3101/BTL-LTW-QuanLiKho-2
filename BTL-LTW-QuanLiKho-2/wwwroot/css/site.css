@@ -556,23 +556,48 @@ body {
   border: 1px solid var(--border);
   padding: 16px;
   min-width: 250px;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s ease;
 }
-/* Thanh cuộn mảnh đẹp cho bộ lọc & bảng hàng hóa */
-.kiot-filter-box::-webkit-scrollbar,
+.kiot-sidebar-col:hover .kiot-filter-box,
+.kiot-filter-box:hover {
+  scrollbar-color: #cbd5e1 transparent;
+}
+/* Thanh cuộn left menu chỉ hiện khi trỏ chuột vào leftmenu (WebKit) */
+.kiot-filter-box::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.kiot-filter-box::-webkit-scrollbar-track {
+  background: transparent;
+}
+.kiot-filter-box::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+.kiot-sidebar-col:hover .kiot-filter-box::-webkit-scrollbar-thumb,
+.kiot-filter-box:hover::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+.kiot-sidebar-col:hover .kiot-filter-box::-webkit-scrollbar-thumb:hover,
+.kiot-filter-box:hover::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Thanh cuộn cho bảng hàng hóa */
 .kiot-table-scroll-body::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-.kiot-filter-box::-webkit-scrollbar-track,
 .kiot-table-scroll-body::-webkit-scrollbar-track {
   background: transparent;
 }
-.kiot-filter-box::-webkit-scrollbar-thumb,
 .kiot-table-scroll-body::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 4px;
 }
-.kiot-filter-box::-webkit-scrollbar-thumb:hover,
 .kiot-table-scroll-body::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
@@ -778,10 +803,21 @@ body {
   box-shadow: 0 2px 8px rgba(10, 102, 232, 0.25);
   color: var(--brand);
   font-size: 13px;
-  transition: left 0.4s cubic-bezier(0.25, 1, 0.35, 1), background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  opacity: 0; /* Mặc định ẩn khi menu mở */
+  pointer-events: none;
+  transition: opacity 0.25s ease, left 0.4s cubic-bezier(0.25, 1, 0.35, 1), background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   user-select: none;
   outline: none;
 }
+
+/* Nút chỉ hiện lên khi trỏ chuột vào leftmenu hoặc vào nút */
+.kiot-sidebar-col:hover ~ .kiot-sidebar-toggle-btn,
+.kiot-sidebar-toggle-btn:hover,
+.kiot-sidebar-toggle-btn.btn-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .kiot-sidebar-toggle-btn:hover {
   background: #eff6ff;
   transform: scale(1.12);
@@ -812,8 +848,11 @@ body {
   overflow: hidden !important;
   pointer-events: none !important;
 }
+/* Khi thụt vào (collapsed): Nút LUÔN HIỆN kể cả khi không trỏ chuột */
 .kiot-container.sidebar-collapsed .kiot-sidebar-toggle-btn {
   left: 8px;
+  opacity: 1 !important;
+  pointer-events: auto !important;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
 }
 .kiot-container.sidebar-collapsed .kiot-main-col {

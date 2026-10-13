@@ -599,6 +599,20 @@ $(document).ready(function () {
         toggleSidebar();
     });
 
+    // Hover buffer cho nút thò thụt khi sidebar đang mở (chống giật/flicker)
+    let toggleHoverTimer = null;
+    $('#sidebarFilterCol, #btnToggleSidebar').on('mouseenter', function () {
+        clearTimeout(toggleHoverTimer);
+        $('#btnToggleSidebar').addClass('btn-visible');
+    }).on('mouseleave', function () {
+        clearTimeout(toggleHoverTimer);
+        toggleHoverTimer = setTimeout(function () {
+            if (!$('#sidebarFilterCol:hover').length && !$('#btnToggleSidebar:hover').length) {
+                $('#btnToggleSidebar').removeClass('btn-visible');
+            }
+        }, 120);
+    });
+
     // Phím tắt F4 để kéo vào / kéo ra
     $(document).on('keydown', function (e) {
         if (e.key === 'F4') {
