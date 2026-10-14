@@ -37,7 +37,7 @@
 | **Đánh dấu sao** | Click ngôi sao | JS AJAX `POST /HangHoa/ToggleFavorite?id=X` | `ToggleFavorite(id)` đảo cờ `DaDanhDau` | Lưu DB ➜ Trả JSON toggle class vàng |
 | **Xóa hàng** | Click Xóa ➜ Xác nhận | JS AJAX `POST /HangHoa/Delete?id=X` | `Delete(id)` kiểm tra ràng buộc chứng từ | Chặn nếu đã có giao dịch; xóa nếu chưa có |
 | **Cập nhật nhanh thuộc tính** | "+ Thêm thuộc tính" ở dòng chi tiết | JS mở `quickAttrModal`, nạp thuộc tính | `UpdateThuocTinh(...)` lưu JSON mảng thuộc tính | Cập nhật `HangHoa.ThuocTinh` ➜ reload bảng |
-| **Hiển thị ảnh** | Bảng hiển thị `<img>` | `src="/HangHoa/GetImage?id=X"` | `GetImage(id)` đọc byte ảnh từ DB | Trả byte ảnh / SVG. Cấm SELECT ảnh ở bảng |
+| **Hiển thị ảnh** | Bảng hiển thị `<img>` | `src="/HangHoa/GetImage/@item.MaHang?v=@item.ImageVersion"` | `GetImage(id)` hỗ trợ HTTP cache 24h, cache bust chính xác theo `ImageVersion` | Trả byte ảnh / SVG. Cấm SELECT ảnh ở bảng |
 
 ---
 

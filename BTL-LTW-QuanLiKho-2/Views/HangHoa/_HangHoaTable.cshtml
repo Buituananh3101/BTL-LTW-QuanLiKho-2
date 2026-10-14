@@ -57,11 +57,11 @@
                     </td>
                     <td class="text-center p-1" onclick="event.stopPropagation();">
                         <div class="product-img-wrapper" title="@item.TenHang">
-                            <img src="/HangHoa/GetImage/@item.MaHang" class="product-thumb-img" alt="@item.TenHang" />
+                            <img src="/HangHoa/GetImage/@item.MaHang?v=@item.ImageVersion" class="product-thumb-img" data-img-id="@item.MaHang" alt="@item.TenHang" />
                             @if (item.HasImage)
                             {
                                 <div class="product-img-popover">
-                                    <img src="/HangHoa/GetImage/@item.MaHang" alt="@item.TenHang" />
+                                    <img src="/HangHoa/GetImage/@item.MaHang?v=@item.ImageVersion" data-popover-img-id="@item.MaHang" alt="@item.TenHang" />
                                 </div>
                             }
                         </div>
@@ -128,7 +128,7 @@
                                     <div class="tab-pane-content tab-info">
                                         <div class="d-flex gap-4 align-items-start mb-4">
                                             <div class="product-detail-img-box">
-                                                <img src="/HangHoa/GetImage/@item.MaHang" alt="@item.TenHang" onerror="this.src='/images/no-image.png'" />
+                                                <img src="/HangHoa/GetImage/@item.MaHang?v=@item.ImageVersion" data-detail-img-id="@item.MaHang" alt="@item.TenHang" onerror="this.src='/images/no-image.png'" />
                                             </div>
                                             <div class="flex-grow-1" style="min-width: 0;">
                                                 <h4 class="product-detail-title mb-1">@item.TenHang</h4>

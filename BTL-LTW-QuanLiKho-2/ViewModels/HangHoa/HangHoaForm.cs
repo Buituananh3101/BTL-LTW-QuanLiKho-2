@@ -112,6 +112,7 @@ public class HangHoaItemVM
     public bool IsFavorite { get; set; }
     public bool DaDanhDau { get; set; }
     public bool HasImage { get; set; }
+    public long ImageVersion { get; set; } = 0;
     public int SoLuongAnh { get; set; } = 0;
     public DateTime? NgayTao { get; set; }
     public int KhachDat { get; set; } = 0;

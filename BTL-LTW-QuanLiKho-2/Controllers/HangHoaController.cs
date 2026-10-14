@@ -59,7 +59,7 @@ public class HangHoaController : BaseKhoController
 
     // Lấy ảnh trực tiếp từ CSDL (hỗ trợ ảnh chính hoặc theo index 0-4)
     [HttpGet]
-    [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Client)]
+    [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Client)]
     public async Task<IActionResult> GetImage(int id, int? index = 0)
     {
         byte[]? data = null;
@@ -72,6 +72,25 @@ public class HangHoaController : BaseKhoController
                 .Where(x => x.MaHang == id && x.ThuTu == idx)
                 .Select(x => x.DuLieuAnh)
                 .FirstOrDefaultAsync();
+        }
+        else
+        {
+            // Ưu tiên ảnh được đánh dấu LaAnhChinh trong bảng HinhAnhHangHoa
+            data = await _context.HinhAnhHangHoas
+                .AsNoTracking()
+                .Where(x => x.MaHang == id && x.LaAnhChinh)
+                .Select(x => x.DuLieuAnh)
+                .FirstOrDefaultAsync();
+
+            if (data == null || data.Length == 0)
+            {
+                data = await _context.HinhAnhHangHoas
+                    .AsNoTracking()
+                    .Where(x => x.MaHang == id)
+                    .OrderBy(x => x.ThuTu)
+                    .Select(x => x.DuLieuAnh)
+                    .FirstOrDefaultAsync();
+            }
         }
 
         if (data == null || data.Length == 0)
@@ -335,7 +354,10 @@ public class HangHoaController : BaseKhoController
                 x.QuyCach,
                 x.TrangThai,
                 x.DaDanhDau,
-                HasImage = x.HinhAnh != null,
+                HasImage = x.HinhAnh != null || x.HinhAnhHangHoas.Any(),
+                ImageVersion = x.HinhAnhHangHoas.Where(h => h.LaAnhChinh).Select(h => (long?)h.MaHinhAnh).FirstOrDefault()
+                               ?? x.HinhAnhHangHoas.Select(h => (long?)h.MaHinhAnh).Max()
+                               ?? (x.NgayTao.HasValue ? x.NgayTao.Value.Ticks : (long)x.MaHang),
                 x.NgayTao
             })
             .ToListAsync();
@@ -369,6 +391,7 @@ public class HangHoaController : BaseKhoController
                 IsFavorite = x.DaDanhDau,
                 DaDanhDau = x.DaDanhDau,
                 HasImage = x.HasImage,
+                ImageVersion = x.ImageVersion,
                 NgayTao = x.NgayTao,
                 KhachDat = 0,
                 DuKienHetHang = stock <= 0 ? "Đã hết hàng" :
