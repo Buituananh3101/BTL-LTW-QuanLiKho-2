@@ -1496,7 +1496,11 @@ tr.product-detail-row > td {
   display: none;
   max-height: 250px;
   overflow-y: auto;
-  padding: 4px 0;
+  overflow-x: hidden;
+  padding: 0 0 4px 0;
+}
+.kiot-ms-dropdown:not(:has(.kiot-ms-search)) {
+  padding-top: 4px;
 }
 .kiot-ms-dropdown.show {
   display: block;
@@ -1513,7 +1517,19 @@ tr.product-detail-row > td {
   position: sticky;
   top: 0;
   background: #ffffff;
-  z-index: 2;
+  z-index: 10;
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+}
+.kiot-ms-search::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: #ffffff;
+  pointer-events: none;
 }
 .kiot-ms-search input {
   width: 100%;
