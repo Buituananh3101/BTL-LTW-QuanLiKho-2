@@ -30,6 +30,14 @@ public partial class HangHoa
     public DateTime? NgayTao { get; set; }
  
     public bool DaDanhDau { get; set; }
+ 
+    public string? ViTri { get; set; }
+
+    public decimal? TrongLuong { get; set; }
+
+    public string? DonViTrongLuong { get; set; }
+
+    public string? ThuocTinh { get; set; }
 
     public virtual ICollection<ChiTietDonBan> ChiTietDonBans { get; set; } = new List<ChiTietDonBan>();
 

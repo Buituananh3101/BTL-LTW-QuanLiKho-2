@@ -310,6 +310,11 @@ public class HangHoaController : BaseKhoController
                 x.GiaBanThamKhao,
                 x.GiaVon,
                 TonToiThieu = x.NguongTonKhos.Where(n => n.MaKho == whId).Select(n => (decimal?)n.TonToiThieu).FirstOrDefault(),
+                TonCaoNhat = x.NguongTonKhos.Where(n => n.MaKho == whId).Select(n => (decimal?)n.TonCaoNhat).FirstOrDefault(),
+                x.ViTri,
+                x.TrongLuong,
+                x.DonViTrongLuong,
+                x.ThuocTinh,
                 x.QuyCach,
                 x.TrangThai,
                 x.DaDanhDau,
@@ -336,6 +341,12 @@ public class HangHoaController : BaseKhoController
                 GiaVon = cost,
                 TonKho = stock,
                 TonToiThieu = x.TonToiThieu,
+                TonCaoNhat = x.TonCaoNhat,
+                ViTri = x.ViTri,
+                TrongLuong = x.TrongLuong,
+                DonViTrongLuong = x.DonViTrongLuong ?? "g",
+                ThuocTinhJson = x.ThuocTinh,
+                ThuocTinhs = ParseThuocTinhJson(x.ThuocTinh),
                 QuyCach = x.QuyCach,
                 TrangThai = x.TrangThai,
                 IsFavorite = x.DaDanhDau,
@@ -488,6 +499,11 @@ public class HangHoaController : BaseKhoController
             giaVon = cost,
             tonKhoBanDau = stock,
             tonToiThieu = nguong?.TonToiThieu ?? 0,
+            tonCaoNhat = nguong?.TonCaoNhat ?? 999999999m,
+            viTri = item.ViTri ?? "",
+            trongLuong = item.TrongLuong ?? 0,
+            donViTrongLuong = item.DonViTrongLuong ?? "g",
+            thuocTinhJson = item.ThuocTinh ?? "[]",
             trangThai = item.TrangThai,
             hinhAnhBase64 = imgBase64
         });
@@ -592,14 +608,16 @@ public class HangHoaController : BaseKhoController
         using var trans = await _context.Database.BeginTransactionAsync();
         try
         {
-            // Lưu ngưỡng tồn kho
-            if (model.TonToiThieu.HasValue && model.TonToiThieu.Value > 0)
+            // Lưu ngưỡng tồn kho (Tối thiểu & Tối đa)
+            bool hasNguong = (model.TonToiThieu.HasValue && model.TonToiThieu.Value > 0) || (model.TonCaoNhat.HasValue && model.TonCaoNhat.Value > 0);
+            if (hasNguong)
             {
                 var nguong = new NguongTonKho
                 {
                     MaHang = item.MaHang,
                     MaKho = whId,
-                    TonToiThieu = model.TonToiThieu.Value
+                    TonToiThieu = model.TonToiThieu ?? 0,
+                    TonCaoNhat = model.TonCaoNhat ?? 999999999m
                 };
                 _context.NguongTonKhos.Add(nguong);
                 await _context.SaveChangesAsync();
@@ -690,18 +708,26 @@ public class HangHoaController : BaseKhoController
 
         int whId = GetCurrentWarehouseId();
 
-        // Cập nhật ngưỡng tồn
+        // Cập nhật ngưỡng tồn (Tối thiểu & Tối đa)
         var nguong = await _context.NguongTonKhos.FirstOrDefaultAsync(n => n.MaHang == id && n.MaKho == whId);
-        if (model.TonToiThieu.HasValue && model.TonToiThieu.Value > 0)
+        bool hasThreshold = (model.TonToiThieu.HasValue && model.TonToiThieu.Value > 0) || (model.TonCaoNhat.HasValue && model.TonCaoNhat.Value > 0);
+        if (hasThreshold)
         {
             if (nguong == null)
             {
-                nguong = new NguongTonKho { MaHang = id, MaKho = whId, TonToiThieu = model.TonToiThieu.Value };
+                nguong = new NguongTonKho
+                {
+                    MaHang = id,
+                    MaKho = whId,
+                    TonToiThieu = model.TonToiThieu ?? 0,
+                    TonCaoNhat = model.TonCaoNhat ?? 999999999m
+                };
                 _context.NguongTonKhos.Add(nguong);
             }
             else
             {
-                nguong.TonToiThieu = model.TonToiThieu.Value;
+                nguong.TonToiThieu = model.TonToiThieu ?? 0;
+                nguong.TonCaoNhat = model.TonCaoNhat ?? 999999999m;
             }
         }
         else if (nguong != null)
@@ -834,6 +860,35 @@ public class HangHoaController : BaseKhoController
         x.GiaBanThamKhao = m.GiaBanThamKhao;
         x.GiaVon = m.GiaVon;
         x.TrangThai = m.TrangThai;
+        x.ViTri = string.IsNullOrWhiteSpace(m.ViTri) ? null : m.ViTri.Trim();
+        x.TrongLuong = m.TrongLuong;
+        x.DonViTrongLuong = string.IsNullOrWhiteSpace(m.DonViTrongLuong) ? "g" : m.DonViTrongLuong.Trim();
+        x.ThuocTinh = string.IsNullOrWhiteSpace(m.ThuocTinhJson) ? null : m.ThuocTinhJson.Trim();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UpdateThuocTinh([FromBody] CapNhatThuocTinhRequest req)
+    {
+        if (req == null || req.MaHang <= 0) return BadRequest(new { message = "Dữ liệu không hợp lệ." });
+        var item = await _context.HangHoas.FindAsync(req.MaHang);
+        if (item == null) return NotFound(new { message = "Không tìm thấy hàng hóa." });
+
+        item.ThuocTinh = string.IsNullOrWhiteSpace(req.ThuocTinhJson) ? null : req.ThuocTinhJson.Trim();
+        await _context.SaveChangesAsync();
+        return Json(new { success = true, message = "Đã cập nhật thuộc tính thành công." });
+    }
+
+    private static List<ThuocTinhItemVM> ParseThuocTinhJson(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return new();
+        try
+        {
+            return System.Text.Json.JsonSerializer.Deserialize<List<ThuocTinhItemVM>>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+        }
+        catch
+        {
+            return new();
+        }
     }
 
     private async Task Options(HangHoaForm? model = null)
