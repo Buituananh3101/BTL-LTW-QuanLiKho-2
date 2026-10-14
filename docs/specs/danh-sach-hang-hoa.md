@@ -9,15 +9,15 @@
 ### 1.1. Bản đồ File liên quan (File Map)
 - **Controller**: `Controllers/HangHoaController.cs` (`Index`, lọc AJAX `Filter`, `Create`, `Edit`, `GetItem`, `ToggleFavorite`, `Delete`, `GetImage`, `CreateDvtQuick`, `UpdateThuocTinh`).
 - **ViewModel**: `ViewModels/HangHoa/` (`HangHoaForm.cs`, `QuickGroupRequest.cs`, `QuickDvtRequest.cs`).
-- **View & Modal**: `Views/HangHoa/Index.cshtml`, `Views/HangHoa/_HangHoaModal.cshtml` (Modal chuẩn KiotViet: Tab Thông tin & Mô tả, lưu tối đa 5 ảnh CSDL, ĐVT thay Thương hiệu, accordion gập mở, hệ thống custom dropdown đồng nhất toàn diện: Nhóm hàng, ĐVT, Vị trí đa chọn, Trọng lượng, Thuộc tính với hover nút bút chì sửa/xóa item, bo góc, bóng mờ, tìm kiếm và dấu tích xanh ✓; Modal con `hhEditItemOv` sửa/xóa vị trí & thuộc tính chuẩn KiotViet).
-- **Styles & Scripts**: `wwwroot/css/hang-hoa-form.css`, `wwwroot/js/hang-hoa-form.js` (Quản lý 5 ảnh, định dạng số có phẩy, hệ thống Single-Select & Multi-Select dropdown chuẩn KiotViet, thuộc tính động, quick prompt & quick pick chips, hover pencil edit & delete vị trí và thuộc tính).
+- **View & Modal**: `Views/HangHoa/Index.cshtml`, `Views/HangHoa/_HangHoaModal.cshtml` (Modal chuẩn KiotViet: Tab Thông tin & Mô tả, lưu tối đa 5 ảnh CSDL, ĐVT thay Thương hiệu, accordion gập mở, hệ thống custom dropdown đồng nhất toàn diện: Nhóm hàng, ĐVT, Vị trí đa chọn, Trọng lượng, Thuộc tính với hover nút bút chì sửa/xóa item, bo góc, bóng mờ, tìm kiếm và dấu tích xanh ✓; Modal con `hhPickOv` chọn giá trị thuộc tính kèm dropdown Sắp xếp A-Z / Z-A chuẩn KiotViet; Modal con `hhEditItemOv` sửa/xóa vị trí & thuộc tính chuẩn KiotViet).
+- **Styles & Scripts**: `wwwroot/css/hang-hoa-form.css`, `wwwroot/js/hang-hoa-form.js`, `wwwroot/css/site.css` (Quản lý 5 ảnh, định dạng số có phẩy, hệ thống Single-Select & Multi-Select dropdown chuẩn KiotViet cho Tiêu chí tồn và Sắp xếp, thuộc tính động, quick prompt & quick pick chips, hover pencil edit & delete vị trí và thuộc tính).
 - **Bảng dữ liệu**: `Views/HangHoa/_HangHoaTable.cshtml` (Partial bảng, accordion chi tiết: ĐVT, vị trí, trọng lượng, định mức tồn Min-Max, thuộc tính).
 - **Service tồn kho**: `Services/ITonKhoService.cs`, `Services/TonKhoService.cs`.
 - **DbContext & Entity**: `Models/QuanLyKhoPhuQuocLtwContext.cs`, các Entity (`HangHoa`, `HinhAnhHangHoa`, `NhomHang`, `DonViTinh`, `NguongTonKho`, `VwTonKhoHienTai`).
 
 ### 1.2. Bảng CSDL tham gia:
 - `HangHoa`: `MaHang`, `MaHangNoiBo`, `TenHang`, `MaNhom`, `MaDvt`, `QuyCach`, `GiaBanThamKhao`, `GiaVon`, `HinhAnh` (ảnh chính đồng bộ), `TrangThai`, `NgayTao`, `DaDanhDau`, `ViTri`, `TrongLuong`, `DonViTrongLuong`, `ThuocTinh` (JSON array), `MoTa`.
-- `HinhAnhHangHoa`: `MaHinhAnh`, `MaHang` (FK), `DuLieuAnh` (VARBINARY MAX), `ThuTu`, `LaAnhChinh`, `NgayTao` (lưu tối đa 5 ảnh).
+- `HinhAnhHangHoa`: `MaHinhAnh`, `MaHang` (FK), `DuLieuAnh` (VARBINARY MAX), `ThuTu`, `LaAnhChinh`, `NgayTao` (lưu tối đa 5 ảnh: 1 ảnh to đại diện và 4 ảnh nhỏ phụ bên phải).
 - `NhomHang`, `DonViTinh`: Phân loại và ĐVT cơ bản duy nhất.
 - `NguongTonKho`: Định mức tồn theo kho (`MaHang`, `MaKho`, `TonToiThieu`, `TonCaoNhat`).
 - `vw_TonKhoHienTai`: View tính tồn kho động hiện thời theo `(MaKho, MaHang)`.
@@ -44,13 +44,13 @@
 ## 3. Quy chuẩn Giao diện & 7 Bộ lọc Sidebar
 
 ### 3.1. Cột lọc bên trái (Sidebar Filter):
-1. **Nhóm hàng**: Radio/Checkbox nhóm + nút tạo nhanh.
-2. **Tồn kho**: Tất cả / Còn hàng / Hết hàng / Dưới định mức (⚠️).
+1. **Nhóm hàng**: Multi-select Tag Dropdown + ô tìm kiếm dính đỉnh + nút tạo nhanh.
+2. **Tồn kho**: Custom Single Select KiotViet (`.kiot-single-select-box`, `.kiot-ss-dropdown`): Tất cả / Còn hàng / Hết hàng / Dưới định mức (⚠️), hỗ trợ auto drop-up.
 3. **Dự kiến hết hàng**: Hôm nay, 3 ngày tới, 7 ngày tới, Trong tháng, > 30 ngày.
-4. **Nhà cung cấp**: Lọc theo nhà cung cấp từng nhập.
+4. **Nhà cung cấp**: Lọc theo nhà cung cấp từng nhập (Multi-select tag dropdown).
 5. **Loại hàng**: Hàng hóa / Dịch vụ / Combo đóng gói.
 6. **Vị trí**: Dropdown đa chọn kèm ô tìm kiếm nhanh `.kiot-ms-search`, nạp động danh sách vị trí từ DB và vị trí mặc định (`Model.ViTris`), truy vấn lọc chính xác theo trường `HangHoa.ViTri`.
-7. **Thời gian tạo**: Hôm nay, Tuần này, Tháng này, hoặc tùy chọn ngày.
+7. **Thời gian tạo**: Hôm nay, Tuần này, Tháng này, hoặc tùy chọn ngày (Dual Calendar 2 tháng).
 
 ### 3.2. Thanh công cụ trên (Action Bar):
 - Ô tìm kiếm từ khóa (Tên, Mã nội bộ, Mã vạch).

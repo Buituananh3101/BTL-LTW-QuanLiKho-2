@@ -47,10 +47,38 @@
             </div>
 
             <!-- 2. Tồn kho -->
-            <div class="f-block">
+            <div class="f-block position-relative">
                 <h6>Tồn kho <span class="filter-dot" id="dotTonKho"></span></h6>
                 <div class="text-muted small mb-1">Tiêu chí tồn</div>
-                <select class="form-select filter-change" id="filterTonKho">
+                <div class="position-relative">
+                    <div class="kiot-single-select-box" id="boxTonKho">
+                        <span id="textTonKho">
+                            @(Model.TonKhoFilter == "CON_HANG" ? "Còn hàng trong kho" :
+                              Model.TonKhoFilter == "HET_HANG" ? "Hết hàng trong kho" :
+                              Model.TonKhoFilter == "DUOI_DINH_MUC" ? "Dưới định mức tồn ⚠️" : "Tất cả")
+                        </span>
+                        <i class="bi bi-chevron-down kiot-select-chevron"></i>
+                    </div>
+                    <div class="kiot-ss-dropdown shadow" id="dropdownTonKho">
+                        <div class="kiot-ss-item @(Model.TonKhoFilter == "ALL" || string.IsNullOrEmpty(Model.TonKhoFilter) ? "selected" : "")" data-val="ALL">
+                            <span>Tất cả</span>
+                            <i class="bi bi-check2 check-icon"></i>
+                        </div>
+                        <div class="kiot-ss-item @(Model.TonKhoFilter == "CON_HANG" ? "selected" : "")" data-val="CON_HANG">
+                            <span>Còn hàng trong kho</span>
+                            <i class="bi bi-check2 check-icon"></i>
+                        </div>
+                        <div class="kiot-ss-item @(Model.TonKhoFilter == "HET_HANG" ? "selected" : "")" data-val="HET_HANG">
+                            <span>Hết hàng trong kho</span>
+                            <i class="bi bi-check2 check-icon"></i>
+                        </div>
+                        <div class="kiot-ss-item @(Model.TonKhoFilter == "DUOI_DINH_MUC" ? "selected" : "")" data-val="DUOI_DINH_MUC">
+                            <span>Dưới định mức tồn ⚠️</span>
+                            <i class="bi bi-check2 check-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                <select class="form-select filter-change d-none" id="filterTonKho">
                     <option value="ALL" selected="@(Model.TonKhoFilter == "ALL")">Tất cả</option>
                     <option value="CON_HANG" selected="@(Model.TonKhoFilter == "CON_HANG")">Còn hàng trong kho</option>
                     <option value="HET_HANG" selected="@(Model.TonKhoFilter == "HET_HANG")">Hết hàng trong kho</option>
@@ -1151,11 +1179,47 @@ $(document).ready(function () {
     renderMultiSelectBox('vitri');
     renderMultiSelectBox('loaihang');
 
+    // 3b. Single-select Dropdown cho Tiêu chí tồn (KiotViet style)
+    $('#boxTonKho').on('click', function (e) {
+        e.stopPropagation();
+        const box = $(this);
+        const dropdown = $('#dropdownTonKho');
+
+        $('.kiot-ms-dropdown, .kiot-ss-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
+        $('.kiot-multiselect-box, .kiot-single-select-box').not(box).removeClass('open');
+        $('.quick-date-popup, .dual-calendar-popup').hide();
+
+        const willShow = !dropdown.hasClass('show');
+        if (willShow) {
+            checkSidebarDropdownDirection(box, dropdown);
+            dropdown.addClass('show');
+            box.addClass('open');
+        } else {
+            dropdown.removeClass('show drop-up').css('max-height', '');
+            box.removeClass('open');
+        }
+    });
+
+    $('#dropdownTonKho').on('click', '.kiot-ss-item', function (e) {
+        e.stopPropagation();
+        const val = $(this).data('val');
+        const text = $(this).find('span').text().trim();
+
+        $('#textTonKho').text(text);
+        $('#dropdownTonKho .kiot-ss-item').removeClass('selected');
+        $(this).addClass('selected');
+
+        $('#dropdownTonKho').removeClass('show drop-up').css('max-height', '');
+        $('#boxTonKho').removeClass('open');
+
+        $('#filterTonKho').val(val).trigger('change');
+    });
+
     // Lắng nghe cuộn sidebar để tự động đảo hướng drop-up/drop-down
     $('.kiot-filter-box').on('scroll', function () {
-        const openDropdown = $('.kiot-ms-dropdown.show');
+        const openDropdown = $('.kiot-ms-dropdown.show, .kiot-ss-dropdown.show');
         if (openDropdown.length) {
-            const box = openDropdown.siblings('.kiot-multiselect-box');
+            const box = openDropdown.siblings('.kiot-multiselect-box, .kiot-single-select-box');
             if (box.length) {
                 checkSidebarDropdownDirection(box, openDropdown);
             }
@@ -1175,14 +1239,22 @@ $(document).ready(function () {
         if (!$targetBlock.length) {
             $('.quick-date-popup').hide();
             $('.dual-calendar-popup').hide();
-            $('.kiot-ms-dropdown').removeClass('show drop-up').css('max-height', '');
-            $('.kiot-multiselect-box').removeClass('open');
+            $('.kiot-ms-dropdown, .kiot-ss-dropdown').removeClass('show drop-up').css('max-height', '');
+            $('.kiot-multiselect-box, .kiot-single-select-box').removeClass('open');
         } else {
             // Click vào f-block khác -> đóng popup/dropdown của các f-block khác
             $('.dual-calendar-popup').not($targetBlock.find('.dual-calendar-popup')).hide();
             $('.quick-date-popup').not($targetBlock.find('.quick-date-popup')).hide();
-            $('.kiot-ms-dropdown').not($targetBlock.find('.kiot-ms-dropdown')).removeClass('show drop-up').css('max-height', '');
-            $('.kiot-multiselect-box').not($targetBlock.find('.kiot-multiselect-box')).removeClass('open');
+            $('.kiot-ms-dropdown, .kiot-ss-dropdown').not($targetBlock.find('.kiot-ms-dropdown, .kiot-ss-dropdown')).removeClass('show drop-up').css('max-height', '');
+            $('.kiot-multiselect-box, .kiot-single-select-box').not($targetBlock.find('.kiot-multiselect-box, .kiot-single-select-box')).removeClass('open');
+        }
+    });
+
+    $(document).on('keydown', function (e) {
+        if (e.key === 'Escape') {
+            $('.kiot-ms-dropdown, .kiot-ss-dropdown').removeClass('show drop-up').css('max-height', '');
+            $('.kiot-multiselect-box, .kiot-single-select-box').removeClass('open');
+            $('.quick-date-popup, .dual-calendar-popup').hide();
         }
     });
 

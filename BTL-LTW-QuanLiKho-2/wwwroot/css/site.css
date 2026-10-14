@@ -1571,6 +1571,96 @@ tr.product-detail-row > td {
   pointer-events: none;
 }
 
+/* Single-select filter box (KiotViet style - Tiêu chí tồn) */
+.kiot-single-select-box {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  height: 38px;
+  padding: 0 12px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13.5px;
+  color: #1f2937;
+  user-select: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.kiot-single-select-box:hover {
+  border-color: #9ca3af;
+}
+.kiot-single-select-box.is-active,
+.kiot-single-select-box.open {
+  border-color: var(--blue, #0070f4);
+  box-shadow: 0 0 0 3px rgba(0, 112, 244, 0.12);
+}
+.kiot-select-chevron {
+  font-size: 12px;
+  color: #6b7280;
+  transition: transform .2s ease;
+  pointer-events: none;
+}
+.kiot-single-select-box.open .kiot-select-chevron {
+  transform: rotate(180deg);
+  color: var(--blue, #0070f4);
+}
+.kiot-ss-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  z-index: 1050;
+  display: none;
+  max-height: 250px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0;
+}
+.kiot-ss-dropdown.show {
+  display: block;
+}
+.kiot-ss-dropdown.drop-up {
+  top: auto !important;
+  bottom: calc(100% + 4px) !important;
+  box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.12) !important;
+}
+.kiot-ss-item {
+  padding: 8px 12px;
+  font-size: 13.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: none !important;
+  user-select: none;
+  color: #374151;
+}
+.kiot-ss-item:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+  transition: none !important;
+}
+.kiot-ss-item.selected {
+  background-color: #eff6ff;
+  color: #0070f4;
+  font-weight: 600;
+}
+.kiot-ss-item .check-icon {
+  display: none;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0070f4;
+  transition: none !important;
+}
+.kiot-ss-item.selected .check-icon {
+  display: inline-block;
+}
+
 /* ==========================================================================
    RESPONSIVE: ZOOM IN / MÀN HÌNH NHỎ (< 992px) & ZOOM OUT / MÀN HÌNH RỘNG
    ========================================================================== */

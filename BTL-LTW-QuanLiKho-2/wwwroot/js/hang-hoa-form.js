@@ -114,9 +114,8 @@
     };
   });
 
-  /* ---------- Quản lý tối đa 5 ảnh sản phẩm ---------- */
-  let imgs = []; // Mảng chứa: { base64: 'data:image/...', url: '...' }
-  let mainIdx = 0;
+  /* ---------- Quản lý 5 ảnh sản phẩm: 1 ảnh to + 4 ảnh nhỏ bên phải ---------- */
+  let imgs = []; // Mảng chứa tối đa 5 ảnh: imgs[0] là ảnh to (Ảnh chính), imgs[1..4] là 4 ảnh nhỏ bên phải (Ảnh phụ)
   const MAX_IMG = 5;
 
   function renderImgs() {
@@ -124,65 +123,118 @@
     const thumbsBox = $('#hhThumbs');
     if (!mainBox || !thumbsBox) return;
 
-    if (imgs[mainIdx]) {
-      mainBox.innerHTML = `<img src="${imgs[mainIdx].url}" alt="Ảnh chính hàng hóa">`;
+    // 1. Render Ảnh to (imgs[0])
+    if (imgs.length > 0 && imgs[0]) {
+      mainBox.innerHTML = `
+        <img src="${imgs[0].url}" alt="Ảnh chính hàng hóa">
+        <span class="hh-main-badge">Ảnh chính</span>
+        <button type="button" class="hh-main-x" id="btnRemoveMainImg" title="Xóa ảnh chính" aria-label="Xóa ảnh chính">×</button>
+        <div class="hh-main-change-hint">Bấm để đổi ảnh</div>
+      `;
     } else {
-      mainBox.innerHTML = `<svg class="hh-ic" style="width:44px;height:44px;"><use href="#i-img"/></svg><span>Chưa có ảnh</span>`;
+      mainBox.innerHTML = `
+        <svg class="hh-ic" style="width:44px;height:44px;"><use href="#i-img"/></svg>
+        <span>Chưa có ảnh</span>
+        <small style="font-size:11.5px;color:#9ca3af;margin-top:2px;">(Bấm để thêm ảnh chính)</small>
+      `;
     }
 
-    let h = imgs.map((im, i) => `
-      <div class="hh-th ${i === mainIdx ? 'on' : ''}" data-i="${i}" role="button" tabindex="0" title="Ảnh ${i + 1}${i === mainIdx ? ' (Ảnh chính)' : ''}">
-        <img src="${im.url}" alt="">
-        <button type="button" class="hh-th-x" data-x="${i}" aria-label="Xóa ảnh ${i + 1}">×</button>
-      </div>
-    `).join('');
+    // 2. Render đúng 4 ảnh nhỏ bên phải (tương ứng imgs[1..4])
+    const subImgs = imgs.slice(1);
+    let h = '';
 
-    let used = imgs.length;
-    if (used < MAX_IMG) {
-      h += `<button type="button" class="hh-th add" id="btnAddImgThumb" title="Thêm ảnh (${used}/${MAX_IMG})">${ICON('i-plus')}</button>`;
-      used++;
-    }
-    for (let i = used; i < 4; i++) {
-      h += `<button type="button" class="hh-th add" tabindex="-1" aria-hidden="true" style="color:#d1d5db;cursor:default;">${ICON('i-img')}</button>`;
+    for (let i = 0; i < 4; i++) {
+      if (i < subImgs.length) {
+        // Đã có ảnh phụ thứ i + 1
+        h += `
+          <div class="hh-th" data-sub-idx="${i}" role="button" tabindex="0" title="Ảnh phụ ${i + 1} (Bấm để đổi thành ảnh chính)">
+            <img src="${subImgs[i].url}" alt="Ảnh phụ ${i + 1}">
+            <button type="button" class="hh-th-x" data-del-sub="${i}" aria-label="Xóa ảnh phụ ${i + 1}">×</button>
+          </div>
+        `;
+      } else if (i === subImgs.length && imgs.length < MAX_IMG) {
+        // Nút thêm ảnh vào slot kế tiếp
+        h += `
+          <button type="button" class="hh-th add" id="btnAddImgThumb" title="Thêm ảnh phụ (${imgs.length}/5)">
+            ${ICON('i-plus')}
+          </button>
+        `;
+      } else {
+        // Slot trống placeholder
+        h += `
+          <div class="hh-th placeholder" tabindex="-1" aria-hidden="true" title="Vị trí ảnh ${i + 2}">
+            ${ICON('i-img')}
+          </div>
+        `;
+      }
     }
 
     thumbsBox.innerHTML = h;
   }
 
-  // Click vào vùng ảnh chính: nếu chưa có ảnh thì mở chọn file
-  $('#hhImgMain').onclick = () => {
-    if (!imgs.length) $('#hhImgFile').click();
-  };
-
-  // Click trên thumbnail: chọn ảnh chính hoặc xóa ảnh hoặc thêm ảnh mới
-  $('#hhThumbs').addEventListener('click', e => {
-    const x = e.target.closest('[data-x]');
-    if (x) {
+  // Click vào vùng ảnh chính:
+  // - Nếu chưa có ảnh: mở chọn ảnh mới
+  // - Nếu đã có ảnh: mở chọn ảnh thay thế ảnh chính
+  $('#hhImgMain').onclick = (e) => {
+    if (e.target.closest('#btnRemoveMainImg')) {
       e.stopPropagation();
-      const idx = +x.dataset.x;
-      imgs.splice(idx, 1);
-      mainIdx = Math.min(mainIdx, Math.max(imgs.length - 1, 0));
-      renderImgs();
+      if (imgs.length > 0) {
+        imgs.splice(0, 1);
+        renderImgs();
+        showToast('Đã xóa ảnh chính');
+      }
       return;
     }
-    const t = e.target.closest('.hh-th');
-    if (!t) return;
-    if (t.classList.contains('add') && t.id === 'btnAddImgThumb') {
+    if (!imgs.length) {
       $('#hhImgFile').click();
-    } else if (t.dataset.i !== undefined) {
-      mainIdx = +t.dataset.i;
+    } else {
+      $('#hhImgFileReplaceMain')?.click();
+    }
+  };
+
+  // Click trên 4 ảnh nhỏ bên phải:
+  $('#hhThumbs').addEventListener('click', e => {
+    // 1. Xóa ảnh phụ
+    const delBtn = e.target.closest('[data-del-sub]');
+    if (delBtn) {
+      e.stopPropagation();
+      const subIdx = +delBtn.dataset.delSub;
+      imgs.splice(subIdx + 1, 1);
       renderImgs();
+      showToast('Đã xóa ảnh phụ');
+      return;
+    }
+
+    // 2. Click nút thêm ảnh phụ
+    const addBtn = e.target.closest('#btnAddImgThumb');
+    if (addBtn) {
+      $('#hhImgFile').click();
+      return;
+    }
+
+    // 3. Click vào ảnh phụ để ĐỔI LÀM ẢNH CHÍNH (swap với imgs[0])
+    const th = e.target.closest('[data-sub-idx]');
+    if (th) {
+      const subIdx = +th.dataset.subIdx;
+      const targetIdx = subIdx + 1;
+      if (targetIdx < imgs.length) {
+        const tmp = imgs[0];
+        imgs[0] = imgs[targetIdx];
+        imgs[targetIdx] = tmp;
+        renderImgs();
+        showToast('Đã đổi làm ảnh chính');
+      }
     }
   });
 
-  // Chọn ảnh từ máy tính (hỗ trợ chọn nhiều file)
+  // Chọn ảnh từ máy tính (thêm mới)
   $('#hhImgFile').addEventListener('change', e => {
     const files = [...e.target.files];
     if (!files.length) return;
 
     files.forEach(f => {
       if (imgs.length >= MAX_IMG) {
-        showToast('Chỉ được chọn tối đa ' + MAX_IMG + ' ảnh cho một hàng hóa.');
+        showToast('Chỉ được chọn tối đa ' + MAX_IMG + ' ảnh (1 ảnh chính và 4 ảnh phụ).');
         return;
       }
       if (f.size > 5 * 1024 * 1024) {
@@ -193,11 +245,39 @@
       const reader = new FileReader();
       reader.onload = evt => {
         const b64 = evt.target.result;
-        imgs.push({ base64: b64, url: b64 });
-        renderImgs();
+        if (imgs.length < MAX_IMG) {
+          imgs.push({ base64: b64, url: b64 });
+          renderImgs();
+        }
       };
       reader.readAsDataURL(f);
     });
+
+    e.target.value = '';
+  });
+
+  // Thay thế riêng ảnh chính
+  $('#hhImgFileReplaceMain')?.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Ảnh "' + file.name + '" vượt quá dung lượng 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = evt => {
+      const b64 = evt.target.result;
+      if (imgs.length > 0) {
+        imgs[0] = { base64: b64, url: b64 };
+      } else {
+        imgs.push({ base64: b64, url: b64 });
+      }
+      renderImgs();
+      showToast('Đã thay đổi ảnh chính');
+    };
+    reader.readAsDataURL(file);
 
     e.target.value = '';
   });
@@ -931,6 +1011,9 @@
     if (!e.target.closest('.hh-cs-wrap') && !e.target.closest('.hh-link')) {
       closeAllSingleSelects();
     }
+    if (!e.target.closest('#wrapPkSort')) {
+      $('#wrapPkSort')?.classList.remove('open');
+    }
   });
 
   // Tự động kiểm tra và đảo hướng dropdown khi cuộn modal
@@ -1236,7 +1319,10 @@
     pk.q = '';
     pk.sort = 'asc';
     $('#pkSearch').value = '';
-    $('#pkSort').value = 'asc';
+    if ($('#pkSort')) $('#pkSort').value = 'asc';
+    if ($('#textPkSort')) $('#textPkSort').textContent = 'A → Z';
+    $('#wrapPkSort')?.classList.remove('open');
+    $$('#dropdownPkSort .hh-pk-sort-item').forEach(it => it.classList.toggle('selected', it.dataset.val === 'asc'));
     $('#pkTitle').textContent = 'Chọn giá trị: ' + pk.name;
     renderPickChips();
     show($('#hhPickOv'));
@@ -1254,7 +1340,28 @@
     pk.q = e.target.value;
     renderPickChips();
   });
-  $('#pkSort').addEventListener('change', e => {
+  
+  // Custom dropdown Sắp xếp A-Z / Z-A
+  $('#boxPkSort')?.addEventListener('click', e => {
+    e.stopPropagation();
+    $('#wrapPkSort')?.classList.toggle('open');
+  });
+
+  $$('#dropdownPkSort .hh-pk-sort-item').forEach(it => {
+    it.addEventListener('click', e => {
+      e.stopPropagation();
+      const val = it.dataset.val;
+      const text = it.querySelector('span')?.textContent || (val === 'asc' ? 'A → Z' : 'Z → A');
+      if ($('#textPkSort')) $('#textPkSort').textContent = text;
+      $$('#dropdownPkSort .hh-pk-sort-item').forEach(x => x.classList.toggle('selected', x === it));
+      $('#wrapPkSort')?.classList.remove('open');
+      pk.sort = val;
+      if ($('#pkSort')) $('#pkSort').value = val;
+      renderPickChips();
+    });
+  });
+
+  $('#pkSort')?.addEventListener('change', e => {
     pk.sort = e.target.value;
     renderPickChips();
   });
@@ -1331,7 +1438,7 @@
       moTa: moTaHtml || null,
       trangThai: isDirectSale ? 'DANG_BAN' : 'NGUNG_BAN',
       danhSachHinhAnhBase64: imgs.map(i => i.base64).filter(Boolean),
-      viTriAnhChinh: mainIdx,
+      viTriAnhChinh: 0,
       xoaHinhAnh: imgs.length === 0
     };
   }
@@ -1365,7 +1472,6 @@
     $('#chkBanTrucTiep').checked = true;
 
     imgs = [];
-    mainIdx = 0;
     renderImgs();
 
     attrRows.innerHTML = '';
@@ -1494,14 +1600,18 @@
         $('#formMoTa').innerHTML = res.moTa || '';
         $('#chkBanTrucTiep').checked = (res.trangThai === 'DANG_BAN');
 
-        // Nạp tối đa 5 ảnh
+        // Nạp tối đa 5 ảnh (1 ảnh to + 4 ảnh nhỏ bên phải)
         imgs = [];
         if (Array.isArray(res.danhSachHinhAnhBase64) && res.danhSachHinhAnhBase64.length > 0) {
           imgs = res.danhSachHinhAnhBase64.map(b => ({ base64: b, url: b }));
-          mainIdx = Math.min(res.viTriAnhChinh || 0, imgs.length - 1);
+          const pMain = Math.min(res.viTriAnhChinh || 0, imgs.length - 1);
+          if (pMain > 0 && pMain < imgs.length) {
+            // Đưa ảnh chính lên vị trí đầu imgs[0] (Ảnh to)
+            const mainImg = imgs.splice(pMain, 1)[0];
+            imgs.unshift(mainImg);
+          }
         } else if (res.hinhAnhBase64) {
           imgs = [{ base64: res.hinhAnhBase64, url: res.hinhAnhBase64 }];
-          mainIdx = 0;
         }
         renderImgs();
 
