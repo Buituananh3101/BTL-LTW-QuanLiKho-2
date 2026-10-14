@@ -7,15 +7,17 @@
 ## 1. Kiến trúc File & Bảng CSDL liên quan
 
 ### 1.1. Bản đồ File liên quan (File Map)
-- **Controller**: `Controllers/HangHoaController.cs` (`Index`, lọc AJAX `Filter`, `Create`, `Edit`, `GetItem`, `ToggleFavorite`, `Delete`, `GetImage`, `UpdateThuocTinh`).
-- **ViewModel**: `ViewModels/HangHoa/HangHoaForm.cs` (`HangHoaIndexVM`, `HangHoaItemVM`, `HangHoaForm`, `ThuocTinhItemVM`, `CapNhatThuocTinhRequest`).
-- **View & JS**: `Views/HangHoa/Index.cshtml` (Search bar, 7 khối lọc, modal thêm/sửa, `quickAttrModal`, logic JS AJAX).
-- **Bảng dữ liệu**: `Views/HangHoa/_HangHoaTable.cshtml` (Partial bảng, accordion chi tiết: vị trí, trọng lượng, định mức tồn Min-Max, thuộc tính).
+- **Controller**: `Controllers/HangHoaController.cs` (`Index`, lọc AJAX `Filter`, `Create`, `Edit`, `GetItem`, `ToggleFavorite`, `Delete`, `GetImage`, `CreateDvtQuick`, `UpdateThuocTinh`).
+- **ViewModel**: `ViewModels/HangHoa/` (`HangHoaForm.cs`, `QuickGroupRequest.cs`, `QuickDvtRequest.cs`).
+- **View & Modal**: `Views/HangHoa/Index.cshtml`, `Views/HangHoa/_HangHoaModal.cshtml` (Modal chuẩn KiotViet: Tab Thông tin & Mô tả, lưu tối đa 5 ảnh CSDL, ĐVT thay Thương hiệu, accordion gập mở).
+- **Styles & Scripts**: `wwwroot/css/hang-hoa-form.css`, `wwwroot/js/hang-hoa-form.js` (Quản lý 5 ảnh, định dạng số có phẩy, thuộc tính động, quick prompt & quick pick chips).
+- **Bảng dữ liệu**: `Views/HangHoa/_HangHoaTable.cshtml` (Partial bảng, accordion chi tiết: ĐVT, vị trí, trọng lượng, định mức tồn Min-Max, thuộc tính).
 - **Service tồn kho**: `Services/ITonKhoService.cs`, `Services/TonKhoService.cs`.
-- **DbContext & Entity**: `Models/QuanLyKhoPhuQuocLtwContext.cs`, các Entity (`HangHoa`, `NhomHang`, `DonViTinh`, `NguongTonKho`, `VwTonKhoHienTai`).
+- **DbContext & Entity**: `Models/QuanLyKhoPhuQuocLtwContext.cs`, các Entity (`HangHoa`, `HinhAnhHangHoa`, `NhomHang`, `DonViTinh`, `NguongTonKho`, `VwTonKhoHienTai`).
 
 ### 1.2. Bảng CSDL tham gia:
-- `HangHoa`: `MaHang`, `MaHangNoiBo`, `TenHang`, `MaNhom`, `MaDvt`, `QuyCach`, `GiaBanThamKhao`, `GiaVon`, `HinhAnh`, `TrangThai`, `NgayTao`, `DaDanhDau`, `ViTri`, `TrongLuong`, `DonViTrongLuong`, `ThuocTinh` (JSON array).
+- `HangHoa`: `MaHang`, `MaHangNoiBo`, `TenHang`, `MaNhom`, `MaDvt`, `QuyCach`, `GiaBanThamKhao`, `GiaVon`, `HinhAnh` (ảnh chính đồng bộ), `TrangThai`, `NgayTao`, `DaDanhDau`, `ViTri`, `TrongLuong`, `DonViTrongLuong`, `ThuocTinh` (JSON array), `MoTa`.
+- `HinhAnhHangHoa`: `MaHinhAnh`, `MaHang` (FK), `DuLieuAnh` (VARBINARY MAX), `ThuTu`, `LaAnhChinh`, `NgayTao` (lưu tối đa 5 ảnh).
 - `NhomHang`, `DonViTinh`: Phân loại và ĐVT cơ bản duy nhất.
 - `NguongTonKho`: Định mức tồn theo kho (`MaHang`, `MaKho`, `TonToiThieu`, `TonCaoNhat`).
 - `vw_TonKhoHienTai`: View tính tồn kho động hiện thời theo `(MaKho, MaHang)`.

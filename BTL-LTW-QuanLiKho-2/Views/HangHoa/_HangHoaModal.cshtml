@@ -1,0 +1,292 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.HangHoaIndexVM
+
+<!-- ========================================================================
+     MODAL CHÍNH: TẠO & CẬP NHẬT HÀNG HÓA CHUẨN KIOTVIET (PROTOTYPE MATCH)
+     Hỗ trợ tối đa 5 ảnh trực tiếp CSDL, Tab Mô tả, Khối gập accordion
+     ======================================================================== -->
+
+<!-- Sprite icon SVG dùng cho modal -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v7M14 10v7"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M3 17l5-5 4 4 3-3 6 6"/></symbol>
+</svg>
+
+<div class="hh-ov" id="hangHoaModalOv">
+  <div class="hh-modal main" role="dialog" aria-modal="true" aria-labelledby="hhModalTitle">
+    <!-- Header Modal -->
+    <div class="hh-m-head">
+      <h2 id="hhModalTitle">Tạo hàng hóa</h2>
+      <button type="button" class="hh-x" data-close="hangHoaModalOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+      <div class="hh-tabs">
+        <button type="button" class="hh-tab on" data-tab="info">Thông tin</button>
+        <button type="button" class="hh-tab" data-tab="desc">Mô tả</button>
+      </div>
+    </div>
+
+    <!-- Body Modal -->
+    <div class="hh-m-body" id="hhModalBody">
+      <form id="hhForm" onsubmit="return false;">
+        <input type="hidden" id="formMaHang" value="0" />
+
+        <!-- ---- TAB 1: THÔNG TIN ---- -->
+        <div class="hh-pane on" id="hh-pane-info">
+          <div class="hh-top-grid">
+            <!-- Cột trái: Các trường thông tin cơ bản -->
+            <div class="hh-fields">
+              <div class="hh-f">
+                <label for="formMaHangNoiBo">Mã hàng</label>
+                <input type="text" id="formMaHangNoiBo" placeholder="Tự động" autocomplete="off" />
+              </div>
+              <div class="hh-f">
+                <label for="formQuyCach">Mã vạch</label>
+                <input type="text" id="formQuyCach" placeholder="Nhập mã vạch" autocomplete="off" />
+              </div>
+              <div class="hh-f hh-span2" id="hhFldTen">
+                <label for="formTenHang">Tên hàng <span style="color:var(--hh-danger)">*</span></label>
+                <input type="text" id="formTenHang" placeholder="Bắt buộc" autocomplete="off" />
+                <span class="hh-err">Vui lòng nhập tên hàng.</span>
+              </div>
+              <div class="hh-f" id="hhFldNhom">
+                <label for="formMaNhom">Nhóm hàng <button type="button" class="hh-link" id="btnNewNhom" data-new="nhom">+ Tạo mới</button></label>
+                <select id="formMaNhom">
+                  <option value="">Chọn nhóm hàng (Bắt buộc)</option>
+                  @foreach (var g in Model.NhomHangs)
+                  {
+                    <option value="@g.MaNhom">@g.TenNhom</option>
+                  }
+                </select>
+                <span class="hh-err">Vui lòng chọn nhóm hàng.</span>
+              </div>
+              <!-- Thay thế Thương hiệu bằng Đơn vị tính theo yêu cầu của dự án -->
+              <div class="hh-f" id="hhFldDvt">
+                <label for="formMaDvt">Đơn vị tính <button type="button" class="hh-link" id="btnNewDvt" data-new="dvt">+ Tạo mới</button></label>
+                <select id="formMaDvt">
+                  <option value="">Chọn ĐVT (Bắt buộc)</option>
+                  @foreach (var u in Model.DonViTinhs)
+                  {
+                    <option value="@u.MaDvt">@u.TenDvt</option>
+                  }
+                </select>
+                <span class="hh-err">Vui lòng chọn đơn vị tính.</span>
+              </div>
+            </div>
+
+            <!-- Cột phải: Quản lý 5 ảnh sản phẩm -->
+            <div class="hh-imgs">
+              <div class="hh-img-main" id="hhImgMain" title="Bấm để chọn ảnh từ máy tính">
+                <svg class="hh-ic" style="width:44px;height:44px;"><use href="#i-img"/></svg>
+                <span>Chưa có ảnh</span>
+              </div>
+              <div class="hh-thumbs" id="hhThumbs">
+                <!-- Dynamic thumbnails render via JS (tối đa 5 ảnh) -->
+              </div>
+              <input type="file" id="hhImgFile" accept="image/*" multiple hidden />
+            </div>
+          </div>
+
+          <!-- Section 1: Giá vốn, giá bán -->
+          <section class="hh-sec open">
+            <div class="hh-sec-h">
+              <div><h3>Giá vốn, giá bán</h3></div>
+              <svg class="hh-chev"><use href="#i-chev"/></svg>
+            </div>
+            <div class="hh-sec-b">
+              <div class="hh-row">
+                <div class="hh-f">
+                  <label for="formGiaVon">Giá vốn</label>
+                  <input type="text" id="formGiaVon" class="hh-num" value="0" inputmode="numeric" />
+                </div>
+                <div class="hh-f">
+                  <label for="formGiaBan">Giá bán</label>
+                  <input type="text" id="formGiaBan" class="hh-num" value="0" inputmode="numeric" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section 2: Tồn kho & Định mức -->
+          <section class="hh-sec open">
+            <div class="hh-sec-h">
+              <div>
+                <h3>Tồn kho</h3>
+                <p>Quản lý số lượng tồn kho và định mức tồn. Khi tồn kho chạm đến định mức, bạn sẽ nhận được cảnh báo từ hệ thống.</p>
+              </div>
+              <svg class="hh-chev"><use href="#i-chev"/></svg>
+            </div>
+            <div class="hh-sec-b">
+              <div class="hh-row">
+                <div class="hh-f" id="boxInitialStock">
+                  <label for="formTonKhoBanDau">Tồn kho ban đầu</label>
+                  <input type="text" id="formTonKhoBanDau" class="hh-num" value="0" inputmode="numeric" />
+                </div>
+                <div class="hh-f">
+                  <label for="formTonToiThieu">Định mức tồn thấp nhất</label>
+                  <input type="text" id="formTonToiThieu" class="hh-num" value="0" inputmode="numeric" />
+                </div>
+                <div class="hh-f">
+                  <label for="formTonCaoNhat">Định mức tồn cao nhất</label>
+                  <input type="text" id="formTonCaoNhat" class="hh-num" value="999,999,999" inputmode="numeric" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section 3: Vị trí, trọng lượng -->
+          <section class="hh-sec open">
+            <div class="hh-sec-h">
+              <div>
+                <h3>Vị trí, trọng lượng</h3>
+                <p>Quản lý việc sắp xếp kho, vị trí bán hàng hoặc trọng lượng hàng hóa</p>
+              </div>
+              <svg class="hh-chev"><use href="#i-chev"/></svg>
+            </div>
+            <div class="hh-sec-b">
+              <div class="hh-row">
+                <div class="hh-f hh-w2">
+                  <label for="formViTri">Vị trí <button type="button" class="hh-link" id="btnNewViTri" data-new="vitri">+ Tạo mới</button></label>
+                  <input type="text" id="formViTri" list="listViTriSuggestions" placeholder="Chọn hoặc nhập vị trí (VD: Kệ A1 - Tầng 1)" autocomplete="off" />
+                  <datalist id="listViTriSuggestions">
+                    <option value="Kho trung tâm"></option>
+                    <option value="Kệ A1 - Tầng 1"></option>
+                    <option value="Kệ A1 - Tầng 2"></option>
+                    <option value="Kệ B2 - Tầng 1"></option>
+                    <option value="Kệ B2 - Tầng 2"></option>
+                    <option value="Khu vực xuất hàng"></option>
+                  </datalist>
+                </div>
+                <div class="hh-f hh-w2">
+                  <label for="formTrongLuong">Trọng lượng</label>
+                  <div class="hh-weight">
+                    <input type="text" id="formTrongLuong" class="hh-num" value="0" inputmode="decimal" />
+                    <select id="formDonViTrongLuong">
+                      <option value="g" selected>g</option>
+                      <option value="kg">kg</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section 4: Thuộc tính hàng hóa (bỏ phần quy đổi đơn vị tính theo yêu cầu) -->
+          <section class="hh-sec open">
+            <div class="hh-sec-h">
+              <div>
+                <h3>Thuộc tính</h3>
+                <p>Thêm đặc điểm như hương vị, dung tích, màu sắc</p>
+              </div>
+              <svg class="hh-chev"><use href="#i-chev"/></svg>
+            </div>
+            <div class="hh-sec-b">
+              <div id="hhAttrRows"></div>
+              <button type="button" class="hh-add-link" id="hhAddAttr">
+                <svg style="width:16px;height:16px;"><use href="#i-plus"/></svg> Thêm thuộc tính
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <!-- ---- TAB 2: MÔ TẢ ---- -->
+        <div class="hh-pane" id="hh-pane-desc">
+          <div class="hh-rte-bar">
+            <button type="button" data-cmd="bold" title="In đậm"><b>B</b></button>
+            <button type="button" data-cmd="italic" title="In nghiêng"><i>I</i></button>
+            <button type="button" data-cmd="underline" title="Gạch chân"><u>U</u></button>
+            <button type="button" data-cmd="insertUnorderedList" title="Danh sách dấu chấm">•</button>
+          </div>
+          <div class="hh-rte" id="formMoTa" contenteditable="true" data-ph="Nhập mô tả chi tiết hàng hóa, bảo quản, hướng dẫn sử dụng…"></div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Footer Modal -->
+    <div class="hh-m-foot">
+      <label class="hh-chk">
+        <input type="checkbox" id="chkBanTrucTiep" checked />
+        <span>Bán trực tiếp</span>
+      </label>
+      <span class="hh-info">
+        <svg style="width:18px;height:18px;"><use href="#i-info"/></svg>
+        <span class="hh-tip">Hàng hóa được phép bán trực tiếp trên màn hình bán hàng (POS).</span>
+      </span>
+      <span class="sp"></span>
+      <button type="button" class="hh-btn" data-close="hangHoaModalOv">Bỏ qua</button>
+      <div class="hh-split">
+        <button type="button" class="hh-btn" id="btnSaveAgain">Lưu &amp; Tạo thêm hàng</button>
+        <button type="button" class="hh-btn caret" id="btnCaret" aria-label="Thêm tùy chọn">
+          <svg style="width:14px;height:14px;"><use href="#i-chev"/></svg>
+        </button>
+        <div class="hh-menu" id="hhSplitMenu">
+          <button type="button" id="btnSaveCopy">Lưu &amp; Sao chép</button>
+        </div>
+      </div>
+      <button type="button" class="hh-btn primary" id="btnSaveProduct">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL CON 1: NHẬP TÊN NHANH (Nhóm hàng / Đơn vị tính / Vị trí / Thuộc tính) ===== -->
+<div class="hh-ov" id="hhPromptOv">
+  <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+    <div class="hh-m-head">
+      <h2 id="pTitle">Tạo mới</h2>
+      <button type="button" class="hh-x" data-close="hhPromptOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div class="hh-m-body">
+      <div class="hh-f" id="pField">
+        <label for="pInput" id="pLabel">Tên</label>
+        <input type="text" id="pInput" autocomplete="off" />
+        <span class="hh-err" id="pErr">Vui lòng nhập thông tin.</span>
+      </div>
+    </div>
+    <div class="hh-m-foot">
+      <span class="sp"></span>
+      <button type="button" class="hh-btn" data-close="hhPromptOv">Bỏ qua</button>
+      <button type="button" class="hh-btn primary" id="pSave">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL CON 2: CHỌN GIÁ TRỊ THUỘC TÍNH (Chips / Search / Sort) ===== -->
+<div class="hh-ov" id="hhPickOv">
+  <div class="hh-modal pick" role="dialog" aria-modal="true" aria-labelledby="pkTitle">
+    <div class="hh-m-head">
+      <h2 id="pkTitle">Chọn giá trị thuộc tính</h2>
+      <button type="button" class="hh-x" data-close="hhPickOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div class="hh-m-body">
+      <div class="hh-pk-bar">
+        <div class="hh-pk-search">
+          <svg class="hh-ic"><use href="#i-search"/></svg>
+          <input type="text" id="pkSearch" placeholder="Tìm kiếm giá trị..." autocomplete="off" />
+        </div>
+        <select id="pkSort">
+          <option value="asc">A → Z</option>
+          <option value="desc">Z → A</option>
+        </select>
+        <span class="sp" style="flex:1"></span>
+        <button type="button" class="hh-link" id="pkAll" style="font-size:14.5px;font-weight:600">Chọn tất cả</button>
+      </div>
+      <div class="hh-pk-chips" id="pkChips"></div>
+    </div>
+    <div class="hh-m-foot">
+      <span class="sp"></span>
+      <button type="button" class="hh-btn" data-close="hhPickOv">Bỏ qua</button>
+      <button type="button" class="hh-btn primary" id="pkDone">Xong</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast thông báo nổi -->
+<div class="hh-toast" id="hhToast"></div>

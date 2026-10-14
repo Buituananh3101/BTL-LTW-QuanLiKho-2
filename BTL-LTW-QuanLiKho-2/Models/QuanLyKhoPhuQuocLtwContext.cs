@@ -31,6 +31,8 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
 
     public virtual DbSet<HangHoa> HangHoas { get; set; }
 
+    public virtual DbSet<HinhAnhHangHoa> HinhAnhHangHoas { get; set; }
+
     public virtual DbSet<KhachHang> KhachHangs { get; set; }
 
     public virtual DbSet<Kho> Khos { get; set; }
@@ -312,6 +314,7 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
                 .IsUnicode(false)
                 .HasDefaultValue("g", "DF_HangHoa_DonViTrongLuong");
             entity.Property(e => e.ThuocTinh).HasColumnType("nvarchar(max)");
+            entity.Property(e => e.MoTa).HasColumnType("nvarchar(max)");
 
             entity.HasOne(d => d.MaDvtNavigation).WithMany(p => p.HangHoas)
                 .HasForeignKey(d => d.MaDvt)
@@ -322,6 +325,23 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
                 .HasForeignKey(d => d.MaNhom)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_HangHoa_NhomHang");
+        });
+
+        modelBuilder.Entity<HinhAnhHangHoa>(entity =>
+        {
+            entity.HasKey(e => e.MaHinhAnh).HasName("PK__HinhAnhH__B6E4BF9801");
+
+            entity.ToTable("HinhAnhHangHoa");
+
+            entity.Property(e => e.DuLieuAnh).HasColumnType("varbinary(max)");
+            entity.Property(e => e.ThuTu).HasDefaultValue(0);
+            entity.Property(e => e.LaAnhChinh).HasDefaultValue(false);
+            entity.Property(e => e.NgayTao).HasColumnType("datetime").HasDefaultValueSql("GETDATE()");
+
+            entity.HasOne(d => d.MaHangNavigation).WithMany(p => p.HinhAnhHangHoas)
+                .HasForeignKey(d => d.MaHang)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_HinhAnhHangHoa_HangHoa");
         });
 
         modelBuilder.Entity<KhachHang>(entity =>

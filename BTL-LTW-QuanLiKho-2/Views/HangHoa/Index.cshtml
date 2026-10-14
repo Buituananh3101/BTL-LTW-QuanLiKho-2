@@ -3,6 +3,8 @@
     ViewData["Title"] = "Hàng hóa";
 }
 
+<link rel="stylesheet" href="~/css/hang-hoa-form.css" asp-append-version="true" />
+
 <div class="kiot-container position-relative" id="kiotContainer">
     <!-- CỘT BÊN TRÁI: TIÊU ĐỀ "HÀNG HÓA" + BỘ LỌC -->
     <aside class="kiot-sidebar-col" id="sidebarFilterCol">
@@ -336,10 +338,13 @@
             </div>
 
             <div class="kiot-actions-group">
-                <!-- Dropdown + Tạo mới -->
-                <div class="dropdown">
-                    <button class="btn btn-primary dropdown-toggle kiot-btn-create" type="button" id="btnDropdownCreate" data-bs-toggle="dropdown" aria-expanded="false" title="Thêm mới hàng hóa">
+                <!-- Dropdown + Tạo mới (Split button chuẩn KiotViet: bấm nút chính tạo ngay, bấm mũi tên mở menu) -->
+                <div class="btn-group">
+                    <button class="btn btn-primary kiot-btn-create" type="button" id="btnDirectCreate" title="Thêm mới hàng hóa">
                         <i class="bi bi-plus-lg"></i><span class="d-none d-md-inline ms-1">Tạo mới</span>
+                    </button>
+                    <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" id="btnDropdownCreate" data-bs-toggle="dropdown" aria-expanded="false" title="Thêm tùy chọn">
+                        <span class="visually-hidden">Mở menu</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="btnDropdownCreate">
                         <li>
@@ -400,254 +405,9 @@
 </div>
 
 <!-- ========================================================================
-     MODAL KIOTVIET: THÊM MỚI / CẬP NHẬT HÀNG HÓA (ĐẦY ĐỦ CHỨC NĂNG ẢNH CSDL)
+     MODAL KIOTVIET: THÊM MỚI / CẬP NHẬT HÀNG HÓA CHUẨN PROTOTYPE (5 ẢNH CSDL)
      ======================================================================== -->
-<div class="modal fade modal-kiot" id="hangHoaModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Thêm mới hàng hóa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body p-3">
-                <!-- Nav Tabs -->
-                <ul class="nav nav-tabs mb-3" id="productModalTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active fw-semibold" id="tab-info-btn" data-bs-toggle="tab" data-bs-target="#tab-info" type="button" role="tab">
-                            Thông tin
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link fw-semibold" id="tab-desc-btn" data-bs-toggle="tab" data-bs-target="#tab-desc" type="button" role="tab">
-                            Mô tả chi tiết
-                        </button>
-                    </li>
-                </ul>
-
-                <form id="hangHoaForm">
-                    <input type="hidden" id="formMaHang" name="MaHang" value="0" />
-                    <input type="hidden" id="formHinhAnhBase64" name="HinhAnhBase64" value="" />
-                    <input type="hidden" id="formXoaHinhAnh" name="XoaHinhAnh" value="false" />
-
-                    <!-- Input file ẩn để chọn ảnh -->
-                    <input type="file" id="fileUploadInput" accept="image/*" style="display: none;" />
-
-                    <div class="tab-content" id="productModalTabContent">
-                        <!-- TAB 1: THÔNG TIN -->
-                        <div class="tab-pane fade show active" id="tab-info" role="tabpanel">
-                            <div class="modal-card-section">
-                                <div class="row g-3">
-                                    <div class="col-md-8">
-                                        <div class="row g-2">
-                                            <!-- Mã hàng -->
-                                            <div class="col-md-6">
-                                                <label class="form-label small fw-bold text-muted mb-1">Mã hàng</label>
-                                                <input type="text" class="form-control form-control-sm" id="formMaHangNoiBo" name="MaHangNoiBo" placeholder="Mã hàng tự động" />
-                                            </div>
-                                            <!-- Mã vạch / Quy cách -->
-                                            <div class="col-md-6">
-                                                <label class="form-label small fw-bold text-muted mb-1">Mã vạch / Quy cách</label>
-                                                <input type="text" class="form-control form-control-sm" id="formQuyCach" name="QuyCach" placeholder="Barcode, quy cách…" />
-                                            </div>
-                                            <!-- Tên hàng (*) -->
-                                            <div class="col-md-12">
-                                                <label class="form-label small fw-bold text-muted mb-1">Tên hàng hóa <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control form-control-sm" id="formTenHang" name="TenHang" required placeholder="Nhập tên hàng hóa…" />
-                                            </div>
-                                            <!-- Nhóm hàng (*) -->
-                                            <div class="col-md-6">
-                                                <label class="form-label small fw-bold text-muted mb-1">Nhóm hàng <span class="text-danger">*</span></label>
-                                                <select class="form-select form-select-sm" id="formMaNhom" name="MaNhom" required>
-                                                    <option value="">-- Chọn nhóm hàng --</option>
-                                                    @foreach (var g in Model.NhomHangs)
-                                                    {
-                                                        <option value="@g.MaNhom">@g.TenNhom</option>
-                                                    }
-                                                </select>
-                                            </div>
-                                            <!-- Đơn vị tính (*) -->
-                                            <div class="col-md-6">
-                                                <label class="form-label small fw-bold text-muted mb-1">Đơn vị tính <span class="text-danger">*</span></label>
-                                                <select class="form-select form-select-sm" id="formMaDvt" name="MaDvt" required>
-                                                    <option value="">-- Chọn ĐVT --</option>
-                                                    @foreach (var u in Model.DonViTinhs)
-                                                    {
-                                                        <option value="@u.MaDvt">@u.TenDvt</option>
-                                                    }
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- VÙNG ẢNH SẢN PHẨM HOÀN THIỆN: LƯU TRỰC TIẾP VÀO CSDL -->
-                                    <div class="col-md-4 text-center">
-                                        <div class="p-3 border rounded bg-light d-flex flex-column align-items-center justify-content-center position-relative" style="min-height: 170px;">
-                                            <div id="imagePlaceholder" class="d-flex flex-column align-items-center justify-content-center">
-                                                <i class="bi bi-image text-muted fs-1 mb-2"></i>
-                                                <span class="small text-muted">Chưa có ảnh</span>
-                                            </div>
-
-                                            <img id="imagePreview" src="" alt="Ảnh sản phẩm" class="rounded mb-2" style="display: none; max-width: 120px; max-height: 120px; object-fit: contain; border: 1px solid #d9dee5;" />
-
-                                            <div class="d-flex gap-1 mt-2">
-                                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" id="btnSelectImage">
-                                                    <i class="bi bi-upload me-1"></i>Chọn ảnh
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" id="btnRemoveImage" style="display: none;">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </div>
-                                            <small class="text-muted d-block mt-1" style="font-size: 11px;">Hỗ trợ JPG, PNG, WebP</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Section: Giá vốn, giá bán -->
-                            <div class="modal-card-section">
-                                <div class="modal-card-title">
-                                    <span>Giá vốn &amp; Giá bán</span>
-                                </div>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted mb-1">Giá vốn (VNĐ)</label>
-                                        <input type="number" step="1000" min="0" class="form-control form-control-sm text-end" id="formGiaVon" name="GiaVon" value="0" />
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted mb-1">Giá bán tham khảo (VNĐ) <span class="text-danger">*</span></label>
-                                        <input type="number" step="1000" min="0" class="form-control form-control-sm text-end fw-bold text-primary" id="formGiaBan" name="GiaBanThamKhao" value="0" required />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Section: Tồn kho & Định mức (Chuẩn KiotViet Image 1) -->
-                            <div class="modal-card-section">
-                                <div class="modal-card-title">
-                                    <span>Tồn kho</span>
-                                </div>
-                                <div class="small text-muted mb-2">Quản lý số lượng tồn kho và định mức tồn. Khi tồn kho chạm đến định mức, bạn sẽ nhận được cảnh báo.</div>
-                                <div class="row g-3">
-                                    <div class="col-md-4" id="boxInitialStock">
-                                        <label class="form-label small fw-bold text-muted mb-1">Tồn kho ban đầu</label>
-                                        <input type="number" step="1" min="0" class="form-control form-control-sm text-end" id="formTonKhoBanDau" name="TonKhoBanDau" value="0" />
-                                        <small class="text-muted d-block mt-1">Số lượng tồn ghi nhận vào kho</small>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label small fw-bold text-muted mb-1">Định mức tồn thấp nhất</label>
-                                        <input type="number" step="1" min="0" class="form-control form-control-sm text-end" id="formTonToiThieu" name="TonToiThieu" value="0" />
-                                        <small class="text-muted d-block mt-1">Cảnh báo khi dưới ngưỡng này</small>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label small fw-bold text-muted mb-1">Định mức tồn cao nhất</label>
-                                        <input type="number" step="1" min="0" class="form-control form-control-sm text-end" id="formTonCaoNhat" name="TonCaoNhat" value="999999999" placeholder="999,999,999" />
-                                        <small class="text-muted d-block mt-1">Cảnh báo khi vượt quá ngưỡng</small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Section: Vị trí, trọng lượng (Chuẩn KiotViet Image 1) -->
-                            <div class="modal-card-section">
-                                <div class="modal-card-title">
-                                    <span>Vị trí, trọng lượng</span>
-                                </div>
-                                <div class="small text-muted mb-2">Quản lý việc sắp xếp kho, vị trí bán hàng hoặc trọng lượng hàng hóa.</div>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <label class="form-label small fw-bold text-muted mb-0">Vị trí</label>
-                                            <a href="javascript:void(0)" class="small text-primary text-decoration-none fw-semibold" id="btnQuickAddLocation">Tạo mới</a>
-                                        </div>
-                                        <input type="text" class="form-control form-control-sm" id="formViTri" name="ViTri" list="listViTriSuggestions" placeholder="Chọn hoặc nhập vị trí (VD: Kệ A1 - Tầng 1)" autocomplete="off" />
-                                        <datalist id="listViTriSuggestions">
-                                            <option value="Kho trung tâm"></option>
-                                            <option value="Kệ A1 - Tầng 1"></option>
-                                            <option value="Kệ A1 - Tầng 2"></option>
-                                            <option value="Kệ B2 - Tầng 1"></option>
-                                            <option value="Kệ B2 - Tầng 2"></option>
-                                            <option value="Khu vực xuất hàng"></option>
-                                        </datalist>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted mb-1">Trọng lượng</label>
-                                        <div class="input-group input-group-sm">
-                                            <input type="number" step="any" min="0" class="form-control text-end" id="formTrongLuong" name="TrongLuong" value="0" placeholder="0" />
-                                            <select class="form-select text-center" id="formDonViTrongLuong" name="DonViTrongLuong" style="max-width: 80px;">
-                                                <option value="g" selected>g</option>
-                                                <option value="kg">kg</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Section: Thuộc tính hàng hóa (Chuẩn KiotViet Image Match) -->
-                            <div class="modal-card-section">
-                                <div class="modal-card-title mb-1">
-                                    <span>Thuộc tính</span>
-                                </div>
-                                <div class="small text-muted mb-3">Thêm đặc điểm như hương vị, dung tích, màu sắc</div>
-                                
-                                <div id="attributeRowsContainer" class="d-flex flex-column mb-1">
-                                    <!-- Dynamic rows created via JS -->
-                                </div>
-                                <div id="noAttributeAlert" class="text-muted small fst-italic py-2 text-center border rounded bg-light" style="display: none;">
-                                    Chưa có thuộc tính nào. Bấm <strong>"+ Thêm thuộc tính"</strong> để tạo thuộc tính cho hàng hóa này.
-                                </div>
-                                <div class="mt-2" id="boxAddAttrBtn">
-                                    <a href="javascript:void(0)" class="text-primary text-decoration-none fw-semibold small d-inline-flex align-items-center gap-1" id="btnAddAttributeRow">
-                                        <i class="bi bi-plus-lg"></i> Thêm thuộc tính
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Section: Trạng thái kinh doanh -->
-                            <div class="modal-card-section mb-0">
-                                <div class="modal-card-title">
-                                    <span>Trạng thái kinh doanh</span>
-                                </div>
-                                <div class="d-flex gap-4">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="TrangThai" id="statusActive" value="DANG_BAN" checked />
-                                        <label class="form-check-label text-success fw-semibold" for="statusActive">Đang bán</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="TrangThai" id="statusInactive" value="NGUNG_BAN" />
-                                        <label class="form-check-label text-muted fw-semibold" for="statusInactive">Ngừng bán</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- TAB 2: MÔ TẢ CHI TIẾT -->
-                        <div class="tab-pane fade" id="tab-desc" role="tabpanel">
-                            <div class="modal-card-section">
-                                <label class="form-label small fw-bold text-muted mb-1">Mô tả sản phẩm</label>
-                                <textarea class="form-control" id="formMoTa" rows="6" placeholder="Nhập đặc điểm, bảo quản, ghi chú…"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <div class="modal-footer d-flex justify-content-between align-items-center">
-                <div class="form-check mb-0">
-                    <input class="form-check-input" type="checkbox" id="chkBanTrucTiep" checked />
-                    <label class="form-check-label small fw-semibold text-dark" for="chkBanTrucTiep">
-                        Bán trực tiếp
-                    </label>
-                </div>
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Bỏ qua</button>
-                    <button type="button" class="btn btn-outline-primary" id="btnSaveAndAddMore">Lưu &amp; Thêm hàng hóa cùng loại</button>
-                    <button type="button" class="btn btn-brand" id="btnSaveProduct">
-                        <i class="bi bi-check-lg me-1"></i>Lưu
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<partial name="_HangHoaModal" model="Model" />
 
 <!-- ========================================================================
      MODAL TẠO NHANH NHÓM HÀNG
@@ -735,8 +495,6 @@
 $(document).ready(function () {
     let currentPage = @Model.Page;
     let deleteId = 0;
-    const modalEl = document.getElementById('hangHoaModal');
-    const hangHoaModal = new bootstrap.Modal(modalEl);
     const groupModal = new bootstrap.Modal(document.getElementById('quickGroupModal'));
     const quickAttrModal = new bootstrap.Modal(document.getElementById('quickAttrModal'));
 
@@ -1444,50 +1202,10 @@ $(document).ready(function () {
     });
 
     // 6. Mở modal Thêm mới hàng hóa
-    $('#btnOpenCreateModal').on('click', function () {
-        resetModalForm();
-        $('#modalTitle').text('Thêm mới hàng hóa');
-        $('#formMaHang').val(0);
-        $('#boxInitialStock').show();
-        hangHoaModal.show();
-    });
-
-    // Xử lý chọn ảnh từ máy tính (Lưu CSDL)
-    $('#btnSelectImage').on('click', function () {
-        $('#fileUploadInput').click();
-    });
-
-    $('#fileUploadInput').on('change', function () {
-        const file = this.files[0];
-        if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Dung lượng ảnh tối đa là 5MB.');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const base64Data = e.target.result;
-                $('#formHinhAnhBase64').val(base64Data);
-                $('#formXoaHinhAnh').val('false');
-
-                $('#imagePreview').attr('src', base64Data).show();
-                $('#imagePlaceholder').hide();
-                $('#btnRemoveImage').show();
-            };
-            reader.readAsDataURL(file);
+    $('#btnDirectCreate, #btnOpenCreateModal').on('click', function () {
+        if (typeof window.openCreateProductModal === 'function') {
+            window.openCreateProductModal();
         }
-    });
-
-    // Xóa ảnh trong modal
-    $('#btnRemoveImage').on('click', function () {
-        $('#fileUploadInput').val('');
-        $('#formHinhAnhBase64').val('');
-        $('#formXoaHinhAnh').val('true');
-
-        $('#imagePreview').attr('src', '').hide();
-        $('#imagePlaceholder').show();
-        $('#btnRemoveImage').hide();
     });
 
     // ========================================================================
@@ -1796,145 +1514,13 @@ $(document).ready(function () {
         });
     });
 
-    // Mở modal Sửa hàng hóa
+    // Mở modal Sửa hàng hóa (kết nối với module modal KiotViet mới)
     $(document).on('click', '.btn-edit-product', function () {
         const id = $(this).data('id');
-        resetModalForm();
-        $('#modalTitle').text('Cập nhật hàng hóa');
-        $('#formMaHang').val(id);
-        $('#boxInitialStock').hide();
-
-        $.ajax({
-            url: '/HangHoa/GetItem/' + id,
-            type: 'GET',
-            success: function (res) {
-                $('#formMaHangNoiBo').val(res.maHangNoiBo);
-                $('#formQuyCach').val(res.quyCach);
-                $('#formTenHang').val(res.tenHang);
-                $('#formMaNhom').val(res.maNhom);
-                $('#formMaDvt').val(res.maDvt);
-                $('#formGiaVon').val(res.giaVon);
-                $('#formGiaBan').val(res.giaBanThamKhao);
-                $('#formTonToiThieu').val(res.tonToiThieu);
-                $('#formTonCaoNhat').val(res.tonCaoNhat ?? 999999999);
-                $('#formViTri').val(res.viTri || '');
-                $('#formTrongLuong').val(res.trongLuong || 0);
-                $('#formDonViTrongLuong').val(res.donViTrongLuong || 'g');
-                $('#formMoTa').val(res.moTa || res.quyCach || '');
-
-                renderAttributeRows(res.thuocTinhJson, '#attributeRowsContainer', '#noAttributeAlert');
-
-                if (res.hinhAnhBase64) {
-                    $('#imagePreview').attr('src', res.hinhAnhBase64).show();
-                    $('#imagePlaceholder').hide();
-                    $('#btnRemoveImage').show();
-                } else {
-                    $('#imagePreview').hide();
-                    $('#imagePlaceholder').show();
-                    $('#btnRemoveImage').hide();
-                }
-
-                if (res.trangThai === 'DANG_BAN') {
-                    $('#statusActive').prop('checked', true);
-                    $('#chkBanTrucTiep').prop('checked', true);
-                } else {
-                    $('#statusInactive').prop('checked', true);
-                    $('#chkBanTrucTiep').prop('checked', false);
-                }
-
-                hangHoaModal.show();
-            },
-            error: function (xhr) {
-                alert('Không thể tải thông tin hàng hóa: ' + (xhr.responseJSON?.message || 'Lỗi kết nối'));
-            }
-        });
-    });
-
-    // Lưu hàng hóa (Nút Lưu)
-    $('#btnSaveProduct').on('click', function () {
-        saveProduct(false);
-    });
-
-    $('#btnSaveAndAddMore').on('click', function () {
-        saveProduct(true);
-    });
-
-    function saveProduct(addMore) {
-        const maHang = parseInt($('#formMaHang').val()) || 0;
-        const tenHang = $('#formTenHang').val().trim();
-        const maNhom = parseInt($('#formMaNhom').val()) || 0;
-        const maDvt = parseInt($('#formMaDvt').val()) || 0;
-        const giaBan = parseFloat($('#formGiaBan').val()) || 0;
-
-        if (!tenHang) {
-            alert('Vui lòng nhập tên hàng hóa.');
-            $('#formTenHang').focus();
-            return;
+        if (typeof window.openEditProductModal === 'function') {
+            window.openEditProductModal(id);
         }
-
-        if (maNhom <= 0) {
-            alert('Vui lòng chọn nhóm hàng.');
-            $('#formMaNhom').focus();
-            return;
-        }
-
-        if (maDvt <= 0) {
-            alert('Vui lòng chọn đơn vị tính.');
-            $('#formMaDvt').focus();
-            return;
-        }
-
-        const attrs = collectAttributes('#attributeRowsContainer');
-        const payload = {
-            maHang: maHang,
-            maHangNoiBo: $('#formMaHangNoiBo').val().trim(),
-            quyCach: $('#formQuyCach').val().trim(),
-            tenHang: tenHang,
-            maNhom: maNhom,
-            maDvt: maDvt,
-            giaVon: parseFloat($('#formGiaVon').val()) || 0,
-            giaBanThamKhao: giaBan,
-            tonKhoBanDau: parseFloat($('#formTonKhoBanDau').val()) || 0,
-            tonToiThieu: parseFloat($('#formTonToiThieu').val()) || 0,
-            tonCaoNhat: parseFloat($('#formTonCaoNhat').val()) || 999999999,
-            viTri: $('#formViTri').val().trim(),
-            trongLuong: parseFloat($('#formTrongLuong').val()) || 0,
-            donViTrongLuong: $('#formDonViTrongLuong').val(),
-            thuocTinhJson: JSON.stringify(attrs),
-            trangThai: $('#chkBanTrucTiep').length ? ($('#chkBanTrucTiep').is(':checked') ? 'DANG_BAN' : 'NGUNG_BAN') : $('input[name="TrangThai"]:checked').val(),
-            hinhAnhBase64: $('#formHinhAnhBase64').val(),
-            xoaHinhAnh: $('#formXoaHinhAnh').val() === 'true'
-        };
-
-        const url = maHang > 0 ? ('/HangHoa/Edit/' + maHang) : '/HangHoa/Create';
-        const saveBtn = $('#btnSaveProduct');
-        saveBtn.prop('disabled', true).text('Đang lưu...');
-
-        $.ajax({
-            url: url,
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(payload),
-            success: function (res) {
-                saveBtn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i>Lưu');
-                if (addMore) {
-                    resetModalForm();
-                    $('#modalTitle').text('Thêm mới hàng hóa');
-                    $('#formMaHang').val(0);
-                    $('#boxInitialStock').show();
-                    $('#formTenHang').focus();
-                    loadTable();
-                } else {
-                    hangHoaModal.hide();
-                    loadTable();
-                }
-            },
-            error: function (xhr) {
-                saveBtn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i>Lưu');
-                alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể lưu hàng hóa.'));
-            }
-        });
-    }
+    });
 
     // Modal Xóa hàng hóa
     $(document).on('click', '.btn-delete-product', function () {
@@ -1958,42 +1544,6 @@ $(document).ready(function () {
                 }
             });
         }
-    });
-
-    function resetModalForm() {
-        $('#hangHoaForm')[0].reset();
-        $('#fileUploadInput').val('');
-        $('#formHinhAnhBase64').val('');
-        $('#formXoaHinhAnh').val('false');
-        $('#imagePreview').attr('src', '').hide();
-        $('#imagePlaceholder').show();
-        $('#btnRemoveImage').hide();
-
-        $('#formMaHang').val(0);
-        $('#formViTri').val('');
-        $('#formTrongLuong').val(0);
-        $('#formDonViTrongLuong').val('g');
-        $('#formTonCaoNhat').val(999999999);
-        $('#formMoTa').val('');
-        $('#attributeRowsContainer').empty();
-        $('#noAttributeAlert').hide();
-
-        $('#chkBanTrucTiep').prop('checked', true);
-        $('#statusActive').prop('checked', true);
-        $('#tab-info-btn').tab('show');
-    }
-
-    // Đồng bộ checkbox Bán trực tiếp và radio Trạng thái
-    $('#chkBanTrucTiep').on('change', function () {
-        if ($(this).is(':checked')) {
-            $('#statusActive').prop('checked', true);
-        } else {
-            $('#statusInactive').prop('checked', true);
-        }
-    });
-
-    $('input[name="TrangThai"]').on('change', function () {
-        $('#chkBanTrucTiep').prop('checked', $('#statusActive').is(':checked'));
     });
 
     // 7. Lọc dữ liệu qua AJAX
@@ -2083,54 +1633,22 @@ $(document).ready(function () {
         $panel.find('.tab-' + tabName).fadeIn(120);
     });
 
-    // Sao chép hàng hóa
+    // Double click dòng hàng hóa để mở nhanh modal sửa
+    $(document).on('dblclick', '.product-row', function (e) {
+        if ($(e.target).closest('input[type="checkbox"], .star-btn, button, a').length) return;
+        const id = $(this).data('id');
+        if (typeof window.openEditProductModal === 'function') {
+            window.openEditProductModal(id);
+        }
+    });
+
+    // Sao chép hàng hóa (mở modal KiotViet mới ở chế độ sao chép)
     $(document).on('click', '.btn-copy-product', function (e) {
         e.stopPropagation();
         const id = $(this).data('id');
-        $.ajax({
-            url: '/HangHoa/GetItem/' + id,
-            type: 'GET',
-            success: function (res) {
-                resetModalForm();
-                $('#modalTitle').text('Thêm mới hàng hóa (Sao chép)');
-                $('#formMaHang').val(0); // 0 để tạo mới
-                $('#formMaHangNoiBo').val(res.maHangNoiBo ? res.maHangNoiBo + '_CP' : '');
-                $('#formTenHang').val((res.tenHang || '') + ' (Copy)');
-                $('#formMaNhom').val(res.maNhom);
-                $('#formMaDvt').val(res.maDvt);
-                $('#formQuyCach').val(res.quyCach || '');
-                $('#formGiaBan').val(res.giaBanThamKhao || 0);
-                $('#formGiaVon').val(res.giaVon || 0);
-                $('#formTonToiThieu').val(res.tonToiThieu || 0);
-                $('#formTonCaoNhat').val(res.tonCaoNhat ?? 999999999);
-                $('#formViTri').val(res.viTri || '');
-                $('#formTrongLuong').val(res.trongLuong || 0);
-                $('#formDonViTrongLuong').val(res.donViTrongLuong || 'g');
-                renderAttributeRows(res.thuocTinhJson, '#attributeRowsContainer', '#noAttributeAlert');
-                $('#formTonKhoBanDau').val(0);
-                $('#boxInitialStock').show();
-
-                if (res.hinhAnhBase64) {
-                    $('#imagePreview').attr('src', res.hinhAnhBase64).show();
-                    $('#imagePlaceholder').hide();
-                    $('#btnRemoveImage').show();
-                    $('#formHinhAnhBase64').val(res.hinhAnhBase64);
-                }
-
-                if (res.trangThai === 'DANG_BAN') {
-                    $('#statusActive').prop('checked', true);
-                    $('#chkBanTrucTiep').prop('checked', true);
-                } else {
-                    $('#statusInactive').prop('checked', true);
-                    $('#chkBanTrucTiep').prop('checked', false);
-                }
-
-                hangHoaModal.show();
-            },
-            error: function () {
-                alert('Không thể tải thông tin hàng hóa để sao chép.');
-            }
-        });
+        if (typeof window.openEditProductModal === 'function') {
+            window.openEditProductModal(id, true);
+        }
     });
 
     // Hàm toàn cục xử lý bấm đánh dấu sao ở từng dòng hàng hóa (AJAX)
@@ -2264,6 +1782,9 @@ $(document).ready(function () {
             }
         });
     }
+
+    window.loadTable = loadTable;
 });
 </script>
+<script src="~/js/hang-hoa-form.js" asp-append-version="true"></script>
 }

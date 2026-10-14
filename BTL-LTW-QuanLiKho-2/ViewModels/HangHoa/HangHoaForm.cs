@@ -62,11 +62,16 @@ public class HangHoaForm
     [Display(Name = "Thuộc tính hàng hóa")]
     public string? ThuocTinhJson { get; set; }
 
+    [Display(Name = "Mô tả sản phẩm")]
+    public string? MoTa { get; set; }
+
     [Required, StringLength(20)]
     [Display(Name = "Trạng thái")]
     public string TrangThai { get; set; } = "DANG_BAN";
 
     public string? HinhAnhBase64 { get; set; }
+    public List<string> DanhSachHinhAnhBase64 { get; set; } = new();
+    public int ViTriAnhChinh { get; set; } = 0;
     public bool XoaHinhAnh { get; set; }
 }
 
@@ -102,10 +107,12 @@ public class HangHoaItemVM
     public string? ThuocTinhJson { get; set; }
     public List<ThuocTinhItemVM> ThuocTinhs { get; set; } = new();
     public string? QuyCach { get; set; }
+    public string? MoTa { get; set; }
     public string TrangThai { get; set; } = "DANG_BAN";
     public bool IsFavorite { get; set; }
     public bool DaDanhDau { get; set; }
     public bool HasImage { get; set; }
+    public int SoLuongAnh { get; set; } = 0;
     public DateTime? NgayTao { get; set; }
     public int KhachDat { get; set; } = 0;
     public string DuKienHetHang { get; set; } = "---";
