@@ -297,13 +297,48 @@
   /* ==========================================================================
      HỆ THỐNG CUSTOM SINGLE-SELECT DROPDOWN (Nhóm hàng, ĐVT, Trọng lượng)
      Đồng nhất giao diện với Dropdown Vị trí (hover, bo góc, bóng mờ, tích xanh ✓)
+     Tự động đảo hướng hiển thị ngược lên (drop-up) khi ở vị trí thấp
      ========================================================================== */
+  function checkDropdownDirection(wrap, box, dropdown) {
+    if (!wrap || !box || !dropdown) return;
+
+    const boxRect = box.getBoundingClientRect();
+    const modalBody = wrap.closest('.hh-m-body') || document.body;
+    const bodyRect = modalBody.getBoundingClientRect();
+
+    // Giới hạn dưới cùng giữa mép modal body và mép màn hình
+    const containerBottom = Math.min(bodyRect.bottom, window.innerHeight);
+    const containerTop = Math.max(bodyRect.top, 0);
+
+    const spaceBelow = containerBottom - boxRect.bottom;
+    const spaceAbove = boxRect.top - containerTop;
+
+    const neededHeight = 220; // Chiều cao tối đa chuẩn của dropdown
+
+    // Nếu khoảng trống bên dưới không đủ (< 220px) VÀ bên trên có nhiều khoảng trống hơn bên dưới
+    if (spaceBelow < neededHeight && spaceAbove > spaceBelow) {
+      wrap.classList.add('drop-up');
+      const maxH = Math.min(220, Math.max(120, spaceAbove - 12));
+      dropdown.style.maxHeight = maxH + 'px';
+    } else {
+      wrap.classList.remove('drop-up');
+      const maxH = Math.min(220, Math.max(120, spaceBelow - 12));
+      dropdown.style.maxHeight = maxH + 'px';
+    }
+  }
+
   function closeAllSingleSelects(exceptWrap = null) {
     $$('.hh-cs-wrap.open').forEach(w => {
       if (w !== exceptWrap) {
         w.classList.remove('open');
+        w.classList.remove('drop-up');
         const dd = w.querySelector('.hh-cs-dropdown');
-        if (dd) dd.style.display = 'none';
+        if (dd) {
+          dd.style.display = 'none';
+          dd.style.maxHeight = '';
+        }
+        const sec = w.closest('.hh-sec, .hh-top-grid');
+        if (sec) sec.style.zIndex = '';
         const inp = w.querySelector('.hh-cs-input');
         const targetId = w.dataset.selectId;
         const sel = targetId ? $(targetId) : null;
@@ -332,6 +367,9 @@
     function openDropdown() {
       closeAllSingleSelects(wrap);
       closeLocationDropdown();
+      checkDropdownDirection(wrap, box, dropdown);
+      const sec = wrap.closest('.hh-sec, .hh-top-grid');
+      if (sec) sec.style.zIndex = '50';
       dropdown.style.display = 'block';
       wrap.classList.add('open');
       input.focus();
@@ -340,7 +378,11 @@
 
     function closeDropdown() {
       dropdown.style.display = 'none';
+      dropdown.style.maxHeight = '';
       wrap.classList.remove('open');
+      wrap.classList.remove('drop-up');
+      const sec = wrap.closest('.hh-sec, .hh-top-grid');
+      if (sec) sec.style.zIndex = '';
       const curOpt = select.options[select.selectedIndex];
       input.value = (curOpt && curOpt.value) ? curOpt.textContent.trim() : '';
       filterItems('');
@@ -398,6 +440,9 @@
 
     input.addEventListener('input', e => {
       if (!wrap.classList.contains('open')) {
+        checkDropdownDirection(wrap, box, dropdown);
+        const sec = wrap.closest('.hh-sec, .hh-top-grid');
+        if (sec) sec.style.zIndex = '50';
         dropdown.style.display = 'block';
         wrap.classList.add('open');
       }
@@ -579,16 +624,31 @@
 
   function openLocationDropdown() {
     const dd = $('#formViTriDropdown');
-    if (!dd) return;
+    const wrap = $('#formViTriWrap');
+    const box = $('#formViTriBox');
+    if (!dd || !wrap || !box) return;
+    closeAllSingleSelects();
+    checkDropdownDirection(wrap, box, dd);
+    const sec = wrap.closest('.hh-sec, .hh-top-grid');
+    if (sec) sec.style.zIndex = '50';
     dd.style.display = 'block';
-    $('#formViTriWrap')?.classList.add('open');
+    wrap.classList.add('open');
     renderLocationDropdown($('#formViTriSearch')?.value || '');
   }
 
   function closeLocationDropdown() {
     const dd = $('#formViTriDropdown');
-    if (dd) dd.style.display = 'none';
-    $('#formViTriWrap')?.classList.remove('open');
+    const wrap = $('#formViTriWrap');
+    if (dd) {
+      dd.style.display = 'none';
+      dd.style.maxHeight = '';
+    }
+    if (wrap) {
+      wrap.classList.remove('open');
+      wrap.classList.remove('drop-up');
+      const sec = wrap.closest('.hh-sec, .hh-top-grid');
+      if (sec) sec.style.zIndex = '';
+    }
   }
 
   // Mở dropdown khi click vào box vị trí trong modal
@@ -659,6 +719,18 @@
       closeAllSingleSelects();
     }
   });
+
+  // Tự động kiểm tra và đảo hướng dropdown khi cuộn modal
+  $('#hhModalBody')?.addEventListener('scroll', () => {
+    const openWrap = document.querySelector('.hh-cs-wrap.open, .hh-multiselect-wrap.open');
+    if (openWrap) {
+      const box = openWrap.querySelector('.hh-cs-box, .hh-multiselect-box');
+      const dd = openWrap.querySelector('.hh-cs-dropdown, .hh-multiselect-dropdown');
+      if (box && dd) {
+        checkDropdownDirection(openWrap, box, dd);
+      }
+    }
+  }, { passive: true });
 
   // Nút Tạo mới Vị trí
   $('#btnNewViTri')?.addEventListener('click', () => {
@@ -844,8 +916,14 @@
       e.stopPropagation();
       const wrap = aItem.closest('.hh-a-cs-wrap');
       const dd = wrap?.querySelector('.hh-cs-dropdown');
-      if (dd) dd.style.display = 'none';
+      if (dd) {
+        dd.style.display = 'none';
+        dd.style.maxHeight = '';
+      }
       wrap?.classList.remove('open');
+      wrap?.classList.remove('drop-up');
+      const sec = wrap?.closest('.hh-sec, .hh-top-grid');
+      if (sec) sec.style.zIndex = '';
       const val = aItem.dataset.val;
       if (val === '__new') {
         openPrompt('Tạo thuộc tính mới', 'Tên thuộc tính', '', n => {
@@ -867,9 +945,14 @@
       closeAllSingleSelects();
       closeLocationDropdown();
       if (!isOpen && wrap) {
-        wrap.classList.add('open');
         const dd = wrap.querySelector('.hh-cs-dropdown');
-        if (dd) dd.style.display = 'block';
+        if (dd) {
+          checkDropdownDirection(wrap, csBox, dd);
+          dd.style.display = 'block';
+        }
+        const sec = wrap.closest('.hh-sec, .hh-top-grid');
+        if (sec) sec.style.zIndex = '50';
+        wrap.classList.add('open');
       }
       return;
     }

@@ -729,6 +729,14 @@
   border-left: 0 !important;
 }
 
+/* ===== Drop-up Mode (Hiển thị ngược lên khi dropdown ở vị trí thấp) ===== */
+.hh-cs-wrap.drop-up .hh-cs-dropdown,
+.hh-multiselect-wrap.drop-up .hh-multiselect-dropdown {
+  top: auto !important;
+  bottom: calc(100% + 4px) !important;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
 /* Thuộc tính */
 .hh-sub-t {
   font-size: 13.5px;
