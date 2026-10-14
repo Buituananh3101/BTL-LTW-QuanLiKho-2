@@ -212,7 +212,10 @@
   const errorsContainer = document.getElementById('importErrorsContainer');
   const errorsList = document.getElementById('importErrorsList');
 
+  let selectedImportFile = null;
+
   function resetImportForm() {
+    selectedImportFile = null;
     if (fileInput) fileInput.value = '';
     if (emptyView) emptyView.style.display = 'block';
     if (selectedView) selectedView.style.display = 'none';
@@ -271,6 +274,19 @@
       return;
     }
 
+    selectedImportFile = file;
+
+    // Cố gắng đồng bộ sang fileInput bằng DataTransfer nếu môi trường hỗ trợ
+    try {
+      if (fileInput && window.DataTransfer) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+      }
+    } catch (err) {
+      // Bỏ qua nếu browser bảo mật không cho gán
+    }
+
     if (fileNameEl) fileNameEl.textContent = file.name;
     if (fileSizeEl) fileSizeEl.textContent = (file.size / 1024).toFixed(1) + ' KB';
     if (emptyView) emptyView.style.display = 'none';
@@ -286,12 +302,12 @@
 
   // Nhấn nút "Thực hiện nhập"
   btnExecuteImport?.addEventListener('click', () => {
-    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+    const file = selectedImportFile || (fileInput && fileInput.files && fileInput.files[0]);
+    if (!file) {
       alert('Vui lòng chọn file Excel trước khi thực hiện.');
       return;
     }
 
-    const file = fileInput.files[0];
     const dupMode = document.querySelector('input[name="duplicateMode"]:checked')?.value || 'UPDATE';
 
     const formData = new FormData();
