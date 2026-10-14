@@ -54,7 +54,7 @@
   // Đóng modal bằng phím Escape
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
-    const top = ['hhEditItemOv', 'hhPickOv', 'hhPromptOv', 'hangHoaModalOv'].map(id => $('#' + id)).find(o => o && o.classList.contains('show'));
+    const top = ['hhDeleteProductOv', 'hhEditItemOv', 'hhPickOv', 'hhPromptOv', 'hangHoaModalOv'].map(id => $('#' + id)).find(o => o && o.classList.contains('show'));
     if (top) hide(top);
   });
 
@@ -1597,6 +1597,7 @@
     resetForm();
     $('#hhModalTitle').textContent = 'Tạo hàng hóa';
     $('#boxInitialStock').style.display = '';
+    if ($('#btnDeleteProductInModal')) $('#btnDeleteProductInModal').style.display = 'none';
     show($('#hangHoaModalOv'));
     setTimeout(() => $('#formTenHang').focus(), 40);
   };
@@ -1606,6 +1607,7 @@
     $('#hhModalTitle').textContent = isCopy ? 'Thêm mới hàng hóa (Sao chép)' : 'Cập nhật hàng hóa';
     $('#formMaHang').value = isCopy ? '0' : id;
     $('#boxInitialStock').style.display = isCopy ? '' : 'none';
+    if ($('#btnDeleteProductInModal')) $('#btnDeleteProductInModal').style.display = isCopy ? 'none' : 'inline-flex';
 
     jQuery.ajax({
       url: '/HangHoa/GetItem/' + id,
@@ -1685,6 +1687,100 @@
       }
     });
   };
+
+  /* ---------- Xóa hàng hóa & Chuyển trạng thái Ngừng bán (Chuẩn KiotViet) ---------- */
+  window.openDeleteProductModal = function (id, name) {
+    if (!id) return;
+    const hiddenId = $('#delProdId');
+    const nameEl = $('#delProdName');
+    const errBox = $('#delProdErrorBox');
+    const btnDel = $('#btnConfirmDeleteProd');
+
+    if (hiddenId) hiddenId.value = id;
+    if (nameEl) nameEl.textContent = name || ('Mã #' + id);
+    if (errBox) errBox.style.display = 'none';
+    if (btnDel) {
+      btnDel.disabled = false;
+      btnDel.textContent = 'Đồng ý xóa';
+    }
+    show($('#hhDeleteProductOv'));
+  };
+
+  $('#btnDeleteProductInModal')?.addEventListener('click', () => {
+    const id = parseInt($('#formMaHang').value) || 0;
+    const name = $('#formTenHang').value.trim();
+    if (id > 0) {
+      window.openDeleteProductModal(id, name);
+    }
+  });
+
+  $('#btnConfirmDeleteProd')?.addEventListener('click', () => {
+    const id = parseInt($('#delProdId').value) || 0;
+    if (id <= 0) return;
+
+    const btn = $('#btnConfirmDeleteProd');
+    const origText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Đang xóa...';
+
+    jQuery.ajax({
+      url: '/HangHoa/Delete/' + id,
+      type: 'POST',
+      success: function (res) {
+        btn.disabled = false;
+        btn.textContent = origText;
+        hide($('#hhDeleteProductOv'));
+        hide($('#hangHoaModalOv'));
+        showToast(res.message || 'Đã xóa hàng hóa thành công.');
+        if (typeof window.loadTable === 'function') {
+          window.loadTable();
+        }
+      },
+      error: function (xhr) {
+        btn.disabled = false;
+        btn.textContent = origText;
+        const msg = xhr.responseJSON?.message || 'Không thể xóa hàng hóa do lỗi hệ thống.';
+        const errBox = $('#delProdErrorBox');
+        const errMsg = $('#delProdErrorMsg');
+        const btnNgung = $('#btnSwitchNgungBan');
+        if (errMsg) errMsg.textContent = msg;
+        if (errBox) errBox.style.display = 'block';
+        if (btnNgung) {
+          btnNgung.style.display = xhr.responseJSON?.hasTransaction ? 'inline-flex' : 'none';
+        }
+      }
+    });
+  });
+
+  $('#btnSwitchNgungBan')?.addEventListener('click', () => {
+    const id = parseInt($('#delProdId').value) || 0;
+    if (id <= 0) return;
+
+    const btn = $('#btnSwitchNgungBan');
+    const origText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Đang chuyển...';
+
+    jQuery.ajax({
+      url: '/HangHoa/NgungBan/' + id,
+      type: 'POST',
+      success: function (res) {
+        btn.disabled = false;
+        btn.textContent = origText;
+        hide($('#hhDeleteProductOv'));
+        hide($('#hangHoaModalOv'));
+        showToast(res.message || 'Đã chuyển hàng hóa sang Ngừng bán.');
+        if (typeof window.loadTable === 'function') {
+          window.loadTable();
+        }
+      },
+      error: function (xhr) {
+        btn.disabled = false;
+        btn.textContent = origText;
+        alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể cập nhật trạng thái.'));
+      }
+    });
+  });
 
   // Khởi tạo ban đầu
   if (attrRows) {

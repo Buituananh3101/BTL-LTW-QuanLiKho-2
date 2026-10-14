@@ -446,32 +446,10 @@
     </div>
 </div>
 
-<!-- ========================================================================
-     MODAL XÁC NHẬN XÓA HÀNG HÓA
-     ======================================================================== -->
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title text-danger">Xóa hàng hóa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body py-3">
-                Bạn có chắc chắn muốn xóa hàng hóa <strong id="deleteTargetName"></strong>? Thao tác này chỉ thực hiện được nếu hàng hóa chưa phát sinh giao dịch.
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Bỏ qua</button>
-                <button type="button" class="btn btn-danger btn-sm" id="btnExecuteDelete">Đồng ý xóa</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
 <script>
 $(document).ready(function () {
     let currentPage = @Model.Page;
-    let deleteId = 0;
     const groupModal = new bootstrap.Modal(document.getElementById('quickGroupModal'));
 
     // 1. Thu gọn / Mở rộng (Kéo vào / Kéo ra) sidebar bên trái
@@ -1547,27 +1525,14 @@ $(document).ready(function () {
         }
     });
 
-    // Modal Xóa hàng hóa
-    $(document).on('click', '.btn-delete-product', function () {
-        deleteId = $(this).data('id');
-        $('#deleteTargetName').text($(this).data('name'));
-        const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
-        modal.show();
-    });
-
-    $('#btnExecuteDelete').on('click', function () {
-        if (deleteId > 0) {
-            $.ajax({
-                url: '/HangHoa/Delete/' + deleteId,
-                type: 'POST',
-                success: function (res) {
-                    $('#deleteConfirmModal').modal('hide');
-                    loadTable();
-                },
-                error: function (xhr) {
-                    alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể xóa hàng hóa.'));
-                }
-            });
+    // Modal Xóa hàng hóa (kết nối với modal KiotViet đồng bộ)
+    $(document).on('click', '.btn-delete-product', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = $(this).data('id');
+        const name = $(this).data('name') || '';
+        if (typeof window.openDeleteProductModal === 'function') {
+            window.openDeleteProductModal(id, name);
         }
     });
 

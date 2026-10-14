@@ -31,7 +31,7 @@
 .hh-ov.show {
   display: flex !important;
 }
-#hhPromptOv, #hhPickOv {
+#hhPromptOv, #hhPickOv, #hhEditItemOv, #hhDeleteProductOv {
   z-index: 1065;
 }
 
@@ -173,6 +173,20 @@
 .hh-btn.primary:hover {
   background: var(--hh-blue-d);
   border-color: var(--hh-blue-d);
+}
+.hh-btn.danger {
+  background: var(--hh-danger);
+  border-color: var(--hh-danger);
+  color: #fff;
+}
+.hh-btn.danger:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+.hh-btn.danger:disabled {
+  background: #fca5a5;
+  border-color: #fca5a5;
+  cursor: not-allowed;
 }
 .hh-icon-btn {
   width: 36px;

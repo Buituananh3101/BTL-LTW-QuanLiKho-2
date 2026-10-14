@@ -905,21 +905,58 @@ public class HangHoaController : BaseKhoController
 
         bool used = await _context.ChiTietDonBans.AnyAsync(x => x.MaHang == id)
             || await _context.ChiTietPhieuNhaps.AnyAsync(x => x.MaHang == id)
+            || await _context.ChiTietPhieuXuats.AnyAsync(x => x.MaHang == id)
             || await _context.ChiTietPhieuChuyenKhos.AnyAsync(x => x.MaHang == id)
             || await _context.ChiTietPhieuKiemKes.AnyAsync(x => x.MaHang == id);
 
         if (used)
         {
-            return BadRequest(new { message = "Hàng hóa này đã phát sinh giao dịch/chứng từ trong hệ thống, không thể xóa. Bạn có thể chuyển sang trạng thái 'Ngừng bán'." });
+            return BadRequest(new
+            {
+                success = false,
+                hasTransaction = true,
+                message = $"Hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) đã phát sinh giao dịch/chứng từ trong hệ thống, không thể xóa. Bạn có thể chuyển sang trạng thái 'Ngừng bán' để ẩn khỏi danh mục kinh doanh."
+            });
         }
 
-        var nguongs = await _context.NguongTonKhos.Where(x => x.MaHang == id).ToListAsync();
-        _context.NguongTonKhos.RemoveRange(nguongs);
+        using var trans = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            var images = await _context.HinhAnhHangHoas.Where(x => x.MaHang == id).ToListAsync();
+            if (images.Any())
+            {
+                _context.HinhAnhHangHoas.RemoveRange(images);
+            }
 
-        _context.HangHoas.Remove(item);
+            var nguongs = await _context.NguongTonKhos.Where(x => x.MaHang == id).ToListAsync();
+            if (nguongs.Any())
+            {
+                _context.NguongTonKhos.RemoveRange(nguongs);
+            }
+
+            _context.HangHoas.Remove(item);
+            await _context.SaveChangesAsync();
+            await trans.CommitAsync();
+
+            return Json(new { success = true, message = $"Đã xóa hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) thành công." });
+        }
+        catch (Exception ex)
+        {
+            await trans.RollbackAsync();
+            return BadRequest(new { message = "Lỗi khi xóa dữ liệu hàng hóa: " + ex.Message });
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> NgungBan(int id)
+    {
+        var item = await _context.HangHoas.FindAsync(id);
+        if (item == null) return NotFound(new { message = "Không tìm thấy hàng hóa." });
+
+        item.TrangThai = "NGUNG_BAN";
         await _context.SaveChangesAsync();
 
-        return Json(new { success = true, message = $"Đã xóa hàng hóa {item.TenHang} thành công." });
+        return Json(new { success = true, message = $"Đã chuyển hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) sang trạng thái 'Ngừng bán'." });
     }
 
     private static byte[]? ParseBase64Image(string? base64)

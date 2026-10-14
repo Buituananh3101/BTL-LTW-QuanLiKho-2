@@ -7,11 +7,11 @@
 ## 1. Kiến trúc File & Bảng CSDL liên quan
 
 ### 1.1. Bản đồ File liên quan (File Map)
-- **Controller**: `Controllers/HangHoaController.cs` (`Index`, lọc AJAX `Filter`, `Create`, `Edit`, `GetItem`, `ToggleFavorite`, `Delete`, `GetImage`, `CreateDvtQuick`, `UpdateThuocTinh`).
+- **Controller**: `Controllers/HangHoaController.cs` (`Index`, lọc AJAX `Filter`, `Create`, `Edit`, `GetItem`, `ToggleFavorite`, `Delete`, `NgungBan`, `GetImage`, `CreateDvtQuick`, `UpdateThuocTinh`).
 - **ViewModel**: `ViewModels/HangHoa/` (`HangHoaForm.cs`, `QuickGroupRequest.cs`, `QuickDvtRequest.cs`).
-- **View & Modal**: `Views/HangHoa/Index.cshtml`, `Views/HangHoa/_HangHoaModal.cshtml` (Modal chuẩn KiotViet: Tab Thông tin & Mô tả, lưu tối đa 5 ảnh CSDL, ĐVT thay Thương hiệu, accordion gập mở, hệ thống custom dropdown đồng nhất toàn diện: Nhóm hàng, ĐVT, Vị trí đa chọn, Trọng lượng, Thuộc tính với hover nút bút chì sửa/xóa item, bo góc, bóng mờ, tìm kiếm và dấu tích xanh ✓; Modal con `hhPickOv` chọn giá trị thuộc tính kèm dropdown Sắp xếp A-Z / Z-A chuẩn KiotViet; Modal con `hhEditItemOv` sửa/xóa vị trí & thuộc tính chuẩn KiotViet).
-- **Styles & Scripts**: `wwwroot/css/hang-hoa-form.css`, `wwwroot/js/hang-hoa-form.js`, `wwwroot/css/site.css` (Quản lý 5 ảnh, định dạng số có phẩy, hệ thống Single-Select & Multi-Select dropdown chuẩn KiotViet cho Tiêu chí tồn và Sắp xếp, thuộc tính động, quick prompt & quick pick chips, hover pencil edit & delete vị trí và thuộc tính).
-- **Bảng dữ liệu**: `Views/HangHoa/_HangHoaTable.cshtml` (Partial bảng, accordion chi tiết: ĐVT, vị trí, trọng lượng, định mức tồn Min-Max, thuộc tính).
+- **View & Modal**: `Views/HangHoa/Index.cshtml`, `Views/HangHoa/_HangHoaModal.cshtml` (Modal chuẩn KiotViet: Tab Thông tin & Mô tả, lưu tối đa 5 ảnh CSDL, ĐVT thay Thương hiệu, accordion gập mở, hệ thống custom dropdown đồng nhất; Modal con `hhPickOv` chọn giá trị thuộc tính; Modal con `hhEditItemOv` sửa/xóa vị trí & thuộc tính; Modal con `hhDeleteProductOv` xác nhận xóa chuẩn KiotViet tích hợp cảnh báo giao dịch và nút chuyển nhanh sang Ngừng bán).
+- **Styles & Scripts**: `wwwroot/css/hang-hoa-form.css`, `wwwroot/js/hang-hoa-form.js`, `wwwroot/css/site.css` (Quản lý 5 ảnh, định dạng số có phẩy, Single & Multi-Select dropdown, xử lý xóa hàng hóa `window.openDeleteProductModal`, toast thông báo).
+- **Bảng dữ liệu**: `Views/HangHoa/_HangHoaTable.cshtml` (Partial bảng, accordion chi tiết: nút Xóa kết nối modal KiotViet đồng bộ).
 - **Service tồn kho**: `Services/ITonKhoService.cs`, `Services/TonKhoService.cs`.
 - **DbContext & Entity**: `Models/QuanLyKhoPhuQuocLtwContext.cs`, các Entity (`HangHoa`, `HinhAnhHangHoa`, `NhomHang`, `DonViTinh`, `NguongTonKho`, `VwTonKhoHienTai`).
 
@@ -32,11 +32,12 @@
 | **Tìm kiếm & Lọc** | Gõ tìm / Chọn lọc / Đánh dấu sao | JS debounce 300ms ➜ AJAX `GET /HangHoa/Filter` | `Filter(...)` query kết hợp `vw_TonKhoHienTai` | Render `_HangHoaTable.cshtml` (AJAX) |
 | **Phân trang** | Click trang | JS gán `pageIndex` ➜ AJAX `GET /HangHoa/Filter` | `Filter(...)` dùng `.Skip().Take()` | Cập nhật bảng và thanh phân trang |
 | **Thêm mới hàng** | "+ Thêm mới", nhập form, "Lưu" | JS gom form + Base64 ➜ `POST /HangHoa/Create` | `Create(...)` validate, tự sinh mã hàng | Lưu `HangHoa`, `NguongTonKho`, `PhieuNhap` đầu kỳ ➜ JSON `{success:true}` |
-| **Mở form Sửa** | Click icon bút chì | JS AJAX `GET /HangHoa/GetItem?id=X` | `GetItem(id)` đọc thông tin hàng & tồn | Trả JSON ➜ điền form modal sửa |
+| **Mở form Sửa** | Click icon bút chì / Chỉnh sửa | JS AJAX `GET /HangHoa/GetItem?id=X` | `GetItem(id)` đọc thông tin hàng & tồn | Trả JSON ➜ điền form modal sửa |
 | **Lưu Sửa hàng** | Sửa form, "Cập nhật" | JS gom form ➜ AJAX `POST /HangHoa/Edit?id=X` | `Edit(id, form)` validate & cập nhật | Cập nhật `HangHoa`, `NguongTonKho` ➜ JSON `{success:true}` |
 | **Đánh dấu sao** | Click ngôi sao | JS AJAX `POST /HangHoa/ToggleFavorite?id=X` | `ToggleFavorite(id)` đảo cờ `DaDanhDau` | Lưu DB ➜ Trả JSON toggle class vàng |
-| **Xóa hàng** | Click Xóa ➜ Xác nhận | JS AJAX `POST /HangHoa/Delete?id=X` | `Delete(id)` kiểm tra ràng buộc chứng từ | Chặn nếu đã có giao dịch; xóa nếu chưa có |
-| **Hiển thị ảnh** | Bảng hiển thị `<img>` | `src="/HangHoa/GetImage/@item.MaHang?v=@item.ImageVersion"` | `GetImage(id)` hỗ trợ HTTP cache 24h, cache bust chính xác theo `ImageVersion` | Trả byte ảnh / SVG. Cấm SELECT ảnh ở bảng |
+| **Xóa hàng** | Click Xóa (bảng / modal sửa) | Mở `#hhDeleteProductOv` ➜ AJAX `POST /HangHoa/Delete/{id}` | `Delete(id)` check 5 bảng giao dịch, bọc Transaction xóa cascade ảnh & ngưỡng tồn | Chưa có GD: Xóa thành công ➜ Toast + `loadTable()`. Đã có GD: Trả `hasTransaction: true` kèm nút chuyển Ngừng bán |
+| **Ngừng bán** | Bấm "Chuyển sang 'Ngừng bán' ngay" | AJAX `POST /HangHoa/NgungBan/{id}` | `NgungBan(id)` cập nhật `TrangThai = 'NGUNG_BAN'` | Lưu DB ➜ Đóng modal, Toast + `loadTable()` |
+| **Hiển thị ảnh** | Bảng hiển thị `<img>` | `src="/HangHoa/GetImage/@item.MaHang?v=@item.ImageVersion"` | `GetImage(id)` hỗ trợ HTTP cache 24h, cache bust theo `ImageVersion` | Trả byte ảnh / SVG. Cấm SELECT ảnh ở bảng |
 
 ---
 
@@ -60,7 +61,9 @@
 
 ## 4. Các Quy tắc Nghiệp vụ Bất biến
 
-1. **BẢO TOÀN DỮ LIỆU (CẤM XÓA KHI ĐÃ CÓ GIAO DỊCH)**: Kiểm tra `ChiTietDonBan`, `ChiTietPhieuNhap`, `ChiTietPhieuChuyenKho`, `ChiTietPhieuKiemKe`. Có giao dịch: chặn và báo lỗi, gợi ý chuyển 'NGUNG_BAN'. Chưa có: cho phép xóa.
+1. **BẢO TOÀN DỮ LIỆU (CẤM XÓA KHI ĐÃ CÓ GIAO DỊCH)**: Kiểm tra cả 5 bảng chứng từ: `ChiTietDonBan`, `ChiTietPhieuNhap`, `ChiTietPhieuXuat`, `ChiTietPhieuChuyenKho`, `ChiTietPhieuKiemKe`.
+   - Có giao dịch: Chặn xóa, hiển thị card cảnh báo đỏ trong modal `#hhDeleteProductOv` kèm nút hành động 1-click chuyển sang trạng thái `NGUNG_BAN`.
+   - Chưa có giao dịch: Bọc Transaction EF, tự động xóa cascade các bảng phụ thuộc (`HinhAnhHangHoa`, `NguongTonKho`), xóa hàng hóa và commit.
 2. **Mã nội bộ & Retry**: Mã `HH` + 6 số tự tăng (`HH000001`), Unique, retry 3 lần chống Race Condition.
 3. **Tồn kho theo kho làm việc**: Đọc động từ `vw_TonKhoHienTai` theo `CurrentWarehouseId`. Đổi kho ở Header thì tồn kho tự động đổi theo.
 4. **Tối ưu RAM ảnh**: Tuyệt đối không `SELECT HinhAnh` ở danh sách. Dùng LINQ Projection `HasImage = x.HinhAnh != null`.

@@ -275,6 +275,10 @@
 
     <!-- Footer Modal -->
     <div class="hh-m-foot">
+      <button type="button" class="hh-btn-del" id="btnDeleteProductInModal" style="display: none; margin-right: 12px;" title="Xóa hàng hóa này">
+        <svg style="width:16px;height:16px;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:4px;"><use href="#i-trash"/></svg>
+        <span>Xóa</span>
+      </button>
       <label class="hh-chk">
         <input type="checkbox" id="chkBanTrucTiep" checked />
         <span>Bán trực tiếp</span>
@@ -397,6 +401,44 @@
         <button type="button" class="hh-btn" data-close="hhEditItemOv">Bỏ qua</button>
         <button type="button" class="hh-btn primary" id="btnEditItemSave">Lưu</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL CON 4: XÁC NHẬN XÓA HÀNG HÓA (Chuẩn KiotViet) ===== -->
+<div class="hh-ov" id="hhDeleteProductOv">
+  <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="delProdTitle" style="max-width: 480px;">
+    <div class="hh-m-head" style="border-bottom: 1px solid var(--hh-line-l); padding-bottom: 12px;">
+      <h2 id="delProdTitle" style="color: #dc2626; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 18px;">
+        <svg style="width:20px;height:20px;stroke:#dc2626;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><use href="#i-trash"/></svg>
+        <span>Xóa hàng hóa</span>
+      </h2>
+      <button type="button" class="hh-x" data-close="hhDeleteProductOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div class="hh-m-body" style="padding: 20px 24px; font-size: 14.5px; line-height: 1.5;">
+      <input type="hidden" id="delProdId" value="0" />
+      <div id="delProdConfirmMsg" style="color: #374151;">
+        Bạn có chắc chắn muốn xóa hàng hóa <strong id="delProdName" style="color: #111827;"></strong>? Thao tác này không thể hoàn tác.
+      </div>
+
+      <!-- Khối cảnh báo khi hàng hóa đã phát sinh giao dịch không thể xóa -->
+      <div id="delProdErrorBox" style="display: none; margin-top: 14px; padding: 12px 14px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #991b1b; font-size: 13.5px; line-height: 1.5;">
+        <div style="display: flex; gap: 8px; align-items: flex-start;">
+          <svg style="width:18px;height:18px;flex:none;stroke:#dc2626;fill:none;stroke-width:2;margin-top:2px;"><use href="#i-info"/></svg>
+          <div style="flex: 1;">
+            <div id="delProdErrorMsg" style="font-weight: 500; margin-bottom: 8px;"></div>
+            <button type="button" class="hh-btn" id="btnSwitchNgungBan" style="background:#fff;border-color:#fca5a5;color:#b91c1c;height:32px;font-size:13px;padding:0 12px;font-weight:600;">
+              Chuyển sang "Ngừng bán" ngay
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hh-m-foot" style="background: #f9fafb; border-top: 1px solid var(--hh-line-l); padding: 12px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+      <button type="button" class="hh-btn" data-close="hhDeleteProductOv">Bỏ qua</button>
+      <button type="button" class="hh-btn danger" id="btnConfirmDeleteProd">Đồng ý xóa</button>
     </div>
   </div>
 </div>

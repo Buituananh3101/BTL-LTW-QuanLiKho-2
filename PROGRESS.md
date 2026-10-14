@@ -4,7 +4,16 @@ Cập nhật lần cuối: 2026-10-14 – Nâng cấp Form Thêm/Sửa Hàng hó
 
 ---
 
-## Đã xong
+- **Đồng bộ toàn diện Logic & Giao diện Xóa hàng hóa chuẩn KiotViet**:
+  - Backend (`HangHoaController.cs`):
+    - Hoàn thiện kiểm tra bảo toàn dữ liệu trên cả 5 bảng chứng từ: `ChiTietDonBan`, `ChiTietPhieuNhap`, `ChiTietPhieuXuat`, `ChiTietPhieuChuyenKho`, `ChiTietPhieuKiemKe`.
+    - Bọc Transaction EF (`BeginTransactionAsync`), tự động xóa cascade dữ liệu bảng con liên quan (`HinhAnhHangHoa`, `NguongTonKho`) khi hàng hóa chưa phát sinh giao dịch.
+    - Cung cấp API `NgungBan(int id)` cho phép chuyển nhanh hàng hóa sang trạng thái `NGUNG_BAN` khi không thể xóa do đã có chứng từ.
+  - Frontend (`_HangHoaModal.cshtml`, `Index.cshtml`, `hang-hoa-form.css`, `hang-hoa-form.js`):
+    - Thay thế hoàn toàn modal Bootstrap thô cũ bằng modal overlay KiotViet `#hhDeleteProductOv` đồng bộ phong cách thiết kế (`.hh-modal.small`, nút đỏ `.hh-btn.danger`, đóng ESC/click ngoài).
+    - Tích hợp nút "🗑 Xóa" ở footer của modal Cập nhật hàng hóa (`#btnDeleteProductInModal`, tự động ẩn ở form Tạo mới / Sao chép, chỉ hiển thị khi Chỉnh sửa) kết nối chung với modal xác nhận xóa.
+    - Xử lý UX thông minh: Khi xóa hàng đã có giao dịch, modal không hiển thị alert trình duyệt mà hiển thị trực quan card cảnh báo màu đỏ với thông điệp rõ ràng và nút 1-click *"Chuyển sang 'Ngừng bán' ngay"*.
+    - Đồng bộ sự kiện xóa từ dòng chi tiết bảng (`.btn-delete-product`) qua hàm toàn cục `window.openDeleteProductModal(id, name)`.
 - **Tối ưu hóa toàn diện hiệu năng và độ mượt mà khi đổi/lưu ảnh hàng hóa (10x Faster)**:
   - Nén ảnh phía Client (Canvas Compression): Viết hàm `compressImage` tự động nén và resize ảnh chụp/ảnh nặng về tối đa 1000px, chất lượng JPEG 0.85 trước khi nạp base64; dung lượng giảm từ 5MB xuống ~100-200KB (giảm 95% payload truyền tải và thời gian ghi CSDL).
   - Cập nhật giao diện tức thì (Optimistic UI): Khi lưu thành công hàng hóa, JS lập tức cập nhật ảnh mới trực tiếp vào DOM của bảng (`thumb`, `popover`, `detail`) với độ trễ 0ms trước khi `loadTable()` reload xong.
@@ -58,6 +67,9 @@ Cập nhật lần cuối: 2026-10-14 – Nâng cấp Form Thêm/Sửa Hàng hó
 
 ## Nhật ký phiên
 - **2026-10-14 (Phiên 15 - Chiều/Tối)**:
+  - Đồng bộ toàn diện Logic & Giao diện Xóa hàng hóa chuẩn KiotViet:
+    - **Logic Backend**: Bổ sung `ChiTietPhieuXuat` vào danh sách 5 bảng chứng từ kiểm tra toàn vẹn (`ChiTietDonBan`, `ChiTietPhieuNhap`, `ChiTietPhieuXuat`, `ChiTietPhieuChuyenKho`, `ChiTietPhieuKiemKe`); bọc transaction EF xóa cascade dữ liệu bảng phụ (`HinhAnhHangHoa`, `NguongTonKho`); bổ sung endpoint `NgungBan(id)` chuyển nhanh trạng thái `NGUNG_BAN`.
+    - **Giao diện & Trải nghiệm**: Gỡ bỏ hoàn toàn modal Bootstrap thô cũ trong `Index.cshtml`, thay bằng modal overlay KiotViet `#hhDeleteProductOv` (`.hh-modal.small`, nút đỏ `.hh-btn.danger`, đóng ESC/click ngoài); thêm nút "🗑 Xóa" (`#btnDeleteProductInModal`) ở footer modal Cập nhật hàng hóa (tự động ẩn khi Tạo mới/Sao chép); cảnh báo giao dịch trực quan kèm nút 1-click chuyển sang 'Ngừng bán' thay vì browser alert; hiển thị toast nổi và tự động nạp lại bảng sau thao tác.
   - Tối ưu hóa toàn diện hiệu năng và độ mượt mà khi hoán đổi/đổi/lưu ảnh hàng hóa (10x Faster):
     - **Nén ảnh phía Client (Canvas Compression)**: Tự động nén ảnh chọn từ máy (cả thêm mới và thay thế ảnh chính) về kích thước tối đa 1000px, JPEG quality 0.85; giảm dung lượng payload JSON từ 10-25MB xuống ~200-500KB (giảm 95% thời gian truyền tải và ghi DB).
     - **Cập nhật tức thì (Optimistic UI)**: Khi lưu form thành công, JS lập tức cập nhật `src` của ảnh thumbnail, hover popover và tab detail trên bảng (`data-img-id`, `data-popover-img-id`, `data-detail-img-id`) ngay lập tức mà không phải chờ `loadTable()`, loại bỏ hoàn toàn độ trễ và hiện tượng giật/chớp màn hình.
