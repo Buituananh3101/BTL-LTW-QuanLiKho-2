@@ -338,13 +338,10 @@
             </div>
 
             <div class="kiot-actions-group">
-                <!-- Dropdown + Tạo mới (Split button chuẩn KiotViet: bấm nút chính tạo ngay, bấm mũi tên mở menu) -->
-                <div class="btn-group">
-                    <button class="btn btn-primary kiot-btn-create" type="button" id="btnDirectCreate" title="Thêm mới hàng hóa">
-                        <i class="bi bi-plus-lg"></i><span class="d-none d-md-inline ms-1">Tạo mới</span>
-                    </button>
-                    <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" id="btnDropdownCreate" data-bs-toggle="dropdown" aria-expanded="false" title="Thêm tùy chọn">
-                        <span class="visually-hidden">Mở menu</span>
+                <!-- Dropdown + Tạo mới (Click vào bất kỳ vị trí nào của nút đều mở menu tùy chọn) -->
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle kiot-btn-create d-inline-flex align-items-center" type="button" id="btnDropdownCreate" data-bs-toggle="dropdown" aria-expanded="false" title="Thêm mới">
+                        <i class="bi bi-plus-lg me-1"></i><span class="d-none d-md-inline">Tạo mới</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="btnDropdownCreate">
                         <li>
@@ -1201,8 +1198,8 @@ $(document).ready(function () {
         }
     });
 
-    // 6. Mở modal Thêm mới hàng hóa
-    $('#btnDirectCreate, #btnOpenCreateModal').on('click', function () {
+    // 6. Mở modal Thêm mới hàng hóa từ menu dropdown
+    $('#btnOpenCreateModal').on('click', function () {
         if (typeof window.openCreateProductModal === 'function') {
             window.openCreateProductModal();
         }
@@ -1631,15 +1628,6 @@ $(document).ready(function () {
 
         $panel.find('.tab-pane-content').hide();
         $panel.find('.tab-' + tabName).fadeIn(120);
-    });
-
-    // Double click dòng hàng hóa để mở nhanh modal sửa
-    $(document).on('dblclick', '.product-row', function (e) {
-        if ($(e.target).closest('input[type="checkbox"], .star-btn, button, a').length) return;
-        const id = $(this).data('id');
-        if (typeof window.openEditProductModal === 'function') {
-            window.openEditProductModal(id);
-        }
     });
 
     // Sao chép hàng hóa (mở modal KiotViet mới ở chế độ sao chép)
