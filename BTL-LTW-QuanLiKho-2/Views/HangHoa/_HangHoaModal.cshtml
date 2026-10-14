@@ -37,7 +37,7 @@
 
         <!-- ---- TAB 1: THÔNG TIN ---- -->
         <div class="hh-pane on" id="hh-pane-info">
-          <div class="hh-top-grid">
+          <div class="hh-top-grid" style="position: relative; z-index: 30;">
             <!-- Cột trái: Các trường thông tin cơ bản -->
             <div class="hh-fields">
               <div class="hh-f">
@@ -54,8 +54,28 @@
                 <span class="hh-err">Vui lòng nhập tên hàng.</span>
               </div>
               <div class="hh-f" id="hhFldNhom">
-                <label for="formMaNhom">Nhóm hàng <button type="button" class="hh-link" id="btnNewNhom" data-new="nhom">+ Tạo mới</button></label>
-                <select id="formMaNhom">
+                <label for="inputMaNhom">Nhóm hàng <button type="button" class="hh-link" id="btnNewNhom" data-new="nhom">+ Tạo mới</button></label>
+                <div class="hh-cs-wrap" id="wrapMaNhom" data-select-id="#formMaNhom">
+                  <div class="hh-cs-box" id="boxMaNhom">
+                    <input type="text" class="hh-cs-input" id="inputMaNhom" placeholder="Chọn nhóm hàng (Bắt buộc)" autocomplete="off" />
+                    <svg class="hh-cs-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                  </div>
+                  <div class="hh-cs-dropdown" id="dropdownMaNhom" style="display: none;">
+                    <div class="hh-cs-list" id="listMaNhom">
+                      @foreach (var g in Model.NhomHangs)
+                      {
+                        <div class="hh-cs-item" data-val="@g.MaNhom">
+                          <span>@g.TenNhom</span>
+                          <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+                        </div>
+                      }
+                      <div class="hh-cs-item hh-cs-new-item">
+                        <span>+ Tạo nhóm hàng mới</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <select id="formMaNhom" style="display: none;">
                   <option value="">Chọn nhóm hàng (Bắt buộc)</option>
                   @foreach (var g in Model.NhomHangs)
                   {
@@ -66,8 +86,28 @@
               </div>
               <!-- Thay thế Thương hiệu bằng Đơn vị tính theo yêu cầu của dự án -->
               <div class="hh-f" id="hhFldDvt">
-                <label for="formMaDvt">Đơn vị tính <button type="button" class="hh-link" id="btnNewDvt" data-new="dvt">+ Tạo mới</button></label>
-                <select id="formMaDvt">
+                <label for="inputMaDvt">Đơn vị tính <button type="button" class="hh-link" id="btnNewDvt" data-new="dvt">+ Tạo mới</button></label>
+                <div class="hh-cs-wrap" id="wrapMaDvt" data-select-id="#formMaDvt">
+                  <div class="hh-cs-box" id="boxMaDvt">
+                    <input type="text" class="hh-cs-input" id="inputMaDvt" placeholder="Chọn ĐVT (Bắt buộc)" autocomplete="off" />
+                    <svg class="hh-cs-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                  </div>
+                  <div class="hh-cs-dropdown" id="dropdownMaDvt" style="display: none;">
+                    <div class="hh-cs-list" id="listMaDvt">
+                      @foreach (var u in Model.DonViTinhs)
+                      {
+                        <div class="hh-cs-item" data-val="@u.MaDvt">
+                          <span>@u.TenDvt</span>
+                          <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+                        </div>
+                      }
+                      <div class="hh-cs-item hh-cs-new-item">
+                        <span>+ Tạo đơn vị tính mới</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <select id="formMaDvt" style="display: none;">
                   <option value="">Chọn ĐVT (Bắt buộc)</option>
                   @foreach (var u in Model.DonViTinhs)
                   {
@@ -171,7 +211,25 @@
                   <label for="formTrongLuong">Trọng lượng</label>
                   <div class="hh-weight">
                     <input type="text" id="formTrongLuong" class="hh-num" value="0" inputmode="decimal" />
-                    <select id="formDonViTrongLuong">
+                    <div class="hh-cs-wrap" id="wrapDonViTrongLuong" data-select-id="#formDonViTrongLuong" style="width: 75px; flex: none;">
+                      <div class="hh-cs-box" id="boxDonViTrongLuong" style="border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: 0; padding: 0 8px;">
+                        <input type="text" class="hh-cs-input" id="inputDonViTrongLuong" value="g" readonly style="text-align: center; cursor: pointer;" />
+                        <svg class="hh-cs-arrow" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path d="M6 9l6 6 6-6"/></svg>
+                      </div>
+                      <div class="hh-cs-dropdown" id="dropdownDonViTrongLuong" style="display: none; min-width: 75px;">
+                        <div class="hh-cs-list" id="listDonViTrongLuong">
+                          <div class="hh-cs-item selected" data-val="g">
+                            <span>g</span>
+                            <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+                          </div>
+                          <div class="hh-cs-item" data-val="kg">
+                            <span>kg</span>
+                            <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <select id="formDonViTrongLuong" style="display: none;">
                       <option value="g" selected>g</option>
                       <option value="kg">kg</option>
                     </select>
@@ -182,7 +240,7 @@
           </section>
 
           <!-- Section 4: Thuộc tính hàng hóa (bỏ phần quy đổi đơn vị tính theo yêu cầu) -->
-          <section class="hh-sec open">
+          <section class="hh-sec open" style="position: relative; z-index: 10; overflow: visible;">
             <div class="hh-sec-h">
               <div>
                 <h3>Thuộc tính</h3>
@@ -190,7 +248,7 @@
               </div>
               <svg class="hh-chev"><use href="#i-chev"/></svg>
             </div>
-            <div class="hh-sec-b">
+            <div class="hh-sec-b" style="overflow: visible;">
               <div id="hhAttrRows"></div>
               <button type="button" class="hh-add-link" id="hhAddAttr">
                 <svg style="width:16px;height:16px;"><use href="#i-plus"/></svg> Thêm thuộc tính

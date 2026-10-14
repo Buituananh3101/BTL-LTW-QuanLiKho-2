@@ -9,8 +9,8 @@
 ### 1.1. Bản đồ File liên quan (File Map)
 - **Controller**: `Controllers/HangHoaController.cs` (`Index`, lọc AJAX `Filter`, `Create`, `Edit`, `GetItem`, `ToggleFavorite`, `Delete`, `GetImage`, `CreateDvtQuick`, `UpdateThuocTinh`).
 - **ViewModel**: `ViewModels/HangHoa/` (`HangHoaForm.cs`, `QuickGroupRequest.cs`, `QuickDvtRequest.cs`).
-- **View & Modal**: `Views/HangHoa/Index.cshtml`, `Views/HangHoa/_HangHoaModal.cshtml` (Modal chuẩn KiotViet: Tab Thông tin & Mô tả, lưu tối đa 5 ảnh CSDL, ĐVT thay Thương hiệu, accordion gập mở).
-- **Styles & Scripts**: `wwwroot/css/hang-hoa-form.css`, `wwwroot/js/hang-hoa-form.js` (Quản lý 5 ảnh, định dạng số có phẩy, thuộc tính động, quick prompt & quick pick chips).
+- **View & Modal**: `Views/HangHoa/Index.cshtml`, `Views/HangHoa/_HangHoaModal.cshtml` (Modal chuẩn KiotViet: Tab Thông tin & Mô tả, lưu tối đa 5 ảnh CSDL, ĐVT thay Thương hiệu, accordion gập mở, hệ thống custom dropdown đồng nhất toàn diện: Nhóm hàng, ĐVT, Vị trí đa chọn, Trọng lượng, Thuộc tính với hover, bo góc, bóng mờ, tìm kiếm và dấu tích xanh ✓).
+- **Styles & Scripts**: `wwwroot/css/hang-hoa-form.css`, `wwwroot/js/hang-hoa-form.js` (Quản lý 5 ảnh, định dạng số có phẩy, hệ thống Single-Select & Multi-Select dropdown chuẩn KiotViet, thuộc tính động, quick prompt & quick pick chips).
 - **Bảng dữ liệu**: `Views/HangHoa/_HangHoaTable.cshtml` (Partial bảng, accordion chi tiết: ĐVT, vị trí, trọng lượng, định mức tồn Min-Max, thuộc tính).
 - **Service tồn kho**: `Services/ITonKhoService.cs`, `Services/TonKhoService.cs`.
 - **DbContext & Entity**: `Models/QuanLyKhoPhuQuocLtwContext.cs`, các Entity (`HangHoa`, `HinhAnhHangHoa`, `NhomHang`, `DonViTinh`, `NguongTonKho`, `VwTonKhoHienTai`).

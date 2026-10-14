@@ -254,6 +254,7 @@
           opt.textContent = res.tenNhom;
           sel.appendChild(opt);
           sel.value = res.maNhom;
+          csMaNhom?.sync();
           $('#hhFldNhom').classList.remove('invalid');
           showToast('Đã tạo nhóm hàng: ' + res.tenNhom);
         },
@@ -282,6 +283,7 @@
             sel.appendChild(opt);
           }
           sel.value = res.maDvt;
+          csMaDvt?.sync();
           $('#hhFldDvt').classList.remove('invalid');
           showToast('Đã thêm đơn vị tính: ' + res.tenDvt);
         },
@@ -291,6 +293,209 @@
       });
     });
   };
+
+  /* ==========================================================================
+     HỆ THỐNG CUSTOM SINGLE-SELECT DROPDOWN (Nhóm hàng, ĐVT, Trọng lượng)
+     Đồng nhất giao diện với Dropdown Vị trí (hover, bo góc, bóng mờ, tích xanh ✓)
+     ========================================================================== */
+  function closeAllSingleSelects(exceptWrap = null) {
+    $$('.hh-cs-wrap.open').forEach(w => {
+      if (w !== exceptWrap) {
+        w.classList.remove('open');
+        const dd = w.querySelector('.hh-cs-dropdown');
+        if (dd) dd.style.display = 'none';
+        const inp = w.querySelector('.hh-cs-input');
+        const targetId = w.dataset.selectId;
+        const sel = targetId ? $(targetId) : null;
+        if (inp && sel) {
+          const opt = sel.options[sel.selectedIndex];
+          inp.value = (opt && opt.value) ? opt.textContent.trim() : '';
+        }
+        w.querySelectorAll('.hh-cs-item').forEach(it => it.style.display = 'flex');
+        const emptyEl = w.querySelector('.hh-cs-empty');
+        if (emptyEl) emptyEl.style.display = 'none';
+      }
+    });
+  }
+
+  function initSingleSelect(config) {
+    const { wrapId, boxId, inputId, dropdownId, listId, selectId, onSelect, onNew } = config;
+    const wrap = $(wrapId);
+    const box = $(boxId);
+    const input = $(inputId);
+    const dropdown = $(dropdownId);
+    const list = $(listId);
+    const select = $(selectId);
+
+    if (!wrap || !box || !input || !dropdown || !list || !select) return null;
+
+    function openDropdown() {
+      closeAllSingleSelects(wrap);
+      closeLocationDropdown();
+      dropdown.style.display = 'block';
+      wrap.classList.add('open');
+      input.focus();
+      filterItems('');
+    }
+
+    function closeDropdown() {
+      dropdown.style.display = 'none';
+      wrap.classList.remove('open');
+      const curOpt = select.options[select.selectedIndex];
+      input.value = (curOpt && curOpt.value) ? curOpt.textContent.trim() : '';
+      filterItems('');
+    }
+
+    function selectValue(val, text) {
+      select.value = val;
+      input.value = text || (val ? select.options[select.selectedIndex]?.textContent?.trim() : '');
+      updateSelectedUI();
+      closeDropdown();
+      select.closest('.hh-f')?.classList.remove('invalid');
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      select.dispatchEvent(new Event('input', { bubbles: true }));
+      if (typeof onSelect === 'function') onSelect(val, text);
+    }
+
+    function updateSelectedUI() {
+      const curVal = String(select.value ?? '');
+      $$('.hh-cs-item', list).forEach(item => {
+        const itemVal = String(item.dataset.val ?? '');
+        item.classList.toggle('selected', itemVal === curVal);
+      });
+      const curOpt = select.options[select.selectedIndex];
+      input.value = (curOpt && curOpt.value) ? curOpt.textContent.trim() : '';
+    }
+
+    function filterItems(query) {
+      query = (query || '').toLowerCase().trim();
+      let matchCount = 0;
+      $$('.hh-cs-item', list).forEach(item => {
+        if (item.classList.contains('hh-cs-new-item')) return;
+        const text = (item.textContent || '').toLowerCase();
+        const matches = !query || text.includes(query);
+        item.style.display = matches ? 'flex' : 'none';
+        if (matches) matchCount++;
+      });
+      let emptyMsg = list.querySelector('.hh-cs-empty');
+      if (!emptyMsg) {
+        emptyMsg = document.createElement('div');
+        emptyMsg.className = 'hh-cs-empty';
+        emptyMsg.textContent = 'Không tìm thấy kết quả phù hợp';
+        list.appendChild(emptyMsg);
+      }
+      emptyMsg.style.display = (matchCount === 0 && query) ? 'block' : 'none';
+    }
+
+    box.addEventListener('click', e => {
+      e.stopPropagation();
+      if (wrap.classList.contains('open')) {
+        closeDropdown();
+      } else {
+        openDropdown();
+      }
+    });
+
+    input.addEventListener('input', e => {
+      if (!wrap.classList.contains('open')) {
+        dropdown.style.display = 'block';
+        wrap.classList.add('open');
+      }
+      filterItems(e.target.value);
+    });
+
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeDropdown();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const firstVisible = list.querySelector('.hh-cs-item:not([style*="display: none"]):not(.hh-cs-new-item)');
+        if (firstVisible) {
+          selectValue(firstVisible.dataset.val, firstVisible.querySelector('span')?.textContent?.trim());
+        }
+      }
+    });
+
+    list.addEventListener('click', e => {
+      e.stopPropagation();
+      const newItemBtn = e.target.closest('.hh-cs-new-item');
+      if (newItemBtn) {
+        closeDropdown();
+        if (typeof onNew === 'function') onNew();
+        return;
+      }
+      const item = e.target.closest('.hh-cs-item');
+      if (!item) return;
+      selectValue(item.dataset.val, item.querySelector('span')?.textContent?.trim());
+    });
+
+    function syncOptions() {
+      list.innerHTML = '';
+      Array.from(select.options).forEach(opt => {
+        if (opt.value === '') return;
+        const isSel = (String(select.value) === String(opt.value));
+        const it = document.createElement('div');
+        it.className = `hh-cs-item ${isSel ? 'selected' : ''}`;
+        it.dataset.val = opt.value;
+        it.innerHTML = `
+          <span>${esc(opt.textContent.trim())}</span>
+          <svg class="hh-check-icon" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#2563eb;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 12l5 5L20 6"/></svg>
+        `;
+        list.appendChild(it);
+      });
+      if (config.newItemText) {
+        const newBtn = document.createElement('div');
+        newBtn.className = 'hh-cs-item hh-cs-new-item';
+        newBtn.innerHTML = `<span>${config.newItemText}</span>`;
+        list.appendChild(newBtn);
+      }
+      updateSelectedUI();
+    }
+
+    return {
+      open: openDropdown,
+      close: closeDropdown,
+      select: selectValue,
+      sync: syncOptions,
+      updateUI: updateSelectedUI
+    };
+  }
+
+  const csMaNhom = initSingleSelect({
+    wrapId: '#wrapMaNhom',
+    boxId: '#boxMaNhom',
+    inputId: '#inputMaNhom',
+    dropdownId: '#dropdownMaNhom',
+    listId: '#listMaNhom',
+    selectId: '#formMaNhom',
+    newItemText: '+ Tạo nhóm hàng mới',
+    onNew: () => $('#btnNewNhom')?.click()
+  });
+
+  const csMaDvt = initSingleSelect({
+    wrapId: '#wrapMaDvt',
+    boxId: '#boxMaDvt',
+    inputId: '#inputMaDvt',
+    dropdownId: '#dropdownMaDvt',
+    listId: '#listMaDvt',
+    selectId: '#formMaDvt',
+    newItemText: '+ Tạo đơn vị tính mới',
+    onNew: () => $('#btnNewDvt')?.click()
+  });
+
+  const csDonViTrongLuong = initSingleSelect({
+    wrapId: '#wrapDonViTrongLuong',
+    boxId: '#boxDonViTrongLuong',
+    inputId: '#inputDonViTrongLuong',
+    dropdownId: '#dropdownDonViTrongLuong',
+    listId: '#listDonViTrongLuong',
+    selectId: '#formDonViTrongLuong'
+  });
+
+  csMaNhom?.updateUI();
+  csMaDvt?.updateUI();
+  csDonViTrongLuong?.updateUI();
 
   /* ---------- Vị trí đa chọn (Multi-select dropdown tags chuẩn KiotViet) ---------- */
   let availableLocations = [
@@ -450,6 +655,9 @@
     if (!e.target.closest('#formViTriWrap') && !e.target.closest('#btnNewViTri')) {
       closeLocationDropdown();
     }
+    if (!e.target.closest('.hh-cs-wrap') && !e.target.closest('.hh-link')) {
+      closeAllSingleSelects();
+    }
   });
 
   // Nút Tạo mới Vị trí
@@ -491,13 +699,35 @@
       const used = rows.filter(x => x !== r).map(getRowName);
       const opts = Object.keys(knownAttributes).filter(n => !used.includes(n));
       const sel = r.querySelector('.hh-a-name');
-      if (!sel) return;
+      const csInput = r.querySelector('.hh-a-input');
+      const csList = r.querySelector('.hh-a-list');
 
-      sel.innerHTML = '<option value="">Chọn thuộc tính</option>' +
-        opts.map(n => `<option ${n === cur ? 'selected' : ''}>${esc(n)}</option>`).join('') +
-        (cur && !opts.includes(cur) ? `<option value="${esc(cur)}" selected>${esc(cur)}</option>` : '') +
-        '<option value="__new">+ Tạo thuộc tính mới</option>';
-      sel.value = cur;
+      if (sel) {
+        sel.innerHTML = '<option value="">Chọn thuộc tính</option>' +
+          opts.map(n => `<option ${n === cur ? 'selected' : ''}>${esc(n)}</option>`).join('') +
+          (cur && !opts.includes(cur) ? `<option value="${esc(cur)}" selected>${esc(cur)}</option>` : '') +
+          '<option value="__new">+ Tạo thuộc tính mới</option>';
+        sel.value = cur;
+      }
+
+      if (csInput) {
+        csInput.value = cur || '';
+      }
+
+      if (csList) {
+        const allItems = [...opts];
+        if (cur && !allItems.includes(cur)) allItems.unshift(cur);
+        csList.innerHTML = allItems.map(n => `
+          <div class="hh-cs-item ${n === cur ? 'selected' : ''}" data-val="${esc(n)}">
+            <span>${esc(n)}</span>
+            <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+          </div>
+        `).join('') + `
+          <div class="hh-cs-item hh-cs-new-item" data-val="__new">
+            <span>+ Tạo thuộc tính mới</span>
+          </div>
+        `;
+      }
     });
   }
 
@@ -540,7 +770,16 @@
     r.dataset.cur = initialName;
 
     r.innerHTML = `
-      <select class="hh-a-name" aria-label="Tên thuộc tính"></select>
+      <div class="hh-cs-wrap hh-a-cs-wrap" style="width: 220px; flex: none;">
+        <div class="hh-cs-box">
+          <input type="text" class="hh-cs-input hh-a-input" placeholder="Chọn thuộc tính" readonly autocomplete="off" />
+          <svg class="hh-cs-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="hh-cs-dropdown" style="display: none;">
+          <div class="hh-cs-list hh-a-list"></div>
+        </div>
+      </div>
+      <select class="hh-a-name" aria-label="Tên thuộc tính" style="display:none;"></select>
       <div class="hh-tagwrap ${initialName ? '' : 'disabled'}">
         <div class="hh-tagbox">
           <span class="hh-tags"></span>
@@ -598,6 +837,43 @@
   attrRows.addEventListener('click', e => {
     const r = e.target.closest('.hh-attr-row');
     if (!r) return;
+
+    // Click vào item trong dropdown thuộc tính
+    const aItem = e.target.closest('.hh-a-list .hh-cs-item');
+    if (aItem) {
+      e.stopPropagation();
+      const wrap = aItem.closest('.hh-a-cs-wrap');
+      const dd = wrap?.querySelector('.hh-cs-dropdown');
+      if (dd) dd.style.display = 'none';
+      wrap?.classList.remove('open');
+      const val = aItem.dataset.val;
+      if (val === '__new') {
+        openPrompt('Tạo thuộc tính mới', 'Tên thuộc tính', '', n => {
+          if (!knownAttributes[n]) knownAttributes[n] = [];
+          setRowAttr(r, n);
+        });
+        return;
+      }
+      setRowAttr(r, val);
+      return;
+    }
+
+    // Click vào box thuộc tính để mở/đóng dropdown
+    const csBox = e.target.closest('.hh-a-cs-wrap .hh-cs-box');
+    if (csBox) {
+      e.stopPropagation();
+      const wrap = csBox.closest('.hh-a-cs-wrap');
+      const isOpen = wrap?.classList.contains('open');
+      closeAllSingleSelects();
+      closeLocationDropdown();
+      if (!isOpen && wrap) {
+        wrap.classList.add('open');
+        const dd = wrap.querySelector('.hh-cs-dropdown');
+        if (dd) dd.style.display = 'block';
+      }
+      return;
+    }
+
     const tagX = e.target.closest('.hh-tag button');
     if (tagX) {
       r._vals.splice(+tagX.dataset.i, 1);
@@ -759,6 +1035,12 @@
     $('#formTenHang').value = '';
     $('#formMaNhom').selectedIndex = 0;
     $('#formMaDvt').selectedIndex = 0;
+    $('#formTrongLuong').value = '0';
+    $('#formDonViTrongLuong').value = 'g';
+    closeAllSingleSelects();
+    csMaNhom?.updateUI();
+    csMaDvt?.updateUI();
+    csDonViTrongLuong?.updateUI();
     $('#formGiaVon').value = '0';
     $('#formGiaBan').value = '0';
     $('#formTonKhoBanDau').value = '0';
@@ -771,8 +1053,6 @@
     const ddViTri = $('#formViTriDropdown');
     if (ddViTri) ddViTri.style.display = 'none';
     $('#formViTriWrap')?.classList.remove('open');
-    $('#formTrongLuong').value = '0';
-    $('#formDonViTrongLuong').value = 'g';
     $('#formMoTa').innerHTML = '';
     $('#chkBanTrucTiep').checked = true;
 
@@ -880,6 +1160,8 @@
         $('#formTenHang').value = isCopy ? ((res.tenHang || '') + ' (Copy)') : (res.tenHang || '');
         $('#formMaNhom').value = res.maNhom || '';
         $('#formMaDvt').value = res.maDvt || '';
+        csMaNhom?.updateUI();
+        csMaDvt?.updateUI();
         $('#formGiaVon').value = formatNum(res.giaVon);
         $('#formGiaBan').value = formatNum(res.giaBanThamKhao);
         $('#formTonKhoBanDau').value = '0';
@@ -900,6 +1182,7 @@
 
         $('#formTrongLuong').value = res.trongLuong || 0;
         $('#formDonViTrongLuong').value = res.donViTrongLuong || 'g';
+        csDonViTrongLuong?.updateUI();
         $('#formMoTa').innerHTML = res.moTa || '';
         $('#chkBanTrucTiep').checked = (res.trangThai === 'DANG_BAN');
 
