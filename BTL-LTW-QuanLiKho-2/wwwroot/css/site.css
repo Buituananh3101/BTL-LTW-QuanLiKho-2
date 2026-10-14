@@ -846,40 +846,114 @@ body {
   background: var(--brand-dark);
 }
 
-/* ---------- Modal Tạo hàng hóa (KiotViet Style) ---------- */
+/* ---------- Modal Tạo hàng hóa (KiotViet Style - Image Match) ---------- */
+.modal-kiot .modal-dialog {
+  max-width: 920px;
+}
+.modal-kiot .modal-content {
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
 .modal-kiot .modal-header {
-  border-bottom: 1px solid #e5e7eb;
-  padding: 14px 20px;
+  border-bottom: 0;
+  padding: 14px 20px 0 20px;
+  background: #fff;
 }
 .modal-kiot .modal-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  color: #111827;
+  color: #1e293b;
+}
+.modal-kiot .nav-tabs {
+  border-bottom: 1px solid #e2e8f0;
+  margin-top: 8px;
+}
+.modal-kiot .nav-tabs .nav-link {
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #64748b;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 8px 16px;
+  background: transparent;
+}
+.modal-kiot .nav-tabs .nav-link.active {
+  color: #0d6efd;
+  font-weight: 600;
+  border-bottom: 2px solid #0d6efd;
+  background: transparent;
 }
 .modal-kiot .modal-body {
-  padding: 20px;
-  background: #f9fafb;
+  padding: 16px 20px;
+  background: #f8fafc;
 }
 .modal-kiot .modal-footer {
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #e2e8f0;
   padding: 12px 20px;
   background: #fff;
 }
 .modal-card-section {
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 14px;
+  padding: 14px 18px;
+  margin-bottom: 12px;
 }
 .modal-card-title {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 12px;
+  color: #1e293b;
+  margin-bottom: 4px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+.modal-card-subtext {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.form-label-kiot {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #334155;
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.form-label-kiot .form-label-link {
+  font-size: 12px;
+  font-weight: 500;
+  color: #0d6efd;
+  text-decoration: none;
+}
+.form-label-kiot .form-label-link:hover {
+  text-decoration: underline;
+}
+.modal-kiot .form-control,
+.modal-kiot .form-select {
+  height: 36px !important;
+  font-size: 13.5px !important;
+  border-radius: 6px !important;
+  border: 1px solid #d1d5db !important;
+  color: #1e293b;
+  background-color: #ffffff;
+  padding: 6px 12px;
+}
+.modal-kiot .form-control:focus,
+.modal-kiot .form-select:focus {
+  border-color: #0d6efd !important;
+  box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.16) !important;
+}
+.modal-kiot .form-control::placeholder {
+  color: #94a3b8;
+  font-size: 13px;
+}
+.modal-kiot textarea.form-control {
+  height: auto !important;
 }
 
 /* Sidebar toggle button (round button on vertical boundary - KiotViet style) */
@@ -1726,16 +1800,18 @@ tr.product-detail-row > td {
   margin-bottom: 8px;
 }
 
-.kiot-attr-dropdown .dropdown-toggle::after {
+.kiot-attr-dropdown .dropdown-toggle::after,
+.kiot-loc-dropdown .dropdown-toggle::after {
   display: none !important;
 }
 
-.kiot-attr-btn {
+.kiot-attr-btn,
+.kiot-loc-btn {
   background-color: #ffffff !important;
-  border: 1px solid #ced4da !important;
+  border: 1px solid #d1d5db !important;
   border-radius: 6px !important;
   font-size: 13.5px !important;
-  height: 38px !important;
+  height: 36px !important;
   padding: 6px 12px !important;
   text-align: left;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
@@ -1743,21 +1819,29 @@ tr.product-detail-row > td {
 
 .kiot-attr-btn:focus,
 .kiot-attr-btn:active,
-.kiot-attr-dropdown.show .kiot-attr-btn {
+.kiot-attr-dropdown.show .kiot-attr-btn,
+.kiot-loc-btn:focus,
+.kiot-loc-btn:active,
+.kiot-loc-dropdown.show .kiot-loc-btn {
   border-color: #0d6efd !important;
-  box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.18) !important;
+  box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.16) !important;
 }
 
-.kiot-attr-dropdown.show .kiot-attr-chevron {
+.kiot-attr-dropdown.show .kiot-attr-chevron,
+.kiot-loc-dropdown.show .kiot-loc-chevron,
+.kiot-attr-dropdown .dropdown-toggle.show .kiot-attr-chevron,
+.kiot-loc-dropdown .dropdown-toggle.show .kiot-loc-chevron {
   transform: rotate(180deg);
 }
 
-.kiot-attr-chevron {
+.kiot-attr-chevron,
+.kiot-loc-chevron {
   transition: transform 0.2s ease;
   font-size: 11px;
 }
 
-.kiot-attr-menu {
+.kiot-attr-menu,
+.kiot-loc-menu {
   border: 1px solid #dee2e6 !important;
   border-radius: 6px !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
@@ -1766,7 +1850,8 @@ tr.product-detail-row > td {
   min-width: 220px !important;
 }
 
-.kiot-attr-item {
+.kiot-attr-item,
+.kiot-loc-item {
   font-size: 13.5px;
   color: #212529 !important;
   padding: 8px 16px !important;
@@ -1777,35 +1862,37 @@ tr.product-detail-row > td {
   align-items: center !important;
 }
 
-.kiot-attr-item:hover {
+.kiot-attr-item:hover,
+.kiot-loc-item:hover {
   background-color: #f0f7ff !important;
   color: #0d6efd !important;
 }
 
-.kiot-attr-item.active {
+.kiot-attr-item.active,
+.kiot-loc-item.active {
   background-color: #f0f7ff !important;
   color: #0d6efd !important;
   font-weight: 600;
 }
 
 .kiot-attr-val-input {
-  border: 1px solid #ced4da !important;
+  border: 1px solid #d1d5db !important;
   border-radius: 6px !important;
   font-size: 13.5px !important;
-  height: 38px !important;
+  height: 36px !important;
 }
 
 .kiot-attr-val-input:focus {
   border-color: #86b7fe !important;
-  box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.18) !important;
+  box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.16) !important;
 }
 
 .kiot-btn-remove-attr {
   background: #ffffff !important;
-  border: 1px solid #ced4da !important;
+  border: 1px solid #d1d5db !important;
   border-radius: 6px !important;
-  width: 38px !important;
-  height: 38px !important;
+  width: 36px !important;
+  height: 36px !important;
   flex-shrink: 0;
   display: flex;
   align-items: center;

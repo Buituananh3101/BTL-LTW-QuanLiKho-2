@@ -406,7 +406,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Thêm mới hàng hóa</h5>
+                <h5 class="modal-title" id="modalTitle" style="font-size: 17px; font-weight: 600; color: #1e293b;">Tạo hàng hóa</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
@@ -420,7 +420,7 @@
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link fw-semibold" id="tab-desc-btn" data-bs-toggle="tab" data-bs-target="#tab-desc" type="button" role="tab">
-                            Mô tả chi tiết
+                            Mô tả
                         </button>
                     </li>
                 </ul>
@@ -442,24 +442,27 @@
                                         <div class="row g-2">
                                             <!-- Mã hàng -->
                                             <div class="col-md-6">
-                                                <label class="form-label small fw-bold text-muted mb-1">Mã hàng</label>
-                                                <input type="text" class="form-control form-control-sm" id="formMaHangNoiBo" name="MaHangNoiBo" placeholder="Mã hàng tự động" />
+                                                <label class="form-label-kiot mb-1">Mã hàng</label>
+                                                <input type="text" class="form-control" id="formMaHangNoiBo" name="MaHangNoiBo" placeholder="Tự động" />
                                             </div>
-                                            <!-- Mã vạch / Quy cách -->
+                                            <!-- Mã vạch -->
                                             <div class="col-md-6">
-                                                <label class="form-label small fw-bold text-muted mb-1">Mã vạch / Quy cách</label>
-                                                <input type="text" class="form-control form-control-sm" id="formQuyCach" name="QuyCach" placeholder="Barcode, quy cách…" />
+                                                <label class="form-label-kiot mb-1">Mã vạch</label>
+                                                <input type="text" class="form-control" id="formQuyCach" name="QuyCach" placeholder="Nhập mã vạch" />
                                             </div>
                                             <!-- Tên hàng (*) -->
                                             <div class="col-md-12">
-                                                <label class="form-label small fw-bold text-muted mb-1">Tên hàng hóa <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control form-control-sm" id="formTenHang" name="TenHang" required placeholder="Nhập tên hàng hóa…" />
+                                                <label class="form-label-kiot mb-1">Tên hàng <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="formTenHang" name="TenHang" required placeholder="Bắt buộc" />
                                             </div>
                                             <!-- Nhóm hàng (*) -->
                                             <div class="col-md-6">
-                                                <label class="form-label small fw-bold text-muted mb-1">Nhóm hàng <span class="text-danger">*</span></label>
-                                                <select class="form-select form-select-sm" id="formMaNhom" name="MaNhom" required>
-                                                    <option value="">-- Chọn nhóm hàng --</option>
+                                                <div class="form-label-kiot mb-1">
+                                                    <span>Nhóm hàng <span class="text-danger">*</span></span>
+                                                    <a href="javascript:void(0)" class="form-label-link" id="btnQuickAddGroup">Tạo mới</a>
+                                                </div>
+                                                <select class="form-select" id="formMaNhom" name="MaNhom" required>
+                                                    <option value="">Chọn nhóm hàng (Bắt buộc)</option>
                                                     @foreach (var g in Model.NhomHangs)
                                                     {
                                                         <option value="@g.MaNhom">@g.TenNhom</option>
@@ -468,9 +471,12 @@
                                             </div>
                                             <!-- Đơn vị tính (*) -->
                                             <div class="col-md-6">
-                                                <label class="form-label small fw-bold text-muted mb-1">Đơn vị tính <span class="text-danger">*</span></label>
-                                                <select class="form-select form-select-sm" id="formMaDvt" name="MaDvt" required>
-                                                    <option value="">-- Chọn ĐVT --</option>
+                                                <div class="form-label-kiot mb-1">
+                                                    <span>Đơn vị tính <span class="text-danger">*</span></span>
+                                                    <a href="javascript:void(0)" class="form-label-link" id="btnQuickAddUnit">Tạo mới</a>
+                                                </div>
+                                                <select class="form-select" id="formMaDvt" name="MaDvt" required>
+                                                    <option value="">Chọn đơn vị tính (Bắt buộc)</option>
                                                     @foreach (var u in Model.DonViTinhs)
                                                     {
                                                         <option value="@u.MaDvt">@u.TenDvt</option>
@@ -480,99 +486,122 @@
                                         </div>
                                     </div>
 
-                                    <!-- VÙNG ẢNH SẢN PHẨM HOÀN THIỆN: LƯU TRỰC TIẾP VÀO CSDL -->
-                                    <div class="col-md-4 text-center">
-                                        <div class="p-3 border rounded bg-light d-flex flex-column align-items-center justify-content-center position-relative" style="min-height: 170px;">
-                                            <div id="imagePlaceholder" class="d-flex flex-column align-items-center justify-content-center">
-                                                <i class="bi bi-image text-muted fs-1 mb-2"></i>
-                                                <span class="small text-muted">Chưa có ảnh</span>
+                                    <!-- VÙNG ẢNH SẢN PHẨM HOÀN THIỆN: CHUẨN KIOTVIET IMAGE 1 -->
+                                    <div class="col-md-4">
+                                        <div class="kiot-image-upload-box d-flex align-items-center justify-content-between p-3" style="border: 1px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; min-height: 148px; height: 100%;">
+                                            <!-- Main upload / preview area -->
+                                            <div class="flex-grow-1 text-center py-1 d-flex flex-column align-items-center justify-content-center" style="min-width: 0;">
+                                                <!-- Placeholder khi CHƯA có ảnh -->
+                                                <div id="imagePlaceholder" class="flex-column align-items-center justify-content-center text-center py-2" style="display: flex;">
+                                                    <button type="button" class="btn btn-sm bg-white border px-3 py-1 fw-semibold text-dark shadow-xs" id="btnSelectImage" style="border-color: #cbd5e1; font-size: 13px; border-radius: 6px;">
+                                                        Thêm ảnh
+                                                    </button>
+                                                    <span class="text-muted mt-2 d-block" style="font-size: 11.5px;">Mỗi ảnh không quá 2 MB</span>
+                                                </div>
+
+                                                <!-- Preview khi ĐÃ CÓ ảnh (thay thế hoàn toàn Placeholder) -->
+                                                <div id="imagePreviewWrap" class="position-relative text-center py-1" style="display: none;">
+                                                    <img id="imagePreview" src="" alt="Ảnh sản phẩm" class="rounded shadow-xs" style="max-width: 105px; max-height: 105px; object-fit: contain; border: 1px solid #d1d5db; background: #fff; cursor: pointer;" title="Bấm để đổi ảnh khác" />
+                                                    <button type="button" class="btn btn-sm btn-danger position-absolute rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm" id="btnRemoveImage" title="Xóa ảnh" style="top: -6px; right: -6px; width: 22px; height: 22px; font-size: 12px; line-height: 1; z-index: 5;">
+                                                        <i class="bi bi-x"></i>
+                                                    </button>
+                                                </div>
                                             </div>
 
-                                            <img id="imagePreview" src="" alt="Ảnh sản phẩm" class="rounded mb-2" style="display: none; max-width: 120px; max-height: 120px; object-fit: contain; border: 1px solid #d9dee5;" />
-
-                                            <div class="d-flex gap-1 mt-2">
-                                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" id="btnSelectImage">
-                                                    <i class="bi bi-upload me-1"></i>Chọn ảnh
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" id="btnRemoveImage" style="display: none;">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
+                                            <!-- 3 ô vuông placeholder thumbnail mờ bên phải chuẩn ảnh -->
+                                            <div class="d-flex flex-column gap-2 ps-2 border-start" style="border-color: #e2e8f0 !important;">
+                                                <div class="d-flex align-items-center justify-content-center rounded bg-white" style="width: 32px; height: 32px; border: 1px solid #e2e8f0;">
+                                                    <i class="bi bi-image text-muted" style="font-size: 13px; opacity: 0.35;"></i>
+                                                </div>
+                                                <div class="d-flex align-items-center justify-content-center rounded bg-white" style="width: 32px; height: 32px; border: 1px solid #e2e8f0;">
+                                                    <i class="bi bi-image text-muted" style="font-size: 13px; opacity: 0.35;"></i>
+                                                </div>
+                                                <div class="d-flex align-items-center justify-content-center rounded bg-white" style="width: 32px; height: 32px; border: 1px solid #e2e8f0;">
+                                                    <i class="bi bi-image text-muted" style="font-size: 13px; opacity: 0.35;"></i>
+                                                </div>
                                             </div>
-                                            <small class="text-muted d-block mt-1" style="font-size: 11px;">Hỗ trợ JPG, PNG, WebP</small>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Section: Giá vốn, giá bán -->
+                            <!-- Section: Giá vốn, giá bán (Chuẩn KiotViet Image Match) -->
                             <div class="modal-card-section">
                                 <div class="modal-card-title">
-                                    <span>Giá vốn &amp; Giá bán</span>
+                                    <span>Giá vốn, giá bán</span>
+                                    <i class="bi bi-chevron-up text-muted" style="font-size: 12px;"></i>
                                 </div>
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted mb-1">Giá vốn (VNĐ)</label>
-                                        <input type="number" step="1000" min="0" class="form-control form-control-sm text-end" id="formGiaVon" name="GiaVon" value="0" />
+                                        <label class="form-label-kiot mb-1">Giá vốn</label>
+                                        <input type="number" step="1000" min="0" class="form-control text-end" id="formGiaVon" name="GiaVon" value="0" />
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted mb-1">Giá bán tham khảo (VNĐ) <span class="text-danger">*</span></label>
-                                        <input type="number" step="1000" min="0" class="form-control form-control-sm text-end fw-bold text-primary" id="formGiaBan" name="GiaBanThamKhao" value="0" required />
+                                        <div class="form-label-kiot mb-1">
+                                            <span>Giá bán <span class="text-danger">*</span></span>
+                                            <span class="d-inline-flex align-items-center gap-1">
+                                                <i class="bi bi-tag text-primary" style="font-size: 11px;"></i>
+                                                <a href="javascript:void(0)" class="form-label-link">Thiết lập giá</a>
+                                            </span>
+                                        </div>
+                                        <input type="number" step="1000" min="0" class="form-control text-end" id="formGiaBan" name="GiaBanThamKhao" value="0" required />
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Section: Tồn kho & Định mức (Chuẩn KiotViet Image 1) -->
+                            <!-- Section: Tồn kho & Định mức (Chuẩn KiotViet Image Match) -->
                             <div class="modal-card-section">
                                 <div class="modal-card-title">
                                     <span>Tồn kho</span>
+                                    <i class="bi bi-chevron-up text-muted" style="font-size: 12px;"></i>
                                 </div>
-                                <div class="small text-muted mb-2">Quản lý số lượng tồn kho và định mức tồn. Khi tồn kho chạm đến định mức, bạn sẽ nhận được cảnh báo.</div>
+                                <div class="modal-card-subtext">Quản lý số lượng tồn kho và định mức tồn. Khi tồn kho chạm đến định mức, bạn sẽ nhận được cảnh báo từ KiotViet.</div>
                                 <div class="row g-3">
                                     <div class="col-md-4" id="boxInitialStock">
-                                        <label class="form-label small fw-bold text-muted mb-1">Tồn kho ban đầu</label>
-                                        <input type="number" step="1" min="0" class="form-control form-control-sm text-end" id="formTonKhoBanDau" name="TonKhoBanDau" value="0" />
-                                        <small class="text-muted d-block mt-1">Số lượng tồn ghi nhận vào kho</small>
+                                        <label class="form-label-kiot mb-1">Tồn kho</label>
+                                        <input type="number" step="1" min="0" class="form-control text-end" id="formTonKhoBanDau" name="TonKhoBanDau" value="0" />
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label small fw-bold text-muted mb-1">Định mức tồn thấp nhất</label>
-                                        <input type="number" step="1" min="0" class="form-control form-control-sm text-end" id="formTonToiThieu" name="TonToiThieu" value="0" />
-                                        <small class="text-muted d-block mt-1">Cảnh báo khi dưới ngưỡng này</small>
+                                        <label class="form-label-kiot mb-1">Định mức tồn thấp nhất</label>
+                                        <input type="number" step="1" min="0" class="form-control text-end" id="formTonToiThieu" name="TonToiThieu" value="0" />
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label small fw-bold text-muted mb-1">Định mức tồn cao nhất</label>
-                                        <input type="number" step="1" min="0" class="form-control form-control-sm text-end" id="formTonCaoNhat" name="TonCaoNhat" value="999999999" placeholder="999,999,999" />
-                                        <small class="text-muted d-block mt-1">Cảnh báo khi vượt quá ngưỡng</small>
+                                        <label class="form-label-kiot mb-1">Định mức tồn cao nhất</label>
+                                        <input type="number" step="1" min="0" class="form-control text-end" id="formTonCaoNhat" name="TonCaoNhat" value="999999999" placeholder="999,999,999" />
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Section: Vị trí, trọng lượng (Chuẩn KiotViet Image 1) -->
+                            <!-- Section: Vị trí, trọng lượng (Chuẩn KiotViet Image Match) -->
                             <div class="modal-card-section">
                                 <div class="modal-card-title">
                                     <span>Vị trí, trọng lượng</span>
+                                    <i class="bi bi-chevron-up text-muted" style="font-size: 12px;"></i>
                                 </div>
-                                <div class="small text-muted mb-2">Quản lý việc sắp xếp kho, vị trí bán hàng hoặc trọng lượng hàng hóa.</div>
+                                <div class="modal-card-subtext">Quản lý việc sắp xếp kho, vị trí bán hàng hoặc trọng lượng hàng hóa</div>
                                 <div class="row g-3">
+                                    <!-- Ô VỊ TRÍ CHUẨN KIOTVIET (SELECT + MODAL TẠO VỊ TRÍ IMAGE 3) -->
                                     <div class="col-md-6">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <label class="form-label small fw-bold text-muted mb-0">Vị trí</label>
-                                            <a href="javascript:void(0)" class="small text-primary text-decoration-none fw-semibold" id="btnQuickAddLocation">Tạo mới</a>
+                                        <div class="form-label-kiot mb-1">
+                                            <span>Vị trí</span>
+                                            <a href="javascript:void(0)" class="form-label-link" id="btnOpenQuickLocationModal">Tạo mới</a>
                                         </div>
-                                        <input type="text" class="form-control form-control-sm" id="formViTri" name="ViTri" list="listViTriSuggestions" placeholder="Chọn hoặc nhập vị trí (VD: Kệ A1 - Tầng 1)" autocomplete="off" />
-                                        <datalist id="listViTriSuggestions">
-                                            <option value="Kho trung tâm"></option>
-                                            <option value="Kệ A1 - Tầng 1"></option>
-                                            <option value="Kệ A1 - Tầng 2"></option>
-                                            <option value="Kệ B2 - Tầng 1"></option>
-                                            <option value="Kệ B2 - Tầng 2"></option>
-                                            <option value="Khu vực xuất hàng"></option>
-                                        </datalist>
+                                        <select class="form-select" id="formViTri" name="ViTri" style="height: 36px; font-size: 13.5px; border-radius: 6px;">
+                                            <option value="">Chọn vị trí</option>
+                                            <option value="Kho trung tâm">Kho trung tâm</option>
+                                            <option value="Kệ A1 - Tầng 1">Kệ A1 - Tầng 1</option>
+                                            <option value="Kệ A1 - Tầng 2">Kệ A1 - Tầng 2</option>
+                                            <option value="Kệ B2 - Tầng 1">Kệ B2 - Tầng 1</option>
+                                            <option value="Kệ B2 - Tầng 2">Kệ B2 - Tầng 2</option>
+                                            <option value="Khu vực xuất hàng">Khu vực xuất hàng</option>
+                                            <option value="__NEW__">+ Tạo vị trí mới...</option>
+                                        </select>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted mb-1">Trọng lượng</label>
-                                        <div class="input-group input-group-sm">
-                                            <input type="number" step="any" min="0" class="form-control text-end" id="formTrongLuong" name="TrongLuong" value="0" placeholder="0" />
-                                            <select class="form-select text-center" id="formDonViTrongLuong" name="DonViTrongLuong" style="max-width: 80px;">
+                                        <label class="form-label-kiot mb-1">Trọng lượng</label>
+                                        <div class="input-group">
+                                            <input type="number" step="any" min="0" class="form-control text-end" id="formTrongLuong" name="TrongLuong" value="0" placeholder="0" style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;" />
+                                            <select class="form-select text-center" id="formDonViTrongLuong" name="DonViTrongLuong" style="max-width: 75px; height: 36px; border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; border-left: 0;">
                                                 <option value="g" selected>g</option>
                                                 <option value="kg">kg</option>
                                             </select>
@@ -581,15 +610,16 @@
                                 </div>
                             </div>
 
-                            <!-- Section: Thuộc tính hàng hóa (Chuẩn KiotViet Image Match) -->
+                            <!-- Section: Thuộc tính hàng hóa (Chuẩn KiotViet Image 4) -->
                             <div class="modal-card-section">
                                 <div class="modal-card-title mb-1">
                                     <span>Thuộc tính</span>
+                                    <i class="bi bi-chevron-up text-muted" style="font-size: 12px;"></i>
                                 </div>
-                                <div class="small text-muted mb-3">Thêm đặc điểm như hương vị, dung tích, màu sắc</div>
+                                <div class="modal-card-subtext mb-3">Thêm đặc điểm như hương vị, dung tích, màu sắc</div>
                                 
                                 <div id="attributeRowsContainer" class="d-flex flex-column mb-1">
-                                    <!-- Dynamic rows created via JS -->
+                                    <!-- Dynamic rows created via JS (Image 4 match) -->
                                 </div>
                                 <div id="noAttributeAlert" class="text-muted small fst-italic py-2 text-center border rounded bg-light" style="display: none;">
                                     Chưa có thuộc tính nào. Bấm <strong>"+ Thêm thuộc tính"</strong> để tạo thuộc tính cho hàng hóa này.
@@ -603,7 +633,7 @@
 
                             <!-- Section: Trạng thái kinh doanh -->
                             <div class="modal-card-section mb-0">
-                                <div class="modal-card-title">
+                                <div class="modal-card-title mb-2">
                                     <span>Trạng thái kinh doanh</span>
                                 </div>
                                 <div class="d-flex gap-4">
@@ -622,7 +652,7 @@
                         <!-- TAB 2: MÔ TẢ CHI TIẾT -->
                         <div class="tab-pane fade" id="tab-desc" role="tabpanel">
                             <div class="modal-card-section">
-                                <label class="form-label small fw-bold text-muted mb-1">Mô tả sản phẩm</label>
+                                <label class="form-label-kiot mb-1">Mô tả sản phẩm</label>
                                 <textarea class="form-control" id="formMoTa" rows="6" placeholder="Nhập đặc điểm, bảo quản, ghi chú…"></textarea>
                             </div>
                         </div>
@@ -631,17 +661,28 @@
             </div>
 
             <div class="modal-footer d-flex justify-content-between align-items-center">
-                <div class="form-check mb-0">
-                    <input class="form-check-input" type="checkbox" id="chkBanTrucTiep" checked />
-                    <label class="form-check-label small fw-semibold text-dark" for="chkBanTrucTiep">
+                <div class="form-check mb-0 d-flex align-items-center">
+                    <input class="form-check-input mt-0" type="checkbox" id="chkBanTrucTiep" checked />
+                    <label class="form-check-label small fw-semibold text-dark ms-2 d-inline-flex align-items-center gap-1" for="chkBanTrucTiep">
                         Bán trực tiếp
+                        <i class="bi bi-info-circle text-muted" style="font-size: 13px;" title="Cho phép bán trực tiếp hàng hóa tại màn hình thu ngân"></i>
                     </label>
                 </div>
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Bỏ qua</button>
-                    <button type="button" class="btn btn-outline-primary" id="btnSaveAndAddMore">Lưu &amp; Thêm hàng hóa cùng loại</button>
-                    <button type="button" class="btn btn-brand" id="btnSaveProduct">
-                        <i class="bi bi-check-lg me-1"></i>Lưu
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="height: 36px; font-size: 13.5px; border-color: #d1d5db; color: #374151;">Bỏ qua</button>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-secondary border-end-0" id="btnSaveAndAddMore" style="height: 36px; font-size: 13.5px; border-color: #d1d5db; color: #374151;">
+                            Lưu &amp; Tạo thêm hàng
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" style="height: 36px; border-color: #d1d5db; color: #374151;">
+                            <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item small" href="javascript:void(0)" id="btnSaveAndCopy">Lưu &amp; Sao chép</a></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btnSaveProduct" style="background-color: #0070f4; border-color: #0070f4; height: 36px; font-size: 13.5px; font-weight: 600; padding: 6px 20px;">
+                        Lưu
                     </button>
                 </div>
             </div>
@@ -672,6 +713,28 @@
 </div>
 
 <!-- ========================================================================
+     MODAL TẠO VỊ TRÍ (CHUẨN KIOTVIET IMAGE 3)
+     ======================================================================== -->
+<div class="modal fade" id="quickLocationModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content" style="border-radius: 8px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+            <div class="modal-header py-3 px-4" style="border-bottom: 1px solid #e2e8f0;">
+                <h6 class="modal-title fw-bold text-dark mb-0" style="font-size: 16px;">Tạo vị trí</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <label class="form-label-kiot mb-2" style="font-size: 13px; font-weight: 500; color: #334155;">Vị trí</label>
+                <input type="text" class="form-control" id="quickLocationInput" placeholder="" style="height: 38px; font-size: 13.5px; border-radius: 6px; border: 1px solid #d1d5db;" />
+            </div>
+            <div class="modal-footer py-2 px-4" style="border-top: 1px solid #e2e8f0; background: #fff;">
+                <button type="button" class="btn btn-outline-secondary px-3" data-bs-dismiss="modal" style="height: 36px; font-size: 13.5px; border-color: #d1d5db; color: #374151;">Bỏ qua</button>
+                <button type="button" class="btn btn-primary px-4 fw-semibold" id="btnSaveQuickLocation" style="background-color: #0070f4; border-color: #0070f4; height: 36px; font-size: 13.5px;">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================
      MODAL XÁC NHẬN XÓA HÀNG HÓA
      ======================================================================== -->
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
@@ -696,7 +759,7 @@
      MODAL CẬP NHẬT NHANH THUỘC TÍNH HÀNG HÓA (KiotViet Quick Attributes)
      ======================================================================== -->
 <div class="modal fade" id="quickAttrModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <div>
@@ -1394,10 +1457,28 @@ $(document).ready(function () {
     });
 
     // 4. Modal Tạo nhanh Nhóm hàng
-    $('#btnOpenQuickGroupModal').on('click', function () {
+    $('#btnOpenQuickGroupModal, #btnQuickAddGroup').on('click', function () {
         $('#quickGroupInput').val('');
         groupModal.show();
         setTimeout(() => $('#quickGroupInput').focus(), 300);
+    });
+
+    $('#btnQuickAddUnit').on('click', function () {
+        const newUnit = prompt('Nhập tên đơn vị tính mới (Ví dụ: Chai, Lốc, Thùng, Hộp):');
+        if (newUnit && newUnit.trim()) {
+            const val = newUnit.trim();
+            let exists = false;
+            $('#formMaDvt option').each(function () {
+                if ($(this).text().trim().toLowerCase() === val.toLowerCase()) {
+                    exists = true;
+                    $('#formMaDvt').val($(this).val());
+                }
+            });
+            if (!exists) {
+                const tempId = -Math.floor(Math.random() * 1000 + 1);
+                $('#formMaDvt').append(`<option value="${tempId}" selected>${escapeHtml(val)}</option>`);
+            }
+        }
     });
 
     $('#btnSaveQuickGroup').on('click', function () {
@@ -1414,8 +1495,8 @@ $(document).ready(function () {
             data: JSON.stringify({ tenNhom: name }),
             success: function (res) {
                 groupModal.hide();
-                // Bổ sung vào modal form Thêm/Sửa
-                $('#formMaNhom').append(`<option value="${res.maNhom}">${res.tenNhom}</option>`);
+                // Bổ sung vào modal form Thêm/Sửa & tự chọn
+                $('#formMaNhom').append(`<option value="${res.maNhom}">${res.tenNhom}</option>`).val(res.maNhom);
 
                 // Bổ sung vào dropdown nhóm hàng & tự động chọn
                 const itemHtml = `<div class="kiot-ms-item selected" data-val="${res.maNhom}" data-name="${res.tenNhom}">
@@ -1443,17 +1524,37 @@ $(document).ready(function () {
         }
     });
 
-    // 6. Mở modal Thêm mới hàng hóa
+    // 6. Mở modal Tạo hàng hóa
     $('#btnOpenCreateModal').on('click', function () {
         resetModalForm();
-        $('#modalTitle').text('Thêm mới hàng hóa');
+        $('#modalTitle').text('Tạo hàng hóa');
         $('#formMaHang').val(0);
         $('#boxInitialStock').show();
         hangHoaModal.show();
     });
 
+    // ========================================================================
+    // QUẢN LÝ ẢNH HÀNG HÓA (CHUẨN KIOTVIET IMAGE 1)
+    // ========================================================================
+    function showProductImage(base64Data) {
+        $('#formHinhAnhBase64').val(base64Data || '');
+        $('#formXoaHinhAnh').val('false');
+        $('#imagePreview').attr('src', base64Data || '');
+        $('#imagePlaceholder').attr('style', 'display: none !important;');
+        $('#imagePreviewWrap').attr('style', 'display: inline-block !important;');
+    }
+
+    function clearProductImage() {
+        $('#fileUploadInput').val('');
+        $('#formHinhAnhBase64').val('');
+        $('#formXoaHinhAnh').val('true');
+        $('#imagePreview').attr('src', '');
+        $('#imagePreviewWrap').attr('style', 'display: none !important;');
+        $('#imagePlaceholder').attr('style', 'display: flex !important;');
+    }
+
     // Xử lý chọn ảnh từ máy tính (Lưu CSDL)
-    $('#btnSelectImage').on('click', function () {
+    $('#btnSelectImage, #imagePreview').on('click', function () {
         $('#fileUploadInput').click();
     });
 
@@ -1467,34 +1568,21 @@ $(document).ready(function () {
 
             const reader = new FileReader();
             reader.onload = function (e) {
-                const base64Data = e.target.result;
-                $('#formHinhAnhBase64').val(base64Data);
-                $('#formXoaHinhAnh').val('false');
-
-                $('#imagePreview').attr('src', base64Data).show();
-                $('#imagePlaceholder').hide();
-                $('#btnRemoveImage').show();
+                showProductImage(e.target.result);
             };
             reader.readAsDataURL(file);
         }
     });
 
     // Xóa ảnh trong modal
-    $('#btnRemoveImage').on('click', function () {
-        $('#fileUploadInput').val('');
-        $('#formHinhAnhBase64').val('');
-        $('#formXoaHinhAnh').val('true');
-
-        $('#imagePreview').attr('src', '').hide();
-        $('#imagePlaceholder').show();
-        $('#btnRemoveImage').hide();
+    $('#btnRemoveImage').on('click', function (e) {
+        e.stopPropagation();
+        clearProductImage();
     });
 
     // ========================================================================
-    // QUẢN LÝ THUỘC TÍNH ĐỘNG & VỊ TRÍ, TRỌNG LƯỢNG (KIOTVIET STYLE - IMAGE MATCH)
+    // QUẢN LÝ THUỘC TÍNH HÀNG HÓA (KIOTVIET STYLE - IMAGE 4)
     // ========================================================================
-    let availableAttributes = ['Màu sắc', 'Kích cỡ', 'Dung tích', 'Hương vị', 'Chất liệu', 'Xuất xứ'];
-
     function escapeHtml(text) {
         if (!text) return '';
         return text.toString()
@@ -1505,66 +1593,40 @@ $(document).ready(function () {
             .replace(/'/g, "&#039;");
     }
 
-    function renderDropdownItems(selectedName) {
-        if (!availableAttributes || availableAttributes.length === 0) {
-            return '<li class="text-muted small px-3 py-1 fst-italic">Chưa có thuộc tính mẫu</li>';
-        }
-        return availableAttributes.map(attr => {
-            const isSelected = (selectedName && attr.trim().toLowerCase() === selectedName.trim().toLowerCase());
-            return `
-                <li>
-                    <a class="dropdown-item d-flex justify-content-between align-items-center py-2 px-3 kiot-attr-item ${isSelected ? 'active' : ''}" href="javascript:void(0)" data-name="${escapeHtml(attr)}">
-                        <span>${escapeHtml(attr)}</span>
-                        ${isSelected ? '<i class="bi bi-check2 text-primary fw-bold" style="font-size: 16px;"></i>' : ''}
-                    </a>
-                </li>
-            `;
-        }).join('');
-    }
-
     function createAttrRowHtml(name = '', val = '') {
-        if (name && !availableAttributes.some(a => a.toLowerCase() === name.toLowerCase())) {
-            availableAttributes.push(name);
+        const defaultAttrs = ['Màu sắc', 'Kích cỡ', 'Dung tích', 'Hương vị', 'Chất liệu', 'Xuất xứ'];
+        let options = '<option value="">Chọn thuộc tính</option>';
+        let matched = false;
+        defaultAttrs.forEach(a => {
+            const isSel = (name && a.toLowerCase() === name.trim().toLowerCase());
+            if (isSel) matched = true;
+            options += `<option value="${escapeHtml(a)}" ${isSel ? 'selected' : ''}>${escapeHtml(a)}</option>`;
+        });
+        if (name && !matched) {
+            options += `<option value="${escapeHtml(name)}" selected>${escapeHtml(name)}</option>`;
         }
-
-        const displayName = name ? escapeHtml(name) : 'Chọn thuộc tính';
-        const isPlaceholder = !name;
+        options += '<option value="__CUSTOM__">+ Thuộc tính khác...</option>';
 
         return `
-            <div class="kiot-attr-row">
-                <!-- Dropdown Chọn thuộc tính -->
-                <div class="dropdown kiot-attr-dropdown" style="width: 220px; flex-shrink: 0;">
-                    <button class="btn btn-outline-secondary dropdown-toggle d-flex justify-content-between align-items-center w-100 bg-white border kiot-attr-btn ${isPlaceholder ? 'text-muted' : 'text-dark fw-semibold'}" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="height: 38px; border-color: #ced4da; border-radius: 6px; padding: 6px 12px;">
-                        <span class="kiot-attr-selected-text text-truncate">${displayName}</span>
-                        <i class="bi bi-chevron-down ms-1 text-muted kiot-attr-chevron" style="font-size: 11px;"></i>
-                    </button>
-                    <div class="dropdown-menu shadow-sm py-1 w-100 kiot-attr-menu" style="min-width: 220px; font-size: 13.5px; border-radius: 6px; border: 1px solid #dee2e6;">
-                        <div class="dropdown-header text-muted small py-1 px-3" style="font-weight: 500;">Chọn thuộc tính</div>
-                        <ul class="list-unstyled mb-0 kiot-attr-list-items" style="max-height: 200px; overflow-y: auto;">
-                            ${renderDropdownItems(name)}
-                        </ul>
-                        <div class="dropdown-divider my-1"></div>
-                        <a class="dropdown-item text-primary py-2 px-3 fw-semibold kiot-btn-create-attr d-flex align-items-center" href="javascript:void(0)">
-                            <i class="bi bi-plus-lg me-2" style="font-size: 12px;"></i>Tạo thuộc tính mới
-                        </a>
-                        <div class="kiot-attr-inline-form p-2 border-top bg-light" style="display: none;">
-                            <div class="input-group input-group-sm">
-                                <input type="text" class="form-control kiot-attr-new-name-input" placeholder="Tên thuộc tính..." />
-                                <button class="btn btn-primary kiot-btn-confirm-create-attr" type="button">Tạo</button>
-                                <button class="btn btn-outline-secondary kiot-btn-cancel-create-attr" type="button">×</button>
-                            </div>
-                        </div>
-                    </div>
-                    <input type="hidden" class="kiot-attr-name-val" value="${escapeHtml(name)}" />
+            <div class="row g-2 align-items-center mb-2 kiot-attr-row">
+                <div class="col-md-3">
+                    <select class="form-select kiot-attr-name-select" style="height: 36px; font-size: 13.5px; border-radius: 6px;">
+                        ${options}
+                    </select>
                 </div>
-
-                <!-- Ô nhập giá trị thuộc tính -->
-                <input type="text" class="form-control kiot-attr-val-input" placeholder="Nhập giá trị thuộc tính (VD: Đỏ, Xanh, XL)" value="${escapeHtml(val)}" style="height: 38px; border-radius: 6px; border-color: #ced4da;" />
-
-                <!-- Nút xóa thùng rác -->
-                <button type="button" class="btn btn-outline-secondary kiot-btn-remove-attr" title="Xóa thuộc tính">
-                    <i class="bi bi-trash text-muted" style="font-size: 15px;"></i>
-                </button>
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" class="form-control kiot-attr-val-input" placeholder="Nhập giá trị thuộc tính và enter" value="${escapeHtml(val)}" style="height: 36px; font-size: 13.5px;" />
+                        <button type="button" class="btn btn-outline-secondary kiot-btn-quick-val" style="height: 36px; font-size: 13px; color: #475569; background: #f8fafc; border-color: #d1d5db;" title="Gợi ý chọn nhanh">
+                            Chọn nhanh
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-1 text-center">
+                    <button type="button" class="btn btn-link text-muted p-0 kiot-btn-remove-attr" title="Xóa thuộc tính" style="font-size: 17px; text-decoration: none;">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
             </div>
         `;
     }
@@ -1601,7 +1663,7 @@ $(document).ready(function () {
     function collectAttributes(containerSelector) {
         const result = [];
         $(containerSelector).find('.kiot-attr-row').each(function () {
-            const name = $(this).find('.kiot-attr-name-val').val().trim();
+            const name = $(this).find('.kiot-attr-name-select').val();
             const val = $(this).find('.kiot-attr-val-input').val().trim();
             if (name || val) {
                 result.push({ ten: name, giaTri: val });
@@ -1610,89 +1672,53 @@ $(document).ready(function () {
         return result;
     }
 
-    // Chọn thuộc tính từ dropdown
-    $(document).on('click', '.kiot-attr-item', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const name = $(this).data('name');
-        const dropdown = $(this).closest('.kiot-attr-dropdown');
-        
-        dropdown.find('.kiot-attr-name-val').val(name);
-        dropdown.find('.kiot-attr-selected-text').text(name);
-        dropdown.find('.kiot-attr-btn').removeClass('text-muted').addClass('text-dark fw-semibold');
-        
-        // Re-render items để cập nhật checkmark
-        dropdown.find('.kiot-attr-list-items').html(renderDropdownItems(name));
-
-        // Đóng dropdown
-        const btn = dropdown.find('.kiot-attr-btn')[0];
-        const bsDropdown = bootstrap.Dropdown.getInstance(btn) || new bootstrap.Dropdown(btn);
-        bsDropdown.hide();
-
-        // Focus vào ô giá trị
+    // Chọn thuộc tính tùy biến
+    $(document).on('change', '.kiot-attr-name-select', function () {
+        if ($(this).val() === '__CUSTOM__') {
+            const customName = prompt('Nhập tên thuộc tính mới (VD: Độ ngọt, Độ cay, Hạn sử dụng):');
+            if (customName && customName.trim()) {
+                const trimmed = customName.trim();
+                $(this).find('option[value="__CUSTOM__"]').before(`<option value="${escapeHtml(trimmed)}" selected>${escapeHtml(trimmed)}</option>`);
+                $(this).val(trimmed);
+            } else {
+                $(this).val('');
+            }
+        }
         $(this).closest('.kiot-attr-row').find('.kiot-attr-val-input').focus();
     });
 
-    // Bấm "+ Tạo thuộc tính mới"
-    $(document).on('click', '.kiot-btn-create-attr', function (e) {
+    // Nút Chọn nhanh giá trị thuộc tính
+    $(document).on('click', '.kiot-btn-quick-val', function (e) {
         e.preventDefault();
-        e.stopPropagation();
-        const menu = $(this).closest('.kiot-attr-menu');
-        $(this).hide();
-        const form = menu.find('.kiot-attr-inline-form');
-        form.show();
-        form.find('.kiot-attr-new-name-input').focus();
-    });
+        const row = $(this).closest('.kiot-attr-row');
+        const attrName = row.find('.kiot-attr-name-select').val();
+        const input = row.find('.kiot-attr-val-input');
 
-    // Hủy tạo mới
-    $(document).on('click', '.kiot-btn-cancel-create-attr', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const menu = $(this).closest('.kiot-attr-menu');
-        menu.find('.kiot-attr-inline-form').hide();
-        menu.find('.kiot-btn-create-attr').show();
-    });
+        const quickPresets = {
+            'Màu sắc': ['Đỏ', 'Xanh dương', 'Xanh lá', 'Trắng', 'Đen', 'Vàng', 'Hồng', 'Cam', 'Xám'],
+            'Kích cỡ': ['S', 'M', 'L', 'XL', '2XL', '3XL', '36', '37', '38', '39', '40', '41', '42'],
+            'Dung tích': ['250ml', '330ml', '500ml', '750ml', '1 Lít', '1.5 Lít', '2 Lít', '5 Lít'],
+            'Hương vị': ['Dâu', 'Cam', 'Bạc hà', 'Vani', 'Socola', 'Truyền thống', 'Trà xanh'],
+            'Chất liệu': ['Cotton', 'Da', 'Nhựa', 'Kim loại', 'Thủy tinh', 'Gỗ', 'Vải lụa'],
+            'Xuất xứ': ['Việt Nam', 'Hàn Quốc', 'Nhật Bản', 'Thái Lan', 'Mỹ', 'Trung Quốc']
+        };
 
-    // Xác nhận tạo mới
-    $(document).on('click', '.kiot-btn-confirm-create-attr', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const form = $(this).closest('.kiot-attr-inline-form');
-        const input = form.find('.kiot-attr-new-name-input');
-        const newName = input.val().trim();
-        if (!newName) {
-            input.focus();
-            return;
+        const list = quickPresets[attrName] || ['Loại 1', 'Loại 2', 'Tiêu chuẩn', 'Cao cấp'];
+        const chosen = prompt(`Chọn nhanh giá trị cho "${attrName || 'Thuộc tính'}":\nGợi ý: ${list.join(', ')}\n\nNhập giá trị:`, list[0]);
+        if (chosen && chosen.trim()) {
+            const currentVal = input.val().trim();
+            if (currentVal) {
+                input.val(currentVal + ', ' + chosen.trim());
+            } else {
+                input.val(chosen.trim());
+            }
         }
-
-        if (!availableAttributes.some(a => a.toLowerCase() === newName.toLowerCase())) {
-            availableAttributes.push(newName);
-        }
-
-        const dropdown = $(this).closest('.kiot-attr-dropdown');
-        dropdown.find('.kiot-attr-name-val').val(newName);
-        dropdown.find('.kiot-attr-selected-text').text(newName);
-        dropdown.find('.kiot-attr-btn').removeClass('text-muted').addClass('text-dark fw-semibold');
-
-        // Cập nhật lại dropdown items
-        dropdown.find('.kiot-attr-list-items').html(renderDropdownItems(newName));
-        form.hide();
-        dropdown.find('.kiot-btn-create-attr').show();
-        input.val('');
-
-        // Đóng dropdown
-        const btn = dropdown.find('.kiot-attr-btn')[0];
-        const bsDropdown = bootstrap.Dropdown.getInstance(btn) || new bootstrap.Dropdown(btn);
-        bsDropdown.hide();
-
-        // Focus vào ô giá trị
-        dropdown.closest('.kiot-attr-row').find('.kiot-attr-val-input').focus();
     });
 
-    $(document).on('keydown', '.kiot-attr-new-name-input', function (e) {
+    $(document).on('keydown', '.kiot-attr-val-input', function (e) {
         if (e.key === 'Enter') {
             e.preventDefault();
-            $(this).closest('.kiot-attr-inline-form').find('.kiot-btn-confirm-create-attr').click();
+            $('#btnAddAttributeRow').click();
         }
     });
 
@@ -1702,12 +1728,7 @@ $(document).ready(function () {
         $('#noAttributeAlert').hide();
         const newRow = $(createAttrRowHtml('', ''));
         $('#attributeRowsContainer').append(newRow);
-        // Tự động mở dropdown chọn thuộc tính cho dòng mới (chuẩn như ảnh)
-        const btn = newRow.find('.kiot-attr-btn')[0];
-        if (btn) {
-            const bsDropdown = new bootstrap.Dropdown(btn);
-            bsDropdown.show();
-        }
+        newRow.find('.kiot-attr-name-select').focus();
     });
 
     // Thêm dòng thuộc tính trong modal cập nhật nhanh
@@ -1716,11 +1737,7 @@ $(document).ready(function () {
         $('#quickAttrEmptyAlert').hide();
         const newRow = $(createAttrRowHtml('', ''));
         $('#quickAttrRowsContainer').append(newRow);
-        const btn = newRow.find('.kiot-attr-btn')[0];
-        if (btn) {
-            const bsDropdown = new bootstrap.Dropdown(btn);
-            bsDropdown.show();
-        }
+        newRow.find('.kiot-attr-name-select').focus();
     });
 
     // Xóa dòng thuộc tính
@@ -1737,19 +1754,58 @@ $(document).ready(function () {
         }
     });
 
-    // Nút Tạo mới Vị trí
-    $('#btnQuickAddLocation').on('click', function () {
-        const newLoc = prompt('Nhập tên vị trí kho mới (Ví dụ: Kệ C3 - Tầng 2):');
-        if (newLoc && newLoc.trim()) {
-            const val = newLoc.trim();
+    // ========================================================================
+    // QUẢN LÝ VỊ TRÍ KHO & MODAL TẠO VỊ TRÍ (KIOTVIET IMAGE 3)
+    // ========================================================================
+    function setLocationValue(val) {
+        val = (val || '').trim();
+        if (val) {
             let exists = false;
-            $('#listViTriSuggestions option').each(function () {
+            $('#formViTri option').each(function () {
                 if ($(this).val().toLowerCase() === val.toLowerCase()) exists = true;
             });
             if (!exists) {
-                $('#listViTriSuggestions').append(`<option value="${escapeHtml(val)}"></option>`);
+                $('#formViTri option[value="__NEW__"]').before(`<option value="${escapeHtml(val)}">${escapeHtml(val)}</option>`);
             }
             $('#formViTri').val(val);
+        } else {
+            $('#formViTri').val('');
+        }
+    }
+
+    // Mở modal Tạo vị trí khi bấm Tạo mới hoặc chọn "+ Tạo vị trí mới..."
+    $('#btnOpenQuickLocationModal').on('click', function (e) {
+        e.preventDefault();
+        $('#quickLocationInput').val('');
+        const locModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('quickLocationModal'));
+        locModal.show();
+        setTimeout(() => $('#quickLocationInput').focus(), 300);
+    });
+
+    $('#formViTri').on('change', function () {
+        if ($(this).val() === '__NEW__') {
+            $(this).val('');
+            $('#btnOpenQuickLocationModal').click();
+        }
+    });
+
+    // Lưu vị trí từ modal quickLocationModal
+    $('#btnSaveQuickLocation').on('click', function () {
+        const newLoc = $('#quickLocationInput').val().trim();
+        if (!newLoc) {
+            alert('Vui lòng nhập tên vị trí kho.');
+            $('#quickLocationInput').focus();
+            return;
+        }
+        setLocationValue(newLoc);
+        const locModal = bootstrap.Modal.getInstance(document.getElementById('quickLocationModal'));
+        if (locModal) locModal.hide();
+    });
+
+    $('#quickLocationInput').on('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            $('#btnSaveQuickLocation').click();
         }
     });
 
@@ -1817,7 +1873,7 @@ $(document).ready(function () {
                 $('#formGiaBan').val(res.giaBanThamKhao);
                 $('#formTonToiThieu').val(res.tonToiThieu);
                 $('#formTonCaoNhat').val(res.tonCaoNhat ?? 999999999);
-                $('#formViTri').val(res.viTri || '');
+                setLocationValue(res.viTri || '');
                 $('#formTrongLuong').val(res.trongLuong || 0);
                 $('#formDonViTrongLuong').val(res.donViTrongLuong || 'g');
                 $('#formMoTa').val(res.moTa || res.quyCach || '');
@@ -1825,13 +1881,9 @@ $(document).ready(function () {
                 renderAttributeRows(res.thuocTinhJson, '#attributeRowsContainer', '#noAttributeAlert');
 
                 if (res.hinhAnhBase64) {
-                    $('#imagePreview').attr('src', res.hinhAnhBase64).show();
-                    $('#imagePlaceholder').hide();
-                    $('#btnRemoveImage').show();
+                    showProductImage(res.hinhAnhBase64);
                 } else {
-                    $('#imagePreview').hide();
-                    $('#imagePlaceholder').show();
-                    $('#btnRemoveImage').hide();
+                    clearProductImage();
                 }
 
                 if (res.trangThai === 'DANG_BAN') {
@@ -1855,7 +1907,7 @@ $(document).ready(function () {
         saveProduct(false);
     });
 
-    $('#btnSaveAndAddMore').on('click', function () {
+    $('#btnSaveAndAddMore, #btnSaveAndCopy').on('click', function () {
         saveProduct(true);
     });
 
@@ -1919,7 +1971,7 @@ $(document).ready(function () {
                 saveBtn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i>Lưu');
                 if (addMore) {
                     resetModalForm();
-                    $('#modalTitle').text('Thêm mới hàng hóa');
+                    $('#modalTitle').text('Tạo hàng hóa');
                     $('#formMaHang').val(0);
                     $('#boxInitialStock').show();
                     $('#formTenHang').focus();
@@ -1962,15 +2014,11 @@ $(document).ready(function () {
 
     function resetModalForm() {
         $('#hangHoaForm')[0].reset();
-        $('#fileUploadInput').val('');
-        $('#formHinhAnhBase64').val('');
+        clearProductImage();
         $('#formXoaHinhAnh').val('false');
-        $('#imagePreview').attr('src', '').hide();
-        $('#imagePlaceholder').show();
-        $('#btnRemoveImage').hide();
 
         $('#formMaHang').val(0);
-        $('#formViTri').val('');
+        setLocationValue('');
         $('#formTrongLuong').val(0);
         $('#formDonViTrongLuong').val('g');
         $('#formTonCaoNhat').val(999999999);
@@ -2092,7 +2140,7 @@ $(document).ready(function () {
             type: 'GET',
             success: function (res) {
                 resetModalForm();
-                $('#modalTitle').text('Thêm mới hàng hóa (Sao chép)');
+                $('#modalTitle').text('Tạo hàng hóa (Sao chép)');
                 $('#formMaHang').val(0); // 0 để tạo mới
                 $('#formMaHangNoiBo').val(res.maHangNoiBo ? res.maHangNoiBo + '_CP' : '');
                 $('#formTenHang').val((res.tenHang || '') + ' (Copy)');
@@ -2103,7 +2151,7 @@ $(document).ready(function () {
                 $('#formGiaVon').val(res.giaVon || 0);
                 $('#formTonToiThieu').val(res.tonToiThieu || 0);
                 $('#formTonCaoNhat').val(res.tonCaoNhat ?? 999999999);
-                $('#formViTri').val(res.viTri || '');
+                setLocationValue(res.viTri || '');
                 $('#formTrongLuong').val(res.trongLuong || 0);
                 $('#formDonViTrongLuong').val(res.donViTrongLuong || 'g');
                 renderAttributeRows(res.thuocTinhJson, '#attributeRowsContainer', '#noAttributeAlert');
@@ -2111,10 +2159,9 @@ $(document).ready(function () {
                 $('#boxInitialStock').show();
 
                 if (res.hinhAnhBase64) {
-                    $('#imagePreview').attr('src', res.hinhAnhBase64).show();
-                    $('#imagePlaceholder').hide();
-                    $('#btnRemoveImage').show();
-                    $('#formHinhAnhBase64').val(res.hinhAnhBase64);
+                    showProductImage(res.hinhAnhBase64);
+                } else {
+                    clearProductImage();
                 }
 
                 if (res.trangThai === 'DANG_BAN') {

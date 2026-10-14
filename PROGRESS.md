@@ -1,10 +1,14 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-14 – Nâng cấp Vị trí, Trọng lượng, Định mức tồn cao nhất & Thuộc tính động chuẩn KiotViet (Phiên 13)
+Cập nhật lần cuối: 2026-10-14 – Đồng bộ giao diện Modal Tạo hàng hóa & Dropdown Vị trí chuẩn KiotViet (Phiên 14)
 
 ---
 
 ## Đã xong
+- **Đồng bộ Giao diện Modal Tạo hàng hóa & Dropdown Vị trí chuẩn mẫu KiotViet**:
+  - Giao diện & CSS: Đồng bộ toàn diện chiều cao chuẩn 36px, font chữ nhãn 12.5px (`font-weight: 500`), input 13.5px, card header 13.5px bold kèm icon chevron `^` thu gọn; nâng cấp vùng tải ảnh sang chuẩn nét đứt 1px dashed với nút "Thêm ảnh", text "Mỗi ảnh không quá 2 MB", và 3 ô thumbnail placeholder mờ; input group Trọng lượng liền khối số căn phải + select đơn vị `g`/`kg`; modal footer chuẩn KiotViet với checkbox "Bán trực tiếp (i)", nút "Bỏ qua", split button "Lưu & Tạo thêm hàng", và nút "Lưu" xanh dương đậm.
+  - Chức năng Vị trí: Chuyển đổi từ `<input>` thông thường sang component Dropdown Vị trí (`.kiot-loc-dropdown`) đồng bộ cơ chế và hành vi với Thuộc tính: hiển thị vị trí được chọn có checkmark xanh `✓`, hỗ trợ form inline `+ Tạo vị trí mới` trực tiếp trong menu dropdown hoặc qua link "Tạo mới" ở nhãn, đồng bộ 2 chiều qua hàm `setLocationValue(val)` tương thích với form submit và các chức năng Sửa/Sao chép/Reset.
+  - Tác động: [`Index.cshtml`](./BTL-LTW-QuanLiKho-2/Views/HangHoa/Index.cshtml), [`site.css`](./BTL-LTW-QuanLiKho-2/wwwroot/css/site.css), [`danh-sach-hang-hoa.md`](./docs/specs/danh-sach-hang-hoa.md) – 2026-10-14
 - **Bổ sung Thuộc tính Hàng hóa chuẩn KiotViet (Vị trí, Trọng lượng, Tồn cao nhất, Thuộc tính động)**:
   - CSDL: Tạo và thực thi migration script `migrations/sql/06_bo_sung_vitri_trongluong_thuoctinh_tontoida.sql` bổ sung `ViTri`, `TrongLuong`, `DonViTrongLuong`, `ThuocTinh` (JSON array) vào bảng `dbo.HangHoa`, bổ sung `TonCaoNhat` vào bảng `dbo.NguongTonKho`.
   - Backend: Cập nhật Models (`HangHoa.cs`, `NguongTonKho.cs`, `QuanLyKhoPhuQuocLtwContext.cs`), ViewModels (`HangHoaForm.cs`, `HangHoaItemVM`, `ThuocTinhItemVM`, `CapNhatThuocTinhRequest`), và Controller (`HangHoaController.cs`: Create, Edit, GetItem, UpdateThuocTinh, bọc Transaction).
@@ -47,7 +51,17 @@ Cập nhật lần cuối: 2026-10-14 – Nâng cấp Vị trí, Trọng lượn
 
 ---
 
-## Nhật ký phiên
+- **2026-10-14 (Phiên 15 - Chiều)**:
+  - Sửa lỗi hiển thị vùng Tải ảnh, thiết kế Modal "Tạo vị trí" và Thuộc tính động theo 4 ảnh chụp thực tế KiotViet:
+    - **Lỗi hiển thị ảnh**: Khắc phục triệt để lỗi xung đột `d-flex` (có `!important` trong Bootstrap) khiến placeholder "Thêm ảnh" bị đè lên ảnh xem trước. Tách biệt `imagePlaceholder` và `imagePreviewWrap`, chuẩn hóa hai hàm `showProductImage(base64)` và `clearProductImage()` với `!important` inline. Đồng bộ ở `btn-edit-product`, `btn-copy-product` và `resetModalForm`.
+    - **Vị trí kho & Modal Tạo vị trí** (Khớp ảnh 3): Chuyển ô chọn vị trí sang select dropdown tiêu chuẩn kết hợp modal popup riêng `quickLocationModal` (Tiêu đề "Tạo vị trí", nhãn "Vị trí", input và 2 nút "Bỏ qua" / "Lưu"). Tự động kích hoạt khi chọn `+ Tạo vị trí mới...` hoặc link "Tạo mới".
+    - **Thuộc tính động 3 cột** (Khớp ảnh 4): Cột 1 `<select>` tên thuộc tính, Cột 2 input group ô nhập + nút "Chọn nhanh" gợi ý danh mục giá trị thông dụng theo loại thuộc tính, Cột 3 nút thùng rác xóa dòng.
+    - Biên dịch dự án: 0 lỗi. Đồng bộ tài liệu đặc tả `docs/specs/danh-sach-hang-hoa.md`.
+- **2026-10-14 (Phiên 14 - Chiều)**:
+  - Đồng bộ chi tiết toàn diện giao diện Modal "Tạo hàng hóa" và ô chọn Vị trí theo hình ảnh thực tế KiotViet:
+    - Thay thế ô input Vị trí thông thường thành component Custom Dropdown Vị trí (`.kiot-loc-dropdown`) tương tự như dropdown Thuộc tính: hiển thị danh sách vị trí kèm dấu tích xanh `✓`, hỗ trợ form inline `+ Tạo vị trí mới` và link "Tạo mới" ở nhãn, đồng bộ 2 chiều qua hàm `setLocationValue(val)`.
+    - Chuẩn hóa toàn bộ modal: chiều cao các ô input/select/button chuẩn 36px, nhãn `.form-label-kiot` 12.5px font-weight 500, tiêu đề card `.modal-card-title` 13.5px bold kèm icon chevron `^` thu gọn; vùng tải ảnh viền nét đứt 1px dashed với nút "Thêm ảnh", text "Mỗi ảnh không quá 2 MB" và 3 thumbnail placeholder mờ; chân modal có checkbox "Bán trực tiếp (i)", nút "Bỏ qua", button group "Lưu & Tạo thêm hàng", và nút "Lưu" xanh dương đậm.
+    - Biên dịch kiểm tra: 0 lỗi. Đồng bộ tài liệu đặc tả `docs/specs/danh-sach-hang-hoa.md`.
 - **2026-10-14 (Phiên 13 - Trưa)**:
   - Bổ sung và nâng cấp đầy đủ các thuộc tính còn thiếu trong Quản lý Hàng hóa theo mẫu thực tế KiotViet:
     - CSDL: Tạo và chạy migration script `06_bo_sung_vitri_trongluong_thuoctinh_tontoida.sql` bổ sung các trường `ViTri`, `TrongLuong`, `DonViTrongLuong`, `ThuocTinh` cho `dbo.HangHoa` và `TonCaoNhat` cho `dbo.NguongTonKho`.

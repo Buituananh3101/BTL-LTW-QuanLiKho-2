@@ -55,6 +55,15 @@
 - Nút lọc nhanh hàng Đánh dấu sao (`DaDanhDau`).
 - Nút "+ Thêm mới" mở modal; nút Import/Export Excel.
 
+### 3.3. Quy chuẩn Modal Thêm/Sửa Hàng hóa (Chuẩn KiotViet Image Match):
+- **Tiêu đề & Tabs**: "Tạo hàng hóa" / "Cập nhật hàng hóa", 2 tabs "Thông tin" và "Mô tả".
+- **Kích thước & Kiểu chữ**: Chiều cao các ô input/select/button chuẩn 36px; Font chữ input 13.5px; Nhãn `.form-label-kiot` 12.5px, font-weight 500; Tiêu đề card `.modal-card-title` 13.5px bold kèm icon chevron `bi-chevron-up` bên phải.
+- **Khung tải ảnh**: Viền nét đứt `1px dashed #cbd5e1`, placeholder nút `Thêm ảnh`, subtext `Mỗi ảnh không quá 2 MB`, 3 ô thumbnail placeholder mờ bên phải. Khi đã chọn ảnh: placeholder ẩn hoàn toàn, ảnh hiển thị tối đa 105x105px kèm nút xóa tròn đỏ ở góc trên bên phải, click vào ảnh để chọn ảnh khác.
+- **Vị trí**: Select box vị trí chuẩn phong cách KiotViet kết hợp modal popup riêng `quickLocationModal` (Tiêu đề "Tạo vị trí", body label "Vị trí", footer "Bỏ qua" & "Lưu"). Chọn "+ Tạo vị trí mới..." hoặc bấm "Tạo mới" ở nhãn sẽ mở modal này.
+- **Trọng lượng**: Input group liền khối căn phải số `0` + select đơn vị `g`/`kg`.
+- **Thuộc tính**: Dòng động 3 cột: Cột 1 là `<select>` chọn tên thuộc tính (Màu sắc, Kích cỡ, Dung tích... + "+ Thuộc tính khác..."), Cột 2 là input group gồm ô nhập giá trị + nút "Chọn nhanh" (gợi ý nhanh danh sách giá trị phổ biến), Cột 3 là nút icon thùng rác xóa dòng.
+- **Chân Modal**: Trái có checkbox `☑ Bán trực tiếp (i)`; Phải có nút `Bỏ qua`, nút group `Lưu & Tạo thêm hàng` kèm menu `Lưu & Sao chép`, nút `Lưu` (`#0070f4`).
+
 ---
 
 ## 4. Các Quy tắc Nghiệp vụ Bất biến
