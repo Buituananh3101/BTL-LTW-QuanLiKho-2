@@ -523,13 +523,14 @@
   }
 
   function initSingleSelect(config) {
-    const { wrapId, boxId, inputId, dropdownId, listId, selectId, onSelect, onNew } = config;
+    const { wrapId, boxId, inputId, dropdownId, listId, selectId, searchInputId, onSelect, onNew } = config;
     const wrap = $(wrapId);
     const box = $(boxId);
     const input = $(inputId);
     const dropdown = $(dropdownId);
     const list = $(listId);
     const select = $(selectId);
+    const searchInput = searchInputId ? $(searchInputId) : dropdown?.querySelector('.hh-cs-search input');
 
     if (!wrap || !box || !input || !dropdown || !list || !select) return null;
 
@@ -541,7 +542,12 @@
       if (sec) sec.style.zIndex = '50';
       dropdown.style.display = 'block';
       wrap.classList.add('open');
-      input.focus();
+      if (searchInput) {
+        searchInput.value = '';
+        setTimeout(() => searchInput.focus(), 30);
+      } else {
+        input.focus();
+      }
       filterItems('');
     }
 
@@ -554,6 +560,7 @@
       if (sec) sec.style.zIndex = '';
       const curOpt = select.options[select.selectedIndex];
       input.value = (curOpt && curOpt.value) ? curOpt.textContent.trim() : '';
+      if (searchInput) searchInput.value = '';
       filterItems('');
     }
 
@@ -583,7 +590,7 @@
       let matchCount = 0;
       $$('.hh-cs-item', list).forEach(item => {
         if (item.classList.contains('hh-cs-new-item')) return;
-        const text = (item.textContent || '').toLowerCase();
+        const text = (item.querySelector('span')?.textContent || item.textContent || '').toLowerCase();
         const matches = !query || text.includes(query);
         item.style.display = matches ? 'flex' : 'none';
         if (matches) matchCount++;
@@ -607,7 +614,27 @@
       }
     });
 
+    if (searchInput) {
+      searchInput.addEventListener('click', e => e.stopPropagation());
+      searchInput.addEventListener('input', e => {
+        filterItems(e.target.value);
+      });
+      searchInput.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeDropdown();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          const firstVisible = list.querySelector('.hh-cs-item:not([style*="display: none"]):not(.hh-cs-new-item)');
+          if (firstVisible) {
+            selectValue(firstVisible.dataset.val, firstVisible.querySelector('span')?.textContent?.trim());
+          }
+        }
+      });
+    }
+
     input.addEventListener('input', e => {
+      if (searchInput) return;
       if (!wrap.classList.contains('open')) {
         checkDropdownDirection(wrap, box, dropdown);
         const sec = wrap.closest('.hh-sec, .hh-top-grid');
@@ -619,6 +646,7 @@
     });
 
     input.addEventListener('keydown', e => {
+      if (searchInput) return;
       if (e.key === 'Escape') {
         e.preventDefault();
         closeDropdown();
@@ -683,8 +711,7 @@
     dropdownId: '#dropdownMaNhom',
     listId: '#listMaNhom',
     selectId: '#formMaNhom',
-    newItemText: '+ Tạo nhóm hàng mới',
-    onNew: () => $('#btnNewNhom')?.click()
+    searchInputId: '#searchMaNhom'
   });
 
   const csMaDvt = initSingleSelect({
@@ -694,8 +721,7 @@
     dropdownId: '#dropdownMaDvt',
     listId: '#listMaDvt',
     selectId: '#formMaDvt',
-    newItemText: '+ Tạo đơn vị tính mới',
-    onNew: () => $('#btnNewDvt')?.click()
+    searchInputId: '#searchMaDvt'
   });
 
   const csDonViTrongLuong = initSingleSelect({

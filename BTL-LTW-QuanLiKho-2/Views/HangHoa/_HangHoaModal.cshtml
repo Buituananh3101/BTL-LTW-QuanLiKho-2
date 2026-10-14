@@ -58,10 +58,13 @@
                 <label for="inputMaNhom">Nhóm hàng <button type="button" class="hh-link" id="btnNewNhom" data-new="nhom">+ Tạo mới</button></label>
                 <div class="hh-cs-wrap" id="wrapMaNhom" data-select-id="#formMaNhom">
                   <div class="hh-cs-box" id="boxMaNhom">
-                    <input type="text" class="hh-cs-input" id="inputMaNhom" placeholder="Chọn nhóm hàng (Bắt buộc)" autocomplete="off" />
+                    <input type="text" class="hh-cs-input" id="inputMaNhom" placeholder="Chọn nhóm hàng (Bắt buộc)" readonly autocomplete="off" />
                     <svg class="hh-cs-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
                   </div>
                   <div class="hh-cs-dropdown" id="dropdownMaNhom" style="display: none;">
+                    <div class="hh-cs-search">
+                      <input type="text" id="searchMaNhom" placeholder="Tìm nhóm hàng..." autocomplete="off" />
+                    </div>
                     <div class="hh-cs-list" id="listMaNhom">
                       @foreach (var g in Model.NhomHangs)
                       {
@@ -70,9 +73,6 @@
                           <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
                         </div>
                       }
-                      <div class="hh-cs-item hh-cs-new-item">
-                        <span>+ Tạo nhóm hàng mới</span>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -90,10 +90,13 @@
                 <label for="inputMaDvt">Đơn vị tính <button type="button" class="hh-link" id="btnNewDvt" data-new="dvt">+ Tạo mới</button></label>
                 <div class="hh-cs-wrap" id="wrapMaDvt" data-select-id="#formMaDvt">
                   <div class="hh-cs-box" id="boxMaDvt">
-                    <input type="text" class="hh-cs-input" id="inputMaDvt" placeholder="Chọn ĐVT (Bắt buộc)" autocomplete="off" />
+                    <input type="text" class="hh-cs-input" id="inputMaDvt" placeholder="Chọn ĐVT (Bắt buộc)" readonly autocomplete="off" />
                     <svg class="hh-cs-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
                   </div>
                   <div class="hh-cs-dropdown" id="dropdownMaDvt" style="display: none;">
+                    <div class="hh-cs-search">
+                      <input type="text" id="searchMaDvt" placeholder="Tìm đơn vị tính..." autocomplete="off" />
+                    </div>
                     <div class="hh-cs-list" id="listMaDvt">
                       @foreach (var u in Model.DonViTinhs)
                       {
@@ -102,9 +105,6 @@
                           <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
                         </div>
                       }
-                      <div class="hh-cs-item hh-cs-new-item">
-                        <span>+ Tạo đơn vị tính mới</span>
-                      </div>
                     </div>
                   </div>
                 </div>
