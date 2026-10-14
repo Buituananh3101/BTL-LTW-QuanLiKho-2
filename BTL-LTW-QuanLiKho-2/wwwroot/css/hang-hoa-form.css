@@ -560,24 +560,33 @@
   color: #1f2937;
   cursor: pointer;
   user-select: none;
-  transition: background-color 0.12s;
+  transition: none !important;
 }
 .hh-multiselect-item:hover {
   background-color: #f3f4f6;
   color: #111827;
+  transition: none !important;
 }
 .hh-multiselect-item.selected {
   background-color: #fff;
   color: #1f2937;
+  transition: none !important;
 }
 .hh-multiselect-item.selected:hover {
   background-color: #f3f4f6;
+  transition: none !important;
 }
 .hh-multiselect-item .hh-check-icon {
-  color: #2563eb;
-  font-size: 16px;
-  font-weight: bold;
+  width: 18px;
+  height: 18px;
+  stroke: #2563eb;
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   display: none;
+  flex: none;
+  transition: none !important;
 }
 .hh-multiselect-item.selected .hh-check-icon {
   display: inline-block;
@@ -674,19 +683,22 @@
   color: #1f2937;
   cursor: pointer;
   user-select: none;
-  transition: background-color 0.12s;
+  transition: none !important;
 }
 .hh-cs-item:hover, .hh-cs-item.highlighted {
   background-color: #f3f4f6;
   color: #111827;
+  transition: none !important;
 }
 .hh-cs-item.selected {
   background-color: #fff;
   color: #1f2937;
   font-weight: 500;
+  transition: none !important;
 }
 .hh-cs-item.selected:hover {
   background-color: #f3f4f6;
+  transition: none !important;
 }
 .hh-cs-item .hh-check-icon {
   width: 18px;
@@ -698,9 +710,54 @@
   stroke-linejoin: round;
   display: none;
   flex: none;
+  transition: none !important;
 }
 .hh-cs-item.selected .hh-check-icon {
   display: block;
+}
+/* Nút bút chì sửa item khi hover trong dropdown Vị trí và Thuộc tính (Chuẩn KiotViet) */
+.hh-item-edit-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  background: transparent !important;
+  color: #4b5563 !important;
+  cursor: pointer;
+  border-radius: 0;
+  margin: 0;
+  transition: none !important;
+  flex-shrink: 0;
+  outline: none;
+  box-shadow: none !important;
+}
+.hh-item-edit-btn:hover,
+.hh-item-edit-btn:focus,
+.hh-item-edit-btn:active {
+  background: transparent !important;
+  color: #4b5563 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.hh-item-edit-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+  pointer-events: none;
+  transition: none !important;
+}
+.hh-multiselect-item:hover .hh-item-edit-btn,
+.hh-cs-item:hover .hh-item-edit-btn {
+  display: inline-flex;
+}
+.hh-multiselect-item:hover .hh-check-icon,
+.hh-cs-item:hover .hh-check-icon {
+  display: none !important;
 }
 .hh-cs-item.hh-cs-new-item {
   color: var(--hh-blue);
@@ -1063,6 +1120,32 @@
   border-color: var(--hh-blue);
   color: var(--hh-blue-d);
   font-weight: 600;
+}
+
+/* Nút Xóa ở góc trái chân modal Sửa vị trí / Sửa thuộc tính */
+.hh-btn-del {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.hh-btn-del:hover {
+  color: #dc2626;
+  background-color: #fee2e2;
+}
+.hh-btn-del svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
 }
 
 /* Toast */

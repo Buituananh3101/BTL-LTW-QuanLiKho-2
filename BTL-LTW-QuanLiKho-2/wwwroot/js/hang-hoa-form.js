@@ -54,7 +54,7 @@
   // Đóng modal bằng phím Escape
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
-    const top = ['hhPickOv', 'hhPromptOv', 'hangHoaModalOv'].map(id => $('#' + id)).find(o => o && o.classList.contains('show'));
+    const top = ['hhEditItemOv', 'hhPickOv', 'hhPromptOv', 'hangHoaModalOv'].map(id => $('#' + id)).find(o => o && o.classList.contains('show'));
     if (top) hide(top);
   });
 
@@ -238,6 +238,175 @@
     }
   });
   $('#pInput').addEventListener('input', () => $('#pField').classList.remove('invalid'));
+
+  /* ---------- Modal Sửa & Xóa Vị trí / Thuộc tính (Chuẩn KiotViet) ---------- */
+  let editItemType = null; // 'vitri' | 'thuoctinh'
+  let editItemOldVal = '';
+
+  function openEditItemModal(type, val) {
+    editItemType = type;
+    editItemOldVal = (val || '').trim();
+    const isVitri = type === 'vitri';
+
+    const titleEl = $('#editItemTitle');
+    const labelEl = $('#editItemLabel');
+    const saveBtn = $('#btnEditItemSave');
+    const inp = $('#editItemInput');
+    const field = $('#editItemField');
+    const err = $('#editItemErr');
+
+    if (titleEl) titleEl.textContent = isVitri ? 'Sửa vị trí' : 'Sửa thuộc tính';
+    if (labelEl) labelEl.textContent = isVitri ? 'Vị trí' : 'Tên thuộc tính';
+    if (saveBtn) saveBtn.textContent = isVitri ? 'Lưu' : 'Xong';
+
+    if (inp) inp.value = editItemOldVal;
+    if (field) field.classList.remove('invalid');
+    if (err) err.style.display = 'none';
+
+    show($('#hhEditItemOv'));
+    setTimeout(() => {
+      if (inp) {
+        inp.focus();
+        inp.select();
+      }
+    }, 50);
+  }
+
+  function handleEditItemSave() {
+    const inp = $('#editItemInput');
+    const field = $('#editItemField');
+    const err = $('#editItemErr');
+    const newVal = inp ? inp.value.trim() : '';
+
+    if (!newVal) {
+      if (err) {
+        err.textContent = editItemType === 'vitri' ? 'Vui lòng nhập vị trí.' : 'Vui lòng nhập tên thuộc tính.';
+        err.style.display = 'block';
+      }
+      if (field) field.classList.add('invalid');
+      return;
+    }
+
+    if (ci(newVal, editItemOldVal)) {
+      if (editItemType === 'vitri') {
+        const idx = availableLocations.findIndex(a => ci(a, editItemOldVal));
+        if (idx >= 0) availableLocations[idx] = newVal;
+        const sIdx = selectedLocations.findIndex(s => ci(s, editItemOldVal));
+        if (sIdx >= 0) selectedLocations[sIdx] = newVal;
+        renderLocationTags();
+        renderLocationDropdown($('#formViTriSearch')?.value || '');
+      } else {
+        if (newVal !== editItemOldVal && knownAttributes[editItemOldVal]) {
+          const vals = knownAttributes[editItemOldVal];
+          delete knownAttributes[editItemOldVal];
+          knownAttributes[newVal] = vals;
+          $$('.hh-attr-row', attrRows).forEach(r => {
+            if (ci(getRowName(r), editItemOldVal)) r.dataset.cur = newVal;
+          });
+          refreshAttrDropdowns();
+        }
+      }
+      hide($('#hhEditItemOv'));
+      return;
+    }
+
+    if (editItemType === 'vitri') {
+      if (availableLocations.some(a => ci(a, newVal))) {
+        if (err) {
+          err.textContent = 'Vị trí "' + newVal + '" đã tồn tại trong danh sách.';
+          err.style.display = 'block';
+        }
+        if (field) field.classList.add('invalid');
+        return;
+      }
+      const idx = availableLocations.findIndex(a => ci(a, editItemOldVal));
+      if (idx >= 0) {
+        availableLocations[idx] = newVal;
+      } else {
+        availableLocations.push(newVal);
+      }
+      const sIdx = selectedLocations.findIndex(s => ci(s, editItemOldVal));
+      if (sIdx >= 0) {
+        selectedLocations[sIdx] = newVal;
+      }
+      renderLocationTags();
+      renderLocationDropdown($('#formViTriSearch')?.value || '');
+
+      // Đồng bộ nếu có item ở menu lọc cột trái
+      const sideItem = $(`#dropdownViTri .kiot-ms-item[data-val="${CSS.escape ? CSS.escape(editItemOldVal) : editItemOldVal}"]`);
+      if (sideItem) {
+        sideItem.dataset.val = newVal;
+        sideItem.dataset.name = newVal;
+        const sp = sideItem.querySelector('span');
+        if (sp) sp.textContent = newVal;
+      }
+
+      hide($('#hhEditItemOv'));
+      showToast('Đã cập nhật vị trí: ' + newVal);
+    } else {
+      if (knownAttributes[newVal]) {
+        if (err) {
+          err.textContent = 'Thuộc tính "' + newVal + '" đã tồn tại trong danh sách.';
+          err.style.display = 'block';
+        }
+        if (field) field.classList.add('invalid');
+        return;
+      }
+      const vals = knownAttributes[editItemOldVal] || [];
+      delete knownAttributes[editItemOldVal];
+      knownAttributes[newVal] = vals;
+
+      $$('.hh-attr-row', attrRows).forEach(r => {
+        if (ci(getRowName(r), editItemOldVal)) {
+          r.dataset.cur = newVal;
+        }
+      });
+      refreshAttrDropdowns();
+      hide($('#hhEditItemOv'));
+      showToast('Đã cập nhật thuộc tính: ' + newVal);
+    }
+  }
+
+  function handleEditItemDelete() {
+    if (!editItemOldVal) return;
+    if (editItemType === 'vitri') {
+      availableLocations = availableLocations.filter(a => !ci(a, editItemOldVal));
+      selectedLocations = selectedLocations.filter(s => !ci(s, editItemOldVal));
+      renderLocationTags();
+      renderLocationDropdown($('#formViTriSearch')?.value || '');
+
+      // Đồng bộ nếu có item ở menu lọc cột trái
+      const sideItem = $(`#dropdownViTri .kiot-ms-item[data-val="${CSS.escape ? CSS.escape(editItemOldVal) : editItemOldVal}"]`);
+      if (sideItem) sideItem.remove();
+
+      hide($('#hhEditItemOv'));
+      showToast('Đã xóa vị trí: ' + editItemOldVal);
+    } else {
+      delete knownAttributes[editItemOldVal];
+      $$('.hh-attr-row', attrRows).forEach(r => {
+        if (ci(getRowName(r), editItemOldVal)) {
+          setRowAttr(r, '');
+        }
+      });
+      refreshAttrDropdowns();
+      hide($('#hhEditItemOv'));
+      showToast('Đã xóa thuộc tính: ' + editItemOldVal);
+    }
+  }
+
+  $('#btnEditItemSave')?.addEventListener('click', handleEditItemSave);
+  $('#btnEditItemDelete')?.addEventListener('click', handleEditItemDelete);
+  $('#editItemInput')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleEditItemSave();
+    }
+  });
+  $('#editItemInput')?.addEventListener('input', () => {
+    $('#editItemField')?.classList.remove('invalid');
+    const err = $('#editItemErr');
+    if (err) err.style.display = 'none';
+  });
 
   // Nút Tạo mới Nhóm hàng
   $('#btnNewNhom').onclick = () => {
@@ -551,6 +720,15 @@
     'Kệ B2 - Tầng 2',
     'Khu vực xuất hàng'
   ];
+
+  // Tự động nạp thêm vị trí từ danh sách vị trí đã nạp trong DB nếu có
+  $$('#dropdownViTri .kiot-ms-item').forEach(el => {
+    const v = el.dataset.val?.trim();
+    if (v && !availableLocations.some(a => ci(a, v))) {
+      availableLocations.push(v);
+    }
+  });
+
   let selectedLocations = [];
 
   function renderLocationTags() {
@@ -588,6 +766,9 @@
       return `
         <div class="hh-multiselect-item ${isSel ? 'selected' : ''}" data-val="${esc(loc)}">
           <span>${esc(loc)}</span>
+          <button type="button" class="hh-item-edit-btn" data-type="vitri" data-val="${esc(loc)}" title="Sửa vị trí" aria-label="Sửa vị trí ${esc(loc)}">
+            <svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>
+          </button>
           <svg class="hh-check-icon" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#2563eb;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 12l5 5L20 6"/></svg>
         </div>
       `;
@@ -699,6 +880,12 @@
   // Click vào item trong dropdown (giữ dropdown mở, toggle checkmark)
   $('#formViTriList')?.addEventListener('click', e => {
     e.stopPropagation();
+    const editBtn = e.target.closest('.hh-item-edit-btn');
+    if (editBtn) {
+      const val = editBtn.dataset.val;
+      openEditItemModal('vitri', val);
+      return;
+    }
     const item = e.target.closest('.hh-multiselect-item');
     if (!item) return;
     const val = item.dataset.val;
@@ -792,6 +979,9 @@
         csList.innerHTML = allItems.map(n => `
           <div class="hh-cs-item ${n === cur ? 'selected' : ''}" data-val="${esc(n)}">
             <span>${esc(n)}</span>
+            <button type="button" class="hh-item-edit-btn" data-type="thuoctinh" data-val="${esc(n)}" title="Sửa thuộc tính" aria-label="Sửa thuộc tính ${esc(n)}">
+              <svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>
+            </button>
             <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
           </div>
         `).join('') + `
@@ -909,6 +1099,15 @@
   attrRows.addEventListener('click', e => {
     const r = e.target.closest('.hh-attr-row');
     if (!r) return;
+
+    // Click vào nút sửa thuộc tính bút chì
+    const editBtn = e.target.closest('.hh-item-edit-btn');
+    if (editBtn) {
+      e.stopPropagation();
+      const val = editBtn.dataset.val;
+      openEditItemModal('thuoctinh', val);
+      return;
+    }
 
     // Click vào item trong dropdown thuộc tính
     const aItem = e.target.closest('.hh-a-list .hh-cs-item');

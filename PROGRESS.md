@@ -68,6 +68,14 @@ Cập nhật lần cuối: 2026-10-14 – Nâng cấp Form Thêm/Sửa Hàng hó
     - **Tự động đảo hướng**: Bổ sung hàm `checkSidebarDropdownDirection(box, dropdown)` cho các dropdown bộ lọc ở cột trái gồm: **Nhóm hàng** (`dropdownNhomHang`), **Nhà cung cấp** (`dropdownNcc`), **Vị trí** (`dropdownViTri`), và **Loại hàng** (`dropdownLoaiHang`).
     - **Hiển thị thông minh**: Khi các khối lọc ở dưới thấp (như Vị trí, Loại hàng) được mở và khoảng trống bên dưới không đủ (< 220px), popup tự động bật ngược lên trên (`.kiot-ms-dropdown.drop-up` với `bottom: calc(100% + 4px)` và bóng đổ ngược `0 -10px 25px`); tự động tính toán lại khi cuộn sidebar `.kiot-filter-box`.
     - Kiểm tra cú pháp JS và biên dịch: Đạt chuẩn. Đồng bộ `docs/specs/danh-sach-hang-hoa.md`.
+  - Triển khai tính năng Sửa & Xóa Vị trí và Thuộc tính trực tiếp từ Dropdown chuẩn KiotViet:
+    - **Hover hiển thị nút Bút chì (`✎`)**: Khi di chuột qua từng mục trong dropdown Vị trí (`#formViTriList .hh-multiselect-item`) và Thuộc tính (`.hh-a-list .hh-cs-item`), nút bút chì `.hh-item-edit-btn` tự động xuất hiện ở mép phải (thay thế dấu check xanh nếu đang chọn); click nút sẽ chặn nổi bọt sự kiện và mở popup sửa.
+    - **Modal popup chuẩn KiotViet (`#hhEditItemOv`)**: Hỗ trợ 2 chế độ "Sửa vị trí" (tiêu đề Vị trí, nút Lưu) và "Sửa thuộc tính" (tiêu đề Tên thuộc tính, nút Xong), input tự động nạp giá trị cũ và focus.
+    - **Xử lý Đổi tên & Xóa**:
+      - Đổi tên: Cập nhật dữ liệu trong mảng `availableLocations` và `selectedLocations` hoặc `knownAttributes` và các dòng thuộc tính đang chọn trong form, đồng bộ tức thì sang danh sách dropdown và bộ lọc sidebar `#dropdownViTri`.
+      - Xóa: Nút "🗑 Xóa" ở góc trái modal gỡ bỏ mục khỏi danh sách dữ liệu, bỏ chọn ở các tag/dòng liên quan, đóng modal và hiển thị Toast thông báo.
+    - **Tinh chỉnh Hover thuần màu (Không hiệu ứng chuyển động & Giữ nguyên nút bút chì)**: Loại bỏ toàn bộ `transition` làm chậm/chuyển động khi rê chuột qua các mục danh sách chọn (`.hh-multiselect-item`, `.hh-cs-item`, `.kiot-ms-item`), chỉ đổi màu nền `#f3f4f6` ngay lập tức; đồng thời cố định trạng thái hover của nút bút chì `.hh-item-edit-btn` (trong suốt, giữ nguyên màu `#4b5563`, không tạo khối nền hoặc đổi màu xanh khi rê chuột vào icon).
+    - Kiểm tra cú pháp JS: `node -c` 0 lỗi. Đồng bộ `docs/specs/danh-sach-hang-hoa.md`.
 - **2026-10-14 (Phiên 14 - Chiều)**:
   - Tái thiết kế và nâng cấp toàn diện Modal Tạo/Sửa Hàng hóa theo prototype KiotViet `prototype-taohanghoa.html`:
     - CSDL: Nâng cấp lưu trữ từ 1 ảnh thành tối đa 5 ảnh lưu trực tiếp trong SQL Server qua bảng `dbo.HinhAnhHangHoa` (`migrations/sql/07_nang_cap_5_anh_va_mota_hanghoa.sql`) và bổ sung cột `MoTa` cho `dbo.HangHoa`.

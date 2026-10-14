@@ -1534,11 +1534,12 @@ tr.product-detail-row > td {
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: background 0.1s;
+  transition: none !important;
   user-select: none;
 }
 .kiot-ms-item:hover {
   background-color: #f3f4f6;
+  transition: none !important;
 }
 .kiot-ms-item.selected {
   background-color: #eff6ff;
@@ -1776,7 +1777,7 @@ tr.product-detail-row > td {
   font-size: 13.5px;
   color: #212529 !important;
   padding: 8px 16px !important;
-  transition: background-color 0.12s ease;
+  transition: none !important;
   cursor: pointer;
   display: flex !important;
   justify-content: space-between !important;
@@ -1786,6 +1787,7 @@ tr.product-detail-row > td {
 .kiot-attr-item:hover {
   background-color: #f0f7ff !important;
   color: #0d6efd !important;
+  transition: none !important;
 }
 
 .kiot-attr-item.active {
