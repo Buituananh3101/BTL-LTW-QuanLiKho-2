@@ -4,6 +4,7 @@
 }
 
 <link rel="stylesheet" href="~/css/hang-hoa-form.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/hang-hoa-excel.css" asp-append-version="true" />
 
 <div class="kiot-container position-relative" id="kiotContainer">
     <!-- CỘT BÊN TRÁI: TIÊU ĐỀ "HÀNG HÓA" + BỘ LỌC -->
@@ -371,10 +372,10 @@
                 </div>
 
                 <!-- Nút Import & Xuất file cho Desktop -->
-                <button type="button" class="btn btn-tool d-none d-md-inline-flex" onclick="alert('Tính năng Import file Excel');">
+                <button type="button" class="btn btn-tool d-none d-md-inline-flex" id="btnOpenImportModal" onclick="window.openImportModal();">
                     <i class="bi bi-box-arrow-in-down me-1"></i>Import file
                 </button>
-                <button type="button" class="btn btn-tool d-none d-md-inline-flex" onclick="alert('Tính năng xuất danh sách Excel');">
+                <button type="button" class="btn btn-tool d-none d-md-inline-flex" id="btnOpenExportModal" onclick="window.openExportModal();">
                     <i class="bi bi-box-arrow-up me-1"></i>Xuất file
                 </button>
 
@@ -385,12 +386,12 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="btnDropdownExcelMobile">
                         <li>
-                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="alert('Tính năng Import file Excel');">
+                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="window.openImportModal();">
                                 <i class="bi bi-box-arrow-in-down me-2 text-primary"></i>Import file
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="alert('Tính năng xuất danh sách Excel');">
+                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="window.openExportModal();">
                                 <i class="bi bi-box-arrow-up me-2 text-success"></i>Xuất file
                             </a>
                         </li>
@@ -423,6 +424,8 @@
      MODAL KIOTVIET: THÊM MỚI / CẬP NHẬT HÀNG HÓA CHUẨN PROTOTYPE (5 ẢNH CSDL)
      ======================================================================== -->
 <partial name="_HangHoaModal" model="Model" />
+<partial name="_HangHoaExportModal" />
+<partial name="_HangHoaImportModal" />
 
 <!-- ========================================================================
      MODAL TẠO NHANH NHÓM HÀNG
@@ -450,6 +453,8 @@
 <script>
 $(document).ready(function () {
     let currentPage = @Model.Page;
+    let currentSortBy = '@(Model.SortBy ?? "")';
+    let currentSortDir = '@(Model.SortDir ?? "")';
     const groupModal = new bootstrap.Modal(document.getElementById('quickGroupModal'));
 
     // 1. Thu gọn / Mở rộng (Kéo vào / Kéo ra) sidebar bên trái
@@ -1700,6 +1705,33 @@ $(document).ready(function () {
         window.toggleStarHeaderFilter(e);
     });
 
+    // 8. Sắp xếp cột 3 trạng thái khi click header (KiotViet style)
+    // Lần 1: Tăng dần (asc) -> Lần 2: Giảm dần (desc) -> Lần 3: Trả lại bình thường (none)
+    // Click cột khác: Hủy cột cũ, chuyển sang cột mới và bắt đầu tăng dần (asc)
+    $(document).on('click', '#productTable thead th.sortable-th', function (e) {
+        e.preventDefault();
+        const col = $(this).data('col');
+        if (!col) return;
+
+        if (currentSortBy === col) {
+            if (currentSortDir === 'asc') {
+                currentSortDir = 'desc'; // Lần 2: giảm dần
+            } else if (currentSortDir === 'desc') {
+                currentSortBy = '';      // Lần 3: trở lại bình thường
+                currentSortDir = '';
+            } else {
+                currentSortDir = 'asc';  // Lần 1: tăng dần
+            }
+        } else {
+            // Chuyển sang cột mới: hủy sắp xếp cột cũ, bắt đầu tăng dần
+            currentSortBy = col;
+            currentSortDir = 'asc';
+        }
+
+        currentPage = 1;
+        loadTable();
+    });
+
     function loadTable() {
         const q = $('#keywordSearch').val()?.trim() || '';
         const nhom = (filterState.nhom || []).map(x => x.val).join(',');
@@ -1749,6 +1781,8 @@ $(document).ready(function () {
                 tgTaoFrom: tgTaoFrom,
                 tgTaoTo: tgTaoTo,
                 daDanhDau: isStarredFilterActive,
+                sortBy: currentSortBy,
+                sortDir: currentSortDir,
                 page: currentPage
             },
             beforeSend: function () {
@@ -1764,8 +1798,46 @@ $(document).ready(function () {
         });
     }
 
+    window.getCurrentFilterParams = function () {
+        const q = $('#keywordSearch').val()?.trim() || '';
+        const nhom = (filterState.nhom || []).map(x => x.val).join(',');
+        const tonKho = $('#filterTonKho').val() || 'ALL';
+        const nhaCungCap = (filterState.ncc || []).map(x => x.val).join(';');
+        const viTri = (filterState.vitri || []).map(x => x.val).join(';');
+        const loaiHang = (filterState.loaihang || []).map(x => x.val).join(';');
+
+        let duKien = activeDuKienVal || 'ALL';
+        if ($('#dkCustom').is(':checked') && duKien === 'ALL') {
+            duKien = 'CUSTOM';
+        }
+
+        let tgTao = activeTgTaoVal || 'ALL';
+        let tgTaoFrom = '';
+        let tgTaoTo = '';
+        if ($('#tgtCustom').is(':checked')) {
+            tgTao = 'CUSTOM';
+            tgTaoFrom = activeTgTaoFrom;
+            tgTaoTo = activeTgTaoTo;
+        }
+
+        return {
+            q: q,
+            nhom: nhom,
+            tonKho: tonKho,
+            nhaCungCap: nhaCungCap,
+            viTri: viTri,
+            loaiHang: loaiHang,
+            duKien: duKien,
+            tgTao: tgTao,
+            tgTaoFrom: tgTaoFrom,
+            tgTaoTo: tgTaoTo,
+            daDanhDau: isStarredFilterActive
+        };
+    };
+
     window.loadTable = loadTable;
 });
 </script>
 <script src="~/js/hang-hoa-form.js" asp-append-version="true"></script>
+<script src="~/js/hang-hoa-excel.js" asp-append-version="true"></script>
 }

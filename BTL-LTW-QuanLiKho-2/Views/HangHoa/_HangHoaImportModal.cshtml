@@ -1,0 +1,121 @@
+<!-- ========================================================================
+     MODAL NHẬP HÀNG HÓA TỪ FILE EXCEL CHUẨN KIOTVIET
+     ======================================================================== -->
+<div class="hh-ov" id="hhImportModalOv">
+  <div class="hh-modal" role="dialog" aria-modal="true" aria-labelledby="importModalTitle" style="max-width: 650px;">
+    <!-- Modal Header -->
+    <div class="hh-m-head">
+      <h2 id="importModalTitle" style="display: flex; align-items: center; gap: 8px;">
+        <i class="bi bi-box-arrow-in-down text-primary fs-5"></i>
+        <span>Nhập hàng hóa từ file Excel</span>
+      </h2>
+      <button type="button" class="hh-x" data-close="hhImportModalOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="hh-m-body" style="padding: 20px 24px;">
+      <!-- Khối 1: Tải file mẫu chuẩn -->
+      <div class="p-3 mb-3" style="background: #f0f7ff; border: 1px solid #cce5ff; border-radius: 8px;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div>
+            <div class="fw-bold text-primary mb-1">
+              <i class="bi bi-file-earmark-excel me-1"></i> File mẫu Excel chuẩn KiotViet
+            </div>
+            <div class="text-muted small">
+              Chứa đầy đủ 16 trường thông tin quản lý và dòng dữ liệu minh họa.
+            </div>
+          </div>
+          <a href="/HangHoa/DownloadTemplate" class="btn btn-sm btn-primary py-1 px-3" style="font-size: 13px; font-weight: 600;">
+            <i class="bi bi-download me-1"></i> Tải file mẫu
+          </a>
+        </div>
+      </div>
+
+      <!-- Khối 2: Dropzone chọn file Excel -->
+      <div class="mb-3">
+        <label class="fw-bold text-dark mb-2 d-block">Chọn file dữ liệu cần nhập (.xlsx)</label>
+        
+        <div id="importDropzone" class="hh-dropzone" style="border: 2px dashed #cbd5e1; border-radius: 10px; padding: 28px 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f8fafc;">
+          <input type="file" id="importFileInput" accept=".xlsx" style="display: none;" />
+          
+          <div id="dropzoneEmpty">
+            <i class="bi bi-cloud-arrow-up text-primary" style="font-size: 40px; line-height: 1; display: block; margin-bottom: 8px;"></i>
+            <div class="fw-semibold text-dark mb-1" style="font-size: 14.5px;">Kéo thả file .xlsx vào đây hoặc bấm để chọn file</div>
+            <div class="text-muted small">Hỗ trợ file Excel định dạng .xlsx, dung lượng tối đa 10MB</div>
+          </div>
+
+          <div id="dropzoneFileSelected" style="display: none; align-items: center; justify-content: space-between; background: #fff; padding: 10px 16px; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <div class="d-flex align-items-center gap-3 text-start">
+              <i class="bi bi-file-earmark-spreadsheet-fill text-success" style="font-size: 32px; line-height: 1;"></i>
+              <div>
+                <div id="importFileName" class="fw-bold text-dark" style="font-size: 14px;">ten-file.xlsx</div>
+                <div id="importFileSize" class="text-muted small">0 KB</div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-danger" id="btnRemoveImportFile" title="Chọn file khác">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Khối 3: Tùy chọn khi trùng mã hàng -->
+      <div class="mb-3">
+        <label class="fw-bold text-dark mb-2 d-block">Tùy chọn khi mã hàng đã tồn tại:</label>
+        <div class="d-flex flex-column gap-2" style="background: #fafafa; padding: 12px 16px; border: 1px solid var(--hh-line-l); border-radius: 8px;">
+          <label class="hh-radio-label">
+            <input type="radio" name="duplicateMode" value="UPDATE" checked />
+            <div>
+              <strong>Cập nhật thông tin (Khuyên dùng)</strong>
+              <div class="text-muted small">Ghi đè giá bán, giá vốn, vị trí, thuộc tính và cập nhật ngưỡng tồn của hàng cũ</div>
+            </div>
+          </label>
+          <label class="hh-radio-label">
+            <input type="radio" name="duplicateMode" value="SKIP" />
+            <div>
+              <strong>Bỏ qua dòng trùng</strong>
+              <div class="text-muted small">Giữ nguyên thông tin cũ trong hệ thống, chỉ thêm mới các mặt hàng chưa có</div>
+            </div>
+          </label>
+          <label class="hh-radio-label">
+            <input type="radio" name="duplicateMode" value="ERROR" />
+            <div>
+              <strong>Báo lỗi và dừng</strong>
+              <div class="text-muted small">Hủy toàn bộ tiến trình nhập nếu phát hiện bất kỳ mã hàng nào đã tồn tại</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Khối 4: Trạng thái & Kết quả sau khi nhập -->
+      <div id="importLoadingBox" style="display: none; padding: 16px; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 14px;">
+        <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+        <span class="text-secondary fw-semibold">Đang đọc và xử lý dữ liệu từ file Excel... Vui lòng chờ trong giây lát.</span>
+      </div>
+
+      <div id="importResultBox" style="display: none; margin-top: 14px;">
+        <!-- Card tổng kết kết quả -->
+        <div id="importResultCard" class="p-3 border rounded-3 mb-2" style="font-size: 13.5px;">
+          <!-- Rendered via JS -->
+        </div>
+
+        <!-- Danh sách lỗi chi tiết nếu có -->
+        <div id="importErrorsContainer" style="display: none;">
+          <div class="fw-semibold text-danger small mb-1">Chi tiết các dòng bị lỗi:</div>
+          <div id="importErrorsList" style="max-height: 150px; overflow-y: auto; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 8px 12px; font-size: 12.5px; color: #991b1b;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="hh-m-foot" style="background: #f9fafb; border-top: 1px solid var(--hh-line-l); padding: 12px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+      <button type="button" class="hh-btn" data-close="hhImportModalOv">Đóng</button>
+      <button type="button" class="hh-btn primary" id="btnExecuteImport" disabled>
+        <i class="bi bi-box-arrow-in-down me-1"></i> Thực hiện nhập
+      </button>
+    </div>
+  </div>
+</div>

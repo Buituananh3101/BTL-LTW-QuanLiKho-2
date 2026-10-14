@@ -1,0 +1,57 @@
+/* ==========================================================================
+   CSS CHO TÍNH NĂNG NHẬP & XUẤT FILE EXCEL HÀNG HÓA CHUẨN KIOTVIET
+   ========================================================================== */
+
+#hhExportModalOv, #hhImportModalOv {
+  z-index: 1065;
+}
+
+.hh-radio-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13.5px;
+  color: #374151;
+  user-select: none;
+}
+
+.hh-radio-label input[type="radio"] {
+  margin-top: 3px;
+  accent-color: var(--hh-blue, #0070f4);
+  cursor: pointer;
+}
+
+.hh-col-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #1f2937;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: background-color 0.15s;
+  user-select: none;
+}
+
+.hh-col-item:hover {
+  background-color: #f1f5f9;
+}
+
+.hh-col-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--hh-blue, #0070f4);
+  cursor: pointer;
+}
+
+/* Dropzone dragover */
+.hh-dropzone.dragover {
+  background: #eff6ff !important;
+  border-color: #3b82f6 !important;
+}
+
+.hh-export-sec-title {
+  font-size: 14px;
+}

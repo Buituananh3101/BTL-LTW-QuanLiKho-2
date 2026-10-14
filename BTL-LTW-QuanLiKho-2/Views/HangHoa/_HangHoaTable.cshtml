@@ -8,23 +8,87 @@
 <table class="tbl" id="productTable">
     <thead>
         <tr>
-            <th style="width: 34px;" class="text-center">
+            <th style="width: 36px;" class="text-center th-checkbox">
                 <input class="form-check-input" type="checkbox" id="selectAllRows" />
             </th>
-            <th style="width: 30px;" class="text-center" style="cursor: pointer;" onclick="toggleStarHeaderFilter(event)">
+            <th style="width: 36px; cursor: pointer;" class="text-center th-star" onclick="toggleStarHeaderFilter(event)">
                 <span class="star-btn star-header-filter @(Model.DaDanhDauFilter ? "starred" : "")" id="starHeaderFilter" title="@(Model.DaDanhDauFilter ? "Bỏ lọc sao (Hiển thị tất cả)" : "Lọc danh sách hàng được đánh dấu sao")">
                     <i class="bi @(Model.DaDanhDauFilter ? "bi-star-fill" : "bi-star")"></i>
                 </span>
             </th>
-            <th style="width: 44px;" class="text-center">Ảnh</th>
-            <th style="width: 120px;">Mã hàng</th>
-            <th class="col-product-name">Tên hàng</th>
-            <th class="num" style="width: 105px;">Giá bán</th>
-            <th class="num" style="width: 105px;">Giá vốn</th>
-            <th class="num" style="width: 85px;">Tồn kho</th>
-            <th class="num" style="width: 85px;">Khách đặt</th>
-            <th style="width: 130px;">Thời gian tạo</th>
-            <th style="width: 120px;">Dự kiến hết hàng</th>
+            <th style="width: 48px;" class="text-center th-img">Ảnh</th>
+            <th style="width: 120px;" class="sortable-th @(Model.SortBy == "mahang" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="mahang" title="Nhấn để sắp xếp theo Mã hàng">
+                <div class="th-content">
+                    <span class="th-title-wrap">
+                        <span class="th-text">Mã hàng</span>
+                        @if (Model.SortBy == "mahang" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                        else if (Model.SortBy == "mahang" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                    </span>
+                </div>
+            </th>
+            <th class="col-product-name sortable-th @(Model.SortBy == "tenhang" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="tenhang" title="Nhấn để sắp xếp theo Tên hàng">
+                <div class="th-content">
+                    <span class="th-title-wrap">
+                        <span class="th-text">Tên hàng</span>
+                        @if (Model.SortBy == "tenhang" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                        else if (Model.SortBy == "tenhang" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                    </span>
+                </div>
+            </th>
+            <th class="num sortable-th @(Model.SortBy == "giaban" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" style="width: 105px;" data-col="giaban" title="Nhấn để sắp xếp theo Giá bán">
+                <div class="th-content">
+                    <span class="th-title-wrap">
+                        <span class="th-text">Giá bán</span>
+                        @if (Model.SortBy == "giaban" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                        else if (Model.SortBy == "giaban" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                    </span>
+                </div>
+            </th>
+            <th class="num sortable-th @(Model.SortBy == "giavon" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" style="width: 105px;" data-col="giavon" title="Nhấn để sắp xếp theo Giá vốn">
+                <div class="th-content">
+                    <span class="th-title-wrap">
+                        <span class="th-text">Giá vốn</span>
+                        @if (Model.SortBy == "giavon" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                        else if (Model.SortBy == "giavon" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                    </span>
+                </div>
+            </th>
+            <th class="num sortable-th @(Model.SortBy == "tonkho" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" style="width: 90px;" data-col="tonkho" title="Nhấn để sắp xếp theo Tồn kho">
+                <div class="th-content">
+                    <span class="th-title-wrap">
+                        <span class="th-text">Tồn kho</span>
+                        @if (Model.SortBy == "tonkho" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                        else if (Model.SortBy == "tonkho" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                    </span>
+                </div>
+            </th>
+            <th class="num sortable-th @(Model.SortBy == "khachdat" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" style="width: 95px;" data-col="khachdat" title="Nhấn để sắp xếp theo Khách đặt">
+                <div class="th-content">
+                    <span class="th-title-wrap">
+                        <span class="th-text">Khách đặt</span>
+                        @if (Model.SortBy == "khachdat" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                        else if (Model.SortBy == "khachdat" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                    </span>
+                </div>
+            </th>
+            <th style="width: 140px;" class="sortable-th @(Model.SortBy == "ngaytao" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="ngaytao" title="Nhấn để sắp xếp theo Thời gian tạo">
+                <div class="th-content">
+                    <span class="th-title-wrap">
+                        <span class="th-text">Thời gian tạo</span>
+                        @if (Model.SortBy == "ngaytao" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                        else if (Model.SortBy == "ngaytao" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                    </span>
+                </div>
+            </th>
+            <th style="width: 160px;" class="sortable-th @(Model.SortBy == "dukienhethang" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="dukienhethang" title="Nhấn để sắp xếp theo Dự kiến hết hàng">
+                <div class="th-content">
+                    <span class="th-title-wrap">
+                        <span class="th-text">Dự kiến hết hàng</span>
+                        @if (Model.SortBy == "dukienhethang" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                        else if (Model.SortBy == "dukienhethang" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                    </span>
+                </div>
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -47,7 +111,7 @@
             @foreach (var item in Model.Items)
             {
                 <tr data-id="@item.MaHang" class="product-row" title="Nhấn để xem chi tiết hàng hóa">
-                    <td class="text-center" onclick="event.stopPropagation();">
+                    <td class="text-center cell-checkbox" onclick="event.stopPropagation();">
                         <input class="form-check-input row-select" type="checkbox" value="@item.MaHang" />
                     </td>
                     <td class="text-center cell-star" style="cursor: pointer;" onclick="toggleFavoriteProduct(event, @item.MaHang, this)">

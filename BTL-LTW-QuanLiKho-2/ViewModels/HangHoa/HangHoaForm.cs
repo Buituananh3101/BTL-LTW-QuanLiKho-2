@@ -144,6 +144,9 @@ public class HangHoaIndexVM
     public string TgTaoFilter { get; set; } = "ALL";
     public bool DaDanhDauFilter { get; set; } = false;
 
+    public string? SortBy { get; set; } // mahang, tenhang, giaban, giavon, tonkho, khachdat, ngaytao, dukienhethang
+    public string? SortDir { get; set; } // asc, desc, hoặc rỗng
+
     public List<NhomHang> NhomHangs { get; set; } = new();
     public List<DonViTinh> DonViTinhs { get; set; } = new();
     public List<DonViCapHang> DonViCapHangs { get; set; } = new();

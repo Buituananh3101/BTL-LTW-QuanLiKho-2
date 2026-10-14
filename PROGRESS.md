@@ -4,6 +4,28 @@ Cập nhật lần cuối: 2026-10-14 – Nâng cấp Form Thêm/Sửa Hàng hó
 
 ---
 
+## Đã xong
+- **Hoàn thiện Chức năng Sắp xếp 3 trạng thái Header Bảng Hàng hóa & Cố định Icon không tràn viền**:
+  - Hỗ trợ sắp xếp 8 cột: Mã hàng (`mahang`), Tên hàng (`tenhang`), Giá bán (`giaban`), Giá vốn (`giavon`), Tồn kho (`tonkho`), Khách đặt (`khachdat`), Thời gian tạo (`ngaytao`), Dự kiến hết hàng (`dukienhethang`).
+  - Chu trình click 3 trạng thái: Lần 1 Tăng dần (ASC) -> Lần 2 Giảm dần (DESC) -> Lần 3 Bình thường (None). Click cột khác tự động chuyển sang cột mới từ Tăng dần.
+  - Tối ưu hiển thị icon: Ẩn hoàn toàn icon khi chưa sắp xếp; chỉ hiện khi sắp xếp ASC/DESC.
+  - Định vị & Chống tràn viền (khắc phục lỗi out ra ngoài):
+    - Cột căn trái (Mã hàng, Tên hàng, Thời gian tạo, Dự kiến hết hàng): Icon nằm trong luồng inline-flex tự nhiên ngay cạnh text; mở rộng chiều rộng cột "Dự kiến hết hàng" lên 160px và "Thời gian tạo" lên 140px, đảm bảo icon luôn nằm trọn trong ô, không bị tràn ra mép ngoài hay đè lên thanh cuộn, chữ tuyệt đối không bị dịch sang trái.
+    - Cột số căn phải (Giá bán, Giá vốn, Tồn kho, Khách đặt): Dành padding-right 22px cố định cho icon mũi tên, text bám biên phải mà không bị giật lùi sang trái khi xuất hiện icon.
+- **Hoàn thiện Chức năng Nhập & Xuất File Excel Hàng hóa chuẩn KiotViet (16 trường quản lý)**:
+  - Cài đặt thư viện `ClosedXML` (v0.105.1): Xử lý đọc và ghi file Excel `.xlsx` chuẩn định dạng OpenXML, tương thích 100% Microsoft Excel và Google Sheets.
+  - Tải file mẫu chuẩn (`/HangHoa/DownloadTemplate`): Sinh file `Mau_Nhap_Hang_Hoa_KiotViet.xlsx` gồm 16 cột thông tin quản lý chuẩn, header xanh nổi bật, dòng ghi chú hướng dẫn, và 2 dòng dữ liệu mẫu thực tế.
+  - Xuất file Excel tùy chọn cột (`/HangHoa/ExportExcel`):
+    - Modal KiotViet `#hhExportModalOv` cho phép người bán tick chọn các cột muốn xuất.
+    - Hỗ trợ chọn phạm vi xuất: "Tất cả theo bộ lọc hiện tại" hoặc "Chỉ xuất các hàng đã chọn trên bảng".
+    - Nút tiện ích 1-click "★ Bộ cột chuẩn để nhập lại", "Chọn tất cả", "Bỏ chọn".
+    - Hộp cảnh báo nghiệp vụ: Nhắc nhở người bán nếu bỏ chọn các cột thiết yếu (Tên hàng, Mã hàng, Loại hàng, ĐVT) thì file xuất ra sẽ không thể làm file nhập ngược lại.
+  - Nhập file Excel thông minh (`/HangHoa/ImportExcel`):
+    - Modal kéo thả file `.xlsx` (`#hhImportModalOv`) kèm thông tin kích thước và nút gỡ file.
+    - Hỗ trợ 3 chế độ khi trùng mã hàng: "Cập nhật thông tin (ghi đè)", "Bỏ qua dòng trùng", "Báo lỗi và dừng".
+    - Tự động map cột theo tên header linh hoạt (chống xê dịch cột), tự động tạo mới Nhóm hàng và Đơn vị tính nếu chưa có, parse thuộc tính sang JSON array.
+    - Tự động sinh phiếu nhập kho đầu kỳ `LoaiPhieuNhap = 'DAU_KY'` nếu có sản phẩm mới có số lượng tồn kho ban đầu.
+    - Bọc Transaction EF an toàn, trả về bảng tổng kết (Thêm mới, Cập nhật, Bỏ qua, Danh sách lỗi chi tiết từng dòng) và tự động tải lại bảng.
 - **Đồng bộ toàn diện Logic & Giao diện Xóa hàng hóa chuẩn KiotViet**:
   - Backend (`HangHoaController.cs`):
     - Hoàn thiện kiểm tra bảo toàn dữ liệu trên cả 5 bảng chứng từ: `ChiTietDonBan`, `ChiTietPhieuNhap`, `ChiTietPhieuXuat`, `ChiTietPhieuChuyenKho`, `ChiTietPhieuKiemKe`.
@@ -67,6 +89,10 @@ Cập nhật lần cuối: 2026-10-14 – Nâng cấp Form Thêm/Sửa Hàng hó
 
 ## Nhật ký phiên
 - **2026-10-14 (Phiên 15 - Chiều/Tối)**:
+  - Hoàn thiện Chức năng Nhập & Xuất File Excel Hàng hóa chuẩn KiotViet (16 trường quản lý):
+    - Tích hợp thư viện ClosedXML (v0.105.1); xây dựng các action `DownloadTemplate`, `ExportExcel`, `ImportExcel` và các ViewModel `ExportHangHoaRequest`, `ImportHangHoaResult`.
+    - Dựng modal chọn cột xuất `#hhExportModalOv` hỗ trợ chọn phạm vi (tất cả / hàng đã chọn), nút tiện ích chọn bộ cột chuẩn để nhập lại, và cảnh báo nghiệp vụ khi bỏ chọn cột thiết yếu.
+    - Dựng modal nhập file kéo thả `#hhImportModalOv` với 3 chế độ xử lý trùng mã, tự động map cột linh hoạt, tự tạo nhóm/ĐVT mới, tạo phiếu nhập kho đầu kỳ `DAU_KY` nếu có tồn ban đầu, và bọc Transaction EF.
   - Đồng bộ toàn diện Logic & Giao diện Xóa hàng hóa chuẩn KiotViet:
     - **Logic Backend**: Bổ sung `ChiTietPhieuXuat` vào danh sách 5 bảng chứng từ kiểm tra toàn vẹn (`ChiTietDonBan`, `ChiTietPhieuNhap`, `ChiTietPhieuXuat`, `ChiTietPhieuChuyenKho`, `ChiTietPhieuKiemKe`); bọc transaction EF xóa cascade dữ liệu bảng phụ (`HinhAnhHangHoa`, `NguongTonKho`); bổ sung endpoint `NgungBan(id)` chuyển nhanh trạng thái `NGUNG_BAN`.
     - **Giao diện & Trải nghiệm**: Gỡ bỏ hoàn toàn modal Bootstrap thô cũ trong `Index.cshtml`, thay bằng modal overlay KiotViet `#hhDeleteProductOv` (`.hh-modal.small`, nút đỏ `.hh-btn.danger`, đóng ESC/click ngoài); thêm nút "🗑 Xóa" (`#btnDeleteProductInModal`) ở footer modal Cập nhật hàng hóa (tự động ẩn khi Tạo mới/Sao chép); cảnh báo giao dịch trực quan kèm nút 1-click chuyển sang 'Ngừng bán' thay vì browser alert; hiển thị toast nổi và tự động nạp lại bảng sau thao tác.
@@ -104,6 +130,11 @@ Cập nhật lần cuối: 2026-10-14 – Nâng cấp Form Thêm/Sửa Hàng hó
     - **Nâng cấp Custom Dropdown "Tiêu chí tồn" & "Sắp xếp giá trị thuộc tính" chuẩn KiotViet**:
       - **Dropdown Tiêu chí tồn** (`Index.cshtml` & `site.css`): Thay thế thẻ `<select id="filterTonKho">` thô sơ bằng Custom Single Select KiotViet (`.kiot-single-select-box`, `.kiot-ss-dropdown`, `.kiot-ss-item`). Thiết kế bo góc 8px, height 38px, mũi tên xoay 180deg mượt mà khi mở, danh sách 4 tiêu chí ("Tất cả", "Còn hàng trong kho", "Hết hàng trong kho", "Dưới định mức tồn ⚠️") với dấu check xanh `bi-check2`, hover `#f3f4f6` phản hồi tức thì (`transition: none`). Tự động đóng khi click ngoài hoặc ESC, hỗ trợ tự động đảo hướng drop-up khi cuộn sidebar, đồng bộ 2 chiều với `<select>` ẩn bảo toàn 100% logic lọc AJAX `loadTable()` và chấm xanh chỉ báo `#dotTonKho`.
       - **Dropdown Sắp xếp giá trị thuộc tính** (`_HangHoaModal.cshtml`, `hang-hoa-form.css`, `hang-hoa-form.js`): Thay thế `<select id="pkSort">` trong modal `#hhPickOv` bằng Custom Dropdown KiotViet mini (`.hh-pk-sort-wrap`, `.hh-pk-sort-box`, `.hh-pk-sort-dropdown`, `.hh-pk-sort-item`). Thiết kế chiều cao 36px bo góc 6px, mũi tên xoay mượt mà, 2 tùy chọn "A → Z" và "Z → A" với dấu check xanh SVG `#i-check`, hover đổi màu tức thì. Tự động đóng khi click ngoài, reset trạng thái chuẩn khi mở modal con, đồng bộ biến `pk.sort` và kích hoạt `renderPickChips()`.
+    - **Tính năng Sắp xếp cột bảng dữ liệu 3 trạng thái (3-State Column Sorting)**:
+      - **Quy tắc chu kỳ 3 bước**: Click lần 1 ➜ Sắp xếp Tăng dần (`asc`, icon mũi tên lên `bi-arrow-up`); Click lần 2 ➜ Sắp xếp Giảm dần (`desc`, icon mũi tên xuống `bi-arrow-down`); Click lần 3 ➜ Trở về mặc định (`none`, hủy sắp xếp). Khi click sang một cột khác, hệ thống tự động hủy sắp xếp của cột cũ và bắt đầu sắp xếp Tăng dần cho cột mới.
+      - **8 Cột hỗ trợ sắp xếp**: Mã hàng (`mahang`), Tên hàng (`tenhang`), Giá bán (`giaban`), Giá vốn (`giavon`), Tồn kho (`tonkho`), Khách đặt (`khachdat`), Thời gian tạo (`ngaytao`), Dự kiến hết hàng (`dukienhethang`).
+      - **Backend & Controller**: `HangHoaController.cs` nhận `sortBy` và `sortDir`, thực hiện sắp xếp động trên danh sách `allItems` trước khi phân trang, bảo toàn 100% dữ liệu lọc và tổng hợp.
+      - **Giao diện**: Header bảng hiển thị icon mũi tên chỉ khi cột đang sắp xếp (`bi-arrow-up` hoặc `bi-arrow-down`), khi không sắp xếp sẽ ẩn hoàn toàn icon giúp tiêu đề gọn gàng sạch sẽ; hover đổi màu mềm mại (`#dbeafe`), ngăn bôi đen text khi click liên tục (`user-select: none`).
     - Kiểm tra cú pháp JS: `node -c` 0 lỗi. Đồng bộ `docs/specs/danh-sach-hang-hoa.md`.
 - **2026-10-14 (Phiên 14 - Chiều)**:
   - Tái thiết kế và nâng cấp toàn diện Modal Tạo/Sửa Hàng hóa theo prototype KiotViet `prototype-taohanghoa.html`:
