@@ -207,11 +207,11 @@
                                             </div>
                                         </div>
 
-                                        <!-- Danh sách Thuộc tính động & Nút Thêm thuộc tính (chuẩn theo Screenshot KiotViet) -->
-                                        <div class="mb-4">
-                                            @if (item.ThuocTinhs.Any())
-                                            {
-                                                <div class="d-flex flex-wrap gap-2 mb-2">
+                                        <!-- Danh sách Thuộc tính động -->
+                                        @if (item.ThuocTinhs.Any())
+                                        {
+                                            <div class="mb-3">
+                                                <div class="d-flex flex-wrap gap-2">
                                                     @foreach (var attr in item.ThuocTinhs)
                                                     {
                                                         <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 12px;">
@@ -219,11 +219,8 @@
                                                         </span>
                                                     }
                                                 </div>
-                                            }
-                                            <a href="javascript:void(0)" class="text-primary text-decoration-none small fw-semibold btn-quick-attr" data-id="@item.MaHang" data-name="@item.TenHang" data-attrs="@item.ThuocTinhJson">
-                                                <i class="bi bi-plus-lg me-1"></i>Thêm thuộc tính
-                                            </a>
-                                        </div>
+                                            </div>
+                                        }
 
                                         <!-- Thanh nút thao tác cuối dòng chi tiết -->
                                         <div class="d-flex justify-content-between align-items-center pt-3 border-top product-detail-footer">

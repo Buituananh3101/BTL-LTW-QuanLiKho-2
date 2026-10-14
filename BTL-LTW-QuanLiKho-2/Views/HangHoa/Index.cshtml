@@ -467,51 +467,12 @@
     </div>
 </div>
 
-<!-- ========================================================================
-     MODAL CẬP NHẬT NHANH THUỘC TÍNH HÀNG HÓA (KiotViet Quick Attributes)
-     ======================================================================== -->
-<div class="modal fade" id="quickAttrModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div>
-                    <h6 class="modal-title fw-bold mb-0">Thuộc tính hàng hóa</h6>
-                    <small class="text-muted" id="quickAttrProductName"></small>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body py-3">
-                <input type="hidden" id="quickAttrMaHang" value="0" />
-                <div class="small text-muted mb-3">Thêm đặc điểm như hương vị, dung tích, màu sắc</div>
-                <div id="quickAttrRowsContainer" class="d-flex flex-column mb-1">
-                    <!-- Dynamic rows -->
-                </div>
-                <div id="quickAttrEmptyAlert" class="text-muted small fst-italic py-2 text-center border rounded bg-light" style="display: none;">
-                    Chưa có thuộc tính nào. Bấm <strong>"+ Thêm thuộc tính"</strong> để thêm.
-                </div>
-                <div class="mt-2" id="boxQuickAddAttrBtn">
-                    <a href="javascript:void(0)" class="text-primary text-decoration-none fw-semibold small d-inline-flex align-items-center gap-1" id="btnQuickModalAddRow">
-                        <i class="bi bi-plus-lg"></i> Thêm thuộc tính
-                    </a>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Bỏ qua</button>
-                <button type="button" class="btn btn-primary btn-sm" id="btnSaveQuickAttr">
-                    <i class="bi bi-check-lg me-1"></i>Lưu thuộc tính
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
 <script>
 $(document).ready(function () {
     let currentPage = @Model.Page;
     let deleteId = 0;
     const groupModal = new bootstrap.Modal(document.getElementById('quickGroupModal'));
-    const quickAttrModal = new bootstrap.Modal(document.getElementById('quickAttrModal'));
 
     // 1. Thu gọn / Mở rộng (Kéo vào / Kéo ra) sidebar bên trái
     let animTimer = null;
@@ -1576,49 +1537,6 @@ $(document).ready(function () {
             }
             $('#formViTri').val(val);
         }
-    });
-
-    // Mở modal Cập nhật nhanh thuộc tính từ bảng danh sách
-    $(document).on('click', '.btn-quick-attr', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const id = $(this).data('id');
-        const name = $(this).data('name');
-        const attrs = $(this).data('attrs');
-
-        $('#quickAttrMaHang').val(id);
-        $('#quickAttrProductName').text(name);
-        renderAttributeRows(attrs, '#quickAttrRowsContainer', '#quickAttrEmptyAlert');
-        quickAttrModal.show();
-    });
-
-    // Lưu nhanh thuộc tính từ modal quickAttrModal
-    $('#btnSaveQuickAttr').on('click', function () {
-        const maHang = parseInt($('#quickAttrMaHang').val()) || 0;
-        if (maHang <= 0) return;
-
-        const attrs = collectAttributes('#quickAttrRowsContainer');
-        const btn = $(this);
-        btn.prop('disabled', true).text('Đang lưu...');
-
-        $.ajax({
-            url: '/HangHoa/UpdateThuocTinh',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                maHang: maHang,
-                thuocTinhJson: JSON.stringify(attrs)
-            }),
-            success: function () {
-                btn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i>Lưu thuộc tính');
-                quickAttrModal.hide();
-                loadTable();
-            },
-            error: function (xhr) {
-                btn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i>Lưu thuộc tính');
-                alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể lưu thuộc tính.'));
-            }
-        });
     });
 
     // Mở modal Sửa hàng hóa (kết nối với module modal KiotViet mới)
