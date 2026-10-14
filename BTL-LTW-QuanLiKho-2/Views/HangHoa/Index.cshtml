@@ -1032,6 +1032,37 @@ $(document).ready(function () {
         box.html(html);
     }
 
+    function checkSidebarDropdownDirection(box, dropdown) {
+        if (!box.length || !dropdown.length) return;
+
+        const boxRect = box[0].getBoundingClientRect();
+        const filterBox = box.closest('.kiot-filter-box');
+        
+        let containerBottom = $(window).height();
+        let containerTop = 0;
+
+        if (filterBox.length) {
+            const filterRect = filterBox[0].getBoundingClientRect();
+            containerBottom = Math.min(filterRect.bottom, $(window).height());
+            containerTop = Math.max(filterRect.top, 0);
+        }
+
+        const spaceBelow = containerBottom - boxRect.bottom;
+        const spaceAbove = boxRect.top - containerTop;
+
+        const neededHeight = 220; // Chiều cao tối đa cần thiết của dropdown
+
+        if (spaceBelow < neededHeight && spaceAbove > spaceBelow) {
+            dropdown.addClass('drop-up');
+            const maxH = Math.min(250, Math.max(120, spaceAbove - 10));
+            dropdown.css('max-height', maxH + 'px');
+        } else {
+            dropdown.removeClass('drop-up');
+            const maxH = Math.min(250, Math.max(120, spaceBelow - 10));
+            dropdown.css('max-height', maxH + 'px');
+        }
+    }
+
     function setupMultiSelect(boxId, dropdownId, key) {
         const box = $(boxId);
         const dropdown = $(dropdownId);
@@ -1040,14 +1071,19 @@ $(document).ready(function () {
         box.on('click', function (e) {
             if ($(e.target).closest('.tag-remove').length) return;
             e.stopPropagation();
-            $('.kiot-ms-dropdown').not(dropdown).removeClass('show');
+            $('.kiot-ms-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
             $('.kiot-multiselect-box').not(box).removeClass('open');
             $('.quick-date-popup, .dual-calendar-popup').hide();
 
-            dropdown.toggleClass('show');
-            box.toggleClass('open', dropdown.hasClass('show'));
-            if (dropdown.hasClass('show')) {
+            const willShow = !dropdown.hasClass('show');
+            if (willShow) {
+                checkSidebarDropdownDirection(box, dropdown);
+                dropdown.addClass('show');
+                box.addClass('open');
                 dropdown.find('.kiot-ms-search input').focus();
+            } else {
+                dropdown.removeClass('show drop-up').css('max-height', '');
+                box.removeClass('open');
             }
         });
 
@@ -1064,7 +1100,8 @@ $(document).ready(function () {
         // Click vào badge +n khác: mở dropdown
         box.on('click', '.kiot-pill-more', function (e) {
             e.stopPropagation();
-            $('.kiot-ms-dropdown').not(dropdown).removeClass('show');
+            $('.kiot-ms-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
+            checkSidebarDropdownDirection(box, dropdown);
             dropdown.addClass('show');
             box.addClass('open');
         });
@@ -1114,6 +1151,17 @@ $(document).ready(function () {
     renderMultiSelectBox('vitri');
     renderMultiSelectBox('loaihang');
 
+    // Lắng nghe cuộn sidebar để tự động đảo hướng drop-up/drop-down
+    $('.kiot-filter-box').on('scroll', function () {
+        const openDropdown = $('.kiot-ms-dropdown.show');
+        if (openDropdown.length) {
+            const box = openDropdown.siblings('.kiot-multiselect-box');
+            if (box.length) {
+                checkSidebarDropdownDirection(box, openDropdown);
+            }
+        }
+    });
+
     // Đóng tất cả popup và dropdown khi click ra ngoài
     $(document).on('click', function (e) {
         // 1. Bỏ qua nếu phần tử click đã bị gỡ khỏi DOM (do re-render động khi click ngày/lọc)
@@ -1127,13 +1175,13 @@ $(document).ready(function () {
         if (!$targetBlock.length) {
             $('.quick-date-popup').hide();
             $('.dual-calendar-popup').hide();
-            $('.kiot-ms-dropdown').removeClass('show');
+            $('.kiot-ms-dropdown').removeClass('show drop-up').css('max-height', '');
             $('.kiot-multiselect-box').removeClass('open');
         } else {
             // Click vào f-block khác -> đóng popup/dropdown của các f-block khác
             $('.dual-calendar-popup').not($targetBlock.find('.dual-calendar-popup')).hide();
             $('.quick-date-popup').not($targetBlock.find('.quick-date-popup')).hide();
-            $('.kiot-ms-dropdown').not($targetBlock.find('.kiot-ms-dropdown')).removeClass('show');
+            $('.kiot-ms-dropdown').not($targetBlock.find('.kiot-ms-dropdown')).removeClass('show drop-up').css('max-height', '');
             $('.kiot-multiselect-box').not($targetBlock.find('.kiot-multiselect-box')).removeClass('open');
         }
     });

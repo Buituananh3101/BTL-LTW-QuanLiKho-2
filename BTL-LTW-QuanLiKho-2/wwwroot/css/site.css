@@ -1501,6 +1501,12 @@ tr.product-detail-row > td {
 .kiot-ms-dropdown.show {
   display: block;
 }
+/* Drop-up: Khi dropdown ở sidebar nằm quá thấp sẽ hiển thị ngược lên */
+.kiot-ms-dropdown.drop-up {
+  top: auto !important;
+  bottom: calc(100% + 4px) !important;
+  box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.12) !important;
+}
 .kiot-ms-search {
   padding: 6px 8px;
   border-bottom: 1px solid #f3f4f6;
