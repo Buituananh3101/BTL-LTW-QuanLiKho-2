@@ -233,14 +233,14 @@ public class HangHoaController : BaseKhoController
             if (vtList.Any())
             {
                 var parameter = System.Linq.Expressions.Expression.Parameter(typeof(HangHoa), "x");
-                var quyCachProp = System.Linq.Expressions.Expression.Property(parameter, nameof(HangHoa.QuyCach));
-                var notNull = System.Linq.Expressions.Expression.NotEqual(quyCachProp, System.Linq.Expressions.Expression.Constant(null, typeof(string)));
+                var viTriProp = System.Linq.Expressions.Expression.Property(parameter, nameof(HangHoa.ViTri));
+                var notNull = System.Linq.Expressions.Expression.NotEqual(viTriProp, System.Linq.Expressions.Expression.Constant(null, typeof(string)));
                 var containsMethod = typeof(string).GetMethod(nameof(string.Contains), new[] { typeof(string) })!;
 
                 System.Linq.Expressions.Expression? orExpr = null;
                 foreach (var vt in vtList)
                 {
-                    var call = System.Linq.Expressions.Expression.Call(quyCachProp, containsMethod, System.Linq.Expressions.Expression.Constant(vt));
+                    var call = System.Linq.Expressions.Expression.Call(viTriProp, containsMethod, System.Linq.Expressions.Expression.Constant(vt));
                     orExpr = orExpr == null ? call : System.Linq.Expressions.Expression.OrElse(orExpr, call);
                 }
 
@@ -432,6 +432,20 @@ public class HangHoaController : BaseKhoController
         var dvtList = await _context.DonViTinhs.AsNoTracking().OrderBy(x => x.TenDvt).ToListAsync();
         var supplierList = await _context.DonViCapHangs.AsNoTracking().Where(s => s.TrangThai == "HOAT_DONG").OrderBy(s => s.TenDonVi).ToListAsync();
 
+        var defaultLocations = new List<string> { "Kho trung tâm", "Kệ A1 - Tầng 1", "Kệ A2 - Tầng 2", "Khu vực đóng gói", "Kho mát" };
+        var dbLocations = await _context.HangHoas.AsNoTracking()
+            .Where(x => !string.IsNullOrEmpty(x.ViTri))
+            .Select(x => x.ViTri!)
+            .Distinct()
+            .ToListAsync();
+
+        var allLocations = defaultLocations
+            .Union(dbLocations.SelectMany(v => v.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim())))
+            .Where(s => !string.IsNullOrEmpty(s))
+            .Distinct()
+            .OrderBy(s => s)
+            .ToList();
+
         return new HangHoaIndexVM
         {
             Items = pagedItems,
@@ -457,7 +471,8 @@ public class HangHoaController : BaseKhoController
             DaDanhDauFilter = daDanhDau,
             NhomHangs = nhomList,
             DonViTinhs = dvtList,
-            DonViCapHangs = supplierList
+            DonViCapHangs = supplierList,
+            ViTris = allLocations
         };
     }
 

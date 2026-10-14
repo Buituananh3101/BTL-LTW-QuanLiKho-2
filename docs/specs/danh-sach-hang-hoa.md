@@ -49,7 +49,7 @@
 3. **Dự kiến hết hàng**: Hôm nay, 3 ngày tới, 7 ngày tới, Trong tháng, > 30 ngày.
 4. **Nhà cung cấp**: Lọc theo nhà cung cấp từng nhập.
 5. **Loại hàng**: Hàng hóa / Dịch vụ / Combo đóng gói.
-6. **Vị trí**: Tìm theo vị trí kho.
+6. **Vị trí**: Dropdown đa chọn kèm ô tìm kiếm nhanh `.kiot-ms-search`, nạp động danh sách vị trí từ DB và vị trí mặc định (`Model.ViTris`), truy vấn lọc chính xác theo trường `HangHoa.ViTri`.
 7. **Thời gian tạo**: Hôm nay, Tuần này, Tháng này, hoặc tùy chọn ngày.
 
 ### 3.2. Thanh công cụ trên (Action Bar):

@@ -292,19 +292,173 @@
     });
   };
 
-  // Nút Tạo mới Vị trí
-  $('#btnNewViTri').onclick = () => {
-    openPrompt('Tạo mới vị trí kho', 'Vị trí kho', '', val => {
-      const list = $('#listViTriSuggestions');
-      if (list && ![...list.options].some(o => ci(o.value, val))) {
-        const opt = document.createElement('option');
-        opt.value = val;
-        list.appendChild(opt);
+  /* ---------- Vị trí đa chọn (Multi-select dropdown tags chuẩn KiotViet) ---------- */
+  let availableLocations = [
+    'Kho trung tâm',
+    'Kệ A1 - Tầng 1',
+    'Kệ A1 - Tầng 2',
+    'Kệ B2 - Tầng 1',
+    'Kệ B2 - Tầng 2',
+    'Khu vực xuất hàng'
+  ];
+  let selectedLocations = [];
+
+  function renderLocationTags() {
+    const wrap = $('#formViTriTags');
+    const hidden = $('#formViTri');
+    if (!wrap) return;
+    wrap.innerHTML = selectedLocations.map(loc => `
+      <span class="hh-loc-tag" data-val="${esc(loc)}">
+        <span>${esc(loc)}</span>
+        <button type="button" class="hh-loc-tag-del" data-del="${esc(loc)}" title="Bỏ chọn ${esc(loc)}">×</button>
+      </span>
+    `).join('');
+    if (hidden) {
+      hidden.value = selectedLocations.join(', ');
+    }
+    const input = $('#formViTriSearch');
+    if (input) {
+      input.placeholder = selectedLocations.length ? '' : 'Chọn hoặc nhập vị trí...';
+    }
+  }
+
+  function renderLocationDropdown(filterText = '') {
+    const listEl = $('#formViTriList');
+    if (!listEl) return;
+    const filter = String(filterText || '').trim().toLowerCase();
+    const filtered = availableLocations.filter(loc => !filter || loc.toLowerCase().includes(filter));
+
+    if (!filtered.length) {
+      listEl.innerHTML = `<div class="hh-multiselect-empty">Không tìm thấy vị trí "${esc(filterText)}" (Nhấn Enter hoặc nút "Tạo mới" để thêm)</div>`;
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(loc => {
+      const isSel = selectedLocations.some(s => ci(s, loc));
+      return `
+        <div class="hh-multiselect-item ${isSel ? 'selected' : ''}" data-val="${esc(loc)}">
+          <span>${esc(loc)}</span>
+          <svg class="hh-check-icon" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#2563eb;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 12l5 5L20 6"/></svg>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function toggleLocation(locName) {
+    if (!locName) return;
+    const idx = selectedLocations.findIndex(s => ci(s, locName));
+    if (idx >= 0) {
+      selectedLocations.splice(idx, 1);
+    } else {
+      selectedLocations.push(locName);
+      if (!availableLocations.some(a => ci(a, locName))) {
+        availableLocations.push(locName);
       }
-      $('#formViTri').value = val;
-      showToast('Đã chọn vị trí: ' + val);
+    }
+    renderLocationTags();
+    renderLocationDropdown($('#formViTriSearch')?.value || '');
+  }
+
+  function addLocation(locName) {
+    locName = (locName || '').trim();
+    if (!locName) return;
+    if (!availableLocations.some(a => ci(a, locName))) {
+      availableLocations.push(locName);
+    }
+    if (!selectedLocations.some(s => ci(s, locName))) {
+      selectedLocations.push(locName);
+    }
+    renderLocationTags();
+    renderLocationDropdown($('#formViTriSearch')?.value || '');
+  }
+
+  function openLocationDropdown() {
+    const dd = $('#formViTriDropdown');
+    if (!dd) return;
+    dd.style.display = 'block';
+    $('#formViTriWrap')?.classList.add('open');
+    renderLocationDropdown($('#formViTriSearch')?.value || '');
+  }
+
+  function closeLocationDropdown() {
+    const dd = $('#formViTriDropdown');
+    if (dd) dd.style.display = 'none';
+    $('#formViTriWrap')?.classList.remove('open');
+  }
+
+  // Mở dropdown khi click vào box vị trí trong modal
+  $('#formViTriBox')?.addEventListener('click', e => {
+    const delBtn = e.target.closest('.hh-loc-tag-del');
+    if (delBtn) {
+      e.stopPropagation();
+      const val = delBtn.dataset.del;
+      const idx = selectedLocations.findIndex(s => ci(s, val));
+      if (idx >= 0) {
+        selectedLocations.splice(idx, 1);
+        renderLocationTags();
+        renderLocationDropdown($('#formViTriSearch')?.value || '');
+      }
+      return;
+    }
+    const input = $('#formViTriSearch');
+    if (input) input.focus();
+    openLocationDropdown();
+  });
+
+  $('#formViTriSearch')?.addEventListener('focus', () => {
+    openLocationDropdown();
+  });
+
+  // Tìm kiếm hoặc nhập thêm vị trí
+  $('#formViTriSearch')?.addEventListener('input', e => {
+    openLocationDropdown();
+    renderLocationDropdown(e.target.value);
+  });
+
+  $('#formViTriSearch')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const val = e.target.value.trim().replace(/^,+|,+$/g, '');
+      if (val) {
+        addLocation(val);
+        e.target.value = '';
+        renderLocationDropdown('');
+      }
+    } else if (e.key === 'Backspace' && !e.target.value && selectedLocations.length) {
+      selectedLocations.pop();
+      renderLocationTags();
+      renderLocationDropdown('');
+    }
+  });
+
+  // Click vào item trong dropdown (giữ dropdown mở, toggle checkmark)
+  $('#formViTriList')?.addEventListener('click', e => {
+    e.stopPropagation();
+    const item = e.target.closest('.hh-multiselect-item');
+    if (!item) return;
+    const val = item.dataset.val;
+    toggleLocation(val);
+    const input = $('#formViTriSearch');
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+  });
+
+  // Đóng dropdown khi click ra ngoài
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#formViTriWrap') && !e.target.closest('#btnNewViTri')) {
+      closeLocationDropdown();
+    }
+  });
+
+  // Nút Tạo mới Vị trí
+  $('#btnNewViTri')?.addEventListener('click', () => {
+    openPrompt('Tạo mới vị trí kho', 'Vị trí kho', '', val => {
+      addLocation(val);
+      showToast('Đã thêm và chọn vị trí: ' + val);
     });
-  };
+  });
 
   /* ---------- Thuộc tính động ---------- */
   const attrRows = $('#hhAttrRows');
@@ -610,7 +764,13 @@
     $('#formTonKhoBanDau').value = '0';
     $('#formTonToiThieu').value = '0';
     $('#formTonCaoNhat').value = '999,999,999';
-    $('#formViTri').value = '';
+    selectedLocations = [];
+    renderLocationTags();
+    renderLocationDropdown('');
+    if ($('#formViTriSearch')) $('#formViTriSearch').value = '';
+    const ddViTri = $('#formViTriDropdown');
+    if (ddViTri) ddViTri.style.display = 'none';
+    $('#formViTriWrap')?.classList.remove('open');
     $('#formTrongLuong').value = '0';
     $('#formDonViTrongLuong').value = 'g';
     $('#formMoTa').innerHTML = '';
@@ -725,7 +885,19 @@
         $('#formTonKhoBanDau').value = '0';
         $('#formTonToiThieu').value = formatNum(res.tonToiThieu);
         $('#formTonCaoNhat').value = formatNum(res.tonCaoNhat ?? 999999999);
-        $('#formViTri').value = res.viTri || '';
+        // Nạp vị trí đa chọn
+        selectedLocations = [];
+        if (res.viTri) {
+          selectedLocations = res.viTri.split(',').map(s => s.trim()).filter(Boolean);
+          selectedLocations.forEach(loc => {
+            if (!availableLocations.some(a => ci(a, loc))) {
+              availableLocations.push(loc);
+            }
+          });
+        }
+        renderLocationTags();
+        renderLocationDropdown('');
+
         $('#formTrongLuong').value = res.trongLuong || 0;
         $('#formDonViTrongLuong').value = res.donViTrongLuong || 'g';
         $('#formMoTa').innerHTML = res.moTa || '';
@@ -775,5 +947,7 @@
   if (attrRows) {
     addAttrRow();
   }
+  renderLocationTags();
+  renderLocationDropdown();
   renderImgs();
 })();

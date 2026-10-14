@@ -261,26 +261,16 @@
                         <span class="kiot-ms-placeholder">Chọn vị trí</span>
                     </div>
                     <div class="kiot-ms-dropdown shadow" id="dropdownViTri">
-                        <div class="kiot-ms-item" data-val="Kho trung tâm" data-name="Kho trung tâm">
-                            <input type="checkbox" class="form-check-input" />
-                            <span>Kho trung tâm</span>
+                        <div class="kiot-ms-search">
+                            <input type="text" placeholder="Tìm vị trí..." autocomplete="off" />
                         </div>
-                        <div class="kiot-ms-item" data-val="Kệ A1 - Tầng 1" data-name="Kệ A1 - Tầng 1">
-                            <input type="checkbox" class="form-check-input" />
-                            <span>Kệ A1 - Tầng 1</span>
-                        </div>
-                        <div class="kiot-ms-item" data-val="Kệ A2 - Tầng 2" data-name="Kệ A2 - Tầng 2">
-                            <input type="checkbox" class="form-check-input" />
-                            <span>Kệ A2 - Tầng 2</span>
-                        </div>
-                        <div class="kiot-ms-item" data-val="Khu vực đóng gói" data-name="Khu vực đóng gói">
-                            <input type="checkbox" class="form-check-input" />
-                            <span>Khu vực đóng gói</span>
-                        </div>
-                        <div class="kiot-ms-item" data-val="Kho mát" data-name="Kho mát">
-                            <input type="checkbox" class="form-check-input" />
-                            <span>Kho mát</span>
-                        </div>
+                        @foreach (var vt in Model.ViTris)
+                        {
+                            <div class="kiot-ms-item" data-val="@vt" data-name="@vt">
+                                <input type="checkbox" class="form-check-input" />
+                                <span>@vt</span>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>

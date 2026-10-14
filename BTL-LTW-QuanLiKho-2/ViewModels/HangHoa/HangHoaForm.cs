@@ -146,4 +146,5 @@ public class HangHoaIndexVM
     public List<NhomHang> NhomHangs { get; set; } = new();
     public List<DonViTinh> DonViTinhs { get; set; } = new();
     public List<DonViCapHang> DonViCapHangs { get; set; } = new();
+    public List<string> ViTris { get; set; } = new();
 }

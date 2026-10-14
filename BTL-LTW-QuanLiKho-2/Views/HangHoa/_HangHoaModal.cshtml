@@ -139,7 +139,7 @@
           </section>
 
           <!-- Section 3: Vị trí, trọng lượng -->
-          <section class="hh-sec open">
+          <section class="hh-sec open" style="position: relative; z-index: 20;">
             <div class="hh-sec-h">
               <div>
                 <h3>Vị trí, trọng lượng</h3>
@@ -147,19 +147,25 @@
               </div>
               <svg class="hh-chev"><use href="#i-chev"/></svg>
             </div>
-            <div class="hh-sec-b">
+            <div class="hh-sec-b" style="overflow: visible;">
               <div class="hh-row">
                 <div class="hh-f hh-w2">
-                  <label for="formViTri">Vị trí <button type="button" class="hh-link" id="btnNewViTri" data-new="vitri">+ Tạo mới</button></label>
-                  <input type="text" id="formViTri" list="listViTriSuggestions" placeholder="Chọn hoặc nhập vị trí (VD: Kệ A1 - Tầng 1)" autocomplete="off" />
-                  <datalist id="listViTriSuggestions">
-                    <option value="Kho trung tâm"></option>
-                    <option value="Kệ A1 - Tầng 1"></option>
-                    <option value="Kệ A1 - Tầng 2"></option>
-                    <option value="Kệ B2 - Tầng 1"></option>
-                    <option value="Kệ B2 - Tầng 2"></option>
-                    <option value="Khu vực xuất hàng"></option>
-                  </datalist>
+                  <label for="formViTriSearch">
+                    <span>Vị trí</span>
+                    <button type="button" class="hh-link" id="btnNewViTri" data-new="vitri">Tạo mới</button>
+                  </label>
+                  <div class="hh-multiselect-wrap" id="formViTriWrap">
+                    <div class="hh-multiselect-box" id="formViTriBox">
+                      <span class="hh-multiselect-tags" id="formViTriTags"></span>
+                      <input type="text" id="formViTriSearch" placeholder="Chọn hoặc nhập vị trí..." autocomplete="off" />
+                    </div>
+                    <div class="hh-multiselect-dropdown" id="formViTriDropdown" style="display: none;">
+                      <div class="hh-multiselect-list" id="formViTriList">
+                        <!-- Dynamic items rendered via JS -->
+                      </div>
+                    </div>
+                  </div>
+                  <input type="hidden" id="formViTri" value="" />
                 </div>
                 <div class="hh-f hh-w2">
                   <label for="formTrongLuong">Trọng lượng</label>
