@@ -1,10 +1,33 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-15 – Nâng cấp và Hoàn thiện Phân hệ Kiểm kho (PhieuKiemKe) chuẩn 100% Prototype KiotViet (Phiên 23)
+Cập nhật lần cuối: 2026-10-15 – Khắc phục triệt để lỗi hiển thị phân hệ Kiểm kho sau chuẩn hóa (Phiên 25)
 
 ---
 
 ## Đã xong
+- **Khắc phục Triệt để Lỗi hiển thị Phân hệ Kiểm kho (Phiên 25)**:
+  - **Dropdown chọn ngày nhanh (`.quick`)**: Sửa lỗi menu bị cắt cụm vỡ nát do `overflow: hidden` của sidebar; cấu trúc lại dropdown cuộn dọc vừa khít 100% bề rộng nút/sidebar, phân 4 nhóm rõ ràng (`Theo ngày`, `Theo tuần`, `Theo tháng`, `Theo quý & năm`).
+  - **Khối ngày Tùy chỉnh (Inline Sidebar)**: Loại bỏ popup 2 tháng 640px tràn màn hình, thay thế bằng cụm input ngày inline trực quan (`inpFromDate`, `inpToDate`) kèm nút "Áp dụng" nằm gọn gàng bên dưới radio "Tùy chỉnh".
+  - **Khối Chi tiết dòng bung mở (`tr.dtl`)**:
+    + Sửa lỗi bảng số liệu `.sums` bị đè bẹp và cắt mép bên phải: Cố định độ rộng `.sums` 330px (`flex: 0 0 330px`), áp dụng Flexbox Bootstrap với `dp-note` chiếm phần còn lại (`flex-grow-1`).
+    + Giữ khối chi tiết luôn trong tầm nhìn khi cuộn ngang bảng 1450px: Định vị `.dp` với `position: sticky; left: 0; max-width: min(1200px, calc(100vw - 320px))` giúp toàn bộ bảng hàng hóa, ghi chú, tổng kết và cụm nút hành động (`.dp-actions`) luôn hiển thị trọn vẹn, không bị đẩy trôi ra ngoài mép màn hình.
+    + Thẩm mỹ chuẩn KiotViet: Thay đổi viền bao quanh toàn bộ dòng mở thô kệch thành dải viền bên trái `border-left: 4px solid var(--blue)` thanh thoát và nền `#f0f7ff`.
+  - **Bảng dữ liệu & Phân trang đáy**: Cấu trúc `#tableWrapper` với class `kiot-table-wrapper` chiếm trọn 100% flex column, giúp thanh phân trang `_Pagination.cshtml` luôn ghim sát đáy card trắng `#content`, loại bỏ hoàn toàn khoảng trắng mênh mông lửng lơ.
+  - **Kiểm tra biên dịch**: `dotnet build` đạt 0 Errors.
+- **Chuẩn hóa Giao diện Phân hệ Kiểm kho (PhieuKiemKe) theo khuôn mẫu Danh sách Hàng hóa (Phiên 24)**:
+  - **Khung giao diện chuẩn KiotViet (`.kiot-container`)**: Chuyển đổi toàn diện trang `Views/PhieuKiemKe/Index.cshtml` sang bố cục 2 cột tiêu chuẩn gồm `.kiot-sidebar-col` (bộ lọc) và `.kiot-main-col` (nội dung), tích hợp nút tròn toggle sidebar `#btnToggleSidebar` (phím tắt F4) ở ranh giới hai cột, animation mượt mà và backdrop che mờ trên mobile/zoom in.
+  - **Đồng bộ thanh công cụ (`.kiot-toolbar-row`)**: Tích hợp tiêu đề mobile, ô tìm kiếm mã phiếu `#keywordSearch` tích hợp phím tắt F3 debounce 300ms, nút Tạo mới `+ Kiểm kho` chuẩn Bootstrap primary, dropdown Xuất file (`btn-tool`) 2 chế độ (danh sách/chi tiết), dropdown Ẩn/Hiện cột, nút Tải lại bảng xoay animation (`bi-arrow-clockwise`) và nút Trợ giúp.
+  - **Đồng bộ hệ thống biểu tượng (Bootstrap Icons `bi bi-*`)**: Thay thế toàn bộ 39 SVG inline rải rác sang các biểu tượng Bootstrap Icons chuẩn mực (`bi-search`, `bi-plus-lg`, `bi-box-arrow-up`, `bi-star`, `bi-star-fill`, `bi-view-list`, `bi-arrow-clockwise`, `bi-trash`, `bi-copy`, `bi-printer`, `bi-pencil-square`, `bi-check-lg`).
+  - **Tái sử dụng Component phân trang LEGO (`_Pagination.cshtml`)**: Bổ sung thuộc tính `PagedData` (`PagedResult<PhieuKiemKeListItemVM>`) trong `PhieuKiemKeIndexVM`, loại bỏ hoàn toàn bộ phân trang HTML tự chế và tái sử dụng component phân trang dùng chung của hệ thống qua AJAX không reload trang.
+  - **Chuẩn hóa cấu trúc bảng (`_PhieuKiemKeTable.cshtml`)**: Bọc bảng trong `.kiot-table-scroll-body`, chuẩn hóa `table.tbl`, dòng dữ liệu `tr.tbl-row`, soft badges KiotViet cho trạng thái (Phiếu tạm, Đã cân bằng kho, Đã hủy) và khối Empty State chuẩn mực khi không tìm thấy kết quả.
+  - **Đồng bộ JavaScript (`phieu-kiem-ke-index.js`)**: Hỗ trợ phím tắt F3/F4, phân trang AJAX bắt sự kiện `.page-ajax`, xử lý đồng thời drawer sidebar mobile và desktop collapse.
+  - **Kiểm tra biên dịch & Đặc tả**: `dotnet build` đạt 0 Errors. Đồng bộ và tinh gọn `docs/specs/kiem-kho.md` đạt 6.987 ký tự (< 8.000 ký tự) theo Luật 12.
+- **Sửa lỗi & Ổn định hóa Phân hệ Kiểm kho (Phiên 23 - Sửa lỗi sau tích hợp)**:
+  - **Khắc phục lỗi khóa file biên dịch (Lock Process MSB3027)**: Đã giải phóng tiến trình cũ chạy ngầm (PID 4824) chiếm giữ binary `BTL-LTW-QuanLiKho-2.exe`. Lệnh `dotnet build` hoàn thành với 0 lỗi.
+  - **Khắc phục xung đột hiển thị bảng (Bootstrap 5 `.row` Clash)**: Đổi toàn bộ thẻ `<tr class="row">` thành `<tr class="tbl-row">` trong `_PhieuKiemKeTable.cshtml`, `kiem-kho.css` và `phieu-kiem-ke-index.js`, đồng thời bổ sung `display: table-row !important;` loại bỏ hoàn toàn hiện tượng vỡ nát cột bảng do Bootstrap Flexbox áp đặt.
+  - **Khắc phục sai lệch bộ lọc khoảng ngày (Date Filter Enum Mismatch)**: Mở rộng `ResolveDateRange` trong `PhieuKiemKeController.cs` để nhận diện cả định dạng preset tiếng Việt (`HOMNAY`, `THANGNAY`, `TUANNAY`...) và tiếng Anh (`TODAY`, `THIS_MONTH`...), đồng thời xử lý `ToLocalTime()` khi browser gửi UTC ISO string.
+  - **Chuẩn hóa múi giờ lưu chứng từ (`ThoiDiemChot`)**: Chuyển đổi an toàn sang giờ địa phương server trong các action `SaveDraft` và `Complete`.
+  - **Bổ sung View `Edit.cshtml`**: Tạo `Views/PhieuKiemKe/Edit.cshtml` bảo đảm cơ chế routing và View Engine tìm kiếm view an toàn.
 - **Nâng cấp và Hoàn thiện Phân hệ Kiểm kho (PhieuKiemKe) chuẩn 100% Prototype KiotViet**:
   - **Giao diện Danh sách (`Index.cshtml`)**: Tách `_PhieuKiemKeFilterSidebar.cshtml` và `_PhieuKiemKeTable.cshtml`, tách toàn bộ JavaScript ra `wwwroot/js/phieu-kiem-ke-index.js`. Hỗ trợ lọc khoảng ngày nhanh / lịch 2 tháng tùy chỉnh, lọc trạng thái 3 checkbox, lọc người tạo dạng chip tags multi-select; hỗ trợ click dòng bung mở khối chi tiết `tr.dtl` inline ngay trong bảng với bộ lọc mã/tên hàng, lưu ghi chú, in và modal xác nhận hủy phiếu.
   - **Giao diện Lập / Sửa phiếu (`Create.cshtml`, `Details.cshtml`)**: Chuẩn hóa `_PhieuKiemKeForm.cshtml`, tách toàn bộ JavaScript sang `wwwroot/js/phieu-kiem-ke-form.js`. Layout 2 cột KiotViet với panel thông tin phải gập mở, tìm kiếm autocomplete F3, nạp hàng theo nhóm (Lưới), 4 tabs phân loại (Tất cả, Khớp, Lệch, Chưa kiểm), nhập file Excel/CSV, widget Kiểm gần đây, phím tắt F9 (Lưu tạm) và F10 (Cân bằng kho).
@@ -111,6 +134,14 @@ Cập nhật lần cuối: 2026-10-15 – Nâng cấp và Hoàn thiện Phân h�
 ---
 
 ## Nhật ký phiên
+- **2026-10-15 (Phiên 25 - Chiều)**:
+  - **Khắc phục Triệt để Lỗi hiển thị Phân hệ Kiểm kho sau chuẩn hóa**:
+    - Thiết kế lại Dropdown chọn nhanh khoảng ngày `#quick` dọc chia 4 nhóm chuẩn KiotViet, vừa khít 100% bề rộng sidebar, cuộn mượt mà không bị `overflow: hidden` của sidebar cắt ngang.
+    - Chuyển lịch chọn ngày tùy chỉnh sang cụm 2 ô nhập ngày inline `#customDateWrap` (`Từ ngày` - `Đến ngày` và nút Áp dụng) nằm gọn gàng bên dưới radio "Tùy chỉnh".
+    - Sửa lỗi bảng số liệu `.sums` bị đè bẹp và cắt mép phải: Áp dụng Bootstrap Flexbox cho `.dp-bottom` với textarea `flex-grow-1` và `.sums` cố định 330px; cấu trúc nhãn và số liệu tách biệt căn đều 2 bên; ghim `.dp` ở vị trí `position: sticky; left: 0; max-width: min(1200px, calc(100vw - 320px))` đảm bảo khi cuộn ngang bảng 1450px, dòng chi tiết luôn nằm trọn trong vùng nhìn thấy.
+    - Đổi viền bao quanh toàn bộ dòng mở thành dải viền bên trái `border-left: 4px solid var(--blue)` thanh lịch chuẩn KiotViet.
+    - Flexbox `.kiot-table-wrapper` giúp phân trang `_Pagination.cshtml` ghim sát đáy card trắng.
+    - Kiểm tra biên dịch `dotnet build` đạt 0 Errors.
 - **2026-10-15 (Phiên 23 - Trưa/Chiều)**:
   - **Nâng cấp và Hoàn thiện Phân hệ Kiểm kho (PhieuKiemKe) chuẩn 100% Prototype KiotViet**:
     - **Frontend & UI**: Bóc tách toàn bộ mã HTML/CSS từ `prototype-kiemkho-full.html` sang hệ thống MVC; tạo CSS `kiem-kho.css`; tách `Views/PhieuKiemKe/_PhieuKiemKeFilterSidebar.cshtml` và `_PhieuKiemKeTable.cshtml` (hỗ trợ bung chi tiết dòng `tr.dtl` inline); tách JS `phieu-kiem-ke-index.js`; chuẩn hóa `_PhieuKiemKeForm.cshtml` 2 cột KiotViet kèm panel gập mở, phím tắt F3/F9/F10 và JS `phieu-kiem-ke-form.js`.

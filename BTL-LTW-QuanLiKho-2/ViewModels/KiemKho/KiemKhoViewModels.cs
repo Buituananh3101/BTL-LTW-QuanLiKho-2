@@ -62,6 +62,13 @@ public class PhieuKiemKeIndexVM
     public List<PhieuKiemKeListItemVM> Items { get; set; } = new();
     public int TotalCount { get; set; }
     public int TotalPages => Math.Max(1, (int)Math.Ceiling(TotalCount / (double)Filter.PageSize));
+    public PagedResult<PhieuKiemKeListItemVM> PagedData => new()
+    {
+        Items = Items,
+        TotalItems = TotalCount,
+        PageIndex = Filter.Page,
+        PageSize = Filter.PageSize
+    };
     public int CurrentWarehouseId { get; set; }
     public string CurrentWarehouseName { get; set; } = "";
     public List<WarehouseItemVM> Warehouses { get; set; } = new();

@@ -23,39 +23,49 @@ public class PhieuKiemKeController : BaseKhoController
     }
 
 
-    private (DateTime fromDate, DateTime toDate) ResolveDateRange(string filterType, DateTime? customFrom, DateTime? customTo)
+    private (DateTime fromDate, DateTime toDate) ResolveDateRange(string? filterType, DateTime? customFrom, DateTime? customTo)
     {
         var now = DateTime.Now;
         var today = now.Date;
 
-        return filterType switch
+        return (filterType ?? "").ToUpper() switch
         {
-            "TODAY" => (today, today.AddDays(1).AddTicks(-1)),
-            "YESTERDAY" => (today.AddDays(-1), today.AddTicks(-1)),
-            "THIS_WEEK" =>
+            "TODAY" or "HOMNAY" => (today, today.AddDays(1).AddTicks(-1)),
+            "YESTERDAY" or "HOMQUA" => (today.AddDays(-1), today.AddTicks(-1)),
+            "THIS_WEEK" or "TUANNAY" =>
                 (today.AddDays(-(int)(today.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)today.DayOfWeek - 1)),
                  today.AddDays(7 - (today.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)today.DayOfWeek)).AddDays(1).AddTicks(-1)),
-            "LAST_WEEK" =>
+            "LAST_WEEK" or "TUANTRUOC" =>
                 (today.AddDays(-(int)(today.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)today.DayOfWeek - 1) - 7),
                  today.AddDays(-(int)(today.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)today.DayOfWeek - 1)).AddTicks(-1)),
-            "LAST_7_DAYS" => (today.AddDays(-6), now),
-            "THIS_MONTH" => (new DateTime(now.Year, now.Month, 1), new DateTime(now.Year, now.Month, 1).AddMonths(1).AddTicks(-1)),
-            "LAST_MONTH" =>
+            "LAST_7_DAYS" or "7NGAY" => (today.AddDays(-6), now),
+            "THIS_MONTH" or "THANGNAY" => (new DateTime(now.Year, now.Month, 1), new DateTime(now.Year, now.Month, 1).AddMonths(1).AddTicks(-1)),
+            "LAST_MONTH" or "THANGTRUOC" =>
                 (new DateTime(now.Year, now.Month, 1).AddMonths(-1),
                  new DateTime(now.Year, now.Month, 1).AddTicks(-1)),
-            "LAST_30_DAYS" => (today.AddDays(-29), now),
-            "THIS_QUARTER" =>
+            "LAST_30_DAYS" or "30NGAY" => (today.AddDays(-29), now),
+            "THIS_QUARTER" or "QUYNAY" =>
             (
                 new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1),
                 new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1).AddMonths(3).AddTicks(-1)
             ),
-            "THIS_YEAR" => (new DateTime(now.Year, 1, 1), new DateTime(now.Year, 12, 31, 23, 59, 59)),
+            "LAST_QUARTER" or "QUYTRUOC" =>
+            (
+                new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1).AddMonths(-3),
+                new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1).AddTicks(-1)
+            ),
+            "THIS_YEAR" or "NAMNAY" => (new DateTime(now.Year, 1, 1), new DateTime(now.Year, 12, 31, 23, 59, 59)),
+            "LAST_YEAR" or "NAMTRUOC" => (new DateTime(now.Year - 1, 1, 1), new DateTime(now.Year - 1, 12, 31, 23, 59, 59)),
             "CUSTOM" =>
             (
-                customFrom ?? new DateTime(now.Year, now.Month, 1),
-                customTo.HasValue ? customTo.Value.Date.AddDays(1).AddTicks(-1) : now
+                customFrom.HasValue ? customFrom.Value.ToLocalTime() : new DateTime(now.Year, now.Month, 1),
+                customTo.HasValue ? customTo.Value.ToLocalTime().Date.AddDays(1).AddTicks(-1) : now
             ),
-            _ => (new DateTime(now.Year, now.Month, 1), new DateTime(now.Year, now.Month, 1).AddMonths(1).AddTicks(-1))
+            _ => (
+                customFrom.HasValue && customTo.HasValue
+                    ? (customFrom.Value.ToLocalTime(), customTo.Value.ToLocalTime())
+                    : (new DateTime(now.Year, now.Month, 1), new DateTime(now.Year, now.Month, 1).AddMonths(1).AddTicks(-1))
+            )
         };
     }
 
@@ -422,7 +432,7 @@ public class PhieuKiemKeController : BaseKhoController
                     return BadRequest(new { success = false, message = "Phiếu này đã hoàn thành hoặc đã hủy, không thể sửa." });
                 }
 
-                pkk.ThoiDiemChot = req.ThoiDiemChot;
+                pkk.ThoiDiemChot = req.ThoiDiemChot == default ? DateTime.Now : (req.ThoiDiemChot.Kind == DateTimeKind.Utc ? req.ThoiDiemChot.ToLocalTime() : req.ThoiDiemChot);
                 pkk.GhiChu = req.GhiChu;
 
                 // Xóa chi tiết cũ và thêm lại
@@ -434,7 +444,7 @@ public class PhieuKiemKeController : BaseKhoController
                 {
                     MaKho = req.MaKho,
                     MaNvlap = req.MaNvlap > 0 ? req.MaNvlap : CurrentNhanVienId,
-                    ThoiDiemChot = req.ThoiDiemChot,
+                    ThoiDiemChot = req.ThoiDiemChot == default ? DateTime.Now : (req.ThoiDiemChot.Kind == DateTimeKind.Utc ? req.ThoiDiemChot.ToLocalTime() : req.ThoiDiemChot),
                     TrangThai = "NHAP",
                     GhiChu = req.GhiChu
                 };
@@ -517,7 +527,7 @@ public class PhieuKiemKeController : BaseKhoController
                     return BadRequest(new { success = false, message = "Phiếu kiểm này đã được cân bằng trước đó." });
                 }
 
-                pkk.ThoiDiemChot = req.ThoiDiemChot;
+                pkk.ThoiDiemChot = req.ThoiDiemChot == default ? DateTime.Now : (req.ThoiDiemChot.Kind == DateTimeKind.Utc ? req.ThoiDiemChot.ToLocalTime() : req.ThoiDiemChot);
                 pkk.GhiChu = req.GhiChu;
                 pkk.TrangThai = "DA_DIEU_CHINH";
 
@@ -529,7 +539,7 @@ public class PhieuKiemKeController : BaseKhoController
                 {
                     MaKho = req.MaKho,
                     MaNvlap = req.MaNvlap > 0 ? req.MaNvlap : CurrentNhanVienId,
-                    ThoiDiemChot = req.ThoiDiemChot,
+                    ThoiDiemChot = req.ThoiDiemChot == default ? DateTime.Now : (req.ThoiDiemChot.Kind == DateTimeKind.Utc ? req.ThoiDiemChot.ToLocalTime() : req.ThoiDiemChot),
                     TrangThai = "DA_DIEU_CHINH",
                     GhiChu = req.GhiChu
                 };

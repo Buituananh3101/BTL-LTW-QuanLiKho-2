@@ -1,13 +1,13 @@
 /**
  * phieu-kiem-ke-index.js - Quản lý tương tác màn hình danh sách phiếu kiểm kho
- * Khớp 100% logic và trải nghiệm người dùng prototype-kiemkho-full.html
+ * Chuẩn hóa 100% theo khuôn mẫu LEGO KiotViet của module Danh sách hàng hóa
  */
 (function () {
     'use strict';
 
     const $ = (s, r = document) => r.querySelector(s);
     const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-    const app = $('#kkIndexApp');
+    const app = $('#kiotContainer') || $('#kkIndexApp');
     if (!app) return;
 
     const filterUrl = app.dataset.filterUrl;
@@ -91,6 +91,7 @@
     });
 
     function togglePop(p, owner) {
+        if (!p) return;
         const was = p.classList.contains('show');
         $$('.pop.show').forEach(x => x.classList.remove('show'));
         if (!was) {
@@ -125,30 +126,35 @@
         RP.m = a.getMonth();
         RP.step = 0;
         paintRange();
-        $('#quick').classList.remove('show');
+        const qEl = $('#quick');
+        if (qEl) qEl.classList.remove('show');
         const p = $('#rangePop');
-        p.dataset.owner = '#customBox';
-        p.classList.add('show');
+        if (p) {
+            p.dataset.owner = '#customBox';
+            p.classList.add('show');
+        }
     }
 
     function paintRange() {
         const nm = new Date(RP.y, RP.m + 1, 1);
-        $('#rangePop').innerHTML = `
+        const rp = $('#rangePop');
+        if (!rp) return;
+        rp.innerHTML = `
             <div class="rp-head">Từ ngày <b>${RP.from ? dDate(new Date(RP.from)) : '--'}</b> – Đến ngày <b>${RP.to ? dDate(new Date(RP.to)) : '--'}</b></div>
             <div class="rp-months">
                 <button type="button" class="rp-nav" data-n="-1" aria-label="Tháng trước">
-                    <svg class="ic"><use href="#i-chev-l"/></svg>
+                    <i class="bi bi-chevron-left"></i>
                 </button>
                 ${calHTML(RP.y, RP.m, RP)}
                 ${calHTML(nm.getFullYear(), nm.getMonth(), RP)}
                 <button type="button" class="rp-nav" data-n="1" aria-label="Tháng sau">
-                    <svg class="ic"><use href="#i-chev-r"/></svg>
+                    <i class="bi bi-chevron-right"></i>
                 </button>
             </div>
             <div class="rp-foot">
-                <button type="button" class="btn" data-r="today">Hôm nay</button>
-                <button type="button" class="btn" data-r="cancel">Bỏ qua</button>
-                <button type="button" class="btn solid" data-r="ok">Áp dụng</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-r="today">Hôm nay</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-r="cancel">Bỏ qua</button>
+                <button type="button" class="btn btn-sm btn-primary" data-r="ok">Áp dụng</button>
             </div>`;
     }
 
@@ -196,29 +202,51 @@
     });
 
     /* ===== CẬP NHẬT GIAO DIỆN BỘ LỌC ===== */
-    function paintFilters() {
-        $('#rdPreset').checked = F.mode === 'preset';
-        $('#rdCustom').checked = F.mode === 'custom';
-        $('#presetTxt').textContent = F.mode === 'preset' ? presetLabel(F.preset) : 'Tháng này';
-        const [a, b] = getActiveRange();
-        $('#customTxt').textContent = F.mode === 'custom' ? `${dDate(a)} - ${dDate(b)}` : 'Tùy chỉnh';
+    const isoDateOnly = d => {
+        const dt = new Date(d);
+        return `${dt.getFullYear()}-${p2(dt.getMonth() + 1)}-${p2(dt.getDate())}`;
+    };
 
-        $('#dotDate').classList.toggle('on', !(F.mode === 'preset' && F.preset === 'thangnay'));
-        $('#dotSt').classList.toggle('on', !(F.statuses.length === 2 && F.statuses.includes('NHAP') && F.statuses.includes('DA_DIEU_CHINH')));
-        $('#dotUser').classList.toggle('on', F.creatorIds.length > 0);
+    function paintFilters() {
+        const rdP = $('#rdPreset'), rdC = $('#rdCustom');
+        if (rdP) rdP.checked = F.mode === 'preset';
+        if (rdC) rdC.checked = F.mode === 'custom';
+
+        const pTxt = $('#presetTxt'), cTxt = $('#customTxt');
+        if (pTxt) pTxt.textContent = F.mode === 'preset' ? presetLabel(F.preset) : 'Tháng này';
+        const [a, b] = getActiveRange();
+        if (cTxt) cTxt.textContent = F.mode === 'custom' ? `${dDate(a)} - ${dDate(b)}` : 'Tùy chỉnh';
+
+        // Ẩn/hiện khối ngày tùy chỉnh inline trong sidebar
+        const cWrap = $('#customDateWrap');
+        if (cWrap) {
+            cWrap.style.display = F.mode === 'custom' ? 'block' : 'none';
+        }
+        if (F.mode === 'custom') {
+            const fromInp = $('#inpFromDate'), toInp = $('#inpToDate');
+            if (fromInp && !fromInp.value) fromInp.value = isoDateOnly(a);
+            if (toInp && !toInp.value) toInp.value = isoDateOnly(b);
+        }
+
+        $('#dotDate')?.classList.toggle('on', !(F.mode === 'preset' && F.preset === 'thangnay'));
+        $('#dotSt')?.classList.toggle('on', !(F.statuses.length === 2 && F.statuses.includes('NHAP') && F.statuses.includes('DA_DIEU_CHINH')));
+        $('#dotUser')?.classList.toggle('on', F.creatorIds.length > 0);
 
         // Render chips người tạo
-        $('#msChips').innerHTML = F.creatorIds.map(id => `
-            <span class="chip">${F.creatorNames[id] || 'NV ' + id}
-                <button type="button" data-rm-id="${id}" aria-label="Bỏ chọn">×</button>
-            </span>`).join('');
+        const msChips = $('#msChips');
+        if (msChips) {
+            msChips.innerHTML = F.creatorIds.map(id => `
+                <span class="chip">${F.creatorNames[id] || 'NV ' + id}
+                    <button type="button" data-rm-id="${id}" aria-label="Bỏ chọn">×</button>
+                </span>`).join('');
+        }
 
         // Cập nhật trạng thái active trong msList
         $$('#msList button').forEach(b => {
             const id = parseInt(b.dataset.uId);
             const on = F.creatorIds.includes(id);
             b.classList.toggle('on', on);
-            const ic = $('svg', b);
+            const ic = $('i', b);
             if (ic) ic.classList.toggle('d-none', !on);
         });
     }
@@ -245,7 +273,8 @@
         })
         .then(res => res.text())
         .then(html => {
-            $('#tableWrapper').innerHTML = html;
+            const wrap = $('#tableWrapper');
+            if (wrap) wrap.innerHTML = html;
             applyColumnVisibility();
             bindTableEvents();
         })
@@ -265,23 +294,82 @@
 
     /* ===== SỰ KIỆN THANH CÔNG CỤ & SIDEBAR ===== */
     function bindSidebarEvents() {
-        // Tìm kiếm nhanh mã phiếu
-        $('#q').addEventListener('input', e => {
-            clearTimeout(searchTimer);
-            F.q = e.target.value;
-            searchTimer = setTimeout(() => {
-                F.page = 1;
-                loadTable();
-            }, 300);
+        // Tìm kiếm nhanh mã phiếu (Debounce 300ms)
+        const sInp = $('#keywordSearch') || $('#q');
+        if (sInp) {
+            sInp.addEventListener('input', e => {
+                clearTimeout(searchTimer);
+                F.q = e.target.value;
+                searchTimer = setTimeout(() => {
+                    F.page = 1;
+                    loadTable();
+                }, 300);
+            });
+        }
+
+        // Phím tắt F3 focus vào ô tìm kiếm
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F3') {
+                e.preventDefault();
+                sInp?.focus();
+            } else if (e.key === 'F4') {
+                e.preventDefault();
+                toggleSidebar();
+            }
         });
 
-        // Nút Xuất file dropdown
-        $('#btnExp').onclick = () => togglePop($('#expMenu'), '#btnExp');
-        $('#expMenu').onclick = e => {
-            const btn = e.target.closest('[data-x]');
-            if (!btn) return;
-            $('#expMenu').classList.remove('show');
-            const type = btn.dataset.x;
+        // Toggle Sidebar KiotViet
+        const toggleBtn = $('#btnToggleSidebar');
+        function toggleSidebar() {
+            const container = $('#kiotContainer');
+            if (container) {
+                container.classList.toggle('sidebar-collapsed');
+                const isCollapsed = container.classList.contains('sidebar-collapsed');
+                const icon = $('#sidebarToggleIcon');
+                if (icon) {
+                    icon.classList.toggle('bi-chevron-right', isCollapsed);
+                    icon.classList.toggle('bi-chevron-left', !isCollapsed);
+                }
+            }
+        }
+        if (toggleBtn) toggleBtn.onclick = toggleSidebar;
+
+        // Mobile Sidebar Filter Drawer
+        const btnMob = $('#btnMobileFilter'), btnCloseMob = $('#btnCloseSidebarMobile'), backdrop = $('#sidebarBackdrop');
+        if (btnMob) {
+            btnMob.onclick = () => {
+                $('#sidebarFilterCol')?.classList.add('show-mobile');
+                backdrop?.classList.add('show');
+            };
+        }
+        const closeMobileFilter = () => {
+            $('#sidebarFilterCol')?.classList.remove('show-mobile');
+            backdrop?.classList.remove('show');
+        };
+        if (btnCloseMob) btnCloseMob.onclick = closeMobileFilter;
+        if (backdrop) backdrop.onclick = closeMobileFilter;
+
+        // Nút Reload bảng
+        const btnReload = $('#btnReloadTable');
+        if (btnReload) {
+            btnReload.onclick = () => {
+                btnReload.classList.add('spinning');
+                loadTable();
+                setTimeout(() => btnReload.classList.remove('spinning'), 600);
+            };
+        }
+
+        // Xuất file
+        const btnExpList = $('#btnExpList');
+        if (btnExpList) {
+            btnExpList.onclick = () => triggerExport('list');
+        }
+        const btnExpDetail = $('#btnExpDetail');
+        if (btnExpDetail) {
+            btnExpDetail.onclick = () => triggerExport('detail');
+        }
+
+        function triggerExport(type) {
             const [a, b] = getActiveRange();
             const p = new URLSearchParams();
             p.append('type', type);
@@ -293,49 +381,96 @@
             F.creatorIds.forEach(id => p.append('CreatorIds', id));
             window.location.href = `${exportUrl}?${p.toString()}`;
             toast('Đang xuất file dữ liệu...');
-        };
+        }
 
-        // Ẩn / hiện cột
-        $('#btnCols').onclick = () => togglePop($('#colMenu'), '#btnCols');
-        $('#colMenu').onchange = e => {
-            const col = e.target.dataset.c;
-            if (col) {
-                F.cols[col] = e.target.checked ? 1 : 0;
-                applyColumnVisibility();
-            }
-        };
-
-        // Thu gọn / mở rộng sidebar
-        $('#sideTg').onclick = () => {
-            F.collapsed = !F.collapsed;
-            $('#side').classList.toggle('collapsed', F.collapsed);
-            $('#sideTg').innerHTML = `<svg class="ic"><use href="#i-${F.collapsed ? 'chev-r' : 'chev-l'}"/></svg>`;
-        };
+        // Ẩn / hiện cột qua dropdown
+        const colMenu = $('#colMenu');
+        if (colMenu) {
+            colMenu.onchange = e => {
+                const col = e.target.dataset.c;
+                if (col) {
+                    F.cols[col] = e.target.checked ? 1 : 0;
+                    applyColumnVisibility();
+                }
+            };
+        }
 
         // Preset menu
-        $('#presetBox').onclick = () => {
-            $$('#quick button').forEach(b => b.classList.toggle('cur', F.mode === 'preset' && b.dataset.p === F.preset));
-            togglePop($('#quick'), '#presetBox');
-        };
-        $('#quick').onclick = e => {
-            const b = e.target.closest('[data-p]');
-            if (!b) return;
-            F.mode = 'preset';
-            F.preset = b.dataset.p;
-            F.page = 1;
-            $('#quick').classList.remove('show');
-            paintFilters();
-            loadTable();
-        };
+        const presetBox = $('#presetBox');
+        if (presetBox) {
+            presetBox.onclick = () => {
+                $$('#quick button').forEach(b => b.classList.toggle('cur', F.mode === 'preset' && b.dataset.p === F.preset));
+                togglePop($('#quick'), '#presetBox');
+            };
+        }
+        const quickEl = $('#quick');
+        if (quickEl) {
+            quickEl.onclick = e => {
+                const b = e.target.closest('[data-p]');
+                if (!b) return;
+                F.mode = 'preset';
+                F.preset = b.dataset.p;
+                F.page = 1;
+                quickEl.classList.remove('show');
+                const cWrap = $('#customDateWrap');
+                if (cWrap) cWrap.style.display = 'none';
+                paintFilters();
+                loadTable();
+            };
+        }
 
-        $('#rdPreset').onchange = () => {
-            F.mode = 'preset';
-            F.page = 1;
+        const rdP = $('#rdPreset');
+        if (rdP) {
+            rdP.onchange = () => {
+                F.mode = 'preset';
+                const cWrap = $('#customDateWrap');
+                if (cWrap) cWrap.style.display = 'none';
+                F.page = 1;
+                paintFilters();
+                loadTable();
+            };
+        }
+
+        function switchToCustom() {
+            F.mode = 'custom';
+            $('#quick')?.classList.remove('show');
+            const cWrap = $('#customDateWrap');
+            if (cWrap) cWrap.style.display = 'block';
+            const [a, b] = getActiveRange();
+            const fromInp = $('#inpFromDate'), toInp = $('#inpToDate');
+            if (fromInp && !fromInp.value) fromInp.value = isoDateOnly(a);
+            if (toInp && !toInp.value) toInp.value = isoDateOnly(b);
             paintFilters();
-            loadTable();
-        };
-        $('#rdCustom').onchange = () => openRange();
-        $('#customBox').onclick = () => openRange();
+            $('#inpFromDate')?.focus();
+        }
+
+        const rdC = $('#rdCustom'), cBox = $('#customBox');
+        if (rdC) rdC.onchange = switchToCustom;
+        if (cBox) cBox.onclick = switchToCustom;
+
+        const btnApplyCustom = $('#btnApplyCustomDate');
+        if (btnApplyCustom) {
+            btnApplyCustom.onclick = () => {
+                const fromVal = $('#inpFromDate')?.value;
+                const toVal = $('#inpToDate')?.value;
+                if (!fromVal || !toVal) {
+                    toast('Vui lòng chọn đầy đủ Từ ngày và Đến ngày');
+                    return;
+                }
+                const dFrom = new Date(fromVal);
+                const dTo = new Date(toVal);
+                if (dFrom > dTo) {
+                    toast('Từ ngày không được lớn hơn Đến ngày');
+                    return;
+                }
+                F.mode = 'custom';
+                F.from = dFrom;
+                F.to = dTo;
+                F.page = 1;
+                paintFilters();
+                loadTable();
+            };
+        }
 
         // Checkbox trạng thái
         $$('[data-s]').forEach(c => {
@@ -354,54 +489,65 @@
 
         // Multi-select Người tạo
         const ms = $('#ms');
-        ms.onclick = e => {
-            const rm = e.target.closest('[data-rm-id]');
-            if (rm) {
-                const id = parseInt(rm.dataset.rmId);
-                F.creatorIds = F.creatorIds.filter(x => x !== id);
+        if (ms) {
+            ms.onclick = e => {
+                const rm = e.target.closest('[data-rm-id]');
+                if (rm) {
+                    const id = parseInt(rm.dataset.rmId);
+                    F.creatorIds = F.creatorIds.filter(x => x !== id);
+                    F.page = 1;
+                    paintFilters();
+                    loadTable();
+                    return;
+                }
+                $('#msIn')?.focus();
+                ms.classList.add('focus');
+                const list = $('#msList');
+                if (list) {
+                    list.dataset.owner = '#ms';
+                    list.classList.add('show');
+                }
+            };
+        }
+
+        const msIn = $('#msIn');
+        if (msIn) {
+            msIn.oninput = e => {
+                const kw = e.target.value.toLowerCase().trim();
+                $$('#msList button').forEach(b => {
+                    const name = (b.dataset.uName || '').toLowerCase();
+                    b.style.display = name.includes(kw) ? '' : 'none';
+                });
+            };
+            msIn.onblur = () => ms?.classList.remove('focus');
+            msIn.onkeydown = e => {
+                if (e.key === 'Backspace' && !e.target.value && F.creatorIds.length) {
+                    F.creatorIds.pop();
+                    paintFilters();
+                    loadTable();
+                }
+            };
+        }
+
+        const msList = $('#msList');
+        if (msList) {
+            msList.onclick = e => {
+                const b = e.target.closest('[data-u-id]');
+                if (!b) return;
+                const id = parseInt(b.dataset.uId);
+                const name = b.dataset.uName;
+                if (F.creatorIds.includes(id)) {
+                    F.creatorIds = F.creatorIds.filter(x => x !== id);
+                } else {
+                    F.creatorIds.push(id);
+                    F.creatorNames[id] = name;
+                }
                 F.page = 1;
                 paintFilters();
                 loadTable();
-                return;
-            }
-            $('#msIn').focus();
-            ms.classList.add('focus');
-            $('#msList').dataset.owner = '#ms';
-            $('#msList').classList.add('show');
-        };
-
-        $('#msIn').oninput = e => {
-            const kw = e.target.value.toLowerCase().trim();
-            $$('#msList button').forEach(b => {
-                const name = b.dataset.uName.toLowerCase();
-                b.style.display = name.includes(kw) ? '' : 'none';
-            });
-        };
-        $('#msIn').onblur = () => ms.classList.remove('focus');
-        $('#msIn').onkeydown = e => {
-            if (e.key === 'Backspace' && !e.target.value && F.creatorIds.length) {
-                F.creatorIds.pop();
-                paintFilters();
-                loadTable();
-            }
-        };
-
-        $('#msList').onclick = e => {
-            const b = e.target.closest('[data-u-id]');
-            if (!b) return;
-            const id = parseInt(b.dataset.uId);
-            const name = b.dataset.uName;
-            if (F.creatorIds.includes(id)) {
-                F.creatorIds = F.creatorIds.filter(x => x !== id);
-            } else {
-                F.creatorIds.push(id);
-                F.creatorNames[id] = name;
-            }
-            F.page = 1;
-            paintFilters();
-            loadTable();
-            $('#msList').classList.add('show');
-        };
+                msList.classList.add('show');
+            };
+        }
     }
 
     /* ===== SỰ KIỆN TRÊN BẢNG DỮ LIỆU ===== */
@@ -416,10 +562,15 @@
                 F.q = '';
                 F.mode = 'preset';
                 F.preset = 'thangnay';
+                F.from = null;
+                F.to = null;
                 F.statuses = ['NHAP', 'DA_DIEU_CHINH'];
                 F.creatorIds = [];
                 F.page = 1;
-                $('#q').value = '';
+                const sInp = $('#keywordSearch') || $('#q');
+                if (sInp) sInp.value = '';
+                const cWrap = $('#customDateWrap');
+                if (cWrap) cWrap.style.display = 'none';
                 paintFilters();
                 loadTable();
             };
@@ -433,23 +584,28 @@
             };
         }
 
-        // Đánh dấu sao
+        // Click dòng -> mở/đóng chi tiết dòng inline hoặc đánh dấu sao
         wrap.onclick = e => {
             const st = e.target.closest('[data-star]');
             if (st) {
-                st.classList.toggle('on');
+                const icon = $('i', st);
+                if (icon) {
+                    const isStarred = icon.classList.contains('bi-star-fill');
+                    icon.classList.toggle('bi-star-fill', !isStarred);
+                    icon.classList.toggle('bi-star', isStarred);
+                    st.classList.toggle('starred', !isStarred);
+                }
                 return;
             }
 
-            // Click dòng -> mở/đóng chi tiết dòng inline
-            const row = e.target.closest('tr.row');
+            const row = e.target.closest('tr.tbl-row');
             if (row && !e.target.closest('input') && !e.target.closest('button') && !e.target.closest('a')) {
                 const id = row.dataset.id;
                 const dtl = $(`#dtl-${id}`, wrap);
                 if (dtl) {
                     const isOpen = dtl.style.display !== 'none';
                     $$('tr.dtl', wrap).forEach(d => d.style.display = 'none');
-                    $$('tr.row', wrap).forEach(r => r.classList.remove('open'));
+                    $$('tr.tbl-row', wrap).forEach(r => r.classList.remove('open'));
                     if (!isOpen) {
                         dtl.style.display = '';
                         row.classList.add('open');
@@ -494,8 +650,7 @@
                 .then(res => {
                     if (res.success) {
                         toast(res.message || 'Đã lưu ghi chú.');
-                        // Cập nhật text ghi chú trên dòng chính
-                        const noteCell = $(`tr.row[data-id="${id}"] [data-col="ghi"]`);
+                        const noteCell = $(`tr.tbl-row[data-id="${id}"] [data-col="ghi"]`);
                         if (noteCell) noteCell.textContent = note;
                     } else {
                         toast(res.message || 'Lỗi khi lưu ghi chú.');
@@ -509,79 +664,48 @@
         $$('.btn-cancel-doc', wrap).forEach(btn => {
             btn.onclick = () => {
                 const id = parseInt(btn.dataset.id);
-                const code = btn.dataset.code;
+                const code = btn.dataset.code || ('PKK' + id);
 
-                modal(
-                    'Hủy phiếu kiểm kho',
-                    `Bạn có chắc chắn muốn hủy phiếu <b>${code}</b>?<br>Phiếu tạm sau khi hủy sẽ không thể mở lại. Tồn kho không bị ảnh hưởng.`,
-                    [
-                        { label: 'Bỏ qua', cls: 'btn' },
-                        {
-                            label: 'Hủy phiếu',
-                            cls: 'btn danger',
-                            fn: () => {
-                                fetch(`${cancelUrl}/${id}`, { method: 'POST' })
-                                .then(r => r.json())
-                                .then(res => {
-                                    if (res.success) {
-                                        toast(res.message || 'Đã hủy phiếu.');
-                                        loadTable();
-                                    } else {
-                                        toast(res.message || 'Không thể hủy phiếu.');
-                                    }
-                                })
-                                .catch(() => toast('Lỗi kết nối máy chủ.'));
-                            }
+                if (confirm(`Bạn có chắc chắn muốn hủy phiếu kiểm ${code}?\nPhiếu tạm sau khi hủy sẽ không thể mở lại. Tồn kho không bị ảnh hưởng.`)) {
+                    fetch(`${cancelUrl}/${id}`, { method: 'POST' })
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.success) {
+                            toast(res.message || 'Đã hủy phiếu kiểm thành công.');
+                            loadTable();
+                        } else {
+                            toast(res.message || 'Không thể hủy phiếu.');
                         }
-                    ]
-                );
+                    })
+                    .catch(() => toast('Lỗi kết nối máy chủ.'));
+                }
             };
         });
+    }
 
-        // Phân trang
-        const sizeSel = $('#size', wrap);
-        if (sizeSel) {
-            sizeSel.onchange = e => {
-                F.size = parseInt(e.target.value);
-                F.page = 1;
+    // Phân trang AJAX qua _Pagination.cshtml
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('.page-ajax');
+        if (btn) {
+            e.preventDefault();
+            const p = parseInt(btn.dataset.page);
+            if (p && p > 0 && p !== F.page) {
+                F.page = p;
                 loadTable();
-            };
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
+    });
 
-        $$('.pgn button[data-pg]', wrap).forEach(btn => {
-            btn.onclick = () => {
-                F.page = parseInt(btn.dataset.pg);
-                loadTable();
-            };
-        });
-    }
-
-    /* ===== MODAL & TOAST TIỆN ÍCH ===== */
-    function modal(title, bodyHTML, buttons) {
-        $('#mTitle').textContent = title;
-        $('#mBody').innerHTML = bodyHTML;
-        const mf = $('#mFoot');
-        mf.innerHTML = '';
-        buttons.forEach(b => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = b.cls || 'btn';
-            btn.textContent = b.label;
-            btn.onclick = () => {
-                $('#ov').classList.remove('show');
-                if (b.fn) b.fn();
-            };
-            mf.appendChild(btn);
-        });
-        $('#ov').classList.add('show');
-    }
-
-    $('#ov').onclick = e => {
-        if (e.target === $('#ov')) $('#ov').classList.remove('show');
-    };
-
+    /* ===== TOAST TIỆN ÍCH ===== */
     function toast(msg) {
-        const t = $('#toast');
+        let t = $('#toast');
+        if (!t) {
+            t = document.createElement('div');
+            t.className = 'toast-box';
+            t.id = 'toast';
+            document.body.appendChild(t);
+        }
         t.textContent = msg;
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 3000);
