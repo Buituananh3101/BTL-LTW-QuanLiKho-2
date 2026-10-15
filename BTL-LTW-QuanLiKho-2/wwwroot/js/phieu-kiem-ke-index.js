@@ -88,14 +88,28 @@
     }
 
     /* ===== FLOATING POPUP ĐỊNH VỊ FIXED (CHUẨN HÀNG HÓA) ===== */
+    let lastToggleTime = 0;
+    let lastToggledSelector = '';
+
     function toggleFloatingPopup(triggerElement, popupSelector) {
         const popup = $(popupSelector);
         if (!popup) return;
-        const isVisible = popup.style.display === 'block';
-        $$('.quick-date-popup, .dual-calendar-popup').forEach(p => p.style.display = 'none');
-        if (isVisible) return;
 
-        const rect = triggerElement.getBoundingClientRect();
+        const now = Date.now();
+        const isVisible = popup.style.display === 'block';
+
+        // Bảo vệ chống double-fire / synthetic click từ label -> input: nếu vừa bật popup này trong vòng 250ms thì giữ nguyên hiển thị
+        if (isVisible && lastToggledSelector === popupSelector && (now - lastToggleTime < 250)) {
+            return;
+        }
+
+        $$('.quick-date-popup, .dual-calendar-popup').forEach(p => p.style.display = 'none');
+        if (isVisible) {
+            lastToggledSelector = '';
+            return;
+        }
+
+        const rect = triggerElement ? triggerElement.getBoundingClientRect() : { left: 20, bottom: 200, top: 200 };
         const popupWidth = popupSelector.includes('Calendar') ? 540 : 330;
 
         let left = rect.left;
@@ -117,6 +131,9 @@
         popup.style.left = left + 'px';
         popup.style.zIndex = '1060';
         popup.style.display = 'block';
+
+        lastToggleTime = now;
+        lastToggledSelector = popupSelector;
     }
 
     /* ===== LỊCH TÙY CHỈNH 2 THÁNG (DUAL CALENDAR) ===== */
@@ -177,7 +194,9 @@
                 const sT = new Date(s).setHours(0, 0, 0, 0);
                 const eT = new Date(e).setHours(0, 0, 0, 0);
                 if (curT >= sT && curT <= eT) {
-                    td.classList.add('selected');
+                    td.classList.add('in-range');
+                    if (curT === sT) td.classList.add('range-start');
+                    if (curT === eT) td.classList.add('range-end');
                 }
             }
 
@@ -305,11 +324,16 @@
         if (rdC) rdC.checked = F.mode === 'custom';
 
         const pTxt = $('#presetTxt'), cTxt = $('#customTxt');
-        if (pTxt) pTxt.textContent = F.mode === 'preset' ? presetLabel(F.preset) : 'Tháng này';
-        const [a, b] = getActiveRange();
-        if (cTxt) cTxt.textContent = F.mode === 'custom' ? `${formatDateVN(a)} - ${formatDateVN(b)}` : 'Tùy chỉnh';
+        if (pTxt) pTxt.textContent = presetLabel(F.preset);
+        if (cTxt) {
+            if (F.mode === 'custom' && F.from && F.to) {
+                cTxt.textContent = `${formatDateVN(F.from)} - ${formatDateVN(F.to)}`;
+            } else {
+                cTxt.textContent = 'Tùy chỉnh';
+            }
+        }
 
-        $('#dotDate')?.classList.toggle('on', !(F.mode === 'preset' && F.preset === 'thangnay'));
+        $('#dotDate')?.classList.toggle('on', !(F.mode === 'preset' && (F.preset === 'thangnay' || F.preset === 'toanthoigian')));
         $('#dotSt')?.classList.toggle('on', !(F.statuses.length === 2 && F.statuses.includes('NHAP') && F.statuses.includes('DA_DIEU_CHINH')));
         $('#dotUser')?.classList.toggle('on', F.creatorIds.length > 0);
 
@@ -325,13 +349,17 @@
     /* ===== NẠP BẢNG DỮ LIỆU BẰNG AJAX ===== */
     let searchTimer = null;
     function loadTable() {
-        const [a, b] = getActiveRange();
         const params = new URLSearchParams();
 
         if (F.q.trim()) params.append('Q', F.q.trim());
-        params.append('DateFilterType', F.mode === 'preset' ? F.preset.toUpperCase() : 'CUSTOM');
-        params.append('FromDate', a.toISOString());
-        params.append('ToDate', b.toISOString());
+        if (F.mode === 'preset') {
+            params.append('DateFilterType', F.preset.toUpperCase());
+        } else {
+            params.append('DateFilterType', 'CUSTOM');
+            const [a, b] = getActiveRange();
+            params.append('FromDate', a.toISOString());
+            params.append('ToDate', b.toISOString());
+        }
 
         F.statuses.forEach(s => params.append('Statuses', s));
         F.creatorIds.forEach(id => params.append('CreatorIds', id));
@@ -441,13 +469,17 @@
         }
 
         function triggerExport(type) {
-            const [a, b] = getActiveRange();
             const p = new URLSearchParams();
             p.append('type', type);
             if (F.q.trim()) p.append('Q', F.q.trim());
-            p.append('DateFilterType', F.mode === 'preset' ? F.preset.toUpperCase() : 'CUSTOM');
-            p.append('FromDate', a.toISOString());
-            p.append('ToDate', b.toISOString());
+            if (F.mode === 'preset') {
+                p.append('DateFilterType', F.preset.toUpperCase());
+            } else {
+                p.append('DateFilterType', 'CUSTOM');
+                const [a, b] = getActiveRange();
+                p.append('FromDate', a.toISOString());
+                p.append('ToDate', b.toISOString());
+            }
             F.statuses.forEach(s => p.append('Statuses', s));
             F.creatorIds.forEach(id => p.append('CreatorIds', id));
             window.location.href = `${exportUrl}?${p.toString()}`;
@@ -467,23 +499,38 @@
         }
 
         // 1. Popup Chọn nhanh thời gian (Quick Date)
-        const openQuickDate = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+        function openQuickDate(triggerEl) {
             const rdP = $('#rdPreset');
             if (rdP) rdP.checked = true;
-            const targetEl = $('#btnOpenQuickDate') || $('#labelPreset') || e.currentTarget;
+            const targetEl = triggerEl || $('#btnOpenQuickDate') || $('#labelPreset');
             toggleFloatingPopup(targetEl, '#popupQuickDate');
-        };
+        }
         const btnOpenQuick = $('#btnOpenQuickDate'), labelPreset = $('#labelPreset');
-        if (btnOpenQuick) btnOpenQuick.onclick = openQuickDate;
-        if (labelPreset) labelPreset.onclick = openQuickDate;
+        if (btnOpenQuick) {
+            btnOpenQuick.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openQuickDate(btnOpenQuick);
+            };
+        }
+        if (labelPreset) {
+            labelPreset.onclick = (e) => {
+                if (e.target.closest('#btnOpenQuickDate')) return;
+                e.preventDefault();
+                e.stopPropagation();
+                openQuickDate(labelPreset);
+            };
+        }
 
         const rdP = $('#rdPreset');
         if (rdP) {
             rdP.onchange = () => {
                 F.mode = 'preset';
+                F.from = null;
+                F.to = null;
                 F.page = 1;
+                const cTxt = $('#customTxt');
+                if (cTxt) cTxt.textContent = 'Tùy chỉnh';
                 paintFilters();
                 loadTable();
             };
@@ -508,33 +555,52 @@
 
             F.mode = 'preset';
             F.preset = val;
+            F.from = null;
+            F.to = null;
             F.page = 1;
             const pTxt = $('#presetTxt');
             if (pTxt) pTxt.textContent = text;
+            const cTxt = $('#customTxt');
+            if (cTxt) cTxt.textContent = 'Tùy chỉnh';
             paintFilters();
             loadTable();
         });
 
-        // 2. Popup Lịch 2 tháng tùy chỉnh (Dual Calendar)
-        const openCalendar = (e) => {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
+        // 2. Popup Lịch 2 tháng tùy chỉnh (Dual Calendar - Chuẩn hóa theo HangHoa)
+        function openCalendar(triggerEl) {
             const rdC = $('#rdCustom');
             if (rdC) rdC.checked = true;
-            renderDualCalendar();
-            const targetEl = $('#btnOpenCalendar') || $('#labelCustom') || e?.currentTarget;
-            toggleFloatingPopup(targetEl, '#popupCalendar');
-        };
-        const btnOpenCal = $('#btnOpenCalendar'), labelCustom = $('#labelCustom');
-        if (btnOpenCal) btnOpenCal.onclick = openCalendar;
-        if (labelCustom) labelCustom.onclick = openCalendar;
 
-        const rdC = $('#rdCustom');
+            if (F.mode === 'custom' && F.from && F.to) {
+                calState.start = new Date(F.from);
+                calState.end = new Date(F.to);
+                calState.currentYear = calState.start.getFullYear();
+                calState.currentMonth = calState.start.getMonth();
+            } else {
+                const now = new Date();
+                calState.start = now;
+                calState.end = now;
+                calState.currentYear = now.getFullYear();
+                calState.currentMonth = now.getMonth();
+            }
+            selectingStart = true;
+            renderDualCalendar();
+            const targetEl = triggerEl || $('#btnOpenCalendar') || $('#rdCustom');
+            toggleFloatingPopup(targetEl, '#popupCalendar');
+        }
+
+        const btnOpenCal = $('#btnOpenCalendar'), rdC = $('#rdCustom');
+        if (btnOpenCal) {
+            btnOpenCal.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openCalendar(btnOpenCal);
+            };
+        }
         if (rdC) {
-            rdC.onchange = () => {
-                openCalendar(null);
+            rdC.onclick = (e) => {
+                e.stopPropagation();
+                openCalendar(rdC);
             };
         }
 
@@ -600,6 +666,7 @@
                 calState.currentMonth = t.getMonth();
                 calState.start = t;
                 calState.end = t;
+                selectingStart = true;
                 renderDualCalendar();
                 return;
             }
@@ -610,6 +677,10 @@
                 e.stopPropagation();
                 const pop = $('#popupCalendar');
                 if (pop) pop.style.display = 'none';
+                if (F.mode === 'preset') {
+                    const rdP = $('#rdPreset');
+                    if (rdP) rdP.checked = true;
+                }
                 return;
             }
 
@@ -643,6 +714,10 @@
         if (filterBox) {
             filterBox.addEventListener('scroll', () => {
                 $$('.quick-date-popup, .dual-calendar-popup').forEach(p => p.style.display = 'none');
+                if (F.mode === 'preset') {
+                    const rdP = $('#rdPreset');
+                    if (rdP) rdP.checked = true;
+                }
                 const openDropdown = $('.kiot-ms-dropdown.show');
                 if (openDropdown) {
                     const box = openDropdown.parentElement?.querySelector('.kiot-multiselect-box');
@@ -652,9 +727,14 @@
         }
 
         document.addEventListener('click', e => {
+            if (e.target.closest('.dual-calendar-popup, .quick-date-popup')) return;
             const targetBlock = e.target.closest('.f-block');
             if (!targetBlock) {
                 $$('.quick-date-popup, .dual-calendar-popup').forEach(p => p.style.display = 'none');
+                if (F.mode === 'preset') {
+                    const rdP = $('#rdPreset');
+                    if (rdP) rdP.checked = true;
+                }
                 $$('.kiot-ms-dropdown').forEach(d => {
                     d.classList.remove('show', 'drop-up');
                     d.style.maxHeight = '';
@@ -662,7 +742,13 @@
                 $$('.kiot-multiselect-box').forEach(b => b.classList.remove('open'));
             } else {
                 $$('.dual-calendar-popup, .quick-date-popup').forEach(p => {
-                    if (!targetBlock.contains(p)) p.style.display = 'none';
+                    if (!targetBlock.contains(p)) {
+                        p.style.display = 'none';
+                        if (F.mode === 'preset') {
+                            const rdP = $('#rdPreset');
+                            if (rdP) rdP.checked = true;
+                        }
+                    }
                 });
                 $$('.kiot-ms-dropdown').forEach(d => {
                     if (!targetBlock.contains(d)) {
@@ -679,6 +765,10 @@
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') {
                 $$('.quick-date-popup, .dual-calendar-popup').forEach(p => p.style.display = 'none');
+                if (F.mode === 'preset') {
+                    const rdP = $('#rdPreset');
+                    if (rdP) rdP.checked = true;
+                }
                 $$('.kiot-ms-dropdown').forEach(d => {
                     d.classList.remove('show', 'drop-up');
                     d.style.maxHeight = '';
@@ -933,6 +1023,16 @@
             btn.onclick = () => {
                 const id = parseInt(btn.dataset.id);
                 const code = btn.dataset.code || ('PKK' + id);
+                const status = btn.dataset.status || '';
+
+                if (status === 'DA_DIEU_CHINH') {
+                    alert(`Phiếu kiểm ${code} đã cân bằng kho, không được phép hủy theo quy định.`);
+                    return;
+                }
+                if (status === 'HUY') {
+                    alert(`Phiếu kiểm ${code} đã được hủy trước đó.`);
+                    return;
+                }
 
                 if (confirm(`Bạn có chắc chắn muốn hủy phiếu kiểm ${code}?\nPhiếu tạm sau khi hủy sẽ không thể mở lại. Tồn kho không bị ảnh hưởng.`)) {
                     fetch(`${cancelUrl}/${id}`, { method: 'POST' })
@@ -983,4 +1083,5 @@
     bindSidebarEvents();
     bindTableEvents();
     paintFilters();
+    renderDualCalendar();
 })();

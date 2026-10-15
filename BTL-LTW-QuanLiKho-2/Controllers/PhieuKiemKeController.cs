@@ -31,40 +31,40 @@ public class PhieuKiemKeController : BaseKhoController
         return (filterType ?? "").ToUpper() switch
         {
             "ALL" or "TOANTHOIGIAN" => (new DateTime(2000, 1, 1), now.AddYears(10)),
-            "TODAY" or "HOMNAY" => (today, today.AddDays(1).AddTicks(-1)),
-            "YESTERDAY" or "HOMQUA" => (today.AddDays(-1), today.AddTicks(-1)),
-            "THIS_WEEK" or "TUANNAY" =>
+            "TODAY" or "HOMNAY" or "HOM_NAY" => (today, today.AddDays(1).AddTicks(-1)),
+            "YESTERDAY" or "HOMQUA" or "HOM_QUA" => (today.AddDays(-1), today.AddTicks(-1)),
+            "THIS_WEEK" or "TUANNAY" or "TUAN_NAY" =>
                 (today.AddDays(-(int)(today.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)today.DayOfWeek - 1)),
                  today.AddDays(7 - (today.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)today.DayOfWeek)).AddDays(1).AddTicks(-1)),
-            "LAST_WEEK" or "TUANTRUOC" =>
+            "LAST_WEEK" or "TUANTRUOC" or "TUAN_TRUOC" =>
                 (today.AddDays(-(int)(today.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)today.DayOfWeek - 1) - 7),
                  today.AddDays(-(int)(today.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)today.DayOfWeek - 1)).AddTicks(-1)),
-            "LAST_7_DAYS" or "7NGAY" => (today.AddDays(-6), now),
-            "THIS_MONTH" or "THANGNAY" => (new DateTime(now.Year, now.Month, 1), new DateTime(now.Year, now.Month, 1).AddMonths(1).AddTicks(-1)),
-            "LAST_MONTH" or "THANGTRUOC" =>
+            "LAST_7_DAYS" or "7NGAY" or "7_NGAY" => (today.AddDays(-6), now),
+            "THIS_MONTH" or "THANGNAY" or "THANG_NAY" => (new DateTime(now.Year, now.Month, 1), new DateTime(now.Year, now.Month, 1).AddMonths(1).AddTicks(-1)),
+            "LAST_MONTH" or "THANGTRUOC" or "THANG_TRUOC" =>
                 (new DateTime(now.Year, now.Month, 1).AddMonths(-1),
                  new DateTime(now.Year, now.Month, 1).AddTicks(-1)),
-            "LAST_30_DAYS" or "30NGAY" => (today.AddDays(-29), now),
-            "THIS_QUARTER" or "QUYNAY" =>
+            "LAST_30_DAYS" or "30NGAY" or "30_NGAY" => (today.AddDays(-29), now),
+            "THIS_QUARTER" or "QUYNAY" or "QUY_NAY" =>
             (
                 new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1),
                 new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1).AddMonths(3).AddTicks(-1)
             ),
-            "LAST_QUARTER" or "QUYTRUOC" =>
+            "LAST_QUARTER" or "QUYTRUOC" or "QUY_TRUOC" =>
             (
                 new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1).AddMonths(-3),
                 new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1).AddTicks(-1)
             ),
-            "THIS_YEAR" or "NAMNAY" => (new DateTime(now.Year, 1, 1), new DateTime(now.Year, 12, 31, 23, 59, 59)),
-            "LAST_YEAR" or "NAMTRUOC" => (new DateTime(now.Year - 1, 1, 1), new DateTime(now.Year - 1, 12, 31, 23, 59, 59)),
+            "THIS_YEAR" or "NAMNAY" or "NAM_NAY" => (new DateTime(now.Year, 1, 1), new DateTime(now.Year, 12, 31, 23, 59, 59)),
+            "LAST_YEAR" or "NAMTRUOC" or "NAM_TRUOC" => (new DateTime(now.Year - 1, 1, 1), new DateTime(now.Year - 1, 12, 31, 23, 59, 59)),
             "CUSTOM" =>
             (
-                customFrom.HasValue ? customFrom.Value.ToLocalTime() : new DateTime(now.Year, now.Month, 1),
+                customFrom.HasValue ? customFrom.Value.ToLocalTime().Date : new DateTime(now.Year, now.Month, 1),
                 customTo.HasValue ? customTo.Value.ToLocalTime().Date.AddDays(1).AddTicks(-1) : now
             ),
             _ => (
                 customFrom.HasValue && customTo.HasValue
-                    ? (customFrom.Value.ToLocalTime(), customTo.Value.ToLocalTime())
+                    ? (customFrom.Value.ToLocalTime().Date, customTo.Value.ToLocalTime().Date.AddDays(1).AddTicks(-1))
                     : (new DateTime(now.Year, now.Month, 1), new DateTime(now.Year, now.Month, 1).AddMonths(1).AddTicks(-1))
             )
         };

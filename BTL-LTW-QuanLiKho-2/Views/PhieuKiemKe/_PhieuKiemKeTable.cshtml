@@ -84,21 +84,21 @@
                     <!-- Khối chi tiết bung ra (Inline Drawer / Accordion) -->
                     <tr class="dtl" id="dtl-@item.MaPhieuKiemKe" style="display: none;">
                         <td colspan="13" class="p-0 border-0">
-                            <div class="dp shadow-sm" data-d="@item.MaPhieuKiemKe">
-                                <div class="dp-tabs"><span class="dp-tab">Thông tin phiếu</span></div>
+                                <div class="dp shadow-sm" data-d="@item.MaPhieuKiemKe">
+                                <div class="dp-tabs"><span class="dp-tab">Thông tin</span></div>
                                 <h2 class="d-flex align-items-center gap-2">
-                                    <span>@item.MaPhieuHienThi</span>
+                                    <span class="fw-bold" style="font-size: 18px; color: #1e293b;">@item.MaPhieuHienThi</span>
                                     @if (item.TrangThai == "DA_DIEU_CHINH")
                                     {
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle fs-6">Đã cân bằng kho</span>
+                                        <span class="badge bg-success-subtle text-success border-0 px-2 py-1 rounded-pill" style="font-weight: 500; font-size: 12px;">Đã cân bằng kho</span>
                                     }
                                     else if (item.TrangThai == "HUY")
                                     {
-                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fs-6">Đã hủy</span>
+                                        <span class="badge bg-secondary-subtle text-secondary border-0 px-2 py-1 rounded-pill" style="font-weight: 500; font-size: 12px;">Đã hủy</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6">Phiếu tạm</span>
+                                        <span class="badge bg-primary-subtle text-primary border-0 px-2 py-1 rounded-pill" style="font-weight: 500; font-size: 12px;">Phiếu tạm</span>
                                     }
                                 </h2>
                                 <div class="meta text-muted small mt-2">
@@ -110,25 +110,23 @@
                                         <span>Người cân bằng: <strong class="text-dark">@item.TenNguoiLap</strong></span>
                                         <span>Ngày cân bằng: @(item.NgayCanBang?.ToString("dd/MM/yyyy HH:mm"))</span>
                                     }
-                                    <span>Kho: <strong class="text-dark">@item.TenKho</strong></span>
                                 </div>
 
-                                <table class="dtl-tbl table table-sm table-bordered mt-3">
-                                    <thead class="table-light">
+                                <table class="dtl-tbl table table-sm table-bordered mt-3 mb-0" style="background: #fff;">
+                                    <thead style="background: #f8fafc;">
                                         <tr>
-                                            <th style="width: 140px;">Mã hàng</th>
-                                            <th>Tên hàng</th>
-                                            <th class="r text-end" style="width: 110px;">Tồn kho</th>
-                                            <th class="r text-end" style="width: 110px;">Thực tế</th>
-                                            <th class="r text-end" style="width: 110px;">SL lệch</th>
-                                            <th class="r text-end" style="width: 130px;">Giá trị lệch</th>
+                                            <th style="width: 180px; font-weight: 600; font-size: 13px; color: #334155;">Mã hàng</th>
+                                            <th style="font-weight: 600; font-size: 13px; color: #334155;">Tên hàng</th>
+                                            <th class="r text-end" style="width: 120px; font-weight: 600; font-size: 13px; color: #334155;">Tồn kho</th>
+                                            <th class="r text-end" style="width: 120px; font-weight: 600; font-size: 13px; color: #334155;">Thực tế</th>
+                                            <th class="r text-end" style="width: 120px; font-weight: 600; font-size: 13px; color: #334155;">SL lệch</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr class="fin">
-                                            <td><input class="form-control form-control-sm dtl-search-code" placeholder="Tìm mã hàng"></td>
-                                            <td><input class="form-control form-control-sm dtl-search-name" placeholder="Tìm tên hàng"></td>
-                                            <td colspan="4" class="bg-light"></td>
+                                            <td><input class="form-control form-control-sm dtl-search-code" placeholder="Tìm mã hàng" style="border-radius: 4px; border: 1px solid #d1d5db; height: 28px; font-size: 12.5px;"></td>
+                                            <td><input class="form-control form-control-sm dtl-search-name" placeholder="Tìm tên hàng" style="border-radius: 4px; border: 1px solid #d1d5db; height: 28px; font-size: 12.5px;"></td>
+                                            <td colspan="3" class="bg-transparent border-0"></td>
                                         </tr>
                                     </tbody>
                                     <tbody class="dl">
@@ -137,7 +135,6 @@
                                             foreach (var l in item.Lines)
                                             {
                                                 var diff = l.SlChenhLech;
-                                                var valDiff = l.GiaTriLech;
                                                 <tr class="dtl-line-row" data-code="@l.MaHangNoiBo.ToLower()" data-name="@l.TenHang.ToLower()">
                                                     <td><span class="text-break">@l.MaHangNoiBo</span></td>
                                                     <td>@l.TenHang</td>
@@ -153,17 +150,14 @@
                                                         }
                                                     </td>
                                                     <td class="r text-end">
-                                                        @(diff.HasValue ? (diff > 0 ? "+" : "") + diff.Value.ToString("N0", viCulture) : "")
-                                                    </td>
-                                                    <td class="r text-end">
-                                                        @(valDiff.HasValue ? (valDiff > 0 ? "+" : "") + valDiff.Value.ToString("N0", viCulture) : "")
+                                                        @(diff.HasValue ? diff.Value.ToString("N0", viCulture) : "")
                                                     </td>
                                                 </tr>
                                             }
                                         }
                                         else
                                         {
-                                            <tr><td colspan="6" class="text-muted text-center py-3">Không có hàng nào trong phiếu.</td></tr>
+                                            <tr><td colspan="5" class="text-muted text-center py-3">Không có hàng nào trong phiếu.</td></tr>
                                         }
                                     </tbody>
                                 </table>
@@ -171,61 +165,49 @@
                                 <!-- Khối Ghi chú + Tổng kết số liệu bên phải -->
                                 <div class="dp-bottom d-flex gap-4 align-items-start mt-3">
                                     <div class="flex-grow-1" style="min-width: 250px;">
-                                        <label class="small text-muted fw-semibold mb-1">Ghi chú phiếu kiểm</label>
-                                        <textarea class="form-control dp-note" style="height: 125px; resize: none;" @(item.TrangThai == "HUY" ? "disabled" : "") placeholder="Nhập ghi chú cho phiếu kiểm này...">@item.GhiChu</textarea>
+                                        <textarea class="form-control dp-note" style="height: 105px; resize: none; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13.5px;" @(item.TrangThai == "HUY" ? "disabled" : "") placeholder="Ghi chú">@item.GhiChu</textarea>
                                     </div>
-                                    <div class="sums shadow-sm p-3 bg-light rounded border" style="flex: 0 0 330px; width: 330px;">
-                                        <div class="d-flex justify-content-between py-1 border-bottom border-white">
-                                            <span class="text-secondary small">Số lượng thực tế:</span>
-                                            <span class="fw-bold text-dark">@item.TongThucTe.ToString("N0", viCulture)</span>
+                                    <div class="sums" style="flex: 0 0 280px; width: 280px;">
+                                        <div class="d-flex justify-content-between py-1">
+                                            <span class="text-muted" style="font-size: 13.5px;">Số lượng thực tế</span>
+                                            <span class="text-dark" style="font-size: 13.5px;">@item.TongThucTe.ToString("N0", viCulture)</span>
                                         </div>
-                                        <div class="d-flex justify-content-between py-1 border-bottom border-white">
-                                            <span class="text-secondary small">Số lượng lệch tăng:</span>
-                                            <span class="fw-bold text-success">@(item.SlLechTang > 0 ? "+" + item.SlLechTang.ToString("N0", viCulture) : "0")</span>
+                                        <div class="d-flex justify-content-between py-1">
+                                            <span class="text-muted" style="font-size: 13.5px;">Số lượng lệch tăng</span>
+                                            <span class="text-dark" style="font-size: 13.5px;">@(item.SlLechTang > 0 ? item.SlLechTang.ToString("N0", viCulture) : "0")</span>
                                         </div>
-                                        <div class="d-flex justify-content-between py-1 border-bottom border-white">
-                                            <span class="text-secondary small">Số lượng lệch giảm:</span>
-                                            <span class="fw-bold text-danger">@(item.SlLechGiam > 0 ? "-" + item.SlLechGiam.ToString("N0", viCulture) : "0")</span>
+                                        <div class="d-flex justify-content-between py-1">
+                                            <span class="text-muted" style="font-size: 13.5px;">Số lượng lệch giảm</span>
+                                            <span class="text-dark" style="font-size: 13.5px;">@(item.SlLechGiam > 0 ? "-" + item.SlLechGiam.ToString("N0", viCulture) : "0")</span>
                                         </div>
-                                        <div class="d-flex justify-content-between py-1 border-bottom border-white">
-                                            <span class="text-secondary small">Số lượng chênh lệch:</span>
-                                            <span class="fw-bold @(item.TongChenhLech < 0 ? "text-danger" : (item.TongChenhLech > 0 ? "text-success" : "text-dark"))">
-                                                @(item.TongChenhLech > 0 ? "+" : "")@item.TongChenhLech.ToString("N0", viCulture)
-                                            </span>
-                                        </div>
-                                        <div class="d-flex justify-content-between py-1 pt-2">
-                                            <span class="text-secondary small">Tổng giá trị chênh lệch:</span>
-                                            <span class="fw-bold @(item.TongGiaTriLech < 0 ? "text-danger" : (item.TongGiaTriLech > 0 ? "text-success" : "text-dark"))">
-                                                @(item.TongGiaTriLech > 0 ? "+" : "")@item.TongGiaTriLech.ToString("N0", viCulture) đ
-                                            </span>
+                                        <div class="d-flex justify-content-between py-1">
+                                            <span class="text-muted" style="font-size: 13.5px;">Số lượng chênh lệch</span>
+                                            <span class="text-dark" style="font-size: 13.5px;">@item.TongChenhLech.ToString("N0", viCulture)</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Hàng nút hành động -->
                                 <div class="dp-actions d-flex align-items-center gap-2 mt-3 pt-3 border-top">
-                                    @if (item.TrangThai == "NHAP")
-                                    {
-                                        <button type="button" class="btn btn-sm btn-outline-danger btn-cancel-doc" data-id="@item.MaPhieuKiemKe" data-code="@item.MaPhieuHienThi">
-                                            <i class="bi bi-trash me-1"></i>Hủy phiếu
-                                        </button>
-                                    }
+                                    <button type="button" class="btn btn-sm btn-outline-secondary btn-cancel-doc" data-id="@item.MaPhieuKiemKe" data-code="@item.MaPhieuHienThi" data-status="@item.TrangThai">
+                                        <i class="bi bi-trash me-1"></i>Hủy
+                                    </button>
                                     <a href="@Url.Action("Create", "PhieuKiemKe", new { copyId = item.MaPhieuKiemKe })" class="btn btn-sm btn-outline-secondary">
                                         <i class="bi bi-copy me-1"></i>Sao chép
                                     </a>
                                     <a href="@Url.Action("Export", "PhieuKiemKe", new { type = "detail", Q = item.MaPhieuHienThi })" class="btn btn-sm btn-outline-secondary" target="_blank">
                                         <i class="bi bi-box-arrow-up me-1"></i>Xuất file
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print();">
-                                        <i class="bi bi-printer me-1"></i>In
-                                    </button>
                                     <span class="ms-auto"></span>
                                     @if (item.TrangThai != "HUY")
                                     {
-                                        <button type="button" class="btn btn-sm btn-success btn-save-note" data-id="@item.MaPhieuKiemKe">
-                                            <i class="bi bi-check-lg me-1"></i>Lưu ghi chú
+                                        <button type="button" class="btn btn-sm btn-outline-secondary btn-save-note" data-id="@item.MaPhieuKiemKe">
+                                            <i class="bi bi-floppy me-1"></i>Lưu
                                         </button>
                                     }
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print();">
+                                        <i class="bi bi-printer me-1"></i>In
+                                    </button>
                                     @if (item.TrangThai == "NHAP")
                                     {
                                         <a href="@Url.Action("Edit", "PhieuKiemKe", new { id = item.MaPhieuKiemKe })" class="btn btn-sm btn-primary">
