@@ -1,6 +1,6 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-15 – Tinh gọn UI: Gỡ bỏ biểu tượng cảnh báo ⚠️ ở tiêu chí tồn kho (Phiên 17)
+Cập nhật lần cuối: 2026-10-15 – Tinh gọn UI: Gỡ bỏ icon mũi tên hai chiều trong ô tìm kiếm Hàng hóa (Phiên 18)
 
 ---
 
@@ -165,6 +165,9 @@ Cập nhật lần cuối: 2026-10-15 – Tinh gọn UI: Gỡ bỏ biểu tượ
     - Kiểm tra cú pháp JS: `node -c` 0 lỗi. Đồng bộ `docs/specs/danh-sach-hang-hoa.md`.
 - **2026-10-15 (Phiên 15 - Sáng)**:
   - Tinh gọn thanh công cụ Quản lý Hàng hóa: Gỡ bỏ nút Cài đặt (`bi-gear`) trên thanh công cụ của trang Hàng hóa (`Index.cshtml`), giữ lại 2 nút tiện ích tiêu chuẩn là Tải lại bảng (`bi-arrow-clockwise`) và Trợ giúp (`bi-question-circle`).
+  - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-15 (Phiên 18 - Sáng)**:
+  - Tinh gọn ô tìm kiếm trang Hàng hóa: Gỡ bỏ icon mũi tên hai chiều thừa (`bi-arrow-left-right`) trong ô tìm kiếm `#keywordSearch` (`Index.cshtml`), tinh chỉnh `padding-right: 12px` trong `site.css` giúp thanh tìm kiếm gọn gàng, thoáng mắt.
   - Kiểm tra biên dịch: 0 lỗi.
 - **2026-10-15 (Phiên 17 - Sáng)**:
   - Tinh gọn giao diện Hàng hóa: Gỡ bỏ biểu tượng cảnh báo `⚠️` (!) ở tùy chọn "Dưới định mức tồn" trong dropdown Tiêu chí tồn (`_HangHoaFilterSidebar.cshtml`) và trong ô hiển thị số lượng tồn kho trên bảng (`_HangHoaTable.cshtml`), đồng bộ đặc tả `danh-sach-hang-hoa.md`.
