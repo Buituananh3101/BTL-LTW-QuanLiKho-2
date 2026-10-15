@@ -373,71 +373,6 @@
 .cal .d.sel { background: var(--blue); color: #fff; border-radius: 50%; }
 .cal .d.in.sel { border-radius: 50%; }
 
-/* Multi-select Người tạo */
-.ms {
-  border: 1px solid var(--line-d);
-  border-radius: 8px;
-  background: #fff;
-  padding: 4px 6px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  min-height: 36px;
-  cursor: text;
-}
-.ms.focus { border-color: var(--blue); }
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--blue);
-  color: #fff;
-  border-radius: 4px;
-  padding: 2px 4px 2px 8px;
-  font-size: 13.5px;
-  font-weight: 600;
-}
-.chip button {
-  border: 0;
-  background: none;
-  color: #fff;
-  padding: 0;
-  width: 16px;
-  height: 16px;
-  line-height: 1;
-  font-size: 15px;
-  cursor: pointer;
-}
-.ms input {
-  flex: 1;
-  min-width: 60px;
-  border: 0;
-  outline: none;
-  height: 26px;
-  background: transparent;
-}
-.mslist {
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  padding: 4px 0;
-  max-height: 220px;
-  overflow: auto;
-}
-.mslist button {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  border: 0;
-  background: none;
-  padding: 10px 16px;
-  font-size: 14.5px;
-  text-align: left;
-}
-.mslist button:hover { background: #f3f6fb; }
-.mslist button.on { background: #f0f5ff; }
-.mslist .ic { color: var(--blue); }
 
 /* Bảng dữ liệu */
 .tbl-card {
@@ -1041,33 +976,6 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
 }
 .kiot-filter-box .selbox:hover {
   border-color: #0a66e8;
-}
-.kiot-filter-box .ms {
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 3px 6px;
-  min-height: 32px;
-  background: #fff;
-  transition: border-color 0.15s;
-}
-.kiot-filter-box .ms.focus {
-  border-color: #0a66e8;
-  box-shadow: 0 0 0 2px rgba(10, 102, 232, 0.12);
-}
-.kiot-filter-box .ms input {
-  height: 24px;
-  font-size: 12.5px;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-.kiot-filter-box .chip {
-  font-size: 12px;
-  padding: 1px 4px 1px 6px;
-  border-radius: 4px;
-  background: #0a66e8;
-}
-.kiot-filter-box .chip button {
-  font-size: 14px;
 }
 
 /* Nút xoay spinning khi tải lại bảng */

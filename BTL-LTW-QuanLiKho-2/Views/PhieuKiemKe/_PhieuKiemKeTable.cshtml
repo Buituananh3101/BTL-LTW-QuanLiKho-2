@@ -53,14 +53,14 @@
                                 <i class="bi bi-star"></i>
                             </button>
                         </td>
-                        <td data-col="ma"><strong class="text-primary">@item.MaPhieuHienThi</strong></td>
+                        <td data-col="ma"><span class="text-break">@item.MaPhieuHienThi</span></td>
                         <td data-col="tg">@item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td data-col="tt" class="r text-end fw-bold">@item.TongThucTe.ToString("N0", viCulture)</td>
-                        <td data-col="cl" class="r text-end fw-bold @(item.TongChenhLech < 0 ? "text-danger" : (item.TongChenhLech > 0 ? "text-success" : "text-dark"))">
+                        <td data-col="tt" class="r text-end">@item.TongThucTe.ToString("N0", viCulture)</td>
+                        <td data-col="cl" class="r text-end">
                             @(item.TongChenhLech > 0 ? "+" : "")@item.TongChenhLech.ToString("N0", viCulture)
                         </td>
-                        <td data-col="tang" class="r text-end text-success">@(item.SlLechTang > 0 ? "+" + item.SlLechTang.ToString("N0", viCulture) : "0")</td>
-                        <td data-col="giam" class="r text-end text-danger">@(item.SlLechGiam > 0 ? "-" + item.SlLechGiam.ToString("N0", viCulture) : "0")</td>
+                        <td data-col="tang" class="r text-end">@(item.SlLechTang > 0 ? "+" + item.SlLechTang.ToString("N0", viCulture) : "0")</td>
+                        <td data-col="giam" class="r text-end">@(item.SlLechGiam > 0 ? "-" + item.SlLechGiam.ToString("N0", viCulture) : "0")</td>
                         <td data-col="cb">@(item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
                         <td data-col="slt" class="r text-end">@item.TongThucTe.ToString("N0", viCulture)</td>
                         <td data-col="ghi" class="note text-truncate" title="@item.GhiChu">@item.GhiChu</td>
@@ -139,7 +139,7 @@
                                                 var diff = l.SlChenhLech;
                                                 var valDiff = l.GiaTriLech;
                                                 <tr class="dtl-line-row" data-code="@l.MaHangNoiBo.ToLower()" data-name="@l.TenHang.ToLower()">
-                                                    <td><strong>@l.MaHangNoiBo</strong></td>
+                                                    <td><span class="text-break">@l.MaHangNoiBo</span></td>
                                                     <td>@l.TenHang</td>
                                                     <td class="r text-end">@l.SoLuongTheoSo.ToString("N0", viCulture)</td>
                                                     <td class="r text-end">
@@ -152,10 +152,10 @@
                                                             <span class="text-muted">Chưa kiểm</span>
                                                         }
                                                     </td>
-                                                    <td class="r text-end @(diff < 0 ? "text-danger fw-semibold" : (diff > 0 ? "text-success fw-semibold" : ""))">
+                                                    <td class="r text-end">
                                                         @(diff.HasValue ? (diff > 0 ? "+" : "") + diff.Value.ToString("N0", viCulture) : "")
                                                     </td>
-                                                    <td class="r text-end @(valDiff < 0 ? "text-danger" : (valDiff > 0 ? "text-success" : ""))">
+                                                    <td class="r text-end">
                                                         @(valDiff.HasValue ? (valDiff > 0 ? "+" : "") + valDiff.Value.ToString("N0", viCulture) : "")
                                                     </td>
                                                 </tr>

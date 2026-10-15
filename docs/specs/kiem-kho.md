@@ -41,10 +41,10 @@
   - Tiêu đề "Kiểm kho", nút tròn F4 ở ranh giới giữa 2 cột thu gọn/mở rộng sidebar.
   - Thời gian: Chọn nhanh (Hôm nay, Hôm qua, Tuần này, Tháng này, Quý, Năm) hoặc popup lịch 2 tháng tùy chỉnh.
   - Trạng thái: Checkbox Phiếu tạm (`NHAP`), Đã cân bằng (`DA_DIEU_CHINH`), Đã hủy (`HUY`).
-  - Người tạo: Multi-select dạng chip tag, tìm kiếm theo tên.
+  - Người tạo: Multi-select chuẩn KiotViet (`.kiot-multiselect-box`, thẻ `.kiot-pill-tag`, badge `+N khác`, checkbox và tìm kiếm sticky `.kiot-ms-search`).
   - Hỗ trợ responsive mobile drawer qua `#btnMobileFilter` và `#sidebarBackdrop`.
 - **Bảng dữ liệu & Bung mở chi tiết (`tr.dtl`)**:
-  - Dòng chính `tr.tbl-row`: Hiển thị thông tin tổng hợp, sao (`bi-star`), checkbox chọn, soft badge KiotViet.
+  - Dòng chính `tr.tbl-row`: Hiển thị thông tin tổng hợp dạng chữ thường tiêu chuẩn (Mã kiểm kho, các cột số lượng), sao (`bi-star`), checkbox chọn, soft badge KiotViet.
   - Click dòng: Bung mở accordion inline `tr.dtl` hiển thị bảng hàng kiểm, ô lọc mã/tên hàng, ghi chú, tổng kết và các nút thao tác:
     + **Hủy phiếu**: Chỉ áp dụng với phiếu tạm (`NHAP`), gọi API `HuyPhieu`.
     + **Sao chép**: Điều hướng sang `/PhieuKiemKe/Create?copyId={id}` nạp lại các sản phẩm.

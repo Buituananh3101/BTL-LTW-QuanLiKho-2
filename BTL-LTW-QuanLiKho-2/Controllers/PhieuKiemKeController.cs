@@ -30,6 +30,7 @@ public class PhieuKiemKeController : BaseKhoController
 
         return (filterType ?? "").ToUpper() switch
         {
+            "ALL" or "TOANTHOIGIAN" => (new DateTime(2000, 1, 1), now.AddYears(10)),
             "TODAY" or "HOMNAY" => (today, today.AddDays(1).AddTicks(-1)),
             "YESTERDAY" or "HOMQUA" => (today.AddDays(-1), today.AddTicks(-1)),
             "THIS_WEEK" or "TUANNAY" =>
