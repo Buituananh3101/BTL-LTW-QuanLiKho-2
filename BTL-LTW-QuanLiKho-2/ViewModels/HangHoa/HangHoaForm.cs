@@ -132,6 +132,12 @@ public class HangHoaIndexVM
     public int PageSize { get; set; } = 15;
     public int TotalCount { get; set; }
     public int TotalPages { get; set; }
+    public PagedResultBase PagedData => new PagedResultBase
+    {
+        PageIndex = Page,
+        PageSize = PageSize,
+        TotalItems = TotalCount
+    };
     public int ActiveCount { get; set; }
     public decimal TotalStockSum { get; set; }
     public decimal TotalValueSum { get; set; }

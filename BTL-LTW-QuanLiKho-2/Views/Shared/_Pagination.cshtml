@@ -1,0 +1,41 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.PagedResultBase
+@{
+    string itemLabel = ViewData["ItemLabel"]?.ToString() ?? "bản ghi";
+}
+
+<div class="kiot-table-pagination d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2 pt-2 border-top">
+    <div class="text-muted small">
+        Hiển thị <strong>@Model.StartItemIndex - @Model.EndItemIndex</strong> trong tổng số <strong>@Model.TotalItems.ToString("N0")</strong> @itemLabel • Trang <strong>@Model.PageIndex</strong> / <strong>@(Model.TotalPages == 0 ? 1 : Model.TotalPages)</strong>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <ul class="pagination pagination-sm mb-0">
+            <li class="page-item @(Model.PageIndex <= 1 ? "disabled" : "")">
+                <a class="page-link page-ajax" href="javascript:void(0)" data-page="@(Model.PageIndex - 1)" title="Trang trước">
+                    <i class="bi bi-chevron-left"></i> Trước
+                </a>
+            </li>
+
+            @for (int p = 1; p <= Model.TotalPages; p++)
+            {
+                if (p == 1 || p == Model.TotalPages || (p >= Model.PageIndex - 2 && p <= Model.PageIndex + 2))
+                {
+                    <li class="page-item @(p == Model.PageIndex ? "active" : "")">
+                        <a class="page-link page-ajax" href="javascript:void(0)" data-page="@p">@p</a>
+                    </li>
+                }
+                else if (p == Model.PageIndex - 3 || p == Model.PageIndex + 3)
+                {
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                }
+            }
+
+            <li class="page-item @(Model.PageIndex >= Model.TotalPages ? "disabled" : "")">
+                <a class="page-link page-ajax" href="javascript:void(0)" data-page="@(Model.PageIndex + 1)" title="Trang sau">
+                    Sau <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    }
+</div>
