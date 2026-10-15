@@ -1,104 +1,201 @@
 @model BTL_LTW_QuanLiKho_2.ViewModels.PhieuKiemKeIndexVM
 
-<div class="kk-table-container">
+<div class="tbl-card" id="card">
     @if (!Model.Items.Any())
     {
-        <div class="kk-empty-state">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16">
-                <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2zm3.564 1.426L5.596 5 8 5.961 14.154 3.5zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/>
-            </svg>
-            <h5>Không tìm thấy kết quả</h5>
-            <p class="text-muted">Không có phiếu kiểm kho nào phù hợp với bộ lọc đã chọn.</p>
+        <div class="tbl-scroll">
+            <table class="tbl">
+                <thead>
+                    <tr>
+                        <th class="w-chk"><input type="checkbox" disabled></th>
+                        <th class="w-star"><svg class="ic"><use href="#i-star"/></svg></th>
+                        <th data-col="ma">Mã kiểm kho</th>
+                        <th data-col="tg">Thời gian</th>
+                        <th data-col="tt" class="r">Tổng thực tế</th>
+                        <th data-col="cl" class="r">Tổng chênh lệch</th>
+                        <th data-col="tang" class="r">SL lệch tăng</th>
+                        <th data-col="giam" class="r">SL lệch giảm</th>
+                        <th data-col="cb">Ngày cân bằng</th>
+                        <th data-col="slt" class="r">SL thực tế</th>
+                        <th data-col="ghi">Ghi chú</th>
+                        <th data-col="st">Trạng thái</th>
+                        <th data-col="kho">Kho</th>
+                    </tr>
+                </thead>
+            </table>
+            <div class="empty">
+                <div class="circ"><svg class="ic"><use href="#i-inbox"/></svg></div>
+                <b>Không tìm thấy kết quả</b>
+                <span>Không tìm thấy giao dịch nào phù hợp với bộ lọc hiện tại.<br>Nhấn <a href="javascript:void(0)" id="resetF">vào đây</a> để tiếp tục tìm kiếm.</span>
+            </div>
         </div>
     }
     else
     {
-        <div class="table-responsive">
-            <table class="table table-hover kk-table align-middle">
+        <div class="tbl-scroll">
+            <table class="tbl">
                 <thead>
                     <tr>
-                        <th style="width: 30px;"><input type="checkbox" class="form-check-input" id="selectAllRows" /></th>
-                        <th style="width: 120px;">Mã kiểm kho</th>
-                        <th style="width: 140px;">Thời gian</th>
-                        <th style="width: 140px;">Ngày cân bằng</th>
-                        <th>Kho</th>
-                        <th>Người tạo</th>
-                        <th class="text-end" style="width: 100px;">Tổng thực tế</th>
-                        <th class="text-end" style="width: 110px;">Tổng lệch</th>
-                        <th class="text-end" style="width: 90px;">Lệch tăng</th>
-                        <th class="text-end" style="width: 90px;">Lệch giảm</th>
-                        <th style="width: 130px;" class="text-center">Trạng thái</th>
-                        <th style="width: 90px;" class="text-center">Thao tác</th>
+                        <th class="w-chk"><input type="checkbox" id="chkAll"></th>
+                        <th class="w-star"><svg class="ic"><use href="#i-star"/></svg></th>
+                        <th data-col="ma">Mã kiểm kho</th>
+                        <th data-col="tg">Thời gian</th>
+                        <th data-col="tt" class="r">Tổng thực tế</th>
+                        <th data-col="cl" class="r">Tổng chênh lệch</th>
+                        <th data-col="tang" class="r">SL lệch tăng</th>
+                        <th data-col="giam" class="r">SL lệch giảm</th>
+                        <th data-col="cb">Ngày cân bằng</th>
+                        <th data-col="slt" class="r">SL thực tế</th>
+                        <th data-col="ghi">Ghi chú</th>
+                        <th data-col="st">Trạng thái</th>
+                        <th data-col="kho">Kho</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model.Items)
                     {
-                        <tr>
-                            <td><input type="checkbox" class="form-check-input row-select" value="@item.MaPhieuKiemKe" /></td>
-                            <td>
-                                @if (item.TrangThai == "NHAP")
-                                {
-                                    <a asp-action="Edit" asp-route-id="@item.MaPhieuKiemKe" class="fw-bold text-primary text-decoration-none">
-                                        @item.MaPhieuHienThi
-                                    </a>
-                                }
-                                else
-                                {
-                                    <a asp-action="Details" asp-route-id="@item.MaPhieuKiemKe" class="fw-bold text-primary text-decoration-none">
-                                        @item.MaPhieuHienThi
-                                    </a>
-                                }
+                        var stClass = item.TrangThai == "DA_DIEU_CHINH" ? "s1" : (item.TrangThai == "HUY" ? "s2" : "s0");
+                        <tr class="row" data-id="@item.MaPhieuKiemKe">
+                            <td class="w-chk" onclick="event.stopPropagation();">
+                                <input type="checkbox" data-sel="@item.MaPhieuKiemKe">
                             </td>
-                            <td>@item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm")</td>
-                            <td>@(item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "---")</td>
-                            <td><span class="text-truncate d-inline-block" style="max-width: 130px;" title="@item.TenKho">@item.TenKho</span></td>
-                            <td>@item.TenNguoiLap</td>
-                            <td class="text-end fw-bold">@item.TongThucTe.ToString("N0")</td>
-                            <td class="text-end fw-bold @(item.TongChenhLech > 0 ? "text-success" : (item.TongChenhLech < 0 ? "text-danger" : "text-muted"))">
+                            <td class="w-star" onclick="event.stopPropagation();">
+                                <button type="button" class="star" data-star="@item.MaPhieuKiemKe" aria-label="Đánh dấu">
+                                    <svg class="ic"><use href="#i-star"/></svg>
+                                </button>
+                            </td>
+                            <td data-col="ma"><strong>@item.MaPhieuHienThi</strong></td>
+                            <td data-col="tg">@item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td data-col="tt" class="r fw-bold">@item.TongThucTe.ToString("N0")</td>
+                            <td data-col="cl" class="r fw-bold @(item.TongChenhLech < 0 ? "neg" : "")">
                                 @(item.TongChenhLech > 0 ? "+" : "")@item.TongChenhLech.ToString("N0")
                             </td>
-                            <td class="text-end text-success">
-                                @(item.SlLechTang > 0 ? "+" + item.SlLechTang.ToString("N0") : "0")
-                            </td>
-                            <td class="text-end text-danger">
-                                @(item.SlLechGiam > 0 ? "-" + item.SlLechGiam.ToString("N0") : "0")
-                            </td>
-                            <td class="text-center">
-                                @if (item.TrangThai == "NHAP")
-                                {
-                                    <span class="badge badge-status badge-status-draft">Phiếu tạm</span>
-                                }
-                                else if (item.TrangThai == "DA_DIEU_CHINH")
-                                {
-                                    <span class="badge badge-status badge-status-balanced">Đã cân bằng</span>
-                                }
-                                else if (item.TrangThai == "HUY")
-                                {
-                                    <span class="badge badge-status badge-status-cancelled">Đã hủy</span>
-                                }
-                                else
-                                {
-                                    <span class="badge badge-status bg-info text-white">@item.TenTrangThai</span>
-                                }
-                            </td>
-                            <td class="text-center">
-                                <div class="btn-group btn-group-sm">
-                                    @if (item.TrangThai == "NHAP")
-                                    {
-                                        <a asp-action="Edit" asp-route-id="@item.MaPhieuKiemKe" class="btn btn-outline-primary btn-sm" title="Sửa phiếu tạm">
-                                            ✏
+                            <td data-col="tang" class="r">@(item.SlLechTang > 0 ? "+" + item.SlLechTang.ToString("N0") : "0")</td>
+                            <td data-col="giam" class="r neg">@(item.SlLechGiam > 0 ? "-" + item.SlLechGiam.ToString("N0") : "0")</td>
+                            <td data-col="cb">@(item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
+                            <td data-col="slt" class="r">@item.TongThucTe.ToString("N0")</td>
+                            <td data-col="ghi" class="note text-truncate" title="@item.GhiChu">@item.GhiChu</td>
+                            <td data-col="st"><span class="badge @stClass">@item.TenTrangThai</span></td>
+                            <td data-col="kho">@item.TenKho</td>
+                        </tr>
+
+                        <!-- Khối chi tiết bung ra (Inline Drawer / Accordion) -->
+                        <tr class="dtl" id="dtl-@item.MaPhieuKiemKe" style="display: none;">
+                            <td colspan="13">
+                                <div class="dp" data-d="@item.MaPhieuKiemKe">
+                                    <div class="dp-tabs"><span class="dp-tab">Thông tin</span></div>
+                                    <h2>
+                                        @item.MaPhieuHienThi 
+                                        <span class="badge @stClass" style="font-size: 14px">@item.TenTrangThai</span>
+                                    </h2>
+                                    <div class="meta">
+                                        <span>Người tạo: <strong>@item.TenNguoiLap</strong></span>
+                                        <span>Ngày tạo: @item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm")</span>
+                                        <i class="br"></i>
+                                        @if (item.TrangThai == "DA_DIEU_CHINH")
+                                        {
+                                            <span>Người cân bằng: <strong>@item.TenNguoiLap</strong></span>
+                                            <span>Ngày cân bằng: @(item.NgayCanBang?.ToString("dd/MM/yyyy HH:mm"))</span>
+                                        }
+                                        <span>Kho: <strong>@item.TenKho</strong></span>
+                                    </div>
+
+                                    <table class="dtl-tbl">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 140px;">Mã hàng</th>
+                                                <th>Tên hàng</th>
+                                                <th class="r" style="width: 110px;">Tồn kho</th>
+                                                <th class="r" style="width: 110px;">Thực tế</th>
+                                                <th class="r" style="width: 110px;">SL lệch</th>
+                                                <th class="r" style="width: 130px;">Giá trị lệch</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="fin">
+                                                <td><input class="inp dtl-search-code" placeholder="Tìm mã hàng"></td>
+                                                <td><input class="inp dtl-search-name" placeholder="Tìm tên hàng"></td>
+                                                <td colspan="4"></td>
+                                            </tr>
+                                        </tbody>
+                                        <tbody class="dl">
+                                            @if (item.Lines.Any())
+                                            {
+                                                foreach (var l in item.Lines)
+                                                {
+                                                    var diff = l.SlChenhLech;
+                                                    var valDiff = l.GiaTriLech;
+                                                    <tr class="dtl-line-row" data-code="@l.MaHangNoiBo.ToLower()" data-name="@l.TenHang.ToLower()">
+                                                        <td>@l.MaHangNoiBo</td>
+                                                        <td>@l.TenHang</td>
+                                                        <td class="r">@l.SoLuongTheoSo.ToString("N0")</td>
+                                                        <td class="r">
+                                                            @if (l.SoLuongThucTe.HasValue)
+                                                            {
+                                                                @l.SoLuongThucTe.Value.ToString("N0")
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="muted">Chưa kiểm</span>
+                                                            }
+                                                        </td>
+                                                        <td class="r @(diff < 0 ? "neg" : "")">
+                                                            @(diff.HasValue ? (diff > 0 ? "+" : "") + diff.Value.ToString("N0") : "")
+                                                        </td>
+                                                        <td class="r @(valDiff < 0 ? "neg" : "")">
+                                                            @(valDiff.HasValue ? (valDiff > 0 ? "+" : "") + valDiff.Value.ToString("N0") : "")
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <tr><td colspan="6" class="muted text-center py-3">Không có hàng nào trong phiếu.</td></tr>
+                                            }
+                                        </tbody>
+                                    </table>
+
+                                    <div class="dp-bottom">
+                                        <textarea class="dp-note" @(item.TrangThai == "HUY" ? "disabled" : "") placeholder="Ghi chú">@item.GhiChu</textarea>
+                                        <div class="sums">
+                                            <div><span>Số lượng thực tế</span><span class="fw-bold">@item.TongThucTe.ToString("N0")</span></div>
+                                            <div><span>Số lượng lệch tăng</span><span class="fw-bold text-success">@item.SlLechTang.ToString("N0")</span></div>
+                                            <div><span>Số lượng lệch giảm</span><span class="fw-bold text-danger">@item.SlLechGiam.ToString("N0")</span></div>
+                                            <div><span>Số lượng chênh lệch</span><span class="fw-bold @(item.TongChenhLech < 0 ? "neg" : "")">@item.TongChenhLech.ToString("N0")</span></div>
+                                            <div><span>Giá trị chênh lệch</span><span class="fw-bold @(item.TongGiaTriLech < 0 ? "neg" : "")">@item.TongGiaTriLech.ToString("N0") đ</span></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="dp-actions">
+                                        @if (item.TrangThai == "NHAP")
+                                        {
+                                            <button type="button" class="btn flat btn-cancel-doc" data-id="@item.MaPhieuKiemKe" data-code="@item.MaPhieuHienThi">
+                                                <svg class="ic"><use href="#i-trash"/></svg> Hủy phiếu
+                                            </button>
+                                        }
+                                        <a href="@Url.Action("Create", "PhieuKiemKe", new { copyId = item.MaPhieuKiemKe })" class="btn flat">
+                                            <svg class="ic"><use href="#i-copy"/></svg> Sao chép
                                         </a>
-                                        <button type="button" class="btn btn-outline-danger btn-sm btn-delete-draft" data-id="@item.MaPhieuKiemKe" data-code="@item.MaPhieuHienThi" title="Xóa phiếu tạm">
-                                            🗑
+                                        <a href="@Url.Action("Export", "PhieuKiemKe", new { type = "detail", Q = item.MaPhieuHienThi })" class="btn flat" target="_blank">
+                                            <svg class="ic"><use href="#i-export"/></svg> Xuất file
+                                        </a>
+                                        <span class="sp"></span>
+                                        @if (item.TrangThai == "NHAP")
+                                        {
+                                            <a href="@Url.Action("Edit", "PhieuKiemKe", new { id = item.MaPhieuKiemKe })" class="btn solid">
+                                                <svg class="ic"><use href="#i-pencil"/></svg> Mở phiếu
+                                            </a>
+                                        }
+                                        @if (item.TrangThai != "HUY")
+                                        {
+                                            <button type="button" class="btn btn-save-note" data-id="@item.MaPhieuKiemKe">
+                                                <svg class="ic"><use href="#i-save"/></svg> Lưu
+                                            </button>
+                                        }
+                                        <button type="button" class="btn" onclick="window.print();">
+                                            <svg class="ic"><use href="#i-print"/></svg> In
                                         </button>
-                                    }
-                                    else
-                                    {
-                                        <a asp-action="Details" asp-route-id="@item.MaPhieuKiemKe" class="btn btn-outline-secondary btn-sm" title="Xem chi tiết">
-                                            👁
-                                        </a>
-                                    }
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -107,32 +204,26 @@
             </table>
         </div>
 
-        <!-- Pagination -->
-        <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light">
-            <div class="text-muted small">
-                Hiển thị <strong>@(((Model.Filter.Page - 1) * Model.Filter.PageSize) + 1)</strong> - 
-                <strong>@(Math.Min(Model.Filter.Page * Model.Filter.PageSize, Model.TotalCount))</strong> 
-                trên tổng số <strong>@Model.TotalCount</strong> phiếu kiểm
+        <!-- Phân trang KiotViet -->
+        <div class="pager">
+            <span>
+                Hiển thị
+                <select id="size">
+                    <!option value="15" @(Model.Filter.PageSize == 15 ? "selected" : "")>15 dòng</!option>
+                    <!option value="30" @(Model.Filter.PageSize == 30 ? "selected" : "")>30 dòng</!option>
+                    <!option value="50" @(Model.Filter.PageSize == 50 ? "selected" : "")>50 dòng</!option>
+                </select>
+            </span>
+            <span class="muted">Tổng <strong>@Model.TotalCount</strong> phiếu kiểm</span>
+            <div class="pgn">
+                @if (Model.TotalPages > 1)
+                {
+                    @for (int p = 1; p <= Model.TotalPages; p++)
+                    {
+                        <button type="button" class="@(p == Model.Filter.Page ? "cur" : "")" data-pg="@p">@p</button>
+                    }
+                }
             </div>
-            @if (Model.TotalPages > 1)
-            {
-                <nav>
-                    <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item @(Model.Filter.Page <= 1 ? "disabled" : "")">
-                            <a class="page-link page-ajax" href="#" data-page="@(Model.Filter.Page - 1)">«</a>
-                        </li>
-                        @for (int p = 1; p <= Model.TotalPages; p++)
-                        {
-                            <li class="page-item @(p == Model.Filter.Page ? "active" : "")">
-                                <a class="page-link page-ajax" href="#" data-page="@p">@p</a>
-                            </li>
-                        }
-                        <li class="page-item @(Model.Filter.Page >= Model.TotalPages ? "disabled" : "")">
-                            <a class="page-link page-ajax" href="#" data-page="@(Model.Filter.Page + 1)">»</a>
-                        </li>
-                    </ul>
-                </nav>
-            }
         </div>
     }
 </div>

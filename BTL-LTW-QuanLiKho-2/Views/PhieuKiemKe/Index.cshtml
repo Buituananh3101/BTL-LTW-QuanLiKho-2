@@ -1,366 +1,124 @@
 @model BTL_LTW_QuanLiKho_2.ViewModels.PhieuKiemKeIndexVM
 @{
-    ViewData["Title"] = "Danh sách phiếu kiểm kho";
+    ViewData["Title"] = "Kiểm kho";
 }
 
 <link href="~/css/kiem-kho.css" rel="stylesheet" asp-append-version="true" />
 
-<div class="container-fluid p-0">
-    <div class="row g-0">
-        <!-- Cột lọc bên trái -->
-        <div class="col-auto">
-            <div class="kk-sidebar-filter" id="filterSidebar" style="width: 260px;">
-                <!-- Nút tròn thu gọn/mở rộng -->
-                <button type="button" class="kk-filter-toggle-btn" id="toggleFilterBtn" title="Thu gọn/Mở rộng bộ lọc">
-                    <span id="toggleIcon">◀</span>
+<!-- SVG Icon Symbols (Khớp 100% prototype-kiemkho-full.html) -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-export" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8M17 8l4 4-4 4M21 12H10"/></symbol>
+  <symbol id="i-cols" viewBox="0 0 24 24"><path d="M4 6h3M10 6h10M4 12h3M10 12h10M4 18h3M10 18h10"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 .5c0 1.7-2.5 2-2.5 3.5M12 17h.01"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></symbol>
+  <symbol id="i-chev-d" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 14h2M12 14h2"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-excl" viewBox="0 0 24 24"><path d="M12 5v9M12 18h.01"/></symbol>
+  <symbol id="i-import" viewBox="0 0 24 24"><path d="M4 6h8M4 10h5M4 14h5M4 18h8M20 12H11M15 8l-4 4 4 4" /></symbol>
+  <symbol id="i-sheet" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v7M14 10v7"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l4 4v14H5z"/><path d="M8 3v6h7V3M8 21v-7h8v7"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 3h6l1-3h5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 8H4c0-1 2-2 2-8zM10 21h4"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.7 7L4 20l1.2-4.6A8 8 0 1 1 21 12z"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+</svg>
+
+<div class="kk-container" id="kkIndexApp" 
+     data-filter-url="@Url.Action("Filter", "PhieuKiemKe")"
+     data-details-url="@Url.Action("GetItemDetails", "PhieuKiemKe")"
+     data-note-url="@Url.Action("SaveNote", "PhieuKiemKe")"
+     data-cancel-url="@Url.Action("HuyPhieu", "PhieuKiemKe")"
+     data-export-url="@Url.Action("Export", "PhieuKiemKe")"
+     data-warehouse-id="@Model.CurrentWarehouseId">
+
+    <!-- Thanh công cụ trên cùng (List Top) -->
+    <div class="list-top">
+        <h1 class="page-title">Phiếu kiểm kho</h1>
+        <div class="searchbox focus-w">
+            <svg class="ic"><use href="#i-search"/></svg>
+            <input id="q" placeholder="Theo mã phiếu kiểm" value="@Model.Filter.Q" autocomplete="off">
+            <span class="tail">
+                <button type="button" title="Tìm nâng cao">
+                    <svg class="ic"><use href="#i-sliders"/></svg>
                 </button>
-
-                <!-- Header bộ lọc -->
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="mb-0 fw-bold text-uppercase small text-muted">Bộ lọc tìm kiếm</h6>
-                    <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 text-muted" id="btnResetFilter">
-                        Đặt lại
-                    </button>
-                </div>
-
-                <form id="filterForm">
-                    <input type="hidden" name="Page" id="filterPage" value="@Model.Filter.Page" />
-                    <input type="hidden" name="WarehouseId" id="filterWarehouseId" value="@Model.Filter.WarehouseId" />
-
-                    <!-- Nhóm 1: Ngày tạo -->
-                    <div class="kk-filter-group">
-                        <div class="kk-filter-title">
-                            <span>Thời gian tạo</span>
-                            <span class="kk-filter-dot" id="dateFilterDot" style="display: @(Model.Filter.DateFilterType != "THIS_MONTH" ? "inline-block" : "none");"></span>
-                        </div>
-                        <div class="mb-2">
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="DateFilterType" id="dateRadioQuick" value="@Model.Filter.DateFilterType" 
-                                       @(Model.Filter.DateFilterType != "CUSTOM" ? "checked" : "") />
-                                <label class="form-check-label d-flex justify-content-between align-items-center" for="dateRadioQuick">
-                                    <span id="quickDateLabel">Tháng này</span>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2" id="btnOpenQuickDate">▾</button>
-                                </label>
-                            </div>
-
-                            <!-- Popup chọn nhanh thời gian -->
-                            <div class="card p-2 shadow-sm mb-2" id="quickDateMenu" style="display: none;">
-                                <div class="kk-date-group-title">Theo ngày</div>
-                                <div class="kk-date-option" data-type="TODAY">Hôm nay</div>
-                                <div class="kk-date-option" data-type="YESTERDAY">Hôm qua</div>
-
-                                <div class="kk-date-group-title">Theo tuần</div>
-                                <div class="kk-date-option" data-type="THIS_WEEK">Tuần này</div>
-                                <div class="kk-date-option" data-type="LAST_WEEK">Tuần trước</div>
-                                <div class="kk-date-option" data-type="LAST_7_DAYS">7 ngày qua</div>
-
-                                <div class="kk-date-group-title">Theo tháng</div>
-                                <div class="kk-date-option active" data-type="THIS_MONTH">Tháng này</div>
-                                <div class="kk-date-option" data-type="LAST_MONTH">Tháng trước</div>
-                                <div class="kk-date-option" data-type="LAST_30_DAYS">30 ngày qua</div>
-
-                                <div class="kk-date-group-title">Theo quý / năm</div>
-                                <div class="kk-date-option" data-type="THIS_QUARTER">Quý này</div>
-                                <div class="kk-date-option" data-type="THIS_YEAR">Năm nay</div>
-                            </div>
-
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="DateFilterType" id="dateRadioCustom" value="CUSTOM" 
-                                       @(Model.Filter.DateFilterType == "CUSTOM" ? "checked" : "") />
-                                <label class="form-check-label" for="dateRadioCustom">Tùy chỉnh</label>
-                            </div>
-
-                            <div id="customDateRange" class="mt-2 ps-3" style="display: @(Model.Filter.DateFilterType == "CUSTOM" ? "block" : "none");">
-                                <div class="mb-2">
-                                    <label class="form-label small text-muted mb-1">Từ ngày</label>
-                                    <input type="date" class="form-control form-control-sm" name="FromDate" id="filterFromDate" 
-                                           value="@(Model.Filter.FromDate?.ToString("yyyy-MM-dd"))" />
-                                </div>
-                                <div>
-                                    <label class="form-label small text-muted mb-1">Đến ngày</label>
-                                    <input type="date" class="form-control form-control-sm" name="ToDate" id="filterToDate" 
-                                           value="@(Model.Filter.ToDate?.ToString("yyyy-MM-dd"))" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Nhóm 2: Trạng thái -->
-                    <div class="kk-filter-group">
-                        <div class="kk-filter-title">
-                            <span>Trạng thái</span>
-                        </div>
-                        <div class="form-check mb-1">
-                            <input class="form-check-input status-checkbox" type="checkbox" name="Statuses" value="NHAP" id="stDraft" 
-                                   @(Model.Filter.Statuses.Contains("NHAP") ? "checked" : "") />
-                            <label class="form-check-label" for="stDraft">Phiếu tạm</label>
-                        </div>
-                        <div class="form-check mb-1">
-                            <input class="form-check-input status-checkbox" type="checkbox" name="Statuses" value="DA_DIEU_CHINH" id="stBalanced" 
-                                   @(Model.Filter.Statuses.Contains("DA_DIEU_CHINH") ? "checked" : "") />
-                            <label class="form-check-label" for="stBalanced">Đã cân bằng kho</label>
-                        </div>
-                        <div class="form-check mb-1">
-                            <input class="form-check-input status-checkbox" type="checkbox" name="Statuses" value="HUY" id="stCancelled" 
-                                   @(Model.Filter.Statuses.Contains("HUY") ? "checked" : "") />
-                            <label class="form-check-label" for="stCancelled">Đã hủy</label>
-                        </div>
-                    </div>
-
-                    <!-- Nhóm 3: Người tạo -->
-                    <div class="kk-filter-group">
-                        <div class="kk-filter-title">
-                            <span>Người tạo</span>
-                        </div>
-                        <select class="form-select form-select-sm" name="CreatorId" id="filterCreatorId">
-                            <option value="">-- Tất cả người tạo --</option>
-                            @foreach (var c in Model.Creators)
-                            {
-                                <option value="@c.MaNv" selected="@(Model.Filter.CreatorId == c.MaNv)">@c.TenNv</option>
-                            }
-                        </select>
-                    </div>
-                </form>
+            </span>
+        </div>
+        <span class="sp"></span>
+        <a href="@Url.Action("Create", "PhieuKiemKe")" class="btn primary" id="btnNew">
+            <svg class="ic"><use href="#i-plus"/></svg> Kiểm kho
+        </a>
+        <div class="relw">
+            <button type="button" class="btn" id="btnExp">
+                <svg class="ic"><use href="#i-export"/></svg> Xuất file 
+                <svg class="ic"><use href="#i-chev-d"/></svg>
+            </button>
+            <div class="pop menu" id="expMenu">
+                <button type="button" data-x="list">Xuất danh sách phiếu kiểm</button>
+                <button type="button" data-x="detail">Xuất chi tiết (từng dòng hàng)</button>
             </div>
         </div>
-
-        <!-- Vùng chính bên phải -->
-        <div class="col">
-            <div class="p-3">
-                <!-- Thanh tiêu đề & Công cụ trên -->
-                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-                    <div class="d-flex align-items-center gap-3">
-                        <h4 class="mb-0 fw-bold text-dark">Kiểm kho</h4>
-                        <span class="badge bg-light text-dark border">
-                            Kho: <strong id="lblCurrentWhName">@Model.CurrentWarehouseName</strong>
-                        </span>
-                    </div>
-
-                    <div class="d-flex align-items-center gap-2">
-                        <!-- Ô tìm kiếm mã phiếu -->
-                        <div class="input-group" style="width: 280px;">
-                            <input type="text" class="form-control" id="searchKeyword" placeholder="Theo mã phiếu kiểm..." 
-                                   value="@Model.Filter.Q" autocomplete="off" />
-                            <button class="btn btn-outline-secondary" type="button" id="btnSearch">🔍</button>
-                        </div>
-
-                        <!-- Nút + Kiểm kho -->
-                        <a asp-action="Create" class="btn kk-btn-primary d-flex align-items-center gap-1 shadow-sm">
-                            <span class="fs-5 lh-1">+</span> Kiểm kho
-                        </a>
-
-                        <!-- Nút Xuất file -->
-                        <button type="button" class="btn btn-outline-secondary" title="Xuất danh sách" onclick="alert('Tính năng xuất Excel sẽ được hỗ trợ trong phiên bản sau.');">
-                            Xuất file ▾
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Bảng danh sách phiếu kiểm (Partial View) -->
-                <div id="stockTakeTableContainer">
-                    <partial name="_PhieuKiemKeTable" model="Model" />
-                </div>
+        <div class="relw">
+            <button type="button" class="btn icon" id="btnCols" title="Hiển thị cột">
+                <svg class="ic"><use href="#i-cols"/></svg>
+            </button>
+            <div class="pop colmenu" id="colMenu">
+                <label><input type="checkbox" data-c="ma" checked> Mã kiểm kho</label>
+                <label><input type="checkbox" data-c="tg" checked> Thời gian</label>
+                <label><input type="checkbox" data-c="tt" checked> Tổng thực tế</label>
+                <label><input type="checkbox" data-c="cl" checked> Tổng chênh lệch</label>
+                <label><input type="checkbox" data-c="tang" checked> SL lệch tăng</label>
+                <label><input type="checkbox" data-c="giam" checked> SL lệch giảm</label>
+                <label><input type="checkbox" data-c="cb" checked> Ngày cân bằng</label>
+                <label><input type="checkbox" data-c="slt" checked> SL thực tế</label>
+                <label><input type="checkbox" data-c="ghi" checked> Ghi chú</label>
+                <label><input type="checkbox" data-c="st" checked> Trạng thái</label>
+                <label><input type="checkbox" data-c="kho" checked> Kho</label>
             </div>
         </div>
+        <button type="button" class="btn icon" title="Cài đặt">
+            <svg class="ic"><use href="#i-gear"/></svg>
+        </button>
+        <button type="button" class="btn icon" title="Trợ giúp">
+            <svg class="ic"><use href="#i-help"/></svg>
+        </button>
+    </div>
+
+    <!-- Khối thân trang: Sidebar bộ lọc + Bảng dữ liệu -->
+    <div class="list-wrap">
+        @await Html.PartialAsync("_PhieuKiemKeFilterSidebar", Model)
+        <section class="tbl-card-wrapper" id="tableWrapper" style="flex: 1; min-width: 0;">
+            @await Html.PartialAsync("_PhieuKiemKeTable", Model)
+        </section>
     </div>
 </div>
 
-<!-- Modal xác nhận xóa phiếu tạm -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title text-danger">Xóa phiếu tạm</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body py-3">
-                Bạn có chắc chắn muốn xóa phiếu kiểm kho <strong id="deleteDraftCode"></strong>? Thao tác này không thể hoàn tác.
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Bỏ qua</button>
-                <button type="button" class="btn btn-danger btn-sm" id="btnConfirmDelete">Đồng ý xóa</button>
-            </div>
-        </div>
+<!-- Modal xác nhận chung -->
+<div class="ov" id="ov">
+    <div class="modal-box" role="dialog" aria-modal="true">
+        <h3 id="mTitle"></h3>
+        <div class="mb" id="mBody"></div>
+        <div class="mf" id="mFoot"></div>
     </div>
 </div>
+
+<!-- Toast thông báo -->
+<div class="toast-box" id="toast"></div>
 
 @section Scripts {
-<script>
-$(document).ready(function () {
-    let deleteId = 0;
-
-    // Toggle thu gọn/mở rộng cột lọc
-    $('#toggleFilterBtn').on('click', function () {
-        const sidebar = $('#filterSidebar');
-        sidebar.toggleClass('collapsed');
-        if (sidebar.hasClass('collapsed')) {
-            $('#toggleIcon').text('▶');
-            sidebar.css('width', '0');
-        } else {
-            $('#toggleIcon').text('◀');
-            sidebar.css('width', '260px');
-        }
-    });
-
-    // Mở popup chọn nhanh ngày
-    $('#btnOpenQuickDate').on('click', function (e) {
-        e.stopPropagation();
-        $('#quickDateMenu').toggle();
-    });
-
-    $(document).on('click', function () {
-        $('#quickDateMenu').hide();
-    });
-
-    $('#quickDateMenu').on('click', function (e) {
-        e.stopPropagation();
-    });
-
-    // Chọn option nhanh thời gian
-    $('.kk-date-option').on('click', function () {
-        const type = $(this).data('type');
-        const text = $(this).text();
-
-        $('.kk-date-option').removeClass('active');
-        $(this).addClass('active');
-
-        $('#quickDateLabel').text(text);
-        $('#dateRadioQuick').val(type).prop('checked', true);
-        $('#customDateRange').hide();
-        $('#quickDateMenu').hide();
-
-        if (type !== 'THIS_MONTH') {
-            $('#dateFilterDot').show();
-        } else {
-            $('#dateFilterDot').hide();
-        }
-
-        $('#filterPage').val(1);
-        loadTable();
-    });
-
-    // Toggle radio Tùy chỉnh ngày
-    $('input[name="DateFilterType"]').on('change', function () {
-        if ($('#dateRadioCustom').is(':checked')) {
-            $('#customDateRange').show();
-            $('#dateFilterDot').show();
-        } else {
-            $('#customDateRange').hide();
-        }
-        $('#filterPage').val(1);
-        loadTable();
-    });
-
-    $('#filterFromDate, #filterToDate').on('change', function () {
-        $('#filterPage').val(1);
-        loadTable();
-    });
-
-    // Lọc theo trạng thái
-    $('.status-checkbox').on('change', function () {
-        $('#filterPage').val(1);
-        loadTable();
-    });
-
-    // Lọc theo người tạo
-    $('#filterCreatorId').on('change', function () {
-        $('#filterPage').val(1);
-        loadTable();
-    });
-
-    // Tìm kiếm ô search
-    $('#searchKeyword').on('keyup', function (e) {
-        if (e.key === 'Enter') {
-            $('#filterPage').val(1);
-            loadTable();
-        }
-    });
-
-    $('#btnSearch').on('click', function () {
-        $('#filterPage').val(1);
-        loadTable();
-    });
-
-    // Đặt lại bộ lọc
-    $('#btnResetFilter').on('click', function () {
-        $('.kk-date-option').removeClass('active');
-        $('.kk-date-option[data-type="THIS_MONTH"]').addClass('active');
-        $('#quickDateLabel').text('Tháng này');
-        $('#dateRadioQuick').val('THIS_MONTH').prop('checked', true);
-        $('#customDateRange').hide();
-        $('#dateFilterDot').hide();
-
-        $('#stDraft').prop('checked', true);
-        $('#stBalanced').prop('checked', true);
-        $('#stCancelled').prop('checked', false);
-
-        $('#filterCreatorId').val('');
-        $('#searchKeyword').val('');
-        $('#filterPage').val(1);
-
-        loadTable();
-    });
-
-    // Phân trang AJAX
-    $('body').on('click', '.page-ajax', function (e) {
-        e.preventDefault();
-        const page = $(this).data('page');
-        if (page && page > 0) {
-            $('#filterPage').val(page);
-            loadTable();
-        }
-    });
-
-    // Checkbox chọn tất cả
-    $('body').on('change', '#selectAllRows', function () {
-        $('.row-select').prop('checked', $(this).is(':checked'));
-    });
-
-    // Modal xóa phiếu tạm
-    $('body').on('click', '.btn-delete-draft', function () {
-        deleteId = $(this).data('id');
-        $('#deleteDraftCode').text($(this).data('code'));
-        const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-        modal.show();
-    });
-
-    $('#btnConfirmDelete').on('click', function () {
-        if (deleteId > 0) {
-            $.ajax({
-                url: '/PhieuKiemKe/Delete/' + deleteId,
-                type: 'POST',
-                success: function (res) {
-                    $('#deleteModal').modal('hide');
-                    loadTable();
-                },
-                error: function (xhr) {
-                    alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể xóa phiếu tạm.'));
-                }
-            });
-        }
-    });
-
-    // Hàm load bảng qua AJAX
-    function loadTable() {
-        const formData = $('#filterForm').serializeArray();
-        formData.push({ name: 'Q', value: $('#searchKeyword').val() });
-
-        $.ajax({
-            url: '/PhieuKiemKe/Filter',
-            type: 'GET',
-            data: $.param(formData),
-            beforeSend: function () {
-                $('#stockTakeTableContainer').css('opacity', '0.6');
-            },
-            success: function (html) {
-                $('#stockTakeTableContainer').html(html).css('opacity', '1');
-            },
-            error: function () {
-                $('#stockTakeTableContainer').css('opacity', '1');
-                alert('Có lỗi khi tải dữ liệu phiếu kiểm kho.');
-            }
-        });
-    }
-});
-</script>
+    <script src="~/js/phieu-kiem-ke-index.js" asp-append-version="true"></script>
 }

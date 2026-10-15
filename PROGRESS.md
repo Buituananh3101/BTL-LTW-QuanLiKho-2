@@ -1,10 +1,15 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-15 – Tinh gọn cột Tên hàng: Bỏ mã vạch & Chuyển sang chữ thường (Phiên 22)
+Cập nhật lần cuối: 2026-10-15 – Nâng cấp và Hoàn thiện Phân hệ Kiểm kho (PhieuKiemKe) chuẩn 100% Prototype KiotViet (Phiên 23)
 
 ---
 
 ## Đã xong
+- **Nâng cấp và Hoàn thiện Phân hệ Kiểm kho (PhieuKiemKe) chuẩn 100% Prototype KiotViet**:
+  - **Giao diện Danh sách (`Index.cshtml`)**: Tách `_PhieuKiemKeFilterSidebar.cshtml` và `_PhieuKiemKeTable.cshtml`, tách toàn bộ JavaScript ra `wwwroot/js/phieu-kiem-ke-index.js`. Hỗ trợ lọc khoảng ngày nhanh / lịch 2 tháng tùy chỉnh, lọc trạng thái 3 checkbox, lọc người tạo dạng chip tags multi-select; hỗ trợ click dòng bung mở khối chi tiết `tr.dtl` inline ngay trong bảng với bộ lọc mã/tên hàng, lưu ghi chú, in và modal xác nhận hủy phiếu.
+  - **Giao diện Lập / Sửa phiếu (`Create.cshtml`, `Details.cshtml`)**: Chuẩn hóa `_PhieuKiemKeForm.cshtml`, tách toàn bộ JavaScript sang `wwwroot/js/phieu-kiem-ke-form.js`. Layout 2 cột KiotViet với panel thông tin phải gập mở, tìm kiếm autocomplete F3, nạp hàng theo nhóm (Lưới), 4 tabs phân loại (Tất cả, Khớp, Lệch, Chưa kiểm), nhập file Excel/CSV, widget Kiểm gần đây, phím tắt F9 (Lưu tạm) và F10 (Cân bằng kho).
+  - **Backend & Nghiệp vụ (`PhieuKiemKeController.cs`, `KiemKhoViewModels.cs`)**: Bổ sung API `HuyPhieu` (chặn tuyệt đối phiếu đã cân bằng theo Luật 6), `SaveNote` (lưu nhanh ghi chú từ dòng chi tiết bung mở), `GetItemDetails` (nạp chi tiết JSON), `Export` (xuất file CSV danh sách hoặc chi tiết), hỗ trợ `copyId` ở action `Create`. Bọc Transaction an toàn khi cân bằng kho, đọc tồn sổ sách từ `vw_TonKhoHienTai`, chốt giá vốn và sinh `PhieuDieuChinh`.
+  - **Kiểm tra biên dịch & Đặc tả**: `dotnet build` đạt 0 Errors và 0 Warnings. Đồng bộ tài liệu `docs/specs/kiem-kho.md` (< 8.000 ký tự) theo Luật 12.
 - **Chuẩn hóa Kiến trúc Danh mục CRUD dùng chung & Tinh gọn mô-đun Hàng hóa (Khuôn mẫu LEGO)**:
   - Tầng Dùng chung (Shared Framework):
     - `ViewModels/Common/BaseFilterParams.cs`: Chuẩn hóa bộ lọc tìm kiếm (`Q`, `Page`, `PageSize`, `SortBy`, `SortDir`, `FromDate`, `ToDate`, `GetSkipCount()`).
@@ -106,6 +111,11 @@ Cập nhật lần cuối: 2026-10-15 – Tinh gọn cột Tên hàng: Bỏ mã 
 ---
 
 ## Nhật ký phiên
+- **2026-10-15 (Phiên 23 - Trưa/Chiều)**:
+  - **Nâng cấp và Hoàn thiện Phân hệ Kiểm kho (PhieuKiemKe) chuẩn 100% Prototype KiotViet**:
+    - **Frontend & UI**: Bóc tách toàn bộ mã HTML/CSS từ `prototype-kiemkho-full.html` sang hệ thống MVC; tạo CSS `kiem-kho.css`; tách `Views/PhieuKiemKe/_PhieuKiemKeFilterSidebar.cshtml` và `_PhieuKiemKeTable.cshtml` (hỗ trợ bung chi tiết dòng `tr.dtl` inline); tách JS `phieu-kiem-ke-index.js`; chuẩn hóa `_PhieuKiemKeForm.cshtml` 2 cột KiotViet kèm panel gập mở, phím tắt F3/F9/F10 và JS `phieu-kiem-ke-form.js`.
+    - **Backend & Controller**: Nâng cấp `PhieuKiemKeController.cs` và `KiemKhoViewModels.cs`, bổ sung API `HuyPhieu` (chặn hủy phiếu đã cân bằng theo Luật 6), `SaveNote` (lưu ghi chú từ dòng chi tiết), `GetItemDetails` (nạp chi tiết JSON), `Export` (xuất CSV danh sách hoặc chi tiết), hỗ trợ sao chép qua `Create?copyId=...`. Bọc Transaction an toàn, đọc tồn sổ sách từ `vw_TonKhoHienTai`, chốt giá vốn và sinh `PhieuDieuChinh`.
+    - **Kiểm toán & Đồng bộ**: `dotnet build` đạt 0 Errors và 0 Warnings. Đồng bộ tài liệu `docs/specs/kiem-kho.md` (< 8.000 ký tự) theo Luật 12.
 - **2026-10-15 (Phiên 16 - Sáng)**:
   - Chuẩn hóa Kiến trúc Danh mục CRUD dùng chung & Tinh gọn mô-đun Hàng hóa (Khuôn mẫu LEGO):
     - **Tầng Dùng chung (Shared Foundation)**: Xây dựng `BaseFilterParams.cs`, `PagedResult<T>`, `_Pagination.cshtml`, `ExcelHelper.cs`, và `kiot-filter.js`. Mọi danh mục tiếp theo đều có thể tái sử dụng ngay lập tức mà không cần viết lại mã phân trang, bộ lọc hay định dạng Excel.

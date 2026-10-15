@@ -1,0 +1,93 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.PhieuKiemKeIndexVM
+
+<aside class="side" id="side">
+    <!-- Nhóm 1: Ngày tạo -->
+    <div class="blk">
+        <h4>Ngày tạo <i class="dot" id="dotDate"></i></h4>
+        <div class="radrow">
+            <input type="radio" name="dm" id="rdPreset" checked>
+            <button type="button" class="selbox" id="presetBox">
+                <span id="presetTxt">Tháng này</span>
+                <svg class="ic"><use href="#i-chev-r"/></svg>
+            </button>
+        </div>
+        <div class="radrow">
+            <input type="radio" name="dm" id="rdCustom">
+            <button type="button" class="selbox" id="customBox">
+                <span id="customTxt">Tùy chỉnh</span>
+                <svg class="ic"><use href="#i-cal"/></svg>
+            </button>
+        </div>
+
+        <!-- Popup menu chọn nhanh khoảng ngày -->
+        <div class="pop quick" id="quick">
+            <div>
+                <h6>Theo ngày</h6>
+                <button type="button" data-p="homnay">Hôm nay</button>
+                <button type="button" data-p="homqua">Hôm qua</button>
+            </div>
+            <div>
+                <h6>Theo tuần</h6>
+                <button type="button" data-p="tuannay">Tuần này</button>
+                <button type="button" data-p="tuantruoc">Tuần trước</button>
+                <button type="button" data-p="7ngay">7 ngày qua</button>
+            </div>
+            <div>
+                <h6>Theo tháng</h6>
+                <button type="button" data-p="thangnay" class="cur">Tháng này</button>
+                <button type="button" data-p="thangtruoc">Tháng trước</button>
+                <button type="button" data-p="30ngay">30 ngày qua</button>
+            </div>
+            <div>
+                <h6>Theo quý</h6>
+                <button type="button" data-p="quynay">Quý này</button>
+                <button type="button" data-p="quytruoc">Quý trước</button>
+            </div>
+            <div>
+                <h6>Theo năm</h6>
+                <button type="button" data-p="namnay">Năm nay</button>
+                <button type="button" data-p="namtruoc">Năm trước</button>
+            </div>
+        </div>
+
+        <!-- Popup lịch 2 tháng tùy chỉnh -->
+        <div class="pop rangepop" id="rangePop"></div>
+    </div>
+
+    <!-- Nhóm 2: Trạng thái -->
+    <div class="blk">
+        <h4>Trạng thái <i class="dot" id="dotSt"></i></h4>
+        <label class="chk-row">
+            <input type="checkbox" data-s="NHAP" @(Model.Filter.Statuses.Contains("NHAP") ? "checked" : "")> Phiếu tạm
+        </label>
+        <label class="chk-row">
+            <input type="checkbox" data-s="DA_DIEU_CHINH" @(Model.Filter.Statuses.Contains("DA_DIEU_CHINH") ? "checked" : "")> Đã cân bằng kho
+        </label>
+        <label class="chk-row">
+            <input type="checkbox" data-s="HUY" @(Model.Filter.Statuses.Contains("HUY") ? "checked" : "")> Đã hủy
+        </label>
+    </div>
+
+    <!-- Nhóm 3: Người tạo -->
+    <div class="blk">
+        <h4>Người tạo <i class="dot" id="dotUser"></i></h4>
+        <div class="ms" id="ms">
+            <span id="msChips"></span>
+            <input id="msIn" placeholder="Chọn người tạo" autocomplete="off">
+        </div>
+        <div class="pop mslist" id="msList">
+            @foreach (var c in Model.Creators)
+            {
+                <button type="button" data-u-id="@c.MaNv" data-u-name="@c.TenNv">
+                    <span>@c.TenNv</span>
+                    <svg class="ic d-none"><use href="#i-check"/></svg>
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- Nút thu gọn / mở rộng sidebar -->
+    <button type="button" class="side-toggle" id="sideTg" title="Thu gọn / mở rộng bộ lọc">
+        <svg class="ic"><use href="#i-chev-l"/></svg>
+    </button>
+</aside>

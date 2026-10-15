@@ -92,6 +92,7 @@ public class PhieuKiemKeController : BaseKhoController
             .Include(p => p.PhieuDieuChinh)
             .Include(p => p.ChiTietPhieuKiemKes)
                 .ThenInclude(ct => ct.MaHangNavigation)
+                    .ThenInclude(h => h.MaDvtNavigation)
             .AsQueryable();
 
         // Lọc theo kho
@@ -109,8 +110,12 @@ public class PhieuKiemKeController : BaseKhoController
             query = query.Where(p => filter.Statuses.Contains(p.TrangThai));
         }
 
-        // Lọc theo người tạo
-        if (filter.CreatorId.HasValue && filter.CreatorId.Value > 0)
+        // Lọc theo người tạo (hỗ trợ nhiều người tạo hoặc 1 người tạo)
+        if (filter.CreatorIds != null && filter.CreatorIds.Any())
+        {
+            query = query.Where(p => filter.CreatorIds.Contains(p.MaNvlap));
+        }
+        else if (filter.CreatorId.HasValue && filter.CreatorId.Value > 0)
         {
             query = query.Where(p => p.MaNvlap == filter.CreatorId.Value);
         }
@@ -152,6 +157,17 @@ public class PhieuKiemKeController : BaseKhoController
 
             DateTime? ngayCanBang = p.PhieuDieuChinh?.NgayDuyet ?? (p.TrangThai == "DA_DIEU_CHINH" ? p.ThoiDiemChot : null);
 
+            var lines = details.Select(ct => new PhieuKiemKeLineVM
+            {
+                MaHang = ct.MaHang,
+                MaHangNoiBo = ct.MaHangNavigation?.MaHangNoiBo ?? "",
+                TenHang = ct.MaHangNavigation?.TenHang ?? "",
+                TenDvt = ct.MaHangNavigation?.MaDvtNavigation?.TenDvt ?? "",
+                SoLuongTheoSo = ct.SoLuongTheoSo,
+                SoLuongThucTe = ct.SoLuongThucTe,
+                DonGia = ct.DonGia > 0 ? ct.DonGia : ((ct.MaHangNavigation != null && ct.MaHangNavigation.GiaVon > 0) ? ct.MaHangNavigation.GiaVon : (ct.MaHangNavigation?.GiaBanThamKhao ?? 0))
+            }).ToList();
+
             return new PhieuKiemKeListItemVM
             {
                 MaPhieuKiemKe = p.MaPhieuKiemKe,
@@ -167,7 +183,8 @@ public class PhieuKiemKeController : BaseKhoController
                 TongSoLuongSo = tongSoLuongSo,
                 SlLechTang = slLechTang,
                 SlLechGiam = slLechGiam,
-                TongGiaTriLech = tongGiaTriLech
+                TongGiaTriLech = tongGiaTriLech,
+                Lines = lines
             };
         }).ToList();
 
@@ -198,12 +215,52 @@ public class PhieuKiemKeController : BaseKhoController
     }
 
     // GET: PhieuKiemKe/Create
-    public async Task<IActionResult> Create(int? warehouseId)
+    public async Task<IActionResult> Create(int? warehouseId, int? copyId)
     {
         int whId = warehouseId ?? GetCurrentWarehouseId();
         var kho = await _context.Khos.FindAsync(whId);
         int userId = CurrentNhanVienId;
         var user = await _context.NhanViens.FindAsync(userId);
+
+        var lines = new List<PhieuKiemKeLineVM>();
+        string? note = null;
+
+        if (copyId.HasValue && copyId.Value > 0)
+        {
+            var src = await _context.PhieuKiemKes
+                .AsNoTracking()
+                .Include(p => p.ChiTietPhieuKiemKes)
+                    .ThenInclude(ct => ct.MaHangNavigation)
+                        .ThenInclude(h => h.MaDvtNavigation)
+                .Include(p => p.ChiTietPhieuKiemKes)
+                    .ThenInclude(ct => ct.MaHangNavigation)
+                        .ThenInclude(h => h.MaNhomNavigation)
+                .FirstOrDefaultAsync(p => p.MaPhieuKiemKe == copyId.Value);
+
+            if (src != null)
+            {
+                whId = src.MaKho;
+                kho = await _context.Khos.FindAsync(whId);
+                note = src.GhiChu;
+
+                // Lấy tồn kho hiện tại cho các mặt hàng sao chép
+                var stockMap = await _context.VwTonKhoHienTais
+                    .Where(s => s.MaKho == whId)
+                    .ToDictionaryAsync(s => s.MaHang, s => s.SoLuongTon ?? 0);
+
+                lines = src.ChiTietPhieuKiemKes.Select(ct => new PhieuKiemKeLineVM
+                {
+                    MaHang = ct.MaHang,
+                    MaHangNoiBo = ct.MaHangNavigation?.MaHangNoiBo ?? "",
+                    TenHang = ct.MaHangNavigation?.TenHang ?? "",
+                    TenDvt = ct.MaHangNavigation?.MaDvtNavigation?.TenDvt ?? "",
+                    TenNhom = ct.MaHangNavigation?.MaNhomNavigation?.TenNhom ?? "",
+                    SoLuongTheoSo = stockMap.TryGetValue(ct.MaHang, out var ton) ? ton : ct.SoLuongTheoSo,
+                    SoLuongThucTe = null, // Sao chép thì thực tế để trống (chưa kiểm)
+                    DonGia = ct.DonGia > 0 ? ct.DonGia : ((ct.MaHangNavigation != null && ct.MaHangNavigation.GiaVon > 0) ? ct.MaHangNavigation.GiaVon : (ct.MaHangNavigation?.GiaBanThamKhao ?? 0))
+                }).ToList();
+            }
+        }
 
         var model = new PhieuKiemKeFormVM
         {
@@ -214,8 +271,9 @@ public class PhieuKiemKeController : BaseKhoController
             TenNguoiLap = user?.HoTen ?? "Người dùng hiện tại",
             ThoiDiemChot = DateTime.Now,
             TrangThai = "NHAP",
+            GhiChu = note,
             IsReadOnly = false,
-            Lines = new List<PhieuKiemKeLineVM>()
+            Lines = lines
         };
 
         ViewBag.NhomHangs = await _context.NhomHangs.OrderBy(n => n.TenNhom).ToListAsync();
@@ -229,7 +287,7 @@ public class PhieuKiemKeController : BaseKhoController
             .Include(p => p.MaKhoNavigation)
             .Include(p => p.MaNvlapNavigation)
             .Include(p => p.PhieuDieuChinh)
-                .ThenInclude(pdc => pdc.MaNvduyetNavigation)
+                .ThenInclude(pdc => pdc!.MaNvduyetNavigation)
             .Include(p => p.ChiTietPhieuKiemKes)
                 .ThenInclude(ct => ct.MaHangNavigation)
                     .ThenInclude(h => h.MaDvtNavigation)
@@ -292,7 +350,7 @@ public class PhieuKiemKeController : BaseKhoController
             .Include(p => p.MaKhoNavigation)
             .Include(p => p.MaNvlapNavigation)
             .Include(p => p.PhieuDieuChinh)
-                .ThenInclude(pdc => pdc.MaNvduyetNavigation)
+                .ThenInclude(pdc => pdc!.MaNvduyetNavigation)
             .Include(p => p.ChiTietPhieuKiemKes)
                 .ThenInclude(ct => ct.MaHangNavigation)
                     .ThenInclude(h => h.MaDvtNavigation)
@@ -351,7 +409,7 @@ public class PhieuKiemKeController : BaseKhoController
         using var trans = await _context.Database.BeginTransactionAsync();
         try
         {
-            PhieuKiemKe pkk;
+            PhieuKiemKe? pkk;
             if (req.MaPhieuKiemKe > 0)
             {
                 pkk = await _context.PhieuKiemKes
@@ -446,7 +504,7 @@ public class PhieuKiemKeController : BaseKhoController
         using var trans = await _context.Database.BeginTransactionAsync();
         try
         {
-            PhieuKiemKe pkk;
+            PhieuKiemKe? pkk;
             if (req.MaPhieuKiemKe > 0)
             {
                 pkk = await _context.PhieuKiemKes
@@ -665,6 +723,148 @@ public class PhieuKiemKeController : BaseKhoController
         }).ToList();
 
         return Json(result);
+    }
+
+    // POST: PhieuKiemKe/HuyPhieu/5
+    [HttpPost]
+    public async Task<IActionResult> HuyPhieu(int id)
+    {
+        var pkk = await _context.PhieuKiemKes.FindAsync(id);
+        if (pkk == null) return NotFound(new { success = false, message = "Không tìm thấy phiếu kiểm." });
+
+        if (pkk.TrangThai == "DA_DIEU_CHINH")
+        {
+            return BadRequest(new { success = false, message = "Phiếu kiểm đã cân bằng kho không được phép hủy." });
+        }
+
+        if (pkk.TrangThai == "HUY")
+        {
+            return BadRequest(new { success = false, message = "Phiếu này đã được hủy trước đó." });
+        }
+
+        pkk.TrangThai = "HUY";
+        await _context.SaveChangesAsync();
+
+        await _nhatKyService.GhiNhatKyAsync(
+            CurrentUserId,
+            "Hủy phiếu kiểm",
+            "PhieuKiemKe",
+            id.ToString(),
+            $"Hủy phiếu kiểm kho #{id}");
+
+        return Ok(new { success = true, message = $"Đã hủy phiếu {MaChungTuHelper.FormatMaKiemKe(id)} thành công!" });
+    }
+
+    // POST: PhieuKiemKe/SaveNote
+    [HttpPost]
+    public async Task<IActionResult> SaveNote([FromBody] UpdateNoteRequest req)
+    {
+        if (req == null || req.MaPhieuKiemKe <= 0)
+            return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ." });
+
+        var pkk = await _context.PhieuKiemKes.FindAsync(req.MaPhieuKiemKe);
+        if (pkk == null) return NotFound(new { success = false, message = "Không tìm thấy phiếu kiểm." });
+
+        pkk.GhiChu = req.GhiChu?.Trim();
+        await _context.SaveChangesAsync();
+
+        return Ok(new { success = true, message = "Đã lưu ghi chú thành công." });
+    }
+
+    // GET: PhieuKiemKe/GetItemDetails/5
+    [HttpGet]
+    public async Task<IActionResult> GetItemDetails(int id)
+    {
+        var pkk = await _context.PhieuKiemKes
+            .AsNoTracking()
+            .Include(p => p.MaKhoNavigation)
+            .Include(p => p.MaNvlapNavigation)
+            .Include(p => p.PhieuDieuChinh)
+                .ThenInclude(pdc => pdc!.MaNvduyetNavigation)
+            .Include(p => p.ChiTietPhieuKiemKes)
+                .ThenInclude(ct => ct.MaHangNavigation)
+                    .ThenInclude(h => h.MaDvtNavigation)
+            .FirstOrDefaultAsync(p => p.MaPhieuKiemKe == id);
+
+        if (pkk == null) return NotFound(new { success = false, message = "Không tìm thấy phiếu kiểm." });
+
+        var lines = pkk.ChiTietPhieuKiemKes.Select(ct => new
+        {
+            maHang = ct.MaHang,
+            maHangNoiBo = ct.MaHangNavigation?.MaHangNoiBo ?? "",
+            tenHang = ct.MaHangNavigation?.TenHang ?? "",
+            tenDvt = ct.MaHangNavigation?.MaDvtNavigation?.TenDvt ?? "",
+            soLuongTheoSo = ct.SoLuongTheoSo,
+            soLuongThucTe = ct.SoLuongThucTe,
+            donGia = ct.DonGia > 0 ? ct.DonGia : ((ct.MaHangNavigation != null && ct.MaHangNavigation.GiaVon > 0) ? ct.MaHangNavigation.GiaVon : (ct.MaHangNavigation?.GiaBanThamKhao ?? 0)),
+            slChenhLech = ct.SoLuongThucTe.HasValue ? ct.SoLuongThucTe.Value - ct.SoLuongTheoSo : (decimal?)null,
+            giaTriLech = ct.SoLuongThucTe.HasValue ? (ct.SoLuongThucTe.Value - ct.SoLuongTheoSo) * (ct.DonGia > 0 ? ct.DonGia : ((ct.MaHangNavigation != null && ct.MaHangNavigation.GiaVon > 0) ? ct.MaHangNavigation.GiaVon : (ct.MaHangNavigation?.GiaBanThamKhao ?? 0))) : (decimal?)null
+        }).ToList();
+
+        var tongThucTe = lines.Where(x => x.soLuongThucTe.HasValue).Sum(x => x.soLuongThucTe!.Value);
+        var slLechTang = lines.Where(x => x.slChenhLech.HasValue && x.slChenhLech.Value > 0).Sum(x => x.slChenhLech!.Value);
+        var slLechGiam = lines.Where(x => x.slChenhLech.HasValue && x.slChenhLech.Value < 0).Sum(x => -x.slChenhLech!.Value);
+        var tongChenhLech = lines.Where(x => x.slChenhLech.HasValue).Sum(x => x.slChenhLech!.Value);
+        var tongGiaTriLech = lines.Where(x => x.giaTriLech.HasValue).Sum(x => x.giaTriLech!.Value);
+
+        return Ok(new
+        {
+            success = true,
+            data = new
+            {
+                maPhieuKiemKe = pkk.MaPhieuKiemKe,
+                maPhieuHienThi = MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe),
+                thoiDiemChot = pkk.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm"),
+                trangThai = pkk.TrangThai,
+                tenTrangThai = pkk.TrangThai switch { "NHAP" => "Phiếu tạm", "DA_DIEU_CHINH" => "Đã cân bằng kho", "HUY" => "Đã hủy", _ => pkk.TrangThai },
+                tenKho = pkk.MaKhoNavigation?.TenKho ?? $"Kho {pkk.MaKho}",
+                tenNguoiLap = pkk.MaNvlapNavigation?.HoTen ?? $"NV {pkk.MaNvlap}",
+                ngayCanBang = pkk.PhieuDieuChinh?.NgayDuyet?.ToString("dd/MM/yyyy HH:mm"),
+                tenNguoiCanBang = pkk.PhieuDieuChinh?.MaNvduyetNavigation?.HoTen,
+                ghiChu = pkk.GhiChu ?? "",
+                tongThucTe,
+                slLechTang,
+                slLechGiam,
+                tongChenhLech,
+                tongGiaTriLech,
+                lines
+            }
+        });
+    }
+
+    // GET: PhieuKiemKe/Export?type=list|detail
+    [HttpGet]
+    public async Task<IActionResult> Export(string type, PhieuKiemKeFilterVM filter)
+    {
+        filter.PageSize = 10000;
+        var model = await BuildIndexViewModel(filter);
+
+        var csv = new System.Text.StringBuilder();
+        csv.AppendLine("\uFEFF"); // UTF-8 BOM
+
+        if (type == "detail")
+        {
+            csv.AppendLine("Mã kiểm kho,Mã hàng,Tên hàng,Tồn kho,Thực tế,SL lệch,Giá trị lệch");
+            foreach (var item in model.Items)
+            {
+                foreach (var line in item.Lines)
+                {
+                    var diff = line.SlChenhLech;
+                    var valDiff = line.GiaTriLech;
+                    csv.AppendLine($"\"{item.MaPhieuHienThi}\",\"{line.MaHangNoiBo}\",\"{line.TenHang.Replace("\"", "\"\"")}\",{line.SoLuongTheoSo},{(line.SoLuongThucTe.HasValue ? line.SoLuongThucTe.Value.ToString() : "")},{(diff.HasValue ? diff.Value.ToString() : "")},{(valDiff.HasValue ? valDiff.Value.ToString() : "")}");
+                }
+            }
+            return File(System.Text.Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", $"ChiTietKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.csv");
+        }
+        else
+        {
+            csv.AppendLine("Mã kiểm kho,Thời gian,Tổng thực tế,Tổng chênh lệch,SL lệch tăng,SL lệch giảm,Ngày cân bằng,SL thực tế,Ghi chú,Trạng thái,Kho");
+            foreach (var item in model.Items)
+            {
+                csv.AppendLine($"\"{item.MaPhieuHienThi}\",\"{item.ThoiDiemChot:dd/MM/yyyy HH:mm}\",{item.TongThucTe},{item.TongChenhLech},{item.SlLechTang},{item.SlLechGiam},\"{(item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "")}\",{item.TongThucTe},\"{item.GhiChu?.Replace("\"", "\"\"")}\",\"{item.TenTrangThai}\",\"{item.TenKho}\"");
+            }
+            return File(System.Text.Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", $"DanhSachKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.csv");
+        }
     }
 }
 

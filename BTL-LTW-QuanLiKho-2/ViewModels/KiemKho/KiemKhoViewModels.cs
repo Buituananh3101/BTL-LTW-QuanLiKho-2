@@ -39,6 +39,7 @@ public class PhieuKiemKeListItemVM
     public decimal SlLechTang { get; set; }
     public decimal SlLechGiam { get; set; }
     public decimal TongGiaTriLech { get; set; }
+    public List<PhieuKiemKeLineVM> Lines { get; set; } = new();
 }
 
 public class PhieuKiemKeFilterVM
@@ -49,6 +50,7 @@ public class PhieuKiemKeFilterVM
     public DateTime? ToDate { get; set; }
     public List<string> Statuses { get; set; } = new() { "NHAP", "DA_DIEU_CHINH" };
     public int? CreatorId { get; set; }
+    public List<int> CreatorIds { get; set; } = new();
     public int? WarehouseId { get; set; }
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 15;
@@ -157,4 +159,10 @@ public class SaveStockTakeLineRequest
     public decimal SoLuongTheoSo { get; set; }
     public decimal? SoLuongThucTe { get; set; }
     public decimal DonGia { get; set; }
+}
+
+public class UpdateNoteRequest
+{
+    public int MaPhieuKiemKe { get; set; }
+    public string? GhiChu { get; set; }
 }
