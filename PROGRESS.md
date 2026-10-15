@@ -1,6 +1,6 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-15 – Tinh gọn UI: Gỡ bỏ icon mũi tên hai chiều trong ô tìm kiếm Hàng hóa (Phiên 18)
+Cập nhật lần cuối: 2026-10-15 – Tinh gọn cột Tên hàng: Bỏ mã vạch & Chuyển sang chữ thường (Phiên 22)
 
 ---
 
@@ -166,6 +166,25 @@ Cập nhật lần cuối: 2026-10-15 – Tinh gọn UI: Gỡ bỏ icon mũi tê
 - **2026-10-15 (Phiên 15 - Sáng)**:
   - Tinh gọn thanh công cụ Quản lý Hàng hóa: Gỡ bỏ nút Cài đặt (`bi-gear`) trên thanh công cụ của trang Hàng hóa (`Index.cshtml`), giữ lại 2 nút tiện ích tiêu chuẩn là Tải lại bảng (`bi-arrow-clockwise`) và Trợ giúp (`bi-question-circle`).
   - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-15 (Phiên 22 - Sáng)**:
+  - Tinh gọn cột Tên hàng (`_HangHoaTable.cshtml`):
+    - Gỡ bỏ dòng hiển thị mã vạch phụ (`@item.QuyCach`) dưới tên hàng.
+    - Chuyển tên hàng (`@item.TenHang`) từ chữ in đậm (`fw-semibold text-dark`) về kiểu chữ thường tiêu chuẩn, đồng nhất với các cột dữ liệu khác trên bảng.
+  - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-15 (Phiên 21 - Sáng)**:
+  - Đồng bộ màu chữ bảng Hàng hóa (`_HangHoaTable.cshtml`):
+    - Chuyển cột Mã hàng từ màu xanh in đậm (`text-primary fw-semibold`) về màu chữ thường tiêu chuẩn (`text-break`).
+    - Chuyển cột Tồn kho từ màu đỏ in đậm khi hết hàng / dưới định mức (`text-danger fw-bold`) về màu chữ thường tiêu chuẩn (`@item.TonKho.ToString("N0", viCulture)`), giúp toàn bộ bảng dữ liệu đồng nhất màu sắc.
+  - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-15 (Phiên 20 - Sáng)**:
+  - Tinh chỉnh kích thước thẻ thuộc tính hàng hóa mini (`.kiot-attr-chip`): Giảm font-size xuống 11px, giảm padding còn 1.5px (chiều cao chip ~20px), bo góc 4px và thu nhỏ khoảng cách margin/gap giúp thẻ thuộc tính hiển thị vừa vặn, thanh thoát và không chiếm dụng diện tích.
+  - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-15 (Phiên 19 - Sáng)**:
+  - Tối ưu hiển thị Thẻ Thuộc tính Hàng hóa:
+    - Loại bỏ 3 thẻ tĩnh thừa ("Hàng hóa thường", "Bán trực tiếp", "Không tích điểm") trong panel chi tiết sản phẩm (`_HangHoaTable.cshtml`).
+    - Đưa khối thẻ thuộc tính động (`item.ThuocTinhs`) lên vị trí ngay dưới "Nhóm hàng", loại bỏ khối hiển thị trùng lặp ở dưới chân panel.
+    - Thiết kế lại giao diện thẻ thuộc tính `.kiot-attr-chip` dạng 2 khối sang trọng (nhãn xám nhạt `.chip-label`, giá trị nổi bật chữ xanh đậm `.chip-value`, bo góc 6px, đổ bóng nhẹ, phân cách rõ ràng).
+    - Kiểm tra biên dịch: 0 lỗi.
 - **2026-10-15 (Phiên 18 - Sáng)**:
   - Tinh gọn ô tìm kiếm trang Hàng hóa: Gỡ bỏ icon mũi tên hai chiều thừa (`bi-arrow-left-right`) trong ô tìm kiếm `#keywordSearch` (`Index.cshtml`), tinh chỉnh `padding-right: 12px` trong `site.css` giúp thanh tìm kiếm gọn gàng, thoáng mắt.
   - Kiểm tra biên dịch: 0 lỗi.
