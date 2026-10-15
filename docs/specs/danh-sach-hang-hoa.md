@@ -35,7 +35,6 @@
 | **Mở form Sửa** | Click Chỉnh sửa | JS AJAX `GET /HangHoa/GetItem?id=X` | `GetItem(id)` đọc thông tin hàng & tồn | Trả JSON ➜ điền form modal sửa |
 | **Lưu Sửa hàng** | Sửa form, "Cập nhật" | JS gom form ➜ AJAX `POST /HangHoa/Edit?id=X` | `Edit(id, form)` validate & cập nhật | Cập nhật `HangHoa`, `NguongTonKho` ➜ JSON `{success:true}` |
 | **Xóa hàng** | Click Xóa ➜ Xác nhận | Mở `#hhDeleteProductOv` ➜ AJAX `POST /HangHoa/Delete/{id}` | `Delete(id)` check 5 bảng GD, bọc Transaction xóa cascade ảnh & ngưỡng | Chưa có GD: Xóa thành công. Đã có GD: Trả `hasTransaction: true` kèm nút Ngừng bán |
-| **Tải file mẫu** | Bấm "Tải file mẫu" | Link `GET /HangHoa/DownloadTemplate` | ClosedXML tạo workbook 16 cột + 2 dòng mẫu | Trả file `Mau_Nhap_Hang_Hoa_KiotViet.xlsx` |
 | **Xuất file Excel** | Bấm "Xuất file" ➜ Chọn cột ➜ Bấm Xuất | Mở `#hhExportModalOv`, chọn cột ➜ `POST /HangHoa/ExportExcel` | ClosedXML lọc theo bộ lọc/hàng chọn, xuất đúng cột chọn | Trả file `Danh_Sach_Hang_Hoa_yyyyMMdd_HHmmss.xlsx` |
 | **Nhập file Excel** | Kéo thả file ➜ Bấm Thực hiện nhập | Mở `#hhImportModalOv`, FormData ➜ `POST /HangHoa/ImportExcel` | Validate cột bắt buộc `TenHang`, parse 16 trường, xử lý trùng mã, tạo PN đầu kỳ nếu có tồn ban đầu | Commit Transaction ➜ Trả JSON tổng kết & lỗi chi tiết ➜ reload bảng |
 
