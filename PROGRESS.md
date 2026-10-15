@@ -4,11 +4,11 @@ Cập nhật lần cuối: 2026-10-14 – Nâng cấp Form Thêm/Sửa Hàng hó
 
 ---
 
-- **Hoàn thiện Tùy chọn Ẩn/Hiện Cột KiotViet (Column Visibility) & Cố định Độ rộng Cột kèm Thanh cuộn ngang**:
-  - Thanh công cụ: Thay thế nút reload bằng nút icon `bi-grid-3x2-gap` mở popup 2 cột cân đối gồm 16 checkbox tương ứng 16 cột hàng hóa (loại bỏ liên kết kênh bán & thương hiệu).
-  - Tối ưu hiệu năng 0ms (Dynamic CSS): Áp dụng kỹ thuật chèn thẻ `<style id="hhDynamicColStyles">` để ẩn/hiện cột tức thì 0ms, không làm giật hay reload bảng, lưu tùy chọn hiển thị cột vào `localStorage`.
-  - Cố định độ rộng cột (Fixed Column Width): Đặt `table-layout: fixed; width: max-content; min-width: 100%;` trên `.tbl` và quy định kích thước cố định chặt chẽ (width, min-width, max-width) cho toàn bộ 16 cột (Mã hàng 130px, Tên hàng 280px, Giá bán 115px, Tồn kho 105px, v.v.).
-  - Thanh cuộn ngang mượt mà (Horizontal Scroll): Khi người dùng bật thêm nhiều cột hoặc xem trên màn hình hẹp, bảng mở rộng theo tổng chiều rộng các cột hiển thị và thanh cuộn ngang xuất hiện trơn tru trên `.kiot-table-scroll-body`, các cột hiện có giữ nguyên 100% độ rộng cố định, không bao giờ bị co ép méo mó hay rớt dòng số liệu.
+- **Hoàn thiện Tùy chọn Ẩn/Hiện Cột KiotViet (Column Visibility) Đồng bộ File Xuất & Cố định Độ rộng Cột**:
+  - Đồng bộ 100% với File Xuất: Đã loại bỏ hoàn toàn các cột không có trong file xuất (Hình ảnh, Mã vạch, Khách đặt, Thời gian tạo, Dự kiến hết hàng) khỏi menu Ẩn/Hiện cột và bảng dữ liệu.
+  - Menu Ẩn/Hiện cột (`bi-grid-3x2-gap`): Gồm 11 checkbox chuẩn tương ứng 11 trường dữ liệu thực tế (Loại hàng, Nhóm hàng, Mã hàng, Tên hàng, Giá bán, Giá vốn, Tồn kho, Tồn nhỏ nhất, Tồn lớn nhất, Vị trí, Trạng thái).
+  - Tối ưu hiệu năng 0ms (Dynamic CSS): Áp dụng kỹ thuật chèn thẻ `<style id="hhDynamicColStyles">` để ẩn/hiện cột tức thì 0ms, không làm giật hay reload bảng, tự động làm sạch và lưu tùy chọn vào `localStorage`.
+  - Cố định độ rộng cột & Thanh cuộn ngang: Đặt `table-layout: fixed; width: max-content; min-width: 100%;` trên `.tbl` và kích thước cố định chặt chẽ cho toàn bộ các cột; khi bật nhiều cột vượt màn hình sẽ xuất hiện thanh cuộn ngang mượt mà, không bao giờ bị co ép méo mó.
 - **Hoàn thiện Chức năng Sắp xếp 3 trạng thái Header Bảng Hàng hóa & Cố định Icon không tràn viền**:
   - Hỗ trợ sắp xếp 8 cột: Mã hàng (`mahang`), Tên hàng (`tenhang`), Giá bán (`giaban`), Giá vốn (`giavon`), Tồn kho (`tonkho`), Khách đặt (`khachdat`), Thời gian tạo (`ngaytao`), Dự kiến hết hàng (`dukienhethang`).
   - Chu trình click 3 trạng thái: Lần 1 Tăng dần (ASC) -> Lần 2 Giảm dần (DESC) -> Lần 3 Bình thường (None). Click cột khác tự động chuyển sang cột mới từ Tăng dần.

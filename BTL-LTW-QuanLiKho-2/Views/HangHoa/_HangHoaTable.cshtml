@@ -17,6 +17,12 @@
                 </span>
             </th>
             <th style="width: 50px;" class="text-center col-hinhanh">Ảnh</th>
+            <th style="width: 110px;" class="col-loaihang">
+                <div class="th-content"><span class="th-text">Loại hàng</span></div>
+            </th>
+            <th style="width: 140px;" class="col-nhomhang">
+                <div class="th-content"><span class="th-text">Nhóm hàng</span></div>
+            </th>
             <th style="width: 130px;" class="col-mahang sortable-th @(Model.SortBy == "mahang" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="mahang" title="Nhấn để sắp xếp theo Mã hàng">
                 <div class="th-content">
                     <span class="th-title-wrap">
@@ -26,9 +32,6 @@
                     </span>
                 </div>
             </th>
-            <th style="width: 130px;" class="col-mavach">
-                <div class="th-content"><span class="th-text">Mã vạch</span></div>
-            </th>
             <th style="width: 280px;" class="col-product-name col-tenhang sortable-th @(Model.SortBy == "tenhang" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="tenhang" title="Nhấn để sắp xếp theo Tên hàng">
                 <div class="th-content">
                     <span class="th-title-wrap">
@@ -37,12 +40,6 @@
                         else if (Model.SortBy == "tenhang" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                     </span>
                 </div>
-            </th>
-            <th style="width: 140px;" class="col-nhomhang">
-                <div class="th-content"><span class="th-text">Nhóm hàng</span></div>
-            </th>
-            <th style="width: 110px;" class="col-loaihang">
-                <div class="th-content"><span class="th-text">Loại hàng</span></div>
             </th>
             <th class="num col-giaban sortable-th @(Model.SortBy == "giaban" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" style="width: 115px;" data-col="giaban" title="Nhấn để sắp xếp theo Giá bán">
                 <div class="th-content">
@@ -71,41 +68,14 @@
                     </span>
                 </div>
             </th>
-            <th style="width: 130px;" class="col-vitri">
-                <div class="th-content"><span class="th-text">Vị trí</span></div>
-            </th>
-            <th class="num col-khachdat sortable-th @(Model.SortBy == "khachdat" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" style="width: 105px;" data-col="khachdat" title="Nhấn để sắp xếp theo Khách đặt">
-                <div class="th-content">
-                    <span class="th-title-wrap">
-                        <span class="th-text">Khách đặt</span>
-                        @if (Model.SortBy == "khachdat" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
-                        else if (Model.SortBy == "khachdat" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
-                    </span>
-                </div>
-            </th>
-            <th style="width: 150px;" class="col-ngaytao sortable-th @(Model.SortBy == "ngaytao" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="ngaytao" title="Nhấn để sắp xếp theo Thời gian tạo">
-                <div class="th-content">
-                    <span class="th-title-wrap">
-                        <span class="th-text">Thời gian tạo</span>
-                        @if (Model.SortBy == "ngaytao" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
-                        else if (Model.SortBy == "ngaytao" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
-                    </span>
-                </div>
-            </th>
-            <th style="width: 165px;" class="col-dukienhethang sortable-th @(Model.SortBy == "dukienhethang" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="dukienhethang" title="Nhấn để sắp xếp theo Dự kiến hết hàng">
-                <div class="th-content">
-                    <span class="th-title-wrap">
-                        <span class="th-text">Dự kiến hết hàng</span>
-                        @if (Model.SortBy == "dukienhethang" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
-                        else if (Model.SortBy == "dukienhethang" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
-                    </span>
-                </div>
-            </th>
             <th style="width: 130px;" class="col-tontothieu num">
-                <div class="th-content"><span class="th-text">Tồn ít nhất</span></div>
+                <div class="th-content"><span class="th-text">Tồn nhỏ nhất</span></div>
             </th>
             <th style="width: 140px;" class="col-toncaonhat num">
-                <div class="th-content"><span class="th-text">Tồn nhiều nhất</span></div>
+                <div class="th-content"><span class="th-text">Tồn lớn nhất</span></div>
+            </th>
+            <th style="width: 130px;" class="col-vitri">
+                <div class="th-content"><span class="th-text">Vị trí</span></div>
             </th>
             <th style="width: 160px;" class="col-trangthai">
                 <div class="th-content"><span class="th-text">Trạng thái</span></div>
@@ -118,20 +88,16 @@
             <td class="text-center"></td>
             <td class="text-center"></td>
             <td class="col-hinhanh"></td>
-            <td class="col-mahang"></td>
-            <td class="col-mavach"></td>
-            <td class="col-tenhang"></td>
-            <td class="col-nhomhang"></td>
             <td class="col-loaihang"></td>
+            <td class="col-nhomhang"></td>
+            <td class="col-mahang"></td>
+            <td class="col-tenhang"></td>
             <td class="num col-giaban"></td>
             <td class="num col-giavon"></td>
             <td class="num fw-bold text-dark col-tonkho">@Model.TotalStockSum.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</td>
-            <td class="col-vitri"></td>
-            <td class="num fw-bold text-dark col-khachdat">@Model.TotalKhachDatSum.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</td>
-            <td class="text-muted col-ngaytao">---</td>
-            <td class="text-muted col-dukienhethang">---</td>
             <td class="num col-tontothieu"></td>
             <td class="num col-toncaonhat"></td>
+            <td class="col-vitri"></td>
             <td class="col-trangthai"></td>
         </tr>
         @if (Model.Items.Any())
@@ -158,11 +124,14 @@
                             }
                         </div>
                     </td>
+                    <td class="col-loaihang text-muted small">
+                        Hàng hóa
+                    </td>
+                    <td class="col-nhomhang text-muted small">
+                        @(!string.IsNullOrEmpty(item.TenNhom) && item.TenNhom != "---" ? item.TenNhom : "---")
+                    </td>
                     <td class="col-mahang">
                         <span class="fw-semibold text-primary text-break">@item.MaHangNoiBo</span>
-                    </td>
-                    <td class="col-mavach text-muted small">
-                        ---
                     </td>
                     <td class="cell-product-name col-tenhang">
                         <div class="fw-semibold text-dark product-name-text">@item.TenHang</div>
@@ -170,12 +139,6 @@
                         {
                             <small class="text-muted d-block product-spec-text">@item.QuyCach</small>
                         }
-                    </td>
-                    <td class="col-nhomhang text-muted small">
-                        @(!string.IsNullOrEmpty(item.TenNhom) && item.TenNhom != "---" ? item.TenNhom : "---")
-                    </td>
-                    <td class="col-loaihang text-muted small">
-                        Hàng hóa
                     </td>
                     <td class="num text-dark col-giaban">
                         @item.GiaBan.ToString("N0", viCulture)
@@ -199,23 +162,14 @@
                             <span>@item.TonKho.ToString("N0", viCulture)</span>
                         }
                     </td>
-                    <td class="col-vitri text-muted small">
-                        @(!string.IsNullOrWhiteSpace(item.ViTri) ? item.ViTri : "---")
-                    </td>
-                    <td class="num text-muted col-khachdat">
-                        @item.KhachDat
-                    </td>
-                    <td class="text-muted small col-ngaytao">
-                        @(item.NgayTao?.ToString("dd/MM/yyyy HH:mm") ?? "---")
-                    </td>
-                    <td class="text-muted small col-dukienhethang">
-                        @item.DuKienHetHang
-                    </td>
                     <td class="num text-muted small col-tontothieu">
                         @(item.TonToiThieu.HasValue ? item.TonToiThieu.Value.ToString("N0", viCulture) : "0")
                     </td>
                     <td class="num text-muted small col-toncaonhat">
                         @(item.TonCaoNhat.HasValue && item.TonCaoNhat.Value < 999999999 ? item.TonCaoNhat.Value.ToString("N0", viCulture) : "---")
+                    </td>
+                    <td class="col-vitri text-muted small">
+                        @(!string.IsNullOrWhiteSpace(item.ViTri) ? item.ViTri : "---")
                     </td>
                     <td class="col-trangthai small">
                         @if (item.TrangThai == "DANG_BAN")

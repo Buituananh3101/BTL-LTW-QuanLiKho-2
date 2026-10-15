@@ -603,13 +603,6 @@ body {
   box-sizing: border-box;
 }
 
-#productTable .col-mavach {
-  width: 130px;
-  min-width: 130px;
-  max-width: 130px;
-  box-sizing: border-box;
-}
-
 #productTable .col-product-name,
 #productTable .col-tenhang {
   width: 280px;
@@ -657,27 +650,6 @@ body {
   width: 130px;
   min-width: 130px;
   max-width: 130px;
-  box-sizing: border-box;
-}
-
-#productTable .col-khachdat {
-  width: 105px;
-  min-width: 105px;
-  max-width: 105px;
-  box-sizing: border-box;
-}
-
-#productTable .col-ngaytao {
-  width: 150px;
-  min-width: 150px;
-  max-width: 150px;
-  box-sizing: border-box;
-}
-
-#productTable .col-dukienhethang {
-  width: 165px;
-  min-width: 165px;
-  max-width: 165px;
   box-sizing: border-box;
 }
 
