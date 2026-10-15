@@ -398,18 +398,116 @@
                     </ul>
                 </div>
 
-                <!-- 3 icon phụ của KiotViet -->
-                <button type="button" class="btn btn-tool d-none d-sm-inline-flex" title="Tải lại bảng" id="btnReloadTable">
-                    <i class="bi bi-arrow-clockwise"></i>
-                </button>
-                <button type="button" class="btn btn-tool" title="Cài đặt">
-                    <i class="bi bi-gear"></i>
-                </button>
+                <!-- Nút Ẩn/Hiện cột KiotViet (Thay thế nút reload) -->
+                <div class="dropdown d-inline-block position-relative" id="dropdownColConfigWrap">
+                    <button type="button" class="btn btn-tool" id="btnColumnConfig" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Tùy chọn hiển thị cột">
+                        <i class="bi bi-grid-3x2-gap"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end shadow kiot-col-config-menu" aria-labelledby="btnColumnConfig">
+                        <div class="kiot-col-grid">
+                            <!-- Cột trái (Left column - 8 cột) -->
+                            <div class="kiot-col-subcol">
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="hinhanh" />
+                                    <span>Hình ảnh</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="mahang" />
+                                    <span>Mã hàng</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="mavach" />
+                                    <span>Mã vạch</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="tenhang" />
+                                    <span>Tên hàng</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="nhomhang" />
+                                    <span>Nhóm hàng</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="loaihang" />
+                                    <span>Loại hàng</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="giaban" />
+                                    <span>Giá bán</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="giavon" />
+                                    <span>Giá vốn</span>
+                                </label>
+                            </div>
+                            <!-- Cột phải (Right column - 8 cột) -->
+                            <div class="kiot-col-subcol">
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="tonkho" />
+                                    <span>Tồn kho</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="vitri" />
+                                    <span>Vị trí</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="khachdat" />
+                                    <span>Khách đặt</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="ngaytao" />
+                                    <span>Thời gian tạo</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="dukienhethang" />
+                                    <span>Dự kiến hết hàng</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="tontothieu" />
+                                    <span>Định mức tồn ít nhất</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="toncaonhat" />
+                                    <span>Định mức tồn nhiều nhất</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="trangthai" />
+                                    <span>Trạng thái</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <button type="button" class="btn btn-tool" title="Trợ giúp" onclick="alert('Hướng dẫn sử dụng Quản lý Hàng hóa');">
                     <i class="bi bi-question-circle"></i>
                 </button>
             </div>
         </div>
+
+        <!-- Dynamic CSS cho ẩn/hiện cột tức thì không bị nhấp nháy -->
+        <style id="hhDynamicColStyles"></style>
+        <script>
+            (function () {
+                var defCols = ['hinhanh', 'mahang', 'tenhang', 'giaban', 'giavon', 'tonkho', 'dukienhethang', 'trangthai'];
+                var allCols = [
+                    'hinhanh', 'mahang', 'mavach', 'tenhang', 'nhomhang', 'loaihang', 'giaban', 'giavon',
+                    'tonkho', 'vitri', 'khachdat', 'ngaytao', 'dukienhethang', 'tontothieu', 'toncaonhat', 'trangthai'
+                ];
+                var saved = null;
+                try {
+                    saved = JSON.parse(localStorage.getItem('kiot_hanghoa_columns'));
+                } catch (e) {}
+                var activeCols = Array.isArray(saved) && saved.length > 0 ? saved : defCols;
+                var hiddenCols = allCols.filter(function (c) { return activeCols.indexOf(c) === -1; });
+                var css = '';
+                for (var i = 0; i < hiddenCols.length; i++) {
+                    css += '#productTable .col-' + hiddenCols[i] + ' { display: none !important; }\n';
+                }
+                var styleEl = document.getElementById('hhDynamicColStyles');
+                if (styleEl) styleEl.textContent = css;
+            })();
+        </script>
 
         <!-- Bảng danh sách hàng hóa -->
         <section id="content">
@@ -1563,8 +1661,49 @@ $(document).ready(function () {
         loadTable();
     });
 
-    $('#btnReloadTable').on('click', function () {
-        loadTable();
+    // ========================================================================
+    // QUẢN LÝ ẨN / HIỆN CỘT BẢNG HÀNG HÓA (KIOTVIET COLUMN VISIBILITY)
+    // ========================================================================
+    const ALL_COLS = [
+        'hinhanh', 'mahang', 'mavach', 'tenhang', 'nhomhang', 'loaihang', 'giaban', 'giavon',
+        'tonkho', 'vitri', 'khachdat', 'ngaytao', 'dukienhethang', 'tontothieu', 'toncaonhat', 'trangthai'
+    ];
+    const DEFAULT_COLS = ['hinhanh', 'mahang', 'tenhang', 'giaban', 'giavon', 'tonkho', 'dukienhethang', 'trangthai'];
+
+    function getActiveColumns() {
+        try {
+            const saved = JSON.parse(localStorage.getItem('kiot_hanghoa_columns'));
+            if (Array.isArray(saved) && saved.length > 0) return saved;
+        } catch (e) {}
+        return DEFAULT_COLS;
+    }
+
+    function applyColumnVisibility(activeCols) {
+        const hiddenCols = ALL_COLS.filter(c => !activeCols.includes(c));
+        let css = '';
+        hiddenCols.forEach(col => {
+            css += '#productTable .col-' + col + ' { display: none !important; }\n';
+        });
+        $('#hhDynamicColStyles').text(css);
+
+        // Đồng bộ trạng thái checkbox trong popup
+        $('.col-toggle-cb').each(function () {
+            const col = $(this).data('col');
+            $(this).prop('checked', activeCols.includes(col));
+        });
+    }
+
+    // Khởi tạo trạng thái checkbox theo cấu hình đã lưu
+    applyColumnVisibility(getActiveColumns());
+
+    // Bắt sự kiện khi click đổi checkbox cột
+    $(document).on('change', '.col-toggle-cb', function () {
+        const activeCols = [];
+        $('.col-toggle-cb:checked').each(function () {
+            activeCols.push($(this).data('col'));
+        });
+        localStorage.setItem('kiot_hanghoa_columns', JSON.stringify(activeCols));
+        applyColumnVisibility(activeCols);
     });
 
     // Phân trang AJAX

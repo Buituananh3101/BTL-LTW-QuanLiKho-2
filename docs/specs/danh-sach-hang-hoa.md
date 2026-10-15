@@ -54,6 +54,9 @@
 ### 3.2. Sắp xếp 3 trạng thái (3-State Column Sorting):
 Click header: Lần 1 Tăng dần (ASC `bi-arrow-up`) ➜ Lần 2 Giảm dần (DESC `bi-arrow-down`) ➜ Lần 3 Mặc định (Default, không hiện icon). Áp dụng cho 8 cột chính. Cột căn trái dùng inline-flex trong ô chống tràn viền (Dự kiến hết hàng 160px), cột số dùng padding-right 22px cố định vị trí icon không làm dịch chuyển chữ.
 
+### 3.3. Tùy chọn Cột & Độ rộng Cố định (Fixed Columns & Horizontal Scroll):
+Nút `bi-grid-3x2-gap` mở popup 16 cột (2 cột checkbox: Hình ảnh, Mã hàng, Mã vạch, Tên hàng, Nhóm hàng, Loại hàng, Giá bán, Giá vốn, Tồn kho, Vị trí, Khách đặt, Thời gian tạo, Dự kiến hết hàng, Định mức ít/nhiều nhất, Trạng thái). Dùng Dynamic CSS tức thì (0ms, không flicker), lưu vào `localStorage`. Toàn bộ cột được cố định chiều rộng (`table-layout: fixed; width: max-content; min-width: 100%;`), khi bật nhiều cột vượt màn hình sẽ xuất hiện thanh cuộn ngang mượt mà, không co ép méo mó cột.
+
 ---
 
 ## 4. Các Quy tắc Nghiệp vụ Bất biến
