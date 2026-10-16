@@ -1,11 +1,11 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-15 – Khắc phục Ngoại lệ Đọc Ô Excel An toàn trong ClosedXML (Phiên 37)
+Cập nhật lần cuối: 2026-10-16 – Khắc phục lỗi không nạp dữ liệu khi mở lại bản tạm Phiếu kiểm kho (Phiên 38)
 
 ---
 
 ## Đang làm
-- Kiểm tra người dùng nghiệm thu tính năng nhập/xuất Excel và ứng dụng chạy bình thường.
+- Kiểm tra người dùng nghiệm thu chức năng mở lại và chỉnh sửa bản tạm kiểm kho.
 
 ---
 
@@ -15,6 +15,17 @@ Cập nhật lần cuối: 2026-10-15 – Khắc phục Ngoại lệ Đọc Ô E
 ---
 
 ## Đã xong
+- **Sửa lỗi không nạp dữ liệu mặt hàng khi mở lại bản tạm Phiếu kiểm kho (Phiên 38)**:
+  - **Nguyên nhân cốt lõi**:
+    + Trong `_PhieuKiemKeForm.cshtml`, thẻ script cấu hình `<script id="stockTakeConfig" type="application/json">` trước đó tự lắp ráp chuỗi JSON thủ công bằng nội suy Razor `Select(l => $"{{\"pid\":{l.MaHang}... \"sys\":{l.SoLuongTheoSo}... \"cost\":{l.DonGia}}}")`.
+    + Trong môi trường Windows có định dạng văn hóa Việt Nam (`vi-VN`), các số thực/thập phân `decimal` (`SoLuongTheoSo`, `SoLuongThucTe`, `DonGia`) bị định dạng bằng dấu phẩy `,` (ví dụ `10,00`, `25000,00`). Điều này khiến chuỗi JSON sinh ra bị sai cú pháp nghiêm trọng (`"sys": 10,00`), đồng thời `JavaScriptStringEncode` mã hóa nháy đơn `'` thành `\'` (không hợp lệ trong JSON chuẩn).
+    + Trình duyệt khi chạy `JSON.parse(cfgEl.textContent)` trong `phieu-kiem-ke-form.js` gặp ngoại lệ cú pháp `SyntaxError`, rơi vào khối `catch`, làm `cfg.lines` bị rỗng (`[]`). Do đó bảng hàng hóa kiểm kho hiển thị trạng thái rỗng ("Thêm sản phẩm từ ô tìm kiếm hoặc file Excel") thay vì nạp các dòng hàng đã lưu.
+    + Ngoài ra, Action `PhieuKiemKeController.Edit(int id)` trả về nhầm `View("Create", model)` thay vì `View("Edit", model)`, làm sai tiêu đề trang.
+  - **Giải pháp**:
+    + Chuyển đổi toàn bộ việc khởi tạo `stockTakeConfig` trong `_PhieuKiemKeForm.cshtml` sang sử dụng thư viện chuẩn `System.Text.Json.JsonSerializer.Serialize` với `PropertyNamingPolicy = CamelCase` và `JavaScriptEncoder.UnsafeRelaxedJsonEscaping`. Đảm bảo 100% số thực luôn tuân thủ chuẩn JSON quốc tế (dấu chấm `.`), chuỗi tiếng Việt và ký tự đặc biệt được escape chuẩn xác.
+    + Cập nhật `PhieuKiemKeController.Edit(int id)` trả về đúng `View("Edit", model)`.
+    + Hoàn thiện kiểm tra an toàn trong `phieu-kiem-ke-form.js`: `cfgEl.textContent.trim()`, `Array.isArray(cfg.lines)`, đọc textarea ghi chú trực tiếp khi lưu tạm và hoàn thành.
+  - **Kiểm tra biên dịch**: `dotnet build` đạt 0 Errors, cú pháp `node -c phieu-kiem-ke-form.js` 0 lỗi.
 - **Khắc phục Ngoại lệ Đọc Ô Excel An toàn trong ClosedXML (Phiên 37)**:
   - **Nguyên nhân**:
     + Trong `ClosedXML 0.105.1`, các hàm `cell.GetString()` và `cell.GetDouble()` là hàm truy xuất kiểu nghiêm ngặt (Strict Typed). Nếu một ô chứa số (như Mã hàng, Barcode, Mã nhóm dạng số) hoặc text chứa số mà gọi `cell.GetString()`, ClosedXML sẽ ném ngoại lệ `System.InvalidCastException: Cell value is not text`. Ngược lại, nếu ô chứa chuỗi mà gọi `cell.GetDouble()`, ClosedXML cũng ném `InvalidCastException: Cell value is not number`.
@@ -256,6 +267,26 @@ Cập nhật lần cuối: 2026-10-15 – Khắc phục Ngoại lệ Đọc Ô E
 ---
 
 ## Nhật ký phiên
+- **2026-10-16 (Phiên 38 - Sáng)**:
+  - **Sửa lỗi không nạp dữ liệu mặt hàng khi mở lại bản tạm Phiếu kiểm kho**:
+    - **Nguyên nhân**: `<script id="stockTakeConfig">` trong `_PhieuKiemKeForm.cshtml` dùng Razor nội suy chuỗi thủ công; trên Windows văn hóa `vi-VN`, các số thập phân `decimal` (`sys`, `act`, `cost`) bị in dấu phẩy `,` (`10,00`), đồng thời `JavaScriptStringEncode` sinh ký tự `\'` làm `JSON.parse` trên client bị `SyntaxError` và bảng hàng hóa kiểm kho bị rỗng. Đồng thời `PhieuKiemKeController.Edit` trả về nhầm `View("Create")`.
+    - **Khắc phục**: Dùng `System.Text.Json.JsonSerializer.Serialize` với `PropertyNamingPolicy = CamelCase` và `UnsafeRelaxedJsonEscaping` để đảm bảo 100% JSON chuẩn quốc tế; sửa `PhieuKiemKeController.Edit` trả về `View("Edit", model)`; bổ sung kiểm tra an toàn trong `phieu-kiem-ke-form.js`.
+    - Kiểm tra biên dịch: `dotnet build` 0 Errors, cú pháp JavaScript 0 lỗi.
+- **2026-10-16 (Phiên 36 - Sáng)**:
+  - **Chuẩn hóa Nút chọn Thời gian Kiểm kho khớp 100% Danh sách Hàng hóa**:
+    - **HTML & Giao diện** (`_PhieuKiemKeFilterSidebar.cshtml`):
+      + Khối 2 radio: Radio 1 (`#dateAll` / `#labelDateAll`) mặc định hiển thị "Toàn thời gian" kèm icon `bi-chevron-right`; Radio 2 (`#dateCustom` / `#labelDateCustom`) hiển thị "Tùy chỉnh" kèm icon `bi-calendar3`.
+      + Popup chọn nhanh `#popupDateQuick`: Tinh gọn chuẩn 3 cột KiotViet giống hệt Hàng hóa (Theo ngày: Hôm nay, Hôm qua; Theo tuần: Tuần này, Tuần trước, 7 ngày qua; Theo tháng: Tháng này, Tháng trước, 30 ngày qua; Pill dưới: Toàn thời gian).
+      + Popup lịch 2 tháng `#popupDateCalendar`: Tích hợp Dual Calendar 2 tháng cạnh nhau (`#dateCalBody1`, `#dateCalBody2`), dải ngày tô màu xanh (`.in-range`, `.range-start`, `.range-end`), nút chuyển tháng, phím "Hôm nay", "Bỏ qua", và "Áp dụng".
+    - **JavaScript & Tương tác** (`phieu-kiem-ke-index.js`):
+      + Tái sử dụng thư viện jQuery (`$jq = window.jQuery`) theo chuẩn `hang-hoa-index.js`.
+      + Khắc phục triệt để lỗi double-fire / synthetic click khi nhấp vào label "Tùy chỉnh", chặn đóng/mở popup chập chờn.
+      + Đồng bộ hóa định dạng ngày `YYYY-MM-DD` (`formatDateISO`) thay vì ISO UTC string, ngăn chặn sai lệch múi giờ ngày bắt đầu/kết thúc.
+      + Đồng bộ `paintFilters()`, `loadTable()`, `triggerExport()` với mã `DateFilterType` chuẩn (`ALL`, `HOM_NAY`, `HOM_QUA`, `TUAN_NAY`, `TUAN_TRUOC`, `7_NGAY`, `THANG_NAY`, `THANG_TRUOC`, `30_NGAY`, `CUSTOM`).
+    - **Backend & Specs**:
+      + Đổi giá trị mặc định của `PhieuKiemKeFilterVM.DateFilterType` thành `"ALL"` (`KiemKhoViewModels.cs`).
+      + Đồng bộ tài liệu đặc tả `docs/specs/kiem-kho.md` (< 8.000 ký tự) theo Luật 12.
+    - Kiểm tra biên dịch `dotnet build` đạt 0 lỗi.
 - **2026-10-15 (Phiên 35 - Đêm)**:
   - **Đổi tiêu đề màn hình từ "Kiểm kho" thành "Phiếu kiểm kho" chuẩn KiotViet**:
     - Cập nhật tiêu đề sidebar `.kiot-sidebar-title` trong `_PhieuKiemKeFilterSidebar.cshtml` thành "Phiếu kiểm kho", mobile header thành "Bộ lọc phiếu kiểm kho".

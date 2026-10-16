@@ -351,7 +351,7 @@ public class PhieuKiemKeController : BaseKhoController
         };
 
         ViewBag.NhomHangs = await _context.NhomHangs.OrderBy(n => n.TenNhom).ToListAsync();
-        return View("Create", model);
+        return View("Edit", model);
     }
 
     // GET: PhieuKiemKe/Details/5

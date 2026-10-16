@@ -7,6 +7,7 @@
 
     const $ = (s, r = document) => r.querySelector(s);
     const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+    const $jq = window.jQuery;
     const app = $('#kiotContainer') || $('#kkIndexApp');
     if (!app) return;
 
@@ -16,11 +17,11 @@
     const exportUrl = app.dataset.exportUrl;
     let currentWhId = parseInt(app.dataset.warehouseId) || 0;
 
-    // Trạng thái bộ lọc
+    // Trạng thái bộ lọc (Mặc định ALL - Toàn thời gian chuẩn Hàng hóa)
     const F = {
         q: '',
         mode: 'preset',
-        preset: 'thangnay',
+        preset: 'ALL',
         from: null,
         to: null,
         statuses: ['NHAP', 'DA_DIEU_CHINH'],
@@ -33,189 +34,127 @@
         openId: null
     };
 
-    /* ===== PRESETS KHOẢNG NGÀY ===== */
-    const PRESETS = [
-        ['Theo ngày', [['homnay', 'Hôm nay'], ['homqua', 'Hôm qua']]],
-        ['Theo tuần', [['tuannay', 'Tuần này'], ['tuantruoc', 'Tuần trước'], ['7ngay', '7 ngày qua']]],
-        ['Theo tháng', [['thangnay', 'Tháng này'], ['thangtruoc', 'Tháng trước'], ['30ngay', '30 ngày qua']]],
-        ['Theo quý', [['quynay', 'Quý này'], ['quytruoc', 'Quý trước']]],
-        ['Theo năm', [['namnay', 'Năm nay'], ['namtruoc', 'Năm trước']]],
-        ['Toàn bộ', [['toanthoigian', 'Toàn thời gian']]]
-    ];
-
-    const p2 = n => String(n).padStart(2, '0');
-    const formatDateVN = d => {
-        const dt = new Date(d);
-        return `${p2(dt.getDate())}/${p2(dt.getMonth() + 1)}/${dt.getFullYear()}`;
-    };
-    const sod = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const eod = d => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
-    const addD = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
-
-    function presetRange(k) {
-        const now = new Date(), t = sod(now), y = t.getFullYear(), m = t.getMonth(), dow = (t.getDay() + 6) % 7, q = Math.floor(m / 3);
-        switch (k) {
-            case 'homnay': return [t, eod(t)];
-            case 'homqua': return [addD(t, -1), eod(addD(t, -1))];
-            case 'tuannay': return [addD(t, -dow), eod(addD(t, 6 - dow))];
-            case 'tuantruoc': return [addD(t, -dow - 7), eod(addD(t, -dow - 1))];
-            case '7ngay': return [addD(t, -6), eod(t)];
-            case 'thangnay': return [new Date(y, m, 1), eod(new Date(y, m + 1, 0))];
-            case 'thangtruoc': return [new Date(y, m - 1, 1), eod(new Date(y, m, 0))];
-            case '30ngay': return [addD(t, -29), eod(t)];
-            case 'quynay': return [new Date(y, q * 3, 1), eod(new Date(y, q * 3 + 3, 0))];
-            case 'quytruoc': return [new Date(y, q * 3 - 3, 1), eod(new Date(y, q * 3, 0))];
-            case 'namnay': return [new Date(y, 0, 1), eod(new Date(y, 11, 31))];
-            case 'namtruoc': return [new Date(y - 1, 0, 1), eod(new Date(y - 1, 11, 31))];
-            case 'toanthoigian': return [new Date(2000, 0, 1), new Date(y + 10, 11, 31)];
-            default: return [new Date(y, m, 1), eod(new Date(y, m + 1, 0))];
-        }
+    function formatDateVN(date) {
+        if (!date) return '';
+        const d = new Date(date);
+        return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
     }
 
-    function presetLabel(k) {
-        if (k === 'toanthoigian') return 'Toàn thời gian';
-        for (const g of PRESETS) {
-            for (const p of g[1]) {
-                if (p[0] === k) return p[1];
-            }
-        }
-        return 'Tháng này';
-    }
-
-    function getActiveRange() {
-        if (F.mode === 'preset') return presetRange(F.preset);
-        return [sod(F.from || new Date()), eod(F.to || F.from || new Date())];
+    function formatDateISO(date) {
+        if (!date) return '';
+        const d = new Date(date);
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
 
     /* ===== FLOATING POPUP ĐỊNH VỊ FIXED (CHUẨN HÀNG HÓA) ===== */
-    let lastToggleTime = 0;
-    let lastToggledSelector = '';
-
     function toggleFloatingPopup(triggerElement, popupSelector) {
-        const popup = $(popupSelector);
-        if (!popup) return;
-
-        const now = Date.now();
-        const isVisible = popup.style.display === 'block';
-
-        // Bảo vệ chống double-fire / synthetic click từ label -> input: nếu vừa bật popup này trong vòng 250ms thì giữ nguyên hiển thị
-        if (isVisible && lastToggledSelector === popupSelector && (now - lastToggleTime < 250)) {
+        const popup = $jq(popupSelector);
+        if (popup.is(':visible')) {
+            popup.hide();
             return;
         }
+        $jq('.quick-date-popup, .dual-calendar-popup').hide();
 
-        $$('.quick-date-popup, .dual-calendar-popup').forEach(p => p.style.display = 'none');
-        if (isVisible) {
-            lastToggledSelector = '';
-            return;
-        }
-
-        const rect = triggerElement ? triggerElement.getBoundingClientRect() : { left: 20, bottom: 200, top: 200 };
-        const popupWidth = popupSelector.includes('Calendar') ? 540 : 330;
+        const trigger = $jq(triggerElement);
+        const rect = trigger[0].getBoundingClientRect();
+        const popupWidth = popup.outerWidth() || (popupSelector.includes('Calendar') ? 540 : 330);
 
         let left = rect.left;
         let top = rect.bottom + 6;
 
-        const maxRight = window.innerWidth - 10;
+        const maxRight = $jq(window).width() - 10;
         if (left + popupWidth > maxRight) {
             left = maxRight - popupWidth;
         }
         if (left < 10) left = 10;
 
-        const popupHeight = 320;
-        if (top + popupHeight > window.innerHeight - 10) {
+        const popupHeight = popup.outerHeight() || 300;
+        if (top + popupHeight > $jq(window).height() - 10) {
             top = Math.max(10, rect.top - popupHeight - 6);
         }
 
-        popup.style.position = 'fixed';
-        popup.style.top = top + 'px';
-        popup.style.left = left + 'px';
-        popup.style.zIndex = '1060';
-        popup.style.display = 'block';
-
-        lastToggleTime = now;
-        lastToggledSelector = popupSelector;
+        popup.css({
+            position: 'fixed',
+            top: top + 'px',
+            left: left + 'px',
+            zIndex: 1060
+        }).show();
     }
 
-    /* ===== LỊCH TÙY CHỈNH 2 THÁNG (DUAL CALENDAR) ===== */
+    /* ===== LỊCH TÙY CHỈNH 2 THÁNG (DUAL CALENDAR - CHUẨN HÀNG HÓA) ===== */
     const todayObj = new Date();
     const calState = {
-        currentYear: todayObj.getFullYear(),
-        currentMonth: todayObj.getMonth(),
-        start: todayObj,
-        end: todayObj
+        date: {
+            currentYear: todayObj.getFullYear(),
+            currentMonth: todayObj.getMonth(),
+            start: todayObj,
+            end: todayObj
+        }
     };
 
-    function renderDualCalendar() {
-        const y = calState.currentYear;
-        const m = calState.currentMonth;
-        renderCalMonth(1, y, m);
+    function renderDualCalendar(target = 'date') {
+        const y = calState[target].currentYear;
+        const m = calState[target].currentMonth;
+        renderCalMonth(target, 1, y, m);
         let y2 = y;
         let m2 = m + 1;
         if (m2 > 11) { m2 = 0; y2++; }
-        renderCalMonth(2, y2, m2);
-        updateCalendarHeader();
+        renderCalMonth(target, 2, y2, m2);
+        updateCalendarHeader(target);
     }
 
-    function renderCalMonth(idx, year, month) {
-        const titleEl = $(`#calMonthTitle${idx}`);
-        if (titleEl) titleEl.textContent = `Tháng ${month + 1} ${year}`;
-        const tbody = $(`#calBody${idx}`);
-        if (!tbody) return;
-        tbody.innerHTML = '';
+    function renderCalMonth(target, idx, year, month) {
+        const prefix = '#' + target;
+        $jq(`${prefix}MonthTitle${idx}`).text(`Tháng ${month + 1} ${year}`);
+        const tbody = $jq(`${prefix}CalBody${idx}`).empty();
 
         const firstDayOfWeek = (new Date(year, month, 1).getDay() + 6) % 7;
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const daysInPrevMonth = new Date(year, month, 0).getDate();
 
-        let tr = document.createElement('tr');
+        let tr = $jq('<tr>');
         let dayCount = 0;
 
         for (let i = 0; i < firstDayOfWeek; i++) {
             const d = daysInPrevMonth - firstDayOfWeek + i + 1;
-            const td = document.createElement('td');
-            td.className = 'text-muted empty-day';
-            td.textContent = d;
-            tr.appendChild(td);
+            tr.append(`<td class="text-muted empty-day">${d}</td>`);
             dayCount++;
         }
 
         for (let day = 1; day <= daysInMonth; day++) {
             const curDate = new Date(year, month, day);
-            const iso = curDate.getFullYear() + '-' + p2(curDate.getMonth() + 1) + '-' + p2(day);
-            const td = document.createElement('td');
-            td.className = 'cal-day';
-            td.dataset.iso = iso;
-            td.textContent = day;
+            const iso = curDate.getFullYear() + '-' + String(curDate.getMonth() + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+            const td = $jq(`<td class="cal-day" data-target="${target}" data-iso="${iso}">${day}</td>`);
 
-            const s = calState.start;
-            const e = calState.end;
+            const s = calState[target].start;
+            const e = calState[target].end;
             if (s && e) {
                 const curT = new Date(year, month, day).setHours(0, 0, 0, 0);
                 const sT = new Date(s).setHours(0, 0, 0, 0);
                 const eT = new Date(e).setHours(0, 0, 0, 0);
                 if (curT >= sT && curT <= eT) {
-                    td.classList.add('in-range');
-                    if (curT === sT) td.classList.add('range-start');
-                    if (curT === eT) td.classList.add('range-end');
+                    td.addClass('in-range');
+                    if (curT === sT) td.addClass('range-start');
+                    if (curT === eT) td.addClass('range-end');
                 }
             }
 
-            tr.appendChild(td);
+            tr.append(td);
             dayCount++;
             if (dayCount % 7 === 0 || day === daysInMonth) {
-                tbody.appendChild(tr);
-                tr = document.createElement('tr');
+                tbody.append(tr);
+                tr = $jq('<tr>');
             }
         }
     }
 
-    function updateCalendarHeader() {
-        const s = calState.start;
-        const e = calState.end;
+    function updateCalendarHeader(target = 'date') {
+        const s = calState[target].start;
+        const e = calState[target].end;
+        const prefix = '#' + target;
         if (s && e) {
-            const fromText = $('#calFromText'), toText = $('#calToText');
-            if (fromText) fromText.textContent = formatDateVN(s);
-            if (toText) toText.textContent = formatDateVN(e);
+            $jq(`${prefix}CalFromText`).text(formatDateVN(s));
+            $jq(`${prefix}CalToText`).text(formatDateVN(e));
         }
     }
 
@@ -319,26 +258,31 @@
 
     /* ===== CẬP NHẬT GIAO DIỆN BỘ LỌC ===== */
     function paintFilters() {
-        const rdP = $('#rdPreset'), rdC = $('#rdCustom');
-        if (rdP) rdP.checked = F.mode === 'preset';
-        if (rdC) rdC.checked = F.mode === 'custom';
+        const isPreset = F.mode === 'preset';
+        const isAll = isPreset && (F.preset === 'ALL' || F.preset === 'TOANTHOIGIAN');
 
-        const pTxt = $('#presetTxt'), cTxt = $('#customTxt');
-        if (pTxt) pTxt.textContent = presetLabel(F.preset);
-        if (cTxt) {
-            if (F.mode === 'custom' && F.from && F.to) {
-                cTxt.textContent = `${formatDateVN(F.from)} - ${formatDateVN(F.to)}`;
-            } else {
-                cTxt.textContent = 'Tùy chỉnh';
-            }
+        const rdAll = $('#dateAll'), rdCustom = $('#dateCustom');
+        if (rdAll) rdAll.checked = isPreset;
+        if (rdCustom) rdCustom.checked = !isPreset;
+
+        const dotDate = $('#dotDate');
+        if (dotDate) {
+            dotDate.classList.toggle('on', !isAll);
         }
 
-        $('#dotDate')?.classList.toggle('on', !(F.mode === 'preset' && (F.preset === 'thangnay' || F.preset === 'toanthoigian')));
-        $('#dotSt')?.classList.toggle('on', !(F.statuses.length === 2 && F.statuses.includes('NHAP') && F.statuses.includes('DA_DIEU_CHINH')));
-        $('#dotUser')?.classList.toggle('on', F.creatorIds.length > 0);
+        const dotSt = $('#dotSt');
+        if (dotSt) {
+            const isDefaultSt = F.statuses.length === 2 && F.statuses.includes('NHAP') && F.statuses.includes('DA_DIEU_CHINH');
+            dotSt.classList.toggle('on', !isDefaultSt);
+        }
 
-        // Active state cho nút trong popupQuickDate
-        $$('#popupQuickDate .quick-date-btn, #popupQuickDate .quick-date-pill-all').forEach(btn => {
+        const dotUser = $('#dotUser');
+        if (dotUser) {
+            dotUser.classList.toggle('on', F.creatorIds.length > 0);
+        }
+
+        // Active state cho nút trong popupDateQuick
+        $$('#popupDateQuick .quick-date-btn, #popupDateQuick .quick-date-pill-all').forEach(btn => {
             btn.classList.toggle('active', F.mode === 'preset' && btn.dataset.val === F.preset);
         });
 
@@ -353,12 +297,11 @@
 
         if (F.q.trim()) params.append('Q', F.q.trim());
         if (F.mode === 'preset') {
-            params.append('DateFilterType', F.preset.toUpperCase());
+            params.append('DateFilterType', F.preset || 'ALL');
         } else {
             params.append('DateFilterType', 'CUSTOM');
-            const [a, b] = getActiveRange();
-            params.append('FromDate', a.toISOString());
-            params.append('ToDate', b.toISOString());
+            if (F.from) params.append('FromDate', formatDateISO(F.from));
+            if (F.to) params.append('ToDate', formatDateISO(F.to));
         }
 
         F.statuses.forEach(s => params.append('Statuses', s));
@@ -473,12 +416,11 @@
             p.append('type', type);
             if (F.q.trim()) p.append('Q', F.q.trim());
             if (F.mode === 'preset') {
-                p.append('DateFilterType', F.preset.toUpperCase());
+                p.append('DateFilterType', F.preset || 'ALL');
             } else {
                 p.append('DateFilterType', 'CUSTOM');
-                const [a, b] = getActiveRange();
-                p.append('FromDate', a.toISOString());
-                p.append('ToDate', b.toISOString());
+                if (F.from) p.append('FromDate', formatDateISO(F.from));
+                if (F.to) p.append('ToDate', formatDateISO(F.to));
             }
             F.statuses.forEach(s => p.append('Statuses', s));
             F.creatorIds.forEach(id => p.append('CreatorIds', id));
@@ -498,282 +440,208 @@
             };
         }
 
-        // 1. Popup Chọn nhanh thời gian (Quick Date)
-        function openQuickDate(triggerEl) {
-            const rdP = $('#rdPreset');
-            if (rdP) rdP.checked = true;
-            const targetEl = triggerEl || $('#btnOpenQuickDate') || $('#labelPreset');
-            toggleFloatingPopup(targetEl, '#popupQuickDate');
-        }
-        const btnOpenQuick = $('#btnOpenQuickDate'), labelPreset = $('#labelPreset');
-        if (btnOpenQuick) {
-            btnOpenQuick.onclick = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                openQuickDate(btnOpenQuick);
-            };
-        }
-        if (labelPreset) {
-            labelPreset.onclick = (e) => {
-                if (e.target.closest('#btnOpenQuickDate')) return;
-                e.preventDefault();
-                e.stopPropagation();
-                openQuickDate(labelPreset);
-            };
-        }
-
-        const rdP = $('#rdPreset');
-        if (rdP) {
-            rdP.onchange = () => {
-                F.mode = 'preset';
-                F.from = null;
-                F.to = null;
-                F.page = 1;
-                const cTxt = $('#customTxt');
-                if (cTxt) cTxt.textContent = 'Tùy chỉnh';
-                paintFilters();
-                loadTable();
-            };
-        }
-
-        // Click nút chọn khoảng ngày nhanh trong popupQuickDate
-        document.addEventListener('click', e => {
-            const btn = e.target.closest('#popupQuickDate .quick-date-btn, #popupQuickDate .quick-date-pill-all');
-            if (!btn) return;
+        // 1. Popup Chọn nhanh thời gian (Quick Date - Chuẩn Hàng hóa)
+        $jq('#btnOpenDateQuick').on('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            const val = btn.dataset.val;
-            const text = btn.textContent.trim();
+            $jq('#dateAll').prop('checked', true);
+            toggleFloatingPopup(this, '#popupDateQuick');
+        });
 
-            const pop = $('#popupQuickDate');
-            if (pop) pop.style.display = 'none';
-            const rdP = $('#rdPreset');
-            if (rdP) rdP.checked = true;
+        $jq('#labelDateAll').on('click', function (e) {
+            if ($jq(e.target).closest('#btnOpenDateQuick').length) return;
+            e.stopPropagation();
+            toggleFloatingPopup(this, '#popupDateQuick');
+        });
 
-            $$('#popupQuickDate .quick-date-btn, #popupQuickDate .quick-date-pill-all').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        // 2. Popup Lịch 2 tháng (Dual Calendar - Chuẩn Hàng hóa)
+        $jq('#btnOpenDateCalendar').on('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $jq('#dateCustom').prop('checked', true);
+            toggleFloatingPopup(this, '#popupDateCalendar');
+        });
+
+        $jq('#labelDateCustom').on('click', function (e) {
+            if ($jq(e.target).closest('#btnOpenDateCalendar').length) return;
+            e.stopPropagation();
+            $jq('#dateCustom').prop('checked', true);
+            toggleFloatingPopup(this, '#popupDateCalendar');
+        });
+
+        $jq('#dateCustom').on('click', function (e) {
+            e.stopPropagation();
+            toggleFloatingPopup(this, '#popupDateCalendar');
+        });
+
+        // 3. Radio Toàn thời gian thay đổi
+        $jq('#dateAll').on('change', function () {
+            if ($jq(this).is(':checked')) {
+                F.mode = 'preset';
+                F.preset = 'ALL';
+                F.from = null;
+                F.to = null;
+                $jq('#textDateRange').text('Toàn thời gian');
+                $jq('#textDateCustom').text('Tùy chỉnh');
+                $jq('#popupDateQuick .quick-date-btn, #popupDateQuick .quick-date-pill-all').removeClass('active');
+                F.page = 1;
+                paintFilters();
+                loadTable();
+            }
+        });
+
+        // 4. Click chọn khoảng ngày trong popupDateQuick
+        $jq(document).on('click', '#popupDateQuick .quick-date-btn, #popupDateQuick .quick-date-pill-all', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            const val = $jq(this).data('val');
+            const text = $jq(this).text().trim();
 
             F.mode = 'preset';
             F.preset = val;
             F.from = null;
             F.to = null;
+            $jq('#textDateRange').text(text);
+            $jq('#textDateCustom').text('Tùy chỉnh');
+            $jq('#popupDateQuick').hide();
+            $jq('#dateAll').prop('checked', true);
+            $jq('#popupDateQuick').find('.quick-date-btn, .quick-date-pill-all').removeClass('active');
+            $jq(this).addClass('active');
+
             F.page = 1;
-            const pTxt = $('#presetTxt');
-            if (pTxt) pTxt.textContent = text;
-            const cTxt = $('#customTxt');
-            if (cTxt) cTxt.textContent = 'Tùy chỉnh';
             paintFilters();
             loadTable();
         });
 
-        // 2. Popup Lịch 2 tháng tùy chỉnh (Dual Calendar - Chuẩn hóa theo HangHoa)
-        function openCalendar(triggerEl) {
-            const rdC = $('#rdCustom');
-            if (rdC) rdC.checked = true;
-
-            if (F.mode === 'custom' && F.from && F.to) {
-                calState.start = new Date(F.from);
-                calState.end = new Date(F.to);
-                calState.currentYear = calState.start.getFullYear();
-                calState.currentMonth = calState.start.getMonth();
-            } else {
-                const now = new Date();
-                calState.start = now;
-                calState.end = now;
-                calState.currentYear = now.getFullYear();
-                calState.currentMonth = now.getMonth();
-            }
-            selectingStart = true;
-            renderDualCalendar();
-            const targetEl = triggerEl || $('#btnOpenCalendar') || $('#rdCustom');
-            toggleFloatingPopup(targetEl, '#popupCalendar');
-        }
-
-        const btnOpenCal = $('#btnOpenCalendar'), rdC = $('#rdCustom');
-        if (btnOpenCal) {
-            btnOpenCal.onclick = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                openCalendar(btnOpenCal);
-            };
-        }
-        if (rdC) {
-            rdC.onclick = (e) => {
-                e.stopPropagation();
-                openCalendar(rdC);
-            };
-        }
-
-        // Click ngày trong Dual Calendar
+        // 5. Dual Calendar interactions
         let selectingStart = true;
-        document.addEventListener('click', e => {
-            const calDay = e.target.closest('#popupCalendar .cal-day');
-            if (calDay) {
-                e.preventDefault();
-                e.stopPropagation();
-                const iso = calDay.dataset.iso;
-                const clickedDate = new Date(iso);
+        $jq(document).on('click', '.cal-day[data-target="date"]', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            const target = $jq(this).data('target');
+            const iso = $jq(this).data('iso');
+            const clickedDate = new Date(iso);
 
-                if (selectingStart) {
-                    calState.start = clickedDate;
-                    calState.end = clickedDate;
-                    selectingStart = false;
-                } else {
-                    if (clickedDate < calState.start) {
-                        calState.end = calState.start;
-                        calState.start = clickedDate;
-                    } else {
-                        calState.end = clickedDate;
-                    }
-                    selectingStart = true;
-                }
-                renderDualCalendar();
-                return;
-            }
-
-            const prevBtn = e.target.closest('#popupCalendar .btn-cal-prev');
-            if (prevBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                calState.currentMonth--;
-                if (calState.currentMonth < 0) {
-                    calState.currentMonth = 11;
-                    calState.currentYear--;
-                }
-                renderDualCalendar();
-                return;
-            }
-
-            const nextBtn = e.target.closest('#popupCalendar .btn-cal-next');
-            if (nextBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                calState.currentMonth++;
-                if (calState.currentMonth > 11) {
-                    calState.currentMonth = 0;
-                    calState.currentYear++;
-                }
-                renderDualCalendar();
-                return;
-            }
-
-            const todayBtn = e.target.closest('#popupCalendar .btn-cal-today');
-            if (todayBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                const t = new Date();
-                calState.currentYear = t.getFullYear();
-                calState.currentMonth = t.getMonth();
-                calState.start = t;
-                calState.end = t;
-                selectingStart = true;
-                renderDualCalendar();
-                return;
-            }
-
-            const closeBtn = e.target.closest('#popupCalendar .btn-close-popup');
-            if (closeBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                const pop = $('#popupCalendar');
-                if (pop) pop.style.display = 'none';
-                if (F.mode === 'preset') {
-                    const rdP = $('#rdPreset');
-                    if (rdP) rdP.checked = true;
-                }
-                return;
-            }
-
-            const applyBtn = e.target.closest('#popupCalendar .btn-apply-calendar');
-            if (applyBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                const s = calState.start || new Date();
-                const eDate = calState.end || s;
-                const rangeText = `${formatDateVN(s)} - ${formatDateVN(eDate)}`;
-
-                const pop = $('#popupCalendar');
-                if (pop) pop.style.display = 'none';
-                const rdC = $('#rdCustom');
-                if (rdC) rdC.checked = true;
-
-                F.mode = 'custom';
-                F.from = s;
-                F.to = eDate;
-                F.page = 1;
-                const cTxt = $('#customTxt');
-                if (cTxt) cTxt.textContent = rangeText;
-                paintFilters();
-                loadTable();
-                return;
-            }
-        });
-
-        // 3. Đóng popup khi cuộn sidebar hoặc click ngoài hoặc phím ESC
-        const filterBox = $('.kiot-filter-box');
-        if (filterBox) {
-            filterBox.addEventListener('scroll', () => {
-                $$('.quick-date-popup, .dual-calendar-popup').forEach(p => p.style.display = 'none');
-                if (F.mode === 'preset') {
-                    const rdP = $('#rdPreset');
-                    if (rdP) rdP.checked = true;
-                }
-                const openDropdown = $('.kiot-ms-dropdown.show');
-                if (openDropdown) {
-                    const box = openDropdown.parentElement?.querySelector('.kiot-multiselect-box');
-                    if (box) checkSidebarDropdownDirection(box, openDropdown);
-                }
-            });
-        }
-
-        document.addEventListener('click', e => {
-            if (e.target.closest('.dual-calendar-popup, .quick-date-popup')) return;
-            const targetBlock = e.target.closest('.f-block');
-            if (!targetBlock) {
-                $$('.quick-date-popup, .dual-calendar-popup').forEach(p => p.style.display = 'none');
-                if (F.mode === 'preset') {
-                    const rdP = $('#rdPreset');
-                    if (rdP) rdP.checked = true;
-                }
-                $$('.kiot-ms-dropdown').forEach(d => {
-                    d.classList.remove('show', 'drop-up');
-                    d.style.maxHeight = '';
-                });
-                $$('.kiot-multiselect-box').forEach(b => b.classList.remove('open'));
+            if (selectingStart) {
+                calState[target].start = clickedDate;
+                calState[target].end = clickedDate;
+                selectingStart = false;
             } else {
-                $$('.dual-calendar-popup, .quick-date-popup').forEach(p => {
-                    if (!targetBlock.contains(p)) {
-                        p.style.display = 'none';
-                        if (F.mode === 'preset') {
-                            const rdP = $('#rdPreset');
-                            if (rdP) rdP.checked = true;
-                        }
-                    }
-                });
-                $$('.kiot-ms-dropdown').forEach(d => {
-                    if (!targetBlock.contains(d)) {
-                        d.classList.remove('show', 'drop-up');
-                        d.style.maxHeight = '';
-                    }
-                });
-                $$('.kiot-multiselect-box').forEach(b => {
-                    if (!targetBlock.contains(b)) b.classList.remove('open');
-                });
+                if (clickedDate < calState[target].start) {
+                    calState[target].end = calState[target].start;
+                    calState[target].start = clickedDate;
+                } else {
+                    calState[target].end = clickedDate;
+                }
+                selectingStart = true;
+            }
+            renderDualCalendar(target);
+        });
+
+        $jq(document).on('click', '.btn-cal-prev[data-target="date"]', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            const target = $jq(this).data('target');
+            calState[target].currentMonth--;
+            if (calState[target].currentMonth < 0) {
+                calState[target].currentMonth = 11;
+                calState[target].currentYear--;
+            }
+            renderDualCalendar(target);
+        });
+
+        $jq(document).on('click', '.btn-cal-next[data-target="date"]', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            const target = $jq(this).data('target');
+            calState[target].currentMonth++;
+            if (calState[target].currentMonth > 11) {
+                calState[target].currentMonth = 0;
+                calState[target].currentYear++;
+            }
+            renderDualCalendar(target);
+        });
+
+        $jq(document).on('click', '.btn-cal-today[data-target="date"]', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            const target = $jq(this).data('target');
+            const t = new Date();
+            calState[target].currentYear = t.getFullYear();
+            calState[target].currentMonth = t.getMonth();
+            calState[target].start = t;
+            calState[target].end = t;
+            selectingStart = true;
+            renderDualCalendar(target);
+        });
+
+        $jq(document).on('click', '.btn-close-popup', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            $jq('.dual-calendar-popup').hide();
+        });
+
+        $jq(document).on('click', '.btn-apply-calendar[data-target="date"]', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            const target = $jq(this).data('target');
+            const s = calState[target].start || new Date();
+            const eDate = calState[target].end || s;
+            const rangeText = `${formatDateVN(s)} - ${formatDateVN(eDate)}`;
+
+            $jq('#popupDateCalendar').hide();
+            $jq('#dateCustom').prop('checked', true);
+            F.mode = 'custom';
+            F.preset = 'CUSTOM';
+            F.from = s;
+            F.to = eDate;
+            $jq('#textDateRange').text('Toàn thời gian');
+            $jq('#textDateCustom').text(rangeText);
+            $jq('#popupDateQuick .quick-date-btn, #popupDateQuick .quick-date-pill-all').removeClass('active');
+            F.page = 1;
+            paintFilters();
+            loadTable();
+        });
+
+        // 6. Đóng popup khi cuộn sidebar hoặc click ngoài hoặc phím ESC
+        $jq('.kiot-filter-box').on('scroll', function () {
+            $jq('.quick-date-popup, .dual-calendar-popup').hide();
+            const openDropdown = $('.kiot-ms-dropdown.show');
+            if (openDropdown) {
+                const box = openDropdown.parentElement?.querySelector('.kiot-multiselect-box');
+                if (box) checkSidebarDropdownDirection(box, openDropdown);
             }
         });
 
-        document.addEventListener('keydown', e => {
+        $jq(document).on('click', function (e) {
+            if (!document.contains(e.target)) return;
+            if ($jq(e.target).closest('.dual-calendar-popup, .quick-date-popup').length) return;
+
+            const $targetBlock = $jq(e.target).closest('.f-block');
+            if (!$targetBlock.length) {
+                $jq('.quick-date-popup, .dual-calendar-popup').hide();
+                $jq('.kiot-ms-dropdown').removeClass('show drop-up').css('max-height', '');
+                $jq('.kiot-multiselect-box').removeClass('open');
+            } else {
+                $jq('.dual-calendar-popup').not($targetBlock.find('.dual-calendar-popup')).hide();
+                $jq('.quick-date-popup').not($targetBlock.find('.quick-date-popup')).hide();
+                $jq('.kiot-ms-dropdown').not($targetBlock.find('.kiot-ms-dropdown')).removeClass('show drop-up').css('max-height', '');
+                $jq('.kiot-multiselect-box').not($targetBlock.find('.kiot-multiselect-box')).removeClass('open');
+            }
+        });
+
+        $jq(document).on('keydown', function (e) {
             if (e.key === 'Escape') {
-                $$('.quick-date-popup, .dual-calendar-popup').forEach(p => p.style.display = 'none');
-                if (F.mode === 'preset') {
-                    const rdP = $('#rdPreset');
-                    if (rdP) rdP.checked = true;
-                }
-                $$('.kiot-ms-dropdown').forEach(d => {
-                    d.classList.remove('show', 'drop-up');
-                    d.style.maxHeight = '';
-                });
-                $$('.kiot-multiselect-box').forEach(b => b.classList.remove('open'));
+                $jq('.quick-date-popup, .dual-calendar-popup').hide();
+                $jq('.kiot-ms-dropdown').removeClass('show drop-up').css('max-height', '');
+                $jq('.kiot-multiselect-box').removeClass('open');
             }
         });
 

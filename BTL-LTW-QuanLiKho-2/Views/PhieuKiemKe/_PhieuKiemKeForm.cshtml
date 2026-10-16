@@ -192,28 +192,45 @@
 <input type="file" id="fileIn" accept=".csv,.xlsx,.xls" hidden>
 
 <!-- Dữ liệu khởi tạo nạp an toàn từ Razor ViewModel -->
-<script id="stockTakeConfig" type="application/json">
-{
-    "id": @Model.MaPhieuKiemKe,
-    "code": "@Model.MaPhieuHienThi",
-    "warehouseId": @Model.MaKho,
-    "created": "@Model.ThoiDiemChot.ToString("yyyy-MM-ddTHH:mm:ss")",
-    "note": "@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(Model.GhiChu ?? ""))",
-    "isReadOnly": @(Model.IsReadOnly ? "true" : "false"),
-    "groups": [
-        @if (ViewBag.NhomHangs != null)
-        {
-            var groups = (IEnumerable<BTL_LTW_QuanLiKho_2.Models.NhomHang>)ViewBag.NhomHangs;
-            var groupItems = groups.Select(g => $"{{\"id\":{g.MaNhom},\"name\":\"{Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(g.TenNhom))}\"}}");
-            @Html.Raw(string.Join(",", groupItems))
-        }
-    ],
-    "lines": [
-        @if (Model.Lines != null && Model.Lines.Any())
-        {
-            var lineItems = Model.Lines.Select(l => $"{{\"pid\":{l.MaHang},\"code\":\"{Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(l.MaHangNoiBo))}\",\"name\":\"{Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(l.TenHang))}\",\"unit\":\"{Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(l.TenDvt))}\",\"group\":\"{Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(l.TenNhom))}\",\"sys\":{l.SoLuongTheoSo},\"act\":{(l.SoLuongThucTe.HasValue ? l.SoLuongThucTe.Value.ToString() : "null")},\"cost\":{l.DonGia}}}");
-            @Html.Raw(string.Join(",", lineItems))
-        }
-    ]
+@{
+    var groupsList = new List<object>();
+    if (ViewBag.NhomHangs != null)
+    {
+        var groups = (IEnumerable<BTL_LTW_QuanLiKho_2.Models.NhomHang>)ViewBag.NhomHangs;
+        groupsList = groups.Select(g => (object)new { id = g.MaNhom, name = g.TenNhom }).ToList();
+    }
+
+    var linesList = (Model.Lines ?? new List<BTL_LTW_QuanLiKho_2.ViewModels.PhieuKiemKeLineVM>()).Select(l => new
+    {
+        pid = l.MaHang,
+        code = l.MaHangNoiBo ?? "",
+        name = l.TenHang ?? "",
+        unit = l.TenDvt ?? "",
+        group = l.TenNhom ?? "",
+        sys = l.SoLuongTheoSo,
+        act = l.SoLuongThucTe,
+        cost = l.DonGia
+    }).ToList();
+
+    var configObj = new
+    {
+        id = Model.MaPhieuKiemKe,
+        code = Model.MaPhieuHienThi,
+        warehouseId = Model.MaKho,
+        created = Model.ThoiDiemChot.ToString("yyyy-MM-ddTHH:mm:ss"),
+        note = Model.GhiChu ?? "",
+        isReadOnly = Model.IsReadOnly,
+        groups = groupsList,
+        lines = linesList
+    };
+
+    var configJson = System.Text.Json.JsonSerializer.Serialize(configObj, new System.Text.Json.JsonSerializerOptions
+    {
+        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    });
 }
+<script id="stockTakeConfig" type="application/json">
+@Html.Raw(configJson)
 </script>
+

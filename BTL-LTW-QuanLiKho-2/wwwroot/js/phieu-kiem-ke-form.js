@@ -20,8 +20,12 @@
     // Đọc cấu hình từ thẻ script JSON an toàn
     const cfgEl = $('#stockTakeConfig');
     let cfg = { id: 0, code: '', warehouseId: 1, created: new Date().toISOString(), note: '', isReadOnly: false, groups: [], lines: [] };
-    if (cfgEl) {
-        try { cfg = JSON.parse(cfgEl.textContent); } catch (e) { console.error('Lỗi parse stockTakeConfig:', e); }
+    if (cfgEl && cfgEl.textContent && cfgEl.textContent.trim()) {
+        try {
+            cfg = JSON.parse(cfgEl.textContent.trim());
+        } catch (e) {
+            console.error('Lỗi parse stockTakeConfig:', e, cfgEl.textContent);
+        }
     }
 
     const fmt = n => (Number(n) || 0).toLocaleString('vi-VN');
@@ -36,10 +40,10 @@
         code: cfg.code || '',
         warehouseId: cfg.warehouseId || 1,
         created: cfg.created ? new Date(cfg.created) : new Date(),
-        note: cfg.note || '',
+        note: cfg.note || ($('#fNote') ? $('#fNote').value : ''),
         tab: 'all',
         dirty: false,
-        lines: cfg.lines || [],
+        lines: Array.isArray(cfg.lines) ? cfg.lines : [],
         recent: [],
         cols: { dvt: 1, gt: 1 }
     };
@@ -684,7 +688,7 @@
             maPhieuKiemKe: FM.id,
             maKho: FM.warehouseId,
             thoiDiemChot: FM.created,
-            ghiChu: FM.note,
+            ghiChu: $('#fNote') ? $('#fNote').value : FM.note,
             lines: FM.lines.map(l => ({
                 maHang: l.pid,
                 soLuongTheoSo: fsys(l),
@@ -736,7 +740,7 @@
                             maPhieuKiemKe: FM.id,
                             maKho: FM.warehouseId,
                             thoiDiemChot: FM.created,
-                            ghiChu: FM.note,
+                            ghiChu: $('#fNote') ? $('#fNote').value : FM.note,
                             lines: FM.lines.map(l => ({
                                 maHang: l.pid,
                                 soLuongTheoSo: fsys(l),

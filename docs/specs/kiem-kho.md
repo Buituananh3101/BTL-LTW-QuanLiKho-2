@@ -39,7 +39,7 @@
 - **Toolbar (`.kiot-toolbar-row`)**: Ô tìm kiếm `#keywordSearch` (F3 debounce), nút `+ Kiểm kho` (`btn-primary`), nút `Xuất file` (dropdown danh sách/chi tiết), nút `Hiển thị cột`, tải lại bảng (`bi-arrow-clockwise`), trợ giúp.
 - **Sidebar (`.kiot-sidebar-col`)**:
   - Tiêu đề "Phiếu kiểm kho", nút tròn F4 ở ranh giới giữa 2 cột thu gọn/mở rộng sidebar.
-  - Thời gian: Chọn nhanh (Hôm nay, Hôm qua, Tuần này, Tháng này, Quý, Năm) hoặc popup lịch 2 tháng tùy chỉnh.
+  - Thời gian: Chuẩn 100% Danh sách Hàng hóa với 2 radio (Toàn thời gian / Tùy chỉnh), popup chọn nhanh 3 cột (Ngày, Tuần, Tháng + pill Toàn thời gian) và popup lịch 2 tháng Dual Calendar.
   - Trạng thái: Checkbox Phiếu tạm (`NHAP`), Đã cân bằng (`DA_DIEU_CHINH`), Đã hủy (`HUY`).
   - Người tạo: Multi-select chuẩn KiotViet (`.kiot-multiselect-box`, thẻ `.kiot-pill-tag`, badge `+N khác`, checkbox và tìm kiếm sticky `.kiot-ms-search`).
   - Hỗ trợ responsive mobile drawer qua `#btnMobileFilter` và `#sidebarBackdrop`.

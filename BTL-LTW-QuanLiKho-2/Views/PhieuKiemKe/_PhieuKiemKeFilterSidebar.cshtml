@@ -18,91 +18,79 @@
         <div class="f-block position-relative">
             <h6>Thời gian <span class="filter-dot" id="dotDate"></span></h6>
             <div class="form-check mb-1">
-                <input class="form-check-input" type="radio" name="dm" id="rdPreset" checked />
-                <label class="form-check-label d-flex justify-content-between align-items-center" for="rdPreset" id="labelPreset" style="cursor: pointer;">
-                    <span id="presetTxt">Tháng này</span>
-                    <i class="bi bi-chevron-right text-muted small" id="btnOpenQuickDate"></i>
+                <input class="form-check-input" type="radio" name="dateFilter" id="dateAll" checked />
+                <label class="form-check-label d-flex justify-content-between align-items-center" for="dateAll" id="labelDateAll" style="cursor: pointer;">
+                    <span id="textDateRange">Toàn thời gian</span>
+                    <i class="bi bi-chevron-right text-muted small" id="btnOpenDateQuick"></i>
                 </label>
             </div>
 
-            <!-- Popup chọn nhanh thời gian (chuẩn KiotViet 3 cột giống Danh sách Hàng hóa) -->
-            <div class="quick-date-popup" id="popupQuickDate">
+            <!-- Popup chọn nhanh thời gian (chuẩn KiotViet 3 cột giống hệt Danh sách Hàng hóa) -->
+            <div class="quick-date-popup" id="popupDateQuick">
                 <div class="quick-date-grid">
                     <div class="quick-date-col">
                         <div class="quick-date-col-title">Theo ngày</div>
-                        <div class="quick-date-btn" data-val="homnay">Hôm nay</div>
-                        <div class="quick-date-btn" data-val="homqua">Hôm qua</div>
+                        <div class="quick-date-btn" data-target="date" data-val="HOM_NAY">Hôm nay</div>
+                        <div class="quick-date-btn" data-target="date" data-val="HOM_QUA">Hôm qua</div>
                     </div>
                     <div class="quick-date-col">
                         <div class="quick-date-col-title">Theo tuần</div>
-                        <div class="quick-date-btn" data-val="tuannay">Tuần này</div>
-                        <div class="quick-date-btn" data-val="tuantruoc">Tuần trước</div>
-                        <div class="quick-date-btn" data-val="7ngay">7 ngày qua</div>
+                        <div class="quick-date-btn" data-target="date" data-val="TUAN_NAY">Tuần này</div>
+                        <div class="quick-date-btn" data-target="date" data-val="TUAN_TRUOC">Tuần trước</div>
+                        <div class="quick-date-btn" data-target="date" data-val="7_NGAY">7 ngày qua</div>
                     </div>
                     <div class="quick-date-col">
                         <div class="quick-date-col-title">Theo tháng</div>
-                        <div class="quick-date-btn active" data-val="thangnay">Tháng này</div>
-                        <div class="quick-date-btn" data-val="thangtruoc">Tháng trước</div>
-                        <div class="quick-date-btn" data-val="30ngay">30 ngày qua</div>
+                        <div class="quick-date-btn" data-target="date" data-val="THANG_NAY">Tháng này</div>
+                        <div class="quick-date-btn" data-target="date" data-val="THANG_TRUOC">Tháng trước</div>
+                        <div class="quick-date-btn" data-target="date" data-val="30_NGAY">30 ngày qua</div>
                     </div>
                 </div>
-                <div class="quick-date-grid mt-2">
-                    <div class="quick-date-col">
-                        <div class="quick-date-col-title">Theo quý</div>
-                        <div class="quick-date-btn" data-val="quynay">Quý này</div>
-                        <div class="quick-date-btn" data-val="quytruoc">Quý trước</div>
-                    </div>
-                    <div class="quick-date-col">
-                        <div class="quick-date-col-title">Theo năm</div>
-                        <div class="quick-date-btn" data-val="namnay">Năm nay</div>
-                        <div class="quick-date-btn" data-val="namtruoc">Năm trước</div>
-                    </div>
-                </div>
-                <button type="button" class="quick-date-pill-all mt-2" data-val="toanthoigian">Toàn thời gian</button>
+                <button type="button" class="quick-date-pill-all" data-target="date" data-val="ALL">Toàn thời gian</button>
             </div>
 
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="dm" id="rdCustom" />
-                <label class="form-check-label d-flex justify-content-between align-items-center" for="rdCustom" id="labelCustom" style="cursor: pointer;">
-                    <span id="customTxt">Tùy chỉnh</span>
-                    <i class="bi bi-calendar3 text-muted small" id="btnOpenCalendar"></i>
+                <input class="form-check-input" type="radio" name="dateFilter" id="dateCustom" />
+                <label class="form-check-label d-flex justify-content-between align-items-center" for="dateCustom" id="labelDateCustom" style="cursor: pointer;">
+                    <span id="textDateCustom">Tùy chỉnh</span>
+                    <i class="bi bi-calendar3 text-muted small" id="btnOpenDateCalendar"></i>
                 </label>
             </div>
 
             <!-- Popup Lịch 2 tháng cho Tùy chỉnh (Giống hệt Hàng hóa) -->
-            <div class="dual-calendar-popup" id="popupCalendar">
+            <div class="dual-calendar-popup" id="popupDateCalendar">
                 <div class="dual-calendar-header">
-                    Từ ngày: <span class="fw-bold text-primary" id="calFromText">--</span> - Đến ngày: <span class="fw-bold text-primary" id="calToText">--</span>
+                    Từ ngày: <span class="fw-bold text-primary" id="dateCalFromText">--</span> - Đến ngày: <span class="fw-bold text-primary" id="dateCalToText">--</span>
                 </div>
                 <div class="dual-calendar-body">
                     <div class="dual-cal-month">
                         <div class="dual-cal-nav">
-                            <button type="button" class="btn-cal-prev">‹</button>
-                            <span id="calMonthTitle1">Tháng 10 2026</span>
-                            <button type="button" class="btn-cal-next">›</button>
+                            <button type="button" class="btn-cal-prev" data-target="date">‹</button>
+                            <span id="dateMonthTitle1">Tháng 10 2026</span>
+                            <button type="button" class="btn-cal-next" data-target="date">›</button>
                         </div>
                         <table class="dual-cal-table">
                             <thead><tr><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>T7</th><th>CN</th></tr></thead>
-                            <tbody id="calBody1"></tbody>
+                            <tbody id="dateCalBody1"></tbody>
                         </table>
                     </div>
                     <div class="dual-cal-month">
                         <div class="dual-cal-nav">
-                            <button type="button" class="btn-cal-prev">‹</button>
-                            <span id="calMonthTitle2">Tháng 11 2026</span>
-                            <button type="button" class="btn-cal-next">›</button>
+                            <button type="button" class="btn-cal-prev" data-target="date">‹</button>
+                            <span id="dateMonthTitle2">Tháng 11 2026</span>
+                            <button type="button" class="btn-cal-next" data-target="date">›</button>
                         </div>
                         <table class="dual-cal-table">
                             <thead><tr><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>T7</th><th>CN</th></tr></thead>
-                            <tbody id="calBody2"></tbody>
+                            <tbody id="dateCalBody2"></tbody>
                         </table>
                     </div>
                 </div>
                 <div class="dual-calendar-footer">
-                    <a href="javascript:void(0)" class="text-primary small text-decoration-none fw-bold btn-cal-today">Hôm nay</a>
+                    <a href="javascript:void(0)" class="text-primary small text-decoration-none fw-bold btn-cal-today" data-target="date">Hôm nay</a>
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-3 btn-close-popup">Bỏ qua</button>
-                        <button type="button" class="btn btn-primary btn-sm py-1 px-3 btn-apply-calendar">Áp dụng</button>
+                        <button type="button" class="btn btn-primary btn-sm py-1 px-3 btn-apply-calendar" data-target="date">Áp dụng</button>
                     </div>
                 </div>
             </div>
