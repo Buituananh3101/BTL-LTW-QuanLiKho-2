@@ -1,8 +1,40 @@
 using Microsoft.EntityFrameworkCore;
 using BTL_LTW_QuanLiKho_2.Models;
+// Tự động định vị ContentRootPath trỏ đúng vào thư mục project chứa Views và wwwroot
+var contentRoot = Directory.GetCurrentDirectory();
+if (!Directory.Exists(Path.Combine(contentRoot, "Views")))
+{
+    var projectSubDir = Path.Combine(contentRoot, "BTL-LTW-QuanLiKho-2");
+    if (Directory.Exists(Path.Combine(projectSubDir, "Views")))
+    {
+        contentRoot = projectSubDir;
+    }
+    else
+    {
+        var baseDir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (baseDir != null && baseDir.Exists)
+        {
+            if (Directory.Exists(Path.Combine(baseDir.FullName, "Views")))
+            {
+                contentRoot = baseDir.FullName;
+                break;
+            }
+            if (Directory.Exists(Path.Combine(baseDir.FullName, "BTL-LTW-QuanLiKho-2", "Views")))
+            {
+                contentRoot = Path.Combine(baseDir.FullName, "BTL-LTW-QuanLiKho-2");
+                break;
+            }
+            baseDir = baseDir.Parent;
+        }
+    }
+}
+Directory.SetCurrentDirectory(contentRoot);
 
-var builder = WebApplication.CreateBuilder(args);
-
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    ContentRootPath = contentRoot
+});
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddJsonOptions(options =>
 {

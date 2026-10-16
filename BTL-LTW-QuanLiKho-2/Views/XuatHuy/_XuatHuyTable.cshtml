@@ -25,12 +25,30 @@
                         </span>
                     </div>
                 </th>
+                <th data-col="gt" style="width: 150px;" class="num r text-end sortable-th @(Model.SortBy == "gt" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tổng giá trị hủy">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Tổng giá trị hủy</span>
+                            @if (Model.SortBy == "gt" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "gt" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
                 <th data-col="tg" style="width: 150px;" class="sortable-th @(Model.SortBy == "tg" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Thời gian">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Thời gian</span>
                             @if (Model.SortBy == "tg" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
                             else if (Model.SortBy == "tg" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th data-col="tgt" style="width: 150px; display: none;" class="sortable-th @(Model.SortBy == "tgt" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Thời gian tạo">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Thời gian tạo</span>
+                            @if (Model.SortBy == "tgt" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "tgt" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
@@ -43,12 +61,21 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="gt" style="width: 150px;" class="num r text-end sortable-th @(Model.SortBy == "gt" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tổng giá trị hủy">
+                <th data-col="nxh" style="width: 150px; display: none;" class="sortable-th @(Model.SortBy == "nxh" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Người xuất hủy">
                     <div class="th-content">
                         <span class="th-title-wrap">
-                            <span class="th-text">Tổng giá trị hủy</span>
-                            @if (Model.SortBy == "gt" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
-                            else if (Model.SortBy == "gt" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                            <span class="th-text">Người xuất hủy</span>
+                            @if (Model.SortBy == "nxh" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "nxh" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th data-col="nt" style="width: 150px; display: none;" class="sortable-th @(Model.SortBy == "nt" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Người tạo">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Người tạo</span>
+                            @if (Model.SortBy == "nt" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "nt" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
@@ -76,7 +103,7 @@
             @if (!Model.Items.Any())
             {
                 <tr>
-                    <td colspan="8" class="p-0">
+                    <td colspan="11" class="p-0">
                         <div class="empty d-block py-5 text-center">
                             <div class="ico mb-3"><i class="bi bi-trash fs-1 text-primary"></i></div>
                             <h5 class="fw-bold">Không tìm thấy phiếu xuất hủy</h5>
@@ -98,10 +125,13 @@
                                 <i class="bi @(item.DaDanhDau ? "bi-star-fill" : "bi-star")"></i>
                             </span>
                         </td>
-                        <td data-col="ma"><span class="fw-semibold text-primary">@item.MaPhieuHienThi</span></td>
+                        <td data-col="ma"><span class="text-break">@item.MaPhieuHienThi</span></td>
+                        <td data-col="gt" class="r text-end">@item.TongGiaTriHuy.ToString("N0", viCulture)</td>
                         <td data-col="tg">@item.NgayLap.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td data-col="tgt" style="display: none;">@item.NgayLap.ToString("dd/MM/yyyy HH:mm")</td>
                         <td data-col="kho">@item.TenKho</td>
-                        <td data-col="gt" class="r text-end fw-semibold">@item.TongGiaTriHuy.ToString("N0", viCulture)</td>
+                        <td data-col="nxh" style="display: none;">@(string.IsNullOrEmpty(item.TenNguoiXacNhan) ? item.TenNguoiLap : item.TenNguoiXacNhan)</td>
+                        <td data-col="nt" style="display: none;">@item.TenNguoiLap</td>
                         <td data-col="ghi" class="note text-truncate" title="@item.GhiChu">@item.GhiChu</td>
                         <td data-col="st">
                             @if (item.TrangThai == "DA_XAC_NHAN")
@@ -121,10 +151,10 @@
 
                     <!-- Khối chi tiết bung ra (Inline Drawer / Accordion) khớp KiotViet Screenshot 1 -->
                     <tr class="dtl" id="dtl-@item.MaPhieuXuat" style="display: none;">
-                        <td colspan="8" class="p-0 border-0">
+                        <td colspan="11" class="p-0">
                             <div class="dp shadow-sm" data-d="@item.MaPhieuXuat">
-                                <div class="dp-tabs"><span class="dp-tab">Thông tin</span></div>
-                                <h2 class="d-flex align-items-center gap-2 mt-2">
+                                <div class="dp-tabs"><span class="dp-tab active">Thông tin</span></div>
+                                <h2 class="d-flex align-items-center gap-2">
                                     <span class="fw-bold" style="font-size: 18px; color: #1e293b;">@item.MaPhieuHienThi</span>
                                     @if (item.TrangThai == "DA_XAC_NHAN")
                                     {
@@ -139,53 +169,47 @@
                                         <span class="badge bg-primary-subtle text-primary border-0 px-2 py-1 rounded-pill" style="font-weight: 500; font-size: 12px;">Phiếu tạm</span>
                                     }
                                 </h2>
-                                <div class="meta text-muted small mt-2 d-flex flex-wrap gap-3">
+                                <div class="meta text-muted small mt-2">
                                     <span>Người tạo: <strong class="text-dark">@item.TenNguoiLap</strong></span>
-                                    <span>Thời gian: @item.NgayLap.ToString("dd/MM/yyyy HH:mm")</span>
                                     <span>Người xuất hủy: <strong class="text-dark">@(string.IsNullOrEmpty(item.TenNguoiXacNhan) ? item.TenNguoiLap : item.TenNguoiXacNhan)</strong></span>
+                                    <span>Ngày xuất hủy: <strong class="text-dark">@item.NgayLap.ToString("dd/MM/yyyy HH:mm")</strong></span>
                                     <span>Chi nhánh: <strong class="text-dark">@item.TenKho</strong></span>
                                 </div>
 
                                 <table class="dtl-tbl table table-sm table-bordered mt-3 mb-0" style="background: #fff;">
                                     <thead style="background: #f8fafc;">
                                         <tr>
-                                            <th style="width: 50px; text-align: center; font-weight: 600; font-size: 13px; color: #334155;">STT</th>
-                                            <th style="width: 170px; font-weight: 600; font-size: 13px; color: #334155;">Mã hàng</th>
+                                            <th style="width: 200px; font-weight: 600; font-size: 13px; color: #334155;">Mã hàng</th>
                                             <th style="font-weight: 600; font-size: 13px; color: #334155;">Tên hàng</th>
-                                            <th style="width: 100px; font-weight: 600; font-size: 13px; color: #334155;">ĐVT</th>
-                                            <th class="r text-end" style="width: 120px; font-weight: 600; font-size: 13px; color: #334155;">Số lượng hủy</th>
+                                            <th class="r text-end" style="width: 120px; font-weight: 600; font-size: 13px; color: #334155;">SL hủy</th>
                                             <th class="r text-end" style="width: 130px; font-weight: 600; font-size: 13px; color: #334155;">Giá vốn</th>
                                             <th class="r text-end" style="width: 140px; font-weight: 600; font-size: 13px; color: #334155;">Giá trị hủy</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr class="fin">
-                                            <td></td>
                                             <td><input class="form-control form-control-sm dtl-search-code" placeholder="Tìm mã hàng" style="border-radius: 4px; border: 1px solid #d1d5db; height: 28px; font-size: 12.5px;"></td>
                                             <td><input class="form-control form-control-sm dtl-search-name" placeholder="Tìm tên hàng" style="border-radius: 4px; border: 1px solid #d1d5db; height: 28px; font-size: 12.5px;"></td>
-                                            <td colspan="5" class="bg-transparent border-0"></td>
+                                            <td colspan="3" class="bg-transparent border-0"></td>
                                         </tr>
                                     </tbody>
                                     <tbody class="dl">
                                         @if (item.Lines.Any())
                                         {
-                                            int stt = 1;
                                             foreach (var l in item.Lines)
                                             {
                                                 <tr class="dtl-line-row" data-code="@l.MaHangNoiBo.ToLower()" data-name="@l.TenHang.ToLower()">
-                                                    <td class="text-center text-muted">@(stt++)</td>
-                                                    <td><span class="text-break fw-semibold">@l.MaHangNoiBo</span></td>
+                                                    <td><span class="text-primary fw-medium text-break">@l.MaHangNoiBo</span></td>
                                                     <td>@l.TenHang</td>
-                                                    <td>@l.TenDvt</td>
-                                                    <td class="r text-end fw-semibold">@l.SoLuongXuat.ToString("N0", viCulture)</td>
+                                                    <td class="r text-end">@l.SoLuongXuat.ToString("N0", viCulture)</td>
                                                     <td class="r text-end">@l.DonGiaXuat.ToString("N0", viCulture)</td>
-                                                    <td class="r text-end fw-semibold text-danger">@l.ThanhTien.ToString("N0", viCulture)</td>
+                                                    <td class="r text-end">@l.ThanhTien.ToString("N0", viCulture)</td>
                                                 </tr>
                                             }
                                         }
                                         else
                                         {
-                                            <tr><td colspan="7" class="text-muted text-center py-3">Không có hàng nào trong phiếu xuất hủy này.</td></tr>
+                                            <tr><td colspan="5" class="text-muted text-center py-3">Không có hàng nào trong phiếu xuất hủy này.</td></tr>
                                         }
                                     </tbody>
                                 </table>
@@ -193,16 +217,16 @@
                                 <!-- Khối Ghi chú + Tổng kết số liệu bên phải -->
                                 <div class="dp-bottom d-flex gap-4 align-items-start mt-3">
                                     <div class="flex-grow-1" style="min-width: 250px;">
-                                        <textarea class="form-control dp-note" style="height: 105px; resize: none; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13.5px;" @(item.TrangThai == "HUY" ? "disabled" : "") placeholder="Ghi chú">@item.GhiChu</textarea>
+                                        <textarea class="form-control dp-note" style="height: 105px; resize: none; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13.5px;" @(item.TrangThai == "HUY" ? "disabled" : "") placeholder="Chưa có">@item.GhiChu</textarea>
                                     </div>
                                     <div class="sums" style="flex: 0 0 280px; width: 280px;">
                                         <div class="d-flex justify-content-between py-1">
-                                            <span class="text-muted" style="font-size: 13.5px;">Tổng số lượng hủy:</span>
-                                            <span class="text-dark fw-bold" style="font-size: 13.5px;">@item.TongSoLuong.ToString("N0", viCulture)</span>
+                                            <span class="text-muted" style="font-size: 13.5px;">Tổng số lượng hủy</span>
+                                            <span class="text-dark fw-medium" style="font-size: 13.5px;">@item.TongSoLuong.ToString("N0", viCulture)</span>
                                         </div>
-                                        <div class="d-flex justify-content-between py-1 border-top mt-1 pt-1">
-                                            <span class="text-muted" style="font-size: 13.5px;">Tổng giá trị hủy:</span>
-                                            <span class="text-danger fw-bold fs-6">@item.TongGiaTriHuy.ToString("N0", viCulture) đ</span>
+                                        <div class="d-flex justify-content-between py-1">
+                                            <span class="text-muted" style="font-size: 13.5px;">Tổng giá trị hủy</span>
+                                            <span class="text-dark fw-medium" style="font-size: 13.5px;">@item.TongGiaTriHuy.ToString("N0", viCulture)</span>
                                         </div>
                                     </div>
                                 </div>
@@ -211,15 +235,9 @@
                                 <div class="dp-actions d-flex align-items-center gap-2 mt-3 pt-3 border-top">
                                     @if (item.TrangThai != "HUY")
                                     {
-                                        <button type="button" class="btn btn-sm btn-outline-danger btn-cancel-doc" data-id="@item.MaPhieuXuat" data-code="@item.MaPhieuHienThi" data-status="@item.TrangThai">
-                                            <i class="bi bi-trash me-1"></i>Hủy bỏ
+                                        <button type="button" class="btn btn-sm btn-outline-secondary btn-cancel-doc" data-id="@item.MaPhieuXuat" data-code="@item.MaPhieuHienThi" data-status="@item.TrangThai">
+                                            <i class="bi bi-trash me-1"></i>Hủy
                                         </button>
-                                    }
-                                    @if (item.TrangThai == "NHAP")
-                                    {
-                                        <a href="@Url.Action("Edit", "XuatHuy", new { id = item.MaPhieuXuat })" class="btn btn-sm btn-primary">
-                                            <i class="bi bi-pencil me-1"></i>Mở phiếu
-                                        </a>
                                     }
                                     <a href="@Url.Action("Create", "XuatHuy", new { copyFromId = item.MaPhieuXuat })" class="btn btn-sm btn-outline-secondary">
                                         <i class="bi bi-copy me-1"></i>Sao chép
@@ -227,15 +245,22 @@
                                     <a href="@Url.Action("Export", "XuatHuy", new { type = "detail", id = item.MaPhieuXuat })" class="btn btn-sm btn-outline-secondary" target="_blank">
                                         <i class="bi bi-box-arrow-up me-1"></i>Xuất file
                                     </a>
+                                    <span class="ms-auto"></span>
                                     @if (item.TrangThai != "HUY")
                                     {
-                                        <button type="button" class="btn btn-sm btn-outline-primary btn-save-note" data-id="@item.MaPhieuXuat">
-                                            <i class="bi bi-check2 me-1"></i>Lưu
+                                        <button type="button" class="btn btn-sm btn-outline-secondary btn-save-note" data-id="@item.MaPhieuXuat">
+                                            <i class="bi bi-floppy me-1"></i>Lưu
                                         </button>
                                     }
-                                    <button type="button" class="btn btn-sm btn-outline-secondary btn-print-doc" data-id="@item.MaPhieuXuat">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print();">
                                         <i class="bi bi-printer me-1"></i>In
                                     </button>
+                                    @if (item.TrangThai == "NHAP")
+                                    {
+                                        <a href="@Url.Action("Edit", "XuatHuy", new { id = item.MaPhieuXuat })" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-pencil-square me-1"></i>Mở phiếu
+                                        </a>
+                                    }
                                 </div>
                             </div>
                         </td>
@@ -247,4 +272,4 @@
 </div>
 
 <!-- Phân trang chuẩn KiotViet LEGO -->
-<partial name="_Pagination" model="Model.PagedData" />
+@await Html.PartialAsync("_Pagination", Model.PagedData, new ViewDataDictionary(ViewData) { { "ItemLabel", "phiếu xuất hủy" } })

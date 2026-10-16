@@ -350,6 +350,12 @@ public class XuatHuyController : BaseKhoController
             return NotFound("Không tìm thấy phiếu xuất hủy.");
         }
 
+        // Nếu phiếu đã hoàn thành hoặc đã hủy -> chuyển sang trang Details chỉ đọc
+        if (phieu.TrangThai != "NHAP")
+        {
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
         var nhanViens = await _context.NhanViens
             .Where(n => n.TrangThai == "DANG_LAM")
             .Select(n => new CreatorItemVM { MaNv = n.MaNv, TenNv = n.HoTen })
@@ -388,6 +394,63 @@ public class XuatHuyController : BaseKhoController
         };
 
         return View(form);
+    }
+
+    // GET: XuatHuy/Details/5
+    public async Task<IActionResult> Details(int id)
+    {
+        var phieu = await _context.PhieuXuats
+            .Include(p => p.MaKhoNavigation)
+            .Include(p => p.MaNvlapNavigation)
+            .Include(p => p.MaNvxacNhanNavigation)
+            .Include(p => p.ChiTietPhieuXuats)
+                .ThenInclude(ct => ct.MaHangNavigation!)
+                    .ThenInclude(h => h.MaDvtNavigation)
+            .FirstOrDefaultAsync(p => p.MaPhieuXuat == id && p.LoaiPhieuXuat == "XUAT_HUY");
+
+        if (phieu == null)
+        {
+            return NotFound("Không tìm thấy phiếu xuất hủy.");
+        }
+
+        var nhanViens = await _context.NhanViens
+            .Where(n => n.TrangThai == "DANG_LAM")
+            .Select(n => new CreatorItemVM { MaNv = n.MaNv, TenNv = n.HoTen })
+            .ToListAsync();
+
+        var stockMap = await _context.VwTonKhoHienTais
+            .Where(s => s.MaKho == phieu.MaKho)
+            .ToDictionaryAsync(s => s.MaHang, s => s.SoLuongTon ?? 0);
+
+        var form = new XuatHuyFormVM
+        {
+            MaPhieuXuat = phieu.MaPhieuXuat,
+            MaPhieu = phieu.MaPhieu,
+            MaKho = phieu.MaKho,
+            TenKho = phieu.MaKhoNavigation?.TenKho ?? $"Kho {phieu.MaKho}",
+            MaNvlap = phieu.MaNvlap,
+            TenNguoiLap = phieu.MaNvlapNavigation?.HoTen ?? $"NV {phieu.MaNvlap}",
+            MaNvxacNhan = phieu.MaNvxacNhan,
+            TenNguoiXacNhan = phieu.MaNvxacNhanNavigation?.HoTen,
+            NgayLap = phieu.NgayLap,
+            NgayXacNhan = phieu.NgayXacNhan,
+            TrangThai = phieu.TrangThai,
+            GhiChu = phieu.GhiChu,
+            IsReadOnly = true,
+            NhanViens = nhanViens,
+            Lines = phieu.ChiTietPhieuXuats.Select(ct => new XuatHuyLineVM
+            {
+                MaHang = ct.MaHang,
+                MaHangNoiBo = ct.MaHangNavigation?.MaHangNoiBo ?? "",
+                TenHang = ct.MaHangNavigation?.TenHang ?? "",
+                TenDvt = ct.MaHangNavigation?.MaDvtNavigation?.TenDvt ?? "",
+                SoLuongXuat = ct.SoLuongXuat,
+                DonGiaXuat = ct.DonGiaXuat > 0 ? ct.DonGiaXuat : (ct.MaHangNavigation?.GiaVon ?? 0),
+                TonKho = stockMap.TryGetValue(ct.MaHang, out var ton) ? ton : 0
+            }).ToList()
+        };
+
+        return View("Details", form);
     }
 
     // POST: XuatHuy/SaveDraft

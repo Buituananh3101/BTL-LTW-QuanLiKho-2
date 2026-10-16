@@ -60,7 +60,9 @@ public class NhaCungCapController : BaseKhoController
             Filter = filter,
             NhomNccList = nhomList,
             TongMuaToanBo = allStats.Sum(s => s.TongMua),
-            TongNoToanBo = allStats.Sum(s => s.TongMua)
+            TongNoToanBo = allStats.Sum(s => s.TongMua),
+            SortBy = filter.SortBy,
+            SortDir = filter.SortDir
         };
 
         return View(vm);
@@ -78,15 +80,21 @@ public class NhaCungCapController : BaseKhoController
         var totalItems = await query.CountAsync();
         var items = await ApplySortingAndPaging(query, filter).ToListAsync();
 
-        var pagedResult = new PagedResult<NhaCungCapItemVM>
+        var vm = new NhaCungCapIndexVM
         {
-            Items = items,
-            PageIndex = filter.Page < 1 ? 1 : filter.Page,
-            PageSize = filter.PageSize < 1 ? 15 : filter.PageSize,
-            TotalItems = totalItems
+            PagedData = new PagedResult<NhaCungCapItemVM>
+            {
+                Items = items,
+                PageIndex = filter.Page < 1 ? 1 : filter.Page,
+                PageSize = filter.PageSize < 1 ? 15 : filter.PageSize,
+                TotalItems = totalItems
+            },
+            Filter = filter,
+            SortBy = filter.SortBy,
+            SortDir = filter.SortDir
         };
 
-        return PartialView("_NhaCungCapTable", pagedResult);
+        return PartialView("_NhaCungCapTable", vm);
     }
 
     // 3. Lấy chi tiết Master-Detail xổ xuống khi click vào dòng
@@ -425,10 +433,22 @@ public class NhaCungCapController : BaseKhoController
             }
         }
 
-        // 3. Lọc theo Trạng thái (HOAT_DONG / NGUNG_HOAT_DONG)
+        // 3. Lọc theo Trạng thái (HOAT_DONG / NGUNG_HOAT_DONG hoặc active / off)
         if (!string.IsNullOrWhiteSpace(filter.TrangThai))
         {
-            query = query.Where(d => d.TrangThai == filter.TrangThai);
+            string st = filter.TrangThai.Trim().ToUpper();
+            if (st == "HOAT_DONG" || st == "ACTIVE")
+            {
+                query = query.Where(d => d.TrangThai == "HOAT_DONG");
+            }
+            else if (st == "NGUNG_HOAT_DONG" || st == "OFF")
+            {
+                query = query.Where(d => d.TrangThai == "NGUNG_HOAT_DONG");
+            }
+            else if (st != "ALL")
+            {
+                query = query.Where(d => d.TrangThai == filter.TrangThai);
+            }
         }
 
         // 4. Lọc theo Thời gian tạo (dùng DateRangeHelper)
@@ -457,6 +477,10 @@ public class NhaCungCapController : BaseKhoController
             TrangThai = d.TrangThai,
             NgayTao = d.NgayTao,
             NguoiTao = d.NguoiTao,
+            GhiChu = d.GhiChu,
+            TenCongTy = d.TenCongTy,
+            MaSoThue = d.MaSoThue,
+            SoCccd = d.SoCccd,
             TongMua = d.PhieuNhaps
                 .Where(p => p.TrangThai == "DA_XAC_NHAN" || p.TrangThai == "HOAN_THANH" || p.TrangThai == "DA_NHAP")
                 .SelectMany(p => p.ChiTietPhieuNhaps)

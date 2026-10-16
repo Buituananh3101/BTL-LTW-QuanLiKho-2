@@ -24,9 +24,9 @@
 - `Views/XuatHuy/Index.cshtml`: Layout `.kiot-container`, `.kiot-main-col`, toolbar KiotViet, nút F4.
 - `Views/XuatHuy/_XuatHuyFilterSidebar.cshtml`: Sidebar lọc thời gian (Tháng này), trạng thái, người tạo, người xuất hủy.
 - `Views/XuatHuy/_XuatHuyTable.cshtml`: Bảng chứng từ xuất hủy, sao bookmark, accordion `tr.dtl`, `_Pagination.cshtml`.
-- `Views/XuatHuy/Create.cshtml` & `Edit.cshtml`: Màn hình tạo và sửa phiếu xuất hủy.
-- `Views/XuatHuy/_XuatHuyForm.cshtml`: Partial form 2 cột KiotViet matching Screenshot 2.
-- `wwwroot/css/xuat-huy.css`: CSS bảng xuất hủy, empty state tải file Excel, panel thông tin F4.
+- `Views/XuatHuy/Create.cshtml`, `Edit.cshtml`, `Details.cshtml`: Màn hình tạo, sửa và xem chi tiết (read-only) phiếu xuất hủy.
+- `Views/XuatHuy/_XuatHuyForm.cshtml`: Partial form 2 cột chuẩn `kiem-kho.css` (bảng lưới, F3 autocomplete, F4 panel, F9/F10).
+- `wwwroot/css/xuat-huy.css` & `kiem-kho.css`: CSS bảng xuất hủy, panel thông tin F4, trạng thái active row `.open`.
 - `wwwroot/js/xuat-huy-index.js`: Script lọc AJAX, sao bookmark, phím tắt F3/F4, accordion `tr.dtl`, in ấn, xuất Excel.
 - `wwwroot/js/xuat-huy-form.js`: Script tìm kiếm hàng F3, bảng hàng xuất hủy, import Excel, phím tắt F3/F4/F9/F10.
 
@@ -35,7 +35,7 @@
 ## 2. Luồng màn hình & Tương tác
 
 ### 2.1. Màn hình Danh sách (`Index`)
-- **Toolbar (`.kiot-toolbar-row`)**: Ô tìm kiếm `#keywordSearch` ("Theo mã xuất hủy (F3)"), nút `+ Xuất hủy`, nút `Xuất file` (Danh sách / Chi tiết), nút `Tùy chọn hiển thị cột`, nút tải lại bảng.
+- **Toolbar (`.kiot-toolbar-row`)**: Ô tìm kiếm `#keywordSearch` ("Theo mã xuất hủy (F3)"), nút `+ Xuất hủy`, nút `Xuất file` (Danh sách / Chi tiết), nút `Tùy chọn hiển thị cột` (hỗ trợ 9 cột), nút tải lại bảng.
 - **Sidebar (`.kiot-sidebar-col`)**:
   - Tiêu đề "Xuất hủy", nút tròn F4 thu gọn/mở rộng sidebar.
   - Trạng thái: Checkbox `Phiếu tạm` (`NHAP`), `Hoàn thành` (`DA_XAC_NHAN`), `Đã hủy` (`HUY`).
@@ -45,18 +45,22 @@
 - **Đánh dấu Sao Bookmark**:
   - Header: Lọc các phiếu có sao (`DaDanhDau`).
   - Dòng: Click sao ⭐ lưu trực tiếp trạng thái vào CSDL qua AJAX `ToggleFavorite`.
+- **Cấu trúc Cột bảng (`_XuatHuyTable`)**:
+  - Checkbox, Sao bookmark.
+  - Mã xuất hủy, Tổng giá trị hủy (căn phải), Thời gian, Thời gian tạo (tùy chọn), Chi nhánh, Người xuất hủy (tùy chọn), Người tạo (tùy chọn), Ghi chú, Trạng thái.
 - **Bung mở chi tiết (`tr.dtl`)**:
-  - Click dòng mở accordion thông tin chứng từ: Người tạo, Thời gian, Người xuất hủy, Chi nhánh.
-  - Bảng dòng hàng: Có ô tìm kiếm inline `Tìm mã hàng`, `Tìm tên hàng`.
+  - Click dòng thêm class `.open` vào `tr.tbl-row`, tạo đường viền xanh 4px bên trái kết nối dòng và bảng chi tiết `.dp`.
+  - Thông tin chứng từ: Người tạo, Người xuất hủy, Ngày xuất hủy, Chi nhánh (định dạng divider `|` chuẩn).
+  - Bảng dòng hàng (`dtl-tbl`): 5 cột chuẩn KiotViet: `Mã hàng`, `Tên hàng`, `SL hủy`, `Giá vốn`, `Giá trị hủy` kèm ô tìm kiếm inline `Tìm mã hàng`, `Tìm tên hàng`.
+  - Khối dưới: Ô textarea ghi chú (placeholder "Chưa có") và tổng kết `Tổng số lượng hủy`, `Tổng giá trị hủy`.
   - Hàng nút hành động:
-    + `Hủy bỏ`: Mở modal xác nhận `KiotConfirm`, cập nhật `TrangThai = 'HUY'`. Nếu phiếu đã hoàn thành, tồn kho sổ sách tự động phục hồi trong `vw_TonKhoHienTai`.
-    + `Mở phiếu`: Chuyển sang màn hình sửa (nếu là phiếu tạm).
-    + `Sao chép`: Tạo phiếu xuất hủy mới kế thừa toàn bộ danh sách hàng từ phiếu cũ.
-    + `Xuất file`: Xuất Excel chi tiết riêng cho phiếu này.
-    + `Lưu`: Cập nhật ghi chú trực tiếp qua AJAX `UpdateNote`.
-    + `In`: In phiếu xuất hủy chuẩn layout giấy in.
+    + Cụm trái: `Hủy` (mở modal `KiotConfirm`), `Sao chép`, `Xuất file`.
+    + Spacer `ms-auto`.
+    + Cụm phải: `Lưu` ghi chú AJAX, `In` (`window.print()`), `Mở phiếu` (nếu phiếu tạm).
 
-### 2.2. Màn hình Lập / Sửa phiếu (`Create` / `Edit`)
+### 2.2. Màn hình Lập / Sửa / Xem chi tiết (`Create` / `Edit` / `Details`)
+- Tự động điều hướng: Truy cập `Edit/{id}` với phiếu đã hoàn thành/hủy sẽ chuyển tiếp sang `Details/{id}`.
+- Chế độ chỉ đọc (`IsReadOnly = true`): Ẩn thanh tìm kiếm F3, khóa các trường nhập liệu, hiển thị banner thông tin xác nhận thời điểm và người duyệt.
 - **Header**: Nút `← Xuất hủy` quay lại trang danh sách, ô tìm kiếm `Tìm mặt hàng (F3)` với gợi ý xổ xuống tức thì, nút tải file mẫu và import Excel.
 - **Bảng hàng hóa (Cột trái)**:
   - Trạng thái rỗng: Hiện khối thân thiện "Thêm sản phẩm từ file excel" với 2 nút: `Tải về file mẫu` và `Chọn file dữ liệu`.

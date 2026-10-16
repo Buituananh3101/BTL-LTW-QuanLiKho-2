@@ -40,6 +40,28 @@
     border-bottom: 2px solid #0066cc;
 }
 
+/* 1.1 Drawer Tabs (.dp-tabs & .dp-tab) */
+.dp-tabs {
+    display: flex;
+    gap: 24px;
+}
+.dp-tab {
+    cursor: pointer;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    border-bottom: 2px solid transparent !important;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+.dp-tab:hover {
+    color: #0070f4 !important;
+}
+.dp-tab.active {
+    color: #0070f4 !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid #0070f4 !important;
+}
+
 /* 2. Highlight Row khi đang mở chi tiết */
 .ncc-row.is-expanded {
     background-color: #f0f7ff !important;

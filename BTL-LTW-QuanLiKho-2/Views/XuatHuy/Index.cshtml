@@ -77,13 +77,16 @@
                     <button class="btn btn-tool" type="button" id="btnColsDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Tùy chọn hiển thị cột">
                         <i class="bi bi-view-list"></i>
                     </button>
-                    <div class="dropdown-menu dropdown-menu-end shadow p-3" id="colMenu" style="min-width: 200px;">
+                    <div class="dropdown-menu dropdown-menu-end shadow p-3" id="colMenu" style="min-width: 210px;">
                         <h6 class="dropdown-header px-0 pt-0 text-dark fw-bold">Hiển thị cột</h6>
                         <div class="d-flex flex-column gap-2 small">
                             <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ma" checked> Mã xuất hủy</label>
-                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tg" checked> Thời gian</label>
-                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="kho" checked> Chi nhánh</label>
                             <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="gt" checked> Tổng giá trị hủy</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tg" checked> Thời gian</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tgt"> Thời gian tạo</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="kho" checked> Chi nhánh</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="nxh"> Người xuất hủy</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="nt"> Người tạo</label>
                             <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ghi" checked> Ghi chú</label>
                             <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="st" checked> Trạng thái</label>
                         </div>
@@ -98,9 +101,11 @@
         </div>
 
         <!-- Bảng danh sách phiếu xuất hủy (Load AJAX qua Partial View) -->
-        <div class="kiot-table-wrap" id="tableContainer">
-            <partial name="_XuatHuyTable" model="Model" />
-        </div>
+        <section id="content">
+            <div id="tableWrapper" class="kiot-table-wrapper">
+                <partial name="_XuatHuyTable" model="Model" />
+            </div>
+        </section>
     </main>
 </div>
 

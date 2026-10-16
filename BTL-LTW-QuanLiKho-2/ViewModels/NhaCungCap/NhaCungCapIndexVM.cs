@@ -10,6 +10,9 @@ public class NhaCungCapIndexVM
     public NhaCungCapFilterParams Filter { get; set; } = new();
     public List<NhomNhaCungCap> NhomNccList { get; set; } = new();
 
+    public string? SortBy { get; set; }
+    public string? SortDir { get; set; }
+
     public decimal TongNoToanBo { get; set; }
     public decimal TongMuaToanBo { get; set; }
 }

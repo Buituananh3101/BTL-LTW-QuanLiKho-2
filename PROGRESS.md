@@ -1,22 +1,179 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-16 – Hoàn thành Phân hệ Quản lý Nhà cung cấp chuẩn KiotViet (Phiên 55)
+Cập nhật lần cuối: 2026-10-16 – Khắc phục Lỗi Hiển thị Bảng & Đồng bộ Cột Nhà Cung Cấp theo Chuẩn Kiểm Kho (Phiên 65)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử giao diện & nghiệp vụ phân hệ Nhà cung cấp cùng người dùng.
+- Sẵn sàng tiếp tục các hạng mục nâng cấp giao diện hoặc xây dựng phân hệ kế tiếp theo yêu cầu người dùng.
 
 ---
 
 ## Việc kế tiếp
-1. Lập tài liệu đặc tả chi tiết `docs/specs/nhap-kho.md` theo chuẩn Kiểm kho & Nhà cung cấp.
-2. Xây dựng ViewModel cho Nhập kho (`NhapKhoIndexVM`, `NhapKhoFormVM`, `NhapKhoLineVM`...).
-3. Xây dựng `PhieuNhapController` và View giao diện (`Views/PhieuNhap/`) theo phong cách KiotViet dựa trên các khối Lego dùng chung đã đóng gói.
+1. Kiểm tra trải nghiệm thực tế modal thêm/sửa, bảng hiển thị và tùy chọn hiển thị cột nhà cung cấp cùng người dùng.
+2. Lập tài liệu đặc tả chi tiết `docs/specs/nhap-kho.md` theo chuẩn Kiểm kho & Nhà cung cấp.
+3. Xây dựng ViewModel cho Nhập kho (`NhapKhoIndexVM`, `NhapKhoFormVM`, `NhapKhoLineVM`...).
+4. Xây dựng `PhieuNhapController` và View giao diện (`Views/PhieuNhap/`) theo phong cách KiotViet.
 
 ---
 
-## Đã xong
+- **Khắc phục Lỗi Hiển thị Bảng & Đồng bộ Cột Nhà Cung Cấp theo Chuẩn Kiểm Kho (Phiên 65)**:
+  - **Nhu cầu**: Sửa lỗi hiển thị bảng nhà cung cấp bị lệch cột, co hẹp văn bản theo chiều dọc ("C ô n g t y Gas Kiên Giang") đè lên số điện thoại khi ẩn/hiện cột; đồng bộ toàn diện cách thức hiển thị và layout bảng theo chuẩn Kiểm kho (`PhieuKiemKe`).
+  - **Nguyên nhân cốt lõi**:
+    + Thiếu định nghĩa `#supplierTable.tbl` trong `kiem-kho.css` khiến bảng không có thuộc tính `table-layout: fixed; min-width: 1450px !important;`.
+    + Thẻ tiêu đề `<th data-col="ten">` thiếu thuộc tính `style="width: 220px;"` khiến trình duyệt tự co rút cột khi các cột khác có độ rộng cố định.
+    + Thẻ bao ngoài bảng trong `Index.cshtml` dùng `div#tableContainer` thay vì cấu trúc chuẩn `<section id="content"><div id="tableWrapper" class="kiot-table-wrapper">...</div></section>`.
+    + Cơ chế ẩn/hiện cột dùng jQuery `.toggle()` can thiệp sai `display` trên thẻ bảng; thiếu cấu hình giá trị mặc định an toàn cho các cột cơ bản.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Đồng bộ CSS (`kiem-kho.css`)**: Bổ sung `#supplierTable.tbl` vào nhóm luật `table-layout: fixed; min-width: 1450px !important; border-collapse: separate; border-spacing: 0;` cùng styling `th`, `td` chuẩn KiotViet.
+    + **Đồng bộ Markup Bảng (`_NhaCungCapTable.cshtml`)**: Bổ sung `style="width: 220px;"` cho cột Tên NCC, nâng `min-width: 1450px;` cho bảng, đảm bảo toàn bộ 13 cột (1 checkbox + 12 cột dữ liệu) có độ rộng xác định và khớp hoàn hảo giữa `thead`, `summary-row`, và `tbody` (`colspan="13"`).
+    + **Khung Bao Ngoài (`Index.cshtml`)**: Chuyển sang `<section id="content"><div id="tableWrapper" class="kiot-table-wrapper">...</div></section>`.
+    + **Xử lý JavaScript (`nha-cung-cap-index.js`)**: Cập nhật container AJAX sang `#tableWrapper`; đổi cơ chế hiển thị cột sang `this.style.display = isChecked ? '' : 'none';`; nâng key lưu trữ lên `kiot_ncc_columns_v2` với bộ fallback `DEFAULT_NCC_COLS` đảm bảo cột Tên NCC luôn hiển thị mặc định và không bị ảnh hưởng bởi cache cũ.
+    + **Kiểm tra biên dịch & Cú pháp**: `dotnet build` đạt 0 Errors, `node -c` đạt 0 Errors.
+- **Khắc phục Toàn diện Bộ Lọc LeftMenu và Tương tác Phân hệ Xuất hủy (Phiên 64)**:
+  - **Nhu cầu**: Sửa lỗi toàn bộ các thành phần trong leftmenu / sidebar bộ lọc của màn hình Xuất hủy (`_XuatHuyFilterSidebar.cshtml`) bị đơ, bấm vào không phản hồi hoặc không mở được popup/dropdown.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bộ Lọc Thời Gian (`KiotDateFilter`)**: Gọi `KiotFilter.initDateFilter('date', ...)` kết nối sự kiện mở Quick Date popup và Dual Calendar popup, nhận sự kiện lọc từ preset hoặc chọn ngày tùy chỉnh.
+    + **Bộ Lọc Trạng Thái (`KiotStatusFilter`)**: Đổi bộ lắng nghe sự kiện sang `input[data-s]` (thay vì selector sai `input[name="stChk"]`), kích hoạt lọc AJAX ngay khi tick chọn `Phiếu tạm`, `Hoàn thành`, `Đã hủy`.
+    + **Bộ Lọc Người Tạo & Người Xuất Hủy (`KiotMultiSelectFilter`)**: Loại bỏ lệnh gọi hàm không tồn tại `KiotFilter.toggleSidebarDropdown`, chuyển sang quản lý class `.show` / `.open` chuẩn với `KiotFilter.checkSidebarDropdownDirection`, sửa selector tên `.kiot-ms-text` và nút xóa tag `.tag-remove`.
+    + **Điều khiển Popup & Sidebar**: Bổ sung bộ lắng nghe Escape và click bên ngoài để tự động đóng dropdowns/popups; sửa nút F4 thu gọn/mở rộng sidebar đồng bộ class `.kiot-container.sidebar-collapsed`; hỗ trợ đầy đủ nút phễu mở lọc trên mobile.
+    + **Đồng bộ Giao diện Bộ Lọc (`paintFilters`)**: Cập nhật trạng thái các chấm cảnh báo (`dotDate`, `dotSt`, `dotUser`, `dotConfirmer`), radio buttons và thẻ tag KiotViet.
+    + **Kiểm tra biên dịch & Cú pháp**: `dotnet build` đạt 0 Errors, `node -c` đạt 0 lỗi.
+- **Hoàn thiện Tùy chọn Hiển thị Cột cho Phân hệ Nhà Cung Cấp theo Chuẩn KiotViet (Phiên 63)**:
+  - **Nhu cầu**: Bổ sung và chuẩn hóa tính năng tùy chọn ẩn/hiện cột dữ liệu cho màn hình danh sách nhà cung cấp theo đúng phong cách KiotViet (tương tự Kiểm kho và Xuất hủy).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Toolbar & Menu Tùy chọn Cột (`Index.cshtml`)**:
+      * Chuẩn hóa nút bấm công cụ sang `.btn-tool` với icon `bi-view-list` và cơ chế chống đóng tự động `data-bs-auto-close="outside"`, cho phép người dùng click bật/tắt liên tục nhiều cột mà không bị đóng menu dropdown.
+      * Cấu hình danh mục 12 cột dữ liệu đầy đủ trong menu `#colMenu`: Mã NCC, Tên NCC, Điện thoại, Email, Nhóm NCC, Địa chỉ, Mã số thuế, Nợ cần trả hiện tại, Tổng mua, Ghi chú, Trạng thái, Ngày tạo.
+      * Thêm nút Tải lại bảng `#btnReloadTable` có hiệu ứng icon xoay tròn `.spinning`.
+    + **Cấu trúc Bảng Dữ liệu (`_NhaCungCapTable.cshtml`)**:
+      * Mở rộng thêm 4 cột dữ liệu mới: Địa chỉ (`data-col="diachi"`), Mã số thuế (`data-col="masothue"`), Ghi chú (`data-col="ghi"`), Ngày tạo (`data-col="ngaytao"`).
+      * Đồng bộ thẻ `th`, ô dữ liệu `td` trên từng dòng và ô tương ứng trên hàng tổng cộng `summary-row`.
+      * Cập nhật `colspan="13"` cho dòng chi tiết `tr.dtl` và dòng thông báo trống khi lọc.
+    + **JavaScript Điều khiển (`nha-cung-cap-index.js`)**:
+      * Triển khai hàm `initColumnToggle()` và `applyColumnVisibility()`: Tự động khôi phục trạng thái hiển thị cột từ `localStorage` (`kiot_ncc_columns`).
+      * Lắng nghe sự kiện `change` trên menu `#colMenu` để ẩn/hiện tức thời các cột và lưu vào `localStorage`.
+      * Tự động áp dụng lại trạng thái cột sau mỗi lần nạp bảng AJAX (`loadTable()`).
+      * Gắn sự kiện quay vòng cho nút `#btnReloadTable`.
+    + **Kiểm tra biên dịch & Cú pháp**:
+      * Cập nhật `docs/specs/nha-cung-cap.md` (7.894 ký tự < 8.000 ký tự theo Luật 12).
+      * `dotnet build` đạt 0 Errors, cú pháp JavaScript `node -c` đạt 0 Errors.
+- **Đồng bộ Bảng Hiển thị Nhà Cung Cấp & Inline Accordion Drawer theo Chuẩn Kiểm Kho (Phiên 62)**:
+  - **Nhu cầu**: Sửa lại phần bảng hiển thị nhà cung cấp giống hệt phần kiểm kho (`_PhieuKiemKeTable.cshtml`): cấu trúc bảng `.tbl`, highlight dòng được chọn `tr.tbl-row.open` (`#f0f7ff`, dải viền xanh 4px), bung dòng chi tiết `tr.dtl` inline tức thì mà không bị giật trang hay spinner toàn màn hình, thanh tab chi tiết `.dp-tabs` (`Thông tin`, `Lịch sử nhập/trả hàng`, `Nợ cần trả`), tiêu đề `h2` kèm mã & pill trạng thái, hàng meta thông tin, 3 khối card chi tiết (liên hệ, hóa đơn, ghi chú + tổng kết `.sums`), và cụm nút hành động đáy drawer (`Xóa`, `Ngừng hoạt động / Cho hoạt động lại`, spacer `.ms-auto`, `Chỉnh sửa`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **ViewModel (`NhaCungCapItemVM.cs`) & Controller (`NhaCungCapController.cs`)**:
+      * Bổ sung các trường `GhiChu`, `TenCongTy`, `MaSoThue`, `SoCccd` vào `NhaCungCapItemVM` để nạp sẵn toàn bộ thông tin cơ bản cho Tab 1 ("Thông tin"), cho phép mở accordion tức thì với 0 delay.
+      * Cập nhật `BuildFilterQuery` trong Controller chiếu (project) đầy đủ các trường mới.
+    + **Giao diện Bảng & Inline Drawer (`_NhaCungCapTable.cshtml`, `Index.cshtml`, `nha-cung-cap.css`)**:
+      * Nạp `kiem-kho.css` vào `Index.cshtml` kế thừa toàn bộ styling chuẩn KiotViet của bảng và inline drawer.
+      * Tái cấu trúc bảng: `<table class="tbl" id="supplierTable">`, dòng dữ liệu `<tr class="tbl-row" data-id="...">`, checkbox `<td class="w-chk"><input type="checkbox" data-sel="..." /></td>`, dòng tổng kết `summary-row`.
+      * Dòng chi tiết `<tr class="dtl" id="dtl-...">` chứa `.dp`: Thanh tabs `.dp-tabs`, tiêu đề `h2` + pill trạng thái, hàng meta, 3 khối thông tin, tổng kết nợ/tổng mua `.sums`, thanh nút hành động `.dp-actions` có `ms-auto`.
+      * Bổ sung CSS `.dp-tabs` & `.dp-tab` trong `nha-cung-cap.css` cho phép tương tác chuyển tab mượt mà.
+    + **JavaScript Điều khiển (`nha-cung-cap-index.js`)**:
+      * Chuẩn hóa logic click dòng `tr.tbl-row`: toggle class `.open` và hiển thị inline `tr.dtl` (#dtl-${id}), bỏ qua click từ input/button/link/.w-chk.
+      * Tích hợp cơ chế lazy loading thông minh: Tab 1 hiển thị tức thì; Tab 2 & 3 tự động nạp AJAX qua `/NhaCungCap/GetDetail?id=${id}` khi click chuyển tab lần đầu và lưu cache trong DOM.
+      * Đồng bộ checkbox chọn tất cả dòng `#chkAll` với `input[data-sel]`.
+      * Bổ sung sự kiện `#resetF` khôi phục bộ lọc khi bảng trống.
+    + **Tài liệu & Kiểm thử**:
+      * Cập nhật `docs/specs/nha-cung-cap.md` (7.900 ký tự < 8.000 ký tự theo Luật 12).
+      * Biên dịch `dotnet build` đạt 0 Errors, kiểm tra cú pháp JS `node -c` đạt 0 Errors.
+- **Triển khai & Chuẩn hóa Phân hệ Xuất hủy theo Chuẩn KiotViet (Phiên 61)**:
+  - **Nhu cầu**: Lập kế hoạch, triển khai toàn diện phân hệ Xuất hủy (`XuatHuyController`) và chuẩn hóa màn hình danh sách, bảng dữ liệu, bung dòng chi tiết (Inline Drawer) cùng chức năng bật/tắt cột theo đúng ảnh chụp thực tế KiotViet và phong cách Kiểm kho.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Xây dựng Kiến trúc Backend & ViewModel**:
+      * Controller `XuatHuyController`: Xử lý Index, Filter (AJAX), Create (GET/POST), Edit, Details, Cancel, UpdateNote, Export Excel (List/Detail), ToggleFavorite.
+      * ViewModels (`XuatHuyViewModels.cs`): Đầy đủ các DTO `XuatHuyIndexVM`, `XuatHuyFilterVM`, `XuatHuyListItemVM`, `XuatHuyFormVM`, `SaveXuatHuyRequest`, `UpdateXuatHuyNoteRequest`.
+    + **Bảng Dữ liệu & Tùy chọn Ẩn/Hiện Cột**:
+      * Menu `#colMenu` hỗ trợ 9 cột đúng chuẩn: Mã xuất hủy, Tổng giá trị hủy, Thời gian, Thời gian tạo, Chi nhánh, Người xuất hủy, Người tạo, Ghi chú, Trạng thái.
+      * Khắc phục lỗi ẩn/hiện cột: chuyển sang truy vấn dynamic selector `$(tableSelector)` trong `kiot-filter.js` và logic đồng bộ thời gian thực trong `xuat-huy-index.js`, lưu `localStorage`.
+    + **Bung Mở Chi Tiết Dòng (Inline Drawer) Chuẩn KiotViet**:
+      * Đặt bảng trong `<section id="content"><div id="tableWrapper" class="kiot-table-wrapper">...</div></section>`.
+      * Bổ sung styling `#xuatHuyTable.tbl` trong `kiem-kho.css`.
+      * Chi tiết `.dp`: Tab "Thông tin", tiêu đề mã phiếu kèm badge trạng thái, hàng thông tin `Người tạo | Người xuất hủy | Ngày xuất hủy | Chi nhánh`.
+      * Bảng chi tiết hàng hóa `dtl-tbl`: 5 cột (`Mã hàng`, `Tên hàng`, `SL hủy`, `Giá vốn`, `Giá trị hủy`) kèm 2 ô tìm kiếm nội bộ, liên kết xanh trên mã hàng.
+      * Khối dưới: Textarea ghi chú (placeholder "Chưa có") và tổng kết `Tổng số lượng hủy`, `Tổng giá trị hủy`.
+      * Cụm nút hành động: Hủy, Sao chép, Xuất file, Lưu, In, Mở phiếu.
+    + **Kiểm tra biên dịch & Cú pháp**: `dotnet build` đạt 0 Errors, `node -c` đạt 0 lỗi.
+- **Đồng bộ Chuẩn Giao diện & Nghiệp vụ Modal Thêm/Sửa Nhà Cung Cấp theo Phần Thêm Hàng (Phiên 60)**:
+  - **Nhu cầu**: Người dùng yêu cầu sửa lại phần thêm nhà cung cấp dựa trên phần thêm hàng (đồng bộ cấu trúc modal KiotViet phẳng, custom combobox nhóm hàng có tìm kiếm và sửa/xóa ✎ tại chỗ, các khối accordion bo góc, sub-modals xác nhận/tạo nhanh).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Giao diện Modal (`_NhaCungCapModal.cshtml`, `Index.cshtml`)**:
+      * Loại bỏ hoàn toàn modal bootstrap thô sơ cũ, chuyển sang cấu trúc Modal KiotViet chuẩn `.hh-ov`, `.hh-modal.main` (thừa hưởng CSS từ `hang-hoa-form.css`).
+      * Header có tiêu đề và nút đóng `hh-x` SVG `#i-x`.
+      * Cụm thông tin cơ bản: Tên NCC (bắt buộc, kèm `.hh-err`), Mã NCC (tự động), Điện thoại, Email.
+      * 3 khối Accordion `.hh-sec.open`: Địa chỉ, Nhóm nhà cung cấp & Ghi chú, Thông tin xuất hóa đơn.
+      * Nhóm NCC được nâng cấp thành **Custom Combobox**: có ô input readonly, mũi tên xoay, dropdown bật mượt mà với thanh tìm kiếm dính đỉnh `#searchMaNhomNcc`, danh sách các nhóm nạp từ DB kèm icon tick xanh `✓` và **icon bút chì ✎** (`.hh-item-edit-btn`) cho phép sửa/xóa nhóm trực tiếp tại chỗ! Kèm nút link `+ Tạo mới` trên nhãn.
+      * Footer `.hh-m-foot`: Nút Xóa đỏ (`.hh-btn-del`, hiện khi sửa, ẩn khi tạo mới), cụm trạng thái checkbox/switch KiotViet, nút Bỏ qua, Lưu & Thêm mới, Lưu.
+    + **Các Sub-modals đi kèm**:
+      * `#nccPromptOv`: Tạo nhanh nhóm NCC.
+      * `#nccEditGroupOv`: Sửa / Xóa nhóm NCC tại chỗ.
+      * `#nccDeleteOv`: Xác nhận xóa NCC, tự động kiểm tra chứng từ và cung cấp tùy chọn "Chuyển sang Ngừng hoạt động ngay".
+    + **Client Script (`nha-cung-cap-index.js`)**:
+      * Triển khai bộ điều khiển combobox `nccGroupCombobox` với đầy đủ tính năng tìm kiếm, chọn, sync và xử lý click bút chì ✎.
+      * Quản lý đóng mở modal bằng overlay (`showModal`/`hideModal`, data-close, phím Escape).
+      * Validate form và hiển thị cảnh báo lỗi tiếng Việt trực tiếp dưới ô nhập liệu (`.invalid` + `.hh-err`).
+    + **Kiểm tra biên dịch & Cú pháp**: `dotnet build` đạt 0 Errors, `node -c` đạt 0 lỗi.
+- **Đồng bộ Hiển Thị Cột Mã Nhà Cung Cấp và Mũi Tên Sắp Xếp 3 Trạng Thái theo Bảng Kiểm Kho (Phiên 59)**:
+  - **Nhu cầu**: Người dùng yêu cầu sửa bảng hiển thị nhà cung cấp, cụ thể là đồng bộ kiểu dáng hiển thị của cột "Mã nhà cung cấp" từ màu xanh in đậm sang chữ thường tiêu chuẩn (`<span class="text-break">`), đồng thời đồng bộ cấu trúc và icon mũi tên sắp xếp 3 trạng thái ở header giống hệt như bảng Phiếu kiểm kho (`_PhieuKiemKeTable.cshtml`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **ViewModels (`NhaCungCapIndexVM.cs`)**: Bổ sung hai thuộc tính `SortBy` và `SortDir` vào `NhaCungCapIndexVM`.
+    + **Backend (`NhaCungCapController.cs`)**: Cập nhật cả Action `Index` và Action `Filter` truyền `SortBy = filter.SortBy, SortDir = filter.SortDir` vào `NhaCungCapIndexVM` khi trả về View và PartialView `_NhaCungCapTable`.
+    + **Giao diện (`Index.cshtml` & `_NhaCungCapTable.cshtml`)**:
+      * `Index.cshtml`: Truyền `Model` vào `<partial name="_NhaCungCapTable" model="Model" />` và thêm `data-sort-by` / `data-sort-dir` vào container `#kiotContainer`.
+      * `_NhaCungCapTable.cshtml`: Chuyển model sang `NhaCungCapIndexVM`; đổi thẻ hiển thị mã NCC từ `<span class="fw-semibold text-primary">@item.MaNcc</span>` sang `<span class="text-break">@item.MaNcc</span>` chữ thường tiêu chuẩn giống cột Mã kiểm kho; đồng bộ hiển thị class `is-sorted sorted-asc / sorted-desc` và icon mũi tên sắp xếp Razor động cho toàn bộ các cột sortable (`ma`, `ten`, `sdt`, `email`, `no`, `tongmua`).
+    + **JavaScript (`nha-cung-cap-index.js`)**: Khởi tạo `sortBy` và `sortDir` từ `#kiotContainer`; nâng cấp `updateSortIcons()` tự động tạo/xóa phần tử `.sort-icon` đồng bộ với Razor partial view khi click xoay vòng 3 trạng thái.
+  - **Kiểm tra biên dịch & Cú pháp**: `dotnet build -t:CoreCompile` 0 Errors, cú pháp JavaScript `node -c` 0 lỗi.
+- **Đóng gói Chế độ Pills cho Component `_KiotStatusFilter` và Chuẩn hóa Nút Trạng Thái theo Prototype (Phiên 58)**:
+  - **Nhu cầu**: Dựa trên prototype `prototype-nhacungcap.html`, người dùng yêu cầu sửa lại nút Trạng thái trong leftmenu thành đúng chuẩn widget nút viên thuốc (`[Tất cả]`, `[Đang hoạt động]`, `[Ngừng hoạt động]`), đồng thời đóng gói thành component Lego dùng chung toàn hệ thống (bảo đảm tương thích ngược 100% với các màn hình đang dùng checkbox).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **ViewModel (`KiotStatusFilterVM.cs`)**:
+      * Bổ sung enum `KiotStatusRenderMode` (`Checkbox`, `Pills`).
+      * Bổ sung thuộc tính `ContainerId` (mặc định `"pillsStatus"`), `RenderMode` (mặc định `Checkbox`).
+      * Khởi tạo hàm dựng linh hoạt hỗ trợ cả 2 chế độ, đảm bảo 0 regression cho các màn hình `PhieuKiemKe`, `XuatHuy`.
+    + **Component Partial View (`_KiotStatusFilter.cshtml`)**:
+      * Hỗ trợ 2 chế độ render: `Pills` render ra `<div class="pills" id="@containerId">` với các button `.pill @(opt.Checked ? "on" : "")`, `Checkbox` render danh sách hộp kiểm như trước.
+    + **Giao diện & Trải nghiệm (`site.css`)**:
+      * Định nghĩa style `.pills` (flex, gap 8px) và `.pill` (height 32px, padding 0 14px, bo góc 16px, nền `#f3f4f6`, hover `#e5e7eb`, trạng thái kích hoạt `.on` với nền `#0070f4`, chữ trắng, font-weight 600).
+    + **Thư viện JavaScript Dùng chung (`kiot-filter.js`)**:
+      * Đóng gói hàm `KiotFilter.initStatusFilter(containerSelector, onSelectCallback)`: Tự động xử lý sự kiện click chuyển `.on`, lấy giá trị `data-st` và kích hoạt callback.
+    + **Tích hợp Phân hệ Nhà cung cấp (`_NhaCungCapFilterSidebar.cshtml`, `nha-cung-cap-index.js`, `NhaCungCapController.cs`)**:
+      * Tích hợp partial `_KiotStatusFilter` chế độ `Pills` với 3 lựa chọn: `all` ("Tất cả"), `active` ("Đang hoạt động", mặc định bật), `off` ("Ngừng hoạt động").
+      * `nha-cung-cap-index.js` gọi `KiotFilter.initStatusFilter('#pillsStatus', ...)` đồng bộ chấm xanh `#dotTrangThai` và gửi AJAX lọc dữ liệu.
+      * Controller nạp và nhận diện linh hoạt các giá trị trạng thái (`HOAT_DONG`/`active`, `NGUNG_HOAT_DONG`/`off`).
+    + **Đồng bộ tài liệu**: Cập nhật mục 12 trong `.agent/rules/03-giao-dien-layout.md` (7.566 ký tự < 8.000 ký tự).
+    + **Kiểm tra biên dịch & Cú pháp**: `dotnet build` 0 Errors, `node -c` toàn bộ file JS đạt 0 lỗi.
+- **Đồng bộ Chuẩn Giao diện Hiển thị Phiếu Xuất Hủy Dựa trên Chức năng Kiểm Tồn / Kiểm Kho (Phiên 57)**:
+  - **Nhu cầu**: Người dùng yêu cầu dựa trên chức năng kiểm tồn (Kiểm kho - `PhieuKiemKe`), đồng bộ và chuẩn hóa toàn bộ giao diện hiển thị phiếu xuất hủy (cả màn hình form/chi tiết và accordion inline trong danh sách).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Backend (`XuatHuyController.cs`)**:
+      * Bổ sung Action `Details(int id)`: Hiển thị phiếu xuất hủy ở chế độ chỉ đọc (`IsReadOnly = true`), nạp đầy đủ danh sách dòng hàng và tên người duyệt/xác nhận.
+      * Cập nhật Action `Edit(int id)`: Tự động chuyển tiếp sang `Details(id)` nếu phiếu đã hoàn thành (`DA_XAC_NHAN`) hoặc đã hủy (`HUY`) theo đúng Luật 5 không sửa chứng từ đã chốt.
+    + **Giao diện Màn hình Form & Chi tiết (`_XuatHuyForm.cshtml`, `Details.cshtml`, `xuat-huy-form.js`)**:
+      * Tái sử dụng 100% hệ thống class và bố cục của `kiem-kho.css`: `.kk-container`, `.form-wrap`, `.f-main`, `.f-top`, `.grid-card`, `.panel-toggle` (F4), `.f-panel`, `.pr`, `#sums`, `#fNote`, `.recent`, `.f-actions` (`.save` F9, `.done` F10).
+      * Khi xem chi tiết (`Details`), ẩn thanh tìm kiếm F3, khóa các trường nhập liệu và hiển thị banner thông báo thời gian xác nhận cùng người duyệt.
+      * Tối ưu `xuat-huy-form.js`: Đồng bộ logic vẽ lưới `paintGrid()`, hiển thị card autocomplete gợi ý F3 (avatar viết tắt, mã, giá vốn, tồn kho), phím tắt F3/F4/F9/F10 và modal xác nhận `#ov`.
+    + **Bảng Danh sách & Accordion Drawer (`_XuatHuyTable.cshtml`, `xuat-huy-index.js`)**:
+      * Đồng bộ class `.open` trên `tr.tbl-row` khi bung mở chi tiết, kích hoạt hiệu ứng nền xanh nhạt `#f0f7ff` và dải viền xanh 4px liền khối kết nối dòng chính với panel chi tiết.
+      * Cấu trúc lại thanh công cụ hành động `.dp-actions` với spacer `.ms-auto`: Nhóm nút bên trái (`Hủy`, `Sao chép`, `Xuất file`), nhóm nút bên phải (`Lưu`, `In`, `Mở phiếu`). Nút `Mở phiếu` tự động dẫn sang `Edit` cho phiếu tạm và `Details` cho phiếu đã xong.
+    + **Tài liệu & Kiểm thử**:
+      * Cập nhật đặc tả `docs/specs/xuat-huy.md` (7.293 ký tự < 8.000 ký tự theo Luật 12).
+      * Biên dịch `dotnet build` đạt 0 Errors, cú pháp `node -c` toàn bộ file JS đạt 0 lỗi.
+- **Đóng gói Component Lego `_KiotValueFilter` và Chuẩn hóa Ô Nhập Giá trị Từ - Tới theo Prototype (Phiên 56)**:
+  - **Nhu cầu**: Người dùng cung cấp file prototype `prototype-nhacungcap.html` và yêu cầu sửa lại nút/ô lọc Giá trị trong leftmenu thành đúng chuẩn widget `.fromto` (2 hàng xếp chồng `[Từ] [Nhập giá trị]` và `[Tới] [Nhập giá trị]`), đồng thời đóng gói thành component Lego dùng chung toàn hệ thống.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Đóng gói ViewModel & Partial View (`KiotValueFilterVM.cs` & `_KiotValueFilter.cshtml`)**:
+      * Tạo `ViewModels/Common/KiotValueFilterVM.cs`: Hỗ trợ cấu hình `Id`, `Title`, `SubTitle` (mặc định "Giá trị"), `FromLabel` ("Từ"), `ToLabel` ("Tới"), `FromPlaceholder` ("Nhập giá trị"), `ToPlaceholder`, `FromValue`, `ToValue`.
+      * Tạo `Views/Shared/_KiotValueFilter.cshtml`: Component Lego linh hoạt, tự động sinh cấu trúc `.fromto` với badge `<b>Từ</b>`, `<b>Tới</b>` xám nhạt, ô nhập class `.money`, text căn phải và tự format hàng nghìn. Hỗ trợ hiển thị độc lập kèm tiêu đề hoặc nhúng vào khối lọc có sẵn.
+    + **Định dạng giao diện & Trải nghiệm (`site.css` & `site.js`)**:
+      * Bổ sung định dạng `.fromto` và `.sub` vào `site.css`: Bo góc 6px, viền xám mềm, hiệu ứng focus viền xanh `#0070f4` kèm box-shadow mờ, badge label `<b>` nền `#f1f3f6` min-width 44px.
+      * Cập nhật `site.js`: Bổ sung lắng nghe sự kiện input toàn cục tự động định dạng phân cách hàng nghìn cho class `.money`, không tự động điền số 0 khi xóa trắng để người dùng thao tác lọc tự nhiên.
+    + **Thư viện JavaScript dùng chung (`kiot-filter.js`)**:
+      * Bổ sung hàm tiện ích `KiotFilter.initValueFilter(id, onChangeCallback)`: Tự động gắn bộ lắng nghe `debounce 400ms` cho cụm `#filter{id}Tu` và `#filter{id}Den`, tự động toggle chấm xanh `#dot{id}` và gọi callback lọc dữ liệu.
+    + **Tích hợp vào Phân hệ Nhà cung cấp (`_NhaCungCapFilterSidebar.cshtml` & `nha-cung-cap-index.js`)**:
+      * Thay thế mã HTML cũ của "Tổng mua" và "Nợ hiện tại" bằng `<partial name="_KiotValueFilter" model='new KiotValueFilterVM("TongMua", "Tổng mua", "Giá trị")' />` và `<partial name="_KiotValueFilter" model='new KiotValueFilterVM("No", "Nợ hiện tại", "Giá trị")' />`.
+      * Sử dụng `KiotFilter.initValueFilter('TongMua', ...)` và `KiotFilter.initValueFilter('No', ...)`.
+    + **Cập nhật tài liệu luật**: Bổ sung mục 11 vào `.agent/rules/03-giao-dien-layout.md` (7.120 ký tự < 8.000 ký tự theo Rule 12).
+  - **Kiểm tra biên dịch & Cú pháp**: `dotnet build -t:CoreCompile` 0 Errors, `node -c` trên các file JS đạt 0 lỗi.
 - **Triển khai Toàn diện Phân hệ Quản lý Nhà cung cấp Chuẩn KiotViet (Phiên 55)**:
   - **Nhu cầu**: Xây dựng toàn diện phân hệ Quản lý Nhà cung cấp (`NhaCungCap`) mô phỏng chuẩn giao diện & nghiệp vụ thực tế của KiotViet, đồng bộ với kiến trúc khối Lego đã đóng gói trong dự án.
   - **Giải pháp & Kết quả thực hiện**:
@@ -506,6 +663,9 @@ Cập nhật lần cuối: 2026-10-16 – Hoàn thành Phân hệ Quản lý Nh�
 ---
 
 ## Nhật ký phiên
+- **2026-10-16 (Phiên 59 - Chiều)**:
+  - Đồng bộ hiển thị cột Mã nhà cung cấp (`span.text-break`) và mũi tên sắp xếp 3 trạng thái header giống bảng Phiếu kiểm kho (`_NhaCungCapTable.cshtml`, `NhaCungCapIndexVM.cs`, `NhaCungCapController.cs`, `Index.cshtml`, `nha-cung-cap-index.js`).
+  - Biên dịch kiểm tra: `dotnet build -t:CoreCompile` 0 Errors, cú pháp JS 0 lỗi.
 - **2026-10-16 (Phiên 53 - Chiều)**:
   - Bỏ mục "Tồn kho" và "Nhóm hàng" trên Menu Hàng hóa Topbar (`_MainMenu.cshtml` và `_Header.cshtml`).
   - Biên dịch kiểm tra: `dotnet build -t:CoreCompile` 0 Errors.

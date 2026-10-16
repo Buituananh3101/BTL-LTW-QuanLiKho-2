@@ -18,8 +18,8 @@
         noTu: null,
         noDen: null,
         trangThai: 'HOAT_DONG',
-        sortBy: '',
-        sortDir: '',
+        sortBy: $('#kiotContainer').data('sort-by') || '',
+        sortDir: $('#kiotContainer').data('sort-dir') || '',
         page: 1,
         pageSize: 15,
         expandedId: null
@@ -67,7 +67,7 @@
         params.append('Page', state.page);
         params.append('PageSize', state.pageSize);
 
-        const $container = $('#tableContainer');
+        const $container = $('#tableWrapper').length ? $('#tableWrapper') : $('#tableContainer');
         $container.css('opacity', '0.6');
 
         $.ajax({
@@ -82,7 +82,7 @@
 
                 // Nếu có dòng đang mở trước đó, khôi phục trạng thái
                 if (state.expandedId) {
-                    const $row = $(`.ncc-row[data-id="${state.expandedId}"]`);
+                    const $row = $(`#supplierTable tr.tbl-row[data-id="${state.expandedId}"]`);
                     if ($row.length) {
                         expandSupplierRow(state.expandedId, false);
                     } else {
@@ -196,25 +196,13 @@
             handleCreateGroupSupplier();
         });
 
-        // 3.3. Khối 2: Tổng mua (Khoảng giá trị)
-        const parseNum = val => {
-            if (!val) return null;
-            const cleaned = String(val).replace(/[^0-9.-]/g, '');
-            const n = parseFloat(cleaned);
-            return isNaN(n) ? null : n;
-        };
-
-        const updateTongMuaFilter = KiotFilter.debounce(function () {
-            const tu = parseNum($('#filterTongMuaTu').val());
-            const den = parseNum($('#filterTongMuaDen').val());
+        // 3.3. Khối 2: Tổng mua (Khoảng giá trị dùng LEGO KiotFilter.initValueFilter)
+        KiotFilter.initValueFilter('TongMua', function (tu, den) {
             state.tongMuaTu = tu;
             state.tongMuaDen = den;
-            $('#dotTongMua').toggleClass('active', tu !== null || den !== null);
             state.page = 1;
             loadTable();
-        }, 400);
-
-        $('#filterTongMuaTu, #filterTongMuaDen').on('input', updateTongMuaFilter);
+        });
 
         // 3.4. Khối 3: Thời gian tạo (KiotDateFilter component)
         KiotFilter.initDateFilter('date', function (from, to, text, val) {
@@ -231,43 +219,24 @@
             loadTable();
         });
 
-        // 3.5. Khối 4: Nợ hiện tại (Khoảng giá trị)
-        const updateNoFilter = KiotFilter.debounce(function () {
-            const tu = parseNum($('#filterNoTu').val());
-            const den = parseNum($('#filterNoDen').val());
+        // 3.5. Khối 4: Nợ hiện tại (Khoảng giá trị dùng LEGO KiotFilter.initValueFilter)
+        KiotFilter.initValueFilter('No', function (tu, den) {
             state.noTu = tu;
             state.noDen = den;
-            $('#dotNo').toggleClass('active', tu !== null || den !== null);
             state.page = 1;
             loadTable();
-        }, 400);
+        });
 
-        $('#filterNoTu, #filterNoDen').on('input', updateNoFilter);
-
-        // 3.6. Khối 5: Trạng thái (Checkbox HOAT_DONG / NGUNG_HOAT_DONG / Tất cả)
-        $('input[data-s]').on('change', function () {
-            const val = $(this).data('s');
-            const isChecked = $(this).is(':checked');
-
-            if (val === '') {
-                // "Tất cả" được chọn
-                if (isChecked) {
-                    $('input[data-s]').not(this).prop('checked', false);
-                    state.trangThai = '';
-                } else {
-                    $(this).prop('checked', true);
-                }
+        // 3.6. Khối 5: Trạng thái (Dạng Pills chuẩn prototype qua LEGO KiotFilter.initStatusFilter)
+        KiotFilter.initStatusFilter('#pillsStatus', function (val) {
+            if (val === 'all' || val === '') {
+                state.trangThai = '';
+            } else if (val === 'active' || val === 'HOAT_DONG') {
+                state.trangThai = 'HOAT_DONG';
+            } else if (val === 'off' || val === 'NGUNG_HOAT_DONG') {
+                state.trangThai = 'NGUNG_HOAT_DONG';
             } else {
-                $('input[data-s=""]').prop('checked', false);
-                const checkedStatuses = $('input[data-s]:checked').map(function () { return $(this).data('s'); }).get().filter(x => x !== '');
-                if (checkedStatuses.length === 1) {
-                    state.trangThai = checkedStatuses[0];
-                } else if (checkedStatuses.length === 0 || checkedStatuses.length === 2) {
-                    state.trangThai = '';
-                    if (checkedStatuses.length === 0) {
-                        $('input[data-s=""]').prop('checked', true);
-                    }
-                }
+                state.trangThai = val;
             }
 
             $('#dotTrangThai').toggleClass('active', state.trangThai !== 'HOAT_DONG');
@@ -435,11 +404,14 @@
     function updateSortIcons() {
         $('#supplierTable thead th.sortable-th').each(function () {
             const col = $(this).data('col');
-            const $icon = $(this).find('.sort-icon');
+            let $icon = $(this).find('.sort-icon');
             $(this).removeClass('is-sorted sorted-asc sorted-desc');
 
             if (state.sortBy === col) {
                 $(this).addClass('is-sorted');
+                if ($icon.length === 0) {
+                    $icon = $('<span class="sort-icon"></span>').appendTo($(this).find('.th-title-wrap'));
+                }
                 if (state.sortDir === 'asc') {
                     $(this).addClass('sorted-asc');
                     $icon.removeClass('d-none').html('<i class="bi bi-arrow-up"></i>');
@@ -448,7 +420,7 @@
                     $icon.removeClass('d-none').html('<i class="bi bi-arrow-down"></i>');
                 }
             } else {
-                $icon.addClass('d-none');
+                $icon.remove();
             }
         });
     }
@@ -476,104 +448,501 @@
         loadTable();
     });
 
-    // Ẩn/hiện cột
+    /* ==========================================================================
+       5.1. TÙY CHỌN ẨN / HIỆN CỘT (COLUMN VISIBILITY) CHUẨN KIOTVIET
+       ========================================================================== */
+    const STORAGE_COLS_KEY = 'kiot_ncc_columns_v2';
+
+    const DEFAULT_NCC_COLS = {
+        ma: 1,
+        ten: 1,
+        sdt: 1,
+        email: 1,
+        nhom: 0,
+        diachi: 0,
+        masothue: 0,
+        no: 1,
+        tongmua: 1,
+        ghi: 0,
+        st: 0,
+        ngaytao: 0
+    };
+
     function applyColumnVisibility() {
-        $('.col-toggle').each(function () {
-            const col = $(this).data('col');
+        const $menu = $('#colMenu');
+        if (!$menu.length) return;
+
+        $menu.find('input[data-c]').each(function () {
+            const col = $(this).data('c');
             const isChecked = $(this).is(':checked');
-            $(`#supplierTable [data-col="${col}"]`).toggle(isChecked);
+            $(`#supplierTable [data-col="${col}"]`).each(function () {
+                this.style.display = isChecked ? '' : 'none';
+            });
         });
     }
 
-    $(document).on('change', '.col-toggle', function () {
-        applyColumnVisibility();
-        const savedCols = {};
-        $('.col-toggle').each(function () {
-            savedCols[$(this).data('col')] = $(this).is(':checked');
-        });
-        localStorage.setItem('kiot_ncc_columns', JSON.stringify(savedCols));
-    });
+    function initColumnToggle() {
+        const $menu = $('#colMenu');
+        if (!$menu.length) return;
 
-    function restoreColumnPreferences() {
+        let savedCols = {};
         try {
-            const saved = JSON.parse(localStorage.getItem('kiot_ncc_columns'));
-            if (saved) {
-                $('.col-toggle').each(function () {
-                    const col = $(this).data('col');
-                    if (saved[col] !== undefined) {
-                        $(this).prop('checked', saved[col]);
-                    }
-                });
-            }
+            savedCols = JSON.parse(localStorage.getItem(STORAGE_COLS_KEY) || '{}');
         } catch (_) {}
+
+        // Khôi phục trạng thái từ localStorage, fallback sang DEFAULT_NCC_COLS
+        $menu.find('input[data-c]').each(function () {
+            const col = $(this).data('c');
+            if (col) {
+                if (savedCols[col] !== undefined) {
+                    $(this).prop('checked', savedCols[col] === 1 || savedCols[col] === true);
+                } else if (DEFAULT_NCC_COLS[col] !== undefined) {
+                    $(this).prop('checked', DEFAULT_NCC_COLS[col] === 1);
+                }
+            }
+        });
+        applyColumnVisibility();
+
+        // Lắng nghe sự kiện click/change trên menu cột
+        $menu.on('change', 'input[data-c]', function () {
+            applyColumnVisibility();
+            saveColumnState();
+        });
+
+        function saveColumnState() {
+            const state = {};
+            $menu.find('input[data-c]').each(function () {
+                const col = $(this).data('c');
+                if (col) {
+                    state[col] = $(this).is(':checked') ? 1 : 0;
+                }
+            });
+            localStorage.setItem(STORAGE_COLS_KEY, JSON.stringify(state));
+        }
     }
 
     /* ==========================================================================
-       6. MASTER-DETAIL ACCORDION (BUNG DÒNG CHI TIẾT & 3 TABS)
+       6. MASTER-DETAIL ACCORDION (BUNG DÒNG CHI TIẾT & 3 TABS KHỚP KIỂM KHO)
        ========================================================================== */
     function expandSupplierRow(id, toggle = true) {
-        const $row = $(`.ncc-row[data-id="${id}"]`);
-        const $detailTr = $(`#nccDetailRow_${id}`);
-        const $container = $(`#nccDetailContainer_${id}`);
+        const $row = $(`#supplierTable tr.tbl-row[data-id="${id}"]`);
+        const $dtl = $(`#dtl-${id}`);
 
-        if (toggle && $row.hasClass('is-expanded')) {
-            $row.removeClass('is-expanded');
-            $detailTr.hide();
+        if (toggle && $row.hasClass('open')) {
+            $row.removeClass('open');
+            $dtl.hide();
             state.expandedId = null;
             return;
         }
 
-        // Đóng dòng cũ
-        $('.ncc-row').removeClass('is-expanded');
-        $('.ncc-detail-tr').hide();
+        // Đóng các dòng đang mở khác
+        $('#supplierTable tr.tbl-row').removeClass('open');
+        $('#supplierTable tr.dtl').hide();
 
-        // Mở dòng mới
-        $row.addClass('is-expanded');
-        $detailTr.show();
+        // Mở dòng được chọn
+        $row.addClass('open');
+        $dtl.show();
         state.expandedId = id;
-
-        // Gọi AJAX lấy HTML chi tiết nếu chưa nạp
-        $.ajax({
-            url: `/NhaCungCap/GetDetail?id=${id}`,
-            type: 'GET',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            success: function (html) {
-                $container.html(html);
-            },
-            error: function () {
-                $container.html('<div class="p-3 text-center text-danger small">Không thể nạp thông tin chi tiết.</div>');
-            }
-        });
     }
 
-    // Click dòng bảng để mở Master-Detail (trừ checkbox, link, button)
-    $(document).on('click', '.ncc-row', function (e) {
-        if ($(e.target).closest('input, button, a, label').length) return;
+    // Click dòng bảng để mở Accordion Drawer (trừ checkbox, link, button)
+    $(document).on('click', '#supplierTable tr.tbl-row', function (e) {
+        if ($(e.target).closest('input, button, a, label, .w-chk').length) return;
         const id = $(this).data('id');
         if (id) expandSupplierRow(id, true);
     });
 
-    // Chuyển tabs trong Master-Detail
-    $(document).on('click', '.ncc-detail-tab-btn', function (e) {
+    // Chuyển tabs trong Accordion Drawer (.dp-tabs -> .dp-tab)
+    $(document).on('click', '.dp-tab', function (e) {
         e.preventDefault();
         const tab = $(this).data('tab');
-        const $panel = $(this).closest('.ncc-detail-panel');
+        const $dp = $(this).closest('.dp');
+        const id = $dp.data('d');
 
-        $panel.find('.ncc-detail-tab-btn').removeClass('active');
+        $dp.find('.dp-tab').removeClass('active');
         $(this).addClass('active');
 
-        $panel.find('.ncc-tab-pane').hide();
-        $panel.find(`.ncc-tab-${tab}`).show();
+        $dp.find('.ncc-tab-pane').hide();
+        const $targetPane = $dp.find(`.ncc-tab-${tab}`);
+        $targetPane.show();
+
+        // Nạp AJAX nếu là tab history hoặc debt và chưa nạp dữ liệu
+        if ((tab === 'history' || tab === 'debt') && id) {
+            const $dyn = $targetPane.find('.ncc-dyn-container[data-loaded="0"]');
+            if ($dyn.length) {
+                $.ajax({
+                    url: `/NhaCungCap/GetDetail?id=${id}`,
+                    type: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    success: function (html) {
+                        const $res = $('<div>').html(html);
+                        const histHtml = $res.find('.ncc-tab-history').html();
+                        const debtHtml = $res.find('.ncc-tab-debt').html();
+
+                        if (histHtml) {
+                            $dp.find('.ncc-tab-history').html(histHtml);
+                        }
+                        if (debtHtml) {
+                            $dp.find('.ncc-tab-debt').html(debtHtml);
+                        }
+                    },
+                    error: function () {
+                        $targetPane.html('<div class="p-3 text-center text-danger small">Không thể nạp dữ liệu.</div>');
+                    }
+                });
+            }
+        }
     });
 
     /* ==========================================================================
-       7. MODAL THÊM MỚI / CHỈNH SỬA NHÀ CUNG CẤP (CHUẨN 3 ACCORDION)
+       7. MODAL THÊM MỚI / CHỈNH SỬA NHÀ CUNG CẤP CHUẨN KIOTVIET (THEO HÀNG HÓA)
        ========================================================================== */
-    const nccModal = new bootstrap.Modal(document.getElementById('nccModal'));
+    function showModal(id) {
+        $('#' + id).addClass('show');
+        $('body').addClass('noscroll');
+    }
 
+    function hideModal(id) {
+        $('#' + id).removeClass('show');
+        if (!$('.hh-ov.show').length) {
+            $('body').removeClass('noscroll');
+        }
+    }
+
+    // Đóng overlay bằng data-close
+    $(document).on('click', '[data-close]', function (e) {
+        e.preventDefault();
+        const targetId = $(this).data('close');
+        if (targetId) hideModal(targetId);
+    });
+
+    // Đóng modal bằng phím Escape
+    $(document).on('keydown', function (e) {
+        if (e.key === 'Escape') {
+            const topModal = ['nccDeleteOv', 'nccEditGroupOv', 'nccPromptOv', 'nccModalOv']
+                .map(id => document.getElementById(id))
+                .find(el => el && el.classList.contains('show'));
+            if (topModal) hideModal(topModal.id);
+        }
+    });
+
+    // Accordion gập mở trong Modal chuẩn .hh-sec
+    $(document).on('click', '.hh-sec-h', function () {
+        $(this).closest('.hh-sec').toggleClass('open');
+    });
+
+    // 7.1. Custom Combobox Nhóm nhà cung cấp trong Modal
+    const nccGroupCombobox = (function () {
+        const $wrap = $('#wrapMaNhomNcc');
+        const $box = $('#boxMaNhomNcc');
+        const $input = $('#inputMaNhomNcc');
+        const $dropdown = $('#dropdownMaNhomNcc');
+        const $list = $('#listMaNhomNcc');
+        const $select = $('#nccMaNhomNcc');
+        const $search = $('#searchMaNhomNcc');
+
+        function open() {
+            $('.hh-cs-wrap').not($wrap).removeClass('open').find('.hh-cs-dropdown').hide();
+            if (window.KiotFilter && window.KiotFilter.checkDropdownDirection && $wrap.length && $box.length && $dropdown.length) {
+                window.KiotFilter.checkDropdownDirection($wrap[0], $box[0], $dropdown[0]);
+            }
+            $wrap.addClass('open');
+            $dropdown.show();
+            if ($search.length) {
+                $search.val('').focus();
+                filterItems('');
+            }
+        }
+
+        function close() {
+            $wrap.removeClass('open');
+            $dropdown.hide();
+        }
+
+        function filterItems(kw) {
+            const term = (kw || '').trim().toLowerCase();
+            $list.find('.hh-cs-item').each(function () {
+                const txt = $(this).find('span').text().toLowerCase();
+                $(this).toggle(!term || txt.includes(term));
+            });
+        }
+
+        function selectVal(val, text) {
+            $select.val(val).trigger('change');
+            $input.val(text || '');
+            $list.find('.hh-cs-item').removeClass('selected').filter(function () {
+                return String($(this).data('val')) === String(val);
+            }).addClass('selected');
+            close();
+        }
+
+        function syncFromSelect() {
+            const curVal = $select.val();
+            $list.empty();
+            $select.find('option').each(function () {
+                const v = $(this).val();
+                if (!v) return;
+                const t = $(this).text();
+                const isSel = (String(v) === String(curVal));
+                const $item = $(`
+                    <div class="hh-cs-item ${isSel ? 'selected' : ''}" data-val="${v}">
+                        <span>${escapeHtml(t)}</span>
+                        <button type="button" class="hh-item-edit-btn" data-type="nhom" data-id="${v}" data-val="${escapeHtml(t)}" title="Sửa nhóm" aria-label="Sửa nhóm ${escapeHtml(t)}">
+                            <svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>
+                        </button>
+                        <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+                    </div>
+                `);
+                $list.append($item);
+            });
+            updateUI();
+        }
+
+        function updateUI() {
+            const curVal = $select.val();
+            const $selectedOpt = $select.find(`option[value="${curVal}"]`);
+            if (curVal && $selectedOpt.length) {
+                $input.val($selectedOpt.text());
+                $list.find('.hh-cs-item').removeClass('selected').filter(function () {
+                    return String($(this).data('val')) === String(curVal);
+                }).addClass('selected');
+            } else {
+                $input.val('');
+                $list.find('.hh-cs-item').removeClass('selected');
+            }
+        }
+
+        $box.on('click', function (e) {
+            e.stopPropagation();
+            if ($wrap.hasClass('open')) close();
+            else open();
+        });
+
+        $search.on('click', function (e) {
+            e.stopPropagation();
+        }).on('input', function () {
+            filterItems($(this).val());
+        }).on('keydown', function (e) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                close();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const $first = $list.find('.hh-cs-item:visible').first();
+                if ($first.length) {
+                    selectVal($first.data('val'), $first.find('span').text().trim());
+                }
+            }
+        });
+
+        $list.on('click', '.hh-cs-item', function (e) {
+            if ($(e.target).closest('.hh-item-edit-btn').length) return;
+            e.stopPropagation();
+            const v = $(this).data('val');
+            const t = $(this).find('span').text().trim();
+            selectVal(v, t);
+        });
+
+        // Click nút bút chì ✎ trên từng item nhóm
+        $list.on('click', '.hh-item-edit-btn', function (e) {
+            e.stopPropagation();
+            const id = $(this).data('id') || $(this).closest('.hh-cs-item').data('val');
+            const val = $(this).data('val') || $(this).closest('.hh-cs-item').find('span').text().trim();
+            close();
+            openEditGroupModal(id, val);
+        });
+
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest($wrap).length) {
+                close();
+            }
+        });
+
+        return {
+            open,
+            close,
+            select: selectVal,
+            sync: syncFromSelect,
+            updateUI
+        };
+    })();
+
+    // 7.2. Quản lý Nhóm NCC qua Sub-modals (Tạo nhanh & Sửa/Xóa tại chỗ)
+    $('#btnNewNhomNcc').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#nccPromptInput').val('');
+        $('#nccPromptErr').hide();
+        showModal('nccPromptOv');
+        setTimeout(() => $('#nccPromptInput').focus(), 40);
+    });
+
+    $('#nccPromptSave').on('click', function () {
+        submitCreateGroupQuick();
+    });
+
+    $('#nccPromptInput').on('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            submitCreateGroupQuick();
+        }
+    });
+
+    function submitCreateGroupQuick() {
+        const name = $('#nccPromptInput').val().trim();
+        if (!name) {
+            $('#nccPromptErr').text('Vui lòng nhập tên nhóm nhà cung cấp.').show();
+            $('#nccPromptInput').focus();
+            return;
+        }
+        $('#nccPromptErr').hide();
+
+        $.ajax({
+            url: '/NhaCungCap/CreateGroupQuick',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ tenNhom: name }),
+            success: function (res) {
+                if (res.success) {
+                    hideModal('nccPromptOv');
+                    if (window.KiotToast) window.KiotToast.success(`Tạo nhóm "${res.tenNhom}" thành công.`);
+
+                    // Bổ sung vào select modal & combobox
+                    if (!$(`#nccMaNhomNcc option[value="${res.maNhomNcc}"]`).length) {
+                        $('#nccMaNhomNcc').append(`<option value="${res.maNhomNcc}">${escapeHtml(res.tenNhom)}</option>`);
+                    }
+                    nccGroupCombobox.sync();
+                    nccGroupCombobox.select(res.maNhomNcc, res.tenNhom);
+
+                    // Bổ sung vào dropdown sidebar nếu chưa có
+                    if (!$(`#dropdownNhomNcc .kiot-ms-item[data-val="${res.maNhomNcc}"]`).length) {
+                        const itemHtml = `
+                            <div class="kiot-ms-item" data-val="${res.maNhomNcc}" data-name="${escapeHtml(res.tenNhom)}">
+                                <input type="checkbox" class="form-check-input" />
+                                <span class="kiot-ms-text">${escapeHtml(res.tenNhom)}</span>
+                                <button type="button" class="kiot-item-edit-btn hh-item-edit-btn" data-id="${res.maNhomNcc}" data-name="${escapeHtml(res.tenNhom)}" title="Sửa nhóm">
+                                    <i class="bi bi-pencil" style="font-size:12px;pointer-events:none;"></i>
+                                </button>
+                            </div>
+                        `;
+                        $('#dropdownNhomNcc').append(itemHtml);
+                    }
+                }
+            },
+            error: function (xhr) {
+                $('#nccPromptErr').text(xhr.responseJSON?.message || 'Không thể tạo nhóm.').show();
+            }
+        });
+    }
+
+    function openEditGroupModal(id, val) {
+        if (!id) return;
+        $('#nccEditGroupId').val(id);
+        $('#nccEditGroupInput').val(val || '');
+        $('#nccEditGroupErr').hide();
+        showModal('nccEditGroupOv');
+        setTimeout(() => $('#nccEditGroupInput').focus().select(), 40);
+    }
+
+    $('#btnEditGroupSave').on('click', function () {
+        submitUpdateGroup();
+    });
+
+    $('#nccEditGroupInput').on('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            submitUpdateGroup();
+        }
+    });
+
+    function submitUpdateGroup() {
+        const id = parseInt($('#nccEditGroupId').val()) || 0;
+        const newName = $('#nccEditGroupInput').val().trim();
+        if (!newName) {
+            $('#nccEditGroupErr').text('Vui lòng nhập tên nhóm nhà cung cấp.').show();
+            $('#nccEditGroupInput').focus();
+            return;
+        }
+
+        $.ajax({
+            url: '/NhaCungCap/UpdateGroupQuick',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ maNhomNcc: id, tenNhom: newName }),
+            success: function (res) {
+                if (res.success) {
+                    hideModal('nccEditGroupOv');
+                    if (window.KiotToast) window.KiotToast.success(`Đã đổi tên nhóm thành "${res.tenNhom}".`);
+
+                    // Cập nhật select modal & combobox
+                    $(`#nccMaNhomNcc option[value="${id}"]`).text(res.tenNhom);
+                    nccGroupCombobox.sync();
+                    if (String($('#nccMaNhomNcc').val()) === String(id)) {
+                        nccGroupCombobox.select(id, res.tenNhom);
+                    }
+
+                    // Cập nhật dropdown sidebar
+                    const $sItem = $(`#dropdownNhomNcc .kiot-ms-item[data-val="${id}"]`);
+                    $sItem.attr('data-name', res.tenNhom);
+                    $sItem.find('.kiot-ms-text').text(res.tenNhom);
+                    $sItem.find('.kiot-item-edit-btn').attr('data-name', res.tenNhom);
+
+                    // Cập nhật state nếu đang lọc nhóm này
+                    const target = state.nhom.find(x => String(x.val) === String(id));
+                    if (target) {
+                        target.name = res.tenNhom;
+                        $('#dotNhomNcc').addClass('active');
+                        KiotFilter.renderTagPills($('#boxNhomNcc'), state.nhom, 'Tất cả các nhóm', 2);
+                    }
+                }
+            },
+            error: function (xhr) {
+                $('#nccEditGroupErr').text(xhr.responseJSON?.message || 'Không thể cập nhật nhóm.').show();
+            }
+        });
+    }
+
+    $('#btnEditGroupDelete').on('click', function () {
+        const id = parseInt($('#nccEditGroupId').val()) || 0;
+        if (!id) return;
+
+        $.ajax({
+            url: '/NhaCungCap/DeleteGroupQuick',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ maNhomNcc: id }),
+            success: function (res) {
+                if (res.success) {
+                    hideModal('nccEditGroupOv');
+                    if (window.KiotToast) window.KiotToast.success(res.message);
+
+                    // Gỡ bỏ khỏi select modal & combobox
+                    $(`#nccMaNhomNcc option[value="${id}"]`).remove();
+                    nccGroupCombobox.sync();
+                    if (String($('#nccMaNhomNcc').val()) === String(id)) {
+                        nccGroupCombobox.select('', '');
+                    }
+
+                    // Gỡ bỏ khỏi sidebar
+                    $(`#dropdownNhomNcc .kiot-ms-item[data-val="${id}"]`).remove();
+                    state.nhom = state.nhom.filter(x => String(x.val) !== String(id));
+                    $('#dotNhomNcc').toggleClass('active', state.nhom.length > 0);
+                    KiotFilter.renderTagPills($('#boxNhomNcc'), state.nhom, 'Tất cả các nhóm', 2);
+                    state.page = 1;
+                    loadTable();
+                }
+            },
+            error: function (xhr) {
+                $('#nccEditGroupErr').text(xhr.responseJSON?.message || 'Không thể xóa nhóm này.').show();
+            }
+        });
+    });
+
+    // 7.3. Reset Form Nhà Cung Cấp
     function resetNccForm() {
         $('#nccId').val('0');
-        $('#nccTenDonVi').val('').removeClass('is-invalid');
+        $('#nccTenDonVi').val('');
+        $('#nccFldTen').removeClass('invalid');
         $('#nccMaNcc').val('');
         $('#nccDienThoai').val('');
         $('#nccEmail').val('');
@@ -581,24 +950,33 @@
         $('#nccKhuVuc').val('');
         $('#nccPhuongXa').val('');
         $('#nccMaNhomNcc').val('');
+        nccGroupCombobox.updateUI();
         $('#nccGhiChu').val('');
         $('#nccTenCongTy').val('');
         $('#nccMaSoThue').val('');
         $('#nccSoCccd').val('');
         $('#nccStatusWrap').hide();
         $('#nccTrangThaiSwitch').prop('checked', true);
+        $('#btnDeleteNccInModal').hide();
         $('#btnSaveAndNewNcc').show();
-        $('#nccModalLabel').html('<i class="bi bi-truck me-1 text-primary"></i> Thêm mới nhà cung cấp');
+        $('#nccModalTitle').text('Thêm mới nhà cung cấp');
 
-        // Thu gọn các accordion
-        $('.kiot-sec').removeClass('open');
-        $('.kiot-sec-b').hide();
+        // Mở sẵn các accordion
+        $('#nccModalOv .hh-sec').addClass('open');
     }
+
+    // Tự động xóa lỗi khi người dùng gõ tên NCC
+    $('#nccTenDonVi').on('input', function () {
+        if ($(this).val().trim()) {
+            $('#nccFldTen').removeClass('invalid');
+        }
+    });
 
     // Mở modal tạo mới
     $('#btnOpenCreateNccModal').on('click', function () {
         resetNccForm();
-        nccModal.show();
+        showModal('nccModalOv');
+        setTimeout(() => $('#nccTenDonVi').focus(), 40);
     });
 
     // Mở modal chỉnh sửa từ nút trong detail panel
@@ -609,8 +987,9 @@
 
         resetNccForm();
         $('#nccId').val(id);
-        $('#nccModalLabel').html('<i class="bi bi-pencil-square me-1 text-primary"></i> Cập nhật nhà cung cấp');
+        $('#nccModalTitle').text('Cập nhật nhà cung cấp');
         $('#btnSaveAndNewNcc').hide();
+        $('#btnDeleteNccInModal').show();
         $('#nccStatusWrap').show();
 
         $.ajax({
@@ -627,6 +1006,7 @@
                     $('#nccKhuVuc').val(d.khuVuc || '');
                     $('#nccPhuongXa').val(d.phuongXa || '');
                     $('#nccMaNhomNcc').val(d.maNhomNcc || '');
+                    nccGroupCombobox.updateUI();
                     $('#nccGhiChu').val(d.ghiChu || '');
                     $('#nccTenCongTy').val(d.tenCongTy || '');
                     $('#nccMaSoThue').val(d.maSoThue || '');
@@ -636,18 +1016,8 @@
                     $('#nccTrangThaiSwitch').prop('checked', isHoatDong);
                     $('#nccTrangThaiLabel').text(isHoatDong ? 'Đang hoạt động' : 'Ngừng hoạt động');
 
-                    // Mở sẵn accordion nếu có dữ liệu
-                    if (d.diaChi || d.khuVuc || d.phuongXa) {
-                        $('#nccDiaChi').closest('.kiot-sec').addClass('open').find('.kiot-sec-b').show();
-                    }
-                    if (d.maNhomNcc || d.ghiChu) {
-                        $('#nccMaNhomNcc').closest('.kiot-sec').addClass('open').find('.kiot-sec-b').show();
-                    }
-                    if (d.tenCongTy || d.maSoThue || d.soCccd) {
-                        $('#nccTenCongTy').closest('.kiot-sec').addClass('open').find('.kiot-sec-b').show();
-                    }
-
-                    nccModal.show();
+                    showModal('nccModalOv');
+                    setTimeout(() => $('#nccTenDonVi').focus().select(), 40);
                 }
             },
             error: function () {
@@ -656,33 +1026,21 @@
         });
     });
 
-    // Accordion gập mở trong Modal
-    $(document).on('click', '.kiot-sec-h', function () {
-        const $sec = $(this).closest('.kiot-sec');
-        $sec.toggleClass('open');
-        $sec.find('.kiot-sec-b').slideToggle(200);
-    });
-
     // Switch trạng thái trong modal edit
     $('#nccTrangThaiSwitch').on('change', function () {
         const isChecked = $(this).is(':checked');
         $('#nccTrangThaiLabel').text(isChecked ? 'Đang hoạt động' : 'Ngừng hoạt động');
     });
 
-    // Thêm nhanh nhóm từ modal
-    $('#btnQuickAddGroupInModal').on('click', function (e) {
-        e.preventDefault();
-        handleCreateGroupSupplier();
-    });
-
     // Xử lý Lưu form (POST)
     function submitNccForm(isSaveAndNew) {
         const ten = $('#nccTenDonVi').val().trim();
         if (!ten) {
-            $('#nccTenDonVi').addClass('is-invalid').focus();
+            $('#nccFldTen').addClass('invalid');
+            $('#nccTenDonVi').focus();
             return;
         }
-        $('#nccTenDonVi').removeClass('is-invalid');
+        $('#nccFldTen').removeClass('invalid');
 
         const id = parseInt($('#nccId').val()) || 0;
         const payload = {
@@ -722,7 +1080,7 @@
                         resetNccForm();
                         $('#nccTenDonVi').focus();
                     } else {
-                        nccModal.hide();
+                        hideModal('nccModalOv');
                     }
                     loadTable();
                 }
@@ -745,56 +1103,75 @@
     /* ==========================================================================
        8. XÓA & ĐỔI TRẠNG THÁI NHÀ CUNG CẤP (RÀNG BUỘC CHỨNG TỪ RULE 5)
        ========================================================================== */
-    function deleteSupplier(id, name) {
+    function openDeleteSupplierModal(id, name) {
+        if (!id) return;
+        $('#delNccId').val(id);
+        $('#delNccName').text(name || 'nhà cung cấp');
+        $('#delNccErrorBox').hide();
+        $('#btnConfirmDeleteNcc').show();
+        showModal('nccDeleteOv');
+    }
+
+    // Nút Xóa trong modal Sửa
+    $('#btnDeleteNccInModal').on('click', function () {
+        const id = parseInt($('#nccId').val()) || 0;
+        const name = $('#nccTenDonVi').val().trim();
+        openDeleteSupplierModal(id, name);
+    });
+
+    // Nút Xóa trong Panel chi tiết
+    $(document).on('click', '.btn-delete-ncc', function (e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        const name = $(this).data('name') || 'nhà cung cấp';
+        openDeleteSupplierModal(id, name);
+    });
+
+    // Xác nhận xóa trong modal #nccDeleteOv
+    $('#btnConfirmDeleteNcc').on('click', function () {
+        const id = parseInt($('#delNccId').val()) || 0;
         if (!id) return;
 
-        const doDelete = () => {
-            $.ajax({
-                url: `/NhaCungCap/Delete?id=${id}`,
-                type: 'POST',
-                success: function (res) {
-                    if (res.success) {
-                        if (window.KiotToast) window.KiotToast.success(res.message);
-                        state.expandedId = null;
-                        loadTable();
-                    }
-                },
-                error: function (xhr) {
-                    const res = xhr.responseJSON;
-                    if (res && res.hasTransaction) {
-                        // Nếu đã phát sinh chứng từ, thông báo và gợi ý chuyển sang Ngừng hoạt động
-                        if (window.KiotConfirm) {
-                            window.KiotConfirm.show({
-                                title: 'Không thể xóa nhà cung cấp',
-                                message: `${escapeHtml(res.message)}<br><br>Bạn có muốn chuyển nhà cung cấp này sang <strong>Ngừng hoạt động</strong> thay vì xóa không?`,
-                                confirmText: 'Ngừng hoạt động',
-                                onConfirm: function () {
-                                    toggleSupplierStatus(id);
-                                }
-                            });
-                        } else {
-                            if (confirm(`${res.message}\n\nBạn có muốn chuyển sang Ngừng hoạt động không?`)) {
-                                toggleSupplierStatus(id);
-                            }
-                        }
-                    } else {
-                        if (window.KiotToast) window.KiotToast.error(res?.message || 'Không thể xóa nhà cung cấp.');
-                    }
-                }
-            });
-        };
+        const $btn = $(this);
+        $btn.prop('disabled', true);
 
-        if (window.KiotConfirm) {
-            window.KiotConfirm.show({
-                title: 'Xóa nhà cung cấp',
-                message: `Bạn có chắc chắn muốn xóa nhà cung cấp <strong>${escapeHtml(name)}</strong>?<br><span class="text-muted small">Thao tác này sẽ xóa hoàn toàn thông tin nếu chưa từng phát sinh chứng từ.</span>`,
-                confirmText: 'Đồng ý xóa',
-                onConfirm: doDelete
-            });
-        } else if (confirm(`Bạn có chắc chắn muốn xóa nhà cung cấp "${name}"?`)) {
-            doDelete();
-        }
-    }
+        $.ajax({
+            url: `/NhaCungCap/Delete?id=${id}`,
+            type: 'POST',
+            success: function (res) {
+                $btn.prop('disabled', false);
+                if (res.success) {
+                    hideModal('nccDeleteOv');
+                    hideModal('nccModalOv');
+                    if (window.KiotToast) window.KiotToast.success(res.message);
+                    state.expandedId = null;
+                    loadTable();
+                }
+            },
+            error: function (xhr) {
+                $btn.prop('disabled', false);
+                const res = xhr.responseJSON;
+                if (res && res.hasTransaction) {
+                    // Đã phát sinh phiếu nhập -> Chặn xóa và hiển thị nút chuyển Ngừng hoạt động
+                    $('#delNccErrorMsg').text(res.message);
+                    $('#delNccErrorBox').show();
+                    $('#btnConfirmDeleteNcc').hide();
+                } else {
+                    if (window.KiotToast) window.KiotToast.error(res?.message || 'Không thể xóa nhà cung cấp.');
+                    hideModal('nccDeleteOv');
+                }
+            }
+        });
+    });
+
+    // Chuyển sang Ngừng hoạt động ngay từ modal xóa
+    $('#btnSwitchNgungHdInDelModal').on('click', function () {
+        const id = parseInt($('#delNccId').val()) || 0;
+        if (!id) return;
+        toggleSupplierStatus(id);
+        hideModal('nccDeleteOv');
+        hideModal('nccModalOv');
+    });
 
     function toggleSupplierStatus(id) {
         if (!id) return;
@@ -812,13 +1189,6 @@
             }
         });
     }
-
-    $(document).on('click', '.btn-delete-ncc', function (e) {
-        e.preventDefault();
-        const id = $(this).data('id');
-        const name = $(this).data('name') || 'nhà cung cấp';
-        deleteSupplier(id, name);
-    });
 
     $(document).on('click', '.btn-toggle-status-ncc', function (e) {
         e.preventDefault();
@@ -854,15 +1224,40 @@
         }
     });
 
-    // Checkbox select all
-    $(document).on('change', '#selectAllNcc', function () {
+    // Checkbox chọn tất cả dòng (khớp Kiểm kho: #chkAll & input[data-sel])
+    $(document).on('change', '#chkAll', function () {
         const isChecked = $(this).is(':checked');
-        $('.row-select-ncc').prop('checked', isChecked);
+        $('#supplierTable input[data-sel]').prop('checked', isChecked);
     });
 
-    $(document).on('change', '.row-select-ncc', function () {
-        const allChecked = $('.row-select-ncc:checked').length === $('.row-select-ncc').length;
-        $('#selectAllNcc').prop('checked', allChecked);
+    $(document).on('change', '#supplierTable input[data-sel]', function () {
+        const total = $('#supplierTable input[data-sel]').length;
+        const checked = $('#supplierTable input[data-sel]:checked').length;
+        $('#chkAll').prop('checked', total > 0 && total === checked);
+    });
+
+    // Reset bộ lọc khi nhấn "vào đây" trong empty state
+    $(document).on('click', '#resetF', function (e) {
+        e.preventDefault();
+        state.q = '';
+        state.nhom = [];
+        state.tongMuaTu = null;
+        state.tongMuaDen = null;
+        state.thoiGian = 'ALL';
+        state.fromDate = null;
+        state.toDate = null;
+        state.noTu = null;
+        state.noDen = null;
+        state.trangThai = 'HOAT_DONG';
+        state.sortBy = '';
+        state.sortDir = '';
+        state.page = 1;
+        $('#keywordSearch').val('');
+        $('#dotNhomNcc').removeClass('active');
+        $('#dotTrangThai').removeClass('active');
+        KiotFilter.renderTagPills($('#boxNhomNcc'), [], 'Tất cả các nhóm', 2);
+        $('#dropdownNhomNcc .kiot-ms-item').removeClass('selected').find('input[type="checkbox"]').prop('checked', false);
+        loadTable();
     });
 
     // Nút Xuất file Excel
@@ -873,12 +1268,19 @@
         window.location.href = `/NhaCungCap/Index?export=excel&q=${encodeURIComponent(state.q)}`;
     });
 
+    // Nút Tải lại bảng
+    $('#btnReloadTable').on('click', function () {
+        const $btn = $(this);
+        $btn.addClass('spinning');
+        loadTable();
+        setTimeout(() => $btn.removeClass('spinning'), 600);
+    });
+
     /* ==========================================================================
        10. KHỞI CHẠY LẦN ĐẦU
        ========================================================================== */
-    restoreColumnPreferences();
     initSidebarFilters();
-    applyColumnVisibility();
+    initColumnToggle();
     bindPaginationEvents();
 
 })(jQuery);

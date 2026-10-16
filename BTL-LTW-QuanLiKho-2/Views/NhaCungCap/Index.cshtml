@@ -3,9 +3,11 @@
     ViewData["Title"] = "Nhà cung cấp";
 }
 
+<link rel="stylesheet" href="~/css/kiem-kho.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/hang-hoa-form.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/nha-cung-cap.css" asp-append-version="true" />
 
-<div class="kiot-container position-relative" id="kiotContainer">
+<div class="kiot-container position-relative" id="kiotContainer" data-sort-by="@Model.SortBy" data-sort-dir="@Model.SortDir">
     <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + 5 KHỐI BỘ LỌC KIOTVIET -->
     <partial name="_NhaCungCapFilterSidebar" model="Model" />
 
@@ -45,29 +47,43 @@
                     <i class="bi bi-file-earmark-arrow-up me-1"></i><span>Xuất file</span>
                 </button>
 
-                <!-- Nút Ẩn / Hiện cột dữ liệu -->
-                <div class="dropdown d-inline-block">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="btnColPicker" data-bs-toggle="dropdown" aria-expanded="false" title="Tùy chỉnh cột hiển thị">
+                <!-- Dropdown Tùy chọn hiển thị cột -->
+                <div class="dropdown">
+                    <button class="btn btn-tool" type="button" id="btnColsDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Tùy chọn hiển thị cột">
                         <i class="bi bi-view-list"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow p-2" aria-labelledby="btnColPicker" style="min-width: 200px;">
-                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="ma" checked> Mã nhà cung cấp</label></li>
-                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="ten" checked> Tên nhà cung cấp</label></li>
-                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="sdt" checked> Điện thoại</label></li>
-                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="email" checked> Email</label></li>
-                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="nhom"> Nhóm nhà cung cấp</label></li>
-                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="no" checked> Nợ cần trả hiện tại</label></li>
-                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="tongmua" checked> Tổng mua</label></li>
-                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="trangthai"> Trạng thái</label></li>
-                    </ul>
+                    <div class="dropdown-menu dropdown-menu-end shadow p-3" id="colMenu" style="min-width: 210px;">
+                        <h6 class="dropdown-header px-0 pt-0 text-dark fw-bold">Hiển thị cột</h6>
+                        <div class="d-flex flex-column gap-2 small">
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ma" checked> Mã nhà cung cấp</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ten" checked> Tên nhà cung cấp</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="sdt" checked> Điện thoại</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="email" checked> Email</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="nhom"> Nhóm nhà cung cấp</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="diachi"> Địa chỉ</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="masothue"> Mã số thuế</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="no" checked> Nợ cần trả hiện tại</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tongmua" checked> Tổng mua</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ghi"> Ghi chú</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="st"> Trạng thái</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ngaytao"> Ngày tạo</label>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Tải lại bảng -->
+                <button type="button" class="btn btn-tool d-none d-sm-inline-flex" title="Tải lại bảng" id="btnReloadTable">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
             </div>
         </div>
 
-        <!-- Bảng danh sách nhà cung cấp + Phân trang AJAX -->
-        <div id="tableContainer">
-            <partial name="_NhaCungCapTable" model="Model.PagedData" />
-        </div>
+        <!-- Bảng danh sách nhà cung cấp (Partial View AJAX) -->
+        <section id="content">
+            <div id="tableWrapper" class="kiot-table-wrapper">
+                <partial name="_NhaCungCapTable" model="Model" />
+            </div>
+        </section>
     </main>
 </div>
 

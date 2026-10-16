@@ -1,6 +1,6 @@
 /**
- * xuat-huy-form.js - Quản lý form Lập / Sửa phiếu xuất hủy
- * Khớp 100% giao diện và tương tác KiotViet Screenshot 2 (F3, F4, F9, F10)
+ * xuat-huy-form.js - Quản lý form Lập / Sửa / Chi tiết phiếu xuất hủy
+ * Chuẩn hóa 100% theo kiến trúc, tương tác và giao diện phieu-kiem-ke-form.js
  */
 (function () {
     'use strict';
@@ -15,6 +15,7 @@
     const completeUrl = app.dataset.completeUrl || '/XuatHuy/Complete';
     const indexUrl = app.dataset.indexUrl || '/XuatHuy/Index';
     const importUrl = app.dataset.importUrl || '/XuatHuy/ImportExcel';
+    const templateUrl = app.dataset.templateUrl || '/XuatHuy/DownloadTemplate';
     const isReadOnly = app.dataset.isReadonly === 'true';
 
     // Đọc cấu hình từ thẻ script JSON an toàn
@@ -41,18 +42,20 @@
         warehouseId: cfg.warehouseId || parseInt(app.dataset.warehouseId) || 1,
         created: cfg.created ? new Date(cfg.created) : new Date(),
         note: cfg.note || ($('#fNote') ? $('#fNote').value : ''),
+        dirty: false,
         lines: Array.isArray(cfg.lines) ? cfg.lines.map(l => ({
-            maHang: l.maHang,
+            pid: l.pid,
             code: l.code || '',
             name: l.name || '',
-            dvt: l.dvt || '',
+            unit: l.unit || '',
             qty: Number(l.qty) || 1,
             cost: Number(l.cost) || 0,
             ton: Number(l.ton) || 0
-        })) : []
+        })) : [],
+        recent: []
     };
 
-    /* ===== CHỌN NGÀY GIỜ LẬP PHIẾU ===== */
+    /* ===== CHỌN NGÀY GIỜ LẬP PHIẾU (POPUP LỊCH 2 THÁNG) ===== */
     const DOW = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
     const DT = { y: FM.created.getFullYear(), m: FM.created.getMonth() };
 
@@ -142,137 +145,266 @@
         });
     }
 
-    /* ===== VẼ BẢNG HÀNG HÓA VÀ TỔNG HỢP ===== */
-    function renderTable() {
-        const emptyBox = $('#emptyBox');
-        const tableWrap = $('#tableWrap');
-        const tbody = $('#gridBody');
-        const badgeCount = $('#badgeCount');
-        const totalAmount = $('#totalAmount');
-
-        const hasLines = FM.lines.length > 0;
-        if (emptyBox) emptyBox.classList.toggle('d-none', hasLines);
-        if (tableWrap) tableWrap.classList.toggle('d-none', !hasLines);
-
-        let sumAmount = 0;
-        let html = '';
-
-        FM.lines.forEach((l, idx) => {
-            const lineAmount = l.qty * l.cost;
-            sumAmount += lineAmount;
-
-            html += `
-                <tr data-id="${l.maHang}">
-                    <td class="text-center text-muted">${idx + 1}</td>
-                    <td><span class="fw-semibold text-primary">${esc(l.code)}</span></td>
-                    <td>
-                        <div class="fw-medium text-dark">${esc(l.name)}</div>
-                        <div class="small text-muted">Tồn: ${fmt(l.ton)}</div>
-                    </td>
-                    <td class="text-center">${esc(l.dvt)}</td>
-                    <td class="text-end">
-                        ${isReadOnly ? `<span class="fw-semibold">${fmt(l.qty)}</span>` : `
-                            <input type="number" class="xh-qty-input" min="1" step="1" value="${l.qty}" data-id="${l.maHang}" title="Số lượng xuất hủy">
-                        `}
-                    </td>
-                    <td class="text-end">
-                        ${isReadOnly ? `<span>${fmt(l.cost)}</span>` : `
-                            <input type="number" class="xh-cost-input" min="0" step="1000" value="${l.cost}" data-id="${l.maHang}" title="Giá vốn">
-                        `}
-                    </td>
-                    <td class="text-end fw-bold text-danger">${fmt(lineAmount)} đ</td>
-                    ${!isReadOnly ? `
-                        <td class="text-center">
-                            <button type="button" class="btn-del-line" data-id="${l.maHang}" title="Xóa mặt hàng này">
-                                <i class="bi bi-trash fs-6"></i>
-                            </button>
-                        </td>
-                    ` : ''}
-                </tr>
-            `;
-        });
-
-        if (tbody) tbody.innerHTML = html;
-        if (badgeCount) badgeCount.textContent = `[${FM.lines.length}]`;
-        if (totalAmount) totalAmount.textContent = `${fmt(sumAmount)} đ`;
+    /* ===== BẢNG LƯỚI HÀNG HÓA VÀ TỔNG HỢP ===== */
+    function rowHTML(l, i) {
+        const lineTotal = (Number(l.qty) || 0) * (Number(l.cost) || 0);
+        return `
+        <tr data-i="${i}" data-id="${l.pid}">
+            <td class="w-del">${isReadOnly ? '' : '<button type="button" class="del" data-del title="Xóa dòng"><i class="bi bi-trash"></i></button>'}</td>
+            <td class="w-stt">${FM.lines.length - i}</td>
+            <td class="w-code"><span class="code-text" title="${esc(l.code)}">${esc(l.code)}</span></td>
+            <td class="w-name"><span class="name-text" title="${esc(l.name)}">${esc(l.name)}</span></td>
+            <td class="w-dvt text-center">${esc(l.unit || '')}</td>
+            <td class="w-sys r">${fmt(l.ton)}</td>
+            <td class="w-act r">
+                ${isReadOnly ? `<span class="fw-semibold">${fmt(l.qty)}</span>` : `
+                    <input class="qty" inputmode="numeric" value="${l.qty}" data-qty aria-label="Số lượng hủy">
+                `}
+            </td>
+            <td class="w-cost r">
+                ${isReadOnly ? `<span>${fmt(l.cost)}</span>` : `
+                    <input class="cost" inputmode="numeric" value="${l.cost}" data-cost aria-label="Giá vốn">
+                `}
+            </td>
+            <td class="w-gt r neg fw-bold">
+                ${fmt(lineTotal)} đ
+            </td>
+        </tr>`;
     }
 
-    /* ===== TƯƠNG TÁC SỬA SỐ LƯỢNG / GIÁ VỐN / XÓA DÒNG ===== */
-    const gridBody = $('#gridBody');
-    if (gridBody && !isReadOnly) {
-        gridBody.addEventListener('input', e => {
-            const qtyInp = e.target.closest('.xh-qty-input');
-            if (qtyInp) {
-                const id = parseInt(qtyInp.dataset.id);
-                const item = FM.lines.find(x => x.maHang === id);
-                if (item) {
-                    const val = parseFloat(qtyInp.value);
-                    item.qty = isNaN(val) || val <= 0 ? 1 : val;
-                    // Cập nhật lại số tiền dòng và tổng tiền mà không giật focus
-                    const row = qtyInp.closest('tr');
-                    if (row) {
-                        const amountCell = $('td:nth-last-child(2)', row);
-                        if (amountCell) amountCell.textContent = `${fmt(item.qty * item.cost)} đ`;
-                    }
-                    updateTotals();
+    function paintGrid() {
+        const card = $('#gridCard');
+        if (!card) return;
+
+        if (!FM.lines.length) {
+            card.innerHTML = `
+            <table>
+                <thead>
+                    <tr>
+                        <th class="w-del"></th>
+                        <th class="w-stt">STT</th>
+                        <th class="w-code">Mã hàng</th>
+                        <th class="w-name">Tên hàng</th>
+                        <th class="w-dvt text-center">ĐVT</th>
+                        <th class="w-sys r">Tồn kho</th>
+                        <th class="w-act r">SL hủy</th>
+                        <th class="w-cost r">Giá vốn</th>
+                        <th class="w-gt r">Giá trị hủy</th>
+                    </tr>
+                </thead>
+            </table>
+            <div class="empty d-flex flex-column align-items-center justify-content-center py-5 text-center flex-grow-1">
+                <div class="ico mb-3"><i class="bi bi-file-earmark-spreadsheet fs-1 text-primary"></i></div>
+                <h5 class="fw-bold text-dark mb-1">Thêm sản phẩm từ ô tìm kiếm hoặc file Excel</h5>
+                <div class="text-muted small mb-3">
+                    (Tải về file mẫu: <a href="${templateUrl}" id="tpl" class="text-primary text-decoration-none fw-semibold">Excel file mẫu</a>)
+                </div>
+                ${isReadOnly ? '' : `
+                    <label class="btn btn-primary d-inline-flex align-items-center gap-2 px-4 py-2 fw-semibold mb-0" id="pick" style="border-radius: 6px; cursor: pointer;">
+                        <i class="bi bi-box-arrow-in-down fs-5"></i><span>Chọn file dữ liệu</span>
+                    </label>
+                `}
+                <div class="text-muted smaller mt-3" style="font-size: 12.5px;">
+                    hoặc gõ tìm hàng ở ô phía trên, bấm phím tắt <strong>F3</strong> để nhảy vào ô tìm
+                </div>
+            </div>`;
+            return;
+        }
+
+        const rows = FM.lines.map((l, i) => rowHTML(l, i)).join('');
+        card.innerHTML = `
+        <div style="overflow:auto;flex:1;">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="w-del"></th>
+                        <th class="w-stt">STT</th>
+                        <th class="w-code">Mã hàng</th>
+                        <th class="w-name">Tên hàng</th>
+                        <th class="w-dvt text-center">ĐVT</th>
+                        <th class="w-sys r">Tồn kho</th>
+                        <th class="w-act r">SL hủy</th>
+                        <th class="w-cost r">Giá vốn</th>
+                        <th class="w-gt r">Giá trị hủy</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>`;
+    }
+
+    function paintSums() {
+        const sumsEl = $('#sums');
+        if (!sumsEl) return;
+
+        let totalQty = 0, totalAmount = 0;
+        FM.lines.forEach(l => {
+            const q = Number(l.qty) || 0;
+            const c = Number(l.cost) || 0;
+            totalQty += q;
+            totalAmount += q * c;
+        });
+
+        sumsEl.innerHTML = `
+            <div class="pr">
+                <span class="l">Số lượng mặt hàng</span>
+                <span class="v fw-bold"><span class="cntbox">${FM.lines.length}</span></span>
+            </div>
+            <div class="pr">
+                <span class="l">Tổng số lượng hủy</span>
+                <span class="v left fw-bold">${fmt(totalQty)}</span>
+            </div>
+            <div class="pr">
+                <span class="l">Tổng giá trị hủy</span>
+                <span class="v neg fw-bold" style="font-size: 15px;">${fmt(totalAmount)} đ</span>
+            </div>
+        `;
+    }
+
+    function paintRecent() {
+        const rec = $('#recent');
+        if (!rec) return;
+        rec.innerHTML = FM.recent.map(r => `
+            <li>
+                <i class="bi bi-${r.t === 'del' ? 'trash text-danger' : (r.t === 'edit' ? 'pencil text-warning' : 'plus-circle text-primary')} me-2"></i>
+                <span>${esc(r.name)} (${r.qty})</span>
+            </li>`).join('') || '<li class="muted">Chưa có thao tác</li>';
+    }
+
+    function log(t, l) {
+        FM.recent.unshift({ t, name: l.name, qty: l.qty != null ? l.qty : '—' });
+        FM.recent = FM.recent.slice(0, 30);
+        paintRecent();
+    }
+
+    function refreshAll() {
+        paintGrid();
+        paintSums();
+    }
+
+    /* ===== SỰ KIỆN NHẬP SỐ LƯỢNG / GIÁ VỐN / XÓA DÒNG ===== */
+    const gridCard = $('#gridCard');
+    if (gridCard && !isReadOnly) {
+        gridCard.addEventListener('input', e => {
+            const tr = e.target.closest('tr[data-i]');
+            if (!tr) return;
+            const i = parseInt(tr.dataset.i);
+            const l = FM.lines[i];
+            if (!l) return;
+
+            if (e.target.matches('.qty')) {
+                FM.dirty = true;
+                const v = parseFloat(e.target.value);
+                l.qty = isNaN(v) || v <= 0 ? 1 : v;
+                log('edit', l);
+
+                // Cập nhật lại giá trị dòng và tổng
+                const gtCell = $('.w-gt', tr);
+                if (gtCell) gtCell.textContent = `${fmt(l.qty * l.cost)} đ`;
+                paintSums();
+            } else if (e.target.matches('.cost')) {
+                FM.dirty = true;
+                const v = parseFloat(e.target.value);
+                l.cost = isNaN(v) || v < 0 ? 0 : v;
+                log('edit', l);
+
+                const gtCell = $('.w-gt', tr);
+                if (gtCell) gtCell.textContent = `${fmt(l.qty * l.cost)} đ`;
+                paintSums();
+            }
+        });
+
+        gridCard.addEventListener('click', e => {
+            if (e.target.closest('[data-del]')) {
+                const tr = e.target.closest('tr[data-i]');
+                if (!tr) return;
+                const i = parseInt(tr.dataset.i);
+                const l = FM.lines[i];
+                if (l) {
+                    FM.dirty = true;
+                    log('del', l);
+                    FM.lines.splice(i, 1);
+                    refreshAll();
+                    toast(`Đã xóa ${l.name}`);
                 }
-                return;
-            }
-
-            const costInp = e.target.closest('.xh-cost-input');
-            if (costInp) {
-                const id = parseInt(costInp.dataset.id);
-                const item = FM.lines.find(x => x.maHang === id);
-                if (item) {
-                    const val = parseFloat(costInp.value);
-                    item.cost = isNaN(val) || val < 0 ? 0 : val;
-                    const row = costInp.closest('tr');
-                    if (row) {
-                        const amountCell = $('td:nth-last-child(2)', row);
-                        if (amountCell) amountCell.textContent = `${fmt(item.qty * item.cost)} đ`;
-                    }
-                    updateTotals();
-                }
-                return;
-            }
-        });
-
-        gridBody.addEventListener('click', e => {
-            const btnDel = e.target.closest('.btn-del-line');
-            if (btnDel) {
-                const id = parseInt(btnDel.dataset.id);
-                FM.lines = FM.lines.filter(x => x.maHang !== id);
-                renderTable();
+            } else if (e.target.closest('#pick')) {
+                $('#fileIn')?.click();
             }
         });
     }
 
-    function updateTotals() {
-        const badgeCount = $('#badgeCount');
-        const totalAmount = $('#totalAmount');
-        const sum = FM.lines.reduce((acc, cur) => acc + (cur.qty * cur.cost), 0);
-        if (badgeCount) badgeCount.textContent = `[${FM.lines.length}]`;
-        if (totalAmount) totalAmount.textContent = `${fmt(sum)} đ`;
+    /* ===== AUTOCOMPLETE TÌM KIẾM HÀNG HÓA (F3) ===== */
+    let sgList = [], sgIdx = 0, searchTimer = null;
+    function paintSuggest() {
+        const box = $('#suggest');
+        if (!box) return;
+        if (!sgList.length) {
+            box.classList.remove('show');
+            return;
+        }
+        box.innerHTML = sgList.map((p, i) => `
+            <div class="sg ${i === sgIdx ? 'act' : ''}" data-i="${i}">
+                <div class="th">${(p.tenHang.trim()[0] || 'H').toUpperCase()}</div>
+                <div class="nm">
+                    <b>${esc(p.tenHang)}</b>
+                    <small>${esc(p.maHangNoiBo)}</small>
+                </div>
+                <div class="nums">
+                    Giá vốn: <b>${fmt(p.giaVon)}</b><br>
+                    Tồn: <b>${fmt(p.tonKho)}</b>
+                </div>
+            </div>`).join('');
+        box.dataset.owner = '#fSearch';
+        box.classList.add('show');
     }
 
-    /* ===== TÌM KIẾM SẢN PHẨM (F3) AUTOCOMPLETE ===== */
     const fSearch = $('#fSearch');
     const suggest = $('#suggest');
     if (fSearch && suggest && !isReadOnly) {
-        let searchTimer;
         fSearch.addEventListener('input', () => {
             clearTimeout(searchTimer);
-            const term = fSearch.value.trim();
-            if (!term) {
-                suggest.classList.remove('show');
+            const q = fSearch.value.trim();
+            if (!q) {
+                sgList = [];
+                paintSuggest();
                 return;
             }
-            searchTimer = setTimeout(() => doProductSearch(term), 250);
+            searchTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch(`${searchUrl}?q=${encodeURIComponent(q)}&warehouseId=${FM.warehouseId}`);
+                    if (!res.ok) return;
+                    sgList = await res.json();
+                    sgIdx = 0;
+                    paintSuggest();
+                } catch (err) {
+                    console.error(err);
+                }
+            }, 250);
         });
 
         fSearch.addEventListener('keydown', e => {
-            if (e.key === 'Escape') {
+            if (!suggest.classList.contains('show')) return;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                sgIdx = (sgIdx + 1) % sgList.length;
+                paintSuggest();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                sgIdx = (sgIdx - 1 + sgList.length) % sgList.length;
+                paintSuggest();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (sgList[sgIdx]) addProduct(sgList[sgIdx]);
+            } else if (e.key === 'Escape') {
                 suggest.classList.remove('show');
+            }
+        });
+
+        suggest.addEventListener('click', e => {
+            const item = e.target.closest('.sg');
+            if (item) {
+                const i = parseInt(item.dataset.i);
+                if (sgList[i]) addProduct(sgList[i]);
             }
         });
 
@@ -283,77 +415,40 @@
         });
     }
 
-    async function doProductSearch(term) {
-        try {
-            const res = await fetch(`${searchUrl}?q=${encodeURIComponent(term)}&warehouseId=${FM.warehouseId}`);
-            if (!res.ok) return;
-            const items = await res.json();
-            if (!items || !items.length) {
-                suggest.innerHTML = '<div class="p-3 text-muted text-center small">Không tìm thấy sản phẩm phù hợp.</div>';
-                suggest.classList.add('show');
-                return;
-            }
-
-            let html = '';
-            items.forEach(it => {
-                html += `
-                    <div class="sg-item p-2 d-flex justify-content-between align-items-center border-bottom" data-item='${JSON.stringify(it)}' style="cursor: pointer;">
-                        <div>
-                            <div class="fw-semibold text-dark">${esc(it.tenHang)}</div>
-                            <div class="small text-muted">
-                                <span class="badge bg-light text-dark border me-1">${esc(it.maHangNoiBo)}</span>
-                                ĐVT: ${esc(it.tenDvt)}
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <div class="fw-semibold text-danger">${fmt(it.giaVon)} đ</div>
-                            <div class="small text-muted">Tồn: ${fmt(it.tonKho)}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            suggest.innerHTML = html;
-            suggest.classList.add('show');
-
-            $$('.sg-item', suggest).forEach(el => {
-                el.addEventListener('click', () => {
-                    const it = JSON.parse(el.dataset.item);
-                    addProductToLines(it);
-                    suggest.classList.remove('show');
-                    fSearch.value = '';
-                    fSearch.focus();
-                });
-            });
-        } catch (err) {
-            console.error('Lỗi tìm kiếm sản phẩm:', err);
-        }
-    }
-
-    function addProductToLines(it) {
-        const exist = FM.lines.find(x => x.maHang === it.maHang);
-        if (exist) {
-            exist.qty += 1;
-            if (window.KiotToast) KiotToast.info(`Tăng số lượng xuất hủy của "${it.tenHang}" lên ${exist.qty}`);
+    function addProduct(p) {
+        FM.dirty = true;
+        const ex = FM.lines.find(l => l.pid === p.maHang || l.code.toLowerCase() === p.maHangNoiBo.toLowerCase());
+        if (ex) {
+            ex.qty = (Number(ex.qty) || 0) + 1;
+            log('edit', ex);
+            toast(`${p.tenHang}: SL hủy = ${ex.qty}`);
         } else {
-            FM.lines.push({
-                maHang: it.maHang,
-                code: it.maHangNoiBo,
-                name: it.tenHang,
-                dvt: it.tenDvt,
+            const l = {
+                pid: p.maHang,
+                code: p.maHangNoiBo,
+                name: p.tenHang,
+                unit: p.tenDvt,
                 qty: 1,
-                cost: it.giaVon || 0,
-                ton: it.tonKho || 0
-            });
-            if (window.KiotToast) KiotToast.success(`Đã thêm "${it.tenHang}" vào danh sách.`);
+                cost: p.giaVon || 0,
+                ton: p.tonKho || 0
+            };
+            FM.lines.unshift(l);
+            log('add', l);
+            toast(`Đã thêm ${p.tenHang}`);
         }
-        renderTable();
+        refreshAll();
+        if (suggest) suggest.classList.remove('show');
+        if (fSearch) {
+            fSearch.value = '';
+            fSearch.focus();
+        }
     }
 
     /* ===== NHẬP EXCEL ===== */
-    function handleExcelUpload(fileInput) {
-        if (!fileInput) return;
-        fileInput.addEventListener('change', async () => {
-            const file = fileInput.files[0];
+    const fileIn = $('#fileIn');
+    if (fileIn && !isReadOnly) {
+        fileIn.addEventListener('change', async () => {
+            const file = fileIn.files[0];
             if (!file) return;
 
             const fd = new FormData();
@@ -361,63 +456,63 @@
             fd.append('warehouseId', FM.warehouseId);
 
             try {
-                if (window.KiotToast) KiotToast.info('Đang đọc dữ liệu từ file Excel...');
-                const res = await fetch(importUrl, {
-                    method: 'POST',
-                    body: fd
-                });
+                toast('Đang đọc file Excel...');
+                const res = await fetch(importUrl, { method: 'POST', body: fd });
                 const data = await res.json();
                 if (data.success && data.items) {
-                    let addedCount = 0;
                     data.items.forEach(it => {
-                        const exist = FM.lines.find(x => x.maHang === it.maHang);
-                        if (exist) {
-                            exist.qty += it.soLuongXuat;
-                            exist.cost = it.donGiaXuat;
+                        const ex = FM.lines.find(l => l.pid === it.maHang);
+                        if (ex) {
+                            ex.qty = it.soLuongXuat;
+                            ex.cost = it.donGiaXuat;
                         } else {
-                            FM.lines.push({
-                                maHang: it.maHang,
+                            FM.lines.unshift({
+                                pid: it.maHang,
                                 code: it.maHangNoiBo,
                                 name: it.tenHang,
-                                dvt: it.tenDvt,
+                                unit: it.tenDvt,
                                 qty: it.soLuongXuat,
                                 cost: it.donGiaXuat,
                                 ton: it.tonKho
                             });
-                            addedCount++;
                         }
                     });
-                    renderTable();
-                    if (window.KiotToast) KiotToast.success(`Đã nhập thành công ${data.items.length} dòng sản phẩm từ Excel!`);
+                    FM.dirty = true;
+                    refreshAll();
+                    toast(`Đã nhập thành công ${data.items.length} mặt hàng từ Excel!`);
                 } else {
-                    if (window.KiotToast) KiotToast.error(data.message || 'Lỗi khi nhập file Excel.');
+                    toast(data.message || 'Lỗi khi nhập Excel.');
                 }
             } catch (err) {
                 console.error(err);
-                if (window.KiotToast) KiotToast.error('Không thể tải lên file Excel.');
+                toast('Không thể tải lên file Excel.');
             } finally {
-                fileInput.value = '';
+                fileIn.value = '';
             }
         });
     }
 
-    handleExcelUpload($('#excelBodyFileInput'));
-    handleExcelUpload($('#excelHeaderFileInput'));
-
-    /* ===== NÚT THU GỌN / MỞ RỘNG PANEL PHẢI (F4) ===== */
-    const pTg = $('#pTg');
-    const panel = $('#panel');
-    if (pTg && panel) {
-        pTg.addEventListener('click', () => {
-            panel.classList.toggle('collapsed');
-            const isColl = panel.classList.contains('collapsed');
-            pTg.classList.toggle('collapsed', isColl);
-            const ic = $('#pTgIcon');
-            if (ic) ic.className = isColl ? 'bi bi-chevron-left' : 'bi bi-chevron-right';
-        });
+    const tImport = $('#tImport');
+    if (tImport && fileIn) {
+        tImport.addEventListener('click', () => fileIn.click());
     }
 
-    /* ===== THAO TÁC LƯU TẠM (F9) & HOÀN THÀNH (F10) ===== */
+    /* ===== THU GỌN / MỞ RỘNG PANEL PHẢI (F4) ===== */
+    const pTg = $('#pTg');
+    const panel = $('#panel');
+    function togglePanel() {
+        if (!panel || !pTg) return;
+        panel.classList.toggle('collapsed');
+        const isCollapsed = panel.classList.contains('collapsed');
+        pTg.classList.toggle('collapsed', isCollapsed);
+        const icon = $('#pTgIcon');
+        if (icon) {
+            icon.className = isCollapsed ? 'bi bi-chevron-left' : 'bi bi-chevron-right';
+        }
+    }
+    if (pTg) pTg.onclick = togglePanel;
+
+    /* ===== LƯU TẠM (F9) & HOÀN THÀNH (F10) ===== */
     function buildPayload() {
         return {
             maPhieuXuat: FM.id,
@@ -427,20 +522,20 @@
             ngayLap: FM.created,
             ghiChu: $('#fNote') ? $('#fNote').value.trim() : '',
             lines: FM.lines.map(l => ({
-                maHang: l.maHang,
+                maHang: l.pid,
                 soLuongXuat: l.qty,
                 donGiaXuat: l.cost
             }))
         };
     }
 
-    async function submitSaveDraft() {
+    async function submitDraft() {
         if (!FM.lines.length) {
-            if (window.KiotToast) KiotToast.warning('Vui lòng thêm ít nhất một mặt hàng để xuất hủy.');
+            toast('Vui lòng thêm ít nhất một mặt hàng để xuất hủy.');
             return;
         }
 
-        const btn = $('#btnSaveDraft');
+        const btn = $('#bSave');
         if (btn) btn.disabled = true;
 
         try {
@@ -451,76 +546,124 @@
             });
             const data = await res.json();
             if (data.success) {
-                if (window.KiotToast) KiotToast.success(data.message || 'Đã lưu bản tạm phiếu xuất hủy!');
+                toast(data.message || 'Đã lưu bản tạm phiếu xuất hủy!');
                 setTimeout(() => {
                     window.location.href = indexUrl;
-                }, 600);
+                }, 500);
             } else {
-                if (window.KiotToast) KiotToast.error(data.message || 'Không thể lưu bản tạm.');
+                toast(data.message || 'Lỗi khi lưu bản tạm.');
                 if (btn) btn.disabled = false;
             }
         } catch (err) {
             console.error(err);
-            if (window.KiotToast) KiotToast.error('Lỗi khi gửi yêu cầu lưu bản tạm.');
+            toast('Không thể kết nối máy chủ.');
             if (btn) btn.disabled = false;
         }
     }
 
-    async function submitComplete() {
+    function submitComplete() {
         if (!FM.lines.length) {
-            if (window.KiotToast) KiotToast.warning('Vui lòng thêm ít nhất một mặt hàng để xuất hủy.');
+            toast('Vui lòng thêm ít nhất một mặt hàng để xuất hủy.');
             return;
         }
 
-        const ov = $('#kiotConfirmOv');
-        if (!ov) return;
-        const msg = $('#kiotConfirmMsg');
-        if (msg) msg.textContent = 'Bạn có chắc chắn muốn hoàn thành phiếu xuất hủy này? Số lượng tồn kho sổ sách sẽ được tự động trừ tương ứng.';
+        openModal({
+            title: 'Hoàn thành phiếu xuất hủy',
+            icon: 'check2-circle text-success',
+            body: `<p class="mb-0">Bạn có chắc chắn muốn hoàn thành phiếu xuất hủy này không?<br><strong>Số lượng tồn kho sổ sách sẽ được tự động trừ tương ứng.</strong></p>`,
+            okText: 'Đồng ý hoàn thành',
+            okClass: 'btn btn-success',
+            onOk: async () => {
+                closeModal();
+                const btn = $('#bDone');
+                if (btn) btn.disabled = true;
 
-        const okBtn = $('#kiotConfirmOkBtn');
-        const cancelBtn = $('#kiotConfirmCancelBtn');
-        const closeBtn = $('#kiotConfirmCloseBtn');
-
-        const close = () => ov.classList.remove('show');
-        cancelBtn.onclick = close;
-        closeBtn.onclick = close;
-
-        okBtn.onclick = async () => {
-            close();
-            const btn = $('#btnComplete');
-            if (btn) btn.disabled = true;
-
-            try {
-                const res = await fetch(completeUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                    body: JSON.stringify(buildPayload())
-                });
-                const data = await res.json();
-                if (data.success) {
-                    if (window.KiotToast) KiotToast.success(data.message || 'Phiếu xuất hủy đã hoàn thành!');
-                    setTimeout(() => {
-                        window.location.href = indexUrl;
-                    }, 600);
-                } else {
-                    if (window.KiotToast) KiotToast.error(data.message || 'Không thể hoàn thành phiếu.');
+                try {
+                    const res = await fetch(completeUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: JSON.stringify(buildPayload())
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        toast(data.message || 'Phiếu xuất hủy đã hoàn thành!');
+                        setTimeout(() => {
+                            window.location.href = indexUrl;
+                        }, 500);
+                    } else {
+                        toast(data.message || 'Lỗi khi hoàn thành phiếu.');
+                        if (btn) btn.disabled = false;
+                    }
+                } catch (err) {
+                    console.error(err);
+                    toast('Lỗi khi gửi yêu cầu hoàn thành.');
                     if (btn) btn.disabled = false;
                 }
-            } catch (err) {
-                console.error(err);
-                if (window.KiotToast) KiotToast.error('Lỗi khi gửi yêu cầu hoàn thành.');
-                if (btn) btn.disabled = false;
             }
-        };
+        });
+    }
 
+    const bSave = $('#bSave');
+    if (bSave) bSave.onclick = submitDraft;
+
+    const bDone = $('#bDone');
+    if (bDone) bDone.onclick = submitComplete;
+
+    /* ===== MODAL CHUẨN KIOTVIET (#ov) ===== */
+    const ov = $('#ov');
+    function openModal({ title, icon, body, okText = 'Đồng ý', okClass = 'btn btn-primary', onOk }) {
+        if (!ov) return;
+        $('#mTitleText').textContent = title || 'Xác nhận';
+        const ic = $('#mIcon');
+        if (ic) {
+            ic.className = `bi bi-${icon || 'info-circle'}`;
+            ic.style.display = icon ? 'inline-block' : 'none';
+        }
+        $('#mBody').innerHTML = body || '';
+        $('#mFoot').innerHTML = `
+            <button type="button" class="btn btn-secondary" id="mCancel">Bỏ qua</button>
+            <button type="button" class="${okClass}" id="mOk">${okText}</button>
+        `;
+        $('#mCancel').onclick = closeModal;
+        $('#mOk').onclick = onOk;
         ov.classList.add('show');
     }
 
-    const btnDraft = $('#btnSaveDraft');
-    if (btnDraft) btnDraft.addEventListener('click', submitSaveDraft);
+    function closeModal() {
+        if (ov) ov.classList.remove('show');
+    }
 
-    const btnComp = $('#btnComplete');
-    if (btnComp) btnComp.addEventListener('click', submitComplete);
+    const mClose = $('#mClose');
+    if (mClose) mClose.onclick = closeModal;
+
+    /* ===== TOAST THÔNG BÁO DÙNG CHUNG ===== */
+    let toastTimer;
+    function toast(msg) {
+        if (window.KiotToast) {
+            KiotToast.info(msg);
+            return;
+        }
+        const t = $('#toast');
+        if (!t) return;
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    /* ===== TOOLTIP & GHI CHÚ POPUP ===== */
+    const tNote = $('#tNote'), notes = $('#notes');
+    if (tNote && notes) {
+        tNote.onclick = e => {
+            e.stopPropagation();
+            notes.classList.toggle('show');
+        };
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#tNote') && !e.target.closest('#notes')) {
+                notes.classList.remove('show');
+            }
+        });
+    }
 
     /* ===== PHÍM TẮT F3, F4, F9, F10 ===== */
     window.addEventListener('keydown', e => {
@@ -529,16 +672,17 @@
             fSearch?.focus();
         } else if (e.key === 'F4') {
             e.preventDefault();
-            pTg?.click();
+            togglePanel();
         } else if (e.key === 'F9') {
             e.preventDefault();
-            if (!isReadOnly && btnDraft) submitSaveDraft();
+            if (!isReadOnly && bSave) submitDraft();
         } else if (e.key === 'F10') {
             e.preventDefault();
-            if (!isReadOnly && btnComp) submitComplete();
+            if (!isReadOnly && bDone) submitComplete();
         }
     });
 
     // Khởi tạo ban đầu
-    renderTable();
+    refreshAll();
+    paintRecent();
 })();

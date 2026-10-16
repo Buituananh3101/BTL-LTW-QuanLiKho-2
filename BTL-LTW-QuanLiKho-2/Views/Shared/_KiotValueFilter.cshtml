@@ -1,0 +1,43 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.Common.KiotValueFilterVM
+@{
+    var id = Model?.Id ?? "";
+    var dotId = !string.IsNullOrEmpty(Model?.DotId) ? Model.DotId : ("dot" + id);
+    var fromId = !string.IsNullOrEmpty(Model?.FromId) ? Model.FromId : ("filter" + id + "Tu");
+    var toId = !string.IsNullOrEmpty(Model?.ToId) ? Model.ToId : ("filter" + id + "Den");
+    var hasTitle = !string.IsNullOrWhiteSpace(Model?.Title);
+    var hasSubTitle = !string.IsNullOrWhiteSpace(Model?.SubTitle);
+}
+
+@if (hasTitle)
+{
+    <div class="f-block position-relative kiot-value-filter-block">
+        <h6>@Model!.Title <span class="filter-dot" id="@dotId"></span></h6>
+        @if (hasSubTitle)
+        {
+            <div class="sub">@Model.SubTitle</div>
+        }
+        <div class="fromto">
+            <b>@Model.FromLabel</b>
+            <input type="text" class="money" id="@fromId" placeholder="@Model.FromPlaceholder" inputmode="numeric" autocomplete="off" value="@(Model.FromValue?.ToString("N0") ?? "")" />
+        </div>
+        <div class="fromto">
+            <b>@Model.ToLabel</b>
+            <input type="text" class="money" id="@toId" placeholder="@Model.ToPlaceholder" inputmode="numeric" autocomplete="off" value="@(Model.ToValue?.ToString("N0") ?? "")" />
+        </div>
+    </div>
+}
+else
+{
+    @if (hasSubTitle)
+    {
+        <div class="sub">@Model!.SubTitle</div>
+    }
+    <div class="fromto">
+        <b>@(Model?.FromLabel ?? "Từ")</b>
+        <input type="text" class="money" id="@fromId" placeholder="@(Model?.FromPlaceholder ?? "Nhập giá trị")" inputmode="numeric" autocomplete="off" value="@(Model?.FromValue?.ToString("N0") ?? "")" />
+    </div>
+    <div class="fromto">
+        <b>@(Model?.ToLabel ?? "Tới")</b>
+        <input type="text" class="money" id="@toId" placeholder="@(Model?.ToPlaceholder ?? "Nhập giá trị")" inputmode="numeric" autocomplete="off" value="@(Model?.ToValue?.ToString("N0") ?? "")" />
+    </div>
+}

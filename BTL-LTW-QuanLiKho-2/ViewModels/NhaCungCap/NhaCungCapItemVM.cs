@@ -19,4 +19,8 @@ public class NhaCungCapItemVM
     public string TrangThai { get; set; } = "HOAT_DONG";
     public DateTime NgayTao { get; set; }
     public string? NguoiTao { get; set; }
+    public string? GhiChu { get; set; }
+    public string? TenCongTy { get; set; }
+    public string? MaSoThue { get; set; }
+    public string? SoCccd { get; set; }
 }

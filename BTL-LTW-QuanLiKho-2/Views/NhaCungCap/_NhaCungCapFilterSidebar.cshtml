@@ -23,35 +23,19 @@
         }' />
 
         <!-- 2. Tổng mua -->
-        <div class="f-block position-relative">
-            <h6>Tổng mua <span class="filter-dot" id="dotTongMua"></span></h6>
-            <div class="text-muted small mb-1">Giá trị</div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <input type="text" id="filterTongMuaTu" class="form-control form-control-sm kiot-num text-end" placeholder="Từ" />
-                <span class="text-muted">-</span>
-                <input type="text" id="filterTongMuaDen" class="form-control form-control-sm kiot-num text-end" placeholder="Tới" />
-            </div>
-        </div>
+        <partial name="_KiotValueFilter" model='new KiotValueFilterVM("TongMua", "Tổng mua", "Giá trị")' />
 
         <!-- 3. Thời gian tạo -->
         <partial name="_KiotDateFilter" model='new KiotDateFilterVM("date", "Thời gian", false)' />
 
         <!-- 4. Nợ hiện tại -->
-        <div class="f-block position-relative">
-            <h6>Nợ hiện tại <span class="filter-dot" id="dotNo"></span></h6>
-            <div class="text-muted small mb-1">Giá trị</div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <input type="text" id="filterNoTu" class="form-control form-control-sm kiot-num text-end" placeholder="Từ" />
-                <span class="text-muted">-</span>
-                <input type="text" id="filterNoDen" class="form-control form-control-sm kiot-num text-end" placeholder="Tới" />
-            </div>
-        </div>
+        <partial name="_KiotValueFilter" model='new KiotValueFilterVM("No", "Nợ hiện tại", "Giá trị")' />
 
         <!-- 5. Trạng thái -->
-        <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("TrangThai", "Trạng thái", new List<KiotStatusOptionVM> {
-            new("Tất cả", ""),
-            new("Đang hoạt động", "HOAT_DONG", true),
-            new("Ngừng hoạt động", "NGUNG_HOAT_DONG")
-        })' />
+        <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Trạng thái", "dotTrangThai", new List<KiotStatusOptionVM> {
+            new("all", "Tất cả"),
+            new("active", "Đang hoạt động", true),
+            new("off", "Ngừng hoạt động")
+        }, KiotStatusRenderMode.Pills) { ContainerId = "pillsStatus" }' />
     </div>
 </aside>

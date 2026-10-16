@@ -1,143 +1,286 @@
 @model BTL_LTW_QuanLiKho_2.ViewModels.NhaCungCap.NhaCungCapIndexVM
 
-<!-- Modal Thêm mới / Cập nhật Nhà cung cấp -->
-<div class="modal fade" id="nccModal" tabindex="-1" aria-labelledby="nccModalLabel" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header py-2 px-3 border-bottom">
-                <h5 class="modal-title fw-bold fs-6 text-dark" id="nccModalLabel">
-                    <i class="bi bi-truck me-1 text-primary"></i> Thêm mới nhà cung cấp
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-3" style="max-height: 75vh; overflow-y: auto;">
-                <form id="nccForm" autocomplete="off" onsubmit="return false;">
-                    <input type="hidden" id="nccId" value="0" />
+<!-- ========================================================================
+     MODAL CHÍNH: TẠO & CẬP NHẬT NHÀ CUNG CẤP CHUẨN KIOTVIET (THEO HÀNG HÓA)
+     Cấu trúc KiotViet Modal, Custom Combobox tìm kiếm + sửa ✎, Accordion Sections
+     ======================================================================== -->
 
-                    <!-- 1. THÔNG TIN CƠ BẢN (BẮT BUỘC & PHỔ BIẾN) -->
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold mb-1">
-                                Tên nhà cung cấp <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" class="form-control form-control-sm" id="nccTenDonVi" placeholder="Nhập tên nhà cung cấp" required />
-                            <div class="invalid-feedback small">Vui lòng nhập tên nhà cung cấp.</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold mb-1">Mã nhà cung cấp</label>
-                            <input type="text" class="form-control form-control-sm" id="nccMaNcc" placeholder="Mã mặc định tự sinh nếu để trống" />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold mb-1">Số điện thoại</label>
-                            <input type="text" class="form-control form-control-sm" id="nccDienThoai" placeholder="Nhập số điện thoại" />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold mb-1">Email</label>
-                            <input type="email" class="form-control form-control-sm" id="nccEmail" placeholder="Nhập địa chỉ email" />
-                        </div>
-                    </div>
+<!-- Sprite icon SVG dùng cho modal -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v7M14 10v7"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+</svg>
 
-                    <!-- 2. KHỐI ACCORDION GẬP MỞ MỞ RỘNG (3 KHỐI LEGO CHUẨN KIOTVIET) -->
-                    <!-- Accordion 1: Địa chỉ -->
-                    <div class="kiot-sec border rounded-2 mb-2">
-                        <div class="kiot-sec-h p-2 px-3 d-flex justify-content-between align-items-center bg-light" style="cursor: pointer;">
-                            <span class="fw-semibold small text-dark"><i class="bi bi-geo-alt me-1 text-primary"></i> Địa chỉ</span>
-                            <i class="bi bi-chevron-down kiot-chev"></i>
-                        </div>
-                        <div class="kiot-sec-b p-3 border-top" style="display: none;">
-                            <div class="row g-2">
-                                <div class="col-12">
-                                    <label class="form-label small text-muted mb-1">Địa chỉ chi tiết</label>
-                                    <input type="text" class="form-control form-control-sm" id="nccDiaChi" placeholder="Số nhà, ngõ/ngách, đường phố..." />
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small text-muted mb-1">Khu vực (Tỉnh/Thành - Quận/Huyện)</label>
-                                    <input type="text" class="form-control form-control-sm" id="nccKhuVuc" placeholder="VD: Hà Nội - Hoàn Kiếm" />
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small text-muted mb-1">Phường/Xã</label>
-                                    <input type="text" class="form-control form-control-sm" id="nccPhuongXa" placeholder="VD: Phường Tràng Tiền" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Accordion 2: Nhóm nhà cung cấp, ghi chú -->
-                    <div class="kiot-sec border rounded-2 mb-2">
-                        <div class="kiot-sec-h p-2 px-3 d-flex justify-content-between align-items-center bg-light" style="cursor: pointer;">
-                            <span class="fw-semibold small text-dark"><i class="bi bi-tag me-1 text-primary"></i> Nhóm nhà cung cấp, ghi chú</span>
-                            <i class="bi bi-chevron-down kiot-chev"></i>
-                        </div>
-                        <div class="kiot-sec-b p-3 border-top" style="display: none;">
-                            <div class="row g-2">
-                                <div class="col-12">
-                                    <label class="form-label small text-muted mb-1">Nhóm nhà cung cấp</label>
-                                    <div class="input-group input-group-sm">
-                                        <select class="form-select form-select-sm" id="nccMaNhomNcc">
-                                            <option value="">-- Chọn nhóm nhà cung cấp --</option>
-                                            @foreach (var g in Model.NhomNccList)
-                                            {
-                                                <option value="@g.MaNhomNcc">@g.TenNhom</option>
-                                            }
-                                        </select>
-                                        <button class="btn btn-outline-secondary" type="button" id="btnQuickAddGroupInModal" title="Thêm nhóm mới">
-                                            <i class="bi bi-plus-lg"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label small text-muted mb-1">Ghi chú</label>
-                                    <textarea class="form-control form-control-sm" id="nccGhiChu" rows="2" placeholder="Ghi chú thêm về nhà cung cấp này..."></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Accordion 3: Thông tin xuất hóa đơn -->
-                    <div class="kiot-sec border rounded-2 mb-2">
-                        <div class="kiot-sec-h p-2 px-3 d-flex justify-content-between align-items-center bg-light" style="cursor: pointer;">
-                            <span class="fw-semibold small text-dark"><i class="bi bi-receipt me-1 text-primary"></i> Thông tin xuất hóa đơn</span>
-                            <i class="bi bi-chevron-down kiot-chev"></i>
-                        </div>
-                        <div class="kiot-sec-b p-3 border-top" style="display: none;">
-                            <div class="row g-2">
-                                <div class="col-12">
-                                    <label class="form-label small text-muted mb-1">Tên công ty xuất hóa đơn</label>
-                                    <input type="text" class="form-control form-control-sm" id="nccTenCongTy" placeholder="VD: Công ty TNHH Dịch vụ Thương mại Phú Quốc" />
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small text-muted mb-1">Mã số thuế</label>
-                                    <input type="text" class="form-control form-control-sm" id="nccMaSoThue" placeholder="Nhập mã số thuế doanh nghiệp" />
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small text-muted mb-1">Số CMND / CCCD</label>
-                                    <input type="text" class="form-control form-control-sm" id="nccSoCccd" placeholder="Nhập số CCCD người đại diện" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer py-2 px-3 border-top d-flex justify-content-between align-items-center">
-                <!-- Bên trái: Trạng thái (khi Chỉnh sửa) -->
-                <div id="nccStatusWrap" style="display: none;">
-                    <div class="form-check form-switch mb-0">
-                        <input class="form-check-input" type="checkbox" id="nccTrangThaiSwitch" checked>
-                        <label class="form-check-label small fw-semibold text-dark" for="nccTrangThaiSwitch" id="nccTrangThaiLabel">Đang hoạt động</label>
-                    </div>
-                </div>
-                <div class="d-flex gap-2 ms-auto">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
-                        <i class="bi bi-x-lg me-1"></i> Bỏ qua
-                    </button>
-                    <button type="button" class="btn btn-outline-primary btn-sm" id="btnSaveAndNewNcc">
-                        <i class="bi bi-plus-circle me-1"></i> Lưu & Thêm mới
-                    </button>
-                    <button type="button" class="btn btn-primary btn-sm" id="btnSaveNcc">
-                        <i class="bi bi-check2 me-1"></i> Lưu
-                    </button>
-                </div>
-            </div>
-        </div>
+<!-- 1. MODAL CHÍNH: TẠO / SỬA NHÀ CUNG CẤP -->
+<div class="hh-ov" id="nccModalOv">
+  <div class="hh-modal main" role="dialog" aria-modal="true" aria-labelledby="nccModalTitle" style="max-width: 920px;">
+    <!-- Header Modal -->
+    <div class="hh-m-head">
+      <h2 id="nccModalTitle">Thêm mới nhà cung cấp</h2>
+      <button type="button" class="hh-x" data-close="nccModalOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
     </div>
+
+    <!-- Body Modal -->
+    <div class="hh-m-body" id="nccModalBody">
+      <form id="nccForm" onsubmit="return false;">
+        <input type="hidden" id="nccId" value="0" />
+
+        <!-- KHỐI 1: CÁC TRƯỜNG THÔNG TIN CƠ BẢN -->
+        <div class="hh-fields" style="margin-bottom: 20px;">
+          <div class="hh-f" id="nccFldTen">
+            <label for="nccTenDonVi">Tên nhà cung cấp <span style="color:var(--hh-danger)">*</span></label>
+            <input type="text" id="nccTenDonVi" placeholder="Bắt buộc" autocomplete="off" />
+            <span class="hh-err">Vui lòng nhập tên nhà cung cấp.</span>
+          </div>
+          <div class="hh-f">
+            <label for="nccMaNcc">Mã nhà cung cấp</label>
+            <input type="text" id="nccMaNcc" placeholder="Tự động" autocomplete="off" />
+          </div>
+          <div class="hh-f">
+            <label for="nccDienThoai">Điện thoại</label>
+            <input type="text" id="nccDienThoai" placeholder="Nhập số điện thoại" autocomplete="off" />
+          </div>
+          <div class="hh-f">
+            <label for="nccEmail">Email</label>
+            <input type="email" id="nccEmail" placeholder="email@gmail.com" autocomplete="off" />
+          </div>
+        </div>
+
+        <!-- KHỐI 2: SECTION ĐỊA CHỈ (ACCORDION GẬP MỞ) -->
+        <section class="hh-sec open">
+          <div class="hh-sec-h">
+            <div>
+              <h3>Địa chỉ</h3>
+              <p>Thông tin vị trí trụ sở hoặc kho giao nhận của nhà cung cấp</p>
+            </div>
+            <svg class="hh-chev"><use href="#i-chev"/></svg>
+          </div>
+          <div class="hh-sec-b">
+            <div class="hh-row">
+              <div class="hh-f" style="flex: 1 1 100%;">
+                <label for="nccDiaChi">Địa chỉ chi tiết</label>
+                <input type="text" id="nccDiaChi" placeholder="Số nhà, ngõ/ngách, đường phố..." autocomplete="off" />
+              </div>
+              <div class="hh-f" style="flex: 1 1 200px;">
+                <label for="nccKhuVuc">Khu vực</label>
+                <input type="text" id="nccKhuVuc" placeholder="VD: Hà Nội - Hoàn Kiếm" autocomplete="off" />
+              </div>
+              <div class="hh-f" style="flex: 1 1 200px;">
+                <label for="nccPhuongXa">Phường/Xã</label>
+                <input type="text" id="nccPhuongXa" placeholder="VD: Phường Tràng Tiền" autocomplete="off" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- KHỐI 3: SECTION NHÓM NHÀ CUNG CẤP & GHI CHÚ -->
+        <section class="hh-sec open" style="position: relative; z-index: 20;">
+          <div class="hh-sec-h">
+            <div>
+              <h3>Nhóm nhà cung cấp, ghi chú</h3>
+              <p>Phân nhóm để phân loại và quản lý ghi chú nghiệp vụ</p>
+            </div>
+            <svg class="hh-chev"><use href="#i-chev"/></svg>
+          </div>
+          <div class="hh-sec-b" style="overflow: visible;">
+            <div class="hh-row">
+              <div class="hh-f" id="nccFldNhom" style="flex: 1 1 100%;">
+                <label for="inputMaNhomNcc">
+                  <span>Nhóm nhà cung cấp</span>
+                  <button type="button" class="hh-link" id="btnNewNhomNcc" data-new="nhom">+ Tạo mới</button>
+                </label>
+                <!-- Custom Combobox KiotViet có ô tìm kiếm và bút chì ✎ sửa/xóa -->
+                <div class="hh-cs-wrap" id="wrapMaNhomNcc" data-select-id="#nccMaNhomNcc">
+                  <div class="hh-cs-box" id="boxMaNhomNcc">
+                    <input type="text" class="hh-cs-input" id="inputMaNhomNcc" placeholder="Chọn nhóm nhà cung cấp" readonly autocomplete="off" />
+                    <svg class="hh-cs-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                  </div>
+                  <div class="hh-cs-dropdown" id="dropdownMaNhomNcc" style="display: none;">
+                    <div class="hh-cs-search">
+                      <input type="text" id="searchMaNhomNcc" placeholder="Tìm nhóm nhà cung cấp..." autocomplete="off" />
+                    </div>
+                    <div class="hh-cs-list" id="listMaNhomNcc">
+                      @foreach (var g in Model.NhomNccList)
+                      {
+                        <div class="hh-cs-item" data-val="@g.MaNhomNcc">
+                          <span>@g.TenNhom</span>
+                          <button type="button" class="hh-item-edit-btn" data-type="nhom" data-id="@g.MaNhomNcc" data-val="@g.TenNhom" title="Sửa nhóm" aria-label="Sửa nhóm @g.TenNhom">
+                            <svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>
+                          </button>
+                          <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+                <select id="nccMaNhomNcc" style="display: none;">
+                  <option value="">Chọn nhóm nhà cung cấp</option>
+                  @foreach (var g in Model.NhomNccList)
+                  {
+                    <option value="@g.MaNhomNcc">@g.TenNhom</option>
+                  }
+                </select>
+              </div>
+              <div class="hh-f" style="flex: 1 1 100%;">
+                <label for="nccGhiChu">Ghi chú</label>
+                <textarea id="nccGhiChu" rows="2" placeholder="Ghi chú thêm về nhà cung cấp này..." style="width: 100%; border: 1px solid var(--hh-line); border-radius: 8px; padding: 8px 12px; font-size: 14px; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- KHỐI 4: SECTION THÔNG TIN XUẤT HÓA ĐƠN -->
+        <section class="hh-sec open">
+          <div class="hh-sec-h">
+            <div>
+              <h3>Thông tin xuất hóa đơn</h3>
+              <p>Phục vụ tra cứu thuế và xuất hóa đơn chứng từ mua hàng</p>
+            </div>
+            <svg class="hh-chev"><use href="#i-chev"/></svg>
+          </div>
+          <div class="hh-sec-b">
+            <div class="hh-row">
+              <div class="hh-f" style="flex: 1 1 100%;">
+                <label for="nccTenCongTy">Tên công ty xuất hóa đơn</label>
+                <input type="text" id="nccTenCongTy" placeholder="VD: Công ty TNHH Dịch vụ Thương mại Phú Quốc" autocomplete="off" />
+              </div>
+              <div class="hh-f" style="flex: 1 1 200px;">
+                <label for="nccMaSoThue">Mã số thuế</label>
+                <input type="text" id="nccMaSoThue" placeholder="Nhập mã số thuế doanh nghiệp" autocomplete="off" />
+              </div>
+              <div class="hh-f" style="flex: 1 1 200px;">
+                <label for="nccSoCccd">Số CMND / CCCD</label>
+                <input type="text" id="nccSoCccd" placeholder="Nhập số CCCD người đại diện" autocomplete="off" />
+              </div>
+            </div>
+          </div>
+        </section>
+      </form>
+    </div>
+
+    <!-- Footer Modal -->
+    <div class="hh-m-foot">
+      <button type="button" class="hh-btn-del" id="btnDeleteNccInModal" style="display: none; margin-right: 12px;" title="Xóa nhà cung cấp này">
+        <svg style="width:16px;height:16px;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:4px;"><use href="#i-trash"/></svg>
+        <span>Xóa</span>
+      </button>
+
+      <div id="nccStatusWrap" style="display: none;">
+        <label class="hh-chk" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+          <input type="checkbox" id="nccTrangThaiSwitch" checked />
+          <span id="nccTrangThaiLabel" style="font-weight: 500; font-size: 13.5px;">Đang hoạt động</span>
+        </label>
+      </div>
+
+      <span class="sp"></span>
+      <button type="button" class="hh-btn" data-close="nccModalOv">Bỏ qua</button>
+      <button type="button" class="hh-btn" id="btnSaveAndNewNcc">Lưu &amp; Thêm mới</button>
+      <button type="button" class="hh-btn primary" id="btnSaveNcc">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================
+     MODAL CON 1: TẠO NHANH NHÓM NHÀ CUNG CẤP (CHUẨN KIOTVIET)
+     ======================================================================== -->
+<div class="hh-ov" id="nccPromptOv">
+  <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="nccPromptTitle" style="max-width: 440px;">
+    <div class="hh-m-head">
+      <h2 id="nccPromptTitle">Tạo nhóm nhà cung cấp</h2>
+      <button type="button" class="hh-x" data-close="nccPromptOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div class="hh-m-body">
+      <div class="hh-f" id="nccPromptFld">
+        <label for="nccPromptInput" id="nccPromptLabel">Tên nhóm</label>
+        <input type="text" id="nccPromptInput" placeholder="Nhập tên nhóm nhà cung cấp..." autocomplete="off" />
+        <span class="hh-err" id="nccPromptErr">Vui lòng nhập tên nhóm.</span>
+      </div>
+    </div>
+    <div class="hh-m-foot">
+      <span class="sp"></span>
+      <button type="button" class="hh-btn" data-close="nccPromptOv">Bỏ qua</button>
+      <button type="button" class="hh-btn primary" id="nccPromptSave">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================
+     MODAL CON 2: SỬA / XÓA NHÓM NHÀ CUNG CẤP (CHUẨN KIOTVIET)
+     ======================================================================== -->
+<div class="hh-ov" id="nccEditGroupOv">
+  <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="nccEditGroupTitle" style="max-width: 480px;">
+    <div class="hh-m-head">
+      <h2 id="nccEditGroupTitle">Sửa nhóm nhà cung cấp</h2>
+      <button type="button" class="hh-x" data-close="nccEditGroupOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div class="hh-m-body">
+      <input type="hidden" id="nccEditGroupId" value="0" />
+      <div class="hh-f" id="nccEditGroupFld">
+        <label for="nccEditGroupInput">Tên nhóm</label>
+        <input type="text" id="nccEditGroupInput" autocomplete="off" />
+        <span class="hh-err" id="nccEditGroupErr">Vui lòng nhập tên nhóm.</span>
+      </div>
+    </div>
+    <div class="hh-m-foot" style="display: flex; justify-content: space-between; align-items: center;">
+      <button type="button" class="hh-btn-del" id="btnEditGroupDelete">
+        <svg style="width:16px;height:16px;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:4px;"><use href="#i-trash"/></svg>
+        <span>Xóa</span>
+      </button>
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="hh-btn" data-close="nccEditGroupOv">Bỏ qua</button>
+        <button type="button" class="hh-btn primary" id="btnEditGroupSave">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================
+     MODAL CON 3: XÁC NHẬN XÓA NHÀ CUNG CẤP (RÀNG BUỘC CHỨNG TỪ)
+     ======================================================================== -->
+<div class="hh-ov" id="nccDeleteOv">
+  <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="delNccTitle" style="max-width: 480px;">
+    <div class="hh-m-head" style="border-bottom: 1px solid var(--hh-line-l); padding-bottom: 12px;">
+      <h2 id="delNccTitle" style="color: #dc2626; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 18px;">
+        <svg style="width:20px;height:20px;stroke:#dc2626;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><use href="#i-trash"/></svg>
+        <span>Xóa nhà cung cấp</span>
+      </h2>
+      <button type="button" class="hh-x" data-close="nccDeleteOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div class="hh-m-body" style="padding: 20px 24px; font-size: 14.5px; line-height: 1.5;">
+      <input type="hidden" id="delNccId" value="0" />
+      <div id="delNccConfirmMsg" style="color: #374151;">
+        Bạn có chắc chắn muốn xóa nhà cung cấp <strong id="delNccName" style="color: #111827;"></strong>? Thao tác này không thể hoàn tác.
+      </div>
+
+      <!-- Cảnh báo khi đã phát sinh phiếu nhập -->
+      <div id="delNccErrorBox" style="display: none; margin-top: 14px; padding: 12px 14px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #991b1b; font-size: 13.5px; line-height: 1.5;">
+        <div style="display: flex; gap: 8px; align-items: flex-start;">
+          <svg style="width:18px;height:18px;flex:none;stroke:#dc2626;fill:none;stroke-width:2;margin-top:2px;"><use href="#i-info"/></svg>
+          <div style="flex: 1;">
+            <div id="delNccErrorMsg" style="font-weight: 500; margin-bottom: 8px;"></div>
+            <button type="button" class="hh-btn" id="btnSwitchNgungHdInDelModal" style="background:#fff;border-color:#fca5a5;color:#b91c1c;height:32px;font-size:13px;padding:0 12px;font-weight:600;">
+              Chuyển sang "Ngừng hoạt động" ngay
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hh-m-foot" style="background: #f9fafb; border-top: 1px solid var(--hh-line-l); padding: 12px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+      <button type="button" class="hh-btn" data-close="nccDeleteOv">Bỏ qua</button>
+      <button type="button" class="hh-btn danger" id="btnConfirmDeleteNcc">Đồng ý xóa</button>
+    </div>
+  </div>
 </div>

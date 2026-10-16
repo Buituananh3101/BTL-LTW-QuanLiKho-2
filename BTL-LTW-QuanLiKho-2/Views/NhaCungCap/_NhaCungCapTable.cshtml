@@ -1,75 +1,109 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.PagedResult<BTL_LTW_QuanLiKho_2.ViewModels.NhaCungCap.NhaCungCapItemVM>
+@model BTL_LTW_QuanLiKho_2.ViewModels.NhaCungCap.NhaCungCapIndexVM
 @using System.Globalization
 @{
     var viCulture = CultureInfo.GetCultureInfo("vi-VN");
 }
 
 <div class="kiot-table-scroll-body">
-    <table class="tbl" id="supplierTable" style="min-width: 1100px;">
+    <table class="tbl" id="supplierTable" style="min-width: 1450px;">
         <thead>
             <tr>
                 <th style="width: 36px;" class="text-center th-checkbox">
-                    <input class="form-check-input" type="checkbox" id="selectAllNcc" @(!Model.Items.Any() ? "disabled" : "") />
+                    <input class="form-check-input" type="checkbox" id="chkAll" @(!Model.PagedData.Items.Any() ? "disabled" : "") />
                 </th>
-                <th data-col="ma" style="width: 130px;" class="sortable-th" title="Nhấn để sắp xếp theo Mã nhà cung cấp">
+                <th data-col="ma" style="width: 140px;" class="sortable-th @(Model.SortBy == "ma" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Mã nhà cung cấp">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Mã nhà cung cấp</span>
-                            <span class="sort-icon d-none"><i class="bi bi-arrow-up"></i></span>
+                            @if (Model.SortBy == "ma" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "ma" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="ten" class="sortable-th" title="Nhấn để sắp xếp theo Tên nhà cung cấp">
+                <th data-col="ten" style="width: 220px;" class="sortable-th @(Model.SortBy == "ten" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tên nhà cung cấp">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Tên nhà cung cấp</span>
-                            <span class="sort-icon d-none"><i class="bi bi-arrow-up"></i></span>
+                            @if (Model.SortBy == "ten" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "ten" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="sdt" style="width: 140px;" class="sortable-th" title="Nhấn để sắp xếp theo Điện thoại">
+                <th data-col="sdt" style="width: 130px;" class="sortable-th @(Model.SortBy == "sdt" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Điện thoại">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Điện thoại</span>
-                            <span class="sort-icon d-none"><i class="bi bi-arrow-up"></i></span>
+                            @if (Model.SortBy == "sdt" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "sdt" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="email" style="width: 180px;" class="sortable-th" title="Nhấn để sắp xếp theo Email">
+                <th data-col="email" style="width: 170px;" class="sortable-th @(Model.SortBy == "email" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Email">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Email</span>
-                            <span class="sort-icon d-none"><i class="bi bi-arrow-up"></i></span>
+                            @if (Model.SortBy == "email" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "email" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="nhom" style="width: 160px;">
+                <th data-col="nhom" style="width: 150px;">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Nhóm NCC</span>
                         </span>
                     </div>
                 </th>
-                <th data-col="no" style="width: 150px;" class="num r text-end sortable-th" title="Nhấn để sắp xếp theo Nợ cần trả hiện tại">
+                <th data-col="diachi" style="width: 200px;">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Địa chỉ</span>
+                        </span>
+                    </div>
+                </th>
+                <th data-col="masothue" style="width: 130px;">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Mã số thuế</span>
+                        </span>
+                    </div>
+                </th>
+                <th data-col="no" style="width: 150px;" class="num r text-end sortable-th @(Model.SortBy == "no" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Nợ cần trả hiện tại">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Nợ cần trả hiện tại</span>
-                            <span class="sort-icon d-none"><i class="bi bi-arrow-up"></i></span>
+                            @if (Model.SortBy == "no" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "no" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="tongmua" style="width: 140px;" class="num r text-end sortable-th" title="Nhấn để sắp xếp theo Tổng mua">
+                <th data-col="tongmua" style="width: 140px;" class="num r text-end sortable-th @(Model.SortBy == "tongmua" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tổng mua">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Tổng mua</span>
-                            <span class="sort-icon d-none"><i class="bi bi-arrow-up"></i></span>
+                            @if (Model.SortBy == "tongmua" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "tongmua" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="trangthai" style="width: 140px;" class="text-center">
+                <th data-col="ghi" style="width: 180px;">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Ghi chú</span>
+                        </span>
+                    </div>
+                </th>
+                <th data-col="st" style="width: 135px;" class="text-center">
                     <div class="th-content justify-content-center">
                         <span class="th-title-wrap">
                             <span class="th-text">Trạng thái</span>
+                        </span>
+                    </div>
+                </th>
+                <th data-col="ngaytao" style="width: 140px;" class="text-center">
+                    <div class="th-content justify-content-center">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Ngày tạo</span>
                         </span>
                     </div>
                 </th>
@@ -84,37 +118,41 @@
                 <td data-col="sdt"></td>
                 <td data-col="email"></td>
                 <td data-col="nhom"></td>
+                <td data-col="diachi"></td>
+                <td data-col="masothue"></td>
                 <td data-col="no" class="num r text-end fw-bold text-dark">
-                    @Model.Items.Sum(x => x.NoCanTraHienTai).ToString("N0", viCulture)
+                    @Model.PagedData.Items.Sum(x => x.NoCanTraHienTai).ToString("N0", viCulture)
                 </td>
                 <td data-col="tongmua" class="num r text-end fw-bold text-dark">
-                    @Model.Items.Sum(x => x.TongMua).ToString("N0", viCulture)
+                    @Model.PagedData.Items.Sum(x => x.TongMua).ToString("N0", viCulture)
                 </td>
-                <td data-col="trangthai"></td>
+                <td data-col="ghi"></td>
+                <td data-col="st"></td>
+                <td data-col="ngaytao"></td>
             </tr>
 
-            @if (!Model.Items.Any())
+            @if (!Model.PagedData.Items.Any())
             {
                 <tr>
-                    <td colspan="9" class="p-0">
+                    <td colspan="13" class="p-0">
                         <div class="empty d-block py-5 text-center">
                             <div class="ico mb-3"><i class="bi bi-truck fs-1 text-primary"></i></div>
                             <h5 class="fw-bold">Không tìm thấy nhà cung cấp</h5>
-                            <p class="text-muted mb-0 small">Không tìm thấy nhà cung cấp nào phù hợp với bộ lọc hiện tại.<br />Thử thay đổi từ khóa hoặc bộ lọc bên trái.</p>
+                            <p class="text-muted mb-0 small">Không tìm thấy nhà cung cấp nào phù hợp với bộ lọc hiện tại.<br />Nhấn <a href="javascript:void(0)" id="resetF" class="text-primary text-decoration-none fw-semibold">vào đây</a> để xóa bộ lọc và tiếp tục tìm kiếm.</p>
                         </div>
                     </td>
                 </tr>
             }
             else
             {
-                foreach (var item in Model.Items)
+                foreach (var item in Model.PagedData.Items)
                 {
-                    <tr class="tbl-row ncc-row" data-id="@item.MaDonViCapHang" style="cursor: pointer;" title="Nhấn để xem chi tiết nhà cung cấp">
-                        <td class="w-chk text-center cell-checkbox" onclick="event.stopPropagation();">
-                            <input class="form-check-input row-select-ncc" type="checkbox" value="@item.MaDonViCapHang" />
+                    <tr class="tbl-row" data-id="@item.MaDonViCapHang" style="cursor: pointer;" title="Nhấn để xem chi tiết nhà cung cấp">
+                        <td class="w-chk text-center" onclick="event.stopPropagation();">
+                            <input class="form-check-input" type="checkbox" data-sel="@item.MaDonViCapHang" />
                         </td>
                         <td data-col="ma">
-                            <span class="fw-semibold text-primary">@item.MaNcc</span>
+                            <span class="text-break">@item.MaNcc</span>
                         </td>
                         <td data-col="ten">
                             <span class="fw-semibold text-dark">@item.TenDonVi</span>
@@ -128,6 +166,12 @@
                         <td data-col="nhom">
                             @(string.IsNullOrWhiteSpace(item.TenNhomNcc) ? "---" : item.TenNhomNcc)
                         </td>
+                        <td data-col="diachi" class="text-truncate" style="max-width: 220px;" title="@item.DiaChi">
+                            @(string.IsNullOrWhiteSpace(item.DiaChi) ? "---" : item.DiaChi)
+                        </td>
+                        <td data-col="masothue">
+                            @(string.IsNullOrWhiteSpace(item.MaSoThue) ? "---" : item.MaSoThue)
+                        </td>
                         <td data-col="no" class="num r text-end">
                             <span class="@(item.NoCanTraHienTai > 0 ? "text-danger fw-semibold" : "text-muted")">
                                 @item.NoCanTraHienTai.ToString("N0", viCulture)
@@ -136,25 +180,166 @@
                         <td data-col="tongmua" class="num r text-end">
                             @item.TongMua.ToString("N0", viCulture)
                         </td>
-                        <td data-col="trangthai" class="text-center">
+                        <td data-col="ghi" class="text-truncate" style="max-width: 200px;" title="@item.GhiChu">
+                            @(string.IsNullOrWhiteSpace(item.GhiChu) ? "---" : item.GhiChu)
+                        </td>
+                        <td data-col="st" class="text-center">
                             @if (item.TrangThai == "HOAT_DONG")
                             {
-                                <span class="badge bg-light text-success border border-success-subtle">Đang hoạt động</span>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">Đang hoạt động</span>
                             }
                             else
                             {
-                                <span class="badge bg-light text-secondary border">Ngừng hoạt động</span>
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Ngừng hoạt động</span>
                             }
+                        </td>
+                        <td data-col="ngaytao" class="text-center text-muted small">
+                            @item.NgayTao.ToString("dd/MM/yyyy HH:mm")
                         </td>
                     </tr>
 
-                    <!-- Khối Master-Detail Accordion Inline -->
-                    <tr class="ncc-detail-tr" id="nccDetailRow_@item.MaDonViCapHang" style="display: none;">
-                        <td colspan="9" class="p-0 border-0">
-                            <div class="ncc-detail-container" id="nccDetailContainer_@item.MaDonViCapHang">
-                                <div class="text-center py-4 text-muted">
-                                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                                    <span>Đang tải thông tin chi tiết...</span>
+                    <!-- Khối chi tiết bung ra inline (Accordion Drawer khớp Kiểm kho) -->
+                    <tr class="dtl" id="dtl-@item.MaDonViCapHang" style="display: none;">
+                        <td colspan="13" class="p-0">
+                            <div class="dp shadow-sm" data-d="@item.MaDonViCapHang">
+                                <!-- Tabs chi tiết -->
+                                <div class="dp-tabs">
+                                    <span class="dp-tab active" data-tab="info">Thông tin</span>
+                                    <span class="dp-tab" data-tab="history">Lịch sử nhập/trả hàng</span>
+                                    <span class="dp-tab" data-tab="debt">Nợ cần trả</span>
+                                </div>
+
+                                <!-- Tiêu đề chi tiết -->
+                                <h2 class="d-flex align-items-center gap-2">
+                                    <span class="fw-bold" style="font-size: 18px; color: #1e293b;">@item.TenDonVi</span>
+                                    <small class="text-muted" style="font-size: 14px; font-weight: normal;">(@item.MaNcc)</small>
+                                    @if (item.TrangThai == "HOAT_DONG")
+                                    {
+                                        <span class="badge bg-success-subtle text-success border-0 px-2 py-1 rounded-pill" style="font-weight: 500; font-size: 12px;">Đang hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary border-0 px-2 py-1 rounded-pill" style="font-weight: 500; font-size: 12px;">Ngừng hoạt động</span>
+                                    }
+                                </h2>
+
+                                <!-- Meta thông tin chung -->
+                                <div class="meta text-muted small mt-2">
+                                    <span>Người tạo: <strong class="text-dark">@(string.IsNullOrWhiteSpace(item.NguoiTao) ? "Admin" : item.NguoiTao)</strong></span>
+                                    <span>Ngày tạo: @item.NgayTao.ToString("dd/MM/yyyy HH:mm")</span>
+                                    <span>Nhóm nhà cung cấp: <strong class="text-dark">@(string.IsNullOrWhiteSpace(item.TenNhomNcc) ? "Chưa có" : item.TenNhomNcc)</strong></span>
+                                </div>
+
+                                <!-- Tab 1: Thông tin -->
+                                <div class="ncc-tab-pane ncc-tab-info mt-3">
+                                    <div class="row g-3">
+                                        <!-- Khối 1: Thông tin liên hệ -->
+                                        <div class="col-md-4">
+                                            <div class="border rounded-2 p-3 h-100" style="background: #f8fafc;">
+                                                <div class="fw-semibold text-secondary small mb-2 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                                                    <i class="bi bi-geo-alt me-1 text-primary"></i> Thông tin liên hệ
+                                                </div>
+                                                <div class="d-flex flex-column gap-2 small">
+                                                    <div class="d-flex justify-content-between">
+                                                        <span class="text-muted">Điện thoại:</span>
+                                                        <span class="fw-semibold text-dark">@(string.IsNullOrWhiteSpace(item.DienThoai) ? "---" : item.DienThoai)</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between">
+                                                        <span class="text-muted">Email:</span>
+                                                        <span class="text-dark">@(string.IsNullOrWhiteSpace(item.Email) ? "---" : item.Email)</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between">
+                                                        <span class="text-muted">Địa chỉ:</span>
+                                                        <span class="text-dark text-end" style="max-width: 60%;">@(string.IsNullOrWhiteSpace(item.DiaChi) ? "---" : item.DiaChi)</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between">
+                                                        <span class="text-muted">Khu vực:</span>
+                                                        <span class="text-dark text-end">@(string.IsNullOrWhiteSpace(item.KhuVuc) ? "---" : item.KhuVuc)</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between">
+                                                        <span class="text-muted">Phường/Xã:</span>
+                                                        <span class="text-dark text-end">@(string.IsNullOrWhiteSpace(item.PhuongXa) ? "---" : item.PhuongXa)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Khối 2: Thông tin xuất hóa đơn -->
+                                        <div class="col-md-4">
+                                            <div class="border rounded-2 p-3 h-100" style="background: #f8fafc;">
+                                                <div class="fw-semibold text-secondary small mb-2 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                                                    <i class="bi bi-receipt me-1 text-primary"></i> Thông tin xuất hóa đơn
+                                                </div>
+                                                <div class="d-flex flex-column gap-2 small">
+                                                    <div class="d-flex justify-content-between">
+                                                        <span class="text-muted">Tên công ty:</span>
+                                                        <span class="text-dark fw-semibold text-end" style="max-width: 65%;">@(string.IsNullOrWhiteSpace(item.TenCongTy) ? "---" : item.TenCongTy)</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between">
+                                                        <span class="text-muted">Mã số thuế:</span>
+                                                        <span class="text-dark fw-semibold">@(string.IsNullOrWhiteSpace(item.MaSoThue) ? "---" : item.MaSoThue)</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between">
+                                                        <span class="text-muted">Số CMND/CCCD:</span>
+                                                        <span class="text-dark">@(string.IsNullOrWhiteSpace(item.SoCccd) ? "---" : item.SoCccd)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Khối 3: Ghi chú + Số liệu công nợ -->
+                                        <div class="col-md-4">
+                                            <div class="border rounded-2 p-3 h-100 d-flex flex-column" style="background: #f8fafc;">
+                                                <div class="fw-semibold text-secondary small mb-2 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                                                    <i class="bi bi-chat-left-text me-1 text-primary"></i> Ghi chú
+                                                </div>
+                                                <div class="small text-muted flex-grow-1" style="white-space: pre-wrap; min-height: 50px;">
+                                                    @(string.IsNullOrWhiteSpace(item.GhiChu) ? "Chưa có ghi chú nào." : item.GhiChu)
+                                                </div>
+                                                <div class="sums mt-2 pt-2 border-top">
+                                                    <div class="d-flex justify-content-between py-1">
+                                                        <span class="text-muted" style="font-size: 13.5px;">Nợ cần trả hiện tại:</span>
+                                                        <span class="fw-bold @(item.NoCanTraHienTai > 0 ? "text-danger" : "text-dark")" style="font-size: 13.5px;">@item.NoCanTraHienTai.ToString("N0", viCulture)</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between py-1">
+                                                        <span class="text-muted" style="font-size: 13.5px;">Tổng mua:</span>
+                                                        <span class="fw-bold text-dark" style="font-size: 13.5px;">@item.TongMua.ToString("N0", viCulture)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tab 2: Lịch sử nhập/trả hàng (AJAX Container) -->
+                                <div class="ncc-tab-pane ncc-tab-history mt-3" style="display: none;">
+                                    <div class="text-center py-4 text-muted ncc-dyn-container" data-loaded="0">
+                                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                        <span>Đang tải lịch sử giao dịch...</span>
+                                    </div>
+                                </div>
+
+                                <!-- Tab 3: Nợ cần trả (AJAX Container) -->
+                                <div class="ncc-tab-pane ncc-tab-debt mt-3" style="display: none;">
+                                    <div class="text-center py-4 text-muted ncc-dyn-container" data-loaded="0">
+                                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                        <span>Đang tải công nợ...</span>
+                                    </div>
+                                </div>
+
+                                <!-- Thanh nút hành động đáy drawer khớp Kiểm kho -->
+                                <div class="dp-actions d-flex align-items-center gap-2 mt-3 pt-3 border-top">
+                                    <button type="button" class="btn btn-sm btn-outline-danger btn-delete-ncc" data-id="@item.MaDonViCapHang" data-name="@item.TenDonVi">
+                                        <i class="bi bi-trash me-1"></i>Xóa
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary btn-toggle-status-ncc" data-id="@item.MaDonViCapHang" data-status="@item.TrangThai">
+                                        <i class="bi @(item.TrangThai == "HOAT_DONG" ? "bi-slash-circle" : "bi-check2-circle") me-1"></i>
+                                        <span>@(item.TrangThai == "HOAT_DONG" ? "Ngừng hoạt động" : "Cho hoạt động lại")</span>
+                                    </button>
+                                    <span class="ms-auto"></span>
+                                    <button type="button" class="btn btn-sm btn-primary btn-edit-ncc" data-id="@item.MaDonViCapHang">
+                                        <i class="bi bi-pencil-square me-1"></i>Chỉnh sửa
+                                    </button>
                                 </div>
                             </div>
                         </td>
@@ -165,5 +350,5 @@
     </table>
 </div>
 
-<!-- Phân trang đáy bảng dùng chung _Pagination.cshtml -->
-@await Html.PartialAsync("_Pagination", Model, new ViewDataDictionary(ViewData) { { "ItemLabel", "nhà cung cấp" } })
+<!-- Phân trang đáy bảng dùng chung component _Pagination.cshtml của hệ thống -->
+@await Html.PartialAsync("_Pagination", Model.PagedData, new ViewDataDictionary(ViewData) { { "ItemLabel", "nhà cung cấp" } })
