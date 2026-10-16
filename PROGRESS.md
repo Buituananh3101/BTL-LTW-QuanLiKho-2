@@ -1,6 +1,6 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-16 – Hỗ trợ Sửa và Xóa Nhóm hàng Trực tiếp từ Dropdown Chuẩn KiotViet (Phiên 51)
+Cập nhật lần cuối: 2026-10-16 – Bỏ mục "Tồn kho" và "Nhóm hàng" trên Menu Hàng hóa Topbar (Phiên 53)
 
 ---
 
@@ -17,6 +17,18 @@ Cập nhật lần cuối: 2026-10-16 – Hỗ trợ Sửa và Xóa Nhóm hàng 
 ---
 
 ## Đã xong
+- **Bỏ Mục "Tồn kho" và "Nhóm hàng" trên Menu Hàng hóa Topbar (Phiên 53)**:
+  - **Nhu cầu**: Người dùng yêu cầu gỡ bỏ 2 mục "Nhóm hàng" (dưới cột HÀNG HÓA) và "Tồn kho" (dưới cột KHO HÀNG) trên dropdown mega menu của tab "Hàng hóa" ở thanh điều hướng trên cùng (Topbar).
+  - **Giải pháp & Kết quả thực hiện**:
+    + Cập nhật `Views/Shared/_MainMenu.cshtml`: Gỡ bỏ link `Nhóm hàng` (`asp-route-tab="nhom"`) trong cột Hàng hóa và link `Tồn kho` trong cột Kho hàng. Menu dropdown giờ chỉ giữ lại "Danh sách hàng hóa" ở cột Hàng hóa, và các nghiệp vụ chứng từ kho ("Kiểm kho", "Chuyển kho", "Xuất dùng nội bộ", "Xuất hủy") ở cột Kho hàng theo đúng bản vẽ thiết kế của người dùng.
+    + Cập nhật đồng bộ `Views/Shared/_Header.cshtml`: Gỡ bỏ 2 mục tương ứng trên Drawer menu điều hướng trên thiết bị di động / màn hình nhỏ.
+  - **Kiểm tra biên dịch**: `dotnet build -t:CoreCompile` 0 Errors.
+- **Loại bỏ Nút Dấu Cộng Thừa trong Thanh Tìm Kiếm Kiểm Kho (Phiên 52)**:
+  - **Nhu cầu**: Người dùng phản ánh trong thanh tìm kiếm hàng hóa (`fSearch`) ở màn hình Tạo/Sửa phiếu kiểm kho (`_PhieuKiemKeForm.cshtml`), nút dấu cộng `+` (`#btnQuick`: Thêm nhanh hàng hóa mới) là thừa và không dùng đến, yêu cầu gỡ bỏ.
+  - **Giải pháp & Kết quả thực hiện**:
+    + Gỡ bỏ phần tử `<button type="button" class="btn-tail" id="btnQuick" title="Thêm nhanh hàng hóa mới"><i class="bi bi-plus-lg"></i></button>` trong `_PhieuKiemKeForm.cshtml`. Giữ lại duy nhất nút chọn hàng theo nhóm (`#btnGrp` icon `bi-grid-3x3-gap`).
+    + Cập nhật CSS `kiem-kho.css`: Tối ưu khoảng đệm `padding` bên phải ô nhập từ `74px` xuống `42px` giúp hiển thị tên hàng hóa rộng rãi, thoáng mắt hơn.
+  - **Kiểm tra biên dịch**: `dotnet build -t:CoreCompile` 0 Errors.
 - **Hỗ trợ Sửa và Xóa Nhóm hàng Trực tiếp từ Dropdown Chuẩn KiotViet (Phiên 51)**:
   - **Nhu cầu**: Người dùng muốn các mục trong dropdown bộ lọc "Nhóm hàng" ở sidebar cột trái (`#dropdownNhomHang`) và dropdown Nhóm hàng trong modal tạo/sửa hàng hóa (`#listMaNhom`) có thể chỉnh sửa tên hoặc xóa nhanh trực tiếp từ dropdown thông qua biểu tượng bút chì ✎ khi hover, tương tự như trong màn hình tạo đơn hàng/hàng hóa chuẩn KiotViet.
   - **Giải pháp & Kết quả thực hiện**:
@@ -436,6 +448,13 @@ Cập nhật lần cuối: 2026-10-16 – Hỗ trợ Sửa và Xóa Nhóm hàng 
 ---
 
 ## Nhật ký phiên
+- **2026-10-16 (Phiên 53 - Chiều)**:
+  - Bỏ mục "Tồn kho" và "Nhóm hàng" trên Menu Hàng hóa Topbar (`_MainMenu.cshtml` và `_Header.cshtml`).
+  - Biên dịch kiểm tra: `dotnet build -t:CoreCompile` 0 Errors.
+- **2026-10-16 (Phiên 52 - Chiều)**:
+  - Loại bỏ nút dấu cộng thừa (`#btnQuick`) trong ô tìm kiếm hàng hóa ở màn hình Kiểm kho (`_PhieuKiemKeForm.cshtml`).
+  - Tối ưu padding phải của ô input từ 74px xuống 42px (`kiem-kho.css`), giữ nguyên nút chọn theo nhóm (`#btnGrp`).
+  - Biên dịch kiểm tra: `dotnet build -t:CoreCompile` 0 lỗi.
 - **2026-10-16 (Phiên 51 - Chiều)**:
   - Hỗ trợ Sửa và Xóa Nhóm hàng trực tiếp từ Dropdown Chuẩn KiotViet:
     - Bổ sung nút bút chì ✎ khi hover vào từng mục nhóm hàng trong dropdown lọc sidebar (`#dropdownNhomHang`) và dropdown form (`#listMaNhom`).

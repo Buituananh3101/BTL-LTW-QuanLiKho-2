@@ -39,7 +39,7 @@
 7. **Luôn dùng giao dịch (Transaction)**: Mọi thao tác lưu chứng từ kèm chi tiết và cân bằng kho phải bọc trong `using var trans = await _context.Database.BeginTransactionAsync();`.
 8. **3 Nguyên tắc vàng khi sửa CSDL**: (1) Chỉ cộng thêm cột/bảng mới, không DROP/đổi tên cột cũ; (2) Khi sửa Model trong C# phải đồng bộ script SQL tương ứng; (3) Phải báo lý do trước khi chạm CSDL.
 9. **Chống Over-posting & Validation**: Action POST form phải có validation rõ ràng, thông báo lỗi tiếng Việt thân thiện.
-10. **Lọc và phân trang bằng AJAX**: Các trang danh sách dữ liệu dùng mô hình tìm kiếm, lọc sidebar và phân trang bằng AJAX trả về PartialView (không reload toàn trang).
+10. **Tái sử dụng Khối Lego & Lọc AJAX**: Mọi màn hình mới BẮT BUỘC tái sử dụng các khối Lego có sẵn trong `.agent/rules/03-giao-dien-layout.md` (Bộ lọc ngày `_KiotDateFilter`, Multi-select `_KiotMultiSelectFilter`, Checkbox `_KiotStatusFilter`, Phân trang `_Pagination`, Combobox sửa ✎ `KiotFilter.initCombobox`, Modal con `KiotPrompt`, Format số `.kiot-num`, Accordion `.kiot-sec`, Toast `KiotToast`). CẤM tự viết lại HTML/JS trùng lặp. Phân trang & lọc dùng AJAX trả về PartialView.
 11. **Không tự ý thêm thư viện ngoài**: Không cài thêm NuGet package hoặc thư viện JS mới khi chưa hỏi ý kiến người dùng.
 12. **Bảo toàn và đồng bộ tài liệu đặc tả**: Khi thay đổi code/luồng/file của chức năng X, BẮT BUỘC đồng bộ lại `docs/specs/<chức-năng>.md` ngay trong phiên đó. Không để file tài liệu luật/đặc tả nào vượt quá 8.000 ký tự.
 

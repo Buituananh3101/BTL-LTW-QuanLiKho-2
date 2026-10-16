@@ -40,6 +40,18 @@
 3. **Màn hình Chi tiết (`Details`)**:
    - Chế độ chỉ đọc, có nút In phiếu và nút Hủy phiếu (nếu được phép).
 
+### 3.1. Danh mục Khối Lego BẮT BUỘC tái sử dụng (Luật 10 AGENTS.md & 03-giao-dien-layout.md):
+- [ ] **Bộ lọc Ngày tháng**: `<partial name="_KiotDateFilter" ... />` + `KiotFilter.initDateFilter` + `DateRangeHelper.Resolve`.
+- [ ] **Bộ lọc Dropdown chọn nhiều**: `<partial name="_KiotMultiSelectFilter" ... />` + `KiotFilter.renderTagPills`.
+- [ ] **Bộ lọc Trạng thái checkbox**: `<partial name="_KiotStatusFilter" ... />`.
+- [ ] **Phân trang AJAX**: `<partial name="_Pagination" model="Model.PagedData" />` + `BaseFilterParams`.
+- [ ] **Combobox vừa gõ vừa chọn có icon bút chì ✎**: `KiotFilter.initCombobox`.
+- [ ] **Modal con tạo nhanh / sửa ✎ / xóa tại chỗ**: `KiotPrompt.open({ ... })`.
+- [ ] **Ô nhập số tự format hàng nghìn**: class `.kiot-num` + `KiotNumber.get()`.
+- [ ] **Khối gập mở Accordion**: class `.kiot-sec`, `.kiot-sec-h`, `.kiot-chev`.
+- [ ] **Nút lưu đa năng Split Button**: class `.kiot-split`, `.caret`, `.kiot-menu`.
+- [ ] **Thông báo Toast**: `KiotToast.success()`, `KiotToast.error()`, `KiotToast.info()`.
+
 ---
 
 ## 4. Quy tắc nghiệp vụ & Xử lý Tồn kho
