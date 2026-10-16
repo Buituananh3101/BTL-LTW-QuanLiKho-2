@@ -49,6 +49,9 @@
     cursor: pointer;
     color: #64748b !important;
     font-weight: 500 !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
     border-bottom: 2px solid transparent !important;
     transition: all 0.2s ease;
     user-select: none;

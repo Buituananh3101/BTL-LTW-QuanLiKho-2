@@ -1332,7 +1332,8 @@ tr.product-detail-row > td {
 /* Tabs Bar */
 .kiot-detail-tabs,
 .product-detail-tabs,
-.ncc-detail-tabs {
+.ncc-detail-tabs,
+.dp-tabs {
   display: flex;
   gap: 24px;
   padding: 0 24px;
@@ -1345,30 +1346,34 @@ tr.product-detail-row > td {
 }
 .kiot-detail-tab-btn,
 .product-detail-tab-btn,
-.ncc-detail-tab-btn {
+.ncc-detail-tab-btn,
+.dp-tab {
   padding: 12px 2px;
   font-size: 13px;
   font-weight: 500;
   color: #475569;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
   cursor: pointer;
   position: relative;
   bottom: -1px;
   transition: all 0.15s ease-in-out;
+  outline: none !important;
 }
 .kiot-detail-tab-btn:hover,
 .product-detail-tab-btn:hover,
-.ncc-detail-tab-btn:hover {
-  color: #0070f3;
+.ncc-detail-tab-btn:hover,
+.dp-tab:hover {
+  color: #0070f3 !important;
 }
 .kiot-detail-tab-btn.active,
 .product-detail-tab-btn.active,
-.ncc-detail-tab-btn.active {
-  color: #0070f3;
-  font-weight: 600;
-  border-bottom: 2px solid #0070f3;
+.ncc-detail-tab-btn.active,
+.dp-tab.active {
+  color: #0070f3 !important;
+  font-weight: 600 !important;
+  border-bottom: 2px solid #0070f3 !important;
 }
 
 /* Tab Panes */

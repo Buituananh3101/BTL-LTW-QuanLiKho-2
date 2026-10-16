@@ -411,10 +411,23 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
 .tbl th.r, .tbl td.r { text-align: right; }
 .tbl tr.tbl-row { display: table-row !important; cursor: pointer; transition: background 0.1s; }
 .tbl tr.tbl-row:hover td { background: #f6f9ff; }
-.tbl tr.tbl-row.open td {
-  background: #f0f7ff;
+.tbl tr.tbl-row.open td,
+.tbl tr.tbl-row.selected td {
+  background: #ffffff !important;
+  border-top: 2px solid #0070f3 !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  border-right: none !important;
 }
-.tbl tr.tbl-row.open td:first-child { border-left: 4px solid var(--blue); }
+.tbl tr.tbl-row.open td:first-child,
+.tbl tr.tbl-row.selected td:first-child {
+  border-left: 3px solid #0070f3 !important;
+}
+.tbl tr.tbl-row.open td.last-visible-col,
+.tbl tr.tbl-row.open td:last-child,
+.tbl tr.tbl-row.selected td.last-visible-col,
+.tbl tr.tbl-row.selected td:last-child {
+  border-right: 3px solid #0070f3 !important;
+}
 .tbl td.note { min-width: 180px; max-width: 220px; line-height: 1.45; }
 .tbl .w-chk { width: 36px; }
 .tbl .w-star { width: 36px; }
@@ -429,12 +442,14 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
 .star.on { color: #f5a524; }
 .star.on .ic { fill: #f5a524; stroke: #f5a524; }
 
-/* Khối chi tiết bung mở khi click dòng */
+/* Khối chi tiết bung mở khi click dòng: Cạnh đáy và 2 bên khép kín hình chữ nhật */
 .tbl tr.dtl > td {
-  padding: 0;
-  border-bottom: 2px solid var(--blue);
-  border-left: 4px solid var(--blue);
-  background: #fff;
+  padding: 0 !important;
+  border-top: none !important;
+  border-bottom: 2px solid #0070f3 !important;
+  border-left: 3px solid #0070f3 !important;
+  border-right: 3px solid #0070f3 !important;
+  background: #ffffff !important;
 }
 .dp {
   padding: 16px 20px 20px;
@@ -445,17 +460,34 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
   box-sizing: border-box;
 }
 .dp-tabs {
+  display: flex;
+  gap: 24px;
   border-bottom: 1px solid var(--line);
   margin: 0 -20px 14px;
   padding: 0 20px;
 }
 .dp-tab {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   padding: 10px 4px 8px;
-  margin-bottom: 0;
-  color: var(--blue);
-  font-weight: 600;
-  border-bottom: 2px solid var(--blue);
+  margin-bottom: -1px;
+  color: #64748b;
+  font-weight: 500;
+  font-size: 13.5px;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  cursor: pointer;
+  outline: none !important;
+  transition: all 0.15s ease-in-out;
+}
+.dp-tab:hover {
+  color: var(--blue) !important;
+}
+.dp-tab.active {
+  color: var(--blue) !important;
+  font-weight: 600 !important;
+  border-bottom: 2px solid var(--blue) !important;
 }
 .dp h2 {
   margin: 0;

@@ -1,6 +1,6 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-16 – Đóng Gói Lego Master-Detail Accordion & Actions (Phiên 75)
+Cập nhật lần cuối: 2026-10-16 – Áp Dụng Chuẩn Hiển Thị Nhà Cung Cấp Cho Phân Hệ Xuất Hủy (Phiên 77)
 
 ---
 
@@ -10,12 +10,48 @@ Cập nhật lần cuối: 2026-10-16 – Đóng Gói Lego Master-Detail Accordi
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế modal thêm/sửa, bảng hiển thị và tùy chọn hiển thị cột nhà cung cấp cùng người dùng.
-2. Lập tài liệu đặc tả chi tiết `docs/specs/nhap-kho.md` theo chuẩn Hàng hóa & Nhà cung cấp.
+1. Kiểm tra trải nghiệm thực tế màn hình danh sách xuất hủy, accordion chi tiết và tùy chọn ẩn/hiện cột cùng người dùng.
+2. Lập tài liệu đặc tả chi tiết `docs/specs/nhap-kho.md` theo chuẩn Hàng hóa, Nhà cung cấp & Kiểm kho.
 3. Xây dựng ViewModel cho Nhập kho (`NhapKhoIndexVM`, `NhapKhoFormVM`, `NhapKhoLineVM`...).
 4. Xây dựng `PhieuNhapController` và View giao diện (`Views/PhieuNhap/`) theo phong cách KiotViet.
 
 ---
+
+- **Áp Dụng Chuẩn Hiển Thị Nhà Cung Cấp Cho Phân Hệ Xuất Hủy (Phiên 77)**:
+  - **Nhu cầu**: Người dùng yêu cầu đồng bộ cấu trúc hiển thị, tùy chọn ẩn/hiện cột và hiệu ứng mở dòng chi tiết của phân hệ Nhà cung cấp sang phân hệ Xuất hủy (`XuatHuy`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Đồng Bộ Giao Diện & Cấu Trúc Bảng (`Views/XuatHuy/_XuatHuyTable.cshtml`)**:
+      * Bổ sung dòng tổng hợp `summary-row` cuộn tự nhiên cùng nội dung bảng, tính tổng giá trị hủy (`TongGiaTriHuy.Sum()`).
+      * Chuẩn hóa bộ chọn dòng: Đổi id checkbox chọn tất cả thành `#selectAllRows`, gắn class `.row-select` cho từng dòng.
+      * Chuẩn hóa class hàng: `tr.product-row.tbl-row` cho dòng dữ liệu và `tr.product-detail-row.dtl` cho dòng chi tiết.
+      * Bọc toàn bộ panel chi tiết trong `.product-detail-panel-wrap` để hỗ trợ hiệu ứng trượt mượt mà.
+    + **Đồng Bộ Phong Cách & Viền Hộp Khép Kín (`wwwroot/css/xuat-huy.css`)**:
+      * Cố định độ rộng bảng `#xuatHuyTable` với `width: max-content !important; min-width: 1100px !important; table-layout: fixed !important;`.
+      * Thiết lập viền chữ nhật xanh `#0070f3` khép kín 4 cạnh hoàn hảo (trên/dưới 2px, 2 bên 3px) phối hợp cùng class `.last-visible-col`.
+    + **Tái Cấu Trúc Script Tương Tác (`wwwroot/js/xuat-huy-index.js`)**:
+      * Tích hợp khối LEGO `KiotFilter.initColumnToggle`: Tùy biến `extraColsCount: 2` (checkbox + sao) và 9 cột dữ liệu, tự động tính toán `colspan` và gán `.last-visible-col`.
+      * Tích hợp khối LEGO `KiotFilter.initRowDetail`: Thay thế mã thủ công bằng bộ quản lý Master-Detail chuẩn, trượt mở/đóng 150ms, tự động đóng dòng khác và tự động khôi phục dòng đang mở sau khi tải lại bảng qua AJAX.
+      * Gắn sự kiện chọn tất cả dòng checkbox `#selectAllRows` và đồng bộ trạng thái khi chọn từng dòng lẻ.
+    + **Kiểm Tra & Đồng Bộ Tài Liệu**:
+      * `dotnet build` đạt **0 Errors**.
+      * `node -c` toàn bộ JavaScript đạt **0 Errors**.
+      * Đồng bộ đặc tả `docs/specs/xuat-huy.md` (< 8.000 ký tự theo Rule 12).
+
+- **Áp Dụng Các Khối Lego (RowDetail, EntityActions, ColumnToggle) Cho Phân Hệ Kiểm Kho (Phiên 76)**:
+  - **Nhu cầu**: Người dùng yêu cầu áp dụng các khối Lego vừa đóng gói (`KiotFilter.initRowDetail`, `KiotFilter.initEntityActions`, và `KiotFilter.initColumnToggle` nâng cấp) vào phân hệ Kiểm kho (`PhieuKiemKe`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tái Cấu Trúc Script Kiểm Kho (`wwwroot/js/phieu-kiem-ke-index.js`)**:
+      * Tích hợp `KiotFilter.initColumnToggle`: Tùy biến `extraColsCount: 2` (cột checkbox + cột sao) và 11 cột dữ liệu, tự động tính toán `colspan` và gán `.last-visible-col` để khép kín hình chữ nhật viền xanh.
+      * Tích hợp `KiotFilter.initRowDetail`: Thay thế hoàn toàn mã thủ công `wrap.onclick`. Điều khiển đóng/mở accordion chi tiết dòng (`tr.dtl`) với slideDown/slideUp mượt mà, tự động đóng dòng khác và tự động khôi phục dòng mở sau khi tải lại bảng qua AJAX (`F.openId`).
+      * Tích hợp `KiotFilter.initEntityActions`: Thay thế vòng lặp gán sự kiện thủ công cho nút Hủy (`.btn-cancel-doc`), ủy quyền sự kiện trên `#tableWrapper`, tích hợp hộp thoại xác nhận hủy phiếu tạm chuẩn KiotConfirm/KiotPrompt và chặn hủy phiếu đã cân bằng.
+      * Tinh gọn `bindTableEvents()`: Chuyển các sự kiện tìm kiếm trong bảng chi tiết (`.dtl-search-*`) và lưu ghi chú (`.btn-save-note`) sang ủy quyền sự kiện qua jQuery `.off().on()`, triệt tiêu nguy cơ rò rỉ bộ nhớ hoặc gắn trùng lặp sự kiện khi tải lại bảng.
+    + **Đồng Bộ Giao Diện & CSS (`wwwroot/css/kiem-kho.css`, `_PhieuKiemKeTable.cshtml`)**:
+      * Bổ sung `.kiot-detail-panel-wrap` vào container `.dp` và chuyển `.dp-tab` sang button ngữ nghĩa.
+      * Viền chữ nhật xanh `#0070f3` khép kín 4 cạnh hoàn hảo (trên/dưới 2px, 2 bên 3px) phối hợp cùng `.last-visible-col`.
+    + **Kiểm Tra & Đồng Bộ Tài Liệu**:
+      * `dotnet build` đạt **0 Errors**.
+      * `node -c` toàn bộ JavaScript đạt **0 Errors**.
+      * Đồng bộ đặc tả `docs/specs/kiem-kho.md` (7.406 ký tự, bảo đảm < 8.000 ký tự theo Rule 12).
 
 - **Đóng gói Khối Master-Detail Accordion, Thao tác Thực thể & Tùy chọn Cột Bảng (Phiên 75)**:
   - **Nhu cầu**: Người dùng yêu cầu đóng gói logic hiển thị trong bảng Nhà cung cấp (click mở dòng chi tiết inline, các tab Thông tin / Lịch sử / Nợ, các nút thao tác Sửa / Xóa / Đổi trạng thái, tùy chọn ẩn/hiện cột) thành các khối Lego dùng chung toàn hệ thống để có thể áp dụng cho các phân hệ khác (Khách hàng, Hàng hóa, Nhân viên...) chỉ với 1-2 dòng cấu hình.

@@ -46,11 +46,15 @@
   - Header: Lọc các phiếu có sao (`DaDanhDau`).
   - Dòng: Click sao ⭐ lưu trực tiếp trạng thái vào CSDL qua AJAX `ToggleFavorite`.
 - **Cấu trúc Cột bảng (`_XuatHuyTable`)**:
-  - Checkbox, Sao bookmark.
+  - Dòng tổng hợp `summary-row` cuộn tự nhiên cùng bảng, hiển thị tổng cộng `TongGiaTriHuy.Sum()`.
+  - Checkbox `#selectAllRows` chọn tất cả và `.row-select` từng dòng.
+  - Sao bookmark header và từng dòng.
   - Mã xuất hủy, Tổng giá trị hủy (căn phải), Thời gian, Thời gian tạo (tùy chọn), Chi nhánh, Người xuất hủy (tùy chọn), Người tạo (tùy chọn), Ghi chú, Trạng thái.
-- **Bung mở chi tiết (`tr.dtl`)**:
-  - Click dòng thêm class `.open` vào `tr.tbl-row`, tạo đường viền xanh 4px bên trái kết nối dòng và bảng chi tiết `.dp`.
-  - Thông tin chứng từ: Người tạo, Người xuất hủy, Ngày xuất hủy, Chi nhánh (định dạng divider `|` chuẩn).
+- **Bung mở chi tiết (`tr.product-detail-row` qua LEGO `KiotFilter.initRowDetail`)**:
+  - Hiệu ứng trượt slideDown/slideUp mượt mà 150ms bọc trong `.product-detail-panel-wrap`.
+  - Viền xanh `#0070f3` khép kín hình chữ nhật 4 cạnh liền mạch quanh dòng được chọn (`tr.product-row.selected > td`) và dòng chi tiết (`tr.product-detail-row > td`), tự động gán `.last-visible-col` cho ô hiển thị cuối cùng.
+  - Tự động đồng bộ `colspan` với số lượng cột hiển thị thực tế qua LEGO `KiotFilter.initColumnToggle`.
+  - Thông tin chứng từ: Người tạo, Người xuất hủy, Ngày xuất hủy, Chi nhánh.
   - Bảng dòng hàng (`dtl-tbl`): 5 cột chuẩn KiotViet: `Mã hàng`, `Tên hàng`, `SL hủy`, `Giá vốn`, `Giá trị hủy` kèm ô tìm kiếm inline `Tìm mã hàng`, `Tìm tên hàng`.
   - Khối dưới: Ô textarea ghi chú (placeholder "Chưa có") và tổng kết `Tổng số lượng hủy`, `Tổng giá trị hủy`.
   - Hàng nút hành động:

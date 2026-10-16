@@ -120,3 +120,46 @@
         width: 100%;
     }
 }
+
+/* ==========================================================================
+   BẢNG DANH SÁCH XUẤT HỦY (CHUẨN KIOTVIET & NHÀ CUNG CẤP)
+   ========================================================================== */
+#xuatHuyTable {
+    width: max-content !important;
+    min-width: 1100px !important;
+    table-layout: fixed !important;
+}
+
+/* Đóng khung hình chữ nhật liền mạch khi mở chi tiết dòng Xuất hủy */
+#xuatHuyTable tr.product-row.selected > td {
+    background-color: #ffffff !important;
+    border-top: 2px solid #0070f3 !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    border-right: none !important;
+}
+#xuatHuyTable tr.product-row.selected > td:first-child {
+    border-left: 3px solid #0070f3 !important;
+}
+#xuatHuyTable tr.product-row.selected > td.last-visible-col,
+#xuatHuyTable tr.product-row.selected > td:last-child {
+    border-right: 3px solid #0070f3 !important;
+}
+
+#xuatHuyTable tr.product-detail-row > td {
+    background-color: #ffffff !important;
+    padding: 0 !important;
+    border-top: none !important;
+    border-bottom: 2px solid #0070f3 !important;
+    border-left: 3px solid #0070f3 !important;
+    border-right: 3px solid #0070f3 !important;
+}
+
+.product-detail-panel.dp {
+    padding: 16px 20px;
+    background: #ffffff;
+}
+
+.product-detail-panel-wrap {
+    width: 100%;
+    box-sizing: border-box;
+}
