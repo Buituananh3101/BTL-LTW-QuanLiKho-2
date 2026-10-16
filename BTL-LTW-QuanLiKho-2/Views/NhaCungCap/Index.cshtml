@@ -3,7 +3,6 @@
     ViewData["Title"] = "Nhà cung cấp";
 }
 
-<link rel="stylesheet" href="~/css/kiem-kho.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/hang-hoa-form.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/nha-cung-cap.css" asp-append-version="true" />
 
@@ -80,7 +79,7 @@
 
         <!-- Bảng danh sách nhà cung cấp (Partial View AJAX) -->
         <section id="content">
-            <div id="tableWrapper" class="kiot-table-wrapper">
+            <div id="productTableContainer">
                 <partial name="_NhaCungCapTable" model="Model" />
             </div>
         </section>

@@ -67,7 +67,7 @@
         params.append('Page', state.page);
         params.append('PageSize', state.pageSize);
 
-        const $container = $('#tableWrapper').length ? $('#tableWrapper') : $('#tableContainer');
+        const $container = $('#productTableContainer').length ? $('#productTableContainer') : ($('#tableWrapper').length ? $('#tableWrapper') : $('#tableContainer'));
         $container.css('opacity', '0.6');
 
         $.ajax({
@@ -82,7 +82,7 @@
 
                 // Nếu có dòng đang mở trước đó, khôi phục trạng thái
                 if (state.expandedId) {
-                    const $row = $(`#supplierTable tr.tbl-row[data-id="${state.expandedId}"]`);
+                    const $row = $(`#supplierTable tr.product-row[data-id="${state.expandedId}"]`);
                     if ($row.length) {
                         expandSupplierRow(state.expandedId, false);
                     } else {
@@ -472,12 +472,24 @@
         const $menu = $('#colMenu');
         if (!$menu.length) return;
 
+        let visibleCols = 1; // 1 cột checkbox luôn hiển thị
         $menu.find('input[data-c]').each(function () {
             const col = $(this).data('c');
             const isChecked = $(this).is(':checked');
+            if (isChecked) visibleCols++;
             $(`#supplierTable [data-col="${col}"]`).each(function () {
                 this.style.display = isChecked ? '' : 'none';
             });
+        });
+
+        // 1. Cập nhật colspan chính xác theo số cột hiển thị để không sinh cột ma
+        $('#supplierTable tr.product-detail-row > td').attr('colspan', visibleCols);
+        $('#supplierTable tr.empty-row > td, #supplierTable tr:has(.empty) > td').attr('colspan', visibleCols);
+
+        // 2. Gắn class last-visible-col cho ô hiển thị cuối cùng của mỗi dòng để khép kín hình chữ nhật
+        $('#supplierTable .last-visible-col').removeClass('last-visible-col');
+        $('#supplierTable tr').each(function () {
+            $(this).children('th:visible, td:visible').last().addClass('last-visible-col');
         });
     }
 
@@ -522,52 +534,72 @@
     }
 
     /* ==========================================================================
-       6. MASTER-DETAIL ACCORDION (BUNG DÒNG CHI TIẾT & 3 TABS KHỚP KIỂM KHO)
+       6. MASTER-DETAIL ACCORDION (BUNG DÒNG CHI TIẾT & 3 TABS KHỚP CHUẨN HÀNG HÓA)
        ========================================================================== */
     function expandSupplierRow(id, toggle = true) {
-        const $row = $(`#supplierTable tr.tbl-row[data-id="${id}"]`);
-        const $dtl = $(`#dtl-${id}`);
+        const $row = $(`#supplierTable tr.product-row[data-id="${id}"]`);
+        const $detailRow = $(`#detail-${id}`);
+        if (!$row.length || !$detailRow.length) return;
 
-        if (toggle && $row.hasClass('open')) {
-            $row.removeClass('open');
-            $dtl.hide();
-            state.expandedId = null;
-            return;
+        const $wrap = $detailRow.find('.product-detail-panel-wrap');
+        const isCurrentlyOpen = $detailRow.is(':visible');
+
+        // Đóng các dòng chi tiết khác đang mở (hiệu ứng slideUp khớp Hàng hóa)
+        $('#supplierTable .product-detail-row').not($detailRow).each(function () {
+            const $other = $(this);
+            $other.find('.product-detail-panel-wrap').slideUp(150, function () {
+                $other.hide();
+            });
+        });
+        $('#supplierTable .product-row').not($row).removeClass('selected');
+
+        if (isCurrentlyOpen) {
+            if (toggle) {
+                $wrap.slideUp(150, function () {
+                    $detailRow.hide();
+                });
+                $row.removeClass('selected');
+                state.expandedId = null;
+            }
+        } else {
+            // Cập nhật colspan và class khép kín viền hình chữ nhật trước khi bung mở
+            const visibleCols = $('#supplierTable thead tr:first-child th:visible').length || 1;
+            $detailRow.find('> td').attr('colspan', visibleCols);
+
+            $row.children('td').removeClass('last-visible-col');
+            $row.children('td:visible').last().addClass('last-visible-col');
+
+            $row.addClass('selected');
+            $detailRow.show();
+            $wrap.hide().slideDown(150);
+            state.expandedId = id;
         }
-
-        // Đóng các dòng đang mở khác
-        $('#supplierTable tr.tbl-row').removeClass('open');
-        $('#supplierTable tr.dtl').hide();
-
-        // Mở dòng được chọn
-        $row.addClass('open');
-        $dtl.show();
-        state.expandedId = id;
     }
 
-    // Click dòng bảng để mở Accordion Drawer (trừ checkbox, link, button)
-    $(document).on('click', '#supplierTable tr.tbl-row', function (e) {
-        if ($(e.target).closest('input, button, a, label, .w-chk').length) return;
+    // Click dòng bảng để mở chi tiết (trừ checkbox, link, button)
+    $(document).on('click', '#supplierTable tr.product-row', function (e) {
+        if ($(e.target).closest('input, button, a, label, .cell-checkbox, .w-chk').length) return;
         const id = $(this).data('id');
         if (id) expandSupplierRow(id, true);
     });
 
-    // Chuyển tabs trong Accordion Drawer (.dp-tabs -> .dp-tab)
-    $(document).on('click', '.dp-tab', function (e) {
-        e.preventDefault();
-        const tab = $(this).data('tab');
-        const $dp = $(this).closest('.dp');
-        const id = $dp.data('d');
+    // Chuyển tabs trong Detail Panel (.product-detail-tab-btn khớp Hàng hóa)
+    $(document).on('click', '.product-detail-tab-btn', function (e) {
+        e.stopPropagation();
+        const tabName = $(this).data('tab');
+        const $panel = $(this).closest('.product-detail-panel');
+        const $detailRow = $(this).closest('.product-detail-row');
+        const id = $detailRow.attr('id') ? $detailRow.attr('id').replace('detail-', '') : '';
 
-        $dp.find('.dp-tab').removeClass('active');
+        $panel.find('.product-detail-tab-btn').removeClass('active');
         $(this).addClass('active');
 
-        $dp.find('.ncc-tab-pane').hide();
-        const $targetPane = $dp.find(`.ncc-tab-${tab}`);
-        $targetPane.show();
+        $panel.find('.tab-pane-content').hide();
+        const $targetPane = $panel.find('.tab-' + tabName);
+        $targetPane.fadeIn(120);
 
         // Nạp AJAX nếu là tab history hoặc debt và chưa nạp dữ liệu
-        if ((tab === 'history' || tab === 'debt') && id) {
+        if ((tabName === 'history' || tabName === 'debt') && id) {
             const $dyn = $targetPane.find('.ncc-dyn-container[data-loaded="0"]');
             if ($dyn.length) {
                 $.ajax({
@@ -580,10 +612,10 @@
                         const debtHtml = $res.find('.ncc-tab-debt').html();
 
                         if (histHtml) {
-                            $dp.find('.ncc-tab-history').html(histHtml);
+                            $panel.find('.tab-history').html(histHtml);
                         }
                         if (debtHtml) {
-                            $dp.find('.ncc-tab-debt').html(debtHtml);
+                            $panel.find('.tab-debt').html(debtHtml);
                         }
                     },
                     error: function () {
@@ -1224,16 +1256,16 @@
         }
     });
 
-    // Checkbox chọn tất cả dòng (khớp Kiểm kho: #chkAll & input[data-sel])
-    $(document).on('change', '#chkAll', function () {
+    // Checkbox chọn tất cả dòng (khớp chuẩn Hàng hóa: #selectAllRows & .row-select)
+    $(document).on('change', '#selectAllRows, #chkAll', function () {
         const isChecked = $(this).is(':checked');
-        $('#supplierTable input[data-sel]').prop('checked', isChecked);
+        $('#supplierTable .row-select, #supplierTable input[data-sel]').prop('checked', isChecked);
     });
 
-    $(document).on('change', '#supplierTable input[data-sel]', function () {
-        const total = $('#supplierTable input[data-sel]').length;
-        const checked = $('#supplierTable input[data-sel]:checked').length;
-        $('#chkAll').prop('checked', total > 0 && total === checked);
+    $(document).on('change', '#supplierTable .row-select, #supplierTable input[data-sel]', function () {
+        const total = $('#supplierTable .row-select, #supplierTable input[data-sel]').length;
+        const checked = $('#supplierTable .row-select:checked, #supplierTable input[data-sel]:checked').length;
+        $('#selectAllRows, #chkAll').prop('checked', total > 0 && total === checked);
     });
 
     // Reset bộ lọc khi nhấn "vào đây" trong empty state

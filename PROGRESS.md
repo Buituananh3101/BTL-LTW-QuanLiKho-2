@@ -1,6 +1,6 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-16 – Khắc phục Lỗi Hiển thị Bảng & Đồng bộ Cột Nhà Cung Cấp theo Chuẩn Kiểm Kho (Phiên 65)
+Cập nhật lần cuối: 2026-10-16 – Cố Định Độ Rộng Cột Nhà Cung Cấp & Khép Kín Chi Tiết/Chỉnh Sửa (Phiên 69)
 
 ---
 
@@ -11,12 +11,65 @@ Cập nhật lần cuối: 2026-10-16 – Khắc phục Lỗi Hiển thị Bản
 
 ## Việc kế tiếp
 1. Kiểm tra trải nghiệm thực tế modal thêm/sửa, bảng hiển thị và tùy chọn hiển thị cột nhà cung cấp cùng người dùng.
-2. Lập tài liệu đặc tả chi tiết `docs/specs/nhap-kho.md` theo chuẩn Kiểm kho & Nhà cung cấp.
+2. Lập tài liệu đặc tả chi tiết `docs/specs/nhap-kho.md` theo chuẩn Hàng hóa & Nhà cung cấp.
 3. Xây dựng ViewModel cho Nhập kho (`NhapKhoIndexVM`, `NhapKhoFormVM`, `NhapKhoLineVM`...).
 4. Xây dựng `PhieuNhapController` và View giao diện (`Views/PhieuNhap/`) theo phong cách KiotViet.
 
 ---
 
+- **Cố Định Độ Rộng Cột Nhà Cung Cấp & Khép Kín Chi Tiết/Chỉnh Sửa (Phiên 69)**:
+  - **Nhu cầu**: Giữ nguyên độ rộng cột cố định cho bảng nhà cung cấp khi còn ít cột (không ép cột Tên hoặc bảng tràn hết 100% chiều ngang màn hình). Khi click vào dòng thì bung mở khối chi tiết nhà cung cấp cùng các nút thao tác (Chỉnh sửa, Xóa, Ngừng hoạt động) và đóng khung thành hình chữ nhật khép kín vừa vặn đúng bằng độ rộng các cột hiển thị.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Độ rộng Bảng & Cột Cố định (`_NhaCungCapTable.cshtml` & `nha-cung-cap.css`)**:
+      * Đưa cột Tên nhà cung cấp về độ rộng cố định `width: 240px;` (toàn bộ 13 cột đều có `width` xác định rõ ràng, không bị kéo dãn bất thường).
+      * Cấu hình bảng `#supplierTable` về `width: max-content !important; min-width: 760px !important; table-layout: fixed !important;`. Bảng có độ rộng thực tế vừa khít bằng tổng các cột hiển thị (khoảng 1.006px ở chế độ mặc định), không bị ép tràn 100% màn hình.
+    + **Bung Mở Chi Tiết & Chỉnh Sửa Khi Click Dòng**:
+      * Khi click bất kỳ đâu trên dòng dữ liệu (trừ checkbox), hàm `expandSupplierRow` kích hoạt hiệu ứng slideDown hiển thị dòng chi tiết `tr.product-detail-row`.
+      * Khối chi tiết hiển thị đầy đủ thông tin (3 tab: Thông tin, Lịch sử nhập/trả hàng, Nợ cần trả) và thanh công cụ đáy chứa nút chính **"Chỉnh sửa"** (`.btn-edit-ncc`) cùng "Xóa", "Ngừng hoạt động / Cho hoạt động lại". Click "Chỉnh sửa" mở ngay modal cập nhật.
+    + **Đóng Khung Hình Chữ Nhật Khép Kín Vừa Vặn**:
+      * Nhờ `colspan` động (`visibleCols`) và độ rộng bảng `max-content`, dòng dữ liệu và dòng chi tiết bên dưới có độ rộng hoàn toàn trùng khớp (cùng bắt đầu tại pixel 0 và kết thúc tại pixel 1.006).
+      * Cạnh trên `2px solid #0070f3`, cạnh đáy `2px solid #0070f3`, hai cạnh bên `3px solid #0070f3` tạo thành một khối hình chữ nhật khép kín 100% ngay tại vùng bảng hiển thị.
+    + **Kiểm tra biên dịch & Cú pháp**: `dotnet build` đạt 0 Errors, `node -c` đạt 0 Errors.
+
+
+- **Hoàn thiện Đóng Khung Hình Chữ Nhật Khép Kín Chi Tiết Nhà Cung Cấp (Phiên 68)**:
+  - **Nhu cầu**: Sửa hiện tượng khi click dòng mở chi tiết nhà cung cấp, viền highlight bị đứt đoạn dạng bậc thang (dòng dữ liệu dừng ở giữa do các cột ẩn, trong khi drawer bên dưới bung rộng hết màn hình ra tận mép phải tạo khoảng trống màu trắng ở trên), không tạo thành một khối hình chữ nhật khép kín liền mạch.
+  - **Nguyên nhân cốt lõi**:
+    + Thẻ `<table id="supplierTable">` bị gán `min-width: 1450px`, đồng thời thẻ `<th data-col="ten">` bị ép cứng `width: 240px` khiến cột Tên không tự co giãn (flex) để lấp đầy bảng theo chiều ngang khi một số cột bị ẩn.
+    + Dòng chi tiết `<tr class="product-detail-row">` bị cố định cứng `colspan="13"`. Khi người dùng ẩn bớt cột (chỉ còn 7–9 cột hiển thị), trình duyệt buộc phải sinh ra các cột ma (phantom columns) rỗng ở góc phải trên thẻ thead và tbody, làm drawer vươn ra tận cột 13 trong khi dòng dữ liệu dừng ở cột hiển thị cuối cùng.
+    + Thẻ CSS `:last-child` trên dòng dữ liệu bị lệch khi cột cuối cùng trong DOM (`ngaytao`) bị ẩn, khiến dòng dữ liệu không đóng được viền bên phải tại đúng vị trí cột hiển thị cuối cùng.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Độ rộng Bảng & Cột Flex (`_NhaCungCapTable.cshtml`)**: Chuyển `#supplierTable` sang `width: 100%; min-width: 100%;`; gỡ bỏ cố định `width: 240px` trên cột Tên sang `min-width: 220px;`, cho phép cột Tên tự do co giãn chiếm trọn chiều ngang còn lại của bảng, đẩy cột hiển thị cuối cùng ra sát cạnh phải mà không tạo khoảng trắng.
+    + **Đồng bộ Colspan Động (`nha-cung-cap-index.js`)**: Trong hàm `applyColumnVisibility` và `expandSupplierRow`, đếm chính xác số cột `visibleCols` đang hiển thị và gán động `colspan = visibleCols` cho dòng chi tiết và dòng dữ liệu trống, triệt tiêu hoàn toàn các cột ma.
+    + **Đóng Cạnh Phải Liền Mạch (`.last-visible-col`)**: Tự động gán class `last-visible-col` cho ô hiển thị cuối cùng của mỗi dòng. Cập nhật CSS trong `site.css` và `nha-cung-cap.css`: Cạnh trên `2px solid #0070f3`, 2 cạnh bên `3px solid #0070f3`, cạnh đáy `2px solid #0070f3`, phân cách nhẹ `1px solid #f1f5f9` bên trong. Dòng được chọn và drawer chi tiết tạo thành một **hình chữ nhật khép kín 100% hoàn hảo**.
+    + **Kiểm tra biên dịch & Cú pháp**: `dotnet build` đạt 0 Errors, `node -c` đạt 0 Errors.
+
+
+- **Khắc phục Triệt để Lỗi Không Tìm Thấy View Sau Biên Dịch (Phiên 67)**:
+  - **Nhu cầu**: Sửa lỗi `InvalidOperationException: The view 'Index' was not found` tại `/PhieuKiemKe/Index.cshtml` và các view MVC khác khi người dùng truy cập ứng dụng.
+  - **Nguyên nhân cốt lõi**:
+    + Trong phiên trước đó, lệnh kiểm tra nhanh `dotnet build -t:CoreCompile` đã được thực thi, chỉ biên dịch mã nguồn C# (`csc`) mà bỏ qua bước biên dịch Razor View của Web SDK (`RazorCoreCompile`).
+    + Tệp assembly `BTL-LTW-QuanLiKho-2.dll` bị ghi đè nhưng thiếu toàn bộ metadata và mã bytecode của các Razor views được biên dịch sẵn.
+    + Khi ứng dụng chạy ở môi trường ASP.NET Core mặc định (không bật `RuntimeCompilation`), engine tìm kiếm view trong assembly không thấy và fallback tìm trên disk nhưng không thể biên dịch động, dẫn đến ngoại lệ `The view 'Index' was not found`. Đồng thời tiến trình cũ đang chạy khóa tệp `.exe` ngăn cản build mới.
+  - **Giải pháp & Kết quả thực hiện**:
+    + Giải phóng toàn bộ tiến trình ứng dụng đang chạy khóa file nhị phân.
+    + Thực hiện biên dịch đầy đủ tiêu chuẩn (`dotnet build`) để Web SDK sinh toàn bộ Razor Views vào assembly.
+    + Kiểm thử tự động thành công 100%: Truy cập `/PhieuKiemKe` (HTTP 200), `/PhieuKiemKe/Filter` (HTTP 200, 82.825 bytes), `/NhaCungCap` (HTTP 200), `/NhaCungCap/Filter` (HTTP 200, 108.709 bytes).
+
+
+- **Đồng bộ Hiển thị Nhà Cung Cấp theo Chuẩn Danh Sách Hàng Hóa (Phiên 66)**:
+  - **Nhu cầu**: Chuyển đổi toàn diện phong cách hiển thị của danh sách nhà cung cấp từ dạng Kiểm kho sang đúng khuôn mẫu Danh mục Hàng hóa (`HangHoa`): dòng dữ liệu `product-row` highlight viền xanh `3px solid #0070f3` (`.selected`), dòng chi tiết `product-detail-row` có hiệu ứng slideDown/slideUp êm ái, thanh tabs `.product-detail-tabs` với nút `.product-detail-tab-btn`, lưới thuộc tính `.product-attr-grid`, thanh footer `.product-detail-footer`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Khung Bao Ngoài (`Index.cshtml`)**: Chuyển container sang `<section id="content"><div id="productTableContainer">...</div></section>` kế thừa styling `flex: 1; height: 100%` của Hàng hóa trong `site.css`; loại bỏ nạp dư thừa `kiem-kho.css`.
+    + **Bảng & Inline Drawer (`_NhaCungCapTable.cshtml`)**:
+      * Chuẩn hóa thẻ `thead`: Checkbox `#selectAllRows`, cột Tên `.col-product-name`, cột số `.num`.
+      * Dòng dữ liệu: `tr.product-row`, checkbox `.row-select`, tên NCC `.cell-product-name > .product-name-text`.
+      * Dòng chi tiết mở rộng: `tr.product-detail-row` chứa `.product-detail-panel-wrap` > `.product-detail-panel`, thanh tabs `.product-detail-tabs` (`Thông tin`, `Lịch sử nhập/trả hàng`, `Nợ cần trả`), lưới 3 khối `.product-attr-grid` (`.attr-item`, `.attr-label`, `.attr-value`), thanh nút hành động `.product-detail-footer` (`Xóa`, `Ngừng hoạt động / Cho hoạt động lại`, `Chỉnh sửa`).
+    + **JavaScript Điều khiển (`nha-cung-cap-index.js`)**:
+      * Triển khai hàm `expandSupplierRow`: Sử dụng hiệu ứng `$wrap.hide().slideDown(150)` và `$wrap.slideUp(150)`, tự động đóng các dòng khác, gán class `.selected` cho dòng được chọn.
+      * Gắn sự kiện click tabs `.product-detail-tab-btn` chuyển tab mượt mà bằng `fadeIn(120)` và nạp AJAX dữ liệu Tab 2/Tab 3 khi cần.
+      * Đồng bộ checkbox `#selectAllRows` và `.row-select`.
+    + **Kiểm tra biên dịch & Cú pháp**: `dotnet build` đạt 0 Errors, `node -c` đạt 0 Errors, `docs/specs/nha-cung-cap.md` 7.968 bytes (< 8.000 ký tự).
 - **Khắc phục Lỗi Hiển thị Bảng & Đồng bộ Cột Nhà Cung Cấp theo Chuẩn Kiểm Kho (Phiên 65)**:
   - **Nhu cầu**: Sửa lỗi hiển thị bảng nhà cung cấp bị lệch cột, co hẹp văn bản theo chiều dọc ("C ô n g t y Gas Kiên Giang") đè lên số điện thoại khi ẩn/hiện cột; đồng bộ toàn diện cách thức hiển thị và layout bảng theo chuẩn Kiểm kho (`PhieuKiemKe`).
   - **Nguyên nhân cốt lõi**:

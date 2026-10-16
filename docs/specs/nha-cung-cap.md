@@ -17,7 +17,7 @@
 - **Views (`Views/NhaCungCap/`)**:
   - `Index.cshtml`: Khung trang chính gồm topbar công cụ, sidebar bộ lọc 5 khối LEGO, bảng dữ liệu.
   - `_NhaCungCapFilterSidebar.cshtml`: 5 khối lọc KiotViet (Nhóm NCC, Tổng mua, Thời gian, Nợ hiện tại, Trạng thái).
-  - `_NhaCungCapTable.cshtml`: Bảng dữ liệu AJAX (`NhaCungCapIndexVM`), khớp chuẩn `PhieuKiemKe`, hỗ trợ inline drawer và ẩn/hiện 12 cột.
+  - `_NhaCungCapTable.cshtml`: Bảng dữ liệu AJAX (`NhaCungCapIndexVM`), khớp chuẩn `HangHoa` (dòng `product-row`, inline panel `product-detail-panel`, slideDown/slideUp, ẩn/hiện 12 cột).
   - `_NhaCungCapModal.cshtml`: Modal tạo mới / sửa Nhà cung cấp (3 khối Accordion: Địa chỉ, Nhóm & Ghi chú, Thông tin hóa đơn).
   - `_NhaCungCapDetail.cshtml`: Panel chi tiết xổ xuống khi click dòng (Tabs: Thông tin, Lịch sử nhập/trả hàng, Nợ cần trả).
 - **Styles & Scripts**:
@@ -59,7 +59,7 @@
 | **1. Nạp ban đầu** | Vào menu "Mua hàng" ➜ "Nhà cung cấp" | GET `/NhaCungCap` | `Index()` nạp nhóm NCC, danh sách trang 1, tính tổng mua & nợ ➜ Render `Index.cshtml` |
 | **2. Lọc & Tìm kiếm** | Gõ ô tìm kiếm (F3) / Chọn nhóm / Chọn thời gian / Chọn trạng thái | Debounce 300ms ➜ AJAX `GET /NhaCungCap/Filter` | `Filter(...)` lọc LINQ, tính toán nợ/tổng mua ➜ Render `_NhaCungCapTable.cshtml` |
 | **3. Phân trang & Sắp xếp** | Click số trang hoặc click tiêu đề cột | Gán `pageIndex` / `sortCol` ➜ AJAX `GET /NhaCungCap/Filter` | `.OrderBy()`, `.Skip().Take()` ➜ Cập nhật bảng và thanh phân trang |
-| **4. Xem chi tiết (Inline Drawer)** | Click vào 1 dòng NCC trên bảng | Bung mở dòng chi tiết `tr.dtl` inline tức thì (khớp Kiểm kho), highlight viền xanh `tr.tbl-row.open`. Tab 1 nạp sẵn, Tab 2 & 3 nạp AJAX khi chuyển tab | Nạp thông tin NCC, lịch sử phiếu nhập, công nợ qua `GetDetail` khi cần |
+| **4. Xem chi tiết (Inline Drawer)** | Click vào 1 dòng NCC trên bảng | Bung mở dòng chi tiết `tr.product-detail-row` trượt êm ái (khớp Hàng hóa), highlight viền xanh `tr.product-row.selected`. Tab 1 nạp sẵn, Tab 2 & 3 nạp AJAX khi chuyển tab | Nạp thông tin NCC, lịch sử phiếu nhập, công nợ qua `GetDetail` khi cần |
 | **5. Thêm mới NCC** | Bấm "+ Nhà cung cấp", điền form, bấm "Lưu" | Form validate ➜ AJAX `POST /NhaCungCap/Create` | Tự sinh `MaNcc`, lưu DB ➜ Trả JSON `{success: true}` ➜ Reload bảng |
 | **6. Sửa NCC** | Bấm "Chỉnh sửa" trong chi tiết hoặc dòng | AJAX `GET /NhaCungCap/GetItem?id=X` ➜ Đổ vào modal sửa | AJAX `POST /NhaCungCap/Edit?id=X` ➜ Cập nhật DB ➜ Reload bảng & detail |
 | **7. Xóa NCC** | Bấm nút Xóa trong panel chi tiết | Mở modal `KiotConfirm` xác nhận | Kiểm tra `PhieuNhaps.Any()`. Nếu đã có GD ➜ Báo không được xóa, gợi ý "Ngừng hoạt động". Nếu chưa có GD ➜ Xóa an toàn |
@@ -68,7 +68,7 @@
 ---
 
 ## 3. Khối Lego Tái sử dụng (Tuân thủ Luật 10 & 03-giao-dien-layout.md)
-- [x] **Hiển thị Cột (`#colMenu`)**: Bật/tắt 12 cột, chuẩn bảng `table-layout: fixed` (`#tableWrapper`), lưu `localStorage` (`kiot_ncc_columns_v2`).
+- [x] **Hiển thị Cột (`#colMenu`)**: Bật/tắt 12 cột, chuẩn `#productTableContainer`, lưu `localStorage` (`kiot_ncc_columns_v2`).
 - [x] **Bộ lọc Thời gian**: `<partial name="_KiotDateFilter" ... />` kết hợp `KiotFilter.initDateFilter`.
 - [x] **Bộ lọc Nhóm NCC**: `<partial name="_KiotMultiSelectFilter" ... />` hỗ trợ sửa/xóa ✎ tại chỗ.
 - [x] **Bộ lọc Trạng thái**: `<partial name="_KiotStatusFilter" ... />` (Đang hoạt động / Ngừng hoạt động).

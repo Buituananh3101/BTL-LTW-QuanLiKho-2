@@ -1281,27 +1281,29 @@ tr.product-row {
 tr.product-row:hover > td {
   background-color: #f8fafc;
 }
-/* Dòng sản phẩm được chọn: Viền 2 bên đậm (3px), viền trên mảnh nhẹ (1px) */
+/* Dòng sản phẩm được chọn: Đóng khung thành hình chữ nhật khép kín với dòng chi tiết */
 tr.product-row.selected > td {
   background-color: #ffffff !important;
-  border-top: 1px solid #93c5fd !important; /* Viền trên mảnh */
-  border-bottom: 1px solid #f1f5f9 !important; /* Phân cách nhẹ với bảng chi tiết */
+  border-top: 2px solid #0070f3 !important; /* Cạnh trên hình chữ nhật */
+  border-bottom: 1px solid #f1f5f9 !important; /* Phân cách nhẹ với bảng chi tiết bên trong */
+  border-right: none !important;
 }
 tr.product-row.selected > td:first-child {
-  border-left: 3px solid #0070f3 !important; /* Viền bên trái ĐẬM */
+  border-left: 3px solid #0070f3 !important; /* Cạnh trái hình chữ nhật */
 }
+tr.product-row.selected > td.last-visible-col,
 tr.product-row.selected > td:last-child {
-  border-right: 3px solid #0070f3 !important; /* Viền bên phải ĐẬM */
+  border-right: 3px solid #0070f3 !important; /* Cạnh phải hình chữ nhật */
 }
 
-/* Dòng chi tiết mở rộng: Viền 2 bên đậm (3px), viền dưới mảnh (1px) */
+/* Dòng chi tiết mở rộng: Cạnh 2 bên và cạnh đáy khép kín hình chữ nhật */
 tr.product-detail-row > td {
   background-color: #ffffff !important;
   padding: 0 !important;
   border-top: none !important;
-  border-bottom: 1px solid #93c5fd !important; /* Viền dưới mảnh */
-  border-left: 3px solid #0070f3 !important; /* Viền bên trái ĐẬM */
-  border-right: 3px solid #0070f3 !important; /* Viền bên phải ĐẬM */
+  border-bottom: 2px solid #0070f3 !important; /* Cạnh đáy hình chữ nhật */
+  border-left: 3px solid #0070f3 !important; /* Cạnh trái hình chữ nhật */
+  border-right: 3px solid #0070f3 !important; /* Cạnh phải hình chữ nhật */
 }
 
 .product-detail-panel-wrap {
