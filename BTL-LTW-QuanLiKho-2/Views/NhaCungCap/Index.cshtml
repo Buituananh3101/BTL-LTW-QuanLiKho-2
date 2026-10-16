@@ -1,0 +1,80 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.NhaCungCap.NhaCungCapIndexVM
+@{
+    ViewData["Title"] = "Nhà cung cấp";
+}
+
+<link rel="stylesheet" href="~/css/nha-cung-cap.css" asp-append-version="true" />
+
+<div class="kiot-container position-relative" id="kiotContainer">
+    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + 5 KHỐI BỘ LỌC KIOTVIET -->
+    <partial name="_NhaCungCapFilterSidebar" model="Model" />
+
+    <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
+    <div class="kiot-sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Nút tròn thu gọn / mở rộng ở ranh giới giữa sidebar và bảng (Phím tắt F4) -->
+    <button type="button" class="kiot-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
+        <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
+    </button>
+
+    <!-- 2. CỘT BÊN PHẢI: TOOLBAR + BẢNG DỮ LIỆU NHÀ CUNG CẤP -->
+    <main class="kiot-main-col">
+        <!-- Toolbar trên cùng: Thanh tìm kiếm thẳng hàng với bảng bên dưới -->
+        <div class="kiot-toolbar-row">
+            <!-- Tiêu đề + Nút phễu bộ lọc trên mobile -->
+            <div class="kiot-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
+                <span class="kiot-mobile-title fw-bold fs-6 text-dark">Nhà cung cấp</span>
+                <button type="button" class="btn btn-sm btn-outline-primary kiot-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+
+            <div class="kiot-search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã, tên, số điện thoại (F3)" value="@Model.Filter.Q" autocomplete="off" />
+            </div>
+
+            <div class="kiot-actions-group">
+                <!-- Nút + Nhà cung cấp -->
+                <button type="button" class="btn btn-primary d-inline-flex align-items-center" id="btnOpenCreateNccModal" title="Thêm mới nhà cung cấp">
+                    <i class="bi bi-plus-lg me-1"></i><span>Nhà cung cấp</span>
+                </button>
+
+                <!-- Nút Xuất file Excel -->
+                <button type="button" class="btn btn-outline-secondary d-none d-md-inline-flex align-items-center" id="btnExportExcel" title="Xuất dữ liệu ra Excel">
+                    <i class="bi bi-file-earmark-arrow-up me-1"></i><span>Xuất file</span>
+                </button>
+
+                <!-- Nút Ẩn / Hiện cột dữ liệu -->
+                <div class="dropdown d-inline-block">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="btnColPicker" data-bs-toggle="dropdown" aria-expanded="false" title="Tùy chỉnh cột hiển thị">
+                        <i class="bi bi-view-list"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow p-2" aria-labelledby="btnColPicker" style="min-width: 200px;">
+                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="ma" checked> Mã nhà cung cấp</label></li>
+                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="ten" checked> Tên nhà cung cấp</label></li>
+                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="sdt" checked> Điện thoại</label></li>
+                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="email" checked> Email</label></li>
+                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="nhom"> Nhóm nhà cung cấp</label></li>
+                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="no" checked> Nợ cần trả hiện tại</label></li>
+                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="tongmua" checked> Tổng mua</label></li>
+                        <li><label class="dropdown-item py-1"><input type="checkbox" class="col-toggle" data-col="trangthai"> Trạng thái</label></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách nhà cung cấp + Phân trang AJAX -->
+        <div id="tableContainer">
+            <partial name="_NhaCungCapTable" model="Model.PagedData" />
+        </div>
+    </main>
+</div>
+
+<!-- Modal Tạo mới / Cập nhật Nhà cung cấp -->
+<partial name="_NhaCungCapModal" model="Model" />
+
+@section Scripts {
+    <script src="~/js/kiot-filter.js" asp-append-version="true"></script>
+    <script src="~/js/nha-cung-cap-index.js" asp-append-version="true"></script>
+}

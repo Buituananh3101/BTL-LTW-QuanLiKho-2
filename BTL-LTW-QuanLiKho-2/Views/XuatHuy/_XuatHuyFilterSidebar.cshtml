@@ -1,0 +1,38 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.XuatHuyIndexVM
+@using BTL_LTW_QuanLiKho_2.ViewModels.Common
+
+<!-- CỘT BÊN TRÁI: TIÊU ĐỀ "XUẤT HỦY" + CÁC KHỐI BỘ LỌC KIOTVIET CHUẨN LEGO -->
+<aside class="kiot-sidebar-col" id="sidebarFilterCol">
+    <!-- Header cho sidebar khi mở ở chế độ mobile/zoom in -->
+    <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+        <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc xuất hủy</div>
+        <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
+    </div>
+
+    <!-- Tiêu đề sidebar Desktop -->
+    <div class="kiot-sidebar-title d-none d-lg-flex">
+        Xuất hủy
+    </div>
+
+    <div class="kiot-filter-box" id="side">
+        <!-- 1. Trạng thái chứng từ (Phiếu tạm, Hoàn thành, Đã hủy) -->
+        <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Trạng thái", "dotSt", new() {
+            new("NHAP", "Phiếu tạm", Model.Filter.Statuses.Contains("NHAP")),
+            new("DA_XAC_NHAN", "Hoàn thành", Model.Filter.Statuses.Contains("DA_XAC_NHAN")),
+            new("HUY", "Đã hủy", Model.Filter.Statuses.Contains("HUY"))
+        })' />
+
+        <!-- 2. Thời gian (Mặc định Tháng này theo chuẩn Screenshot KiotViet) -->
+        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("date", "Thời gian", false)' />
+
+        <!-- 3. Người tạo -->
+        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NguoiTao", "nguoitao", "Người tạo", "Chọn người tạo", true, "dotUser") {
+            Items = Model.Creators.Select(c => new KiotMultiSelectItemVM(c.MaNv.ToString(), c.TenNv)).ToList()
+        }' />
+
+        <!-- 4. Người xuất hủy -->
+        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NguoiXuatHuy", "nguoixuathuy", "Người xuất hủy", "Chọn người xuất hủy", true, "dotConfirmer") {
+            Items = Model.Confirmers.Select(c => new KiotMultiSelectItemVM(c.MaNv.ToString(), c.TenNv)).ToList()
+        }' />
+    </div>
+</aside>

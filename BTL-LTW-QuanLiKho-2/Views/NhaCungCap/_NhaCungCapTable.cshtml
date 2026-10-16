@@ -1,0 +1,169 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.PagedResult<BTL_LTW_QuanLiKho_2.ViewModels.NhaCungCap.NhaCungCapItemVM>
+@using System.Globalization
+@{
+    var viCulture = CultureInfo.GetCultureInfo("vi-VN");
+}
+
+<div class="kiot-table-scroll-body">
+    <table class="tbl" id="supplierTable" style="min-width: 1100px;">
+        <thead>
+            <tr>
+                <th style="width: 36px;" class="text-center th-checkbox">
+                    <input class="form-check-input" type="checkbox" id="selectAllNcc" @(!Model.Items.Any() ? "disabled" : "") />
+                </th>
+                <th data-col="ma" style="width: 130px;" class="sortable-th" title="Nhấn để sắp xếp theo Mã nhà cung cấp">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Mã nhà cung cấp</span>
+                            <span class="sort-icon d-none"><i class="bi bi-arrow-up"></i></span>
+                        </span>
+                    </div>
+                </th>
+                <th data-col="ten" class="sortable-th" title="Nhấn để sắp xếp theo Tên nhà cung cấp">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Tên nhà cung cấp</span>
+                            <span class="sort-icon d-none"><i class="bi bi-arrow-up"></i></span>
+                        </span>
+                    </div>
+                </th>
+                <th data-col="sdt" style="width: 140px;" class="sortable-th" title="Nhấn để sắp xếp theo Điện thoại">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Điện thoại</span>
+                            <span class="sort-icon d-none"><i class="bi bi-arrow-up"></i></span>
+                        </span>
+                    </div>
+                </th>
+                <th data-col="email" style="width: 180px;" class="sortable-th" title="Nhấn để sắp xếp theo Email">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Email</span>
+                            <span class="sort-icon d-none"><i class="bi bi-arrow-up"></i></span>
+                        </span>
+                    </div>
+                </th>
+                <th data-col="nhom" style="width: 160px;">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Nhóm NCC</span>
+                        </span>
+                    </div>
+                </th>
+                <th data-col="no" style="width: 150px;" class="num r text-end sortable-th" title="Nhấn để sắp xếp theo Nợ cần trả hiện tại">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Nợ cần trả hiện tại</span>
+                            <span class="sort-icon d-none"><i class="bi bi-arrow-up"></i></span>
+                        </span>
+                    </div>
+                </th>
+                <th data-col="tongmua" style="width: 140px;" class="num r text-end sortable-th" title="Nhấn để sắp xếp theo Tổng mua">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Tổng mua</span>
+                            <span class="sort-icon d-none"><i class="bi bi-arrow-up"></i></span>
+                        </span>
+                    </div>
+                </th>
+                <th data-col="trangthai" style="width: 140px;" class="text-center">
+                    <div class="th-content justify-content-center">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Trạng thái</span>
+                        </span>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dòng tổng hợp (Summary row) -->
+            <tr class="summary-row">
+                <td class="text-center"></td>
+                <td data-col="ma"></td>
+                <td data-col="ten"></td>
+                <td data-col="sdt"></td>
+                <td data-col="email"></td>
+                <td data-col="nhom"></td>
+                <td data-col="no" class="num r text-end fw-bold text-dark">
+                    @Model.Items.Sum(x => x.NoCanTraHienTai).ToString("N0", viCulture)
+                </td>
+                <td data-col="tongmua" class="num r text-end fw-bold text-dark">
+                    @Model.Items.Sum(x => x.TongMua).ToString("N0", viCulture)
+                </td>
+                <td data-col="trangthai"></td>
+            </tr>
+
+            @if (!Model.Items.Any())
+            {
+                <tr>
+                    <td colspan="9" class="p-0">
+                        <div class="empty d-block py-5 text-center">
+                            <div class="ico mb-3"><i class="bi bi-truck fs-1 text-primary"></i></div>
+                            <h5 class="fw-bold">Không tìm thấy nhà cung cấp</h5>
+                            <p class="text-muted mb-0 small">Không tìm thấy nhà cung cấp nào phù hợp với bộ lọc hiện tại.<br />Thử thay đổi từ khóa hoặc bộ lọc bên trái.</p>
+                        </div>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Model.Items)
+                {
+                    <tr class="tbl-row ncc-row" data-id="@item.MaDonViCapHang" style="cursor: pointer;" title="Nhấn để xem chi tiết nhà cung cấp">
+                        <td class="w-chk text-center cell-checkbox" onclick="event.stopPropagation();">
+                            <input class="form-check-input row-select-ncc" type="checkbox" value="@item.MaDonViCapHang" />
+                        </td>
+                        <td data-col="ma">
+                            <span class="fw-semibold text-primary">@item.MaNcc</span>
+                        </td>
+                        <td data-col="ten">
+                            <span class="fw-semibold text-dark">@item.TenDonVi</span>
+                        </td>
+                        <td data-col="sdt">
+                            @(string.IsNullOrWhiteSpace(item.DienThoai) ? "---" : item.DienThoai)
+                        </td>
+                        <td data-col="email">
+                            @(string.IsNullOrWhiteSpace(item.Email) ? "---" : item.Email)
+                        </td>
+                        <td data-col="nhom">
+                            @(string.IsNullOrWhiteSpace(item.TenNhomNcc) ? "---" : item.TenNhomNcc)
+                        </td>
+                        <td data-col="no" class="num r text-end">
+                            <span class="@(item.NoCanTraHienTai > 0 ? "text-danger fw-semibold" : "text-muted")">
+                                @item.NoCanTraHienTai.ToString("N0", viCulture)
+                            </span>
+                        </td>
+                        <td data-col="tongmua" class="num r text-end">
+                            @item.TongMua.ToString("N0", viCulture)
+                        </td>
+                        <td data-col="trangthai" class="text-center">
+                            @if (item.TrangThai == "HOAT_DONG")
+                            {
+                                <span class="badge bg-light text-success border border-success-subtle">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-secondary border">Ngừng hoạt động</span>
+                            }
+                        </td>
+                    </tr>
+
+                    <!-- Khối Master-Detail Accordion Inline -->
+                    <tr class="ncc-detail-tr" id="nccDetailRow_@item.MaDonViCapHang" style="display: none;">
+                        <td colspan="9" class="p-0 border-0">
+                            <div class="ncc-detail-container" id="nccDetailContainer_@item.MaDonViCapHang">
+                                <div class="text-center py-4 text-muted">
+                                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                    <span>Đang tải thông tin chi tiết...</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Phân trang đáy bảng dùng chung _Pagination.cshtml -->
+@await Html.PartialAsync("_Pagination", Model, new ViewDataDictionary(ViewData) { { "ItemLabel", "nhà cung cấp" } })

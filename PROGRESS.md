@@ -1,22 +1,80 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-16 – Bỏ mục "Tồn kho" và "Nhóm hàng" trên Menu Hàng hóa Topbar (Phiên 53)
+Cập nhật lần cuối: 2026-10-16 – Hoàn thành Phân hệ Quản lý Nhà cung cấp chuẩn KiotViet (Phiên 55)
 
 ---
 
 ## Đang làm
-- Sẵn sàng bước tiếp theo: Lập đặc tả phân hệ Nhập kho theo chuẩn LEGO.
+- Sẵn sàng kiểm thử giao diện & nghiệp vụ phân hệ Nhà cung cấp cùng người dùng.
 
 ---
 
 ## Việc kế tiếp
-1. Lập tài liệu đặc tả chi tiết `docs/specs/nhap-kho.md` theo chuẩn Kiểm kho.
+1. Lập tài liệu đặc tả chi tiết `docs/specs/nhap-kho.md` theo chuẩn Kiểm kho & Nhà cung cấp.
 2. Xây dựng ViewModel cho Nhập kho (`NhapKhoIndexVM`, `NhapKhoFormVM`, `NhapKhoLineVM`...).
 3. Xây dựng `PhieuNhapController` và View giao diện (`Views/PhieuNhap/`) theo phong cách KiotViet dựa trên các khối Lego dùng chung đã đóng gói.
 
 ---
 
 ## Đã xong
+- **Triển khai Toàn diện Phân hệ Quản lý Nhà cung cấp Chuẩn KiotViet (Phiên 55)**:
+  - **Nhu cầu**: Xây dựng toàn diện phân hệ Quản lý Nhà cung cấp (`NhaCungCap`) mô phỏng chuẩn giao diện & nghiệp vụ thực tế của KiotViet, đồng bộ với kiến trúc khối Lego đã đóng gói trong dự án.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Cơ sở dữ liệu (SQL Server `QuanLyKhoPhuQuocLTW`)**:
+      * Bổ sung bảng `NhomNhaCungCap` (`MaNhomNcc` INT IDENTITY PK, `TenNhom` NVARCHAR(150) UNIQUE, `GhiChu` NVARCHAR(255)).
+      * Bổ sung các cột mới cho bảng `DonViCapHang`: `MaNcc` (ký hiệu hiển thị `NCC00001`), `Email`, `KhuVuc`, `PhuongXa`, `MaNhomNcc`, `GhiChu`, `TenCongTy`, `MaSoThue`, `SoCccd`, `NgayTao`, `NguoiTao`. Tuân thủ tuyệt đối 3 nguyên tắc vàng CSDL (chỉ thêm, không DROP/đổi tên cột cũ).
+      * Nạp mã `NCC00001`... cho các bản ghi nhà cung cấp sẵn có.
+    + **Models & DbContext**:
+      * Tạo model `NhomNhaCungCap.cs`, cập nhật navigation property trong `DonViCapHang.cs`.
+      * Đăng ký `DbSet<NhomNhaCungCap>` và cấu hình Fluent API trong `QuanLyKhoPhuQuocLtwContext.cs`.
+    + **ViewModels (`ViewModels/NhaCungCap/`)**:
+      * Tạo `NhaCungCapIndexVM.cs`, `NhaCungCapFilterParams.cs` (kế thừa `BaseFilterParams`), `NhaCungCapItemVM.cs`, `NhaCungCapFormVM.cs`, `NhaCungCapDetailVM.cs`, `QuickGroupSupplierRequest.cs`.
+    + **Backend Controller (`NhaCungCapController.cs`)**:
+      * Kế thừa `BaseKhoController`, bọc transaction khi tạo mới (`BeginTransactionAsync`).
+      * Triển khai các Action: `Index`, `Filter` (lọc AJAX), `GetDetail` (Master-Detail 3 tabs), `GetItem` (đổ dữ liệu modal edit), `Create` (tự sinh mã `NCC00001` nếu để trống), `Edit`, `Delete` (chống xóa nhà cung cấp đã có phiếu nhập theo Luật 5, gợi ý chuyển `NGUNG_HOAT_DONG`), `ToggleStatus`, `CreateGroupQuick`, `UpdateGroupQuick`, `DeleteGroupQuick`.
+    + **Frontend Views & CSS (`Views/NhaCungCap/`, `wwwroot/css/nha-cung-cap.css`)**:
+      * `Index.cshtml`: Thanh công cụ trên cùng (Tìm kiếm F3, `+ Nhà cung cấp`, `Xuất file`, `Ẩn/hiện cột`), layout 2 cột KiotViet.
+      * `_NhaCungCapFilterSidebar.cshtml`: 5 khối Lego (Nhóm NCC multi-select có ✎ sửa/xóa, Tổng mua khoảng số, Thời gian `_KiotDateFilter`, Nợ hiện tại khoảng số, Trạng thái `_KiotStatusFilter`).
+      * `_NhaCungCapTable.cshtml`: Bảng dữ liệu có dòng tổng hợp nợ & tổng mua, checkbox chọn tất cả, sắp xếp cột 3 trạng thái, phân trang AJAX `_Pagination.cshtml`.
+      * `_NhaCungCapDetail.cshtml`: Panel inline accordion xổ xuống gồm 3 sub-tabs (`Thông tin`, `Lịch sử nhập/trả hàng`, `Nợ cần trả nhà cung cấp`) cùng các nút Thao tác (Xóa, Đổi trạng thái, Chỉnh sửa).
+      * `_NhaCungCapModal.cshtml`: Modal tạo mới/sửa với 3 khối accordion gập mở chuẩn KiotViet (`Địa chỉ`, `Nhóm nhà cung cấp, ghi chú`, `Thông tin xuất hóa đơn`), switch đổi trạng thái.
+      * `nha-cung-cap.css`: Phong cách KiotViet chuẩn chỉ cho Master-Detail panel, tab bar, accordion.
+    + **Client JavaScript (`wwwroot/js/nha-cung-cap-index.js`)**:
+      * Tìm kiếm F3 debounce 300ms, lọc AJAX thời gian thực khi tương tác 5 khối Lego.
+      * Mở/đóng dòng Master-Detail mượt mà, chuyển sub-tabs, nạp danh sách 10 phiếu nhập gần nhất.
+      * Quản lý tạo nhanh, sửa tên ✎, xóa nhóm NCC qua `window.KiotPrompt`.
+      * Xóa NCC bảo vệ qua `window.KiotConfirm`.
+    + **Menu điều hướng**:
+      * Cập nhật `_MainMenu.cshtml`: Liên kết tab "Mua hàng" ➜ "Nhà cung cấp" sang `asp-controller="NhaCungCap" asp-action="Index"`, đánh dấu `active`.
+      * Cập nhật `_Header.cshtml`: Đổi liên kết "Nhà cung cấp" trong drawer mobile sang `NhaCungCap/Index`.
+    + **Tài liệu đặc tả**:
+      * Khởi tạo `docs/specs/nha-cung-cap.md` (7.648 ký tự < 8.000 ký tự theo Luật 12).
+  - **Kiểm tra biên dịch & Cú pháp**: `dotnet build -t:CoreCompile` 0 Errors, cú pháp `node -c` 0 lỗi.
+- **Triển khai Toàn diện Phân hệ Xuất hủy (Waste-Disposal Export) Chuẩn KiotViet (Phiên 54)**:
+  - **Nhu cầu**: Người dùng cung cấp 2 ảnh chụp giao diện thực tế KiotViet của nghiệp vụ Xuất hủy (Màn hình Danh sách xuất hủy có accordion chi tiết inline và Màn hình Lập/sửa phiếu xuất hủy 2 cột với phím tắt F3, F4, F9, F10) và yêu cầu lên kế hoạch, lắp ráp linh kiện chuẩn LEGO và triển khai toàn diện.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Cơ sở dữ liệu & Migration (`10_bo_sung_maphieu_dadanhdau_phieuxuat.sql`)**:
+      * Bổ sung `MaPhieu VARCHAR(30) NULL` và `DaDanhDau BIT NOT NULL DEFAULT 0` vào bảng `PhieuXuat` (tuân thủ 3 nguyên tắc vàng CSDL: chỉ cộng thêm cột, không DROP/đổi tên).
+      * Tạo filtered unique index `UQ_PhieuXuat_MaPhieu` chống trùng mã.
+      * Tận dụng `vw_BienDongKho` & `vw_TonKhoHienTai` có sẵn: khi `TrangThai = 'DA_XAC_NHAN'` và `LoaiPhieuXuat = 'XUAT_HUY'`, hệ thống tự động trừ tồn kho sổ sách tức thì mà không cần bảng tồn kho tĩnh. Khi hủy phiếu (`HUY`), tồn kho tự động được hoàn lại.
+    + **Models & Services**:
+      * Đồng bộ `PhieuXuat.cs` và ánh xạ trong `QuanLyKhoPhuQuocLtwContext.cs`.
+      * Bổ sung `MaChungTuHelper.FormatMaXuatHuy(int id) => $"XH{id:D6}"`.
+    + **ViewModels (`ViewModels/XuatHuy/XuatHuyViewModels.cs`)**:
+      * Đóng gói đầy đủ `XuatHuyIndexVM`, `XuatHuyFilterVM`, `XuatHuyListItemVM`, `XuatHuyFormVM`, `XuatHuyLineVM`, `SaveXuatHuyRequest`, `UpdateXuatHuyNoteRequest`.
+    + **Controller (`Controllers/XuatHuyController.cs`)**:
+      * Kế thừa `BaseKhoController`, bảo vệ bằng `[Authorize]`, giao dịch `Database.BeginTransactionAsync()` an toàn.
+      * Cung cấp các API: `Index`, `Filter` (AJAX table), `GetNextCode`, `ToggleFavorite`, `Create`, `Edit`, `SaveDraft` (F9), `Complete` (F10), `Cancel`, `UpdateNote`, `SearchProducts`, `DownloadTemplate`, `ImportExcel`, `Export` (danh sách và chi tiết bằng ClosedXML).
+    + **Views & Giao diện LEGO (`Views/XuatHuy/`)**:
+      * `Index.cshtml` & `_XuatHuyFilterSidebar.cshtml`: Tái sử dụng `_KiotDateFilter` (mặc định Tháng này), `_KiotStatusFilter`, `_KiotMultiSelectFilter` (Người tạo, Người xuất hủy).
+      * `_XuatHuyTable.cshtml`: Đánh dấu sao ⭐, hiển thị các cột chuẩn, mở accordion inline `tr.dtl` với ô tìm kiếm inner search (`Tìm mã hàng`, `Tìm tên hàng`), textarea ghi chú, tổng kết số liệu và các nút hành động (Hủy bỏ, Mở phiếu, Sao chép, Xuất file, Lưu, In).
+      * `_XuatHuyForm.cshtml`, `Create.cshtml`, `Edit.cshtml`: Màn hình 2 cột, bảng sản phẩm với empty state "Thêm sản phẩm từ file excel" + "Tải về file mẫu" + "Chọn file dữ liệu", panel bên phải F4 (Người xuất hủy, Ngày giờ, Mã phiếu, Trạng thái, Tổng giá trị hủy, Ghi chú, Lưu tạm F9, Hoàn thành F10).
+    + **Styling & Client Scripts (`xuat-huy.css`, `xuat-huy-index.js`, `xuat-huy-form.js`)**:
+      * Đáp ứng chuẩn xác 100% từng pixel, màu sắc, phím tắt F3/F4/F9/F10 từ 2 ảnh chụp thực tế KiotViet.
+    + **Tài liệu & Menu**:
+      * Cập nhật liên kết menu trên `_MainMenu.cshtml` và `_Header.cshtml`.
+      * Biên soạn đặc tả `docs/specs/xuat-huy.md` (6.930 ký tự, tuân thủ < 8.000 ký tự).
+  - **Kiểm tra biên dịch & Cú pháp**: `dotnet build` đạt 0 Errors, cú pháp `node -c` trên toàn bộ file JS đạt 0 lỗi.
 - **Bỏ Mục "Tồn kho" và "Nhóm hàng" trên Menu Hàng hóa Topbar (Phiên 53)**:
   - **Nhu cầu**: Người dùng yêu cầu gỡ bỏ 2 mục "Nhóm hàng" (dưới cột HÀNG HÓA) và "Tồn kho" (dưới cột KHO HÀNG) trên dropdown mega menu của tab "Hàng hóa" ở thanh điều hướng trên cùng (Topbar).
   - **Giải pháp & Kết quả thực hiện**:

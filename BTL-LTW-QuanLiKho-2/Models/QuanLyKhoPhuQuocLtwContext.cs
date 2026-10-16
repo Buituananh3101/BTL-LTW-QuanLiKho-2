@@ -47,6 +47,8 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
 
     public virtual DbSet<NhomHang> NhomHangs { get; set; }
 
+    public virtual DbSet<NhomNhaCungCap> NhomNhaCungCaps { get; set; }
+
     public virtual DbSet<PhieuChuyenKho> PhieuChuyenKhos { get; set; }
 
     public virtual DbSet<PhieuDieuChinh> PhieuDieuChinhs { get; set; }
@@ -255,15 +257,37 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
 
             entity.HasIndex(e => e.TenDonVi, "UQ__DonViCap__9031EA2583E39946").IsUnique();
 
-            entity.Property(e => e.DiaChi).HasMaxLength(255);
+            entity.Property(e => e.MaNcc).HasMaxLength(30).IsUnicode(false);
+            entity.Property(e => e.TenDonVi).HasMaxLength(150);
             entity.Property(e => e.DienThoai)
                 .HasMaxLength(15)
                 .IsUnicode(false);
-            entity.Property(e => e.TenDonVi).HasMaxLength(150);
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.DiaChi).HasMaxLength(255);
+            entity.Property(e => e.KhuVuc).HasMaxLength(100);
+            entity.Property(e => e.PhuongXa).HasMaxLength(100);
+            entity.Property(e => e.GhiChu).HasMaxLength(500);
+            entity.Property(e => e.TenCongTy).HasMaxLength(200);
+            entity.Property(e => e.MaSoThue).HasMaxLength(30).IsUnicode(false);
+            entity.Property(e => e.SoCccd).HasMaxLength(30).IsUnicode(false);
+            entity.Property(e => e.NgayTao).HasDefaultValueSql("GETDATE()");
+            entity.Property(e => e.NguoiTao).HasMaxLength(100);
             entity.Property(e => e.TrangThai)
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasDefaultValue("HOAT_DONG", "DF_DonViCapHang_TrangThai");
+
+            entity.HasOne(d => d.MaNhomNccNavigation).WithMany(p => p.DonViCapHangs)
+                .HasForeignKey(d => d.MaNhomNcc)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<NhomNhaCungCap>(entity =>
+        {
+            entity.HasKey(e => e.MaNhomNcc);
+            entity.ToTable("NhomNhaCungCap");
+            entity.Property(e => e.TenNhom).HasMaxLength(150);
+            entity.Property(e => e.GhiChu).HasMaxLength(255);
         });
 
         modelBuilder.Entity<DonViTinh>(entity =>
@@ -651,6 +675,10 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
             entity.HasIndex(e => e.MaDonBan, "UQ__PhieuXua__CDB61EB51063B35E").IsUnique();
 
             entity.Property(e => e.GhiChu).HasMaxLength(500);
+            entity.Property(e => e.MaPhieu).HasMaxLength(30).IsUnicode(false);
+            entity.HasIndex(e => e.MaPhieu, "UQ_PhieuXuat_MaPhieu").IsUnique();
+            entity.Property(e => e.DaDanhDau)
+                .HasDefaultValue(false, "DF_PhieuXuat_DaDanhDau");
             entity.Property(e => e.LoaiPhieuXuat)
                 .HasMaxLength(30)
                 .IsUnicode(false)

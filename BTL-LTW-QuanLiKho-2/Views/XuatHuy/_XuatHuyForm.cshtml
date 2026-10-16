@@ -1,0 +1,258 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.XuatHuyFormVM
+@using System.Globalization
+@{
+    var viCulture = CultureInfo.GetCultureInfo("vi-VN");
+    var configData = new
+    {
+        id = Model.MaPhieuXuat,
+        code = Model.MaPhieu ?? "",
+        warehouseId = Model.MaKho,
+        created = Model.NgayLap.ToString("yyyy-MM-ddTHH:mm:ss"),
+        note = Model.GhiChu ?? "",
+        isReadOnly = Model.IsReadOnly,
+        lines = Model.Lines.Select(l => new
+        {
+            maHang = l.MaHang,
+            code = l.MaHangNoiBo,
+            name = l.TenHang,
+            dvt = l.TenDvt,
+            qty = l.SoLuongXuat,
+            cost = l.DonGiaXuat,
+            ton = l.TonKho
+        }).ToList()
+    };
+}
+
+<link href="~/css/kiem-kho.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/xuat-huy.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="kk-container xuat-huy-form-container" id="xhFormApp"
+     data-search-url="@Url.Action("SearchProducts", "XuatHuy")"
+     data-save-draft-url="@Url.Action("SaveDraft", "XuatHuy")"
+     data-complete-url="@Url.Action("Complete", "XuatHuy")"
+     data-index-url="@Url.Action("Index", "XuatHuy")"
+     data-template-url="@Url.Action("DownloadTemplate", "XuatHuy")"
+     data-import-url="@Url.Action("ImportExcel", "XuatHuy")"
+     data-warehouse-id="@Model.MaKho"
+     data-is-readonly="@(Model.IsReadOnly ? "true" : "false")">
+
+    <div class="form-wrap" id="formWrap">
+        <!-- VÙNG CHÍNH BÊN TRÁI (Bảng hàng hóa xuất hủy & Công cụ) -->
+        <div class="f-main">
+            <!-- Thanh tiêu đề & Tìm kiếm chuẩn Screenshot 2 -->
+            <div class="f-top">
+                <a href="@Url.Action("Index", "XuatHuy")" class="back" id="fBack" title="Quay lại danh sách xuất hủy" aria-label="Quay lại">
+                    <i class="bi bi-arrow-left fs-5"></i>
+                </a>
+                <h1 class="page-title" style="font-size: 20px; font-weight: 700; margin: 0; color: #1f2937;">
+                    @(Model.IsReadOnly ? "Chi tiết xuất hủy" : (Model.MaPhieuXuat > 0 ? "Sửa phiếu xuất hủy" : "Xuất hủy"))
+                </h1>
+
+                @if (!Model.IsReadOnly)
+                {
+                    <div class="searchbox focus-w relw ms-3 flex-grow-1" style="max-width: 480px;">
+                        <i class="bi bi-search search-icon"></i>
+                        <input id="fSearch" placeholder="Tìm mặt hàng (F3)" autocomplete="off">
+                        <div class="pop suggest shadow-sm" id="suggest"></div>
+                    </div>
+                }
+
+                <div class="tools relw ms-auto d-flex align-items-center gap-2">
+                    @if (!Model.IsReadOnly)
+                    {
+                        <label class="btn btn-tool mb-0" id="tImport" title="Nhập danh sách từ Excel" style="cursor: pointer;">
+                            <i class="bi bi-box-arrow-in-down"></i>
+                            <input type="file" id="excelHeaderFileInput" accept=".xlsx, .xls" style="display: none;">
+                        </label>
+                    }
+                    <a href="@Url.Action("DownloadTemplate", "XuatHuy")" class="btn btn-tool" title="Tải về file Excel mẫu">
+                        <i class="bi bi-download"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Khối bảng danh sách hàng xuất hủy -->
+            <div class="grid-card p-0" id="gridCard">
+                <!-- Empty state khi chưa có sản phẩm -->
+                <div class="xh-empty-box @(Model.Lines.Any() ? "d-none" : "d-flex")" id="emptyBox">
+                    <div class="xh-empty-inner text-center">
+                        <div class="xh-empty-icon mb-3">
+                            <i class="bi bi-file-earmark-spreadsheet fs-1 text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-2">Thêm sản phẩm từ file excel</h5>
+                        <p class="text-muted small mb-4">Bạn có thể tải về file mẫu để chuẩn bị dữ liệu hoặc chọn file Excel sẵn có từ máy tính.</p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="@Url.Action("DownloadTemplate", "XuatHuy")" class="btn btn-outline-primary px-3">
+                                <i class="bi bi-download me-1"></i>Tải về file mẫu
+                            </a>
+                            @if (!Model.IsReadOnly)
+                            {
+                                <label class="btn btn-primary px-3 mb-0" style="cursor: pointer;">
+                                    <i class="bi bi-upload me-1"></i>Chọn file dữ liệu
+                                    <input type="file" id="excelBodyFileInput" accept=".xlsx, .xls" style="display: none;">
+                                </label>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng hàng hóa xuất hủy -->
+                <div class="table-responsive @(!Model.Lines.Any() ? "d-none" : "")" id="tableWrap" style="max-height: calc(100vh - 140px); overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0 xh-table" id="gridTable">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th style="width: 48px;" class="text-center">STT</th>
+                                <th style="width: 140px;">Mã hàng</th>
+                                <th>Tên hàng</th>
+                                <th style="width: 90px;" class="text-center">ĐVT</th>
+                                <th style="width: 120px;" class="text-end">SL hủy</th>
+                                <th style="width: 130px;" class="text-end">Giá vốn</th>
+                                <th style="width: 140px;" class="text-end">Giá trị hủy</th>
+                                @if (!Model.IsReadOnly)
+                                {
+                                    <th style="width: 48px;" class="text-center"></th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody id="gridBody">
+                            <!-- Render bằng JS hoặc Model server-side -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- NÚT TRÒN THU GỌN / MỞ RỘNG PANEL PHẢI (F4) -->
+        <button type="button" class="panel-toggle" id="pTg" title="Thu gọn / mở rộng thông tin (Phím tắt F4)">
+            <i class="bi bi-chevron-right" id="pTgIcon"></i>
+        </button>
+
+        <!-- PANEL BÊN PHẢI: THÔNG TIN XUẤT HỦY & HÀNH ĐỘNG KHỚP SCREENSHOT 2 -->
+        <aside class="f-panel" id="panel">
+            <div class="f-panel-inner">
+                <!-- 1. Người xuất hủy dropdown & Ngày giờ -->
+                <div class="pr mb-3">
+                    <span class="l"><i class="bi bi-person me-1 text-secondary"></i>Người xuất hủy</span>
+                    <div class="v">
+                        @if (!Model.IsReadOnly)
+                        {
+                            <select class="form-select form-select-sm" id="fNhanVien" style="font-size: 13px;">
+                                @foreach (var nv in Model.NhanViens)
+                                {
+                                    <option value="@nv.MaNv" selected="@(nv.MaNv == (Model.MaNvxacNhan ?? Model.MaNvlap))">@nv.TenNv</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <span class="fw-semibold text-dark">@(string.IsNullOrEmpty(Model.TenNguoiXacNhan) ? Model.TenNguoiLap : Model.TenNguoiXacNhan)</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- 2. Ngày giờ xuất hủy -->
+                <div class="pr mb-3">
+                    <span class="l"><i class="bi bi-calendar3 me-1 text-secondary"></i>Ngày giờ</span>
+                    <div class="v relw">
+                        <input class="inp" id="fDate" value="@Model.NgayLap.ToString("dd/MM/yyyy HH:mm")" 
+                               @(Model.IsReadOnly ? "disabled" : "") autocomplete="off" style="max-width:166px;height:34px;color:#4b5563;cursor:pointer;" title="Nhấp để chọn ngày giờ">
+                        <div class="pop dtpop shadow-sm" id="dtPop"></div>
+                    </div>
+                </div>
+
+                <!-- 3. Mã xuất hủy (Tự động hoặc nhập tay) -->
+                <div class="pr mb-3">
+                    <span class="l"><i class="bi bi-upc-scan me-1 text-secondary"></i>Mã xuất hủy</span>
+                    <div class="v">
+                        <input type="text" class="form-control form-control-sm" id="fCode" value="@Model.MaPhieu" 
+                               placeholder="Mã phiếu tự động nếu để trống" @(Model.IsReadOnly ? "disabled" : "") style="font-size: 13px;">
+                    </div>
+                </div>
+
+                <!-- 4. Chi nhánh -->
+                <div class="pr mb-3">
+                    <span class="l"><i class="bi bi-building me-1 text-secondary"></i>Chi nhánh</span>
+                    <div class="v">
+                        <span class="text-dark fw-semibold" id="lblWarehouse">@Model.TenKho</span>
+                    </div>
+                </div>
+
+                <!-- 5. Trạng thái -->
+                <div class="pr mb-3">
+                    <span class="l"><i class="bi bi-tag me-1 text-secondary"></i>Trạng thái</span>
+                    <div class="v">
+                        @if (Model.TrangThai == "DA_XAC_NHAN")
+                        {
+                            <span class="badge bg-success-subtle text-success border border-success-subtle" id="badgeStatus">Hoàn thành</span>
+                        }
+                        else if (Model.TrangThai == "HUY")
+                        {
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" id="badgeStatus">Đã hủy</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" id="badgeStatus">Phiếu tạm</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- 6. Tổng giá trị hủy -->
+                <div class="pr mb-3 py-2 border-top border-bottom bg-light px-2 rounded">
+                    <span class="l fw-bold text-dark"><i class="bi bi-cash-stack me-1 text-danger"></i>Tổng giá trị hủy</span>
+                    <div class="v d-flex align-items-center justify-content-end">
+                        <span class="badge bg-secondary-subtle text-dark border px-2 py-1 me-2" id="badgeCount">[@Model.CountAll]</span>
+                        <span class="fw-bold fs-5 text-danger" id="totalAmount">@Model.TongGiaTriHuy.ToString("N0", viCulture) đ</span>
+                    </div>
+                </div>
+
+                <!-- 7. Ghi chú -->
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-semibold mb-1" for="fNote">Ghi chú</label>
+                    <textarea class="form-control" id="fNote" rows="3" placeholder="Ghi chú xuất hủy..." 
+                              @(Model.IsReadOnly ? "disabled" : "") style="resize: none; font-size: 13px;">@Model.GhiChu</textarea>
+                </div>
+
+                <!-- 8. Hai nút hành động đáy form: Lưu tạm (F9) & Hoàn thành (F10) -->
+                @if (!Model.IsReadOnly)
+                {
+                    <div class="d-flex flex-column gap-2 mt-4 pt-3 border-top">
+                        <button type="button" class="btn btn-outline-primary py-2 d-flex align-items-center justify-content-center fw-semibold" id="btnSaveDraft">
+                            <i class="bi bi-save me-2"></i><span>Lưu tạm (F9)</span>
+                        </button>
+                        <button type="button" class="btn btn-success py-2 d-flex align-items-center justify-content-center fw-bold fs-6" id="btnComplete">
+                            <i class="bi bi-check2-circle me-2 fs-5"></i><span>Hoàn thành (F10)</span>
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="mt-4 pt-3 border-top">
+                        <a href="@Url.Action("Index", "XuatHuy")" class="btn btn-secondary w-100 py-2">
+                            <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách
+                        </a>
+                    </div>
+                }
+            </div>
+        </aside>
+    </div>
+</div>
+
+<!-- Modal xác nhận xóa dùng chung -->
+<div class="kiot-confirm-ov" id="kiotConfirmOv">
+    <div class="kiot-confirm-modal">
+        <div class="kiot-confirm-header">
+            <h5 class="kiot-confirm-title" id="kiotConfirmTitle">Xác nhận</h5>
+            <button type="button" class="btn-close" id="kiotConfirmCloseBtn" aria-label="Close"></button>
+        </div>
+        <div class="kiot-confirm-body" id="kiotConfirmMsg">Bạn có chắc chắn muốn thực hiện thao tác này?</div>
+        <div class="kiot-confirm-footer">
+            <button type="button" class="btn btn-secondary kiot-btn-cancel" id="kiotConfirmCancelBtn">Bỏ qua</button>
+            <button type="button" class="btn btn-danger kiot-btn-ok" id="kiotConfirmOkBtn">Đồng ý</button>
+        </div>
+    </div>
+</div>
+
+<!-- Dữ liệu cấu hình ban đầu truyền an toàn qua thẻ script JSON -->
+<script type="application/json" id="xuatHuyConfig">
+    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(configData))
+</script>

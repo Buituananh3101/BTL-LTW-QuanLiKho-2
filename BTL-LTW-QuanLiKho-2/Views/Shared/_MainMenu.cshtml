@@ -9,7 +9,7 @@
       <a asp-controller="Home" asp-action="Index">Tổng quan</a>
     </li>
 
-    <li class="@(controller == "HangHoa" || controller == "PhieuKiemKe" ? "active" : "")">
+    <li class="@(controller == "HangHoa" || controller == "PhieuKiemKe" || controller == "XuatHuy" ? "active" : "")">
       <a href="javascript:void(0)" onclick="return false;">Hàng hóa</a>
       <div class="mega">
         <div class="mega-col">
@@ -21,17 +21,17 @@
           <a asp-controller="PhieuKiemKe" asp-action="Index">Kiểm kho</a>
           <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Chuyển kho</a>
           <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Xuất dùng nội bộ</a>
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Xuất hủy</a>
+          <a asp-controller="XuatHuy" asp-action="Index">Xuất hủy</a>
         </div>
       </div>
     </li>
 
-    <li>
+    <li class="@(controller == "NhaCungCap" ? "active" : "")">
       <a href="#" onclick="return false;">Mua hàng</a>
       <div class="mega">
         <div class="mega-col">
           <div class="mega-title">Nhà cung cấp</div>
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Nhà cung cấp</a>
+          <a asp-controller="NhaCungCap" asp-action="Index">Nhà cung cấp</a>
         </div>
         <div class="mega-col">
           <div class="mega-title">Mua hàng</div>
