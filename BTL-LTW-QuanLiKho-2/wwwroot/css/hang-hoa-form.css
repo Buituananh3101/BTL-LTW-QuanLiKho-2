@@ -560,24 +560,33 @@
   color: #1f2937;
   cursor: pointer;
   user-select: none;
-  transition: background-color 0.12s;
+  transition: none !important;
 }
 .hh-multiselect-item:hover {
   background-color: #f3f4f6;
   color: #111827;
+  transition: none !important;
 }
 .hh-multiselect-item.selected {
   background-color: #fff;
   color: #1f2937;
+  transition: none !important;
 }
 .hh-multiselect-item.selected:hover {
   background-color: #f3f4f6;
+  transition: none !important;
 }
 .hh-multiselect-item .hh-check-icon {
-  color: #2563eb;
-  font-size: 16px;
-  font-weight: bold;
+  width: 18px;
+  height: 18px;
+  stroke: #2563eb;
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   display: none;
+  flex: none;
+  transition: none !important;
 }
 .hh-multiselect-item.selected .hh-check-icon {
   display: inline-block;
@@ -588,6 +597,201 @@
   color: #94a3b8;
   font-style: italic;
   text-align: center;
+}
+
+/* ===== Single-select Custom Dropdown (Nhóm hàng, Đơn vị tính, Trọng lượng, Thuộc tính) ===== */
+.hh-cs-wrap {
+  position: relative;
+  width: 100%;
+}
+.hh-cs-box {
+  height: 38px;
+  min-height: 38px;
+  box-sizing: border-box;
+  border: 1px solid var(--hh-line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 0 10px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.hh-cs-wrap.open .hh-cs-box,
+.hh-cs-box:focus-within {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+.hh-f.invalid .hh-cs-box {
+  border-color: var(--hh-danger) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+}
+.hh-cs-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 32px !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  background: transparent !important;
+  outline: none !important;
+  font-size: 14.5px !important;
+  color: var(--hh-text) !important;
+  margin: 0 !important;
+  cursor: pointer;
+}
+.hh-cs-input::placeholder {
+  color: #9ca3af;
+}
+.hh-cs-arrow {
+  width: 16px;
+  height: 16px;
+  stroke: #4b5563;
+  stroke-width: 2.2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+.hh-cs-wrap.open .hh-cs-arrow {
+  transform: rotate(180deg);
+  stroke: #2563eb;
+}
+.hh-cs-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 9999;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.hh-cs-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #1f2937;
+  cursor: pointer;
+  user-select: none;
+  transition: none !important;
+}
+.hh-cs-item:hover, .hh-cs-item.highlighted {
+  background-color: #f3f4f6;
+  color: #111827;
+  transition: none !important;
+}
+.hh-cs-item.selected {
+  background-color: #fff;
+  color: #1f2937;
+  font-weight: 500;
+  transition: none !important;
+}
+.hh-cs-item.selected:hover {
+  background-color: #f3f4f6;
+  transition: none !important;
+}
+.hh-cs-item .hh-check-icon {
+  width: 18px;
+  height: 18px;
+  stroke: #2563eb;
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: none;
+  flex: none;
+  transition: none !important;
+}
+.hh-cs-item.selected .hh-check-icon {
+  display: block;
+}
+/* Nút bút chì sửa item khi hover trong dropdown Vị trí và Thuộc tính (Chuẩn KiotViet) */
+.hh-item-edit-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  background: transparent !important;
+  color: #4b5563 !important;
+  cursor: pointer;
+  border-radius: 0;
+  margin: 0;
+  transition: none !important;
+  flex-shrink: 0;
+  outline: none;
+  box-shadow: none !important;
+}
+.hh-item-edit-btn:hover,
+.hh-item-edit-btn:focus,
+.hh-item-edit-btn:active {
+  background: transparent !important;
+  color: #4b5563 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.hh-item-edit-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+  pointer-events: none;
+  transition: none !important;
+}
+.hh-multiselect-item:hover .hh-item-edit-btn,
+.hh-cs-item:hover .hh-item-edit-btn {
+  display: inline-flex;
+}
+.hh-multiselect-item:hover .hh-check-icon,
+.hh-cs-item:hover .hh-check-icon {
+  display: none !important;
+}
+.hh-cs-item.hh-cs-new-item {
+  color: var(--hh-blue);
+  font-weight: 500;
+  border-top: 1px solid #f3f4f6;
+  padding: 10px 16px;
+}
+.hh-cs-item.hh-cs-new-item:hover {
+  background-color: #eff6ff;
+  color: var(--hh-blue-d);
+}
+.hh-cs-empty {
+  padding: 12px 16px;
+  font-size: 13.5px;
+  color: #94a3b8;
+  font-style: italic;
+  text-align: center;
+}
+.hh-weight .hh-cs-wrap {
+  width: 75px;
+  flex: none;
+}
+.hh-weight .hh-cs-box {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-left: 0 !important;
+}
+
+/* ===== Drop-up Mode (Hiển thị ngược lên khi dropdown ở vị trí thấp) ===== */
+.hh-cs-wrap.drop-up .hh-cs-dropdown,
+.hh-multiselect-wrap.drop-up .hh-multiselect-dropdown {
+  top: auto !important;
+  bottom: calc(100% + 4px) !important;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.12) !important;
 }
 
 /* Thuộc tính */
@@ -918,6 +1122,32 @@
   font-weight: 600;
 }
 
+/* Nút Xóa ở góc trái chân modal Sửa vị trí / Sửa thuộc tính */
+.hh-btn-del {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.hh-btn-del:hover {
+  color: #dc2626;
+  background-color: #fee2e2;
+}
+.hh-btn-del svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+}
+
 /* Toast */
 .hh-toast {
   position: fixed;
@@ -954,8 +1184,9 @@
   .hh-attr-row {
     flex-wrap: wrap;
   }
-  .hh-attr-row select {
-    width: 100%;
+  .hh-attr-row select,
+  .hh-attr-row .hh-cs-wrap {
+    width: 100% !important;
   }
   .hh-m-foot {
     flex-wrap: wrap;

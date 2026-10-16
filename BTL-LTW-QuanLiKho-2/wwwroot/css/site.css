@@ -1496,10 +1496,20 @@ tr.product-detail-row > td {
   display: none;
   max-height: 250px;
   overflow-y: auto;
-  padding: 4px 0;
+  overflow-x: hidden;
+  padding: 0 0 4px 0;
+}
+.kiot-ms-dropdown:not(:has(.kiot-ms-search)) {
+  padding-top: 4px;
 }
 .kiot-ms-dropdown.show {
   display: block;
+}
+/* Drop-up: Khi dropdown ở sidebar nằm quá thấp sẽ hiển thị ngược lên */
+.kiot-ms-dropdown.drop-up {
+  top: auto !important;
+  bottom: calc(100% + 4px) !important;
+  box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.12) !important;
 }
 .kiot-ms-search {
   padding: 6px 8px;
@@ -1507,7 +1517,19 @@ tr.product-detail-row > td {
   position: sticky;
   top: 0;
   background: #ffffff;
-  z-index: 2;
+  z-index: 10;
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+}
+.kiot-ms-search::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: #ffffff;
+  pointer-events: none;
 }
 .kiot-ms-search input {
   width: 100%;
@@ -1528,11 +1550,12 @@ tr.product-detail-row > td {
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: background 0.1s;
+  transition: none !important;
   user-select: none;
 }
 .kiot-ms-item:hover {
   background-color: #f3f4f6;
+  transition: none !important;
 }
 .kiot-ms-item.selected {
   background-color: #eff6ff;
@@ -1770,7 +1793,7 @@ tr.product-detail-row > td {
   font-size: 13.5px;
   color: #212529 !important;
   padding: 8px 16px !important;
-  transition: background-color 0.12s ease;
+  transition: none !important;
   cursor: pointer;
   display: flex !important;
   justify-content: space-between !important;
@@ -1780,6 +1803,7 @@ tr.product-detail-row > td {
 .kiot-attr-item:hover {
   background-color: #f0f7ff !important;
   color: #0d6efd !important;
+  transition: none !important;
 }
 
 .kiot-attr-item.active {
