@@ -305,6 +305,13 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
             entity.Property(e => e.NgayTao).HasColumnType("datetime");
             entity.Property(e => e.DaDanhDau)
                 .HasDefaultValue(false, "DF_HangHoa_DaDanhDau");
+            entity.Property(e => e.ViTri).HasMaxLength(100);
+            entity.Property(e => e.TrongLuong).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.DonViTrongLuong)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasDefaultValue("g", "DF_HangHoa_DonViTrongLuong");
+            entity.Property(e => e.ThuocTinh).HasColumnType("nvarchar(max)");
 
             entity.HasOne(d => d.MaDvtNavigation).WithMany(p => p.HangHoas)
                 .HasForeignKey(d => d.MaDvt)
@@ -392,6 +399,9 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
             entity.ToTable("NguongTonKho");
 
             entity.Property(e => e.TonToiThieu).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TonCaoNhat)
+                .HasColumnType("decimal(18, 2)")
+                .HasDefaultValue(999999999m, "DF_NguongTonKho_TonCaoNhat");
 
             entity.HasOne(d => d.MaHangNavigation).WithMany(p => p.NguongTonKhos)
                 .HasForeignKey(d => d.MaHang)

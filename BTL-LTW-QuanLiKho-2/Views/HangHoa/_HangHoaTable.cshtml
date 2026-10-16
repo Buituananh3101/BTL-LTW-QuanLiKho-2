@@ -17,16 +17,18 @@
                 </span>
             </th>
             <th style="width: 44px;" class="text-center">Ảnh</th>
-            <th style="width: 130px;">Mã hàng</th>
-            <th>Tên hàng</th>
-            <th class="num" style="width: 110px;">Giá bán</th>
-            <th class="num" style="width: 110px;">Giá vốn</th>
-            <th class="num" style="width: 90px;">Tồn kho</th>
-            <th class="num" style="width: 90px;">Khách đặt</th>
-            <th style="width: 135px;">Thời gian tạo</th>
+            <th style="width: 120px;">Mã hàng</th>
+            <th class="col-product-name">Tên hàng</th>
+            <th class="num" style="width: 105px;">Giá bán</th>
+            <th class="num" style="width: 105px;">Giá vốn</th>
+            <th class="num" style="width: 85px;">Tồn kho</th>
+            <th class="num" style="width: 85px;">Khách đặt</th>
+            <th style="width: 130px;">Thời gian tạo</th>
             <th style="width: 120px;">Dự kiến hết hàng</th>
         </tr>
-        <!-- Dòng tổng hợp (Summary row) chuẩn như ảnh KiotViet -->
+    </thead>
+    <tbody>
+        <!-- Dòng tổng hợp (Summary row) cuộn tự nhiên cùng nội dung bảng -->
         <tr class="summary-row">
             <td class="text-center"></td>
             <td class="text-center"></td>
@@ -40,8 +42,6 @@
             <td class="text-muted">---</td>
             <td class="text-muted">---</td>
         </tr>
-    </thead>
-    <tbody>
         @if (Model.Items.Any())
         {
             @foreach (var item in Model.Items)
@@ -67,13 +67,13 @@
                         </div>
                     </td>
                     <td>
-                        <span class="fw-semibold text-primary">@item.MaHangNoiBo</span>
+                        <span class="fw-semibold text-primary text-break">@item.MaHangNoiBo</span>
                     </td>
-                    <td>
-                        <div class="fw-semibold text-dark">@item.TenHang</div>
+                    <td class="cell-product-name">
+                        <div class="fw-semibold text-dark product-name-text">@item.TenHang</div>
                         @if (!string.IsNullOrWhiteSpace(item.QuyCach))
                         {
-                            <small class="text-muted d-block">@item.QuyCach</small>
+                            <small class="text-muted d-block product-spec-text">@item.QuyCach</small>
                         }
                     </td>
                     <td class="num text-dark">
@@ -130,7 +130,7 @@
                                             <div class="product-detail-img-box">
                                                 <img src="/HangHoa/GetImage/@item.MaHang" alt="@item.TenHang" onerror="this.src='/images/no-image.png'" />
                                             </div>
-                                            <div class="flex-grow-1">
+                                            <div class="flex-grow-1" style="min-width: 0;">
                                                 <h4 class="product-detail-title mb-1">@item.TenHang</h4>
                                                 <div class="text-muted small mb-2">
                                                     Nhóm hàng: <span class="text-dark fw-semibold">@(!string.IsNullOrEmpty(item.TenNhom) && item.TenNhom != "---" ? item.TenNhom : "Chưa có nhóm")</span>
@@ -156,7 +156,9 @@
                                                 </div>
                                                 <div class="attr-item">
                                                     <div class="attr-label">Trọng lượng</div>
-                                                    <div class="attr-value text-muted">Chưa có</div>
+                                                    <div class="attr-value @(item.TrongLuong.HasValue && item.TrongLuong.Value > 0 ? "" : "text-muted")">
+                                                        @(item.TrongLuong.HasValue && item.TrongLuong.Value > 0 ? $"{item.TrongLuong.Value.ToString("G29")} {item.DonViTrongLuong}" : "Chưa có")
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
@@ -182,11 +184,15 @@
                                             <div class="col-md-3">
                                                 <div class="attr-item">
                                                     <div class="attr-label">Định mức tồn</div>
-                                                    <div class="attr-value">@(item.TonToiThieu?.ToString("N0", viCulture) ?? "0") - 0</div>
+                                                    <div class="attr-value">
+                                                        @(item.TonToiThieu?.ToString("N0", viCulture) ?? "0") - @(item.TonCaoNhat.HasValue ? (item.TonCaoNhat.Value >= 999999999m ? "999,999,999" : item.TonCaoNhat.Value.ToString("N0", viCulture)) : "999,999,999")
+                                                    </div>
                                                 </div>
                                                 <div class="attr-item">
                                                     <div class="attr-label">Vị trí</div>
-                                                    <div class="attr-value text-muted">Chưa có</div>
+                                                    <div class="attr-value @(!string.IsNullOrWhiteSpace(item.ViTri) ? "text-primary fw-semibold" : "text-muted")">
+                                                        @(!string.IsNullOrWhiteSpace(item.ViTri) ? item.ViTri : "Chưa có")
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -201,14 +207,27 @@
                                             </div>
                                         </div>
 
-                                        <!-- Nút Thêm thuộc tính -->
+                                        <!-- Danh sách Thuộc tính động & Nút Thêm thuộc tính (chuẩn theo Screenshot KiotViet) -->
                                         <div class="mb-4">
-                                            <a href="javascript:void(0)" class="text-primary text-decoration-none small fw-semibold">+ Thêm thuộc tính</a>
+                                            @if (item.ThuocTinhs.Any())
+                                            {
+                                                <div class="d-flex flex-wrap gap-2 mb-2">
+                                                    @foreach (var attr in item.ThuocTinhs)
+                                                    {
+                                                        <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 12px;">
+                                                            <strong class="text-secondary">@attr.Ten:</strong> @attr.GiaTri
+                                                        </span>
+                                                    }
+                                                </div>
+                                            }
+                                            <a href="javascript:void(0)" class="text-primary text-decoration-none small fw-semibold btn-quick-attr" data-id="@item.MaHang" data-name="@item.TenHang" data-attrs="@item.ThuocTinhJson">
+                                                <i class="bi bi-plus-lg me-1"></i>Thêm thuộc tính
+                                            </a>
                                         </div>
 
                                         <!-- Thanh nút thao tác cuối dòng chi tiết -->
-                                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                                            <div class="d-flex gap-2">
+                                        <div class="d-flex justify-content-between align-items-center pt-3 border-top product-detail-footer">
+                                            <div class="d-flex gap-2 product-detail-footer-left">
                                                 <button type="button" class="btn btn-outline-secondary btn-sm btn-delete-product" data-id="@item.MaHang" data-name="@item.TenHang">
                                                     <i class="bi bi-trash me-1"></i> Xóa
                                                 </button>
@@ -216,7 +235,7 @@
                                                     <i class="bi bi-copy me-1"></i> Sao chép
                                                 </button>
                                             </div>
-                                            <div class="d-flex gap-2">
+                                            <div class="d-flex gap-2 product-detail-footer-right">
                                                 <button type="button" class="btn btn-primary btn-sm btn-edit-product" data-id="@item.MaHang">
                                                     <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
                                                 </button>
@@ -244,10 +263,12 @@
                                             <div class="text-muted small">Chưa có ghi chú</div>
                                         </div>
 
-                                        <div class="d-flex justify-content-end pt-3 border-top">
-                                            <button type="button" class="btn btn-primary btn-sm btn-edit-product" data-id="@item.MaHang">
-                                                <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
-                                            </button>
+                                        <div class="d-flex justify-content-end pt-3 border-top product-detail-footer">
+                                            <div class="product-detail-footer-right">
+                                                <button type="button" class="btn btn-primary btn-sm btn-edit-product" data-id="@item.MaHang">
+                                                    <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -291,11 +312,13 @@
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <div class="d-flex justify-content-between align-items-center pt-2">
-                                            <button type="button" class="btn btn-outline-secondary btn-sm">
-                                                <i class="bi bi-file-earmark-arrow-up me-1"></i> Xuất file
-                                            </button>
-                                            <div class="text-muted small">
+                                        <div class="d-flex justify-content-between align-items-center pt-2 border-top product-detail-footer">
+                                            <div class="product-detail-footer-left">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm">
+                                                    <i class="bi bi-file-earmark-arrow-up me-1"></i> Xuất file
+                                                </button>
+                                            </div>
+                                            <div class="text-muted small product-detail-footer-right">
                                                 1 - 2 trong 2 dòng
                                             </div>
                                         </div>

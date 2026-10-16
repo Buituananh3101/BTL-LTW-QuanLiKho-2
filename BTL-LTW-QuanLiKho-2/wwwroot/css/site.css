@@ -452,8 +452,10 @@ body {
 }
 .tbl {
   width: 100%;
+  min-width: 980px;
   border-collapse: separate;
   border-spacing: 0;
+  table-layout: fixed;
 }
 .tbl thead th {
   position: sticky;
@@ -469,16 +471,41 @@ body {
   color: #1e3a8a;
   border-bottom: 1px solid var(--border);
 }
+.col-product-name {
+  min-width: 180px;
+}
+.cell-product-name {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  white-space: normal;
+  vertical-align: middle;
+}
+.product-name-text {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  white-space: normal;
+  line-height: 1.35;
+}
+.product-spec-text {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  white-space: normal;
+}
 .tbl tbody td {
   padding: 11px 12px;
   border-bottom: 1px solid #f3f4f6;
   font-size: 13px;
   vertical-align: middle;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .tbl tbody tr:hover {
   background: #f8fafc;
 }
-/* Dòng tổng hợp (Summary row) chuẩn phong cách KiotViet */
+/* Dòng tổng hợp (Summary row) chuẩn phong cách KiotViet - cuộn tự nhiên cùng bảng */
 .tbl tr.summary-row,
 .tbl thead tr.summary-row,
 .tbl tbody tr.summary-row {
@@ -487,9 +514,6 @@ body {
 .tbl tr.summary-row td,
 .tbl thead tr.summary-row td,
 .tbl tbody tr.summary-row td {
-  position: sticky;
-  top: 40px;
-  z-index: 19;
   background-color: #fafbfc;
   padding: 10px 12px;
   height: 38px;
@@ -677,6 +701,8 @@ body {
   font-size: 13px;
   margin: 0 0 8px;
   color: #1f2937;
+  display: flex;
+  align-items: center;
 }
 .kiot-filter-box .f-block + .f-block {
   margin-top: 14px;
@@ -1128,6 +1154,12 @@ body {
   border-radius: 50%;
   margin-left: 6px;
   vertical-align: middle;
+  flex-shrink: 0;
+}
+.filter-dot.active,
+.filter-dot[style*="display: block"],
+.filter-dot[style*="display: inline"] {
+  display: inline-block !important;
 }
 
 /* Calendar styling enhancement */
@@ -1186,10 +1218,19 @@ tr.product-detail-row > td {
   border-right: 3px solid #0070f3 !important; /* Viền bên phải ĐẬM */
 }
 
+.product-detail-panel-wrap {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 .product-detail-panel {
   background-color: #ffffff;
   border: none; /* Đã có viền 3px từ thẻ td */
   margin-bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Tabs Bar */
@@ -1199,6 +1240,10 @@ tr.product-detail-row > td {
   padding: 0 24px;
   border-bottom: 1px solid #e2e8f0;
   background-color: #ffffff;
+  position: sticky;
+  left: 0;
+  width: max-content;
+  max-width: 100%;
 }
 .product-detail-tab-btn {
   padding: 12px 2px;
@@ -1251,6 +1296,36 @@ tr.product-detail-row > td {
   font-size: 17px;
   font-weight: 700;
   color: #1e293b;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.product-detail-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.product-detail-footer-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  position: sticky;
+  left: 24px;
+}
+.product-detail-footer-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  position: sticky;
+  right: 24px;
+  margin-left: auto;
 }
 
 .badge-kiot-tag {
@@ -1286,6 +1361,12 @@ tr.product-detail-row > td {
   background-color: #f8fafc;
   border: 1px solid #eef2f6;
 }
+.supplier-names {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  white-space: normal;
+}
 
 /* Sub tables: Thẻ kho & Tồn kho */
 .thekho-table, .tonkho-table {
@@ -1313,4 +1394,324 @@ tr.product-detail-row > td {
   background-color: #f8fafc;
   font-weight: 700;
   border-bottom: 2px solid #e2e8f0;
+}
+
+/* Multi-select filter box (KiotViet style) */
+.kiot-multiselect-box {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-height: 40px;
+  padding: 5px 8px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: center;
+  position: relative;
+  transition: border-color .15s, box-shadow .15s;
+}
+.kiot-multiselect-box:hover {
+  border-color: #9ca3af;
+}
+.kiot-multiselect-box.is-active,
+.kiot-multiselect-box.open {
+  border-color: var(--blue, #0070f4);
+  box-shadow: 0 0 0 3px rgba(0, 112, 244, 0.12);
+}
+.kiot-ms-placeholder {
+  color: #9ca3af;
+  font-size: 13px;
+  user-select: none;
+  line-height: 1.5;
+  padding: 2px 2px;
+}
+
+/* Tag Pill */
+.kiot-pill-tag {
+  background-color: #0070f4;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.3;
+  user-select: none;
+  max-width: 100%;
+}
+.kiot-pill-tag .tag-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kiot-pill-tag .tag-remove {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  opacity: 0.85;
+  font-size: 14px;
+  font-weight: 700;
+  transition: opacity .15s;
+  padding: 0 1px;
+}
+.kiot-pill-tag .tag-remove:hover {
+  opacity: 1;
+}
+
+/* +N khác Badge */
+.kiot-pill-more {
+  background-color: #e0f2fe;
+  color: #0070f4;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+  user-select: none;
+  cursor: pointer;
+  transition: background .15s;
+}
+.kiot-pill-more:hover {
+  background-color: #bae6fd;
+}
+
+/* Dropdown list */
+.kiot-ms-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  z-index: 1050;
+  display: none;
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.kiot-ms-dropdown.show {
+  display: block;
+}
+.kiot-ms-search {
+  padding: 6px 8px;
+  border-bottom: 1px solid #f3f4f6;
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 2;
+}
+.kiot-ms-search input {
+  width: 100%;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 8px;
+  font-size: 12px;
+  outline: none;
+}
+.kiot-ms-search input:focus {
+  border-color: #0070f4;
+}
+.kiot-ms-item {
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.1s;
+  user-select: none;
+}
+.kiot-ms-item:hover {
+  background-color: #f3f4f6;
+}
+.kiot-ms-item.selected {
+  background-color: #eff6ff;
+  color: #0070f4;
+  font-weight: 600;
+}
+.kiot-ms-item input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: #0070f4;
+  cursor: pointer;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   RESPONSIVE: ZOOM IN / MÀN HÌNH NHỎ (< 992px) & ZOOM OUT / MÀN HÌNH RỘNG
+   ========================================================================== */
+
+/* Nút phễu lọc mobile */
+.kiot-btn-funnel {
+  width: 32px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: #0a66e8;
+  border: 1px solid #0a66e8;
+  background: #fff;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+.kiot-btn-funnel:hover,
+.kiot-btn-funnel.has-filter {
+  background: #0a66e8;
+  color: #fff;
+}
+.kiot-mobile-title {
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #111827;
+}
+
+/* Offcanvas mobile drawer */
+.kiot-mobile-nav {
+  z-index: 1070;
+}
+.kiot-mobile-nav-list .list-group-item {
+  border-left: none;
+  border-right: none;
+  font-size: 13.5px;
+  color: #374151;
+  transition: background 0.15s ease;
+}
+.kiot-mobile-nav-list .list-group-item:hover {
+  background: #f3f7ff;
+  color: var(--brand);
+}
+
+@media (max-width: 991.98px) {
+  /* 1. Thanh menu chính xanh: Ẩn hoàn toàn khi phóng to / màn hình hẹp */
+  .mainnav {
+    display: none !important;
+  }
+  .app-main-body {
+    height: calc(100vh - 44px) !important;
+  }
+  .topbar {
+    padding: 0 10px;
+    height: 44px;
+  }
+  .topbar-right {
+    gap: 8px;
+  }
+
+  /* 2. Layout Container */
+  .kiot-container {
+    padding: 8px 10px 10px;
+    gap: 0;
+  }
+  .kiot-sidebar-toggle-btn {
+    display: none !important;
+  }
+
+  /* 3. Cột Sidebar bộ lọc chuyển sang dạng Offcanvas Drawer */
+  .kiot-sidebar-col {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 290px;
+    max-width: 86vw;
+    height: 100vh;
+    z-index: 1060;
+    background: #fff;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.35, 1);
+    padding: 14px;
+    margin: 0 !important;
+    overflow: hidden;
+  }
+  .kiot-sidebar-col.show-mobile {
+    transform: translateX(0);
+  }
+  .kiot-sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1055;
+    display: none;
+    backdrop-filter: blur(1px);
+  }
+  .kiot-sidebar-backdrop.show {
+    display: block;
+  }
+  .kiot-filter-box {
+    border: none;
+    padding: 0;
+    min-width: 0;
+  }
+
+  /* 4. Toolbar trên cùng: Hàng hóa + Phễu + Tìm kiếm + Nhóm nút */
+  .kiot-toolbar-row {
+    gap: 8px;
+    height: auto;
+    margin-bottom: 8px;
+  }
+  .kiot-mobile-title-wrap {
+    flex-shrink: 0;
+  }
+  .kiot-search-box {
+    flex: 1 1 auto;
+    max-width: none;
+    min-width: 100px;
+  }
+  .kiot-actions-group {
+    gap: 5px;
+    flex-shrink: 0;
+  }
+  .kiot-actions-group .btn {
+    padding: 2px 8px;
+    height: 30px;
+  }
+}
+
+/* Màn hình điện thoại nhỏ (< 576px) */
+@media (max-width: 575.98px) {
+  .kiot-mobile-title {
+    font-size: 15px !important;
+  }
+  .kiot-search-box input {
+    font-size: 12px;
+    padding-left: 26px;
+    padding-right: 24px;
+  }
+  .kiot-search-box .bi-search {
+    left: 7px;
+  }
+  .kiot-search-box .bi-arrow-left-right {
+    right: 7px;
+  }
+}
+
+/* Widescreen / Zoom out (>= 1400px) */
+@media (min-width: 1400px) {
+  .kiot-container {
+    max-width: 100%;
+    width: 100%;
+  }
+  .kiot-main-col {
+    width: 100%;
+  }
+  .tbl {
+    width: 100%;
+  }
 }

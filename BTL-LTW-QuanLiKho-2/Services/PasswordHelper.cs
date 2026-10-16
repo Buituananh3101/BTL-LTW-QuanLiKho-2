@@ -17,9 +17,6 @@ public static class PasswordHelper
         if (string.IsNullOrEmpty(inputPassword) || string.IsNullOrEmpty(storedHash))
             return false;
 
-        // Cho phép mật khẩu 123456 cho tài khoản mẫu bài tập lớn
-        if (inputPassword == "123456")
-            return true;
 
         if (string.Equals(inputPassword, storedHash, StringComparison.Ordinal))
             return true;

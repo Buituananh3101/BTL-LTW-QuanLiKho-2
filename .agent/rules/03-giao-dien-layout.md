@@ -28,7 +28,7 @@ Hệ thống sử dụng **duy nhất một Layout chính** cho toàn bộ các 
 
 ### 1.2. Các Layout ngoại lệ (Chỉ tạo khi khung trang khác biệt hoàn toàn):
 - `_LoginLayout.cshtml`: Dành riêng cho trang Đăng nhập (không có topbar và menu).
-- `_PrintLayout.cshtml`: Dành riêng cho trang In ấn phiếu kho (chuẩn khổ giấy A4/A5, ẩn toàn bộ thanh điều hướng).
+- `_PrintLayout.cshtml` (dự kiến, chưa tạo): Dành riêng cho trang In ấn phiếu kho (chuẩn khổ giấy A4/A5, ẩn toàn bộ thanh điều hướng).
 
 ---
 
@@ -50,20 +50,8 @@ Hệ thống sử dụng **duy nhất một Layout chính** cho toàn bộ các 
            .then(() => window.location.reload());
    }
    ```
-5. Mọi Controller đọc kho hiện tại qua hàm tiện ích nội bộ:
-   ```csharp
-   private int GetCurrentWarehouseId()
-   {
-       var whId = HttpContext.Session.GetInt32("CurrentWarehouseId");
-       if (whId.HasValue && whId.Value > 0) return whId.Value;
-
-       var firstWh = _context.Khos.FirstOrDefault(k => k.TrangThai == "HOAT_DONG");
-       int defaultId = firstWh?.MaKho ?? 1;
-       HttpContext.Session.SetInt32("CurrentWarehouseId", defaultId);
-       return defaultId;
-   }
-   ```
-4. **Quy tắc "Tất cả kho" (Dành cho Admin)**:
+5. Mọi Controller kế thừa BaseKhoController và sử dụng property CurrentWarehouseId đã được cung cấp sẵn.
+6. **Quy tắc "Tất cả kho" (Dành cho Admin)**:
    - Mục "Tất cả kho" (`whId = null` hoặc `0`) chỉ dùng cho màn hình **Xem danh sách, Tra cứu và Báo cáo**.
    - Khi thực hiện các thao tác biến động (Tạo phiếu nhập, Xuất kho, Kiểm kho), hệ thống bắt buộc người dùng chọn một kho làm việc cụ thể.
 
@@ -74,7 +62,7 @@ Hệ thống sử dụng **duy nhất một Layout chính** cho toàn bộ các 
 - Vị trí: [`Views/Shared/_MainMenu.cshtml`](../../BTL-LTW-QuanLiKho-2/Views/Shared/_MainMenu.cshtml).
 - Cấu trúc thanh menu ngang phong cách KiotViet:
   1. **Tổng quan** (`/Home/Index`)
-  2. **Hàng hóa**: Danh sách hàng hóa (`/HangHoas/Index`), Nhóm hàng, Tồn kho, Kiểm kho (`/PhieuKiemKe/Index`), Chuyển kho, Xuất dùng nội bộ, Xuất hủy.
+  2. **Hàng hóa**: Danh sách hàng hóa (`/HangHoa/Index`), Nhóm hàng, Tồn kho, Kiểm kho (`/PhieuKiemKe/Index`), Chuyển kho, Xuất dùng nội bộ, Xuất hủy.
   3. **Mua hàng**: Nhà cung cấp, Nhập hàng, Trả hàng nhập.
   4. **Đơn hàng**: Hóa đơn bán hàng.
   5. **Khách hàng**: Danh sách khách hàng.

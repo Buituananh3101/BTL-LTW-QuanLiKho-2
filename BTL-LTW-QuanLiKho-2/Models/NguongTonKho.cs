@@ -11,6 +11,8 @@ public partial class NguongTonKho
 
     public decimal TonToiThieu { get; set; }
 
+    public decimal? TonCaoNhat { get; set; }
+
     public virtual HangHoa MaHangNavigation { get; set; } = null!;
 
     public virtual Kho MaKhoNavigation { get; set; } = null!;

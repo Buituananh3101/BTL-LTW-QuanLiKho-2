@@ -9,28 +9,15 @@ using BTL_LTW_QuanLiKho_2.Services;
 namespace BTL_LTW_QuanLiKho_2.Controllers;
 
 [Authorize]
-public class HangHoaController : Controller
+public class HangHoaController : BaseKhoController
 {
-    private readonly QuanLyKhoPhuQuocLtwContext _context;
-
-    public HangHoaController(QuanLyKhoPhuQuocLtwContext context)
+    public HangHoaController(QuanLyKhoPhuQuocLtwContext context) : base(context)
     {
-        _context = context;
     }
 
-    private int GetCurrentWarehouseId()
-    {
-        var whId = HttpContext.Session.GetInt32("CurrentWarehouseId");
-        if (whId.HasValue && whId.Value > 0) return whId.Value;
-
-        var firstWh = _context.Khos.FirstOrDefault(k => k.TrangThai == "HOAT_DONG");
-        int defaultId = firstWh?.MaKho ?? 1;
-        HttpContext.Session.SetInt32("CurrentWarehouseId", defaultId);
-        return defaultId;
-    }
 
     public async Task<IActionResult> Index(
-        string? q, int? nhom, string? trangThai, string tonKhoFilter = "ALL",
+        string? q, string? nhom = null, string? trangThai = null, string tonKhoFilter = "ALL",
         string? nhaCungCap = null, string? loaiHang = null, string? viTri = null,
         string duKienFilter = "ALL", string tgTaoFilter = "ALL",
         DateTime? tgTaoFrom = null, DateTime? tgTaoTo = null,
@@ -43,7 +30,7 @@ public class HangHoaController : Controller
 
     // AJAX Action trả về Partial View danh sách bảng
     public async Task<IActionResult> Filter(
-        string? q, int? nhom, string? trangThai, string tonKhoFilter = "ALL",
+        string? q, string? nhom = null, string? trangThai = null, string tonKhoFilter = "ALL",
         string? nhaCungCap = null, string? loaiHang = null, string? viTri = null,
         string duKienFilter = "ALL", string tgTaoFilter = "ALL",
         DateTime? tgTaoFrom = null, DateTime? tgTaoTo = null,
@@ -99,7 +86,7 @@ public class HangHoaController : Controller
     }
 
     private async Task<HangHoaIndexVM> BuildIndexVM(
-        string? q, int? nhom, string? trangThai, string tonKhoFilter,
+        string? q, string? nhom, string? trangThai, string tonKhoFilter,
         string? nhaCungCap, string? loaiHang, string? viTri,
         string duKienFilter, string tgTaoFilter,
         DateTime? tgTaoFrom, DateTime? tgTaoTo,
@@ -128,10 +115,18 @@ public class HangHoaController : Controller
             query = query.Where(x => x.TenHang.Contains(q) || x.MaHangNoiBo.Contains(q) || (x.QuyCach != null && x.QuyCach.Contains(q)));
         }
 
-        // 2. Lọc theo Nhóm hàng
-        if (nhom.HasValue && nhom.Value > 0)
+        // 2. Lọc theo Nhóm hàng (hỗ trợ chọn nhiều nhóm hàng)
+        if (!string.IsNullOrWhiteSpace(nhom))
         {
-            query = query.Where(x => x.MaNhom == nhom.Value);
+            var nhomIds = nhom.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => int.TryParse(s.Trim(), out int id) ? id : 0)
+                .Where(id => id > 0)
+                .ToList();
+
+            if (nhomIds.Any())
+            {
+                query = query.Where(x => nhomIds.Contains(x.MaNhom));
+            }
         }
 
         // 3. Lọc theo Trạng thái
@@ -140,40 +135,105 @@ public class HangHoaController : Controller
             query = query.Where(x => x.TrangThai == trangThai);
         }
 
-        // 4. Lọc theo Nhà cung cấp
+        // 4. Lọc theo Nhà cung cấp (hỗ trợ chọn nhiều nhà cung cấp)
         if (!string.IsNullOrWhiteSpace(nhaCungCap))
         {
-            var ncc = nhaCungCap.Trim();
-            var matchedHangIds = await _context.ChiTietPhieuNhaps
-                .Where(ct => ct.MaPhieuNhapNavigation.MaDonViCapHangNavigation != null &&
-                             ct.MaPhieuNhapNavigation.MaDonViCapHangNavigation.TenDonVi.Contains(ncc))
-                .Select(ct => ct.MaHang)
-                .Distinct()
-                .ToListAsync();
+            var nccList = nhaCungCap.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrEmpty(s) && s != "Tất cả")
+                .ToList();
 
-            query = query.Where(x => matchedHangIds.Contains(x.MaHang));
+            if (nccList.Any())
+            {
+                var matchedHangIds = await _context.ChiTietPhieuNhaps
+                    .Where(ct => ct.MaPhieuNhapNavigation.MaDonViCapHangNavigation != null &&
+                                 nccList.Contains(ct.MaPhieuNhapNavigation.MaDonViCapHangNavigation.TenDonVi))
+                    .Select(ct => ct.MaHang)
+                    .Distinct()
+                    .ToListAsync();
+
+                query = query.Where(x => matchedHangIds.Contains(x.MaHang));
+            }
         }
 
-        // 5. Lọc theo Loại hàng
+        // 5. Lọc theo Loại hàng (hỗ trợ chọn nhiều: Hàng hóa, Dịch vụ, Combo - đóng gói)
         if (!string.IsNullOrWhiteSpace(loaiHang) && loaiHang != "Tất cả")
         {
-            var lh = loaiHang.Trim();
-            if (lh == "Dịch vụ" || lh == "Combo - đóng gói")
+            var lhList = loaiHang.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrEmpty(s) && s != "Tất cả")
+                .ToList();
+
+            if (lhList.Any() && lhList.Count < 3)
             {
-                query = query.Where(x => (x.QuyCach != null && x.QuyCach.Contains(lh)) || x.TenHang.Contains(lh));
-            }
-            else if (lh == "Hàng hóa")
-            {
-                query = query.Where(x => (x.QuyCach == null || (!x.QuyCach.Contains("Dịch vụ") && !x.QuyCach.Contains("Combo")))
-                                      && !x.TenHang.Contains("Dịch vụ") && !x.TenHang.Contains("Combo"));
+                bool hasDichVu = lhList.Contains("Dịch vụ");
+                bool hasCombo = lhList.Contains("Combo - đóng gói");
+                bool hasHangHoa = lhList.Contains("Hàng hóa");
+
+                if (hasHangHoa && !hasDichVu && !hasCombo)
+                {
+                    query = query.Where(x => (x.QuyCach == null || (!x.QuyCach.Contains("Dịch vụ") && !x.QuyCach.Contains("Combo")))
+                                          && !x.TenHang.Contains("Dịch vụ") && !x.TenHang.Contains("Combo"));
+                }
+                else if (!hasHangHoa)
+                {
+                    if (hasDichVu && hasCombo)
+                    {
+                        query = query.Where(x => (x.QuyCach != null && (x.QuyCach.Contains("Dịch vụ") || x.QuyCach.Contains("Combo")))
+                                              || x.TenHang.Contains("Dịch vụ") || x.TenHang.Contains("Combo"));
+                    }
+                    else if (hasDichVu)
+                    {
+                        query = query.Where(x => (x.QuyCach != null && x.QuyCach.Contains("Dịch vụ")) || x.TenHang.Contains("Dịch vụ"));
+                    }
+                    else if (hasCombo)
+                    {
+                        query = query.Where(x => (x.QuyCach != null && x.QuyCach.Contains("Combo")) || x.TenHang.Contains("Combo"));
+                    }
+                }
+                else
+                {
+                    if (hasDichVu && !hasCombo)
+                    {
+                        query = query.Where(x => (x.QuyCach == null || !x.QuyCach.Contains("Combo")) && !x.TenHang.Contains("Combo"));
+                    }
+                    else if (!hasDichVu && hasCombo)
+                    {
+                        query = query.Where(x => (x.QuyCach == null || !x.QuyCach.Contains("Dịch vụ")) && !x.TenHang.Contains("Dịch vụ"));
+                    }
+                }
             }
         }
 
-        // 6. Lọc theo Vị trí
+        // 6. Lọc theo Vị trí (hỗ trợ chọn nhiều vị trí)
         if (!string.IsNullOrWhiteSpace(viTri) && viTri != "Tất cả")
         {
-            var vt = viTri.Trim();
-            query = query.Where(x => x.QuyCach != null && x.QuyCach.Contains(vt));
+            var vtList = viTri.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrEmpty(s) && s != "Tất cả")
+                .ToList();
+
+            if (vtList.Any())
+            {
+                var parameter = System.Linq.Expressions.Expression.Parameter(typeof(HangHoa), "x");
+                var quyCachProp = System.Linq.Expressions.Expression.Property(parameter, nameof(HangHoa.QuyCach));
+                var notNull = System.Linq.Expressions.Expression.NotEqual(quyCachProp, System.Linq.Expressions.Expression.Constant(null, typeof(string)));
+                var containsMethod = typeof(string).GetMethod(nameof(string.Contains), new[] { typeof(string) })!;
+
+                System.Linq.Expressions.Expression? orExpr = null;
+                foreach (var vt in vtList)
+                {
+                    var call = System.Linq.Expressions.Expression.Call(quyCachProp, containsMethod, System.Linq.Expressions.Expression.Constant(vt));
+                    orExpr = orExpr == null ? call : System.Linq.Expressions.Expression.OrElse(orExpr, call);
+                }
+
+                if (orExpr != null)
+                {
+                    var finalBody = System.Linq.Expressions.Expression.AndAlso(notNull, orExpr);
+                    var lambda = System.Linq.Expressions.Expression.Lambda<Func<HangHoa, bool>>(finalBody, parameter);
+                    query = query.Where(lambda);
+                }
+            }
         }
 
         // 7. Lọc theo Thời gian tạo
@@ -250,6 +310,11 @@ public class HangHoaController : Controller
                 x.GiaBanThamKhao,
                 x.GiaVon,
                 TonToiThieu = x.NguongTonKhos.Where(n => n.MaKho == whId).Select(n => (decimal?)n.TonToiThieu).FirstOrDefault(),
+                TonCaoNhat = x.NguongTonKhos.Where(n => n.MaKho == whId).Select(n => (decimal?)n.TonCaoNhat).FirstOrDefault(),
+                x.ViTri,
+                x.TrongLuong,
+                x.DonViTrongLuong,
+                x.ThuocTinh,
                 x.QuyCach,
                 x.TrangThai,
                 x.DaDanhDau,
@@ -276,6 +341,12 @@ public class HangHoaController : Controller
                 GiaVon = cost,
                 TonKho = stock,
                 TonToiThieu = x.TonToiThieu,
+                TonCaoNhat = x.TonCaoNhat,
+                ViTri = x.ViTri,
+                TrongLuong = x.TrongLuong,
+                DonViTrongLuong = x.DonViTrongLuong ?? "g",
+                ThuocTinhJson = x.ThuocTinh,
+                ThuocTinhs = ParseThuocTinhJson(x.ThuocTinh),
                 QuyCach = x.QuyCach,
                 TrangThai = x.TrangThai,
                 IsFavorite = x.DaDanhDau,
@@ -428,6 +499,11 @@ public class HangHoaController : Controller
             giaVon = cost,
             tonKhoBanDau = stock,
             tonToiThieu = nguong?.TonToiThieu ?? 0,
+            tonCaoNhat = nguong?.TonCaoNhat ?? 999999999m,
+            viTri = item.ViTri ?? "",
+            trongLuong = item.TrongLuong ?? 0,
+            donViTrongLuong = item.DonViTrongLuong ?? "g",
+            thuocTinhJson = item.ThuocTinh ?? "[]",
             trangThai = item.TrangThai,
             hinhAnhBase64 = imgBase64
         });
@@ -527,49 +603,62 @@ public class HangHoaController : Controller
             return BadRequest(new { message = "Không thể sinh mã hàng tự động do đụng độ hệ thống. Vui lòng thử lại." });
         }
 
-        int whId = GetCurrentWarehouseId();
+        int whId = CurrentWarehouseId;
 
-        // Lưu ngưỡng tồn kho
-        if (model.TonToiThieu.HasValue && model.TonToiThieu.Value > 0)
+        using var trans = await _context.Database.BeginTransactionAsync();
+        try
         {
-            var nguong = new NguongTonKho
+            // Lưu ngưỡng tồn kho (Tối thiểu & Tối đa)
+            bool hasNguong = (model.TonToiThieu.HasValue && model.TonToiThieu.Value > 0) || (model.TonCaoNhat.HasValue && model.TonCaoNhat.Value > 0);
+            if (hasNguong)
             {
-                MaHang = item.MaHang,
-                MaKho = whId,
-                TonToiThieu = model.TonToiThieu.Value
-            };
-            _context.NguongTonKhos.Add(nguong);
-            await _context.SaveChangesAsync();
+                var nguong = new NguongTonKho
+                {
+                    MaHang = item.MaHang,
+                    MaKho = whId,
+                    TonToiThieu = model.TonToiThieu ?? 0,
+                    TonCaoNhat = model.TonCaoNhat ?? 999999999m
+                };
+                _context.NguongTonKhos.Add(nguong);
+                await _context.SaveChangesAsync();
+            }
+
+            // Tạo tồn kho ban đầu nếu có nhập số lượng > 0
+            if (model.TonKhoBanDau.HasValue && model.TonKhoBanDau.Value > 0)
+            {
+                int nvId = CurrentNhanVienId;
+
+                var phieuNhap = new PhieuNhap
+                {
+                    MaKho = whId,
+                    MaNvlap = nvId,
+                    MaNvxacNhan = nvId,
+                    NgayLap = DateTime.Now,
+                    NgayXacNhan = DateTime.Now,
+                    LoaiPhieuNhap = "DAU_KY",
+                    TrangThai = "DA_XAC_NHAN",
+                    GhiChu = "Tồn kho đầu kỳ khi tạo hàng " + item.MaHangNoiBo
+                };
+                _context.PhieuNhaps.Add(phieuNhap);
+                await _context.SaveChangesAsync();
+
+                var ctpn = new ChiTietPhieuNhap
+                {
+                    MaPhieuNhap = phieuNhap.MaPhieuNhap,
+                    MaHang = item.MaHang,
+                    SoLuong = model.TonKhoBanDau.Value,
+                    DonGiaNhap = model.GiaVon > 0 ? model.GiaVon : model.GiaBanThamKhao
+                };
+                _context.ChiTietPhieuNhaps.Add(ctpn);
+                await _context.SaveChangesAsync();
+            }
+
+            await trans.CommitAsync();
         }
-
-        // Tạo tồn kho ban đầu nếu có nhập số lượng > 0
-        if (model.TonKhoBanDau.HasValue && model.TonKhoBanDau.Value > 0)
+        catch (Exception ex)
         {
-            int nvId = User.GetMaNv();
-
-            var phieuNhap = new PhieuNhap
-            {
-                MaKho = whId,
-                MaNvlap = nvId,
-                MaNvxacNhan = nvId,
-                NgayLap = DateTime.Now,
-                NgayXacNhan = DateTime.Now,
-                LoaiPhieuNhap = "DAU_KY",
-                TrangThai = "DA_XAC_NHAN",
-                GhiChu = "Tồn kho đầu kỳ khi tạo hàng " + item.MaHangNoiBo
-            };
-            _context.PhieuNhaps.Add(phieuNhap);
-            await _context.SaveChangesAsync();
-
-            var ctpn = new ChiTietPhieuNhap
-            {
-                MaPhieuNhap = phieuNhap.MaPhieuNhap,
-                MaHang = item.MaHang,
-                SoLuong = model.TonKhoBanDau.Value,
-                DonGiaNhap = model.GiaVon > 0 ? model.GiaVon : model.GiaBanThamKhao
-            };
-            _context.ChiTietPhieuNhaps.Add(ctpn);
-            await _context.SaveChangesAsync();
+            await trans.RollbackAsync();
+            return BadRequest(new { message = "Lỗi khi lưu cấu hình tồn kho ban đầu: " + ex.Message });
         }
 
         return Json(new { success = true, id = item.MaHang, message = $"Đã thêm hàng hóa {item.TenHang} thành công." });
@@ -619,18 +708,26 @@ public class HangHoaController : Controller
 
         int whId = GetCurrentWarehouseId();
 
-        // Cập nhật ngưỡng tồn
+        // Cập nhật ngưỡng tồn (Tối thiểu & Tối đa)
         var nguong = await _context.NguongTonKhos.FirstOrDefaultAsync(n => n.MaHang == id && n.MaKho == whId);
-        if (model.TonToiThieu.HasValue && model.TonToiThieu.Value > 0)
+        bool hasThreshold = (model.TonToiThieu.HasValue && model.TonToiThieu.Value > 0) || (model.TonCaoNhat.HasValue && model.TonCaoNhat.Value > 0);
+        if (hasThreshold)
         {
             if (nguong == null)
             {
-                nguong = new NguongTonKho { MaHang = id, MaKho = whId, TonToiThieu = model.TonToiThieu.Value };
+                nguong = new NguongTonKho
+                {
+                    MaHang = id,
+                    MaKho = whId,
+                    TonToiThieu = model.TonToiThieu ?? 0,
+                    TonCaoNhat = model.TonCaoNhat ?? 999999999m
+                };
                 _context.NguongTonKhos.Add(nguong);
             }
             else
             {
-                nguong.TonToiThieu = model.TonToiThieu.Value;
+                nguong.TonToiThieu = model.TonToiThieu ?? 0;
+                nguong.TonCaoNhat = model.TonCaoNhat ?? 999999999m;
             }
         }
         else if (nguong != null)
@@ -712,7 +809,7 @@ public class HangHoaController : Controller
         int maxId = await _context.HangHoas.MaxAsync(x => (int?)x.MaHang) ?? 0;
         int nextNum = Math.Max(maxNum, maxId) + 1;
 
-        return "HH" + nextNum.ToString("D6");
+        return MaChungTuHelper.FormatMaHang(nextNum);
     }
 
     private async Task ValidateAndPrepareForm(HangHoaForm m)
@@ -763,6 +860,35 @@ public class HangHoaController : Controller
         x.GiaBanThamKhao = m.GiaBanThamKhao;
         x.GiaVon = m.GiaVon;
         x.TrangThai = m.TrangThai;
+        x.ViTri = string.IsNullOrWhiteSpace(m.ViTri) ? null : m.ViTri.Trim();
+        x.TrongLuong = m.TrongLuong;
+        x.DonViTrongLuong = string.IsNullOrWhiteSpace(m.DonViTrongLuong) ? "g" : m.DonViTrongLuong.Trim();
+        x.ThuocTinh = string.IsNullOrWhiteSpace(m.ThuocTinhJson) ? null : m.ThuocTinhJson.Trim();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UpdateThuocTinh([FromBody] CapNhatThuocTinhRequest req)
+    {
+        if (req == null || req.MaHang <= 0) return BadRequest(new { message = "Dữ liệu không hợp lệ." });
+        var item = await _context.HangHoas.FindAsync(req.MaHang);
+        if (item == null) return NotFound(new { message = "Không tìm thấy hàng hóa." });
+
+        item.ThuocTinh = string.IsNullOrWhiteSpace(req.ThuocTinhJson) ? null : req.ThuocTinhJson.Trim();
+        await _context.SaveChangesAsync();
+        return Json(new { success = true, message = "Đã cập nhật thuộc tính thành công." });
+    }
+
+    private static List<ThuocTinhItemVM> ParseThuocTinhJson(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return new();
+        try
+        {
+            return System.Text.Json.JsonSerializer.Deserialize<List<ThuocTinhItemVM>>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+        }
+        catch
+        {
+            return new();
+        }
     }
 
     private async Task Options(HangHoaForm? model = null)
@@ -775,9 +901,4 @@ public class HangHoaController : Controller
             new SelectListItem("Ngừng bán", "NGUNG_BAN")
         };
     }
-}
-
-public class QuickGroupRequest
-{
-    public string TenNhom { get; set; } = "";
 }

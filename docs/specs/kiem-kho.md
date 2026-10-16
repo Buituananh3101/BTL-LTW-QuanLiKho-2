@@ -14,10 +14,10 @@
 - [`NhatKyThaoTac`](../../BTL-LTW-QuanLiKho-2/Models/NhatKyThaoTac.cs): Lưu vết hành động cân bằng kho.
 
 ### 1.2. ViewModels sử dụng:
-- [`PhieuKiemKeIndexVM`](../../BTL-LTW-QuanLiKho-2/ViewModels/KiemKhoViewModels.cs): Dữ liệu trang danh sách.
-- [`PhieuKiemKeFormVM`](../../BTL-LTW-QuanLiKho-2/ViewModels/KiemKhoViewModels.cs): Dữ liệu form lập/sửa phiếu.
-- [`PhieuKiemKeLineVM`](../../BTL-LTW-QuanLiKho-2/ViewModels/KiemKhoViewModels.cs): Một dòng hàng hóa kiểm trong bảng chi tiết.
-- [`SaveStockTakeRequest`](../../BTL-LTW-QuanLiKho-2/ViewModels/KiemKhoViewModels.cs): Dữ liệu JSON gửi lên server khi bấm Lưu tạm hoặc Cân bằng kho.
+- [`PhieuKiemKeIndexVM`](../../BTL-LTW-QuanLiKho-2/ViewModels/KiemKho/KiemKhoViewModels.cs): Dữ liệu trang danh sách.
+- [`PhieuKiemKeFormVM`](../../BTL-LTW-QuanLiKho-2/ViewModels/KiemKho/KiemKhoViewModels.cs): Dữ liệu form lập/sửa phiếu.
+- [`PhieuKiemKeLineVM`](../../BTL-LTW-QuanLiKho-2/ViewModels/KiemKho/KiemKhoViewModels.cs): Một dòng hàng hóa kiểm trong bảng chi tiết.
+- [`SaveStockTakeRequest`](../../BTL-LTW-QuanLiKho-2/ViewModels/KiemKho/KiemKhoViewModels.cs): Dữ liệu JSON gửi lên server khi bấm Lưu tạm hoặc Cân bằng kho.
 
 ---
 

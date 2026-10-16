@@ -43,12 +43,43 @@ public class HangHoaForm
     [Display(Name = "Tồn tối thiểu")]
     public decimal? TonToiThieu { get; set; }
 
+    [Range(typeof(decimal), "0", "999999999999999", ErrorMessage = "Định mức tồn cao nhất phải từ 0.")]
+    [Display(Name = "Định mức tồn cao nhất")]
+    public decimal? TonCaoNhat { get; set; }
+
+    [StringLength(100)]
+    [Display(Name = "Vị trí")]
+    public string? ViTri { get; set; }
+
+    [Range(typeof(decimal), "0", "999999999", ErrorMessage = "Trọng lượng phải từ 0.")]
+    [Display(Name = "Trọng lượng")]
+    public decimal? TrongLuong { get; set; }
+
+    [StringLength(10)]
+    [Display(Name = "Đơn vị trọng lượng")]
+    public string? DonViTrongLuong { get; set; } = "g";
+
+    [Display(Name = "Thuộc tính hàng hóa")]
+    public string? ThuocTinhJson { get; set; }
+
     [Required, StringLength(20)]
     [Display(Name = "Trạng thái")]
     public string TrangThai { get; set; } = "DANG_BAN";
 
     public string? HinhAnhBase64 { get; set; }
     public bool XoaHinhAnh { get; set; }
+}
+
+public class ThuocTinhItemVM
+{
+    public string Ten { get; set; } = "";
+    public string GiaTri { get; set; } = "";
+}
+
+public class CapNhatThuocTinhRequest
+{
+    public int MaHang { get; set; }
+    public string? ThuocTinhJson { get; set; }
 }
 
 public class HangHoaItemVM
@@ -64,6 +95,12 @@ public class HangHoaItemVM
     public decimal GiaVon { get; set; }
     public decimal TonKho { get; set; }
     public decimal? TonToiThieu { get; set; }
+    public decimal? TonCaoNhat { get; set; }
+    public string? ViTri { get; set; }
+    public decimal? TrongLuong { get; set; }
+    public string? DonViTrongLuong { get; set; }
+    public string? ThuocTinhJson { get; set; }
+    public List<ThuocTinhItemVM> ThuocTinhs { get; set; } = new();
     public string? QuyCach { get; set; }
     public string TrangThai { get; set; } = "DANG_BAN";
     public bool IsFavorite { get; set; }
@@ -80,7 +117,7 @@ public class HangHoaIndexVM
     public int CurrentWarehouseId { get; set; }
     public string CurrentWarehouseName { get; set; } = "";
     public string? Q { get; set; }
-    public int? Nhom { get; set; }
+    public string? Nhom { get; set; }
     public string? TrangThai { get; set; }
     public string TonKhoFilter { get; set; } = "ALL"; // ALL, DUOI_DINH_MUC, CON_HANG, HET_HANG
     public int Page { get; set; } = 1;
