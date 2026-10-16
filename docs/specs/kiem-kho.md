@@ -51,7 +51,12 @@
   - Áp dụng trên 11 cột (`ma`, `tg`, `tt`, `cl`, `tang`, `giam`, `cb`, `slt`, `ghi`, `st`, `kho`), hỗ trợ căn lề số học `.num` và đồng bộ qua AJAX/Export.
 - **Bung mở chi tiết (`tr.dtl`)**:
   - Click dòng bung mở accordion 5 cột (Mã, Tên, Tồn, Thực tế, Lệch), textarea ghi chú, tổng kết số lượng.
-  - Nút thao tác: Hủy (chỉ phiếu tạm), Sao chép, Xuất file, Mở phiếu, Lưu ghi chú, In.
+  - Nút thao tác: Hủy (chỉ phiếu tạm), Sao chép, Xuất file (`type=detail&id=...`), Mở phiếu, Lưu ghi chú, In.
+- **Xuất file Excel chuẩn KiotViet (`.xlsx`)**:
+  - Hỗ trợ 2 chế độ:
+    + **Xuất danh sách phiếu kiểm** (`type = "list"`): Xuất danh sách phiếu theo bộ lọc với 13 cột chuẩn mực (STT, Mã kiểm kho, Thời gian kiểm, Kho kiểm, Người tạo, Tổng thực tế, Tổng chênh lệch, SL lệch tăng, SL lệch giảm, Tổng giá trị lệch, Ngày cân bằng, Trạng thái, Ghi chú).
+    + **Xuất chi tiết từng dòng hàng** (`type = "detail"`): Xuất chi tiết toàn bộ các dòng hàng hóa kiểm kê của các phiếu lọc được với 16 cột chi tiết. Hỗ trợ xuất riêng 1 phiếu từ nút "Xuất file" trên từng dòng bảng.
+  - Sử dụng thư viện `ClosedXML` xuất file `.xlsx` chuẩn (MIME `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`), áp dụng định dạng Header KiotViet `#0066cc`, viền ô, căn lề và định dạng số `#,#00` / ngày giờ, tự động điều chỉnh độ rộng cột. Loại bỏ dứt điểm lỗi gom toàn bộ dữ liệu vào 1 cột/1 dòng khi mở CSV trên Windows tiếng Việt.
 - **Phân trang**: Tái sử dụng `_Pagination.cshtml` dùng chung qua AJAX.
 
 ### 2.2. Màn hình Lập / Sửa phiếu (`Create` / `Edit`)

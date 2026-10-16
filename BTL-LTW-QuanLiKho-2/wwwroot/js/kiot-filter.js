@@ -1,6 +1,6 @@
 /**
  * kiot-filter.js – Bộ thư viện JavaScript giao diện chuẩn KiotViet dùng chung
- * Phục vụ các màn hình Danh mục: Hàng hóa, Khách hàng, Nhà cung cấp, Quản lý Kho...
+ * Phục vụ các màn hình Danh mục & Chứng từ: Hàng hóa, Kiểm kho, Nhập kho, Khách hàng, NCC...
  */
 
 window.KiotFilter = (function ($) {
@@ -16,12 +16,31 @@ window.KiotFilter = (function ($) {
         };
     }
 
-    // 2. Quản lý trạng thái Thu gọn / Mở rộng Sidebar bên trái (Phím tắt F4)
+    // 2. Định dạng ngày tháng
+    function formatDateVN(date) {
+        if (!date) return '';
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return '';
+        return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+    }
+
+    function formatDateISO(date) {
+        if (!date) return '';
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return '';
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    // 3. Quản lý trạng thái Thu gọn / Mở rộng Sidebar bên trái (Phím tắt F4 & Mobile Drawer)
     function initSidebar(options) {
         const opt = $.extend({
             containerSelector: '#kiotContainer',
             btnToggleSelector: '#btnToggleSidebar',
             iconSelector: '#sidebarToggleIcon',
+            mobileBtnSelector: '#btnMobileFilter',
+            mobileCloseSelector: '#btnCloseSidebarMobile',
+            backdropSelector: '#sidebarBackdrop',
+            sidebarColSelector: '#sidebarFilterCol',
             storageKey: 'kiot_sidebar_state'
         }, options);
 
@@ -51,35 +70,68 @@ window.KiotFilter = (function ($) {
             }
         }
 
-        // Khôi phục trạng thái đã lưu
         if (localStorage.getItem(opt.storageKey) === 'collapsed') {
             toggleSidebar(true);
         }
 
-        // Click nút
         $(opt.btnToggleSelector).on('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
             toggleSidebar();
         });
 
-        // Phím tắt F4
         $(document).on('keydown', function (e) {
             if (e.key === 'F4') {
                 e.preventDefault();
                 toggleSidebar();
             }
         });
+
+        // Mobile drawer
+        $(opt.mobileBtnSelector).on('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(opt.sidebarColSelector).addClass('show-mobile');
+            $(opt.backdropSelector).addClass('show');
+        });
+
+        function closeMobileSidebar() {
+            $(opt.sidebarColSelector).removeClass('show-mobile');
+            $(opt.backdropSelector).removeClass('show');
+        }
+
+        $(`${opt.mobileCloseSelector}, ${opt.backdropSelector}`).on('click', function (e) {
+            e.preventDefault();
+            closeMobileSidebar();
+        });
     }
 
-    // 3. Khởi tạo Dropdown Single-Select (Chọn 1 tiêu chí)
+    // 4. Tự động kiểm tra và lật hướng Dropdown (Auto-flip Drop-up) khi tràn mép dưới
+    function autoFlipDirection(box, dropdown) {
+        const $box = $(box);
+        const $dd = $(dropdown);
+        if (!$box.length || !$dd.length) return;
+
+        const rect = $box[0].getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+
+        if (spaceBelow < 220 && spaceAbove > spaceBelow) {
+            $dd.addClass('drop-up');
+        } else {
+            $dd.removeClass('drop-up');
+        }
+    }
+
+    // 5. Khởi tạo Dropdown Single-Select (Chọn 1 tiêu chí)
     function initSingleSelect(boxSelector, dropdownSelector, onSelectCallback) {
         const box = $(boxSelector);
         const dropdown = $(dropdownSelector);
 
         box.on('click', function (e) {
             e.stopPropagation();
-            $('.kiot-ss-dropdown, .kiot-ms-dropdown').not(dropdown).removeClass('show');
+            $('.kiot-ss-dropdown, .kiot-ms-dropdown, .quick-date-popup, .dual-calendar-popup').not(dropdown).removeClass('show');
+            autoFlipDirection(box, dropdown);
             dropdown.toggleClass('show');
         });
 
@@ -105,7 +157,7 @@ window.KiotFilter = (function ($) {
         });
     }
 
-    // 4. Khởi tạo Dropdown Multi-Select (Chọn nhiều tiêu chí kèm ô tìm kiếm con)
+    // 6. Khởi tạo Dropdown Multi-Select (Chọn nhiều tiêu chí kèm ô tìm kiếm con)
     function initMultiSelect(boxSelector, dropdownSelector, placeholder, onChangeCallback) {
         const box = $(boxSelector);
         const dropdown = $(dropdownSelector);
@@ -113,14 +165,14 @@ window.KiotFilter = (function ($) {
 
         box.on('click', function (e) {
             e.stopPropagation();
-            $('.kiot-ss-dropdown, .kiot-ms-dropdown').not(dropdown).removeClass('show');
+            $('.kiot-ss-dropdown, .kiot-ms-dropdown, .quick-date-popup, .dual-calendar-popup').not(dropdown).removeClass('show');
+            autoFlipDirection(box, dropdown);
             dropdown.toggleClass('show');
             if (dropdown.hasClass('show')) {
                 searchInput.focus();
             }
         });
 
-        // Tìm kiếm con trong danh sách
         searchInput.on('input', function () {
             const kw = $(this).val().toLowerCase().trim();
             dropdown.find('.kiot-ms-item').each(function () {
@@ -129,7 +181,6 @@ window.KiotFilter = (function ($) {
             });
         });
 
-        // Checkbox click
         dropdown.on('click', '.kiot-ms-item', function (e) {
             e.stopPropagation();
             const checkbox = $(this).find('input[type="checkbox"]');
@@ -172,7 +223,354 @@ window.KiotFilter = (function ($) {
         });
     }
 
-    // 5. Gắn sự kiện phân trang AJAX cho bất kỳ bảng dữ liệu nào
+    // 7. Định vị Floating Popup (Quick date & Dual Calendar) chống tràn màn hình
+    function toggleFloatingPopup(triggerElement, popupSelector) {
+        const popup = $(popupSelector);
+        if (popup.is(':visible')) {
+            popup.hide();
+            return;
+        }
+
+        $('.quick-date-popup, .dual-calendar-popup').hide();
+
+        const trigger = $(triggerElement);
+        if (!trigger.length) return;
+
+        const rect = trigger[0].getBoundingClientRect();
+        const popupWidth = popup.outerWidth() || (popupSelector.includes('Calendar') ? 540 : 330);
+
+        let left = rect.left;
+        let top = rect.bottom + 6;
+
+        const maxRight = $(window).width() - 10;
+        if (left + popupWidth > maxRight) {
+            left = maxRight - popupWidth;
+        }
+        if (left < 10) left = 10;
+
+        const popupHeight = popup.outerHeight() || 300;
+        if (top + popupHeight > $(window).height() - 10) {
+            top = Math.max(10, rect.top - popupHeight - 6);
+        }
+
+        popup.css({
+            position: 'fixed',
+            top: top + 'px',
+            left: left + 'px',
+            zIndex: 1060
+        }).show();
+    }
+
+    // 8. Quản lý Bộ lọc Thời gian & Lịch 2 tháng (Dual Calendar) dùng chung
+    const calState = {};
+
+    function initDateFilter(target, onApplyCallback) {
+        const tgtCap = target.charAt(0).toUpperCase() + target.slice(1);
+        const todayObj = new Date();
+
+        calState[target] = {
+            currentYear: todayObj.getFullYear(),
+            currentMonth: todayObj.getMonth(),
+            start: todayObj,
+            end: todayObj,
+            selectingStart: true
+        };
+
+        const quickPopupSelector = `#popup${tgtCap}Quick`;
+        const calPopupSelector = `#popup${tgtCap}Calendar`;
+
+        // Mở popup chọn nhanh
+        $(`#btnOpen${tgtCap}Quick, #label${tgtCap}All`).on('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(`#${target}All`).prop('checked', true);
+            toggleFloatingPopup(this, quickPopupSelector);
+        });
+
+        // Mở popup lịch tùy chỉnh
+        $(`#btnOpen${tgtCap}Calendar, #label${tgtCap}Custom, #${target}Custom`).on('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(`#${target}Custom`).prop('checked', true);
+            renderDualCalendar(target);
+            toggleFloatingPopup(this, calPopupSelector);
+        });
+
+        // Click nút chọn nhanh (Quick date pill/btn)
+        $(quickPopupSelector).on('click', '.quick-date-btn, .quick-date-pill-all', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const val = $(this).data('val') || 'ALL';
+            const labelText = $(this).text().trim();
+            $(`#text${tgtCap}Range`).text(labelText);
+            $(`#${target}All`).prop('checked', true);
+            $(quickPopupSelector).hide();
+
+            $(`#dot${tgtCap}`).toggleClass('on', val !== 'ALL');
+            $(`#${target}FromInput`).val('');
+            $(`#${target}ToInput`).val('');
+
+            if (typeof onApplyCallback === 'function') {
+                onApplyCallback(null, null, labelText, val);
+            }
+        });
+
+        // Render lịch 2 tháng
+        function renderDualCalendar(tgt) {
+            const st = calState[tgt];
+            const y = st.currentYear;
+            const m = st.currentMonth;
+
+            renderMonth(tgt, 1, y, m);
+
+            let y2 = y;
+            let m2 = m + 1;
+            if (m2 > 11) { m2 = 0; y2++; }
+            renderMonth(tgt, 2, y2, m2);
+
+            updateCalendarHeader(tgt);
+        }
+
+        function renderMonth(tgt, idx, year, month) {
+            $(`#${tgt}MonthTitle${idx}`).text(`Tháng ${month + 1} ${year}`);
+            const tbody = $(`#${tgt}CalBody${idx}`).empty();
+
+            const firstDayOfWeek = (new Date(year, month, 1).getDay() + 6) % 7;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+            let tr = $('<tr>');
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const day = daysInPrevMonth - firstDayOfWeek + i + 1;
+                tr.append(`<td class="text-muted other-month" style="opacity: 0.35;">${day}</td>`);
+            }
+
+            const st = calState[tgt];
+            const sTime = st.start ? new Date(st.start).setHours(0, 0, 0, 0) : null;
+            const eTime = st.end ? new Date(st.end).setHours(0, 0, 0, 0) : null;
+            const todayTime = new Date().setHours(0, 0, 0, 0);
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                if (tr.children().length === 7) {
+                    tbody.append(tr);
+                    tr = $('<tr>');
+                }
+
+                const curTime = new Date(year, month, day).setHours(0, 0, 0, 0);
+                let cls = 'cal-day';
+                if (curTime === todayTime) cls += ' today';
+                if (sTime && curTime === sTime) cls += ' sel-start selected';
+                if (eTime && curTime === eTime) cls += ' sel-end selected';
+                if (sTime && eTime && curTime > sTime && curTime < eTime) cls += ' in-range';
+
+                tr.append(`<td class="${cls}" data-target="${tgt}" data-y="${year}" data-m="${month}" data-d="${day}">${day}</td>`);
+            }
+
+            while (tr.children().length < 7) {
+                tr.append('<td class="text-muted other-month" style="opacity: 0.35;"></td>');
+            }
+            tbody.append(tr);
+        }
+
+        function updateCalendarHeader(tgt) {
+            const st = calState[tgt];
+            if (st.start && st.end) {
+                $(`#${tgt}CalFromText`).text(formatDateVN(st.start));
+                $(`#${tgt}CalToText`).text(formatDateVN(st.end));
+            }
+        }
+
+        // Click ngày trong lịch
+        $(calPopupSelector).on('click', '.cal-day', function (e) {
+            e.stopPropagation();
+            const tgt = $(this).data('target');
+            const y = parseInt($(this).data('y'));
+            const m = parseInt($(this).data('m'));
+            const d = parseInt($(this).data('d'));
+            const clicked = new Date(y, m, d);
+
+            const st = calState[tgt];
+            if (st.selectingStart) {
+                st.start = clicked;
+                st.end = clicked;
+                st.selectingStart = false;
+            } else {
+                if (clicked < st.start) {
+                    st.end = st.start;
+                    st.start = clicked;
+                } else {
+                    st.end = clicked;
+                }
+                st.selectingStart = true;
+            }
+            renderDualCalendar(tgt);
+        });
+
+        // Tháng trước / sau
+        $(calPopupSelector).on('click', '.btn-cal-prev', function (e) {
+            e.stopPropagation();
+            const tgt = $(this).data('target');
+            const st = calState[tgt];
+            st.currentMonth--;
+            if (st.currentMonth < 0) {
+                st.currentMonth = 11;
+                st.currentYear--;
+            }
+            renderDualCalendar(tgt);
+        });
+
+        $(calPopupSelector).on('click', '.btn-cal-next', function (e) {
+            e.stopPropagation();
+            const tgt = $(this).data('target');
+            const st = calState[tgt];
+            st.currentMonth++;
+            if (st.currentMonth > 11) {
+                st.currentMonth = 0;
+                st.currentYear++;
+            }
+            renderDualCalendar(tgt);
+        });
+
+        // Nút Hôm nay
+        $(calPopupSelector).on('click', '.btn-cal-today', function (e) {
+            e.stopPropagation();
+            const tgt = $(this).data('target');
+            const t = new Date();
+            const st = calState[tgt];
+            st.currentYear = t.getFullYear();
+            st.currentMonth = t.getMonth();
+            st.start = t;
+            st.end = t;
+            renderDualCalendar(tgt);
+        });
+
+        // Nút Đóng / Bỏ qua
+        $(calPopupSelector).on('click', '.btn-close-popup', function (e) {
+            e.stopPropagation();
+            $(calPopupSelector).hide();
+        });
+
+        // Nút Áp dụng lịch
+        $(calPopupSelector).on('click', '.btn-apply-calendar', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const tgt = $(this).data('target');
+            const st = calState[tgt];
+            const s = st.start || new Date();
+            const eDate = st.end || s;
+            const rangeText = `${formatDateVN(s)} - ${formatDateVN(eDate)}`;
+
+            $(`#text${tgtCap}Custom`).text(rangeText);
+            $(`#${tgt}Custom`).prop('checked', true);
+            $(`#dot${tgtCap}`).addClass('on');
+            $(calPopupSelector).hide();
+
+            $(`#${tgt}FromInput`).val(formatDateISO(s));
+            $(`#${tgt}ToInput`).val(formatDateISO(eDate));
+
+            if (typeof onApplyCallback === 'function') {
+                onApplyCallback(formatDateISO(s), formatDateISO(eDate), rangeText, 'CUSTOM');
+            }
+        });
+
+        // Tự đóng khi click ra ngoài
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest(`.kiot-date-filter-block[data-date-target="${target}"], ${quickPopupSelector}, ${calPopupSelector}`).length) {
+                $(quickPopupSelector).hide();
+                $(calPopupSelector).hide();
+            }
+        });
+    }
+
+    // 9. Quản lý Ẩn / Hiện Cột bảng dữ liệu (Column Visibility)
+    function initColumnToggle(menuSelector, tableSelector, storageKey) {
+        const menu = $(menuSelector);
+        const table = $(tableSelector);
+        if (!menu.length || !table.length) return;
+
+        // Đọc cấu hình từ localStorage
+        let savedCols = {};
+        try {
+            savedCols = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        } catch (_) { }
+
+        // Khôi phục trạng thái checkbox và ẩn cột
+        menu.find('input[type="checkbox"]').each(function () {
+            const col = $(this).data('c');
+            if (col && savedCols[col] !== undefined) {
+                $(this).prop('checked', savedCols[col] === 1);
+            }
+        });
+        applyVisibility();
+
+        menu.on('change', 'input[type="checkbox"]', function () {
+            applyVisibility();
+            saveState();
+        });
+
+        function applyVisibility() {
+            menu.find('input[type="checkbox"]').each(function () {
+                const col = $(this).data('c');
+                const isChecked = $(this).is(':checked');
+                if (col) {
+                    table.find(`[data-col="${col}"], .col-${col}`).toggle(isChecked);
+                }
+            });
+        }
+
+        function saveState() {
+            const state = {};
+            menu.find('input[type="checkbox"]').each(function () {
+                const col = $(this).data('c');
+                if (col) {
+                    state[col] = $(this).is(':checked') ? 1 : 0;
+                }
+            });
+            localStorage.setItem(storageKey, JSON.stringify(state));
+        }
+    }
+
+    // 10. Gắn sự kiện Đánh dấu sao Yêu thích (Favorite Star)
+    function bindStarToggle(tableSelector, toggleUrl, callback) {
+        $(tableSelector).on('click', '.star-btn, .btn-star, .star', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const btn = $(this);
+            const id = btn.data('id') || btn.closest('tr').data('id');
+            if (!id || !toggleUrl) return;
+
+            $.ajax({
+                url: toggleUrl,
+                type: 'POST',
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        const isFav = res.isFavorite !== undefined ? res.isFavorite : res.isStarred;
+                        btn.toggleClass('starred on', !!isFav);
+                        btn.find('i').toggleClass('bi-star-fill text-warning', !!isFav).toggleClass('bi-star text-muted', !isFav);
+
+                        if (window.KiotToast) {
+                            window.KiotToast.success(isFav ? 'Đã thêm vào mục yêu thích.' : 'Đã bỏ đánh dấu sao.');
+                        }
+
+                        if (typeof callback === 'function') {
+                            callback(id, isFav);
+                        }
+                    }
+                },
+                error: function () {
+                    if (window.KiotToast) {
+                        window.KiotToast.error('Không thể cập nhật đánh dấu sao.');
+                    }
+                }
+            });
+        });
+    }
+
+    // 11. Gắn sự kiện phân trang AJAX
     function bindPagination(containerSelector, onPageChangeCallback) {
         $(containerSelector).on('click', '.page-ajax', function (e) {
             e.preventDefault();
@@ -183,11 +581,96 @@ window.KiotFilter = (function ($) {
         });
     }
 
+    // 12. Xử lý escape ký tự HTML an toàn
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // 13. Tự động kiểm tra và đảo hướng Dropdown trên Sidebar (Drop-up khi gần mép dưới)
+    function checkSidebarDropdownDirection(box, dropdown) {
+        const $box = $(box);
+        const $dd = $(dropdown);
+        if (!$box.length || !$dd.length) return;
+
+        const boxRect = $box[0].getBoundingClientRect();
+        const filterBox = $box.closest('.kiot-filter-box');
+
+        let containerBottom = window.innerHeight;
+        let containerTop = 0;
+
+        if (filterBox.length) {
+            const filterRect = filterBox[0].getBoundingClientRect();
+            containerBottom = Math.min(filterRect.bottom, window.innerHeight);
+            containerTop = Math.max(filterRect.top, 0);
+        }
+
+        const spaceBelow = containerBottom - boxRect.bottom;
+        const spaceAbove = boxRect.top - containerTop;
+        const neededHeight = 220;
+
+        if (spaceBelow < neededHeight && spaceAbove > spaceBelow) {
+            $dd.addClass('drop-up');
+            const maxH = Math.min(250, Math.max(120, spaceAbove - 10));
+            $dd.css('max-height', maxH + 'px');
+        } else {
+            $dd.removeClass('drop-up');
+            const maxH = Math.min(250, Math.max(120, spaceBelow - 10));
+            $dd.css('max-height', maxH + 'px');
+        }
+    }
+
+    // 14. Render danh sách Tag Chips trong ô Multi-select (.kiot-pill-tag & .kiot-pill-more)
+    function renderTagPills(boxElement, selectedItems, placeholder, maxVisible) {
+        const box = $(boxElement);
+        if (!box.length) return;
+        maxVisible = maxVisible || 3;
+
+        if (!selectedItems || selectedItems.length === 0) {
+            box.html(`<span class="kiot-ms-placeholder">${escapeHtml(placeholder)}</span>`);
+            return;
+        }
+
+        let html = '';
+        const visibleCount = Math.min(selectedItems.length, maxVisible);
+        for (let i = 0; i < visibleCount; i++) {
+            const item = selectedItems[i];
+            html += `
+                <span class="kiot-pill-tag" data-val="${escapeHtml(item.val)}">
+                    <span class="tag-text">${escapeHtml(item.name)}</span>
+                    <span class="tag-remove" title="Bỏ chọn">&times;</span>
+                </span>
+            `;
+        }
+
+        if (selectedItems.length > maxVisible) {
+            const remaining = selectedItems.length - maxVisible;
+            const otherNames = selectedItems.slice(maxVisible).map(x => x.name).join(', ');
+            html += `<span class="kiot-pill-more" title="${escapeHtml(otherNames)}">+${remaining} khác</span>`;
+        }
+
+        box.html(html);
+    }
+
     return {
         debounce: debounce,
+        escapeHtml: escapeHtml,
+        formatDateVN: formatDateVN,
+        formatDateISO: formatDateISO,
         initSidebar: initSidebar,
+        checkSidebarDropdownDirection: checkSidebarDropdownDirection,
+        renderTagPills: renderTagPills,
         initSingleSelect: initSingleSelect,
         initMultiSelect: initMultiSelect,
+        toggleFloatingPopup: toggleFloatingPopup,
+        initDateFilter: initDateFilter,
+        initColumnToggle: initColumnToggle,
+        bindStarToggle: bindStarToggle,
         bindPagination: bindPagination
     };
 })(jQuery);

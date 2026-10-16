@@ -91,3 +91,28 @@ Hệ thống sử dụng **duy nhất một Layout chính** cho toàn bộ các 
 2. **Modal thêm/sửa nhanh**:
    - Dùng Modal chuẩn của Bootstrap 5 (`modal fade`).
    - Gửi dữ liệu bằng `fetch` hoặc `$.ajax` dạng JSON, nhận phản hồi `{ success: true, message: "..." }`, hiển thị toast/alert và cập nhật bảng mà không reload trang.
+
+---
+
+## 6. Các Khối Giao Diện & Tiện Ích Dùng Chung (Lego Framework)
+
+Hệ thống đóng gói các thành phần lặp lại thành các "mảnh ghép Lego" độc lập, gọi 1 dòng:
+
+1. **Bộ lọc Ngày tháng (`_KiotDateFilter.cshtml` & `KiotDateFilterVM`)**:
+   - Razor: `<partial name="_KiotDateFilter" model='new KiotDateFilterVM { TargetId = "date", Label = "Thời gian", PresetVal = "ALL", DateType = "past" }' />`
+   - Client JS: `KiotFilter.initDateFilter("date", (from, to, text, val) => { ... })`
+   - Backend: `var (from, to) = DateRangeHelper.Resolve(filter.DateFilterType, filter.FromDate, filter.ToDate);`
+2. **Phân trang AJAX (`_Pagination.cshtml` & `PagedResult<T>`)**:
+   - Razor: `<partial name="_Pagination" model="Model.PagedData" />` (kết hợp `BaseFilterParams`).
+3. **Hệ thống Toast KiotViet (`site.js` & `site.css`)**:
+   - Cú pháp: `KiotToast.success("..."), KiotToast.error("..."), KiotToast.warning("..."), KiotToast.info("...")`.
+4. **Ẩn / Hiện Cột bảng (`KiotFilter.initColumnToggle`)**:
+   - Cú pháp: `KiotFilter.initColumnToggle('#colMenu', '#myTable', 'storage_key');`
+5. **Đánh dấu Sao Bookmark (`KiotFilter.bindStarToggle`)**:
+   - Cú pháp: `KiotFilter.bindStarToggle('#myTable', '/Controller/ToggleFavorite', callback);`
+6. **Bộ lọc Dropdown Chọn Nhiều Multi-Select (`_KiotMultiSelectFilter.cshtml` & `KiotMultiSelectVM`)**:
+   - Razor: `<partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("Ncc", "ncc", "Nhà cung cấp", "Chọn NCC", true) { Items = ... }' />`
+   - Client JS: Hỗ trợ tìm kiếm con, tự động đảo hướng `KiotFilter.checkSidebarDropdownDirection`, render tag chips `KiotFilter.renderTagPills`.
+7. **Bộ lọc Trạng thái Chứng từ Checkbox (`_KiotStatusFilter.cshtml` & `KiotStatusFilterVM`)**:
+   - Razor: `<partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Trạng thái", "dotSt", options)' />`
+

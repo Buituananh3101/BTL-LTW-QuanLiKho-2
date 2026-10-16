@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using BTL_LTW_QuanLiKho_2.Models;
 using BTL_LTW_QuanLiKho_2.ViewModels;
 using BTL_LTW_QuanLiKho_2.Services;
+using BTL_LTW_QuanLiKho_2.Helpers;
+using ClosedXML.Excel;
 
 namespace BTL_LTW_QuanLiKho_2.Controllers;
 
@@ -25,50 +27,9 @@ public class PhieuKiemKeController : BaseKhoController
 
     private (DateTime fromDate, DateTime toDate) ResolveDateRange(string? filterType, DateTime? customFrom, DateTime? customTo)
     {
-        var now = DateTime.Now;
-        var today = now.Date;
-
-        return (filterType ?? "").ToUpper() switch
-        {
-            "ALL" or "TOANTHOIGIAN" => (new DateTime(2000, 1, 1), now.AddYears(10)),
-            "TODAY" or "HOMNAY" or "HOM_NAY" => (today, today.AddDays(1).AddTicks(-1)),
-            "YESTERDAY" or "HOMQUA" or "HOM_QUA" => (today.AddDays(-1), today.AddTicks(-1)),
-            "THIS_WEEK" or "TUANNAY" or "TUAN_NAY" =>
-                (today.AddDays(-(int)(today.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)today.DayOfWeek - 1)),
-                 today.AddDays(7 - (today.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)today.DayOfWeek)).AddDays(1).AddTicks(-1)),
-            "LAST_WEEK" or "TUANTRUOC" or "TUAN_TRUOC" =>
-                (today.AddDays(-(int)(today.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)today.DayOfWeek - 1) - 7),
-                 today.AddDays(-(int)(today.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)today.DayOfWeek - 1)).AddTicks(-1)),
-            "LAST_7_DAYS" or "7NGAY" or "7_NGAY" => (today.AddDays(-6), now),
-            "THIS_MONTH" or "THANGNAY" or "THANG_NAY" => (new DateTime(now.Year, now.Month, 1), new DateTime(now.Year, now.Month, 1).AddMonths(1).AddTicks(-1)),
-            "LAST_MONTH" or "THANGTRUOC" or "THANG_TRUOC" =>
-                (new DateTime(now.Year, now.Month, 1).AddMonths(-1),
-                 new DateTime(now.Year, now.Month, 1).AddTicks(-1)),
-            "LAST_30_DAYS" or "30NGAY" or "30_NGAY" => (today.AddDays(-29), now),
-            "THIS_QUARTER" or "QUYNAY" or "QUY_NAY" =>
-            (
-                new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1),
-                new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1).AddMonths(3).AddTicks(-1)
-            ),
-            "LAST_QUARTER" or "QUYTRUOC" or "QUY_TRUOC" =>
-            (
-                new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1).AddMonths(-3),
-                new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1).AddTicks(-1)
-            ),
-            "THIS_YEAR" or "NAMNAY" or "NAM_NAY" => (new DateTime(now.Year, 1, 1), new DateTime(now.Year, 12, 31, 23, 59, 59)),
-            "LAST_YEAR" or "NAMTRUOC" or "NAM_TRUOC" => (new DateTime(now.Year - 1, 1, 1), new DateTime(now.Year - 1, 12, 31, 23, 59, 59)),
-            "CUSTOM" =>
-            (
-                customFrom.HasValue ? customFrom.Value.ToLocalTime().Date : new DateTime(now.Year, now.Month, 1),
-                customTo.HasValue ? customTo.Value.ToLocalTime().Date.AddDays(1).AddTicks(-1) : now
-            ),
-            _ => (
-                customFrom.HasValue && customTo.HasValue
-                    ? (customFrom.Value.ToLocalTime().Date, customTo.Value.ToLocalTime().Date.AddDays(1).AddTicks(-1))
-                    : (new DateTime(now.Year, now.Month, 1), new DateTime(now.Year, now.Month, 1).AddMonths(1).AddTicks(-1))
-            )
-        };
+        return DateRangeHelper.Resolve(filterType, customFrom, customTo);
     }
+
 
     // GET: PhieuKiemKe/Index
     public async Task<IActionResult> Index(PhieuKiemKeFilterVM filter)
@@ -1016,39 +977,284 @@ public class PhieuKiemKeController : BaseKhoController
         });
     }
 
-    // GET: PhieuKiemKe/Export?type=list|detail
+    // GET: PhieuKiemKe/Export?type=list|detail&id=...
     [HttpGet]
-    public async Task<IActionResult> Export(string type, PhieuKiemKeFilterVM filter)
+    public async Task<IActionResult> Export(string? type, PhieuKiemKeFilterVM filter, int? id = null, string? format = "excel")
     {
+        if (id.HasValue && id.Value > 0)
+        {
+            filter.Q = null;
+            filter.Statuses = new();
+            filter.DateFilterType = "ALL";
+            filter.WarehouseId = null;
+        }
+
+        filter.Page = 1;
         filter.PageSize = 10000;
         var model = await BuildIndexViewModel(filter);
 
-        var csv = new System.Text.StringBuilder();
-        csv.AppendLine("\uFEFF"); // UTF-8 BOM
-
-        if (type == "detail")
+        if (id.HasValue && id.Value > 0)
         {
-            csv.AppendLine("Mã kiểm kho,Mã hàng,Tên hàng,Tồn kho,Thực tế,SL lệch,Giá trị lệch");
+            model.Items = model.Items.Where(p => p.MaPhieuKiemKe == id.Value).ToList();
+        }
+
+        bool isDetail = string.Equals(type, "detail", StringComparison.OrdinalIgnoreCase);
+
+        // Trường hợp người dùng yêu cầu rõ định dạng CSV qua query string (?format=csv)
+        if (string.Equals(format, "csv", StringComparison.OrdinalIgnoreCase))
+        {
+            var csv = new System.Text.StringBuilder();
+
+            if (isDetail)
+            {
+                csv.AppendLine("STT,Mã kiểm kho,Thời gian kiểm,Kho kiểm,Người tạo,Trạng thái,Mã hàng,Tên hàng,Đơn vị tính,Tồn kho,Thực tế,SL lệch,Đơn giá,Giá trị lệch,Ngày cân bằng,Ghi chú");
+                int stt = 1;
+                foreach (var item in model.Items)
+                {
+                    if (item.Lines.Any())
+                    {
+                        foreach (var line in item.Lines)
+                        {
+                            var diff = line.SlChenhLech;
+                            var valDiff = line.GiaTriLech;
+                            csv.AppendLine($"{stt++},\"{EscapeCsv(item.MaPhieuHienThi)}\",\"{item.ThoiDiemChot:dd/MM/yyyy HH:mm}\",\"{EscapeCsv(item.TenKho)}\",\"{EscapeCsv(item.TenNguoiLap)}\",\"{EscapeCsv(item.TenTrangThai)}\",\"{EscapeCsv(line.MaHangNoiBo)}\",\"{EscapeCsv(line.TenHang)}\",\"{EscapeCsv(line.TenDvt)}\",{line.SoLuongTheoSo},{(line.SoLuongThucTe.HasValue ? line.SoLuongThucTe.Value.ToString() : "")},{(diff.HasValue ? diff.Value.ToString() : "")},{line.DonGia},{(valDiff.HasValue ? valDiff.Value.ToString() : "")},\"{(item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "")}\",\"{EscapeCsv(item.GhiChu)}\"");
+                        }
+                    }
+                    else
+                    {
+                        csv.AppendLine($"{stt++},\"{EscapeCsv(item.MaPhieuHienThi)}\",\"{item.ThoiDiemChot:dd/MM/yyyy HH:mm}\",\"{EscapeCsv(item.TenKho)}\",\"{EscapeCsv(item.TenNguoiLap)}\",\"{EscapeCsv(item.TenTrangThai)}\",\"\",\"\",\"\",0,\"\",\"\",0,\"\",\"{(item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "")}\",\"{EscapeCsv(item.GhiChu)}\"");
+                    }
+                }
+                var bytes = System.Text.Encoding.UTF8.GetPreamble().Concat(System.Text.Encoding.UTF8.GetBytes(csv.ToString())).ToArray();
+                return File(bytes, "text/csv; charset=utf-8", $"ChiTietKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.csv");
+            }
+            else
+            {
+                csv.AppendLine("STT,Mã kiểm kho,Thời gian kiểm,Kho kiểm,Người tạo,Tổng thực tế,Tổng chênh lệch,SL lệch tăng,SL lệch giảm,Tổng giá trị lệch,Ngày cân bằng,Trạng thái,Ghi chú");
+                int stt = 1;
+                foreach (var item in model.Items)
+                {
+                    csv.AppendLine($"{stt++},\"{EscapeCsv(item.MaPhieuHienThi)}\",\"{item.ThoiDiemChot:dd/MM/yyyy HH:mm}\",\"{EscapeCsv(item.TenKho)}\",\"{EscapeCsv(item.TenNguoiLap)}\",{item.TongThucTe},{item.TongChenhLech},{item.SlLechTang},{item.SlLechGiam},{item.TongGiaTriLech},\"{(item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "")}\",\"{EscapeCsv(item.TenTrangThai)}\",\"{EscapeCsv(item.GhiChu)}\"");
+                }
+                var bytes = System.Text.Encoding.UTF8.GetPreamble().Concat(System.Text.Encoding.UTF8.GetBytes(csv.ToString())).ToArray();
+                return File(bytes, "text/csv; charset=utf-8", $"DanhSachKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.csv");
+            }
+        }
+
+        // Mặc định xuất file Excel (.xlsx) chuẩn KiotViet bằng ClosedXML
+        using var workbook = new XLWorkbook();
+        if (isDetail)
+        {
+            var ws = workbook.Worksheets.Add("ChiTietKiemKho");
+            var headers = new[]
+            {
+                "STT", "Mã kiểm kho", "Thời gian kiểm", "Kho kiểm", "Người tạo", "Trạng thái",
+                "Mã hàng", "Tên hàng", "ĐVT", "Tồn kho", "Thực tế", "SL lệch",
+                "Đơn giá", "Giá trị lệch", "Ngày cân bằng", "Ghi chú"
+            };
+
+            for (int i = 0; i < headers.Length; i++)
+            {
+                ws.Cell(1, i + 1).Value = headers[i];
+            }
+            ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
+            ws.Row(1).Height = 28;
+
+            int rowIdx = 2;
+            int stt = 1;
             foreach (var item in model.Items)
             {
-                foreach (var line in item.Lines)
+                if (item.Lines.Any())
                 {
-                    var diff = line.SlChenhLech;
-                    var valDiff = line.GiaTriLech;
-                    csv.AppendLine($"\"{item.MaPhieuHienThi}\",\"{line.MaHangNoiBo}\",\"{line.TenHang.Replace("\"", "\"\"")}\",{line.SoLuongTheoSo},{(line.SoLuongThucTe.HasValue ? line.SoLuongThucTe.Value.ToString() : "")},{(diff.HasValue ? diff.Value.ToString() : "")},{(valDiff.HasValue ? valDiff.Value.ToString() : "")}");
+                    foreach (var line in item.Lines)
+                    {
+                        ws.Cell(rowIdx, 1).Value = stt++;
+                        ws.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                        ws.Cell(rowIdx, 2).Value = item.MaPhieuHienThi;
+                        ws.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                        ws.Cell(rowIdx, 3).Value = item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm");
+                        ws.Cell(rowIdx, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                        ws.Cell(rowIdx, 4).Value = item.TenKho;
+                        ws.Cell(rowIdx, 5).Value = item.TenNguoiLap;
+
+                        ws.Cell(rowIdx, 6).Value = item.TenTrangThai;
+                        ws.Cell(rowIdx, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                        ws.Cell(rowIdx, 7).Value = line.MaHangNoiBo;
+                        ws.Cell(rowIdx, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                        ws.Cell(rowIdx, 8).Value = line.TenHang;
+
+                        ws.Cell(rowIdx, 9).Value = line.TenDvt;
+                        ws.Cell(rowIdx, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                        ws.Cell(rowIdx, 10).Value = line.SoLuongTheoSo;
+                        ws.Cell(rowIdx, 10).Style.NumberFormat.Format = "#,##0.##";
+
+                        if (line.SoLuongThucTe.HasValue)
+                        {
+                            ws.Cell(rowIdx, 11).Value = line.SoLuongThucTe.Value;
+                            ws.Cell(rowIdx, 11).Style.NumberFormat.Format = "#,##0.##";
+                        }
+                        else
+                        {
+                            ws.Cell(rowIdx, 11).Value = "";
+                        }
+
+                        if (line.SlChenhLech.HasValue)
+                        {
+                            ws.Cell(rowIdx, 12).Value = line.SlChenhLech.Value;
+                            ws.Cell(rowIdx, 12).Style.NumberFormat.Format = "#,##0.##";
+                        }
+                        else
+                        {
+                            ws.Cell(rowIdx, 12).Value = "";
+                        }
+
+                        ws.Cell(rowIdx, 13).Value = line.DonGia;
+                        ws.Cell(rowIdx, 13).Style.NumberFormat.Format = "#,##0";
+
+                        if (line.GiaTriLech.HasValue)
+                        {
+                            ws.Cell(rowIdx, 14).Value = line.GiaTriLech.Value;
+                            ws.Cell(rowIdx, 14).Style.NumberFormat.Format = "#,##0";
+                        }
+                        else
+                        {
+                            ws.Cell(rowIdx, 14).Value = "";
+                        }
+
+                        ws.Cell(rowIdx, 15).Value = item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "";
+                        ws.Cell(rowIdx, 15).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                        ws.Cell(rowIdx, 16).Value = item.GhiChu ?? "";
+
+                        rowIdx++;
+                    }
+                }
+                else
+                {
+                    ws.Cell(rowIdx, 1).Value = stt++;
+                    ws.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    ws.Cell(rowIdx, 2).Value = item.MaPhieuHienThi;
+                    ws.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    ws.Cell(rowIdx, 3).Value = item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm");
+                    ws.Cell(rowIdx, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    ws.Cell(rowIdx, 4).Value = item.TenKho;
+                    ws.Cell(rowIdx, 5).Value = item.TenNguoiLap;
+
+                    ws.Cell(rowIdx, 6).Value = item.TenTrangThai;
+                    ws.Cell(rowIdx, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    ws.Cell(rowIdx, 7).Value = "";
+                    ws.Cell(rowIdx, 8).Value = "(Phiếu chưa có danh sách hàng)";
+                    ws.Cell(rowIdx, 9).Value = "";
+                    ws.Cell(rowIdx, 10).Value = 0;
+                    ws.Cell(rowIdx, 11).Value = "";
+                    ws.Cell(rowIdx, 12).Value = "";
+                    ws.Cell(rowIdx, 13).Value = 0;
+                    ws.Cell(rowIdx, 14).Value = "";
+
+                    ws.Cell(rowIdx, 15).Value = item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "";
+                    ws.Cell(rowIdx, 15).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    ws.Cell(rowIdx, 16).Value = item.GhiChu ?? "";
+
+                    rowIdx++;
                 }
             }
-            return File(System.Text.Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", $"ChiTietKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.csv");
+
+            if (rowIdx > 2)
+            {
+                ExcelHelper.ApplyTableBorders(ws.Range(1, 1, rowIdx - 1, headers.Length));
+            }
+            ws.Columns().AdjustToContents();
+
+            using var ms = new MemoryStream();
+            workbook.SaveAs(ms);
+            return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"ChiTietKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
         else
         {
-            csv.AppendLine("Mã kiểm kho,Thời gian,Tổng thực tế,Tổng chênh lệch,SL lệch tăng,SL lệch giảm,Ngày cân bằng,SL thực tế,Ghi chú,Trạng thái,Kho");
+            var ws = workbook.Worksheets.Add("DanhSachPhieuKiem");
+            var headers = new[]
+            {
+                "STT", "Mã kiểm kho", "Thời gian kiểm", "Kho kiểm", "Người tạo",
+                "Tổng thực tế", "Tổng chênh lệch", "SL lệch tăng", "SL lệch giảm",
+                "Tổng giá trị lệch", "Ngày cân bằng", "Trạng thái", "Ghi chú"
+            };
+
+            for (int i = 0; i < headers.Length; i++)
+            {
+                ws.Cell(1, i + 1).Value = headers[i];
+            }
+            ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
+            ws.Row(1).Height = 28;
+
+            int rowIdx = 2;
+            int stt = 1;
             foreach (var item in model.Items)
             {
-                csv.AppendLine($"\"{item.MaPhieuHienThi}\",\"{item.ThoiDiemChot:dd/MM/yyyy HH:mm}\",{item.TongThucTe},{item.TongChenhLech},{item.SlLechTang},{item.SlLechGiam},\"{(item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "")}\",{item.TongThucTe},\"{item.GhiChu?.Replace("\"", "\"\"")}\",\"{item.TenTrangThai}\",\"{item.TenKho}\"");
+                ws.Cell(rowIdx, 1).Value = stt++;
+                ws.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws.Cell(rowIdx, 2).Value = item.MaPhieuHienThi;
+                ws.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws.Cell(rowIdx, 3).Value = item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm");
+                ws.Cell(rowIdx, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws.Cell(rowIdx, 4).Value = item.TenKho;
+                ws.Cell(rowIdx, 5).Value = item.TenNguoiLap;
+
+                ws.Cell(rowIdx, 6).Value = item.TongThucTe;
+                ws.Cell(rowIdx, 6).Style.NumberFormat.Format = "#,##0.##";
+
+                ws.Cell(rowIdx, 7).Value = item.TongChenhLech;
+                ws.Cell(rowIdx, 7).Style.NumberFormat.Format = "#,##0.##";
+
+                ws.Cell(rowIdx, 8).Value = item.SlLechTang;
+                ws.Cell(rowIdx, 8).Style.NumberFormat.Format = "#,##0.##";
+
+                ws.Cell(rowIdx, 9).Value = item.SlLechGiam;
+                ws.Cell(rowIdx, 9).Style.NumberFormat.Format = "#,##0.##";
+
+                ws.Cell(rowIdx, 10).Value = item.TongGiaTriLech;
+                ws.Cell(rowIdx, 10).Style.NumberFormat.Format = "#,##0";
+
+                ws.Cell(rowIdx, 11).Value = item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "";
+                ws.Cell(rowIdx, 11).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws.Cell(rowIdx, 12).Value = item.TenTrangThai;
+                ws.Cell(rowIdx, 12).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws.Cell(rowIdx, 13).Value = item.GhiChu ?? "";
+
+                rowIdx++;
             }
-            return File(System.Text.Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", $"DanhSachKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.csv");
+
+            if (rowIdx > 2)
+            {
+                ExcelHelper.ApplyTableBorders(ws.Range(1, 1, rowIdx - 1, headers.Length));
+            }
+            ws.Columns().AdjustToContents();
+
+            using var ms = new MemoryStream();
+            workbook.SaveAs(ms);
+            return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
+    }
+
+    private static string EscapeCsv(string? val)
+    {
+        if (string.IsNullOrEmpty(val)) return "";
+        return val.Replace("\"", "\"\"").Replace("\r", " ").Replace("\n", " ");
     }
 }
 

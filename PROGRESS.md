@@ -1,20 +1,53 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-16 – Đồng bộ Tính năng Sắp xếp Cột 3 Trạng thái trong Kiểm kho (Phiên 42)
+Cập nhật lần cuối: 2026-10-16 – Chuẩn hóa & Tối ưu hóa Bộ lọc LeftMenu dùng chung thành Khối Lego (Shared Multi-Select & Status Filter Components) (Phiên 45)
 
 ---
 
 ## Đang làm
-- Kiểm tra người dùng nghiệm thu tính năng sắp xếp cột 3 trạng thái trong danh sách phiếu kiểm kho.
+- Chuẩn bị xây dựng Phân hệ Nhập kho: Soạn thảo tài liệu đặc tả `docs/specs/nhap-kho.md` từ khuôn mẫu `_mau-dac-ta.md`, chuẩn bị các ViewModel và `PhieuNhapController`.
 
 ---
 
 ## Việc kế tiếp
-- Tiếp tục rà soát và hoàn thiện các nghiệp vụ chứng từ kho tiếp theo (Nhập hàng, Xuất kho, Chuyển kho) dựa trên khuôn mẫu Hàng hóa và Kiểm kho.
+1. Lập tài liệu đặc tả chi tiết `docs/specs/nhap-kho.md` theo chuẩn Kiểm kho.
+2. Xây dựng ViewModel cho Nhập kho (`NhapKhoIndexVM`, `NhapKhoFormVM`, `NhapKhoLineVM`...).
+3. Xây dựng `PhieuNhapController` và View giao diện (`Views/PhieuNhap/`) theo phong cách KiotViet dựa trên các khối Lego dùng chung đã đóng gói.
 
 ---
 
 ## Đã xong
+- **Chuẩn hóa & Tối ưu hóa Bộ lọc LeftMenu dùng chung thành Khối Lego (Phiên 45)**:
+  - **Mục tiêu & Nhu cầu**: Giải quyết triệt để hiện tượng lặp lại mã HTML/Razor và JS trên Sidebar bộ lọc (LeftMenu Filter) giữa các màn hình Danh sách Hàng hóa, Kiểm kho và các phân hệ tiếp theo (Nhập kho, Xuất kho).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **ViewModel Dùng chung (`KiotMultiSelectVM.cs` & `KiotStatusFilterVM.cs`)**: Tạo các ViewModel chuẩn đặt tại `ViewModels/Common/` đóng gói cấu hình dropdown chọn nhiều (Id, Title, Placeholder, DataFilter, HasSearch, HeaderAction, DotId) và danh sách lựa chọn trạng thái chứng từ checkbox.
+    + **Partial Views Dùng chung (`_KiotMultiSelectFilter.cshtml` & `_KiotStatusFilter.cshtml`)**: Tạo 2 partial views dùng chung tại `Views/Shared/`, loại bỏ hoàn toàn việc viết lặp lại các khối HTML dropdown multi-select và checkbox trạng thái trong các sidebar.
+    + **Thư viện JavaScript Mở rộng (`kiot-filter.js`)**: Bổ sung các helper dùng chung vào `KiotFilter`: `escapeHtml`, `checkSidebarDropdownDirection` (tự động đảo hướng drop-up chống tràn đáy màn hình khi cuộn), `renderTagPills` (render danh sách tag chips `.kiot-pill-tag` kèm nút `×` và `+N khác`).
+    + **Tái cấu trúc Sidebar (`_HangHoaFilterSidebar.cshtml` & `_PhieuKiemKeFilterSidebar.cshtml`)**: Chuyển đổi toàn bộ các khối dropdown chọn nhiều (Nhóm hàng, NCC, Vị trí, Loại hàng, Người tạo) và khối Trạng thái chứng từ sang cú pháp gọi 1 dòng `<partial name="_KiotMultiSelectFilter" ... />` và `<partial name="_KiotStatusFilter" ... />`.
+    + **Tối ưu hóa Script View (`hang-hoa-index.js` & `phieu-kiem-ke-index.js`)**: Loại bỏ các hàm tiện ích trùng lặp, tái sử dụng trực tiếp các phương thức từ `KiotFilter`.
+  - **Kiểm tra biên dịch & Cú pháp**: `dotnet build` đạt 0 Errors, `node -c` kiểm tra 3 file JS đạt 0 lỗi cú pháp.
+- **Chuẩn hóa & Đóng gói các Khối Giao diện và Nghiệp vụ Dùng chung thành Mảnh ghép Lego Độc lập (Phiên 44)**:
+  - **Mục tiêu & Nhu cầu**: Loại bỏ triệt để hiện tượng lặp mã (HTML, CSS, JS, C#) ở các thành phần dùng chung lặp lại giữa Danh sách hàng hóa và Kiểm kho (bộ lọc ngày + lịch 2 tháng, thông báo toast, ẩn/hiện cột, đánh dấu sao, backend resolve khoảng ngày); đóng gói thành các khối Lego độc lập, lần sau chỉ việc gọi 1 dòng tái sử dụng theo nguyên lý Open/Closed Principle.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Backend (`DateRangeHelper.cs`)**: Tạo `Helpers/DateRangeHelper.cs` chuẩn hóa logic giải quyết ngày cho 12 loại bộ lọc (`ALL`, `HOM_NAY`, `HOM_QUA`, `TUAN_NAY`, `TUAN_TRUOC`, `7_NGAY`, `THANG_NAY`, `THANG_TRUOC`, `30_NGAY`, `QUY_NAY`, `NAM_NAY`, `CUSTOM`). Refactor `PhieuKiemKeController.cs` và `HangHoaController.cs`: Cắt giảm ~90 dòng code switch-case và if-else lặp lại.
+    + **Hệ thống Toast KiotViet Dùng chung (`site.js` & `site.css`)**: Xây dựng `window.KiotToast` (`success`, `error`, `warning`, `info`) chuẩn KiotViet với container `.kiot-toast-container` cố định góc trên bên phải, animation trượt mượt mà, tự ẩn sau 3s. Tương thích ngược toàn cục `window.showToast` và `window.toast`, gỡ bỏ các đoạn JS tự tạo toast rải rác. Nạp `site.js` vào `_Layout.cshtml`.
+    + **Partial View Bộ lọc Ngày tháng Dùng chung (`_KiotDateFilter.cshtml` & `KiotDateFilterVM.cs`)**: Tạo `ViewModels/Common/KiotDateFilterVM.cs` và Partial `Views/Shared/_KiotDateFilter.cshtml` đóng gói toàn bộ radio, popup chọn nhanh 3 cột và popup Dual Calendar 2 tháng. Hỗ trợ cả 2 chế độ: ngày tương lai (`DateType = "future"` cho Dự kiến hết hàng `dk`) và ngày quá khứ (`DateType = "past"` cho Thời gian tạo `tgt` và Thời gian kiểm `date`). Thay thế ~250 dòng Razor lặp lại trong `_HangHoaFilterSidebar.cshtml` và `_PhieuKiemKeFilterSidebar.cshtml` bằng cú pháp gọi 1 dòng `<partial name="_KiotDateFilter" ... />`.
+    + **Thư viện JavaScript Mở rộng (`kiot-filter.js`)**: Bổ sung `KiotFilter.initDateFilter`, `KiotFilter.initColumnToggle` (lưu localStorage), `KiotFilter.bindStarToggle` (AJAX bookmark + toast), `KiotFilter.toggleFloatingPopup`.
+    + **Tái cấu trúc Script View (`hang-hoa-index.js`, `phieu-kiem-ke-index.js`)**: Thay thế hơn 500 dòng JS tự viết trùng lặp ở 2 trang bằng các lệnh gọi 1 dòng `KiotFilter.initDateFilter(...)` và `KiotFilter.initColumnToggle(...)`.
+  - **Kiểm tra biên dịch**: `dotnet build` đạt 0 Errors.
+- **Khắc phục Triệt để Lỗi Xuất File Dữ liệu Kiểm kho thành File Excel .xlsx Chuẩn KiotViet (Phiên 43)**:
+  - **Nhu cầu**: Người dùng phản ánh khi bấm xuất file dữ liệu kiểm kho ("Xuất danh sách phiếu kiểm", "Xuất chi tiết"), tất cả thông tin bị dồn hết vào 1 cột / 1 dòng do mở file CSV trên Windows có thiết lập vùng Việt Nam (dấu ngăn cách mặc định là chấm phẩy `;` thay vì phẩy `,`), đồng thời thiếu ngắt dòng và BOM chuẩn.
+  - **Giải pháp thực hiện**:
+    + **Backend (`PhieuKiemKeController.cs`)**:
+      - Chuyển đổi định dạng xuất mặc định sang file Excel thực sự (`.xlsx`) bằng thư viện `ClosedXML` với MIME type `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`.
+      - Tách biệt rõ 2 chế độ:
+        * **Xuất danh sách phiếu kiểm** (`type = "list"`): Xuất đầy đủ 13 cột chuẩn mực (STT, Mã kiểm kho, Thời gian kiểm, Kho kiểm, Người tạo, Tổng thực tế, Tổng chênh lệch, SL lệch tăng, SL lệch giảm, Tổng giá trị lệch, Ngày cân bằng, Trạng thái, Ghi chú).
+        * **Xuất chi tiết** (`type = "detail"`): Duyệt qua từng dòng hàng trong phiếu kiểm để xuất 16 cột chi tiết (STT, Mã kiểm kho, Thời gian, Kho, Người tạo, Trạng thái, Mã hàng, Tên hàng, ĐVT, Tồn kho, Thực tế, SL lệch, Đơn giá, Giá trị lệch, Ngày cân bằng, Ghi chú).
+      - Áp dụng chuẩn kiểu dáng KiotViet: `ExcelHelper.ApplyKiotVietHeaderStyle` (nền xanh `#0066cc`, chữ trắng in đậm, căn giữa), viền ô bảng tính `ExcelHelper.ApplyTableBorders`, định dạng số lượng `#,##0.##`, tiền tệ `#,##0`, ngày giờ `dd/MM/yyyy HH:mm`, tự động co giãn kích thước cột (`AdjustToContents`).
+      - Bổ sung tham số `id` trực tiếp cho action `Export` để hỗ trợ xuất chi tiết phiếu đơn lẻ từ nút thao tác trên từng dòng bảng (`_PhieuKiemKeTable.cshtml`), không bị ảnh hưởng bởi bộ lọc ngày/trạng thái.
+      - Vẫn duy trì fallback xuất CSV an toàn nếu có tham số `format=csv` (bổ sung UTF-8 BOM byte preamble chuẩn và hàm `EscapeCsv` làm sạch dấu phẩy, nháy kép, ký tự xuống dòng).
+    + **Giao diện (`_PhieuKiemKeTable.cshtml`)**: Cập nhật link nút "Xuất file" trên từng dòng bảng sang `Export?type=detail&id=@item.MaPhieuKiemKe`.
+  - **Kiểm tra biên dịch**: `dotnet build ... /t:Compile` đạt 0 Warnings mới, 0 Errors.
 - **Đồng bộ Tính năng Sắp xếp Cột 3 Trạng thái trong Kiểm kho Khớp 100% Danh sách Hàng hóa (Phiên 42)**:
   - **Nhu cầu**: Người dùng muốn khi click vào tiêu đề của một cột trong bảng Phiếu kiểm kho thì sắp xếp dữ liệu xoay vòng 3 trạng thái (Tăng dần -> Giảm dần -> Bỏ sắp xếp) giống hệt bên module Danh sách hàng hóa.
   - **Giải pháp thực hiện**:
@@ -304,6 +337,20 @@ Cập nhật lần cuối: 2026-10-16 – Đồng bộ Tính năng Sắp xếp C
 ---
 
 ## Nhật ký phiên
+- **2026-10-16 (Phiên 45 - Trưa)**:
+  - Tối ưu hóa & Đóng gói toàn diện LeftMenu Filter Sidebar thành các Component dùng chung (Lego Block):
+    - ViewModels: Tạo `KiotMultiSelectVM.cs` & `KiotStatusFilterVM.cs` trong `ViewModels/Common/`.
+    - Partial Views: Tạo `Views/Shared/_KiotMultiSelectFilter.cshtml` và `_KiotStatusFilter.cshtml` chuẩn hóa toàn bộ dropdown chọn nhiều (kèm tìm kiếm con, tự động đảo hướng drop-up, tag chips) và checkbox trạng thái chứng từ.
+    - Script dùng chung: Bổ sung `escapeHtml`, `checkSidebarDropdownDirection`, `renderTagPills` vào `kiot-filter.js`.
+    - Refactor View & Script: Rút gọn `_HangHoaFilterSidebar.cshtml` và `_PhieuKiemKeFilterSidebar.cshtml`, tinh gọn `hang-hoa-index.js` và `phieu-kiem-ke-index.js`.
+    - Biên dịch kiểm tra: `dotnet build` đạt 0 Errors, `node -c` kiểm tra JavaScript đạt 0 lỗi.
+- **2026-10-16 (Phiên 44 - Trưa)**:
+  - Đóng gói toàn diện các khối Lego dùng chung độc lập (Lego Framework) giữa Hàng hóa và Kiểm kho:
+    - Backend: Tạo `Helpers/DateRangeHelper.cs` xử lý 12 loại bộ lọc ngày, giảm ~90 dòng code switch-case lặp lại trong `PhieuKiemKeController` và `HangHoaController`.
+    - Toast KiotViet: Xây dựng `window.KiotToast` (`site.js` & `site.css`), tương thích ngược toàn cục, nạp qua `_Layout.cshtml`.
+    - Bộ lọc ngày dùng chung: Tạo `_KiotDateFilter.cshtml` & `KiotDateFilterVM.cs` hỗ trợ cả ngày quá khứ và tương lai, thay thế ~250 dòng Razor lặp lại.
+    - Thư viện JS: Bổ sung `initDateFilter`, `initColumnToggle`, `bindStarToggle`, `toggleFloatingPopup` vào `kiot-filter.js`, cắt giảm hơn 500 dòng JS trùng lặp.
+    - Biên dịch kiểm tra: `dotnet build` đạt 0 Errors.
 - **2026-10-16 (Phiên 40 - Sáng)**:
   - **Hỗ trợ vừa tự động sinh mã vừa nhập tay Mã kiểm kho**:
     - Chạy script Migration `08_bo_sung_maphieu_kiemke.sql` bổ sung cột `MaPhieu VARCHAR(30) NULL` vào bảng `PhieuKiemKe`, cập nhật mã mặc định `PKK00000X` và tạo Filtered Unique Index `UQ_PhieuKiemKe_MaPhieu`.
@@ -497,6 +544,9 @@ Cập nhật lần cuối: 2026-10-16 – Đồng bộ Tính năng Sắp xếp C
   - Kiểm tra biên dịch: 0 lỗi.
 - **2026-10-15 (Phiên 20 - Sáng)**:
   - Tinh chỉnh kích thước thẻ thuộc tính hàng hóa mini (`.kiot-attr-chip`): Giảm font-size xuống 11px, giảm padding còn 1.5px (chiều cao chip ~20px), bo góc 4px và thu nhỏ khoảng cách margin/gap giúp thẻ thuộc tính hiển thị vừa vặn, thanh thoát và không chiếm dụng diện tích.
+- **2026-10-16 (Phiên 43 - Sáng)**:
+  - Khắc phục lỗi xuất file dữ liệu kiểm kho ("tất cả thông tin bị cho vào 1 dòng"): Chuyển đổi toàn diện từ định dạng CSV thô sang file Excel `.xlsx` chuẩn KiotViet bằng `ClosedXML`. Thiết lập đầy đủ header xanh `#0066cc`, viền ô, căn lề, format số tiền và số lượng; hỗ trợ cả xuất danh sách (13 cột) và xuất chi tiết từng dòng hàng (16 cột). Bổ sung tham số `id` cho nút Xuất file trên từng dòng bảng (`_PhieuKiemKeTable.cshtml`). Đồng bộ `PROGRESS.md` và `docs/specs/kiem-kho.md`.
+  - Kiểm tra biên dịch: 0 lỗi.
 - **2026-10-16 (Phiên 42 - Sáng)**:
   - Đồng bộ Chuẩn hóa Tính năng Sắp xếp Cột 3 Trạng thái (3-State Column Sorting) trong Danh sách Phiếu Kiểm kho:
     - Bổ sung `SortBy` và `SortDir` vào `PhieuKiemKeFilterVM` và `PhieuKiemKeIndexVM`.

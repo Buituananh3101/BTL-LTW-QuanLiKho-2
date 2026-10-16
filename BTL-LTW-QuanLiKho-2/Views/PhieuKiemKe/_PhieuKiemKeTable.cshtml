@@ -285,7 +285,7 @@
                                     <a href="@Url.Action("Create", "PhieuKiemKe", new { copyId = item.MaPhieuKiemKe })" class="btn btn-sm btn-outline-secondary">
                                         <i class="bi bi-copy me-1"></i>Sao chép
                                     </a>
-                                    <a href="@Url.Action("Export", "PhieuKiemKe", new { type = "detail", Q = item.MaPhieuHienThi })" class="btn btn-sm btn-outline-secondary" target="_blank">
+                                    <a href="@Url.Action("Export", "PhieuKiemKe", new { type = "detail", id = item.MaPhieuKiemKe })" class="btn btn-sm btn-outline-secondary" target="_blank">
                                         <i class="bi bi-box-arrow-up me-1"></i>Xuất file
                                     </a>
                                     <span class="ms-auto"></span>
