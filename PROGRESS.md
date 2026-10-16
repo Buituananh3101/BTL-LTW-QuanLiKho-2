@@ -1,6 +1,6 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-16 – Modal Xác Nhận Ngừng Hoạt Động Nhà Cung Cấp (Phiên 74)
+Cập nhật lần cuối: 2026-10-16 – Đóng Gói Lego Master-Detail Accordion & Actions (Phiên 75)
 
 ---
 
@@ -16,6 +16,23 @@ Cập nhật lần cuối: 2026-10-16 – Modal Xác Nhận Ngừng Hoạt Độ
 4. Xây dựng `PhieuNhapController` và View giao diện (`Views/PhieuNhap/`) theo phong cách KiotViet.
 
 ---
+
+- **Đóng gói Khối Master-Detail Accordion, Thao tác Thực thể & Tùy chọn Cột Bảng (Phiên 75)**:
+  - **Nhu cầu**: Người dùng yêu cầu đóng gói logic hiển thị trong bảng Nhà cung cấp (click mở dòng chi tiết inline, các tab Thông tin / Lịch sử / Nợ, các nút thao tác Sửa / Xóa / Đổi trạng thái, tùy chọn ẩn/hiện cột) thành các khối Lego dùng chung toàn hệ thống để có thể áp dụng cho các phân hệ khác (Khách hàng, Hàng hóa, Nhân viên...) chỉ với 1-2 dòng cấu hình.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Thư viện JavaScript Dùng chung (`kiot-filter.js`)**:
+      * Đóng gói `KiotFilter.initRowDetail(options)`: Điều khiển click dòng dữ liệu (`rowSelector`) bung mở dòng chi tiết inline (`.product-detail-panel-wrap`) với hiệu ứng slideDown/slideUp mượt mà 150ms; tự động đóng các dòng khác đang mở; tự động đồng bộ `colspan` bằng đúng số cột hiển thị thực tế; tự động gán class `.last-visible-col` cho ô hiển thị cuối cùng để khép kín hình chữ nhật viền xanh; lắng nghe click chuyển tab trong panel chi tiết (`tabBtnSelector`) với hiệu ứng fadeIn 120ms và hỗ trợ callback lazy loading `onTabChange(tabName, id, $pane, $panel)`.
+      * Đóng gói `KiotFilter.initEntityActions(options)`: Bắt sự kiện click các nút thao tác thực thể tiêu chuẩn (`.btn-edit-*`, `.btn-delete-*`, `.btn-toggle-status-*`, `.btn-copy-*`) với callback tương ứng `onEdit(id)`, `onDelete(id, name)`, `onToggleStatus(id, name, status)`, `onCopy(id)`.
+      * Nâng cấp `KiotFilter.initColumnToggle(options)`: Hỗ trợ linh hoạt cả truyền danh sách tham số hoặc object options; tự động khôi phục từ `localStorage` với fallback `defaultCols`; tự động tính `colspan` chính xác và gán `.last-visible-col` cho các dòng để viền bảng không bao giờ bị hở hay lệch.
+    + **Giao diện & CSS Dùng chung (`site.css`)**:
+      * Chuẩn hóa bộ class Lego: `tr.kiot-row.selected > td`, `tr.kiot-detail-row > td`, `.kiot-detail-panel-wrap`, `.kiot-detail-panel`, `.kiot-detail-tabs`, `.kiot-detail-tab-btn`, `.kiot-detail-tab-content`, `.kiot-detail-fixed-wrap` (cố định 992px), `.kiot-attr-grid` (gap 16px), `.kiot-attr-col` (cố định 320px/card), `.kiot-detail-footer`.
+      * Bảo đảm tương thích ngược 100% với các class hiện hữu (`.product-detail-*`, `.ncc-detail-*`).
+    + **Tái cấu trúc Tích hợp Màn hình Nhà Cung Cấp (`nha-cung-cap-index.js`)**:
+      * Thay thế toàn bộ mã lặp lại bằng các lời gọi hàm Lego: `initColumnToggle()` gọi `KiotFilter.initColumnToggle`, `initRowDetail()` gọi `KiotFilter.initRowDetail`, `initEntityActions()` gọi `KiotFilter.initEntityActions`.
+    + **Kiểm tra biên dịch & Cú pháp**:
+      * `dotnet build` đạt **0 Errors**.
+      * `node -c` toàn bộ các tệp JavaScript đạt **0 Errors**.
+      * Đồng bộ tài liệu luật `.agent/rules/03-giao-dien-layout.md` (6.353 ký tự), `docs/quyet-dinh.md` (7.039 ký tự), `docs/specs/nha-cung-cap.md` (6.756 ký tự).
 
 - **Modal Xác Nhận Ngừng Hoạt Động / Kích Hoạt Lại Nhà Cung Cấp (Phiên 74)**:
   - **Nhu cầu**: Khi nhấn nút "Ngừng hoạt động" hoặc "Kích hoạt lại" trên thanh thao tác của nhà cung cấp, hệ thống phải mở hộp thoại (modal) hỏi xác nhận trước khi thực hiện thay vì chuyển trạng thái ngay lập tức.

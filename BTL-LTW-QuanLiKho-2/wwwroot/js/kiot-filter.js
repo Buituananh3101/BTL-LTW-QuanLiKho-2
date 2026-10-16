@@ -498,53 +498,101 @@ window.KiotFilter = (function ($) {
         });
     }
 
-    // 9. Quản lý Ẩn / Hiện Cột bảng dữ liệu (Column Visibility)
-    function initColumnToggle(menuSelector, tableSelector, storageKey) {
-        const menu = $(menuSelector);
-        const table = $(tableSelector);
-        if (!menu.length || !table.length) return;
+    // 9. Quản lý Ẩn / Hiện Cột bảng dữ liệu (Column Visibility) Chuẩn KiotViet
+    function initColumnToggle(menuSelectorOrOptions, tableSelector, storageKey) {
+        let opt = {};
+        if (typeof menuSelectorOrOptions === 'object') {
+            opt = menuSelectorOrOptions;
+        } else {
+            opt = {
+                menuSelector: menuSelectorOrOptions,
+                tableSelector: tableSelector,
+                storageKey: storageKey
+            };
+        }
+
+        const menu = $(opt.menuSelector);
+        const currentStorageKey = opt.storageKey || 'kiot_column_visibility';
+        const defaultCols = opt.defaultCols || {};
+
+        if (!menu.length) {
+            return {
+                apply: function () {},
+                save: function () {}
+            };
+        }
 
         // Đọc cấu hình từ localStorage
         let savedCols = {};
         try {
-            savedCols = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            savedCols = JSON.parse(localStorage.getItem(currentStorageKey) || '{}');
         } catch (_) { }
 
         // Khôi phục trạng thái checkbox và ẩn cột
-        menu.find('input[type="checkbox"]').each(function () {
+        menu.find('input[data-c], input[type="checkbox"]').each(function () {
             const col = $(this).data('c');
-            if (col && savedCols[col] !== undefined) {
-                $(this).prop('checked', savedCols[col] === 1);
+            if (col) {
+                if (savedCols[col] !== undefined) {
+                    $(this).prop('checked', savedCols[col] === 1 || savedCols[col] === true);
+                } else if (defaultCols[col] !== undefined) {
+                    $(this).prop('checked', defaultCols[col] === 1 || defaultCols[col] === true);
+                }
             }
-        });
-        applyVisibility();
-
-        menu.on('change', 'input[type="checkbox"]', function () {
-            applyVisibility();
-            saveState();
         });
 
         function applyVisibility() {
-            const currentTable = $(tableSelector);
-            menu.find('input[type="checkbox"]').each(function () {
+            const currentTable = $(opt.tableSelector);
+            if (!currentTable.length) return;
+
+            let visibleCount = 0;
+            menu.find('input[data-c], input[type="checkbox"]').each(function () {
                 const col = $(this).data('c');
                 const isChecked = $(this).is(':checked');
                 if (col) {
-                    currentTable.find(`[data-col="${col}"], .col-${col}`).toggle(isChecked);
+                    if (isChecked) visibleCount++;
+                    currentTable.find(`[data-col="${col}"], .col-${col}`).each(function () {
+                        this.style.display = isChecked ? '' : 'none';
+                    });
                 }
             });
+
+            // 1. Cập nhật colspan chính xác theo số cột hiển thị để không sinh cột ma
+            const actualVisibleCols = currentTable.find('thead tr:first-child th:visible').length || (visibleCount + (opt.extraColsCount || 0));
+            currentTable.find('tr.product-detail-row > td, tr.kiot-detail-row > td, tr.dtl > td, tr.empty-row > td, tr:has(.empty) > td').attr('colspan', actualVisibleCols);
+
+            // 2. Gắn class last-visible-col cho ô hiển thị cuối cùng của mỗi dòng để khép kín hình chữ nhật
+            currentTable.find('.last-visible-col').removeClass('last-visible-col');
+            currentTable.find('tr').each(function () {
+                $(this).children('th:visible, td:visible').last().addClass('last-visible-col');
+            });
+
+            if (typeof opt.onApply === 'function') {
+                opt.onApply(actualVisibleCols);
+            }
         }
 
         function saveState() {
             const state = {};
-            menu.find('input[type="checkbox"]').each(function () {
+            menu.find('input[data-c], input[type="checkbox"]').each(function () {
                 const col = $(this).data('c');
                 if (col) {
                     state[col] = $(this).is(':checked') ? 1 : 0;
                 }
             });
-            localStorage.setItem(storageKey, JSON.stringify(state));
+            localStorage.setItem(currentStorageKey, JSON.stringify(state));
         }
+
+        applyVisibility();
+
+        menu.off('change.kiotCol', 'input[data-c], input[type="checkbox"]').on('change.kiotCol', 'input[data-c], input[type="checkbox"]', function () {
+            applyVisibility();
+            saveState();
+        });
+
+        return {
+            apply: applyVisibility,
+            save: saveState
+        };
     }
 
     // 10. Gắn sự kiện Đánh dấu sao Yêu thích (Favorite Star)
@@ -879,6 +927,211 @@ window.KiotFilter = (function ($) {
         });
     }
 
+    // 18. Quản lý Master-Detail Accordion & Tabs trong Bảng (Chuẩn KiotViet)
+    function initRowDetail(options) {
+        const opt = $.extend({
+            tableSelector: '',                                  // Selector bảng hoặc container (e.g. '#supplierTable')
+            rowSelector: '.product-row, .tbl-row, .kiot-row',  // Dòng dữ liệu chính
+            detailRowSelector: null,                           // Selector / Hàm lấy dòng chi tiết. Mặc định '#detail-{id}' hoặc '#dtl-{id}'
+            wrapSelector: '.product-detail-panel-wrap, .kiot-detail-panel-wrap', // Khung bọc có hiệu ứng slideDown
+            tabBtnSelector: '.product-detail-tab-btn, .kiot-detail-tab-btn, .detail-tab-btn',
+            tabPaneSelector: '.tab-pane-content, .tab-pane, .kiot-tab-pane',
+            excludeClickSelector: 'input, button, a, label, .cell-checkbox, .cell-star, .star-btn, .w-chk, .kiot-item-edit-btn',
+            slideDuration: 150,
+            fadeDuration: 120,
+            onOpen: null,                                      // callback(id, $row, $detailRow)
+            onClose: null,                                     // callback(id, $row, $detailRow)
+            onTabChange: null                                  // callback(tabName, id, $pane, $panel)
+        }, options);
+
+        function getDetailRow(id, $row) {
+            if (typeof opt.detailRowSelector === 'function') {
+                return opt.detailRowSelector(id, $row);
+            }
+            if (typeof opt.detailRowSelector === 'string') {
+                return $(opt.detailRowSelector.replace('{id}', id));
+            }
+            const $byDetail = $(`#detail-${id}, #dtl-${id}`);
+            if ($byDetail.length) return $byDetail;
+            const $next = $row.next('tr.product-detail-row, tr.kiot-detail-row, tr.dtl');
+            if ($next.length) return $next;
+            return $(`tr.product-detail-row[data-id="${id}"], tr.kiot-detail-row[data-id="${id}"]`);
+        }
+
+        function toggleRow(id, forceOpen) {
+            const $tableEl = opt.tableSelector ? $(opt.tableSelector) : $(document);
+            const $row = $(opt.rowSelector).filter(function () {
+                return String($(this).data('id')) === String(id);
+            });
+            const $detailRow = getDetailRow(id, $row);
+            if (!$row.length || !$detailRow.length) return;
+
+            const $wrap = $detailRow.find(opt.wrapSelector);
+            const isCurrentlyOpen = $detailRow.is(':visible');
+
+            // Đóng các dòng chi tiết khác đang mở (hiệu ứng slideUp khớp KiotViet)
+            const allDetailRows = $(opt.tableSelector ? `${opt.tableSelector} tr.product-detail-row, ${opt.tableSelector} tr.kiot-detail-row, ${opt.tableSelector} tr.dtl` : 'tr.product-detail-row, tr.kiot-detail-row, tr.dtl');
+            allDetailRows.not($detailRow).each(function () {
+                const $other = $(this);
+                $other.find(opt.wrapSelector).slideUp(opt.slideDuration, function () {
+                    $other.hide();
+                });
+            });
+            $(opt.tableSelector ? `${opt.tableSelector} ${opt.rowSelector}` : opt.rowSelector).not($row).removeClass('selected open is-expanded');
+
+            if (isCurrentlyOpen && forceOpen !== true) {
+                // Đóng dòng
+                $wrap.slideUp(opt.slideDuration, function () {
+                    $detailRow.hide();
+                });
+                $row.removeClass('selected open is-expanded');
+                if (typeof opt.onClose === 'function') {
+                    opt.onClose(id, $row, $detailRow);
+                }
+            } else {
+                // Mở dòng: Cập nhật colspan chính xác theo số cột hiển thị
+                const visibleCols = $row.closest('table').find('thead tr:first-child th:visible').length || 1;
+                $detailRow.find('> td').attr('colspan', visibleCols);
+
+                // Gắn class last-visible-col cho ô hiển thị cuối cùng của mỗi dòng để khép kín hình chữ nhật
+                $row.closest('table').find('.last-visible-col').removeClass('last-visible-col');
+                $row.children('td:visible').last().addClass('last-visible-col');
+
+                $row.addClass('selected open is-expanded');
+                $detailRow.show();
+                $wrap.hide().slideDown(opt.slideDuration);
+                if (typeof opt.onOpen === 'function') {
+                    opt.onOpen(id, $row, $detailRow);
+                }
+            }
+        }
+
+        // Lắng nghe click dòng bảng
+        const clickSelector = opt.tableSelector ? `${opt.tableSelector} ${opt.rowSelector}` : opt.rowSelector;
+        $(document).off('click.kiotRowDetail', clickSelector).on('click.kiotRowDetail', clickSelector, function (e) {
+            if ($(e.target).closest(opt.excludeClickSelector).length) return;
+            const id = $(this).data('id');
+            if (id !== undefined && id !== null) {
+                toggleRow(id);
+            }
+        });
+
+        // Lắng nghe click chuyển tab trong Detail Panel
+        const tabClickSelector = opt.tableSelector ? `${opt.tableSelector} ${opt.tabBtnSelector}` : opt.tabBtnSelector;
+        $(document).off('click.kiotRowTab', tabClickSelector).on('click.kiotRowTab', tabClickSelector, function (e) {
+            e.stopPropagation();
+            const $btn = $(this);
+            const tabName = $btn.data('tab');
+            const $panel = $btn.closest('.product-detail-panel, .kiot-detail-panel, .ncc-detail-panel');
+            const $detailRow = $btn.closest('tr');
+            let id = $detailRow.attr('id') ? $detailRow.attr('id').replace(/^(detail-|dtl-)/, '') : $detailRow.data('id');
+            if (!id) {
+                id = $detailRow.prev(opt.rowSelector).data('id');
+            }
+
+            $panel.find(opt.tabBtnSelector).removeClass('active');
+            $btn.addClass('active');
+
+            $panel.find(opt.tabPaneSelector).hide();
+            const $targetPane = $panel.find(`.tab-${tabName}, .ncc-tab-${tabName}, [data-tab-pane="${tabName}"]`);
+            $targetPane.fadeIn(opt.fadeDuration);
+
+            if (typeof opt.onTabChange === 'function') {
+                opt.onTabChange(tabName, id, $targetPane, $panel);
+            }
+        });
+
+        return {
+            expand: function (id) { toggleRow(id, true); },
+            collapse: function (id) { toggleRow(id, false); },
+            toggle: function (id) { toggleRow(id); }
+        };
+    }
+
+    // 19. Quản lý các nút Thao tác Thực thể (Edit, Delete, Toggle Status, Copy) Chuẩn KiotViet
+    function initEntityActions(options) {
+        const opt = $.extend({
+            containerSelector: document,
+            editSelector: '.btn-edit-product, .btn-edit-ncc, .kiot-btn-edit',
+            deleteSelector: '.btn-delete-product, .btn-delete-ncc, .kiot-btn-delete',
+            statusSelector: '.btn-toggle-status-ncc, .btn-toggle-status, .kiot-btn-status',
+            copySelector: '.btn-copy-product, .kiot-btn-copy',
+            onEdit: null,
+            onDelete: null,
+            onToggleStatus: null,
+            onCopy: null
+        }, options);
+
+        const $c = $(opt.containerSelector);
+
+        // Edit
+        $c.off('click.kiotActionEdit', opt.editSelector).on('click.kiotActionEdit', opt.editSelector, function (e) {
+            e.preventDefault();
+            const $btn = $(this);
+            const id = $btn.data('id') || $btn.closest('[data-id]').data('id');
+            if (typeof opt.onEdit === 'function') {
+                opt.onEdit(id, this, e);
+            }
+        });
+
+        // Delete
+        $c.off('click.kiotActionDelete', opt.deleteSelector).on('click.kiotActionDelete', opt.deleteSelector, function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const $btn = $(this);
+            const id = $btn.data('id') || $btn.closest('[data-id]').data('id');
+            let name = $btn.data('name');
+            if (!name) {
+                const $row = $btn.closest('tr.product-row, tr.tbl-row');
+                if ($row.length) {
+                    name = $row.find('[data-col="ten"], .cell-product-name').text().trim();
+                } else {
+                    const $detailRow = $btn.closest('tr');
+                    const $prev = $detailRow.prev('tr');
+                    if ($prev.length) name = $prev.find('[data-col="ten"], .cell-product-name').text().trim();
+                }
+            }
+            if (typeof opt.onDelete === 'function') {
+                opt.onDelete(id, name, this, e);
+            }
+        });
+
+        // Toggle Status
+        $c.off('click.kiotActionStatus', opt.statusSelector).on('click.kiotActionStatus', opt.statusSelector, function (e) {
+            e.preventDefault();
+            const $btn = $(this);
+            const id = $btn.data('id') || $btn.closest('[data-id]').data('id');
+            const status = $btn.data('status') || ($btn.text().includes('Ngừng') ? 'HOAT_DONG' : 'NGUNG_GIAO_DICH');
+            let name = $btn.data('name');
+            if (!name) {
+                const $row = $btn.closest('tr.product-row, tr.tbl-row');
+                if ($row.length) {
+                    name = $row.find('[data-col="ten"], .cell-product-name').text().trim();
+                } else {
+                    const $detailRow = $btn.closest('tr');
+                    const $prev = $detailRow.prev('tr');
+                    if ($prev.length) name = $prev.find('[data-col="ten"], .cell-product-name').text().trim();
+                }
+            }
+            if (typeof opt.onToggleStatus === 'function') {
+                opt.onToggleStatus(id, name, status, this, e);
+            }
+        });
+
+        // Copy
+        if (opt.copySelector) {
+            $c.off('click.kiotActionCopy', opt.copySelector).on('click.kiotActionCopy', opt.copySelector, function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const $btn = $(this);
+                const id = $btn.data('id') || $btn.closest('[data-id]').data('id');
+                if (typeof opt.onCopy === 'function') {
+                    opt.onCopy(id, this, e);
+                }
+            });
+        }
+    }
+
     return {
         debounce: debounce,
         escapeHtml: escapeHtml,
@@ -896,6 +1149,8 @@ window.KiotFilter = (function ($) {
         bindPagination: bindPagination,
         initCombobox: initCombobox,
         initValueFilter: initValueFilter,
-        initStatusFilter: initStatusFilter
+        initStatusFilter: initStatusFilter,
+        initRowDetail: initRowDetail,
+        initEntityActions: initEntityActions
     };
 })(jQuery);

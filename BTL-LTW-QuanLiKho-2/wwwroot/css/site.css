@@ -1281,22 +1281,27 @@ tr.product-row {
 tr.product-row:hover > td {
   background-color: #f8fafc;
 }
-/* Dòng sản phẩm được chọn: Đóng khung thành hình chữ nhật khép kín với dòng chi tiết */
+/* Dòng sản phẩm / dữ liệu được chọn: Đóng khung thành hình chữ nhật khép kín với dòng chi tiết */
+tr.kiot-row.selected > td,
 tr.product-row.selected > td {
   background-color: #ffffff !important;
   border-top: 2px solid #0070f3 !important; /* Cạnh trên hình chữ nhật */
   border-bottom: 1px solid #f1f5f9 !important; /* Phân cách nhẹ với bảng chi tiết bên trong */
   border-right: none !important;
 }
+tr.kiot-row.selected > td:first-child,
 tr.product-row.selected > td:first-child {
   border-left: 3px solid #0070f3 !important; /* Cạnh trái hình chữ nhật */
 }
+tr.kiot-row.selected > td.last-visible-col,
+tr.kiot-row.selected > td:last-child,
 tr.product-row.selected > td.last-visible-col,
 tr.product-row.selected > td:last-child {
   border-right: 3px solid #0070f3 !important; /* Cạnh phải hình chữ nhật */
 }
 
 /* Dòng chi tiết mở rộng: Cạnh 2 bên và cạnh đáy khép kín hình chữ nhật */
+tr.kiot-detail-row > td,
 tr.product-detail-row > td {
   background-color: #ffffff !important;
   padding: 0 !important;
@@ -1306,13 +1311,16 @@ tr.product-detail-row > td {
   border-right: 3px solid #0070f3 !important; /* Cạnh phải hình chữ nhật */
 }
 
+.kiot-detail-panel-wrap,
 .product-detail-panel-wrap {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
 }
 
-.product-detail-panel {
+.kiot-detail-panel,
+.product-detail-panel,
+.ncc-detail-panel {
   background-color: #ffffff;
   border: none; /* Đã có viền 3px từ thẻ td */
   margin-bottom: 0;
@@ -1322,7 +1330,9 @@ tr.product-detail-row > td {
 }
 
 /* Tabs Bar */
-.product-detail-tabs {
+.kiot-detail-tabs,
+.product-detail-tabs,
+.ncc-detail-tabs {
   display: flex;
   gap: 24px;
   padding: 0 24px;
@@ -1333,7 +1343,9 @@ tr.product-detail-row > td {
   width: max-content;
   max-width: 100%;
 }
-.product-detail-tab-btn {
+.kiot-detail-tab-btn,
+.product-detail-tab-btn,
+.ncc-detail-tab-btn {
   padding: 12px 2px;
   font-size: 13px;
   font-weight: 500;
@@ -1346,18 +1358,50 @@ tr.product-detail-row > td {
   bottom: -1px;
   transition: all 0.15s ease-in-out;
 }
-.product-detail-tab-btn:hover {
+.kiot-detail-tab-btn:hover,
+.product-detail-tab-btn:hover,
+.ncc-detail-tab-btn:hover {
   color: #0070f3;
 }
-.product-detail-tab-btn.active {
+.kiot-detail-tab-btn.active,
+.product-detail-tab-btn.active,
+.ncc-detail-tab-btn.active {
   color: #0070f3;
   font-weight: 600;
   border-bottom: 2px solid #0070f3;
 }
 
 /* Tab Panes */
-.product-detail-tab-content {
+.kiot-detail-tab-content,
+.product-detail-tab-content,
+.ncc-detail-content {
   padding: 20px 24px;
+}
+
+/* Khung chi tiết cố định 992px chuẩn KiotViet không bị kéo giãn khi hiển thị nhiều cột */
+.kiot-detail-fixed-wrap,
+.ncc-detail-fixed-wrap {
+  width: 992px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.kiot-attr-grid,
+.ncc-attr-grid {
+  display: flex;
+  gap: 16px;
+  width: 992px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.kiot-attr-col,
+.ncc-attr-col {
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
+  flex: 0 0 320px;
+  box-sizing: border-box;
 }
 
 /* Image box */
@@ -1391,7 +1435,9 @@ tr.product-detail-row > td {
   line-height: 1.4;
 }
 
-.product-detail-footer {
+.kiot-detail-footer,
+.product-detail-footer,
+.ncc-detail-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1400,6 +1446,7 @@ tr.product-detail-row > td {
   width: 100%;
   box-sizing: border-box;
 }
+.kiot-detail-footer-left,
 .product-detail-footer-left {
   display: flex;
   gap: 8px;
@@ -1407,6 +1454,7 @@ tr.product-detail-row > td {
   position: sticky;
   left: 24px;
 }
+.kiot-detail-footer-right,
 .product-detail-footer-right {
   display: flex;
   gap: 8px;
@@ -1414,6 +1462,45 @@ tr.product-detail-row > td {
   position: sticky;
   right: 24px;
   margin-left: auto;
+}
+
+.kiot-detail-fixed-wrap .kiot-detail-footer,
+.kiot-detail-fixed-wrap .product-detail-footer,
+.ncc-detail-fixed-wrap .kiot-detail-footer,
+.ncc-detail-fixed-wrap .product-detail-footer,
+.ncc-detail-fixed-wrap .ncc-detail-footer {
+  width: 992px;
+  max-width: 100%;
+}
+.kiot-detail-fixed-wrap .kiot-detail-footer-left,
+.kiot-detail-fixed-wrap .kiot-detail-footer-right,
+.kiot-detail-fixed-wrap .product-detail-footer-left,
+.kiot-detail-fixed-wrap .product-detail-footer-right,
+.ncc-detail-fixed-wrap .kiot-detail-footer-left,
+.ncc-detail-fixed-wrap .kiot-detail-footer-right,
+.ncc-detail-fixed-wrap .product-detail-footer-left,
+.ncc-detail-fixed-wrap .product-detail-footer-right {
+  position: static !important;
+}
+
+@media (max-width: 1040px) {
+  .kiot-attr-grid, .ncc-attr-grid {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .kiot-attr-col, .ncc-attr-col {
+    width: 100%;
+    min-width: 100%;
+  }
+  .kiot-detail-fixed-wrap,
+  .kiot-detail-fixed-wrap .kiot-detail-footer,
+  .kiot-detail-fixed-wrap .product-detail-footer,
+  .ncc-detail-fixed-wrap,
+  .ncc-detail-fixed-wrap .kiot-detail-footer,
+  .ncc-detail-fixed-wrap .product-detail-footer,
+  .ncc-detail-fixed-wrap .ncc-detail-footer {
+    width: 100%;
+  }
 }
 
 .badge-kiot-tag {
