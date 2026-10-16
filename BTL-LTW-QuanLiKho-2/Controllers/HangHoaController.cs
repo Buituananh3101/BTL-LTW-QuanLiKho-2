@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using BTL_LTW_QuanLiKho_2.Models;
 using BTL_LTW_QuanLiKho_2.ViewModels;
 using BTL_LTW_QuanLiKho_2.Services;
+using ClosedXML.Excel;
+using System.IO;
+using System.Globalization;
 
 namespace BTL_LTW_QuanLiKho_2.Controllers;
 
@@ -22,9 +25,10 @@ public class HangHoaController : BaseKhoController
         string duKienFilter = "ALL", string tgTaoFilter = "ALL",
         DateTime? tgTaoFrom = null, DateTime? tgTaoTo = null,
         bool daDanhDau = false,
+        string? sortBy = null, string? sortDir = null,
         int page = 1)
     {
-        var vm = await BuildIndexVM(q, nhom, trangThai, tonKhoFilter, nhaCungCap, loaiHang, viTri, duKienFilter, tgTaoFilter, tgTaoFrom, tgTaoTo, daDanhDau, page);
+        var vm = await BuildIndexVM(q, nhom, trangThai, tonKhoFilter, nhaCungCap, loaiHang, viTri, duKienFilter, tgTaoFilter, tgTaoFrom, tgTaoTo, daDanhDau, sortBy, sortDir, page);
         return View(vm);
     }
 
@@ -35,9 +39,10 @@ public class HangHoaController : BaseKhoController
         string duKienFilter = "ALL", string tgTaoFilter = "ALL",
         DateTime? tgTaoFrom = null, DateTime? tgTaoTo = null,
         bool daDanhDau = false,
+        string? sortBy = null, string? sortDir = null,
         int page = 1)
     {
-        var vm = await BuildIndexVM(q, nhom, trangThai, tonKhoFilter, nhaCungCap, loaiHang, viTri, duKienFilter, tgTaoFilter, tgTaoFrom, tgTaoTo, daDanhDau, page);
+        var vm = await BuildIndexVM(q, nhom, trangThai, tonKhoFilter, nhaCungCap, loaiHang, viTri, duKienFilter, tgTaoFilter, tgTaoFrom, tgTaoTo, daDanhDau, sortBy, sortDir, page);
         return PartialView("_HangHoaTable", vm);
     }
 
@@ -59,7 +64,7 @@ public class HangHoaController : BaseKhoController
 
     // Lấy ảnh trực tiếp từ CSDL (hỗ trợ ảnh chính hoặc theo index 0-4)
     [HttpGet]
-    [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Client)]
+    [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Client)]
     public async Task<IActionResult> GetImage(int id, int? index = 0)
     {
         byte[]? data = null;
@@ -72,6 +77,25 @@ public class HangHoaController : BaseKhoController
                 .Where(x => x.MaHang == id && x.ThuTu == idx)
                 .Select(x => x.DuLieuAnh)
                 .FirstOrDefaultAsync();
+        }
+        else
+        {
+            // Ưu tiên ảnh được đánh dấu LaAnhChinh trong bảng HinhAnhHangHoa
+            data = await _context.HinhAnhHangHoas
+                .AsNoTracking()
+                .Where(x => x.MaHang == id && x.LaAnhChinh)
+                .Select(x => x.DuLieuAnh)
+                .FirstOrDefaultAsync();
+
+            if (data == null || data.Length == 0)
+            {
+                data = await _context.HinhAnhHangHoas
+                    .AsNoTracking()
+                    .Where(x => x.MaHang == id)
+                    .OrderBy(x => x.ThuTu)
+                    .Select(x => x.DuLieuAnh)
+                    .FirstOrDefaultAsync();
+            }
         }
 
         if (data == null || data.Length == 0)
@@ -102,17 +126,15 @@ public class HangHoaController : BaseKhoController
         return File(data, mime);
     }
 
-    private async Task<HangHoaIndexVM> BuildIndexVM(
+    private async Task<List<HangHoaItemVM>> BuildFilteredItemsListAsync(
         string? q, string? nhom, string? trangThai, string tonKhoFilter,
         string? nhaCungCap, string? loaiHang, string? viTri,
         string duKienFilter, string tgTaoFilter,
         DateTime? tgTaoFrom, DateTime? tgTaoTo,
         bool daDanhDau,
-        int page)
+        string? sortBy, string? sortDir,
+        int whId)
     {
-        int whId = GetCurrentWarehouseId();
-        var wh = await _context.Khos.FindAsync(whId);
-
         var query = _context.HangHoas.AsNoTracking()
             .Include(x => x.MaNhomNavigation)
             .Include(x => x.MaDvtNavigation)
@@ -335,7 +357,10 @@ public class HangHoaController : BaseKhoController
                 x.QuyCach,
                 x.TrangThai,
                 x.DaDanhDau,
-                HasImage = x.HinhAnh != null,
+                HasImage = x.HinhAnh != null || x.HinhAnhHangHoas.Any(),
+                ImageVersion = x.HinhAnhHangHoas.Where(h => h.LaAnhChinh).Select(h => (long?)h.MaHinhAnh).FirstOrDefault()
+                               ?? x.HinhAnhHangHoas.Select(h => (long?)h.MaHinhAnh).Max()
+                               ?? (x.NgayTao.HasValue ? x.NgayTao.Value.Ticks : (long)x.MaHang),
                 x.NgayTao
             })
             .ToListAsync();
@@ -369,6 +394,7 @@ public class HangHoaController : BaseKhoController
                 IsFavorite = x.DaDanhDau,
                 DaDanhDau = x.DaDanhDau,
                 HasImage = x.HasImage,
+                ImageVersion = x.ImageVersion,
                 NgayTao = x.NgayTao,
                 KhachDat = 0,
                 DuKienHetHang = stock <= 0 ? "Đã hết hàng" :
@@ -421,6 +447,80 @@ public class HangHoaController : BaseKhoController
             }
         }
 
+        // 10. Sắp xếp cột theo yêu cầu (3-state: ASC, DESC, None)
+        if (!string.IsNullOrWhiteSpace(sortBy) && !string.IsNullOrWhiteSpace(sortDir))
+        {
+            bool isAsc = string.Equals(sortDir, "asc", StringComparison.OrdinalIgnoreCase);
+            switch (sortBy.Trim().ToLower())
+            {
+                case "mahang":
+                case "mahangnoibo":
+                    allItems = isAsc
+                        ? allItems.OrderBy(x => x.MaHangNoiBo).ToList()
+                        : allItems.OrderByDescending(x => x.MaHangNoiBo).ToList();
+                    break;
+                case "tenhang":
+                    allItems = isAsc
+                        ? allItems.OrderBy(x => x.TenHang).ToList()
+                        : allItems.OrderByDescending(x => x.TenHang).ToList();
+                    break;
+                case "giaban":
+                    allItems = isAsc
+                        ? allItems.OrderBy(x => x.GiaBan).ToList()
+                        : allItems.OrderByDescending(x => x.GiaBan).ToList();
+                    break;
+                case "giavon":
+                    allItems = isAsc
+                        ? allItems.OrderBy(x => x.GiaVon).ToList()
+                        : allItems.OrderByDescending(x => x.GiaVon).ToList();
+                    break;
+                case "tonkho":
+                    allItems = isAsc
+                        ? allItems.OrderBy(x => x.TonKho).ToList()
+                        : allItems.OrderByDescending(x => x.TonKho).ToList();
+                    break;
+                case "khachdat":
+                    allItems = isAsc
+                        ? allItems.OrderBy(x => x.KhachDat).ToList()
+                        : allItems.OrderByDescending(x => x.KhachDat).ToList();
+                    break;
+                case "ngaytao":
+                    allItems = isAsc
+                        ? allItems.OrderBy(x => x.NgayTao ?? DateTime.MinValue).ToList()
+                        : allItems.OrderByDescending(x => x.NgayTao ?? DateTime.MinValue).ToList();
+                    break;
+                case "dukienhethang":
+                    allItems = isAsc
+                        ? allItems.OrderBy(x => x.TonKho).ToList()
+                        : allItems.OrderByDescending(x => x.TonKho).ToList();
+                    break;
+            }
+        }
+
+        return allItems;
+    }
+
+    private async Task<HangHoaIndexVM> BuildIndexVM(
+        string? q, string? nhom, string? trangThai, string tonKhoFilter,
+        string? nhaCungCap, string? loaiHang, string? viTri,
+        string duKienFilter, string tgTaoFilter,
+        DateTime? tgTaoFrom, DateTime? tgTaoTo,
+        bool daDanhDau,
+        string? sortBy, string? sortDir,
+        int page)
+    {
+        int whId = GetCurrentWarehouseId();
+        var wh = await _context.Khos.FindAsync(whId);
+
+        var allItems = await BuildFilteredItemsListAsync(
+            q, nhom, trangThai, tonKhoFilter,
+            nhaCungCap, loaiHang, viTri,
+            duKienFilter, tgTaoFilter,
+            tgTaoFrom, tgTaoTo,
+            daDanhDau,
+            sortBy, sortDir,
+            whId);
+
         const int pageSize = 15;
         int totalCount = allItems.Count;
         int totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
@@ -469,6 +569,8 @@ public class HangHoaController : BaseKhoController
             DuKienFilter = duKienFilter,
             TgTaoFilter = tgTaoFilter,
             DaDanhDauFilter = daDanhDau,
+            SortBy = sortBy,
+            SortDir = sortDir,
             NhomHangs = nhomList,
             DonViTinhs = dvtList,
             DonViCapHangs = supplierList,
@@ -882,21 +984,58 @@ public class HangHoaController : BaseKhoController
 
         bool used = await _context.ChiTietDonBans.AnyAsync(x => x.MaHang == id)
             || await _context.ChiTietPhieuNhaps.AnyAsync(x => x.MaHang == id)
+            || await _context.ChiTietPhieuXuats.AnyAsync(x => x.MaHang == id)
             || await _context.ChiTietPhieuChuyenKhos.AnyAsync(x => x.MaHang == id)
             || await _context.ChiTietPhieuKiemKes.AnyAsync(x => x.MaHang == id);
 
         if (used)
         {
-            return BadRequest(new { message = "Hàng hóa này đã phát sinh giao dịch/chứng từ trong hệ thống, không thể xóa. Bạn có thể chuyển sang trạng thái 'Ngừng bán'." });
+            return BadRequest(new
+            {
+                success = false,
+                hasTransaction = true,
+                message = $"Hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) đã phát sinh giao dịch/chứng từ trong hệ thống, không thể xóa. Bạn có thể chuyển sang trạng thái 'Ngừng bán' để ẩn khỏi danh mục kinh doanh."
+            });
         }
 
-        var nguongs = await _context.NguongTonKhos.Where(x => x.MaHang == id).ToListAsync();
-        _context.NguongTonKhos.RemoveRange(nguongs);
+        using var trans = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            var images = await _context.HinhAnhHangHoas.Where(x => x.MaHang == id).ToListAsync();
+            if (images.Any())
+            {
+                _context.HinhAnhHangHoas.RemoveRange(images);
+            }
 
-        _context.HangHoas.Remove(item);
+            var nguongs = await _context.NguongTonKhos.Where(x => x.MaHang == id).ToListAsync();
+            if (nguongs.Any())
+            {
+                _context.NguongTonKhos.RemoveRange(nguongs);
+            }
+
+            _context.HangHoas.Remove(item);
+            await _context.SaveChangesAsync();
+            await trans.CommitAsync();
+
+            return Json(new { success = true, message = $"Đã xóa hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) thành công." });
+        }
+        catch (Exception ex)
+        {
+            await trans.RollbackAsync();
+            return BadRequest(new { message = "Lỗi khi xóa dữ liệu hàng hóa: " + ex.Message });
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> NgungBan(int id)
+    {
+        var item = await _context.HangHoas.FindAsync(id);
+        if (item == null) return NotFound(new { message = "Không tìm thấy hàng hóa." });
+
+        item.TrangThai = "NGUNG_BAN";
         await _context.SaveChangesAsync();
 
-        return Json(new { success = true, message = $"Đã xóa hàng hóa {item.TenHang} thành công." });
+        return Json(new { success = true, message = $"Đã chuyển hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) sang trạng thái 'Ngừng bán'." });
     }
 
     private static byte[]? ParseBase64Image(string? base64)
@@ -1011,6 +1150,771 @@ public class HangHoaController : BaseKhoController
         item.ThuocTinh = string.IsNullOrWhiteSpace(req.ThuocTinhJson) ? null : req.ThuocTinhJson.Trim();
         await _context.SaveChangesAsync();
         return Json(new { success = true, message = "Đã cập nhật thuộc tính thành công." });
+    }
+
+    // ========================================================================
+    // PHÂN HỆ XUẤT & NHẬP FILE EXCEL (.XLSX) CHUẨN KIOTVIET (CLOSEDXML)
+    // ========================================================================
+
+    /// <summary>
+    /// Tải file mẫu Excel chuẩn để nhập hàng hóa
+    /// </summary>
+    [HttpGet]
+    public IActionResult DownloadTemplate()
+    {
+        using var workbook = new XLWorkbook();
+        var ws = workbook.Worksheets.Add("DanhSachHangHoa");
+
+        var columns = new[]
+        {
+            ("Loại hàng", "Hàng hóa / Dịch vụ / Combo"),
+            ("Nhóm hàng", "Tên nhóm (tự tạo nếu chưa có)"),
+            ("Mã hàng", "Để trống sẽ tự sinh mã HH..."),
+            ("Tên hàng (*)", "Bắt buộc nhập"),
+            ("Giá bán", "Số tiền (VNĐ)"),
+            ("Giá vốn", "Số tiền (VNĐ)"),
+            ("Tồn kho", "Tồn ban đầu trong kho"),
+            ("Tồn nhỏ nhất", "Định mức tồn tối thiểu"),
+            ("Tồn lớn nhất", "Định mức tồn tối đa"),
+            ("Đơn vị tính", "Tên ĐVT (tự tạo nếu chưa có)"),
+            ("Thuộc tính", "Ví dụ: Màu sắc:Đỏ,Size:XL"),
+            ("Trọng lượng", "Số thập phân"),
+            ("Đơn vị trọng lượng", "g hoặc kg"),
+            ("Vị trí", "Ví dụ: Kệ A1, Ngăn 2"),
+            ("Mô tả", "Mô tả chi tiết sản phẩm"),
+            ("Trạng thái", "Đang kinh doanh / Ngừng bán")
+        };
+
+        // Row 1: Header
+        for (int i = 0; i < columns.Length; i++)
+        {
+            var cell = ws.Cell(1, i + 1);
+            cell.Value = columns[i].Item1;
+            cell.Style.Font.Bold = true;
+            cell.Style.Font.FontColor = XLColor.White;
+            cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#005baa");
+            cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            cell.Style.Border.OutsideBorderColor = XLColor.FromHtml("#cccccc");
+        }
+        ws.Row(1).Height = 28;
+
+        // Row 2: Chú thích / Hướng dẫn
+        for (int i = 0; i < columns.Length; i++)
+        {
+            var cell = ws.Cell(2, i + 1);
+            cell.Value = columns[i].Item2;
+            cell.Style.Font.Italic = true;
+            cell.Style.Font.FontSize = 10;
+            cell.Style.Font.FontColor = XLColor.FromHtml("#6c757d");
+            cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#f8f9fa");
+            cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            cell.Style.Border.OutsideBorderColor = XLColor.FromHtml("#e9ecef");
+        }
+        ws.Row(2).Height = 22;
+
+        // Dòng mẫu 1
+        ws.Cell(3, 1).Value = "Hàng hóa";
+        ws.Cell(3, 2).Value = "Bánh kẹo";
+        ws.Cell(3, 3).Value = "HH000001";
+        ws.Cell(3, 4).Value = "Bánh Cosy Marie 144g";
+        ws.Cell(3, 5).Value = 15000;
+        ws.Cell(3, 6).Value = 10000;
+        ws.Cell(3, 7).Value = 50;
+        ws.Cell(3, 8).Value = 10;
+        ws.Cell(3, 9).Value = 200;
+        ws.Cell(3, 10).Value = "Hộp";
+        ws.Cell(3, 11).Value = "Hương vị:Vani,Quy cách:144g";
+        ws.Cell(3, 12).Value = 144;
+        ws.Cell(3, 13).Value = "g";
+        ws.Cell(3, 14).Value = "Kệ A1-02";
+        ws.Cell(3, 15).Value = "Bánh quy bơ xốp thơm ngon dinh dưỡng";
+        ws.Cell(3, 16).Value = "Đang kinh doanh";
+
+        // Dòng mẫu 2
+        ws.Cell(4, 1).Value = "Hàng hóa";
+        ws.Cell(4, 2).Value = "Nước giải khát";
+        ws.Cell(4, 3).Value = ""; // để trống để test tự sinh mã
+        ws.Cell(4, 4).Value = "Nước khoáng Lavie 500ml";
+        ws.Cell(4, 5).Value = 7000;
+        ws.Cell(4, 6).Value = 4500;
+        ws.Cell(4, 7).Value = 120;
+        ws.Cell(4, 8).Value = 24;
+        ws.Cell(4, 9).Value = 500;
+        ws.Cell(4, 10).Value = "Chai";
+        ws.Cell(4, 11).Value = "Dung tích:500ml";
+        ws.Cell(4, 12).Value = 500;
+        ws.Cell(4, 13).Value = "g";
+        ws.Cell(4, 14).Value = "Kệ B2-01";
+        ws.Cell(4, 15).Value = "Nước khoáng thiên nhiên đóng chai tiện lợi";
+        ws.Cell(4, 16).Value = "Đang kinh doanh";
+
+        for (int r = 3; r <= 4; r++)
+        {
+            ws.Cell(r, 5).Style.NumberFormat.Format = "#,##0";
+            ws.Cell(r, 6).Style.NumberFormat.Format = "#,##0";
+            ws.Cell(r, 7).Style.NumberFormat.Format = "#,##0";
+            ws.Cell(r, 8).Style.NumberFormat.Format = "#,##0";
+            ws.Cell(r, 9).Style.NumberFormat.Format = "#,##0";
+            ws.Cell(r, 12).Style.NumberFormat.Format = "#,##0";
+            ws.Row(r).Height = 22;
+        }
+
+        ws.Columns().AdjustToContents();
+
+        using var ms = new MemoryStream();
+        workbook.SaveAs(ms);
+        return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_Nhap_Hang_Hoa_KiotViet.xlsx");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ExportExcel([FromForm] ExportHangHoaRequest req)
+    {
+        int whId = CurrentWarehouseId;
+
+        var allItems = await BuildFilteredItemsListAsync(
+            req.Q, req.Nhom, null, req.TonKhoFilter ?? "ALL",
+            req.NhaCungCap, req.LoaiHang, req.ViTri,
+            req.DuKienFilter ?? "ALL", req.TgTaoFilter ?? "ALL",
+            req.TgTaoFrom, req.TgTaoTo,
+            req.DaDanhDau ?? false,
+            null, null,
+            whId);
+
+        if (req.ExportScope == "SELECTED" && !string.IsNullOrWhiteSpace(req.SelectedIds))
+        {
+            var selectedIds = req.SelectedIds.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => int.TryParse(s.Trim(), out int id) ? id : 0)
+                .Where(id => id > 0)
+                .ToHashSet();
+            if (selectedIds.Any())
+            {
+                allItems = allItems.Where(x => selectedIds.Contains(x.MaHang)).ToList();
+            }
+        }
+
+        var allColumnDefs = new List<(string Key, string Title)>
+        {
+            ("LoaiHang", "Loại hàng"),
+            ("NhomHang", "Nhóm hàng"),
+            ("MaHang", "Mã hàng"),
+            ("TenHang", "Tên hàng"),
+            ("GiaBan", "Giá bán"),
+            ("GiaVon", "Giá vốn"),
+            ("TonKho", "Tồn kho"),
+            ("TonNhoNhat", "Tồn nhỏ nhất"),
+            ("TonLonNhat", "Tồn lớn nhất"),
+            ("Dvt", "Đơn vị tính"),
+            ("ThuocTinh", "Thuộc tính"),
+            ("TrongLuong", "Trọng lượng"),
+            ("DonViTrongLuong", "Đơn vị trọng lượng"),
+            ("ViTri", "Vị trí"),
+            ("MoTa", "Mô tả"),
+            ("TrangThai", "Trạng thái")
+        };
+
+        var selectedCols = (req.Columns != null && req.Columns.Count > 0)
+            ? allColumnDefs.Where(c => req.Columns.Contains(c.Key, StringComparer.OrdinalIgnoreCase)).ToList()
+            : allColumnDefs;
+
+        if (!selectedCols.Any()) selectedCols = allColumnDefs;
+
+        using var workbook = new XLWorkbook();
+        var ws = workbook.Worksheets.Add("DanhSachHangHoa");
+
+        // Header
+        for (int colIdx = 0; colIdx < selectedCols.Count; colIdx++)
+        {
+            var cell = ws.Cell(1, colIdx + 1);
+            cell.Value = selectedCols[colIdx].Title;
+            cell.Style.Font.Bold = true;
+            cell.Style.Font.FontColor = XLColor.White;
+            cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#005baa");
+            cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            cell.Style.Border.OutsideBorderColor = XLColor.FromHtml("#cccccc");
+        }
+        ws.Row(1).Height = 28;
+
+        // Data rows
+        int rowIdx = 2;
+        foreach (var item in allItems)
+        {
+            for (int colIdx = 0; colIdx < selectedCols.Count; colIdx++)
+            {
+                var key = selectedCols[colIdx].Key;
+                var cell = ws.Cell(rowIdx, colIdx + 1);
+
+                switch (key)
+                {
+                    case "LoaiHang":
+                        cell.Value = "Hàng hóa";
+                        break;
+                    case "NhomHang":
+                        cell.Value = item.TenNhom;
+                        break;
+                    case "MaHang":
+                        cell.Value = item.MaHangNoiBo;
+                        break;
+                    case "TenHang":
+                        cell.Value = item.TenHang;
+                        break;
+                    case "GiaBan":
+                        cell.Value = item.GiaBan;
+                        cell.Style.NumberFormat.Format = "#,##0";
+                        break;
+                    case "GiaVon":
+                        cell.Value = item.GiaVon;
+                        cell.Style.NumberFormat.Format = "#,##0";
+                        break;
+                    case "TonKho":
+                        cell.Value = item.TonKho;
+                        cell.Style.NumberFormat.Format = "#,##0";
+                        break;
+                    case "TonNhoNhat":
+                        cell.Value = item.TonToiThieu ?? 0;
+                        cell.Style.NumberFormat.Format = "#,##0";
+                        break;
+                    case "TonLonNhat":
+                        cell.Value = item.TonCaoNhat ?? 0;
+                        cell.Style.NumberFormat.Format = "#,##0";
+                        break;
+                    case "Dvt":
+                        cell.Value = item.TenDvt;
+                        break;
+                    case "ThuocTinh":
+                        if (item.ThuocTinhs != null && item.ThuocTinhs.Any())
+                        {
+                            cell.Value = string.Join(",", item.ThuocTinhs.Select(a => $"{a.Ten}:{a.GiaTri}"));
+                        }
+                        else
+                        {
+                            cell.Value = "";
+                        }
+                        break;
+                    case "TrongLuong":
+                        cell.Value = item.TrongLuong ?? 0;
+                        cell.Style.NumberFormat.Format = "#,##0";
+                        break;
+                    case "DonViTrongLuong":
+                        cell.Value = item.DonViTrongLuong ?? "g";
+                        break;
+                    case "ViTri":
+                        cell.Value = item.ViTri ?? "";
+                        break;
+                    case "MoTa":
+                        cell.Value = item.MoTa ?? item.QuyCach ?? "";
+                        break;
+                    case "TrangThai":
+                        cell.Value = item.TrangThai == "NGUNG_BAN" ? "Ngừng bán" : "Đang kinh doanh";
+                        break;
+                }
+                cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                cell.Style.Border.OutsideBorderColor = XLColor.FromHtml("#e9ecef");
+            }
+            ws.Row(rowIdx).Height = 22;
+            rowIdx++;
+        }
+
+        ws.Columns().AdjustToContents();
+
+        using var ms = new MemoryStream();
+        workbook.SaveAs(ms);
+        string fileName = $"Danh_Sach_Hang_Hoa_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+        return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+    }
+
+    /// <summary>
+    /// Nhập hàng hóa từ file Excel với đầy đủ các trường quản lý
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> ImportExcel(IFormFile? file, string duplicateMode = "UPDATE")
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest(new { success = false, message = "Vui lòng chọn file Excel để nhập dữ liệu." });
+        }
+
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (ext != ".xlsx")
+        {
+            return BadRequest(new { success = false, message = "Hệ thống chỉ hỗ trợ file định dạng Excel (.xlsx)." });
+        }
+
+        using var stream = file.OpenReadStream();
+        using var workbook = new XLWorkbook(stream);
+        var ws = workbook.Worksheets.FirstOrDefault();
+        if (ws == null)
+        {
+            return BadRequest(new { success = false, message = "File Excel không chứa bất kỳ trang tính nào." });
+        }
+
+        // Tìm dòng header (dòng 1 hoặc dòng đầu tiên có cột Tên hàng)
+        int headerRow = 1;
+        var colMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+        for (int r = 1; r <= Math.Min(5, ws.LastRowUsed()?.RowNumber() ?? 1); r++)
+        {
+            var tempMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            int lastCol = ws.Row(r).LastCellUsed()?.Address.ColumnNumber ?? 0;
+            for (int col = 1; col <= lastCol; col++)
+            {
+                string header = ws.Cell(r, col).GetString().Trim();
+                if (string.IsNullOrEmpty(header)) continue;
+                string norm = RemoveDiacritics(header).ToLower().Replace(" ", "").Replace("(*)", "").Replace("*", "");
+
+                if (norm.Contains("tenhang") || norm.Contains("tensanpham")) tempMap["TenHang"] = col;
+                else if (norm.Contains("mahang") || norm.Contains("masanpham") || norm == "ma") tempMap["MaHang"] = col;
+                else if (norm.Contains("loaihang")) tempMap["LoaiHang"] = col;
+                else if (norm.Contains("nhomhang") || norm.Contains("nhom")) tempMap["NhomHang"] = col;
+                else if (norm.Contains("giaban")) tempMap["GiaBan"] = col;
+                else if (norm.Contains("giavon") || norm.Contains("gianhap")) tempMap["GiaVon"] = col;
+                else if (norm.Contains("tonkho") || norm.Contains("tonbandau") || norm == "ton") tempMap["TonKho"] = col;
+                else if (norm.Contains("tonnhonhat") || norm.Contains("tontoithieu")) tempMap["TonNhoNhat"] = col;
+                else if (norm.Contains("tonlonnhat") || norm.Contains("tontoida") || norm.Contains("toncaonhat")) tempMap["TonLonNhat"] = col;
+                else if (norm.Contains("donvitinh") || norm == "dvt") tempMap["Dvt"] = col;
+                else if (norm.Contains("thuoctinh")) tempMap["ThuocTinh"] = col;
+                else if (norm.Contains("trongluong")) tempMap["TrongLuong"] = col;
+                else if (norm.Contains("donvitrongluong") || norm.Contains("donvitl")) tempMap["DonViTrongLuong"] = col;
+                else if (norm.Contains("vitri")) tempMap["ViTri"] = col;
+                else if (norm.Contains("mota") || norm.Contains("quycach")) tempMap["MoTa"] = col;
+                else if (norm.Contains("trangthai")) tempMap["TrangThai"] = col;
+            }
+
+            if (tempMap.ContainsKey("TenHang"))
+            {
+                headerRow = r;
+                colMap = tempMap;
+                break;
+            }
+        }
+
+        if (!colMap.ContainsKey("TenHang"))
+        {
+            return BadRequest(new
+            {
+                success = false,
+                message = "File Excel thiếu cột bắt buộc 'Tên hàng (*)' hoặc tiêu đề không đúng định dạng. Lưu ý: File xuất nếu bị thiếu các trường cốt lõi sẽ không thể làm file nhập ngược lại!"
+            });
+        }
+
+        // Kiểm tra xem dòng kế tiếp có phải dòng chú thích/hướng dẫn không
+        int startRow = headerRow + 1;
+        int lastRow = ws.LastRowUsed()?.RowNumber() ?? headerRow;
+
+        if (startRow <= lastRow)
+        {
+            string sampleCheck = ws.Cell(startRow, colMap["TenHang"]).GetString().ToLower();
+            if (sampleCheck.Contains("bắt buộc") || sampleCheck.Contains("hướng dẫn") || sampleCheck.Contains("ví dụ"))
+            {
+                startRow++;
+            }
+        }
+
+        if (startRow > lastRow)
+        {
+            return BadRequest(new { success = false, message = "File Excel không có dữ liệu hàng hóa nào để nhập." });
+        }
+
+        int whId = CurrentWarehouseId;
+        int nvId = CurrentNhanVienId;
+
+        var existingNhom = await _context.NhomHangs.ToDictionaryAsync(x => x.TenNhom.Trim().ToLower(), x => x);
+        var existingDvt = await _context.DonViTinhs.ToDictionaryAsync(x => x.TenDvt.Trim().ToLower(), x => x);
+        var existingHangHoa = await _context.HangHoas.ToDictionaryAsync(x => x.MaHangNoiBo.Trim().ToLower(), x => x);
+
+        var defaultNhom = existingNhom.Values.FirstOrDefault();
+        if (defaultNhom == null)
+        {
+            defaultNhom = new NhomHang { TenNhom = "Mặc định", TrangThai = "ACTIVE" };
+            _context.NhomHangs.Add(defaultNhom);
+            await _context.SaveChangesAsync();
+            existingNhom[defaultNhom.TenNhom.ToLower()] = defaultNhom;
+        }
+
+        var defaultDvt = existingDvt.Values.FirstOrDefault();
+        if (defaultDvt == null)
+        {
+            defaultDvt = new DonViTinh { TenDvt = "Cái" };
+            _context.DonViTinhs.Add(defaultDvt);
+            await _context.SaveChangesAsync();
+            existingDvt[defaultDvt.TenDvt.ToLower()] = defaultDvt;
+        }
+
+        int nextAutoNum = await GetNextAutoProductNumberAsync();
+        int insertedCount = 0;
+        int updatedCount = 0;
+        int skippedCount = 0;
+        var errorList = new List<string>();
+        var initialStockList = new List<(int MaHang, decimal SoLuong, decimal DonGia)>();
+
+        using var trans = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            for (int r = startRow; r <= lastRow; r++)
+            {
+                // Kiểm tra dòng trống
+                bool isRowEmpty = true;
+                foreach (var col in colMap.Values)
+                {
+                    if (!ws.Cell(r, col).IsEmpty())
+                    {
+                        isRowEmpty = false;
+                        break;
+                    }
+                }
+                if (isRowEmpty) continue;
+
+                string tenHang = GetCellString(ws, r, colMap, "TenHang");
+                if (string.IsNullOrWhiteSpace(tenHang))
+                {
+                    errorList.Add($"Dòng {r}: Tên hàng không được để trống.");
+                    continue;
+                }
+
+                string maHang = GetCellString(ws, r, colMap, "MaHang");
+                string nhom = GetCellString(ws, r, colMap, "NhomHang");
+                string dvt = GetCellString(ws, r, colMap, "Dvt");
+                decimal giaBan = GetCellDecimal(ws, r, colMap, "GiaBan", 0);
+                decimal giaVon = GetCellDecimal(ws, r, colMap, "GiaVon", 0);
+                decimal tonKho = GetCellDecimal(ws, r, colMap, "TonKho", 0);
+                decimal? tonNhoNhat = GetCellDecimalNullable(ws, r, colMap, "TonNhoNhat");
+                decimal? tonLonNhat = GetCellDecimalNullable(ws, r, colMap, "TonLonNhat");
+                string thuocTinhText = GetCellString(ws, r, colMap, "ThuocTinh");
+                decimal? trongLuong = GetCellDecimalNullable(ws, r, colMap, "TrongLuong");
+                string donViTrongLuong = GetCellString(ws, r, colMap, "DonViTrongLuong");
+                if (string.IsNullOrWhiteSpace(donViTrongLuong)) donViTrongLuong = "g";
+                string viTri = GetCellString(ws, r, colMap, "ViTri");
+                string moTa = GetCellString(ws, r, colMap, "MoTa");
+                string trangThai = GetCellString(ws, r, colMap, "TrangThai");
+                string status = (trangThai != null && trangThai.ToLower().Contains("ngừng")) ? "NGUNG_BAN" : "DANG_BAN";
+
+                // Map Nhóm hàng
+                int maNhom = defaultNhom.MaNhom;
+                if (!string.IsNullOrWhiteSpace(nhom))
+                {
+                    string key = nhom.Trim().ToLower();
+                    if (existingNhom.TryGetValue(key, out var grp))
+                    {
+                        maNhom = grp.MaNhom;
+                    }
+                    else
+                    {
+                        var newGrp = new NhomHang { TenNhom = nhom.Trim(), TrangThai = "ACTIVE" };
+                        _context.NhomHangs.Add(newGrp);
+                        await _context.SaveChangesAsync();
+                        existingNhom[key] = newGrp;
+                        maNhom = newGrp.MaNhom;
+                    }
+                }
+
+                // Map Đơn vị tính
+                int maDvt = defaultDvt.MaDvt;
+                if (!string.IsNullOrWhiteSpace(dvt))
+                {
+                    string key = dvt.Trim().ToLower();
+                    if (existingDvt.TryGetValue(key, out var u))
+                    {
+                        maDvt = u.MaDvt;
+                    }
+                    else
+                    {
+                        var newU = new DonViTinh { TenDvt = dvt.Trim() };
+                        _context.DonViTinhs.Add(newU);
+                        await _context.SaveChangesAsync();
+                        existingDvt[key] = newU;
+                        maDvt = newU.MaDvt;
+                    }
+                }
+
+                string? thuocTinhJson = ParseThuocTinhTextToJson(thuocTinhText);
+
+                HangHoa? existingItem = null;
+                bool isExisting = !string.IsNullOrWhiteSpace(maHang) && existingHangHoa.TryGetValue(maHang.Trim().ToLower(), out existingItem);
+
+                if (isExisting && existingItem != null)
+                {
+                    if (duplicateMode == "ERROR")
+                    {
+                        errorList.Add($"Dòng {r}: Mã hàng '{maHang}' đã tồn tại trong hệ thống.");
+                        continue;
+                    }
+                    if (duplicateMode == "SKIP")
+                    {
+                        skippedCount++;
+                        continue;
+                    }
+
+                    // Chế độ UPDATE: Cập nhật thông tin
+                    existingItem.TenHang = tenHang;
+                    existingItem.MaNhom = maNhom;
+                    existingItem.MaDvt = maDvt;
+                    if (giaBan > 0) existingItem.GiaBanThamKhao = giaBan;
+                    if (giaVon > 0) existingItem.GiaVon = giaVon;
+                    if (!string.IsNullOrWhiteSpace(viTri)) existingItem.ViTri = viTri;
+                    if (trongLuong.HasValue && trongLuong.Value > 0) existingItem.TrongLuong = trongLuong;
+                    if (!string.IsNullOrWhiteSpace(donViTrongLuong)) existingItem.DonViTrongLuong = donViTrongLuong;
+                    if (!string.IsNullOrWhiteSpace(moTa))
+                    {
+                        existingItem.MoTa = moTa;
+                        existingItem.QuyCach = moTa;
+                    }
+                    if (!string.IsNullOrWhiteSpace(thuocTinhJson)) existingItem.ThuocTinh = thuocTinhJson;
+                    existingItem.TrangThai = status;
+
+                    if (tonNhoNhat.HasValue || tonLonNhat.HasValue)
+                    {
+                        var nguong = await _context.NguongTonKhos.FirstOrDefaultAsync(n => n.MaHang == existingItem.MaHang && n.MaKho == whId);
+                        if (nguong == null)
+                        {
+                            _context.NguongTonKhos.Add(new NguongTonKho
+                            {
+                                MaHang = existingItem.MaHang,
+                                MaKho = whId,
+                                TonToiThieu = tonNhoNhat ?? 0,
+                                TonCaoNhat = tonLonNhat ?? 999999999m
+                            });
+                        }
+                        else
+                        {
+                            if (tonNhoNhat.HasValue) nguong.TonToiThieu = tonNhoNhat.Value;
+                            if (tonLonNhat.HasValue) nguong.TonCaoNhat = tonLonNhat.Value;
+                        }
+                    }
+
+                    updatedCount++;
+                }
+                else
+                {
+                    // Chế độ INSERT: Thêm mới hàng hóa
+                    string newCode = !string.IsNullOrWhiteSpace(maHang) ? maHang.Trim() : MaChungTuHelper.FormatMaHang(nextAutoNum++);
+                    while (existingHangHoa.ContainsKey(newCode.ToLower()))
+                    {
+                        newCode = MaChungTuHelper.FormatMaHang(nextAutoNum++);
+                    }
+
+                    var newItem = new HangHoa
+                    {
+                        MaHangNoiBo = newCode,
+                        TenHang = tenHang,
+                        MaNhom = maNhom,
+                        MaDvt = maDvt,
+                        GiaBanThamKhao = giaBan,
+                        GiaVon = giaVon,
+                        ViTri = viTri,
+                        TrongLuong = trongLuong,
+                        DonViTrongLuong = donViTrongLuong,
+                        MoTa = moTa,
+                        QuyCach = moTa,
+                        ThuocTinh = thuocTinhJson,
+                        TrangThai = status,
+                        NgayTao = DateTime.Now,
+                        DaDanhDau = false
+                    };
+
+                    _context.HangHoas.Add(newItem);
+                    await _context.SaveChangesAsync();
+                    existingHangHoa[newCode.ToLower()] = newItem;
+
+                    if (tonNhoNhat.HasValue || tonLonNhat.HasValue)
+                    {
+                        _context.NguongTonKhos.Add(new NguongTonKho
+                        {
+                            MaHang = newItem.MaHang,
+                            MaKho = whId,
+                            TonToiThieu = tonNhoNhat ?? 0,
+                            TonCaoNhat = tonLonNhat ?? 999999999m
+                        });
+                        await _context.SaveChangesAsync();
+                    }
+
+                    if (tonKho > 0)
+                    {
+                        decimal cost = giaVon > 0 ? giaVon : (giaBan > 0 ? giaBan : 0);
+                        initialStockList.Add((newItem.MaHang, tonKho, cost));
+                    }
+
+                    insertedCount++;
+                }
+            }
+
+            if (duplicateMode == "ERROR" && errorList.Any())
+            {
+                await trans.RollbackAsync();
+                return BadRequest(new
+                {
+                    success = false,
+                    message = $"Phát hiện {errorList.Count} lỗi trong quá trình xử lý. Dữ liệu chưa được lưu.",
+                    errors = errorList
+                });
+            }
+
+            // Tạo phiếu nhập tồn kho đầu kỳ nếu có sản phẩm mới có số lượng tồn > 0
+            if (initialStockList.Any())
+            {
+                var phieuNhap = new PhieuNhap
+                {
+                    MaKho = whId,
+                    MaNvlap = nvId,
+                    MaNvxacNhan = nvId,
+                    NgayLap = DateTime.Now,
+                    NgayXacNhan = DateTime.Now,
+                    LoaiPhieuNhap = "DAU_KY",
+                    TrangThai = "DA_XAC_NHAN",
+                    GhiChu = $"Tồn kho ban đầu từ file Excel ({initialStockList.Count} mặt hàng)"
+                };
+                _context.PhieuNhaps.Add(phieuNhap);
+                await _context.SaveChangesAsync();
+
+                foreach (var stock in initialStockList)
+                {
+                    _context.ChiTietPhieuNhaps.Add(new ChiTietPhieuNhap
+                    {
+                        MaPhieuNhap = phieuNhap.MaPhieuNhap,
+                        MaHang = stock.MaHang,
+                        SoLuong = stock.SoLuong,
+                        DonGiaNhap = stock.DonGia
+                    });
+                }
+                await _context.SaveChangesAsync();
+            }
+
+            await trans.CommitAsync();
+
+            return Json(new ImportHangHoaResult
+            {
+                Success = true,
+                TotalRows = lastRow - startRow + 1,
+                InsertedCount = insertedCount,
+                UpdatedCount = updatedCount,
+                SkippedCount = skippedCount,
+                Errors = errorList,
+                Message = $"Nhập file thành công! Thêm mới: {insertedCount}, Cập nhật: {updatedCount}, Bỏ qua: {skippedCount}."
+            });
+        }
+        catch (Exception ex)
+        {
+            await trans.RollbackAsync();
+            return BadRequest(new { success = false, message = "Lỗi khi nhập dữ liệu từ file Excel: " + ex.Message });
+        }
+    }
+
+    // ========================================================================
+    // CÁC HÀM TIỆN ÍCH HỖ TRỢ XỬ LÝ FILE EXCEL
+    // ========================================================================
+
+    private static string GetCellString(IXLWorksheet ws, int row, Dictionary<string, int> colMap, string key)
+    {
+        if (!colMap.TryGetValue(key, out int col)) return "";
+        var cell = ws.Cell(row, col);
+        if (cell.IsEmpty()) return "";
+        return cell.GetString()?.Trim() ?? "";
+    }
+
+    private static decimal GetCellDecimal(IXLWorksheet ws, int row, Dictionary<string, int> colMap, string key, decimal defaultValue = 0)
+    {
+        if (!colMap.TryGetValue(key, out int col)) return defaultValue;
+        var cell = ws.Cell(row, col);
+        if (cell.IsEmpty()) return defaultValue;
+        if (cell.DataType == XLDataType.Number)
+        {
+            return Convert.ToDecimal(cell.GetDouble());
+        }
+        string str = cell.GetString()?.Trim() ?? "";
+        if (string.IsNullOrEmpty(str)) return defaultValue;
+        str = str.Replace("₫", "").Replace("VND", "", StringComparison.OrdinalIgnoreCase).Replace(" ", "");
+        if (decimal.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val)) return val;
+        if (decimal.TryParse(str, NumberStyles.Any, new CultureInfo("vi-VN"), out val)) return val;
+        return defaultValue;
+    }
+
+    private static decimal? GetCellDecimalNullable(IXLWorksheet ws, int row, Dictionary<string, int> colMap, string key)
+    {
+        if (!colMap.TryGetValue(key, out int col)) return null;
+        var cell = ws.Cell(row, col);
+        if (cell.IsEmpty()) return null;
+        if (cell.DataType == XLDataType.Number)
+        {
+            return Convert.ToDecimal(cell.GetDouble());
+        }
+        string str = cell.GetString()?.Trim() ?? "";
+        if (string.IsNullOrEmpty(str)) return null;
+        str = str.Replace("₫", "").Replace("VND", "", StringComparison.OrdinalIgnoreCase).Replace(" ", "");
+        if (decimal.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val)) return val;
+        if (decimal.TryParse(str, NumberStyles.Any, new CultureInfo("vi-VN"), out val)) return val;
+        return null;
+    }
+
+    private static string RemoveDiacritics(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return "";
+        var normalizedString = text.Normalize(System.Text.NormalizationForm.FormD);
+        var stringBuilder = new System.Text.StringBuilder(capacity: normalizedString.Length);
+
+        for (int i = 0; i < normalizedString.Length; i++)
+        {
+            char c = normalizedString[i];
+            var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+            if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+            {
+                stringBuilder.Append(c);
+            }
+        }
+
+        return stringBuilder
+            .ToString()
+            .Normalize(System.Text.NormalizationForm.FormC)
+            .Replace('đ', 'd')
+            .Replace('Đ', 'D');
+    }
+
+    private static string? ParseThuocTinhTextToJson(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return null;
+        var pairs = text.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+        var list = new List<ThuocTinhItemVM>();
+        foreach (var pair in pairs)
+        {
+            var parts = pair.Split(new[] { ':', '=' }, 2);
+            if (parts.Length == 2)
+            {
+                string k = parts[0].Trim();
+                string v = parts[1].Trim();
+                if (!string.IsNullOrEmpty(k) && !string.IsNullOrEmpty(v))
+                {
+                    list.Add(new ThuocTinhItemVM { Ten = k, GiaTri = v });
+                }
+            }
+            else if (parts.Length == 1 && !string.IsNullOrWhiteSpace(parts[0]))
+            {
+                list.Add(new ThuocTinhItemVM { Ten = "Thuộc tính", GiaTri = parts[0].Trim() });
+            }
+        }
+        return list.Any() ? System.Text.Json.JsonSerializer.Serialize(list) : null;
+    }
+
+    private async Task<int> GetNextAutoProductNumberAsync()
+    {
+        var existingCodes = await _context.HangHoas
+            .Where(x => x.MaHangNoiBo.StartsWith("HH"))
+            .Select(x => x.MaHangNoiBo)
+            .ToListAsync();
+
+        int maxNum = 0;
+        foreach (var code in existingCodes)
+        {
+            if (code.Length > 2 && int.TryParse(code[2..], out int num))
+            {
+                if (num > maxNum) maxNum = num;
+            }
+        }
+
+        int maxId = await _context.HangHoas.MaxAsync(x => (int?)x.MaHang) ?? 0;
+        return Math.Max(maxNum, maxId) + 1;
     }
 
     private static List<ThuocTinhItemVM> ParseThuocTinhJson(string? json)

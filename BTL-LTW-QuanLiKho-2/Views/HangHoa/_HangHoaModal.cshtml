@@ -15,6 +15,7 @@
   <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
   <symbol id="i-img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M3 17l5-5 4 4 3-3 6 6"/></symbol>
   <symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></symbol>
 </svg>
 
 <div class="hh-ov" id="hangHoaModalOv">
@@ -58,10 +59,13 @@
                 <label for="inputMaNhom">Nhóm hàng <button type="button" class="hh-link" id="btnNewNhom" data-new="nhom">+ Tạo mới</button></label>
                 <div class="hh-cs-wrap" id="wrapMaNhom" data-select-id="#formMaNhom">
                   <div class="hh-cs-box" id="boxMaNhom">
-                    <input type="text" class="hh-cs-input" id="inputMaNhom" placeholder="Chọn nhóm hàng (Bắt buộc)" autocomplete="off" />
+                    <input type="text" class="hh-cs-input" id="inputMaNhom" placeholder="Chọn nhóm hàng (Bắt buộc)" readonly autocomplete="off" />
                     <svg class="hh-cs-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
                   </div>
                   <div class="hh-cs-dropdown" id="dropdownMaNhom" style="display: none;">
+                    <div class="hh-cs-search">
+                      <input type="text" id="searchMaNhom" placeholder="Tìm nhóm hàng..." autocomplete="off" />
+                    </div>
                     <div class="hh-cs-list" id="listMaNhom">
                       @foreach (var g in Model.NhomHangs)
                       {
@@ -70,9 +74,6 @@
                           <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
                         </div>
                       }
-                      <div class="hh-cs-item hh-cs-new-item">
-                        <span>+ Tạo nhóm hàng mới</span>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -90,10 +91,13 @@
                 <label for="inputMaDvt">Đơn vị tính <button type="button" class="hh-link" id="btnNewDvt" data-new="dvt">+ Tạo mới</button></label>
                 <div class="hh-cs-wrap" id="wrapMaDvt" data-select-id="#formMaDvt">
                   <div class="hh-cs-box" id="boxMaDvt">
-                    <input type="text" class="hh-cs-input" id="inputMaDvt" placeholder="Chọn ĐVT (Bắt buộc)" autocomplete="off" />
+                    <input type="text" class="hh-cs-input" id="inputMaDvt" placeholder="Chọn ĐVT (Bắt buộc)" readonly autocomplete="off" />
                     <svg class="hh-cs-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
                   </div>
                   <div class="hh-cs-dropdown" id="dropdownMaDvt" style="display: none;">
+                    <div class="hh-cs-search">
+                      <input type="text" id="searchMaDvt" placeholder="Tìm đơn vị tính..." autocomplete="off" />
+                    </div>
                     <div class="hh-cs-list" id="listMaDvt">
                       @foreach (var u in Model.DonViTinhs)
                       {
@@ -102,9 +106,6 @@
                           <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
                         </div>
                       }
-                      <div class="hh-cs-item hh-cs-new-item">
-                        <span>+ Tạo đơn vị tính mới</span>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -129,6 +130,7 @@
                 <!-- Dynamic thumbnails render via JS (tối đa 5 ảnh) -->
               </div>
               <input type="file" id="hhImgFile" accept="image/*" multiple hidden />
+              <input type="file" id="hhImgFileReplaceMain" accept="image/*" hidden />
             </div>
           </div>
 
@@ -273,6 +275,10 @@
 
     <!-- Footer Modal -->
     <div class="hh-m-foot">
+      <button type="button" class="hh-btn-del" id="btnDeleteProductInModal" style="display: none; margin-right: 12px;" title="Xóa hàng hóa này">
+        <svg style="width:16px;height:16px;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:4px;"><use href="#i-trash"/></svg>
+        <span>Xóa</span>
+      </button>
       <label class="hh-chk">
         <input type="checkbox" id="chkBanTrucTiep" checked />
         <span>Bán trực tiếp</span>
@@ -336,10 +342,27 @@
           <svg class="hh-ic"><use href="#i-search"/></svg>
           <input type="text" id="pkSearch" placeholder="Tìm kiếm giá trị..." autocomplete="off" />
         </div>
-        <select id="pkSort">
-          <option value="asc">A → Z</option>
-          <option value="desc">Z → A</option>
-        </select>
+        <!-- Custom Dropdown Sắp xếp A-Z / Z-A chuẩn KiotViet -->
+        <div class="hh-pk-sort-wrap" id="wrapPkSort">
+          <div class="hh-pk-sort-box" id="boxPkSort" tabindex="0">
+            <span id="textPkSort">A → Z</span>
+            <svg class="hh-pk-sort-arrow"><use href="#i-chev"/></svg>
+          </div>
+          <div class="hh-pk-sort-dropdown" id="dropdownPkSort">
+            <div class="hh-pk-sort-item selected" data-val="asc">
+              <span>A → Z</span>
+              <svg class="hh-check-icon"><use href="#i-check"/></svg>
+            </div>
+            <div class="hh-pk-sort-item" data-val="desc">
+              <span>Z → A</span>
+              <svg class="hh-check-icon"><use href="#i-check"/></svg>
+            </div>
+          </div>
+          <select id="pkSort" style="display:none">
+            <option value="asc" selected>A → Z</option>
+            <option value="desc">Z → A</option>
+          </select>
+        </div>
         <span class="sp" style="flex:1"></span>
         <button type="button" class="hh-link" id="pkAll" style="font-size:14.5px;font-weight:600">Chọn tất cả</button>
       </div>
@@ -378,6 +401,44 @@
         <button type="button" class="hh-btn" data-close="hhEditItemOv">Bỏ qua</button>
         <button type="button" class="hh-btn primary" id="btnEditItemSave">Lưu</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL CON 4: XÁC NHẬN XÓA HÀNG HÓA (Chuẩn KiotViet) ===== -->
+<div class="hh-ov" id="hhDeleteProductOv">
+  <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="delProdTitle" style="max-width: 480px;">
+    <div class="hh-m-head" style="border-bottom: 1px solid var(--hh-line-l); padding-bottom: 12px;">
+      <h2 id="delProdTitle" style="color: #dc2626; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 18px;">
+        <svg style="width:20px;height:20px;stroke:#dc2626;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><use href="#i-trash"/></svg>
+        <span>Xóa hàng hóa</span>
+      </h2>
+      <button type="button" class="hh-x" data-close="hhDeleteProductOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div class="hh-m-body" style="padding: 20px 24px; font-size: 14.5px; line-height: 1.5;">
+      <input type="hidden" id="delProdId" value="0" />
+      <div id="delProdConfirmMsg" style="color: #374151;">
+        Bạn có chắc chắn muốn xóa hàng hóa <strong id="delProdName" style="color: #111827;"></strong>? Thao tác này không thể hoàn tác.
+      </div>
+
+      <!-- Khối cảnh báo khi hàng hóa đã phát sinh giao dịch không thể xóa -->
+      <div id="delProdErrorBox" style="display: none; margin-top: 14px; padding: 12px 14px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #991b1b; font-size: 13.5px; line-height: 1.5;">
+        <div style="display: flex; gap: 8px; align-items: flex-start;">
+          <svg style="width:18px;height:18px;flex:none;stroke:#dc2626;fill:none;stroke-width:2;margin-top:2px;"><use href="#i-info"/></svg>
+          <div style="flex: 1;">
+            <div id="delProdErrorMsg" style="font-weight: 500; margin-bottom: 8px;"></div>
+            <button type="button" class="hh-btn" id="btnSwitchNgungBan" style="background:#fff;border-color:#fca5a5;color:#b91c1c;height:32px;font-size:13px;padding:0 12px;font-weight:600;">
+              Chuyển sang "Ngừng bán" ngay
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hh-m-foot" style="background: #f9fafb; border-top: 1px solid var(--hh-line-l); padding: 12px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+      <button type="button" class="hh-btn" data-close="hhDeleteProductOv">Bỏ qua</button>
+      <button type="button" class="hh-btn danger" id="btnConfirmDeleteProd">Đồng ý xóa</button>
     </div>
   </div>
 </div>

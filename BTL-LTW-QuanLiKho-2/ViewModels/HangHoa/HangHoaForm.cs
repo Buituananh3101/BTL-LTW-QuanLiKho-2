@@ -112,6 +112,7 @@ public class HangHoaItemVM
     public bool IsFavorite { get; set; }
     public bool DaDanhDau { get; set; }
     public bool HasImage { get; set; }
+    public long ImageVersion { get; set; } = 0;
     public int SoLuongAnh { get; set; } = 0;
     public DateTime? NgayTao { get; set; }
     public int KhachDat { get; set; } = 0;
@@ -142,6 +143,9 @@ public class HangHoaIndexVM
     public string DuKienFilter { get; set; } = "ALL";
     public string TgTaoFilter { get; set; } = "ALL";
     public bool DaDanhDauFilter { get; set; } = false;
+
+    public string? SortBy { get; set; } // mahang, tenhang, giaban, giavon, tonkho, khachdat, ngaytao, dukienhethang
+    public string? SortDir { get; set; } // asc, desc, hoặc rỗng
 
     public List<NhomHang> NhomHangs { get; set; } = new();
     public List<DonViTinh> DonViTinhs { get; set; } = new();

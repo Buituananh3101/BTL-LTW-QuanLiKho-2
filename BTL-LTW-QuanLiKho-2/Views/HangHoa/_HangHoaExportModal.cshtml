@@ -1,0 +1,139 @@
+<!-- ========================================================================
+     MODAL XUẤT FILE EXCEL HÀNG HÓA CHUẨN KIOTVIET (CHỌN CỘT DỮ LIỆU)
+     ======================================================================== -->
+<div class="hh-ov" id="hhExportModalOv">
+  <div class="hh-modal" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle" style="max-width: 680px;">
+    <!-- Modal Header -->
+    <div class="hh-m-head">
+      <h2 id="exportModalTitle" style="display: flex; align-items: center; gap: 8px;">
+        <i class="bi bi-file-earmark-arrow-up text-success fs-5"></i>
+        <span>Xuất danh sách hàng hóa ra Excel</span>
+      </h2>
+      <button type="button" class="hh-x" data-close="hhExportModalOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="hh-m-body" style="padding: 18px 24px;">
+      <!-- Khối 1: Phạm vi xuất -->
+      <div class="hh-export-sec mb-3">
+        <label class="hh-export-sec-title fw-bold mb-2 text-dark d-block">1. Phạm vi xuất dữ liệu</label>
+        <div class="d-flex flex-wrap gap-4 pt-1">
+          <label class="hh-radio-label">
+            <input type="radio" name="exportScope" value="ALL" checked id="exportScopeAll" />
+            <span>Tất cả hàng hóa theo bộ lọc hiện tại</span>
+          </label>
+          <label class="hh-radio-label">
+            <input type="radio" name="exportScope" value="SELECTED" id="exportScopeSelected" />
+            <span>Chỉ xuất các hàng hóa đã chọn (<span id="exportSelectedBadge" class="badge bg-primary text-white" style="font-size: 11px;">0 hàng</span>)</span>
+          </label>
+        </div>
+      </div>
+
+      <hr style="border: 0; border-top: 1px solid var(--hh-line-l); margin: 16px 0;" />
+
+      <!-- Khối 2: Chọn các cột cần xuất -->
+      <div class="hh-export-sec mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+          <label class="hh-export-sec-title fw-bold text-dark m-0">2. Chọn các cột cần xuất</label>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2" id="btnSelectImportCompatibleCols" style="font-size: 12px;">
+              <i class="bi bi-check-all me-1"></i>Bộ cột chuẩn để nhập lại
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" id="btnSelectAllExportCols" style="font-size: 12px;">
+              Chọn tất cả
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" id="btnDeselectAllExportCols" style="font-size: 12px;">
+              Bỏ chọn
+            </button>
+          </div>
+        </div>
+
+        <div class="hh-col-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px 16px; margin-top: 12px; background: #fbfcfd; padding: 14px; border: 1px solid var(--hh-line-l); border-radius: 8px;">
+          <!-- 16 Cột dữ liệu -->
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="LoaiHang" checked />
+            <span>Loại hàng <small class="text-primary fw-semibold">*</small></span>
+          </label>
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="NhomHang" checked />
+            <span>Nhóm hàng</span>
+          </label>
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="MaHang" checked />
+            <span>Mã hàng <small class="text-primary fw-semibold">*</small></span>
+          </label>
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="TenHang" checked />
+            <span>Tên hàng <small class="text-danger fw-bold">(*)</small></span>
+          </label>
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="GiaBan" checked />
+            <span>Giá bán</span>
+          </label>
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="GiaVon" checked />
+            <span>Giá vốn</span>
+          </label>
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="TonKho" checked />
+            <span>Tồn kho</span>
+          </label>
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="TonNhoNhat" checked />
+            <span>Tồn nhỏ nhất</span>
+          </label>
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="TonLonNhat" checked />
+            <span>Tồn lớn nhất</span>
+          </label>
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="Dvt" checked />
+            <span>Đơn vị tính <small class="text-primary fw-semibold">*</small></span>
+          </label>
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="ThuocTinh" checked />
+            <span>Thuộc tính</span>
+          </label>
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="TrongLuong" checked />
+            <span>Trọng lượng</span>
+          </label>
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="DonViTrongLuong" checked />
+            <span>Đơn vị TL</span>
+          </label>
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="ViTri" checked />
+            <span>Vị trí</span>
+          </label>
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="MoTa" checked />
+            <span>Mô tả</span>
+          </label>
+          <label class="hh-col-item">
+            <input type="checkbox" class="export-col-chk core-col" value="TrangThai" checked />
+            <span>Trạng thái</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Khối 3: Hộp cảnh báo nghiệp vụ KiotViet -->
+      <div id="exportIncompatibleWarning" style="margin-top: 14px; padding: 12px 14px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; color: #92400e; font-size: 13px; line-height: 1.5; display: flex; gap: 10px; align-items: flex-start;">
+        <i class="bi bi-exclamation-triangle-fill text-warning fs-5 flex-shrink-0" style="line-height: 1;"></i>
+        <div>
+          <strong>Lưu ý quan trọng:</strong> Nếu bạn bỏ chọn các cột thiết yếu (đặc biệt là <em>Tên hàng, Mã hàng, Loại hàng, Đơn vị tính</em>), file xuất ra sẽ chỉ dùng để báo cáo/in ấn và <strong>KHÔNG THỂ</strong> sử dụng làm file nhập ngược lại vào hệ thống.
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="hh-m-foot" style="background: #f9fafb; border-top: 1px solid var(--hh-line-l); padding: 12px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+      <button type="button" class="hh-btn" data-close="hhExportModalOv">Bỏ qua</button>
+      <button type="button" class="hh-btn primary" id="btnConfirmExecuteExport" style="background: #198754; border-color: #198754;">
+        <i class="bi bi-file-earmark-excel me-1"></i> Xuất file Excel
+      </button>
+    </div>
+  </div>
+</div>

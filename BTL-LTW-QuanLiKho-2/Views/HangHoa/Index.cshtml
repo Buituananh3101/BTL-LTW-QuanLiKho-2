@@ -4,6 +4,7 @@
 }
 
 <link rel="stylesheet" href="~/css/hang-hoa-form.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/hang-hoa-excel.css" asp-append-version="true" />
 
 <div class="kiot-container position-relative" id="kiotContainer">
     <!-- CỘT BÊN TRÁI: TIÊU ĐỀ "HÀNG HÓA" + BỘ LỌC -->
@@ -47,10 +48,38 @@
             </div>
 
             <!-- 2. Tồn kho -->
-            <div class="f-block">
+            <div class="f-block position-relative">
                 <h6>Tồn kho <span class="filter-dot" id="dotTonKho"></span></h6>
                 <div class="text-muted small mb-1">Tiêu chí tồn</div>
-                <select class="form-select filter-change" id="filterTonKho">
+                <div class="position-relative">
+                    <div class="kiot-single-select-box" id="boxTonKho">
+                        <span id="textTonKho">
+                            @(Model.TonKhoFilter == "CON_HANG" ? "Còn hàng trong kho" :
+                              Model.TonKhoFilter == "HET_HANG" ? "Hết hàng trong kho" :
+                              Model.TonKhoFilter == "DUOI_DINH_MUC" ? "Dưới định mức tồn ⚠️" : "Tất cả")
+                        </span>
+                        <i class="bi bi-chevron-down kiot-select-chevron"></i>
+                    </div>
+                    <div class="kiot-ss-dropdown shadow" id="dropdownTonKho">
+                        <div class="kiot-ss-item @(Model.TonKhoFilter == "ALL" || string.IsNullOrEmpty(Model.TonKhoFilter) ? "selected" : "")" data-val="ALL">
+                            <span>Tất cả</span>
+                            <i class="bi bi-check2 check-icon"></i>
+                        </div>
+                        <div class="kiot-ss-item @(Model.TonKhoFilter == "CON_HANG" ? "selected" : "")" data-val="CON_HANG">
+                            <span>Còn hàng trong kho</span>
+                            <i class="bi bi-check2 check-icon"></i>
+                        </div>
+                        <div class="kiot-ss-item @(Model.TonKhoFilter == "HET_HANG" ? "selected" : "")" data-val="HET_HANG">
+                            <span>Hết hàng trong kho</span>
+                            <i class="bi bi-check2 check-icon"></i>
+                        </div>
+                        <div class="kiot-ss-item @(Model.TonKhoFilter == "DUOI_DINH_MUC" ? "selected" : "")" data-val="DUOI_DINH_MUC">
+                            <span>Dưới định mức tồn ⚠️</span>
+                            <i class="bi bi-check2 check-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                <select class="form-select filter-change d-none" id="filterTonKho">
                     <option value="ALL" selected="@(Model.TonKhoFilter == "ALL")">Tất cả</option>
                     <option value="CON_HANG" selected="@(Model.TonKhoFilter == "CON_HANG")">Còn hàng trong kho</option>
                     <option value="HET_HANG" selected="@(Model.TonKhoFilter == "HET_HANG")">Hết hàng trong kho</option>
@@ -343,10 +372,10 @@
                 </div>
 
                 <!-- Nút Import & Xuất file cho Desktop -->
-                <button type="button" class="btn btn-tool d-none d-md-inline-flex" onclick="alert('Tính năng Import file Excel');">
+                <button type="button" class="btn btn-tool d-none d-md-inline-flex" id="btnOpenImportModal" onclick="window.openImportModal();">
                     <i class="bi bi-box-arrow-in-down me-1"></i>Import file
                 </button>
-                <button type="button" class="btn btn-tool d-none d-md-inline-flex" onclick="alert('Tính năng xuất danh sách Excel');">
+                <button type="button" class="btn btn-tool d-none d-md-inline-flex" id="btnOpenExportModal" onclick="window.openExportModal();">
                     <i class="bi bi-box-arrow-up me-1"></i>Xuất file
                 </button>
 
@@ -357,30 +386,108 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="btnDropdownExcelMobile">
                         <li>
-                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="alert('Tính năng Import file Excel');">
+                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="window.openImportModal();">
                                 <i class="bi bi-box-arrow-in-down me-2 text-primary"></i>Import file
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="alert('Tính năng xuất danh sách Excel');">
+                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="window.openExportModal();">
                                 <i class="bi bi-box-arrow-up me-2 text-success"></i>Xuất file
                             </a>
                         </li>
                     </ul>
                 </div>
 
-                <!-- 3 icon phụ của KiotViet -->
-                <button type="button" class="btn btn-tool d-none d-sm-inline-flex" title="Tải lại bảng" id="btnReloadTable">
-                    <i class="bi bi-arrow-clockwise"></i>
-                </button>
-                <button type="button" class="btn btn-tool" title="Cài đặt">
-                    <i class="bi bi-gear"></i>
-                </button>
+                <!-- Nút Ẩn/Hiện cột KiotViet (Thay thế nút reload) -->
+                <div class="dropdown d-inline-block position-relative" id="dropdownColConfigWrap">
+                    <button type="button" class="btn btn-tool" id="btnColumnConfig" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Tùy chọn hiển thị cột">
+                        <i class="bi bi-grid-3x2-gap"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end shadow kiot-col-config-menu" aria-labelledby="btnColumnConfig">
+                        <div class="kiot-col-grid">
+                            <!-- Cột trái (6 cột) -->
+                            <div class="kiot-col-subcol">
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="loaihang" />
+                                    <span>Loại hàng</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="nhomhang" />
+                                    <span>Nhóm hàng</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="mahang" />
+                                    <span>Mã hàng</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="tenhang" />
+                                    <span>Tên hàng</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="giaban" />
+                                    <span>Giá bán</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="giavon" />
+                                    <span>Giá vốn</span>
+                                </label>
+                            </div>
+                            <!-- Cột phải (5 cột) -->
+                            <div class="kiot-col-subcol">
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="tonkho" />
+                                    <span>Tồn kho</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="tontothieu" />
+                                    <span>Tồn nhỏ nhất</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="toncaonhat" />
+                                    <span>Tồn lớn nhất</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="vitri" />
+                                    <span>Vị trí</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="trangthai" />
+                                    <span>Trạng thái</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <button type="button" class="btn btn-tool" title="Trợ giúp" onclick="alert('Hướng dẫn sử dụng Quản lý Hàng hóa');">
                     <i class="bi bi-question-circle"></i>
                 </button>
             </div>
         </div>
+
+        <!-- Dynamic CSS cho ẩn/hiện cột tức thì không bị nhấp nháy -->
+        <style id="hhDynamicColStyles"></style>
+        <script>
+            (function () {
+                var defCols = ['hinhanh', 'mahang', 'tenhang', 'giaban', 'giavon', 'tonkho', 'dukienhethang', 'trangthai'];
+                var allCols = [
+                    'hinhanh', 'mahang', 'mavach', 'tenhang', 'nhomhang', 'loaihang', 'giaban', 'giavon',
+                    'tonkho', 'vitri', 'khachdat', 'ngaytao', 'dukienhethang', 'tontothieu', 'toncaonhat', 'trangthai'
+                ];
+                var saved = null;
+                try {
+                    saved = JSON.parse(localStorage.getItem('kiot_hanghoa_columns'));
+                } catch (e) {}
+                var activeCols = Array.isArray(saved) && saved.length > 0 ? saved : defCols;
+                var hiddenCols = allCols.filter(function (c) { return activeCols.indexOf(c) === -1; });
+                var css = '';
+                for (var i = 0; i < hiddenCols.length; i++) {
+                    css += '#productTable .col-' + hiddenCols[i] + ' { display: none !important; }\n';
+                }
+                var styleEl = document.getElementById('hhDynamicColStyles');
+                if (styleEl) styleEl.textContent = css;
+            })();
+        </script>
 
         <!-- Bảng danh sách hàng hóa -->
         <section id="content">
@@ -395,6 +502,8 @@
      MODAL KIOTVIET: THÊM MỚI / CẬP NHẬT HÀNG HÓA CHUẨN PROTOTYPE (5 ẢNH CSDL)
      ======================================================================== -->
 <partial name="_HangHoaModal" model="Model" />
+<partial name="_HangHoaExportModal" />
+<partial name="_HangHoaImportModal" />
 
 <!-- ========================================================================
      MODAL TẠO NHANH NHÓM HÀNG
@@ -418,72 +527,13 @@
     </div>
 </div>
 
-<!-- ========================================================================
-     MODAL XÁC NHẬN XÓA HÀNG HÓA
-     ======================================================================== -->
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title text-danger">Xóa hàng hóa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body py-3">
-                Bạn có chắc chắn muốn xóa hàng hóa <strong id="deleteTargetName"></strong>? Thao tác này chỉ thực hiện được nếu hàng hóa chưa phát sinh giao dịch.
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Bỏ qua</button>
-                <button type="button" class="btn btn-danger btn-sm" id="btnExecuteDelete">Đồng ý xóa</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ========================================================================
-     MODAL CẬP NHẬT NHANH THUỘC TÍNH HÀNG HÓA (KiotViet Quick Attributes)
-     ======================================================================== -->
-<div class="modal fade" id="quickAttrModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div>
-                    <h6 class="modal-title fw-bold mb-0">Thuộc tính hàng hóa</h6>
-                    <small class="text-muted" id="quickAttrProductName"></small>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body py-3">
-                <input type="hidden" id="quickAttrMaHang" value="0" />
-                <div class="small text-muted mb-3">Thêm đặc điểm như hương vị, dung tích, màu sắc</div>
-                <div id="quickAttrRowsContainer" class="d-flex flex-column mb-1">
-                    <!-- Dynamic rows -->
-                </div>
-                <div id="quickAttrEmptyAlert" class="text-muted small fst-italic py-2 text-center border rounded bg-light" style="display: none;">
-                    Chưa có thuộc tính nào. Bấm <strong>"+ Thêm thuộc tính"</strong> để thêm.
-                </div>
-                <div class="mt-2" id="boxQuickAddAttrBtn">
-                    <a href="javascript:void(0)" class="text-primary text-decoration-none fw-semibold small d-inline-flex align-items-center gap-1" id="btnQuickModalAddRow">
-                        <i class="bi bi-plus-lg"></i> Thêm thuộc tính
-                    </a>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Bỏ qua</button>
-                <button type="button" class="btn btn-primary btn-sm" id="btnSaveQuickAttr">
-                    <i class="bi bi-check-lg me-1"></i>Lưu thuộc tính
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
 <script>
 $(document).ready(function () {
     let currentPage = @Model.Page;
-    let deleteId = 0;
+    let currentSortBy = '@(Model.SortBy ?? "")';
+    let currentSortDir = '@(Model.SortDir ?? "")';
     const groupModal = new bootstrap.Modal(document.getElementById('quickGroupModal'));
-    const quickAttrModal = new bootstrap.Modal(document.getElementById('quickAttrModal'));
 
     // 1. Thu gọn / Mở rộng (Kéo vào / Kéo ra) sidebar bên trái
     let animTimer = null;
@@ -1151,11 +1201,47 @@ $(document).ready(function () {
     renderMultiSelectBox('vitri');
     renderMultiSelectBox('loaihang');
 
+    // 3b. Single-select Dropdown cho Tiêu chí tồn (KiotViet style)
+    $('#boxTonKho').on('click', function (e) {
+        e.stopPropagation();
+        const box = $(this);
+        const dropdown = $('#dropdownTonKho');
+
+        $('.kiot-ms-dropdown, .kiot-ss-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
+        $('.kiot-multiselect-box, .kiot-single-select-box').not(box).removeClass('open');
+        $('.quick-date-popup, .dual-calendar-popup').hide();
+
+        const willShow = !dropdown.hasClass('show');
+        if (willShow) {
+            checkSidebarDropdownDirection(box, dropdown);
+            dropdown.addClass('show');
+            box.addClass('open');
+        } else {
+            dropdown.removeClass('show drop-up').css('max-height', '');
+            box.removeClass('open');
+        }
+    });
+
+    $('#dropdownTonKho').on('click', '.kiot-ss-item', function (e) {
+        e.stopPropagation();
+        const val = $(this).data('val');
+        const text = $(this).find('span').text().trim();
+
+        $('#textTonKho').text(text);
+        $('#dropdownTonKho .kiot-ss-item').removeClass('selected');
+        $(this).addClass('selected');
+
+        $('#dropdownTonKho').removeClass('show drop-up').css('max-height', '');
+        $('#boxTonKho').removeClass('open');
+
+        $('#filterTonKho').val(val).trigger('change');
+    });
+
     // Lắng nghe cuộn sidebar để tự động đảo hướng drop-up/drop-down
     $('.kiot-filter-box').on('scroll', function () {
-        const openDropdown = $('.kiot-ms-dropdown.show');
+        const openDropdown = $('.kiot-ms-dropdown.show, .kiot-ss-dropdown.show');
         if (openDropdown.length) {
-            const box = openDropdown.siblings('.kiot-multiselect-box');
+            const box = openDropdown.siblings('.kiot-multiselect-box, .kiot-single-select-box');
             if (box.length) {
                 checkSidebarDropdownDirection(box, openDropdown);
             }
@@ -1175,14 +1261,22 @@ $(document).ready(function () {
         if (!$targetBlock.length) {
             $('.quick-date-popup').hide();
             $('.dual-calendar-popup').hide();
-            $('.kiot-ms-dropdown').removeClass('show drop-up').css('max-height', '');
-            $('.kiot-multiselect-box').removeClass('open');
+            $('.kiot-ms-dropdown, .kiot-ss-dropdown').removeClass('show drop-up').css('max-height', '');
+            $('.kiot-multiselect-box, .kiot-single-select-box').removeClass('open');
         } else {
             // Click vào f-block khác -> đóng popup/dropdown của các f-block khác
             $('.dual-calendar-popup').not($targetBlock.find('.dual-calendar-popup')).hide();
             $('.quick-date-popup').not($targetBlock.find('.quick-date-popup')).hide();
-            $('.kiot-ms-dropdown').not($targetBlock.find('.kiot-ms-dropdown')).removeClass('show drop-up').css('max-height', '');
-            $('.kiot-multiselect-box').not($targetBlock.find('.kiot-multiselect-box')).removeClass('open');
+            $('.kiot-ms-dropdown, .kiot-ss-dropdown').not($targetBlock.find('.kiot-ms-dropdown, .kiot-ss-dropdown')).removeClass('show drop-up').css('max-height', '');
+            $('.kiot-multiselect-box, .kiot-single-select-box').not($targetBlock.find('.kiot-multiselect-box, .kiot-single-select-box')).removeClass('open');
+        }
+    });
+
+    $(document).on('keydown', function (e) {
+        if (e.key === 'Escape') {
+            $('.kiot-ms-dropdown, .kiot-ss-dropdown').removeClass('show drop-up').css('max-height', '');
+            $('.kiot-multiselect-box, .kiot-single-select-box').removeClass('open');
+            $('.quick-date-popup, .dual-calendar-popup').hide();
         }
     });
 
@@ -1506,49 +1600,6 @@ $(document).ready(function () {
         }
     });
 
-    // Mở modal Cập nhật nhanh thuộc tính từ bảng danh sách
-    $(document).on('click', '.btn-quick-attr', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const id = $(this).data('id');
-        const name = $(this).data('name');
-        const attrs = $(this).data('attrs');
-
-        $('#quickAttrMaHang').val(id);
-        $('#quickAttrProductName').text(name);
-        renderAttributeRows(attrs, '#quickAttrRowsContainer', '#quickAttrEmptyAlert');
-        quickAttrModal.show();
-    });
-
-    // Lưu nhanh thuộc tính từ modal quickAttrModal
-    $('#btnSaveQuickAttr').on('click', function () {
-        const maHang = parseInt($('#quickAttrMaHang').val()) || 0;
-        if (maHang <= 0) return;
-
-        const attrs = collectAttributes('#quickAttrRowsContainer');
-        const btn = $(this);
-        btn.prop('disabled', true).text('Đang lưu...');
-
-        $.ajax({
-            url: '/HangHoa/UpdateThuocTinh',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                maHang: maHang,
-                thuocTinhJson: JSON.stringify(attrs)
-            }),
-            success: function () {
-                btn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i>Lưu thuộc tính');
-                quickAttrModal.hide();
-                loadTable();
-            },
-            error: function (xhr) {
-                btn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i>Lưu thuộc tính');
-                alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể lưu thuộc tính.'));
-            }
-        });
-    });
-
     // Mở modal Sửa hàng hóa (kết nối với module modal KiotViet mới)
     $(document).on('click', '.btn-edit-product', function () {
         const id = $(this).data('id');
@@ -1557,27 +1608,14 @@ $(document).ready(function () {
         }
     });
 
-    // Modal Xóa hàng hóa
-    $(document).on('click', '.btn-delete-product', function () {
-        deleteId = $(this).data('id');
-        $('#deleteTargetName').text($(this).data('name'));
-        const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
-        modal.show();
-    });
-
-    $('#btnExecuteDelete').on('click', function () {
-        if (deleteId > 0) {
-            $.ajax({
-                url: '/HangHoa/Delete/' + deleteId,
-                type: 'POST',
-                success: function (res) {
-                    $('#deleteConfirmModal').modal('hide');
-                    loadTable();
-                },
-                error: function (xhr) {
-                    alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể xóa hàng hóa.'));
-                }
-            });
+    // Modal Xóa hàng hóa (kết nối với modal KiotViet đồng bộ)
+    $(document).on('click', '.btn-delete-product', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = $(this).data('id');
+        const name = $(this).data('name') || '';
+        if (typeof window.openDeleteProductModal === 'function') {
+            window.openDeleteProductModal(id, name);
         }
     });
 
@@ -1603,8 +1641,52 @@ $(document).ready(function () {
         loadTable();
     });
 
-    $('#btnReloadTable').on('click', function () {
-        loadTable();
+    // ========================================================================
+    // QUẢN LÝ ẨN / HIỆN CỘT BẢNG HÀNG HÓA (KIOTVIET COLUMN VISIBILITY)
+    // ========================================================================
+    const ALL_COLS = [
+        'loaihang', 'nhomhang', 'mahang', 'tenhang', 'giaban', 'giavon',
+        'tonkho', 'tontothieu', 'toncaonhat', 'vitri', 'trangthai'
+    ];
+    const DEFAULT_COLS = ['mahang', 'tenhang', 'giaban', 'giavon', 'tonkho', 'trangthai'];
+
+    function getActiveColumns() {
+        try {
+            const saved = JSON.parse(localStorage.getItem('kiot_hanghoa_columns'));
+            if (Array.isArray(saved) && saved.length > 0) {
+                const valid = saved.filter(c => ALL_COLS.includes(c));
+                if (valid.length > 0) return valid;
+            }
+        } catch (e) {}
+        return DEFAULT_COLS;
+    }
+
+    function applyColumnVisibility(activeCols) {
+        const hiddenCols = ALL_COLS.filter(c => !activeCols.includes(c));
+        let css = '';
+        hiddenCols.forEach(col => {
+            css += '#productTable .col-' + col + ' { display: none !important; }\n';
+        });
+        $('#hhDynamicColStyles').text(css);
+
+        // Đồng bộ trạng thái checkbox trong popup
+        $('.col-toggle-cb').each(function () {
+            const col = $(this).data('col');
+            $(this).prop('checked', activeCols.includes(col));
+        });
+    }
+
+    // Khởi tạo trạng thái checkbox theo cấu hình đã lưu
+    applyColumnVisibility(getActiveColumns());
+
+    // Bắt sự kiện khi click đổi checkbox cột
+    $(document).on('change', '.col-toggle-cb', function () {
+        const activeCols = [];
+        $('.col-toggle-cb:checked').each(function () {
+            activeCols.push($(this).data('col'));
+        });
+        localStorage.setItem('kiot_hanghoa_columns', JSON.stringify(activeCols));
+        applyColumnVisibility(activeCols);
     });
 
     // Phân trang AJAX
@@ -1745,6 +1827,33 @@ $(document).ready(function () {
         window.toggleStarHeaderFilter(e);
     });
 
+    // 8. Sắp xếp cột 3 trạng thái khi click header (KiotViet style)
+    // Lần 1: Tăng dần (asc) -> Lần 2: Giảm dần (desc) -> Lần 3: Trả lại bình thường (none)
+    // Click cột khác: Hủy cột cũ, chuyển sang cột mới và bắt đầu tăng dần (asc)
+    $(document).on('click', '#productTable thead th.sortable-th', function (e) {
+        e.preventDefault();
+        const col = $(this).data('col');
+        if (!col) return;
+
+        if (currentSortBy === col) {
+            if (currentSortDir === 'asc') {
+                currentSortDir = 'desc'; // Lần 2: giảm dần
+            } else if (currentSortDir === 'desc') {
+                currentSortBy = '';      // Lần 3: trở lại bình thường
+                currentSortDir = '';
+            } else {
+                currentSortDir = 'asc';  // Lần 1: tăng dần
+            }
+        } else {
+            // Chuyển sang cột mới: hủy sắp xếp cột cũ, bắt đầu tăng dần
+            currentSortBy = col;
+            currentSortDir = 'asc';
+        }
+
+        currentPage = 1;
+        loadTable();
+    });
+
     function loadTable() {
         const q = $('#keywordSearch').val()?.trim() || '';
         const nhom = (filterState.nhom || []).map(x => x.val).join(',');
@@ -1794,6 +1903,8 @@ $(document).ready(function () {
                 tgTaoFrom: tgTaoFrom,
                 tgTaoTo: tgTaoTo,
                 daDanhDau: isStarredFilterActive,
+                sortBy: currentSortBy,
+                sortDir: currentSortDir,
                 page: currentPage
             },
             beforeSend: function () {
@@ -1809,8 +1920,46 @@ $(document).ready(function () {
         });
     }
 
+    window.getCurrentFilterParams = function () {
+        const q = $('#keywordSearch').val()?.trim() || '';
+        const nhom = (filterState.nhom || []).map(x => x.val).join(',');
+        const tonKho = $('#filterTonKho').val() || 'ALL';
+        const nhaCungCap = (filterState.ncc || []).map(x => x.val).join(';');
+        const viTri = (filterState.vitri || []).map(x => x.val).join(';');
+        const loaiHang = (filterState.loaihang || []).map(x => x.val).join(';');
+
+        let duKien = activeDuKienVal || 'ALL';
+        if ($('#dkCustom').is(':checked') && duKien === 'ALL') {
+            duKien = 'CUSTOM';
+        }
+
+        let tgTao = activeTgTaoVal || 'ALL';
+        let tgTaoFrom = '';
+        let tgTaoTo = '';
+        if ($('#tgtCustom').is(':checked')) {
+            tgTao = 'CUSTOM';
+            tgTaoFrom = activeTgTaoFrom;
+            tgTaoTo = activeTgTaoTo;
+        }
+
+        return {
+            q: q,
+            nhom: nhom,
+            tonKho: tonKho,
+            nhaCungCap: nhaCungCap,
+            viTri: viTri,
+            loaiHang: loaiHang,
+            duKien: duKien,
+            tgTao: tgTao,
+            tgTaoFrom: tgTaoFrom,
+            tgTaoTo: tgTaoTo,
+            daDanhDau: isStarredFilterActive
+        };
+    };
+
     window.loadTable = loadTable;
 });
 </script>
 <script src="~/js/hang-hoa-form.js" asp-append-version="true"></script>
+<script src="~/js/hang-hoa-excel.js" asp-append-version="true"></script>
 }
