@@ -1,173 +1,75 @@
 @model BTL_LTW_QuanLiKho_2.ViewModels.LoginVM
 @{
-    Layout = null;
-    ViewData["Title"] = "Đăng nhập hệ thống";
+    Layout = "_LoginLayout";
+    ViewData["Title"] = "Đăng nhập";
 }
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Quản lý kho hàng</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-    <style>
-        body {
-            background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 50%, #0ea5e9 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        .login-card {
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 440px;
-            padding: 40px 36px;
-        }
-        .brand-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .brand-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 60px;
-            height: 60px;
-            background: #0284c7;
-            color: #ffffff;
-            border-radius: 14px;
-            font-size: 30px;
-            margin-bottom: 12px;
-            box-shadow: 0 8px 16px rgba(2, 132, 199, 0.3);
-        }
-        .brand-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 4px;
-        }
-        .brand-subtitle {
-            font-size: 13px;
-            color: #64748b;
-        }
-        .form-floating > .form-control {
-            border-radius: 10px;
-            border: 1px solid #cbd5e1;
-        }
-        .form-floating > .form-control:focus {
-            border-color: #0284c7;
-            box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
-        }
-        .btn-login {
-            background: #0284c7;
-            color: #ffffff;
-            font-weight: 600;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 15px;
-            width: 100%;
-            border: none;
-            transition: all 0.2s;
-        }
-        .btn-login:hover {
-            background: #0369a1;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35);
-        }
-        .demo-box {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 14px;
-            margin-top: 24px;
-            font-size: 12px;
-            color: #475569;
-        }
-        .demo-badge {
-            cursor: pointer;
-            padding: 4px 8px;
-            background: #e0f2fe;
-            color: #0369a1;
-            border-radius: 6px;
-            font-weight: 600;
-            display: inline-block;
-            margin: 2px 0;
-            transition: background 0.2s;
-        }
-        .demo-badge:hover {
-            background: #bae6fd;
-        }
-    </style>
-</head>
-<body>
-
-<div class="login-card">
-    <div class="brand-header">
-        <div class="brand-icon"><i class="bi bi-box-seam"></i></div>
-        <div class="brand-title">KhoPro Cloud</div>
-        <div class="brand-subtitle">Hệ thống Quản lý kho hàng nhiều kho</div>
-    </div>
-
-    <form asp-controller="Account" asp-action="Login" method="post">
+<main class="login-card">
+    <form id="loginForm" class="login-body" novalidate autocomplete="on" asp-controller="Account" asp-action="Login" method="post">
         @Html.AntiForgeryToken()
         <input type="hidden" asp-for="ReturnUrl" />
 
+        <div class="brand">
+            <img src="~/images/logo.svg" alt="KhoPro" class="brand-mark" />
+            <span class="brand-name">KhoPro</span>
+        </div>
+
+        <div class="field @(!ViewData.ModelState.IsValid && ViewData.ModelState["TenDangNhap"]?.Errors.Count > 0 ? "invalid" : "")" id="fUser">
+            <input type="text" id="TenDangNhap" asp-for="TenDangNhap" placeholder="Tên đăng nhập" autocomplete="username" autofocus />
+        </div>
+
+        <div class="field @(!ViewData.ModelState.IsValid && ViewData.ModelState["MatKhau"]?.Errors.Count > 0 ? "invalid" : "")" id="fPass">
+            <input type="password" id="MatKhau" asp-for="MatKhau" placeholder="Mật khẩu" autocomplete="current-password" />
+            <button type="button" class="toggle-pw" id="togglePw" aria-label="Hiện mật khẩu" title="Hiện/ẩn mật khẩu">
+                <!-- Mắt gạch chéo = đang ẩn -->
+                <svg id="iconHide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a18.5 18.5 0 0 1 5.06-5.94"/>
+                    <path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                    <path d="M14.12 14.12A3 3 0 1 1 9.88 9.88"/><path d="M1 1l22 22"/>
+                </svg>
+                <svg id="iconShow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+            </button>
+        </div>
+
         @if (!ViewData.ModelState.IsValid)
         {
-            <div class="alert alert-danger py-2 px-3 small rounded-3 mb-3" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+            <div class="error-box show" id="errorBox" role="alert">
                 @Html.ValidationSummary(true, "")
+                <span asp-validation-for="TenDangNhap"></span>
+                <span asp-validation-for="MatKhau"></span>
             </div>
         }
+        else
+        {
+            <div class="error-box" id="errorBox" role="alert"></div>
+        }
 
-        <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="txtUsername" asp-for="TenDangNhap" placeholder="Tên đăng nhập" required autofocus />
-            <label for="txtUsername"><i class="bi bi-person me-1 text-muted"></i>Tên đăng nhập</label>
-            <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
+        <div class="options">
+            <label><input type="checkbox" asp-for="GhiNho" /> Duy trì đăng nhập</label>
+            <span class="sep"></span>
+            <a href="#" id="forgot">Quên mật khẩu?</a>
         </div>
 
-        <div class="form-floating mb-3">
-            <input type="password" class="form-control" id="txtPassword" asp-for="MatKhau" placeholder="Mật khẩu" required />
-            <label for="txtPassword"><i class="bi bi-shield-lock me-1 text-muted"></i>Mật khẩu</label>
-            <span asp-validation-for="MatKhau" class="text-danger small"></span>
-        </div>
-
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="chkRemember" asp-for="GhiNho" />
-                <label class="form-check-label text-muted small" for="chkRemember">Ghi nhớ đăng nhập</label>
+        <!-- Tài khoản mẫu để kiểm thử -->
+        <div class="demo-hint">
+            <div class="demo-hint-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                Tài khoản mẫu thử nghiệm (mật khẩu: 123456):
+            </div>
+            <div class="demo-tags">
+                <button type="button" class="demo-tag" onclick="quickFill('quanly', '123456')">Quản lý (quanly)</button>
+                <button type="button" class="demo-tag" onclick="quickFill('thukho', '123456')">Thủ kho (thukho)</button>
+                <button type="button" class="demo-tag" onclick="quickFill('banhang', '123456')">Bán hàng (banhang)</button>
             </div>
         </div>
-
-        <button type="submit" class="btn btn-login">
-            <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập
-        </button>
     </form>
 
-    <div class="demo-box">
-        <div class="fw-bold mb-1 text-dark"><i class="bi bi-info-circle me-1"></i>Tài khoản mẫu để kiểm thử:</div>
-        <div class="d-flex flex-column gap-1">
-            <div>Quản lý: <span class="demo-badge" onclick="fillLogin('quanly', '123456')">quanly / 123456</span></div>
-            <div>Thủ kho: <span class="demo-badge" onclick="fillLogin('thukho', '123456')">thukho / 123456</span></div>
-            <div>Bán hàng: <span class="demo-badge" onclick="fillLogin('banhang', '123456')">banhang / 123456</span></div>
-        </div>
+    <div class="actions">
+        <button type="submit" form="loginForm" class="btn-manage" id="btnSubmit">
+            <svg viewBox="0 0 24 24"><path d="M3 3h2v16h16v2H3zM7 14l4-4 3 3 5-6 1.5 1.2L14.2 15.4 11 12.2 8.4 15z"/></svg>
+            Quản lý
+        </button>
     </div>
-</div>
-
-<script>
-    function fillLogin(u, p) {
-        document.getElementById('txtUsername').value = u;
-        document.getElementById('txtPassword').value = p;
-    }
-</script>
-
-</body>
-</html>
+</main>
