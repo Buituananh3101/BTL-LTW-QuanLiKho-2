@@ -1715,3 +1715,109 @@ tr.product-detail-row > td {
     width: 100%;
   }
 }
+
+/* ========================================================================
+   KIOTVIET ATTRIBUTE ROW & DROPDOWN COMPONENT (Image Match)
+   ======================================================================== */
+.kiot-attr-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.kiot-attr-dropdown .dropdown-toggle::after {
+  display: none !important;
+}
+
+.kiot-attr-btn {
+  background-color: #ffffff !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 6px !important;
+  font-size: 13.5px !important;
+  height: 38px !important;
+  padding: 6px 12px !important;
+  text-align: left;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.kiot-attr-btn:focus,
+.kiot-attr-btn:active,
+.kiot-attr-dropdown.show .kiot-attr-btn {
+  border-color: #0d6efd !important;
+  box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.18) !important;
+}
+
+.kiot-attr-dropdown.show .kiot-attr-chevron {
+  transform: rotate(180deg);
+}
+
+.kiot-attr-chevron {
+  transition: transform 0.2s ease;
+  font-size: 11px;
+}
+
+.kiot-attr-menu {
+  border: 1px solid #dee2e6 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  padding: 4px 0 !important;
+  z-index: 1065 !important;
+  min-width: 220px !important;
+}
+
+.kiot-attr-item {
+  font-size: 13.5px;
+  color: #212529 !important;
+  padding: 8px 16px !important;
+  transition: background-color 0.12s ease;
+  cursor: pointer;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.kiot-attr-item:hover {
+  background-color: #f0f7ff !important;
+  color: #0d6efd !important;
+}
+
+.kiot-attr-item.active {
+  background-color: #f0f7ff !important;
+  color: #0d6efd !important;
+  font-weight: 600;
+}
+
+.kiot-attr-val-input {
+  border: 1px solid #ced4da !important;
+  border-radius: 6px !important;
+  font-size: 13.5px !important;
+  height: 38px !important;
+}
+
+.kiot-attr-val-input:focus {
+  border-color: #86b7fe !important;
+  box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.18) !important;
+}
+
+.kiot-btn-remove-attr {
+  background: #ffffff !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 6px !important;
+  width: 38px !important;
+  height: 38px !important;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.kiot-btn-remove-attr:hover {
+  background-color: #fee2e2 !important;
+  border-color: #fca5a5 !important;
+}
+
+.kiot-btn-remove-attr:hover i {
+  color: #dc2626 !important;
+}

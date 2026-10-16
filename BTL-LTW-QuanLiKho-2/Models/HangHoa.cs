@@ -39,6 +39,8 @@ public partial class HangHoa
 
     public string? ThuocTinh { get; set; }
 
+    public string? MoTa { get; set; }
+
     public virtual ICollection<ChiTietDonBan> ChiTietDonBans { get; set; } = new List<ChiTietDonBan>();
 
     public virtual ICollection<ChiTietPhieuChuyenKho> ChiTietPhieuChuyenKhos { get; set; } = new List<ChiTietPhieuChuyenKho>();
@@ -48,6 +50,8 @@ public partial class HangHoa
     public virtual ICollection<ChiTietPhieuNhap> ChiTietPhieuNhaps { get; set; } = new List<ChiTietPhieuNhap>();
  
     public virtual ICollection<ChiTietPhieuXuat> ChiTietPhieuXuats { get; set; } = new List<ChiTietPhieuXuat>();
+
+    public virtual ICollection<HinhAnhHangHoa> HinhAnhHangHoas { get; set; } = new List<HinhAnhHangHoa>();
 
     public virtual DonViTinh MaDvtNavigation { get; set; } = null!;
 

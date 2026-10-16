@@ -57,32 +57,49 @@ public class HangHoaController : BaseKhoController
         return Json(new { success = true, isFavorite = item.DaDanhDau, maHang = item.MaHang });
     }
 
-    // Lấy ảnh trực tiếp từ CSDL
+    // Lấy ảnh trực tiếp từ CSDL (hỗ trợ ảnh chính hoặc theo index 0-4)
     [HttpGet]
     [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Client)]
-    public async Task<IActionResult> GetImage(int id)
+    public async Task<IActionResult> GetImage(int id, int? index = 0)
     {
-        var item = await _context.HangHoas.AsNoTracking().FirstOrDefaultAsync(x => x.MaHang == id);
-        if (item?.HinhAnh == null || item.HinhAnh.Length == 0)
+        byte[]? data = null;
+        int idx = index ?? 0;
+
+        if (idx > 0)
+        {
+            data = await _context.HinhAnhHangHoas
+                .AsNoTracking()
+                .Where(x => x.MaHang == id && x.ThuTu == idx)
+                .Select(x => x.DuLieuAnh)
+                .FirstOrDefaultAsync();
+        }
+
+        if (data == null || data.Length == 0)
+        {
+            var item = await _context.HangHoas.AsNoTracking().FirstOrDefaultAsync(x => x.MaHang == id);
+            data = item?.HinhAnh;
+        }
+
+        if (data == null || data.Length == 0)
         {
             return File(GetDefaultPlaceholderSvg(), "image/svg+xml");
         }
 
         string mime = "image/jpeg";
-        if (item.HinhAnh.Length > 4 && item.HinhAnh[0] == 0x89 && item.HinhAnh[1] == 0x50 && item.HinhAnh[2] == 0x4E && item.HinhAnh[3] == 0x47)
+        if (data.Length > 4 && data[0] == 0x89 && data[1] == 0x50 && data[2] == 0x4E && data[3] == 0x47)
         {
             mime = "image/png";
         }
-        else if (item.HinhAnh.Length > 2 && item.HinhAnh[0] == 0x47 && item.HinhAnh[1] == 0x49)
+        else if (data.Length > 2 && data[0] == 0x47 && data[1] == 0x49)
         {
             mime = "image/gif";
         }
-        else if (item.HinhAnh.Length > 12 && item.HinhAnh[8] == 0x57 && item.HinhAnh[9] == 0x45 && item.HinhAnh[10] == 0x42 && item.HinhAnh[11] == 0x50)
+        else if (data.Length > 12 && data[8] == 0x57 && data[9] == 0x45 && data[10] == 0x42 && data[11] == 0x50)
         {
             mime = "image/webp";
         }
 
-        return File(item.HinhAnh, mime);
+        return File(data, mime);
     }
 
     private async Task<HangHoaIndexVM> BuildIndexVM(
@@ -216,14 +233,14 @@ public class HangHoaController : BaseKhoController
             if (vtList.Any())
             {
                 var parameter = System.Linq.Expressions.Expression.Parameter(typeof(HangHoa), "x");
-                var quyCachProp = System.Linq.Expressions.Expression.Property(parameter, nameof(HangHoa.QuyCach));
-                var notNull = System.Linq.Expressions.Expression.NotEqual(quyCachProp, System.Linq.Expressions.Expression.Constant(null, typeof(string)));
+                var viTriProp = System.Linq.Expressions.Expression.Property(parameter, nameof(HangHoa.ViTri));
+                var notNull = System.Linq.Expressions.Expression.NotEqual(viTriProp, System.Linq.Expressions.Expression.Constant(null, typeof(string)));
                 var containsMethod = typeof(string).GetMethod(nameof(string.Contains), new[] { typeof(string) })!;
 
                 System.Linq.Expressions.Expression? orExpr = null;
                 foreach (var vt in vtList)
                 {
-                    var call = System.Linq.Expressions.Expression.Call(quyCachProp, containsMethod, System.Linq.Expressions.Expression.Constant(vt));
+                    var call = System.Linq.Expressions.Expression.Call(viTriProp, containsMethod, System.Linq.Expressions.Expression.Constant(vt));
                     orExpr = orExpr == null ? call : System.Linq.Expressions.Expression.OrElse(orExpr, call);
                 }
 
@@ -415,6 +432,20 @@ public class HangHoaController : BaseKhoController
         var dvtList = await _context.DonViTinhs.AsNoTracking().OrderBy(x => x.TenDvt).ToListAsync();
         var supplierList = await _context.DonViCapHangs.AsNoTracking().Where(s => s.TrangThai == "HOAT_DONG").OrderBy(s => s.TenDonVi).ToListAsync();
 
+        var defaultLocations = new List<string> { "Kho trung tâm", "Kệ A1 - Tầng 1", "Kệ A2 - Tầng 2", "Khu vực đóng gói", "Kho mát" };
+        var dbLocations = await _context.HangHoas.AsNoTracking()
+            .Where(x => !string.IsNullOrEmpty(x.ViTri))
+            .Select(x => x.ViTri!)
+            .Distinct()
+            .ToListAsync();
+
+        var allLocations = defaultLocations
+            .Union(dbLocations.SelectMany(v => v.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim())))
+            .Where(s => !string.IsNullOrEmpty(s))
+            .Distinct()
+            .OrderBy(s => s)
+            .ToList();
+
         return new HangHoaIndexVM
         {
             Items = pagedItems,
@@ -440,7 +471,8 @@ public class HangHoaController : BaseKhoController
             DaDanhDauFilter = daDanhDau,
             NhomHangs = nhomList,
             DonViTinhs = dvtList,
-            DonViCapHangs = supplierList
+            DonViCapHangs = supplierList,
+            ViTris = allLocations
         };
     }
 
@@ -455,6 +487,23 @@ public class HangHoaController : BaseKhoController
         return Json(new { success = true, maNhom = group.MaNhom, tenNhom = group.TenNhom });
     }
 
+    // Tạo nhanh đơn vị tính từ modal form
+    [HttpPost]
+    public async Task<IActionResult> CreateDvtQuick([FromBody] QuickDvtRequest req)
+    {
+        if (string.IsNullOrWhiteSpace(req?.TenDvt)) return BadRequest(new { message = "Vui lòng nhập tên đơn vị tính." });
+        string name = req.TenDvt.Trim();
+        var existing = await _context.DonViTinhs.FirstOrDefaultAsync(u => u.TenDvt.ToLower() == name.ToLower());
+        if (existing != null)
+        {
+            return Json(new { success = true, maDvt = existing.MaDvt, tenDvt = existing.TenDvt });
+        }
+        var dvt = new DonViTinh { TenDvt = name };
+        _context.DonViTinhs.Add(dvt);
+        await _context.SaveChangesAsync();
+        return Json(new { success = true, maDvt = dvt.MaDvt, tenDvt = dvt.TenDvt });
+    }
+
     // Lấy thông tin 1 hàng hóa qua JSON cho Modal Sửa
     [HttpGet]
     public async Task<IActionResult> GetItem(int id)
@@ -462,6 +511,7 @@ public class HangHoaController : BaseKhoController
         int whId = GetCurrentWarehouseId();
         var item = await _context.HangHoas
             .Include(x => x.NguongTonKhos.Where(n => n.MaKho == whId))
+            .Include(x => x.HinhAnhHangHoas)
             .FirstOrDefaultAsync(x => x.MaHang == id);
 
         if (item == null) return NotFound(new { message = "Không tìm thấy hàng hóa." });
@@ -481,11 +531,24 @@ public class HangHoaController : BaseKhoController
 
         var nguong = item.NguongTonKhos.FirstOrDefault();
 
-        string? imgBase64 = null;
-        if (item.HinhAnh != null && item.HinhAnh.Length > 0)
+        // Xử lý danh sách ảnh (tối đa 5 ảnh)
+        var imgList = new List<string>();
+        int mainImgIdx = 0;
+        if (item.HinhAnhHangHoas != null && item.HinhAnhHangHoas.Any())
         {
-            imgBase64 = "data:image/jpeg;base64," + Convert.ToBase64String(item.HinhAnh);
+            var sorted = item.HinhAnhHangHoas.OrderBy(h => h.ThuTu).ToList();
+            for (int i = 0; i < sorted.Count; i++)
+            {
+                if (sorted[i].LaAnhChinh) mainImgIdx = i;
+                imgList.Add("data:image/jpeg;base64," + Convert.ToBase64String(sorted[i].DuLieuAnh));
+            }
         }
+        else if (item.HinhAnh != null && item.HinhAnh.Length > 0)
+        {
+            imgList.Add("data:image/jpeg;base64," + Convert.ToBase64String(item.HinhAnh));
+        }
+
+        string? imgBase64 = imgList.Count > 0 ? imgList[mainImgIdx] : null;
 
         return Json(new
         {
@@ -495,6 +558,7 @@ public class HangHoaController : BaseKhoController
             maNhom = item.MaNhom,
             maDvt = item.MaDvt,
             quyCach = item.QuyCach,
+            moTa = item.MoTa ?? "",
             giaBanThamKhao = item.GiaBanThamKhao,
             giaVon = cost,
             tonKhoBanDau = stock,
@@ -505,7 +569,9 @@ public class HangHoaController : BaseKhoController
             donViTrongLuong = item.DonViTrongLuong ?? "g",
             thuocTinhJson = item.ThuocTinh ?? "[]",
             trangThai = item.TrangThai,
-            hinhAnhBase64 = imgBase64
+            hinhAnhBase64 = imgBase64,
+            danhSachHinhAnhBase64 = imgList,
+            viTriAnhChinh = mainImgIdx
         });
     }
 
@@ -559,10 +625,26 @@ public class HangHoaController : BaseKhoController
         Copy(model, item);
         item.NgayTao = DateTime.Now;
 
-        // Lưu ảnh trực tiếp vào CSDL nếu có
-        if (!string.IsNullOrWhiteSpace(model.HinhAnhBase64))
+        // Xử lý danh sách ảnh (tối đa 5 ảnh)
+        var validImages = new List<byte[]>();
+        if (model.DanhSachHinhAnhBase64 != null && model.DanhSachHinhAnhBase64.Count > 0)
         {
-            item.HinhAnh = ParseBase64Image(model.HinhAnhBase64);
+            foreach (var b64 in model.DanhSachHinhAnhBase64.Take(5))
+            {
+                var parsed = ParseBase64Image(b64);
+                if (parsed != null && parsed.Length > 0) validImages.Add(parsed);
+            }
+        }
+        else if (!string.IsNullOrWhiteSpace(model.HinhAnhBase64))
+        {
+            var parsed = ParseBase64Image(model.HinhAnhBase64);
+            if (parsed != null && parsed.Length > 0) validImages.Add(parsed);
+        }
+
+        int mainIdx = Math.Clamp(model.ViTriAnhChinh, 0, Math.Max(0, validImages.Count - 1));
+        if (validImages.Count > 0)
+        {
+            item.HinhAnh = validImages[mainIdx];
         }
 
         bool isAutoCode = string.IsNullOrWhiteSpace(model.MaHangNoiBo);
@@ -620,6 +702,23 @@ public class HangHoaController : BaseKhoController
                     TonCaoNhat = model.TonCaoNhat ?? 999999999m
                 };
                 _context.NguongTonKhos.Add(nguong);
+                await _context.SaveChangesAsync();
+            }
+
+            // Lưu tối đa 5 ảnh vào bảng HinhAnhHangHoa
+            if (validImages.Count > 0)
+            {
+                for (int i = 0; i < validImages.Count; i++)
+                {
+                    _context.HinhAnhHangHoas.Add(new HinhAnhHangHoa
+                    {
+                        MaHang = item.MaHang,
+                        DuLieuAnh = validImages[i],
+                        ThuTu = i,
+                        LaAnhChinh = (i == mainIdx),
+                        NgayTao = DateTime.Now
+                    });
+                }
                 await _context.SaveChangesAsync();
             }
 
@@ -683,10 +782,45 @@ public class HangHoaController : BaseKhoController
 
         Copy(model, item);
 
-        // Xử lý ảnh: cập nhật hoặc xóa
-        if (model.XoaHinhAnh)
+        // Xử lý ảnh: cập nhật hoặc xóa (tối đa 5 ảnh)
+        if (model.XoaHinhAnh && (model.DanhSachHinhAnhBase64 == null || model.DanhSachHinhAnhBase64.Count == 0))
         {
             item.HinhAnh = null;
+            var oldImages = await _context.HinhAnhHangHoas.Where(h => h.MaHang == id).ToListAsync();
+            _context.HinhAnhHangHoas.RemoveRange(oldImages);
+        }
+        else if (model.DanhSachHinhAnhBase64 != null && model.DanhSachHinhAnhBase64.Count > 0)
+        {
+            var validImages = new List<byte[]>();
+            foreach (var b64 in model.DanhSachHinhAnhBase64.Take(5))
+            {
+                var parsed = ParseBase64Image(b64);
+                if (parsed != null && parsed.Length > 0) validImages.Add(parsed);
+            }
+
+            var oldImages = await _context.HinhAnhHangHoas.Where(h => h.MaHang == id).ToListAsync();
+            _context.HinhAnhHangHoas.RemoveRange(oldImages);
+
+            int mainIdx = Math.Clamp(model.ViTriAnhChinh, 0, Math.Max(0, validImages.Count - 1));
+            if (validImages.Count > 0)
+            {
+                item.HinhAnh = validImages[mainIdx];
+                for (int i = 0; i < validImages.Count; i++)
+                {
+                    _context.HinhAnhHangHoas.Add(new HinhAnhHangHoa
+                    {
+                        MaHang = id,
+                        DuLieuAnh = validImages[i],
+                        ThuTu = i,
+                        LaAnhChinh = (i == mainIdx),
+                        NgayTao = DateTime.Now
+                    });
+                }
+            }
+            else
+            {
+                item.HinhAnh = null;
+            }
         }
         else if (!string.IsNullOrWhiteSpace(model.HinhAnhBase64))
         {
@@ -864,6 +998,7 @@ public class HangHoaController : BaseKhoController
         x.TrongLuong = m.TrongLuong;
         x.DonViTrongLuong = string.IsNullOrWhiteSpace(m.DonViTrongLuong) ? "g" : m.DonViTrongLuong.Trim();
         x.ThuocTinh = string.IsNullOrWhiteSpace(m.ThuocTinhJson) ? null : m.ThuocTinhJson.Trim();
+        x.MoTa = string.IsNullOrWhiteSpace(m.MoTa) ? null : m.MoTa.Trim();
     }
 
     [HttpPost]
