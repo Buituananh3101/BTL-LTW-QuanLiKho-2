@@ -1,0 +1,173 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.LoginVM
+@{
+    Layout = null;
+    ViewData["Title"] = "Đăng nhập hệ thống";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Quản lý kho hàng</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 50%, #0ea5e9 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .login-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 440px;
+            padding: 40px 36px;
+        }
+        .brand-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .brand-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            background: #0284c7;
+            color: #ffffff;
+            border-radius: 14px;
+            font-size: 30px;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 16px rgba(2, 132, 199, 0.3);
+        }
+        .brand-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+        .brand-subtitle {
+            font-size: 13px;
+            color: #64748b;
+        }
+        .form-floating > .form-control {
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+        }
+        .form-floating > .form-control:focus {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
+        }
+        .btn-login {
+            background: #0284c7;
+            color: #ffffff;
+            font-weight: 600;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 15px;
+            width: 100%;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-login:hover {
+            background: #0369a1;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35);
+        }
+        .demo-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 24px;
+            font-size: 12px;
+            color: #475569;
+        }
+        .demo-badge {
+            cursor: pointer;
+            padding: 4px 8px;
+            background: #e0f2fe;
+            color: #0369a1;
+            border-radius: 6px;
+            font-weight: 600;
+            display: inline-block;
+            margin: 2px 0;
+            transition: background 0.2s;
+        }
+        .demo-badge:hover {
+            background: #bae6fd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="brand-header">
+        <div class="brand-icon"><i class="bi bi-box-seam"></i></div>
+        <div class="brand-title">KhoPro Cloud</div>
+        <div class="brand-subtitle">Hệ thống Quản lý kho hàng nhiều kho</div>
+    </div>
+
+    <form asp-controller="Account" asp-action="Login" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ReturnUrl" />
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger py-2 px-3 small rounded-3 mb-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                @Html.ValidationSummary(true, "")
+            </div>
+        }
+
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="txtUsername" asp-for="TenDangNhap" placeholder="Tên đăng nhập" required autofocus />
+            <label for="txtUsername"><i class="bi bi-person me-1 text-muted"></i>Tên đăng nhập</label>
+            <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="txtPassword" asp-for="MatKhau" placeholder="Mật khẩu" required />
+            <label for="txtPassword"><i class="bi bi-shield-lock me-1 text-muted"></i>Mật khẩu</label>
+            <span asp-validation-for="MatKhau" class="text-danger small"></span>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="chkRemember" asp-for="GhiNho" />
+                <label class="form-check-label text-muted small" for="chkRemember">Ghi nhớ đăng nhập</label>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-login">
+            <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập
+        </button>
+    </form>
+
+    <div class="demo-box">
+        <div class="fw-bold mb-1 text-dark"><i class="bi bi-info-circle me-1"></i>Tài khoản mẫu để kiểm thử:</div>
+        <div class="d-flex flex-column gap-1">
+            <div>Quản lý: <span class="demo-badge" onclick="fillLogin('quanly', '123456')">quanly / 123456</span></div>
+            <div>Thủ kho: <span class="demo-badge" onclick="fillLogin('thukho', '123456')">thukho / 123456</span></div>
+            <div>Bán hàng: <span class="demo-badge" onclick="fillLogin('banhang', '123456')">banhang / 123456</span></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function fillLogin(u, p) {
+        document.getElementById('txtUsername').value = u;
+        document.getElementById('txtPassword').value = p;
+    }
+</script>
+
+</body>
+</html>

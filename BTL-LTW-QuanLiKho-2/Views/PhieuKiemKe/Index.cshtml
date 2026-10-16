@@ -1,0 +1,366 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.PhieuKiemKeIndexVM
+@{
+    ViewData["Title"] = "Danh sách phiếu kiểm kho";
+}
+
+<link href="~/css/kiem-kho.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <!-- Cột lọc bên trái -->
+        <div class="col-auto">
+            <div class="kk-sidebar-filter" id="filterSidebar" style="width: 260px;">
+                <!-- Nút tròn thu gọn/mở rộng -->
+                <button type="button" class="kk-filter-toggle-btn" id="toggleFilterBtn" title="Thu gọn/Mở rộng bộ lọc">
+                    <span id="toggleIcon">◀</span>
+                </button>
+
+                <!-- Header bộ lọc -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0 fw-bold text-uppercase small text-muted">Bộ lọc tìm kiếm</h6>
+                    <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 text-muted" id="btnResetFilter">
+                        Đặt lại
+                    </button>
+                </div>
+
+                <form id="filterForm">
+                    <input type="hidden" name="Page" id="filterPage" value="@Model.Filter.Page" />
+                    <input type="hidden" name="WarehouseId" id="filterWarehouseId" value="@Model.Filter.WarehouseId" />
+
+                    <!-- Nhóm 1: Ngày tạo -->
+                    <div class="kk-filter-group">
+                        <div class="kk-filter-title">
+                            <span>Thời gian tạo</span>
+                            <span class="kk-filter-dot" id="dateFilterDot" style="display: @(Model.Filter.DateFilterType != "THIS_MONTH" ? "inline-block" : "none");"></span>
+                        </div>
+                        <div class="mb-2">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="DateFilterType" id="dateRadioQuick" value="@Model.Filter.DateFilterType" 
+                                       @(Model.Filter.DateFilterType != "CUSTOM" ? "checked" : "") />
+                                <label class="form-check-label d-flex justify-content-between align-items-center" for="dateRadioQuick">
+                                    <span id="quickDateLabel">Tháng này</span>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2" id="btnOpenQuickDate">▾</button>
+                                </label>
+                            </div>
+
+                            <!-- Popup chọn nhanh thời gian -->
+                            <div class="card p-2 shadow-sm mb-2" id="quickDateMenu" style="display: none;">
+                                <div class="kk-date-group-title">Theo ngày</div>
+                                <div class="kk-date-option" data-type="TODAY">Hôm nay</div>
+                                <div class="kk-date-option" data-type="YESTERDAY">Hôm qua</div>
+
+                                <div class="kk-date-group-title">Theo tuần</div>
+                                <div class="kk-date-option" data-type="THIS_WEEK">Tuần này</div>
+                                <div class="kk-date-option" data-type="LAST_WEEK">Tuần trước</div>
+                                <div class="kk-date-option" data-type="LAST_7_DAYS">7 ngày qua</div>
+
+                                <div class="kk-date-group-title">Theo tháng</div>
+                                <div class="kk-date-option active" data-type="THIS_MONTH">Tháng này</div>
+                                <div class="kk-date-option" data-type="LAST_MONTH">Tháng trước</div>
+                                <div class="kk-date-option" data-type="LAST_30_DAYS">30 ngày qua</div>
+
+                                <div class="kk-date-group-title">Theo quý / năm</div>
+                                <div class="kk-date-option" data-type="THIS_QUARTER">Quý này</div>
+                                <div class="kk-date-option" data-type="THIS_YEAR">Năm nay</div>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="DateFilterType" id="dateRadioCustom" value="CUSTOM" 
+                                       @(Model.Filter.DateFilterType == "CUSTOM" ? "checked" : "") />
+                                <label class="form-check-label" for="dateRadioCustom">Tùy chỉnh</label>
+                            </div>
+
+                            <div id="customDateRange" class="mt-2 ps-3" style="display: @(Model.Filter.DateFilterType == "CUSTOM" ? "block" : "none");">
+                                <div class="mb-2">
+                                    <label class="form-label small text-muted mb-1">Từ ngày</label>
+                                    <input type="date" class="form-control form-control-sm" name="FromDate" id="filterFromDate" 
+                                           value="@(Model.Filter.FromDate?.ToString("yyyy-MM-dd"))" />
+                                </div>
+                                <div>
+                                    <label class="form-label small text-muted mb-1">Đến ngày</label>
+                                    <input type="date" class="form-control form-control-sm" name="ToDate" id="filterToDate" 
+                                           value="@(Model.Filter.ToDate?.ToString("yyyy-MM-dd"))" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nhóm 2: Trạng thái -->
+                    <div class="kk-filter-group">
+                        <div class="kk-filter-title">
+                            <span>Trạng thái</span>
+                        </div>
+                        <div class="form-check mb-1">
+                            <input class="form-check-input status-checkbox" type="checkbox" name="Statuses" value="NHAP" id="stDraft" 
+                                   @(Model.Filter.Statuses.Contains("NHAP") ? "checked" : "") />
+                            <label class="form-check-label" for="stDraft">Phiếu tạm</label>
+                        </div>
+                        <div class="form-check mb-1">
+                            <input class="form-check-input status-checkbox" type="checkbox" name="Statuses" value="DA_DIEU_CHINH" id="stBalanced" 
+                                   @(Model.Filter.Statuses.Contains("DA_DIEU_CHINH") ? "checked" : "") />
+                            <label class="form-check-label" for="stBalanced">Đã cân bằng kho</label>
+                        </div>
+                        <div class="form-check mb-1">
+                            <input class="form-check-input status-checkbox" type="checkbox" name="Statuses" value="HUY" id="stCancelled" 
+                                   @(Model.Filter.Statuses.Contains("HUY") ? "checked" : "") />
+                            <label class="form-check-label" for="stCancelled">Đã hủy</label>
+                        </div>
+                    </div>
+
+                    <!-- Nhóm 3: Người tạo -->
+                    <div class="kk-filter-group">
+                        <div class="kk-filter-title">
+                            <span>Người tạo</span>
+                        </div>
+                        <select class="form-select form-select-sm" name="CreatorId" id="filterCreatorId">
+                            <option value="">-- Tất cả người tạo --</option>
+                            @foreach (var c in Model.Creators)
+                            {
+                                <option value="@c.MaNv" selected="@(Model.Filter.CreatorId == c.MaNv)">@c.TenNv</option>
+                            }
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Vùng chính bên phải -->
+        <div class="col">
+            <div class="p-3">
+                <!-- Thanh tiêu đề & Công cụ trên -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <h4 class="mb-0 fw-bold text-dark">Kiểm kho</h4>
+                        <span class="badge bg-light text-dark border">
+                            Kho: <strong id="lblCurrentWhName">@Model.CurrentWarehouseName</strong>
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Ô tìm kiếm mã phiếu -->
+                        <div class="input-group" style="width: 280px;">
+                            <input type="text" class="form-control" id="searchKeyword" placeholder="Theo mã phiếu kiểm..." 
+                                   value="@Model.Filter.Q" autocomplete="off" />
+                            <button class="btn btn-outline-secondary" type="button" id="btnSearch">🔍</button>
+                        </div>
+
+                        <!-- Nút + Kiểm kho -->
+                        <a asp-action="Create" class="btn kk-btn-primary d-flex align-items-center gap-1 shadow-sm">
+                            <span class="fs-5 lh-1">+</span> Kiểm kho
+                        </a>
+
+                        <!-- Nút Xuất file -->
+                        <button type="button" class="btn btn-outline-secondary" title="Xuất danh sách" onclick="alert('Tính năng xuất Excel sẽ được hỗ trợ trong phiên bản sau.');">
+                            Xuất file ▾
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bảng danh sách phiếu kiểm (Partial View) -->
+                <div id="stockTakeTableContainer">
+                    <partial name="_PhieuKiemKeTable" model="Model" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal xác nhận xóa phiếu tạm -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-danger">Xóa phiếu tạm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                Bạn có chắc chắn muốn xóa phiếu kiểm kho <strong id="deleteDraftCode"></strong>? Thao tác này không thể hoàn tác.
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Bỏ qua</button>
+                <button type="button" class="btn btn-danger btn-sm" id="btnConfirmDelete">Đồng ý xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+$(document).ready(function () {
+    let deleteId = 0;
+
+    // Toggle thu gọn/mở rộng cột lọc
+    $('#toggleFilterBtn').on('click', function () {
+        const sidebar = $('#filterSidebar');
+        sidebar.toggleClass('collapsed');
+        if (sidebar.hasClass('collapsed')) {
+            $('#toggleIcon').text('▶');
+            sidebar.css('width', '0');
+        } else {
+            $('#toggleIcon').text('◀');
+            sidebar.css('width', '260px');
+        }
+    });
+
+    // Mở popup chọn nhanh ngày
+    $('#btnOpenQuickDate').on('click', function (e) {
+        e.stopPropagation();
+        $('#quickDateMenu').toggle();
+    });
+
+    $(document).on('click', function () {
+        $('#quickDateMenu').hide();
+    });
+
+    $('#quickDateMenu').on('click', function (e) {
+        e.stopPropagation();
+    });
+
+    // Chọn option nhanh thời gian
+    $('.kk-date-option').on('click', function () {
+        const type = $(this).data('type');
+        const text = $(this).text();
+
+        $('.kk-date-option').removeClass('active');
+        $(this).addClass('active');
+
+        $('#quickDateLabel').text(text);
+        $('#dateRadioQuick').val(type).prop('checked', true);
+        $('#customDateRange').hide();
+        $('#quickDateMenu').hide();
+
+        if (type !== 'THIS_MONTH') {
+            $('#dateFilterDot').show();
+        } else {
+            $('#dateFilterDot').hide();
+        }
+
+        $('#filterPage').val(1);
+        loadTable();
+    });
+
+    // Toggle radio Tùy chỉnh ngày
+    $('input[name="DateFilterType"]').on('change', function () {
+        if ($('#dateRadioCustom').is(':checked')) {
+            $('#customDateRange').show();
+            $('#dateFilterDot').show();
+        } else {
+            $('#customDateRange').hide();
+        }
+        $('#filterPage').val(1);
+        loadTable();
+    });
+
+    $('#filterFromDate, #filterToDate').on('change', function () {
+        $('#filterPage').val(1);
+        loadTable();
+    });
+
+    // Lọc theo trạng thái
+    $('.status-checkbox').on('change', function () {
+        $('#filterPage').val(1);
+        loadTable();
+    });
+
+    // Lọc theo người tạo
+    $('#filterCreatorId').on('change', function () {
+        $('#filterPage').val(1);
+        loadTable();
+    });
+
+    // Tìm kiếm ô search
+    $('#searchKeyword').on('keyup', function (e) {
+        if (e.key === 'Enter') {
+            $('#filterPage').val(1);
+            loadTable();
+        }
+    });
+
+    $('#btnSearch').on('click', function () {
+        $('#filterPage').val(1);
+        loadTable();
+    });
+
+    // Đặt lại bộ lọc
+    $('#btnResetFilter').on('click', function () {
+        $('.kk-date-option').removeClass('active');
+        $('.kk-date-option[data-type="THIS_MONTH"]').addClass('active');
+        $('#quickDateLabel').text('Tháng này');
+        $('#dateRadioQuick').val('THIS_MONTH').prop('checked', true);
+        $('#customDateRange').hide();
+        $('#dateFilterDot').hide();
+
+        $('#stDraft').prop('checked', true);
+        $('#stBalanced').prop('checked', true);
+        $('#stCancelled').prop('checked', false);
+
+        $('#filterCreatorId').val('');
+        $('#searchKeyword').val('');
+        $('#filterPage').val(1);
+
+        loadTable();
+    });
+
+    // Phân trang AJAX
+    $('body').on('click', '.page-ajax', function (e) {
+        e.preventDefault();
+        const page = $(this).data('page');
+        if (page && page > 0) {
+            $('#filterPage').val(page);
+            loadTable();
+        }
+    });
+
+    // Checkbox chọn tất cả
+    $('body').on('change', '#selectAllRows', function () {
+        $('.row-select').prop('checked', $(this).is(':checked'));
+    });
+
+    // Modal xóa phiếu tạm
+    $('body').on('click', '.btn-delete-draft', function () {
+        deleteId = $(this).data('id');
+        $('#deleteDraftCode').text($(this).data('code'));
+        const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        modal.show();
+    });
+
+    $('#btnConfirmDelete').on('click', function () {
+        if (deleteId > 0) {
+            $.ajax({
+                url: '/PhieuKiemKe/Delete/' + deleteId,
+                type: 'POST',
+                success: function (res) {
+                    $('#deleteModal').modal('hide');
+                    loadTable();
+                },
+                error: function (xhr) {
+                    alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể xóa phiếu tạm.'));
+                }
+            });
+        }
+    });
+
+    // Hàm load bảng qua AJAX
+    function loadTable() {
+        const formData = $('#filterForm').serializeArray();
+        formData.push({ name: 'Q', value: $('#searchKeyword').val() });
+
+        $.ajax({
+            url: '/PhieuKiemKe/Filter',
+            type: 'GET',
+            data: $.param(formData),
+            beforeSend: function () {
+                $('#stockTakeTableContainer').css('opacity', '0.6');
+            },
+            success: function (html) {
+                $('#stockTakeTableContainer').html(html).css('opacity', '1');
+            },
+            error: function () {
+                $('#stockTakeTableContainer').css('opacity', '1');
+                alert('Có lỗi khi tải dữ liệu phiếu kiểm kho.');
+            }
+        });
+    }
+});
+</script>
+}

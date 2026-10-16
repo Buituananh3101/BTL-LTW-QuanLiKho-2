@@ -1,0 +1,11 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.HangHoaForm
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+<div class="row g-4">
+<div class="col-md-6"><label asp-for="MaHangNoiBo" class="form-label">Mã hàng nội bộ</label><input asp-for="MaHangNoiBo" class="form-control"  /><span asp-validation-for="MaHangNoiBo" class="text-danger small"></span></div>
+<div class="col-md-6"><label asp-for="TenHang" class="form-label">Tên hàng hóa</label><input asp-for="TenHang" class="form-control"  /><span asp-validation-for="TenHang" class="text-danger small"></span></div>
+<div class="col-md-6"><label asp-for="MaNhom" class="form-label">Nhóm hàng</label><select asp-for="MaNhom" asp-items="ViewBag.NhomHang" class="form-select"><option value="">— Chọn —</option></select><span asp-validation-for="MaNhom" class="text-danger small"></span></div>
+<div class="col-md-6"><label asp-for="MaDvt" class="form-label">Đơn vị tính</label><select asp-for="MaDvt" asp-items="ViewBag.DonViTinh" class="form-select"><option value="">— Chọn —</option></select><span asp-validation-for="MaDvt" class="text-danger small"></span></div>
+<div class="col-md-6"><label asp-for="GiaBanThamKhao" class="form-label">Giá bán tham khảo (VNĐ)</label><input asp-for="GiaBanThamKhao" class="form-control" type="number" min="0" step="0.01" /><span asp-validation-for="GiaBanThamKhao" class="text-danger small"></span></div>
+<div class="col-md-6"><label asp-for="TrangThai" class="form-label">Trạng thái</label><select asp-for="TrangThai" asp-items="ViewBag.States" class="form-select"></select><span asp-validation-for="TrangThai" class="text-danger small"></span></div>
+<div class="col-md-12"><label asp-for="QuyCach" class="form-label">Quy cách</label><textarea asp-for="QuyCach" class="form-control" rows="3" placeholder="Ví dụ: bình 12 kg, bao 25 kg…"></textarea><span asp-validation-for="QuyCach" class="text-danger small"></span></div>
+</div>

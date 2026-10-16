@@ -1,0 +1,97 @@
+# Danh sách Vấn đề & Nợ kỹ thuật cần xử lý (Backlog)
+
+> **Quy tắc vận hành**:
+> - Danh sách này do Chủ dự án (Tuấn Anh) phê duyệt và quản lý.
+> - AI khi thực hiện chỉ nhận nhiệm vụ từ danh sách này, sửa đúng lỗi được giao.
+> - Sau khi sửa xong và kiểm tra build thành công, AI đánh dấu `[x]` và cập nhật vào `PROGRESS.md`.
+> - Tuyệt đối không tự ý xóa bỏ lỗi hoặc sửa lan sang các phần khác khi chưa được yêu cầu.
+
+---
+
+## NHÓM 1: CỰC KỲ NGHIÊM TRỌNG (Lỗi sai số liệu & Hiệu năng)
+
+- [x] **[ISSUE-01] Lỗ hổng nuốt dữ liệu âm thầm trong `vw_TonKhoHienTai`**
+  - *Hiện trạng*: Trong View CSDL, trừ tồn xuất dùng `WHERE COALESCE(px.MaKho, db.MaKho) IS NOT NULL AND COALESCE(ctpx.MaHang, ctdb.MaHang) IS NOT NULL`. Nếu phiếu xuất thiếu dữ liệu, dòng xuất bị bỏ qua, tồn không bị trừ mà không báo lỗi.
+  - *Giải pháp đã xử lý*: Ràng buộc `NOT NULL` cho `MaKho` ở `PhieuXuat` và `MaHang` ở `ChiTietPhieuXuat`. Bỏ mệnh đề lọc ẩn này trong View để bảo đảm dữ liệu xuất luôn được tính toán chính xác 100%.
+
+- [x] **[ISSUE-02] Không có ràng buộc và kiểm tra chặn tồn âm**
+  - *Hiện trạng*: Nếu hủy phiếu nhập sau khi hàng đã xuất bán, hoặc 2 giao dịch xuất cùng lúc vượt quá tồn, CSDL sẽ bị tồn kho âm.
+  - *Giải pháp đã xử lý*: Tạo dịch vụ dùng chung `ITonKhoService` / `TonKhoService`, đóng gói các phương thức `KiemTraXuatKhoAsync`, `KiemTraHuyPhieuNhapAsync`, `KiemTraKiemKeAsync` kiểm tra tồn trước giao dịch, chặn đứng việc xuất/hủy/cân bằng gây âm kho và quăng thông báo tiếng Việt thân thiện.
+
+- [x] **[ISSUE-03] View không có cột ngày tháng, không làm được Báo cáo Nhập-Xuất-Tồn theo kỳ**
+  - *Hiện trạng*: `vw_TonKhoHienTai` gom toàn bộ lịch sử không có ngày, không xem được Thẻ kho hay báo cáo theo khoảng ngày.
+  - *Giải pháp đã xử lý*: Tách làm 2 View:
+    1. `vw_BienDongKho`: Lưu từng dòng biến động kèm `NgayGiaoDich`, `MaKho`, `MaHang`, `LoaiChungTu`, `MaChungTu`, `SoLuongTang`, `SoLuongGiam`.
+    2. `vw_TonKhoHienTai`: `SELECT MaKho, MaHang, CAST(SUM(SoLuongTang - SoLuongGiam) AS DECIMAL(18,2)) AS SoLuongTon FROM vw_BienDongKho GROUP BY MaKho, MaHang;`. Đã đồng bộ Model C# `VwBienDongKho` vào DbContext.
+
+- [x] **[ISSUE-04] Lỗ hổng tràn RAM khi nạp ảnh binary `VARBINARY(MAX)` trong `HangHoasController`**
+  - *Hiện trạng*: `query.OrderBy(...).ToListAsync()` nạp toàn bộ entity `HangHoa` gồm mảng byte ảnh `HinhAnh` vào RAM server trước khi phân trang.
+  - *Giải pháp đã xử lý*: Dùng LINQ Projection `.Select(...)` chỉ lấy cờ `HasImage = x.HinhAnh != null`, loại bỏ triệt để việc đọc và chuyển dữ liệu mảng byte `VARBINARY(MAX)` qua RAM khi lấy danh sách. Giảm 99% dung lượng bộ nhớ server.
+
+- [x] **[ISSUE-05] Luồng Bán hàng (POS) đứt gãy với biến động tồn kho**
+  - *Hiện trạng*: View tồn chỉ trừ kho theo `PhieuXuat`, không trừ theo `DonBan`. Nếu bán tại quầy mà không tự sinh `PhieuXuat` thì kho không giảm.
+  - *Giải pháp đã xử lý*: Ban hành luật nghiệp vụ bắt buộc tại `.agent/rules/02-nghiep-vu-kho.md`. Xây dựng `IBanHangService` / `BanHangService` đóng gói các phương thức `TaoDonBanVaXuatKhoAsync`, `XuatKhoChoDonBanAsync`, `HuyDonBanVaPhieuXuatAsync`. Đảm bảo bán hàng tại quầy (POS) tự động sinh kèm 1 `PhieuXuat` trạng thái `DA_XAC_NHAN` (`XUAT_BAN`) trong cùng 1 transaction, kiểm tra chặn tồn âm qua `TonKhoService.KiemTraXuatKhoAsync`, và tự động hoàn trả tồn kho khi hủy đơn.
+
+---
+
+## NHÓM 2: QUAN TRỌNG (Kiến trúc, CSDL & Quy tắc nghiệp vụ)
+
+- [x] **[ISSUE-06] Chốt phương pháp phát triển CSDL & Quản lý Script**
+  - *Hiện trạng*: Thực tế đang chạy Database First nhưng chưa có script schema nền đánh số, chưa có backup trước khi chạy.
+  - *Giải pháp đã xử lý*: Chốt **Database First có kiểm soát**. Toàn bộ script DDL được quản lý tập trung và đánh số phiên bản trong thư mục `migrations/sql/` (`01_init_schema.sql`, `02_update_schema.sql`...). Cập nhật quy tắc bắt buộc vào `.agent/rules/05-co-so-du-lieu.md`.
+
+- [x] **[ISSUE-07] Bổ sung `GiaVon` và lưu đơn giá chốt tại thời điểm kiểm kho**
+  - *Hiện trạng*: `HangHoa` chưa có `GiaVon`. Bảng `ChiTietPhieuKiemKe` không lưu đơn giá lúc kiểm, làm giá trị chênh lệch bị nhảy theo giá mới tương lai.
+  - *Giải pháp đã xử lý*: Bổ sung cột `GiaVon` vào `HangHoa` và `DonGia` vào `ChiTietPhieuKiemKe`. Đồng bộ vào Model C#, DbContext Fluent API và lưu script migration `03_add_dongia_chitietkiemke.sql`. Cập nhật `PhieuKiemKeController.cs` để đóng băng đơn giá chốt lúc lưu tạm và cân bằng kho, tính toán `TongGiaTriLech` chính xác.
+
+- [x] **[ISSUE-08] Đổi tên `HangHoasController` -> `HangHoaController` ngay khi còn ít Controller**
+  - *Hiện trạng*: `HangHoasController` (số nhiều) lệch chuẩn với `PhieuKiemKeController` (số ít).
+  - *Giải pháp đã xử lý*: Đổi tên Controller thành `HangHoaController.cs`, đổi tên thư mục `Views/HangHoas` thành `Views/HangHoa`, cập nhật toàn bộ route/link AJAX và navigation bar, kiểm tra biên dịch 0 lỗi.
+
+- [x] **[ISSUE-09] Đổi tên bảng `TaiKhoan_Kho` thành `TaiKhoanKho`**
+  - *Hiện trạng*: Tên bảng chứa dấu gạch dưới lệch quy ước PascalCase. Logic seed mặc định đang cấp toàn bộ kho cho mọi tài khoản.
+  - *Giải pháp đã xử lý*: Đổi tên bảng trong SQL Server thành `TaiKhoanKho`, lưu script migration `04_rename_taikhoankho.sql`, đồng bộ cấu hình `entity.ToTable("TaiKhoanKho")` trong DbContext và quy tắc tài liệu. Chuẩn hóa 100% PascalCase tiếng Việt không dấu.
+
+- [x] **[ISSUE-10] Quy định rõ về Đơn vị tính (Không có hệ số quy đổi)**
+  - *Hiện trạng*: Không có bảng quy đổi ĐVT (Thùng -> Lon/Chai).
+  - *Giải pháp đã xử lý*: Ban hành quy tắc bất biến tại Mục 10 trong `.agent/rules/02-nghiep-vu-kho.md` và ghi nhận quyết định kiến trúc: Hệ thống chỉ quản lý tồn kho và chứng từ theo 1 ĐVT cơ bản duy nhất cho từng mặt hàng, không dùng hệ số quy đổi phụ để bảo đảm độ chính xác.
+
+- [x] **[ISSUE-11] Khắc phục Race Condition khi sinh mã tự động `MaHangNoiBo`**
+  - *Hiện trạng*: Đọc `MaxAsync` rồi cộng 1 ở client dễ bị đụng độ khi nhiều người lưu cùng lúc.
+  - *Giải pháp đã xử lý*: Triển khai phương thức `SinhMaHangNoiBoTuDongAsync` quét dải số thực tế và cơ chế retry tự động 3 lần bắt lỗi `DbUpdateException` trùng chỉ mục `UQ_HangHoa_MaHangNoiBo` trong `HangHoaController.cs`, chống đụng độ và sập ứng dụng.
+
+- [x] **[ISSUE-12] Bảo mật Controller & Xóa bỏ dữ liệu giả lập (Hardcode User/Kho)**
+  - *Hiện trạng*: `PhieuKiemKeController` đang hardcode `MaNV = 2` và `MaTaiKhoan = 1`, không có `[Authorize]`.
+  - *Giải pháp đã xử lý*: Cấu hình Cookie Authentication trong `Program.cs`, tạo `AccountController` (Login, Logout, AccessDenied), view giao diện đăng nhập đẹp mắt hỗ trợ tài khoản mẫu, xóa bỏ 100% hardcode `MaNV`/`MaTaiKhoan`, đọc thông tin thực tế từ `User.Claims` và bảo vệ Controller bằng `[Authorize]`.
+
+- [x] **[ISSUE-13] Sắp xếp lại thứ tự ưu tiên các module trong `PROGRESS.md`**
+  - *Hiện trạng*: Đăng nhập đang xếp trước Nhập kho, trong khi không có Nhập kho thì không có hàng để thử Xuất, Chuyển, Kiểm.
+  - *Giải pháp đã xử lý*: Tái cấu trúc lại lộ trình phát triển trong `PROGRESS.md`: Đưa phân hệ Nhập kho lên ưu tiên số 1 ngay sau khi dọn dẹp xong nợ kỹ thuật để có hàng hóa thực tế kiểm thử luồng Xuất/Chuyển/Kiểm.
+
+---
+
+## NHÓM 3: NHỎ & DỌN DẸP TÀI LIỆU
+
+- [x] **[ISSUE-14] Thay toàn bộ đường dẫn tuyệt đối `file:///d:/...` bằng đường dẫn tương đối**
+  - *Hiện trạng*: Khoảng 30 link `file:///d:/...` trong các file .md sẽ hỏng khi đổi máy hoặc đưa cho người khác.
+  - *Giải pháp đã xử lý*: Quét toàn bộ repository và thay thế triệt để các đường dẫn tuyệt đối sang đường dẫn tương đối (`../../...`, `./...`) trong tất cả các file luật `.agent/rules/`, đặc tả `docs/specs/`, và tài liệu tổng quan. Đảm bảo toàn bộ tài liệu độc lập với môi trường máy chủ và tuân thủ giới hạn 8.000 ký tự.
+
+- [x] **[ISSUE-15] Xóa bỏ khái niệm "bút toán đảo" trong `docs/specs/_mau-dac-ta.md`**
+  - *Hiện trạng*: File mẫu còn ghi "bút toán đảo", sai lệch với kiến trúc View tính toán hiện tại.
+  - *Giải pháp đã xử lý*: Cập nhật lại chuẩn mực trong `docs/specs/_mau-dac-ta.md`: Khi hủy chứng từ, chuyển trạng thái sang `'HUY'` (kèm kiểm tra chặn tồn âm nếu hủy phiếu nhập). Do tồn kho được tính toán động từ View `vw_TonKhoHienTai`, chứng từ 'HUY' sẽ tự động không còn tính vào tồn kho mà không cần sinh bút toán đảo.
+
+- [x] **[ISSUE-16] Chuẩn hóa ApiResponse dạng JSON cho các Controller**
+  - *Hiện trạng*: Các action AJAX đang trả về định dạng JSON lộn xộn.
+  - *Giải pháp đã xử lý*: Tạo lớp [`ApiResponse`](../BTL-LTW-QuanLiKho-2/ViewModels/ApiResponse.cs) và generic [`ApiResponse<T>`](../BTL-LTW-QuanLiKho-2/ViewModels/ApiResponse.cs) chuẩn hóa định dạng `{ success, message, data }`, cung cấp các helper factory `ApiResponse.Ok(...)`, `ApiResponse.Fail(...)`. Đồng bộ quy định bắt buộc vào Mục 3.3 trong `.agent/rules/01-phong-cach-code.md`.
+
+- [x] **[ISSUE-17] Dọn dẹp các file rác của template Lab cũ trong `Views/Shared/`**
+  - *Hiện trạng*: Còn `MyLayout.cshtml`, `Main.cshtml`, `LeftMenu.cshtml`, `TopNav.cshtml`, `Footer.cshtml`.
+  - *Giải pháp đã xử lý*: Đã xóa bỏ an toàn toàn bộ 5 file template lab thừa. Thư mục `Views/Shared/` chỉ còn lại duy nhất `_Layout.cshtml`, `_Header.cshtml`, `_MainMenu.cshtml`, `_FloatingHelp.cshtml`, `_ValidationScriptsPartial.cshtml`, `Error.cshtml`.
+
+- [x] **[ISSUE-18] Xóa file `Views/HangHoas/_ViewStart.cshtml` thừa**
+  - *Hiện trạng*: Trùng lặp với `Views/_ViewStart.cshtml`.
+  - *Giải pháp đã xử lý*: Đã xóa bỏ file thừa `Views/HangHoa/_ViewStart.cshtml`. Dự án chỉ dùng duy nhất `Views/_ViewStart.cshtml` cho toàn bộ các màn hình.
+
+- [x] **[ISSUE-19] Tạo file dữ liệu mẫu chuẩn `DuLieuMau.sql` để demo**
+  - *Hiện trạng*: Chưa có script tạo sẵn hàng hóa, nhà cung cấp, kho và phiếu mẫu để chạy thử 1 click.
+  - *Giải pháp đã xử lý*: Xuất bản script hoàn chỉnh tại `migrations/sql/05_dulieumau_seed.sql` và `docs/DuLieuMau.sql`: Chạy được nhiều lần (idempotent), thiết lập đầy đủ 3 vai trò, 3 nhân viên, 3 tài khoản demo chuẩn SHA-256 (`quanly`, `thukho`, `banhang` / `123456`), 3 kho, quyền truy cập kho `TaiKhoanKho`, ĐVT, nhóm hàng, NCC, khách hàng, 11+ mặt hàng đa dạng kèm giá vốn và giá bán, ngưỡng tồn kho và phiếu nhập đầu kỳ cấp tồn sẵn sàng cho mọi kịch bản demo. Đã kiểm tra chạy trên SQL Server thành công 100% 0 lỗi.

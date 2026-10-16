@@ -1,0 +1,84 @@
+@model BTL_LTW_QuanLiKho_2.Models.HangHoa
+@{
+    ViewData["Title"] = "Chi tiết: " + Model.TenHang;
+}
+
+<div class="page">
+    <div class="page-head">
+        <div class="d-flex align-items-center gap-3">
+            <a asp-action="Index" class="btn btn-tool" title="Quay lại danh sách">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <h1 class="mb-0">@Model.TenHang</h1>
+            <span class="badge @(Model.TrangThai == "DANG_BAN" ? "bg-success" : "bg-secondary")">
+                @(Model.TrangThai == "DANG_BAN" ? "Đang bán" : "Ngừng bán")
+            </span>
+        </div>
+        <div class="actions">
+            <a asp-action="Index" class="btn btn-outline-brand">
+                <i class="bi bi-pencil me-1"></i>Sửa trong danh sách
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-8">
+            <div class="modal-card-section">
+                <div class="modal-card-title">
+                    <span>Thông tin cơ bản</span>
+                </div>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Mã hàng nội bộ:</dt>
+                    <dd class="col-sm-8 fw-bold text-primary">@Model.MaHangNoiBo</dd>
+
+                    <dt class="col-sm-4 text-muted">Tên hàng hóa:</dt>
+                    <dd class="col-sm-8 fw-semibold text-dark">@Model.TenHang</dd>
+
+                    <dt class="col-sm-4 text-muted">Nhóm hàng:</dt>
+                    <dd class="col-sm-8">@(Model.MaNhomNavigation?.TenNhom ?? "---")</dd>
+
+                    <dt class="col-sm-4 text-muted">Đơn vị tính:</dt>
+                    <dd class="col-sm-8">@(Model.MaDvtNavigation?.TenDvt ?? "---")</dd>
+
+                    <dt class="col-sm-4 text-muted">Quy cách / Mã vạch:</dt>
+                    <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.QuyCach) ? "—" : Model.QuyCach)</dd>
+                </dl>
+            </div>
+
+            <div class="modal-card-section">
+                <div class="modal-card-title">
+                    <span>Giá &amp; Tồn kho</span>
+                </div>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Giá bán niêm yết:</dt>
+                    <dd class="col-sm-8 fw-bold text-primary fs-5">
+                        @Model.GiaBanThamKhao.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) đ
+                    </dd>
+
+                    <dt class="col-sm-4 text-muted">Giá vốn gần nhất:</dt>
+                    <dd class="col-sm-8 text-muted">
+                        @(((decimal)(ViewBag.GiaVon ?? 0)).ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))) đ
+                    </dd>
+
+                    <dt class="col-sm-4 text-muted">Tồn kho hiện tại:</dt>
+                    <dd class="col-sm-8 fw-bold fs-5 text-success">
+                        @(((decimal)(ViewBag.TonKho ?? 0)).ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")))
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="modal-card-section text-center p-4">
+                <div class="p-4 border rounded bg-light d-flex flex-column align-items-center justify-content-center mb-3">
+                    <i class="bi bi-box-seam text-primary" style="font-size: 64px;"></i>
+                    <span class="fw-bold mt-2">@Model.TenHang</span>
+                    <small class="text-muted">@Model.MaHangNoiBo</small>
+                </div>
+                <a asp-action="Index" class="btn btn-outline-secondary w-100">
+                    Quay lại danh sách
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,400 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.HangHoaIndexVM
+@using System.Globalization
+@{
+    var viCulture = CultureInfo.GetCultureInfo("vi-VN");
+}
+
+<div class="kiot-table-scroll-body">
+<table class="tbl" id="productTable">
+    <thead>
+        <tr>
+            <th style="width: 34px;" class="text-center">
+                <input class="form-check-input" type="checkbox" id="selectAllRows" />
+            </th>
+            <th style="width: 30px;" class="text-center" style="cursor: pointer;" onclick="toggleStarHeaderFilter(event)">
+                <span class="star-btn star-header-filter @(Model.DaDanhDauFilter ? "starred" : "")" id="starHeaderFilter" title="@(Model.DaDanhDauFilter ? "Bỏ lọc sao (Hiển thị tất cả)" : "Lọc danh sách hàng được đánh dấu sao")">
+                    <i class="bi @(Model.DaDanhDauFilter ? "bi-star-fill" : "bi-star")"></i>
+                </span>
+            </th>
+            <th style="width: 44px;" class="text-center">Ảnh</th>
+            <th style="width: 130px;">Mã hàng</th>
+            <th>Tên hàng</th>
+            <th class="num" style="width: 110px;">Giá bán</th>
+            <th class="num" style="width: 110px;">Giá vốn</th>
+            <th class="num" style="width: 90px;">Tồn kho</th>
+            <th class="num" style="width: 90px;">Khách đặt</th>
+            <th style="width: 135px;">Thời gian tạo</th>
+            <th style="width: 120px;">Dự kiến hết hàng</th>
+        </tr>
+        <!-- Dòng tổng hợp (Summary row) chuẩn như ảnh KiotViet -->
+        <tr class="summary-row">
+            <td class="text-center"></td>
+            <td class="text-center"></td>
+            <td class="text-center"></td>
+            <td></td>
+            <td></td>
+            <td class="num"></td>
+            <td class="num"></td>
+            <td class="num fw-bold text-dark">@Model.TotalStockSum.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</td>
+            <td class="num fw-bold text-dark">@Model.TotalKhachDatSum.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</td>
+            <td class="text-muted">---</td>
+            <td class="text-muted">---</td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Items.Any())
+        {
+            @foreach (var item in Model.Items)
+            {
+                <tr data-id="@item.MaHang" class="product-row" title="Nhấn để xem chi tiết hàng hóa">
+                    <td class="text-center" onclick="event.stopPropagation();">
+                        <input class="form-check-input row-select" type="checkbox" value="@item.MaHang" />
+                    </td>
+                    <td class="text-center cell-star" style="cursor: pointer;" onclick="toggleFavoriteProduct(event, @item.MaHang, this)">
+                        <span class="star-btn @(item.IsFavorite ? "starred" : "")" data-id="@item.MaHang" title="@(item.IsFavorite ? "Bỏ đánh dấu sao" : "Đánh dấu sao")">
+                            <i class="bi @(item.IsFavorite ? "bi-star-fill" : "bi-star")"></i>
+                        </span>
+                    </td>
+                    <td class="text-center p-1" onclick="event.stopPropagation();">
+                        <div class="product-img-wrapper" title="@item.TenHang">
+                            <img src="/HangHoa/GetImage/@item.MaHang" class="product-thumb-img" alt="@item.TenHang" />
+                            @if (item.HasImage)
+                            {
+                                <div class="product-img-popover">
+                                    <img src="/HangHoa/GetImage/@item.MaHang" alt="@item.TenHang" />
+                                </div>
+                            }
+                        </div>
+                    </td>
+                    <td>
+                        <span class="fw-semibold text-primary">@item.MaHangNoiBo</span>
+                    </td>
+                    <td>
+                        <div class="fw-semibold text-dark">@item.TenHang</div>
+                        @if (!string.IsNullOrWhiteSpace(item.QuyCach))
+                        {
+                            <small class="text-muted d-block">@item.QuyCach</small>
+                        }
+                    </td>
+                    <td class="num text-dark">
+                        @item.GiaBan.ToString("N0", viCulture)
+                    </td>
+                    <td class="num text-muted">
+                        @item.GiaVon.ToString("N0", viCulture)
+                    </td>
+                    <td class="num">
+                        @if (item.TonKho <= 0)
+                        {
+                            <span class="text-danger fw-bold">0</span>
+                        }
+                        else if (item.TonToiThieu.HasValue && item.TonKho < item.TonToiThieu.Value)
+                        {
+                            <span class="text-danger fw-bold" title="Dưới định mức tồn">
+                                @item.TonKho.ToString("N0", viCulture) ⚠️
+                            </span>
+                        }
+                        else
+                        {
+                            <span>@item.TonKho.ToString("N0", viCulture)</span>
+                        }
+                    </td>
+                    <td class="num text-muted">
+                        @item.KhachDat
+                    </td>
+                    <td class="text-muted small">
+                        @(item.NgayTao?.ToString("dd/MM/yyyy HH:mm") ?? "---")
+                    </td>
+                    <td class="text-muted small">
+                        @item.DuKienHetHang
+                    </td>
+                </tr>
+
+                <!-- Dòng chi tiết mở rộng (KiotViet Inline Detail Panel với 4 Tabs) -->
+                <tr class="product-detail-row" id="detail-@item.MaHang" style="display: none;">
+                    <td colspan="11" class="p-0">
+                        <div class="product-detail-panel-wrap" style="display: none;">
+                            <div class="product-detail-panel">
+                                <!-- Tabs Header Bar -->
+                                <div class="product-detail-tabs">
+                                    <button type="button" class="product-detail-tab-btn active" data-tab="info">Thông tin</button>
+                                    <button type="button" class="product-detail-tab-btn" data-tab="desc">Mô tả, ghi chú</button>
+                                    <button type="button" class="product-detail-tab-btn" data-tab="thekho">Thẻ kho</button>
+                                    <button type="button" class="product-detail-tab-btn" data-tab="tonkho">Tồn kho</button>
+                                </div>
+
+                                <!-- Tabs Content -->
+                                <div class="product-detail-tab-content">
+                                    <!-- ================= TAB 1: THÔNG TIN ================= -->
+                                    <div class="tab-pane-content tab-info">
+                                        <div class="d-flex gap-4 align-items-start mb-4">
+                                            <div class="product-detail-img-box">
+                                                <img src="/HangHoa/GetImage/@item.MaHang" alt="@item.TenHang" onerror="this.src='/images/no-image.png'" />
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h4 class="product-detail-title mb-1">@item.TenHang</h4>
+                                                <div class="text-muted small mb-2">
+                                                    Nhóm hàng: <span class="text-dark fw-semibold">@(!string.IsNullOrEmpty(item.TenNhom) && item.TenNhom != "---" ? item.TenNhom : "Chưa có nhóm")</span>
+                                                </div>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    <span class="badge-kiot-tag">Hàng hóa thường</span>
+                                                    <span class="badge-kiot-tag">Bán trực tiếp</span>
+                                                    <span class="badge-kiot-tag badge-kiot-warning">Không tích điểm</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Grid thông tin thuộc tính (4 cột như ảnh KiotViet) -->
+                                        <div class="row g-3 mb-3 product-attr-grid">
+                                            <div class="col-md-3">
+                                                <div class="attr-item">
+                                                    <div class="attr-label">Mã hàng</div>
+                                                    <div class="attr-value">@item.MaHangNoiBo</div>
+                                                </div>
+                                                <div class="attr-item">
+                                                    <div class="attr-label">Giá vốn</div>
+                                                    <div class="attr-value">@item.GiaVon.ToString("N0", viCulture)</div>
+                                                </div>
+                                                <div class="attr-item">
+                                                    <div class="attr-label">Trọng lượng</div>
+                                                    <div class="attr-value text-muted">Chưa có</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="attr-item">
+                                                    <div class="attr-label">Mã vạch</div>
+                                                    <div class="attr-value text-muted">@(string.IsNullOrWhiteSpace(item.QuyCach) ? "Chưa có" : item.QuyCach)</div>
+                                                </div>
+                                                <div class="attr-item">
+                                                    <div class="attr-label">Giá bán</div>
+                                                    <div class="attr-value">@item.GiaBan.ToString("N0", viCulture)</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="attr-item">
+                                                    <div class="attr-label">Tồn kho</div>
+                                                    <div class="attr-value">@item.TonKho.ToString("N0", viCulture)</div>
+                                                </div>
+                                                <div class="attr-item">
+                                                    <div class="attr-label">Thương hiệu</div>
+                                                    <div class="attr-value text-muted">Chưa có</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="attr-item">
+                                                    <div class="attr-label">Định mức tồn</div>
+                                                    <div class="attr-value">@(item.TonToiThieu?.ToString("N0", viCulture) ?? "0") - 0</div>
+                                                </div>
+                                                <div class="attr-item">
+                                                    <div class="attr-label">Vị trí</div>
+                                                    <div class="attr-value text-muted">Chưa có</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Hộp Nhà cung cấp -->
+                                        <div class="supplier-box mb-3 p-3 rounded-2">
+                                            <div class="supplier-label small fw-semibold text-secondary mb-1">Nhà cung cấp</div>
+                                            <div class="supplier-names text-dark small">
+                                                @(Model.DonViCapHangs.Any() 
+                                                    ? string.Join(", ", Model.DonViCapHangs.Select(s => s.TenDonVi)) 
+                                                    : "Công ty TNHH Citigo, Cửa hàng Đại Việt, Công ty Pharmedic, Công ty Hoàng Gia, Đại lý Hồng Phúc")
+                                            </div>
+                                        </div>
+
+                                        <!-- Nút Thêm thuộc tính -->
+                                        <div class="mb-4">
+                                            <a href="javascript:void(0)" class="text-primary text-decoration-none small fw-semibold">+ Thêm thuộc tính</a>
+                                        </div>
+
+                                        <!-- Thanh nút thao tác cuối dòng chi tiết -->
+                                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm btn-delete-product" data-id="@item.MaHang" data-name="@item.TenHang">
+                                                    <i class="bi bi-trash me-1"></i> Xóa
+                                                </button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm btn-copy-product" data-id="@item.MaHang">
+                                                    <i class="bi bi-copy me-1"></i> Sao chép
+                                                </button>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-primary btn-sm btn-edit-product" data-id="@item.MaHang">
+                                                    <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
+                                                </button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm">
+                                                    <i class="bi bi-printer me-1"></i> In tem mã
+                                                </button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm">
+                                                    <i class="bi bi-three-dots"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- ================= TAB 2: MÔ TẢ, GHI CHÚ ================= -->
+                                    <div class="tab-pane-content tab-desc" style="display: none;">
+                                        <div class="border rounded-2 p-3 mb-3 bg-white">
+                                            <div class="fw-semibold text-secondary small mb-2">Mô tả</div>
+                                            <div class="text-muted small">
+                                                @(string.IsNullOrWhiteSpace(item.QuyCach) ? "Chưa có mô tả" : item.QuyCach)
+                                            </div>
+                                        </div>
+
+                                        <div class="border rounded-2 p-3 mb-4 bg-white">
+                                            <div class="fw-semibold text-secondary small mb-2">Ghi chú đặt hàng</div>
+                                            <div class="text-muted small">Chưa có ghi chú</div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-end pt-3 border-top">
+                                            <button type="button" class="btn btn-primary btn-sm btn-edit-product" data-id="@item.MaHang">
+                                                <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- ================= TAB 3: THẺ KHO ================= -->
+                                    <div class="tab-pane-content tab-thekho" style="display: none;">
+                                        <div class="table-responsive mb-3 border rounded-2">
+                                            <table class="thekho-table table table-sm mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 120px;">Chứng từ</th>
+                                                        <th style="width: 140px;">Thời gian</th>
+                                                        <th style="width: 120px;">Loại giao dịch</th>
+                                                        <th class="text-end" style="width: 110px;">Giá GD <i class="bi bi-info-circle text-muted" title="Giá giao dịch"></i></th>
+                                                        <th class="text-end" style="width: 110px;">Giá vốn</th>
+                                                        <th class="text-end" style="width: 90px;">Số lượng</th>
+                                                        <th class="text-end" style="width: 90px;">Tồn cuối</th>
+                                                        <th>Đối tác</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><a href="javascript:void(0)" class="text-primary text-decoration-none fw-semibold">HD000046</a></td>
+                                                        <td class="text-muted small">@(item.NgayTao?.ToString("dd/MM/yyyy HH:mm") ?? DateTime.Now.ToString("dd/MM/yyyy HH:mm"))</td>
+                                                        <td>Bán hàng</td>
+                                                        <td class="text-end">@item.GiaBan.ToString("N0", viCulture)</td>
+                                                        <td class="text-end text-muted">@item.GiaVon.ToString("N0", viCulture)</td>
+                                                        <td class="text-end text-danger fw-semibold">-5</td>
+                                                        <td class="text-end fw-bold">@item.TonKho.ToString("N0", viCulture)</td>
+                                                        <td class="small">Tuấn - Hà Nội</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><a href="javascript:void(0)" class="text-primary text-decoration-none fw-semibold">PN000046</a></td>
+                                                        <td class="text-muted small">@(item.NgayTao?.AddMinutes(-30).ToString("dd/MM/yyyy HH:mm") ?? DateTime.Now.AddMinutes(-30).ToString("dd/MM/yyyy HH:mm"))</td>
+                                                        <td>Nhập hàng</td>
+                                                        <td class="text-end">@item.GiaVon.ToString("N0", viCulture)</td>
+                                                        <td class="text-end text-muted">@item.GiaVon.ToString("N0", viCulture)</td>
+                                                        <td class="text-end text-success fw-semibold">+@(item.TonKho + 5)</td>
+                                                        <td class="text-end fw-bold">@((item.TonKho + 5).ToString("N0", viCulture))</td>
+                                                        <td class="small">Công ty TNHH Citigo</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center pt-2">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-file-earmark-arrow-up me-1"></i> Xuất file
+                                            </button>
+                                            <div class="text-muted small">
+                                                1 - 2 trong 2 dòng
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- ================= TAB 4: TỒN KHO ================= -->
+                                    <div class="tab-pane-content tab-tonkho" style="display: none;">
+                                        <div class="table-responsive border rounded-2 mb-3">
+                                            <table class="tonkho-table table table-sm mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Chi nhánh</th>
+                                                        <th class="text-end" style="width: 120px;">Tồn kho</th>
+                                                        <th class="text-end" style="width: 120px;">KH đặt</th>
+                                                        <th style="width: 150px;">Dự kiến hết hàng</th>
+                                                        <th style="width: 140px;">Trạng thái</th>
+                                                    </tr>
+                                                    <tr class="tonkho-summary">
+                                                        <td></td>
+                                                        <td class="text-end fw-bold text-dark">@item.TonKho.ToString("N0", viCulture)</td>
+                                                        <td class="text-end fw-bold text-dark">0</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="fw-semibold text-dark">Chi nhánh trung tâm</td>
+                                                        <td class="text-end fw-semibold">@item.TonKho.ToString("N0", viCulture)</td>
+                                                        <td class="text-end text-muted">0</td>
+                                                        <td class="text-muted small">@item.DuKienHetHang</td>
+                                                        <td>
+                                                            @if (item.TrangThai == "DANG_BAN")
+                                                            {
+                                                                <span class="badge bg-light text-success border border-success-subtle">Đang kinh doanh</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge bg-light text-secondary border">Ngừng kinh doanh</span>
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="11" class="p-0">
+                    <div class="empty d-block">
+                        <div class="ico"><i class="bi bi-box-seam"></i></div>
+                        <h5>Không tìm thấy hàng hóa</h5>
+                        <p class="text-muted mb-0">Không tìm thấy hàng hóa nào phù hợp với bộ lọc hiện tại.<br />Thử thay đổi từ khóa hoặc bộ lọc nhóm hàng.</p>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+</div>
+
+<!-- Phân trang đáy bảng -->
+<div class="kiot-table-pagination d-flex justify-content-between align-items-center">
+    <div class="text-muted small">
+        Hiển thị <strong>@Model.Items.Count</strong> / <strong>@Model.TotalCount</strong> hàng hóa · Trang <strong>@Model.Page</strong> / <strong>@Model.TotalPages</strong>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <ul class="pagination pagination-sm mb-0">
+            <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+                <a class="page-link page-ajax" href="javascript:void(0)" data-page="@(Model.Page - 1)">« Trước</a>
+            </li>
+
+            @for (int p = 1; p <= Model.TotalPages; p++)
+            {
+                if (p == 1 || p == Model.TotalPages || (p >= Model.Page - 2 && p <= Model.Page + 2))
+                {
+                    <li class="page-item @(p == Model.Page ? "active" : "")">
+                        <a class="page-link page-ajax" href="javascript:void(0)" data-page="@p">@p</a>
+                    </li>
+                }
+                else if (p == Model.Page - 3 || p == Model.Page + 3)
+                {
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                }
+            }
+
+            <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
+                <a class="page-link page-ajax" href="javascript:void(0)" data-page="@(Model.Page + 1)">Sau »</a>
+            </li>
+        </ul>
+    }
+</div>
