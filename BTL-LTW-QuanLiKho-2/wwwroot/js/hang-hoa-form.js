@@ -179,9 +179,20 @@
     if (e.target.closest('#btnRemoveMainImg')) {
       e.stopPropagation();
       if (imgs.length > 0) {
-        imgs.splice(0, 1);
-        renderImgs();
-        showToast('Đã xóa ảnh chính');
+        const doRemove = () => {
+          imgs.splice(0, 1);
+          renderImgs();
+          showToast('Đã xóa ảnh chính');
+        };
+        if (window.KiotConfirm) {
+          window.KiotConfirm.show({
+            title: 'Xóa ảnh chính',
+            message: 'Bạn có chắc chắn muốn xóa ảnh đại diện chính này không? Thao tác này không thể hoàn tác.',
+            onConfirm: doRemove
+          });
+        } else if (confirm('Bạn có chắc chắn muốn xóa ảnh chính này không?')) {
+          doRemove();
+        }
       }
       return;
     }
@@ -199,9 +210,20 @@
     if (delBtn) {
       e.stopPropagation();
       const subIdx = +delBtn.dataset.delSub;
-      imgs.splice(subIdx + 1, 1);
-      renderImgs();
-      showToast('Đã xóa ảnh phụ');
+      const doRemove = () => {
+        imgs.splice(subIdx + 1, 1);
+        renderImgs();
+        showToast('Đã xóa ảnh phụ');
+      };
+      if (window.KiotConfirm) {
+        window.KiotConfirm.show({
+          title: 'Xóa ảnh phụ',
+          message: 'Bạn có chắc chắn muốn xóa ảnh phụ này không? Thao tác này không thể hoàn tác.',
+          onConfirm: doRemove
+        });
+      } else if (confirm('Bạn có chắc chắn muốn xóa ảnh phụ này không?')) {
+        doRemove();
+      }
       return;
     }
 
@@ -479,28 +501,41 @@
 
   function handleEditItemDelete() {
     if (!editItemOldVal) return;
-    if (editItemType === 'vitri') {
-      availableLocations = availableLocations.filter(a => !ci(a, editItemOldVal));
-      selectedLocations = selectedLocations.filter(s => !ci(s, editItemOldVal));
-      renderLocationTags();
-      renderLocationDropdown($('#formViTriSearch')?.value || '');
+    const itemLabel = editItemType === 'vitri' ? 'vị trí' : 'thuộc tính';
+    const doDelete = () => {
+      if (editItemType === 'vitri') {
+        availableLocations = availableLocations.filter(a => !ci(a, editItemOldVal));
+        selectedLocations = selectedLocations.filter(s => !ci(s, editItemOldVal));
+        renderLocationTags();
+        renderLocationDropdown($('#formViTriSearch')?.value || '');
 
-      // Đồng bộ nếu có item ở menu lọc cột trái
-      const sideItem = $(`#dropdownViTri .kiot-ms-item[data-val="${CSS.escape ? CSS.escape(editItemOldVal) : editItemOldVal}"]`);
-      if (sideItem) sideItem.remove();
+        // Đồng bộ nếu có item ở menu lọc cột trái
+        const sideItem = $(`#dropdownViTri .kiot-ms-item[data-val="${CSS.escape ? CSS.escape(editItemOldVal) : editItemOldVal}"]`);
+        if (sideItem) sideItem.remove();
 
-      hide($('#hhEditItemOv'));
-      showToast('Đã xóa vị trí: ' + editItemOldVal);
-    } else {
-      delete knownAttributes[editItemOldVal];
-      $$('.hh-attr-row', attrRows).forEach(r => {
-        if (ci(getRowName(r), editItemOldVal)) {
-          setRowAttr(r, '');
-        }
+        hide($('#hhEditItemOv'));
+        showToast('Đã xóa vị trí: ' + editItemOldVal);
+      } else {
+        delete knownAttributes[editItemOldVal];
+        $$('.hh-attr-row', attrRows).forEach(r => {
+          if (ci(getRowName(r), editItemOldVal)) {
+            setRowAttr(r, '');
+          }
+        });
+        refreshAttrDropdowns();
+        hide($('#hhEditItemOv'));
+        showToast('Đã xóa thuộc tính: ' + editItemOldVal);
+      }
+    };
+
+    if (window.KiotConfirm) {
+      window.KiotConfirm.show({
+        title: `Xóa ${itemLabel}`,
+        message: `Bạn có chắc chắn muốn xóa ${itemLabel} <strong style="color: #111827;">${editItemOldVal}</strong> không? Thao tác này không thể hoàn tác.`,
+        onConfirm: doDelete
       });
-      refreshAttrDropdowns();
-      hide($('#hhEditItemOv'));
-      showToast('Đã xóa thuộc tính: ' + editItemOldVal);
+    } else if (confirm(`Bạn có chắc chắn muốn xóa ${itemLabel} "${editItemOldVal}" không?`)) {
+      doDelete();
     }
   }
 
@@ -1302,8 +1337,23 @@
       return;
     }
     if (e.target.closest('.del')) {
-      r.remove();
-      refreshAttrDropdowns();
+      const attrName = getRowName(r);
+      const msg = attrName
+        ? `Bạn có chắc chắn muốn xóa dòng thuộc tính <strong style="color: #111827;">${attrName}</strong> không? Thao tác này không thể hoàn tác.`
+        : 'Bạn có chắc chắn muốn xóa dòng thuộc tính này không? Thao tác này không thể hoàn tác.';
+      const doRemove = () => {
+        r.remove();
+        refreshAttrDropdowns();
+      };
+      if (window.KiotConfirm) {
+        window.KiotConfirm.show({
+          title: 'Xóa dòng thuộc tính',
+          message: msg,
+          onConfirm: doRemove
+        });
+      } else if (confirm(attrName ? `Bạn có chắc chắn muốn xóa dòng thuộc tính "${attrName}" không?` : 'Bạn có chắc chắn muốn xóa dòng thuộc tính này không?')) {
+        doRemove();
+      }
       return;
     }
     if (e.target.closest('.hh-quick') && !e.target.closest('.hh-quick').disabled) {

@@ -180,10 +180,16 @@
     </div>
 </div>
 
-<!-- Modal chung -->
+<!-- Modal chung (Chuẩn KiotViet, hiển thị chính giữa màn hình) -->
 <div class="ov" id="ov">
     <div class="modal-box" role="dialog" aria-modal="true">
-        <h3 id="mTitle"></h3>
+        <div class="modal-head">
+            <h3 id="mTitle" class="d-flex align-items-center gap-2 m-0">
+                <i class="bi bi-trash" id="mIcon" style="display: none; font-size: 19px;"></i>
+                <span id="mTitleText"></span>
+            </h3>
+            <button type="button" class="btn-close" id="mClose" aria-label="Đóng"></button>
+        </div>
         <div class="mb" id="mBody"></div>
         <div class="mf" id="mFoot"></div>
     </div>

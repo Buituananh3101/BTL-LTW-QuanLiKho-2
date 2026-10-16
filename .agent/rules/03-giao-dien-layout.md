@@ -8,23 +8,7 @@ Hệ thống sử dụng **duy nhất một Layout chính** cho toàn bộ các 
 - Các View con **tuyệt đối không khai báo lại `Layout = ...`**.
 
 ### 1.1. Khung trang trong `_Layout.cshtml`:
-```html
-<header class="app-header-fixed">
-    <partial name="_Header" />
-    <partial name="_MainMenu" />
-</header>
-
-<main role="main" class="app-main-body">
-    @RenderBody()
-</main>
-
-<partial name="_FloatingHelp" />
-
-<!-- Scripts chung -->
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-@await RenderSectionAsync("Scripts", required: false)
-```
+Gồm Topbar cố định (`_Header`, `_MainMenu`), vùng thân `@RenderBody()`, modal con dùng chung `<partial name="_KiotPromptModal" />` và các scripts `jquery`, `bootstrap`, `site.js` (chứa `KiotToast`, `KiotNumber`, `KiotPrompt`).
 
 ### 1.2. Các Layout ngoại lệ (Chỉ tạo khi khung trang khác biệt hoàn toàn):
 - `_LoginLayout.cshtml`: Dành riêng cho trang Đăng nhập (không có topbar và menu).
@@ -110,9 +94,14 @@ Hệ thống đóng gói các thành phần lặp lại thành các "mảnh ghé
    - Cú pháp: `KiotFilter.initColumnToggle('#colMenu', '#myTable', 'storage_key');`
 5. **Đánh dấu Sao Bookmark (`KiotFilter.bindStarToggle`)**:
    - Cú pháp: `KiotFilter.bindStarToggle('#myTable', '/Controller/ToggleFavorite', callback);`
-6. **Bộ lọc Dropdown Chọn Nhiều Multi-Select (`_KiotMultiSelectFilter.cshtml` & `KiotMultiSelectVM`)**:
-   - Razor: `<partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("Ncc", "ncc", "Nhà cung cấp", "Chọn NCC", true) { Items = ... }' />`
-   - Client JS: Hỗ trợ tìm kiếm con, tự động đảo hướng `KiotFilter.checkSidebarDropdownDirection`, render tag chips `KiotFilter.renderTagPills`.
-7. **Bộ lọc Trạng thái Chứng từ Checkbox (`_KiotStatusFilter.cshtml` & `KiotStatusFilterVM`)**:
-   - Razor: `<partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Trạng thái", "dotSt", options)' />`
+6. **Ô nhập số tự định dạng (`.kiot-num` / `KiotNumber`)**:
+   - Cú pháp: Input gắn class `kiot-num` tự format `1,000,000`, select all khi focus; đọc số sạch qua `KiotNumber.get('#input')`.
+7. **Khối gập mở Accordion (`.kiot-sec` / `KiotCollapsible`)**:
+   - Cấu trúc: Khối `.kiot-sec` chứa `.kiot-sec-h` (tiêu đề + icon `.kiot-chev`) và `.kiot-sec-b` (nội dung), click tự động đóng/mở.
+8. **Nút lưu đa năng Split Button (`.kiot-split`)**:
+   - Cấu trúc: Nút chính `.btn-main` + nút mũi tên `.caret` xổ menu `.kiot-menu`, tự đóng khi click ngoài.
+9. **Dropdown Combobox có bút chì ✎ sửa/xóa trực tiếp (`KiotFilter.initCombobox`)**:
+   - Cú pháp: `KiotFilter.initCombobox({ wrapSelector: '#wrap', items: [...], onEditItem: ... })` (vừa gõ tìm kiếm, vừa chọn, hover hiện icon bút chì ✎ sửa trực tiếp).
+10. **Modal con dùng chung (`_KiotPromptModal.cshtml` / `KiotPrompt`)**:
+    - Cú pháp: `KiotPrompt.open({ title, label, value, showDelete, onSave, onDelete })` (tạo mới nhanh / sửa ✎ / xóa dùng chung toàn hệ thống).
 

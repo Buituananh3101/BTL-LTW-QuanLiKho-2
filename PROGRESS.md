@@ -1,11 +1,11 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-16 – Chuẩn hóa & Tối ưu hóa Bộ lọc LeftMenu dùng chung thành Khối Lego (Shared Multi-Select & Status Filter Components) (Phiên 45)
+Cập nhật lần cuối: 2026-10-16 – Hoàn thiện Hiệu ứng Mượt mà (Smooth Animation) cho Toàn bộ Modal Xác nhận Xóa (Phiên 48)
 
 ---
 
 ## Đang làm
-- Chuẩn bị xây dựng Phân hệ Nhập kho: Soạn thảo tài liệu đặc tả `docs/specs/nhap-kho.md` từ khuôn mẫu `_mau-dac-ta.md`, chuẩn bị các ViewModel và `PhieuNhapController`.
+- Sẵn sàng bước tiếp theo: Lập đặc tả phân hệ Nhập kho theo chuẩn LEGO.
 
 ---
 
@@ -17,6 +17,45 @@ Cập nhật lần cuối: 2026-10-16 – Chuẩn hóa & Tối ưu hóa Bộ l�
 ---
 
 ## Đã xong
+- **Tối ưu hóa Trải nghiệm Hiển thị Mượt mà (Smooth Transitions & Animations) cho Toàn bộ Modal Xác nhận Xóa (Phiên 48)**:
+  - **Mục tiêu**: Loại bỏ triệt để hiện tượng giật cục / bật đột ngột khi mở hoặc đóng các modal xác nhận xóa và modal con toàn hệ thống (thay vì chuyển đổi cứng thô từ `display: none` sang `display: flex`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Nền mờ (Backdrop overlay)**: Cấu hình `transition: opacity 0.22s ease-out, visibility 0.22s ease-out, background-color 0.22s ease-out, backdrop-filter 0.22s ease-out;`. Khi mở, nền mờ dần từ trong suốt sang `rgba(15, 23, 42, 0.55)` kèm hiệu ứng nhạt mờ hậu cảnh (`backdrop-filter: blur(3px)`).
+    + **Khung Modal (Modal Box)**: Cấu hình chuyển động trượt và phóng nhẹ từ `transform: scale(0.92) translateY(12px); opacity: 0;` lên `transform: scale(1) translateY(0); opacity: 1;` sử dụng đường cong gia tốc cao cấp `cubic-bezier(0.16, 1, 0.3, 1)` trong 0.25s. Khi đóng, modal thu nhỏ và mờ dần trước khi chuyển `visibility: hidden; pointer-events: none;`.
+    + **Đồng bộ toàn bộ các stylesheet**:
+      * `site.css`: `.kiot-confirm-ov`, `.kiot-confirm-modal`, `.kiot-prompt-ov`, `.kiot-prompt-modal`.
+      * `kiem-kho.css`: `.ov`, `.modal-box` (modal xác nhận xóa dòng, xóa danh sách, cân bằng kho).
+      * `hang-hoa-form.css`: `.hh-ov`, `.hh-modal`, `#hhDeleteProductOv` (modal xóa hàng hóa, modal tạo/sửa).
+  - **Kiểm tra biên dịch**: `dotnet build -t:CoreCompile` 0 Errors, 0 Warnings mới.
+- **Chuẩn hóa Giao diện Xác nhận Xóa Giống Xóa Hàng Hóa & Hiển thị ở Center (Phiên 47)**:
+  - **Nhu cầu**: Thay thế triệt để các hộp thoại `alert()` và `confirm()` mặc định của trình duyệt sang giao diện Modal xác nhận xóa chuẩn KiotViet (giống modal "Xóa hàng hóa" `#hhDeleteProductOv`), đồng thời căn chỉnh vị trí hiển thị chính xác ở **chính giữa màn hình (Center)** cả theo chiều ngang và chiều dọc.
+  - **Giải pháp thực hiện**:
+    + **Thư viện Dùng chung Toàn hệ thống (`_KiotPromptModal.cshtml`, `site.css`, `site.js`)**:
+      - Bổ sung cấu trúc `kiotConfirmOv` vào `_KiotPromptModal.cshtml` (đã nhúng ở `_Layout.cshtml`) gồm: Header tiêu đề đỏ `#dc2626` kèm icon thùng rác và nút close `×`, Body chứa nội dung xác nhận, Footer nền xám nhạt `#f9fafb` với 2 nút "Bỏ qua" và "Đồng ý xóa".
+      - Xây dựng component `window.KiotConfirm` trong `site.js` với các phương thức `KiotConfirm.show({ title, message, confirmText, onConfirm })` và `KiotConfirm.alert(message, title)` thay thế hoàn toàn `confirm()` và `alert()`.
+      - Căn chỉnh CSS `.kiot-confirm-ov`: `align-items: center !important; justify-content: center !important;` hiển thị chính giữa viewport.
+    + **Kiểm kho (`_PhieuKiemKeForm.cshtml`, `phieu-kiem-ke-form.js`, `phieu-kiem-ke-index.js`, `kiem-kho.css`)**:
+      - Căn chỉnh `.ov` trong `kiem-kho.css`: gỡ bỏ `padding-top: 14vh`, đổi thành `align-items: center !important; justify-content: center !important;`.
+      - Nâng cấp `.modal-box`: header có nút close `mClose`, body chuẩn 20px 24px, footer `#f9fafb` chuẩn KiotViet.
+      - Xóa dòng hàng hóa kiểm kho: modal hiển thị chính giữa với thông điệp *"Bạn có chắc chắn muốn xóa hàng hóa [Tên] ([Mã])? Thao tác này không thể hoàn tác."*.
+      - Hủy phiếu kiểm (`phieu-kiem-ke-index.js`): Thay thế hoàn toàn `alert()` và `confirm()` bằng `KiotConfirm.alert()` và `KiotConfirm.show()`.
+    + **Hàng hóa (`hang-hoa-form.css`, `hang-hoa-form.js`)**:
+      - Căn chỉnh `#hhDeleteProductOv, #hhPromptOv, #hhEditItemOv`: `align-items: center !important;` giúp modal Xóa hàng hóa luôn nằm ở trung tâm màn hình.
+      - Kết nối các thao tác xóa ảnh chính, ảnh phụ, xóa vị trí/thuộc tính và xóa dòng thuộc tính qua `KiotConfirm.show()`.
+  - **Kiểm tra biên dịch**: `dotnet build` đạt 0 Errors, cú pháp JavaScript `node -c` 0 lỗi.
+- **Đóng gói Khối Form & Combobox Sửa Trực Tiếp Dùng Chung (Lego Form Components) (Phiên 46)**:
+  - **Mục tiêu & Nhu cầu**: Đóng gói các thành phần giao diện và tương tác phức tạp trong form Tạo hàng hóa thành các khối Lego dùng chung độc lập (Ô nhập số định dạng hàng nghìn, Khối accordion gập mở, Nút lưu split button, Dropdown combobox vừa gõ vừa chọn có icon bút chì ✎ sửa/xóa trực tiếp, Modal con tạo mới nhanh / sửa trực tiếp dùng chung).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Modal Con Dùng Chung (`_KiotPromptModal.cshtml`)**: Tạo `Views/Shared/_KiotPromptModal.cshtml` và nhúng trực tiếp vào `Views/Shared/_Layout.cshtml`. Phục vụ tạo mới nhanh hoặc sửa/xóa tại chỗ cho bất kỳ danh mục nào mà không cần tạo modal HTML riêng cho từng trang.
+    + **Thư viện JavaScript Tiện ích Form (`site.js`)**:
+      - `KiotNumber`: Tự động định dạng số hàng nghìn `1,000,000`, chặn ký tự chữ, tự động bôi đen (select all) khi focus, trả về số sạch qua `KiotNumber.get()`.
+      - `KiotCollapsible`: Tự động gập mở khối `.kiot-sec` khi click vào `.kiot-sec-h`, xoay icon mũi tên `.kiot-chev`.
+      - `KiotSplitButton`: Tự động mở/đóng menu tùy chọn lưu `.kiot-split`, tự đóng khi click ngoài.
+      - `KiotPrompt`: Điều khiển modal con toàn hệ thống qua JavaScript 1 dòng: `KiotPrompt.open({ title, label, value, showDelete, onSave, onDelete })`.
+    + **Thư viện Dropdown Combobox (`kiot-filter.js`)**:
+      - `KiotFilter.initCombobox`: Đóng gói combobox vừa gõ tìm kiếm vừa chọn, hiển thị icon cây bút chì ✎ khi hover để sửa trực tiếp tại chỗ, hỗ trợ cả chọn đơn và chọn nhiều tag chips.
+    + **CSS Hệ thống Dùng chung (`site.css`)**: Bổ sung đầy đủ styling cho `.kiot-sec`, `.kiot-num`, `.kiot-split`, `.kiot-combobox-*`, `.kiot-item-edit-btn`, `.kiot-prompt-*`.
+  - **Kiểm tra biên dịch**: `dotnet build` đạt 0 Errors.
 - **Chuẩn hóa & Tối ưu hóa Bộ lọc LeftMenu dùng chung thành Khối Lego (Phiên 45)**:
   - **Mục tiêu & Nhu cầu**: Giải quyết triệt để hiện tượng lặp lại mã HTML/Razor và JS trên Sidebar bộ lọc (LeftMenu Filter) giữa các màn hình Danh sách Hàng hóa, Kiểm kho và các phân hệ tiếp theo (Nhập kho, Xuất kho).
   - **Giải pháp & Kết quả thực hiện**:
@@ -337,6 +376,25 @@ Cập nhật lần cuối: 2026-10-16 – Chuẩn hóa & Tối ưu hóa Bộ l�
 ---
 
 ## Nhật ký phiên
+- **2026-10-16 (Phiên 48 - Chiều)**:
+  - Tối ưu hóa hiệu ứng mượt mà (Smooth Animation & Transition) cho toàn bộ modal xác nhận xóa và modal con:
+    - Loại bỏ hiện tượng hiển thị đột ngột (giật cục do `display: none` -> `display: flex`).
+    - Nền mờ (Backdrop overlay) chuyển màu mềm mại từ trong suốt sang `rgba(15, 23, 42, 0.55)` kèm `backdrop-filter: blur(3px)` trong 0.22s.
+    - Khung Modal (Modal Box) trượt và phóng nhẹ từ `scale(0.92) translateY(12px)` sang `scale(1) translateY(0)` với đường cong cao cấp `cubic-bezier(0.16, 1, 0.3, 1)` trong 0.25s; khi đóng sẽ thu nhỏ và mờ dần êm ái.
+    - Đồng bộ cho cả 3 stylesheet: `site.css` (`.kiot-confirm-ov`, `.kiot-prompt-ov`), `kiem-kho.css` (`.ov`, `.modal-box`), `hang-hoa-form.css` (`.hh-ov`, `.hh-modal`, `#hhDeleteProductOv`).
+    - Biên dịch kiểm tra: `dotnet build -t:CoreCompile` 0 Errors, 0 Warnings mới.
+- **2026-10-16 (Phiên 47 - Chiều)**:
+  - Bổ sung xác nhận trước khi xóa (Confirm Delete) cho toàn bộ các thao tác xóa:
+    - Kiểm kho: Khi nhấp nút thùng rác xóa dòng hàng hóa khỏi lưới kiểm kho (`phieu-kiem-ke-form.js`, `_PhieuKiemKeForm.cshtml`, `kiem-kho.css`), hiển thị modal xác nhận KiotViet (`Xác nhận xóa hàng hóa`) với thông tin sản phẩm và 2 lựa chọn "Bỏ qua" và "Đồng ý xóa" (nút đỏ). Hỗ trợ phím Escape và nút close đóng nhanh modal.
+    - Hàng hóa: Thêm xác nhận `confirm()` khi xóa ảnh chính, xóa ảnh phụ, xóa vị trí/thuộc tính trong modal con 3 và xóa dòng thuộc tính (`hang-hoa-form.js`).
+    - Biên dịch kiểm tra: `dotnet build` đạt 0 Errors, cú pháp JavaScript `node -c` 0 lỗi.
+- **2026-10-16 (Phiên 46 - Trưa)**:
+  - Đóng gói toàn diện các khối Form & Combobox Sửa Trực Tiếp thành Mảnh ghép Lego dùng chung:
+    - Tạo `_KiotPromptModal.cshtml` nhúng vào `_Layout.cshtml` + điều khiển qua `window.KiotPrompt.open({ title, label, value, showDelete, onSave, onDelete })` tạo mới nhanh / sửa ✎ / xóa tại chỗ.
+    - Xây dựng `window.KiotNumber` tự format số phân cách hàng nghìn `1,000,000`, select all khi focus; `KiotCollapsible` tự động gập mở accordion `.kiot-sec`; `KiotSplitButton` mở/đóng menu split button.
+    - Xây dựng `KiotFilter.initCombobox` đóng gói combobox vừa gõ vừa chọn có icon bút chì ✎ sửa item trực tiếp.
+    - Cập nhật toàn diện `site.css` các class `.kiot-sec`, `.kiot-num`, `.kiot-split`, `.kiot-combobox-*`, `.kiot-prompt-*`.
+    - Biên dịch kiểm tra: `dotnet build` đạt 0 Errors.
 - **2026-10-16 (Phiên 45 - Trưa)**:
   - Tối ưu hóa & Đóng gói toàn diện LeftMenu Filter Sidebar thành các Component dùng chung (Lego Block):
     - ViewModels: Tạo `KiotMultiSelectVM.cs` & `KiotStatusFilterVM.cs` trong `ViewModels/Common/`.

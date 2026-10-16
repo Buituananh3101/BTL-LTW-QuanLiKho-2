@@ -562,15 +562,23 @@
                 const status = btn.dataset.status || '';
 
                 if (status === 'DA_DIEU_CHINH') {
-                    alert(`Phiếu kiểm ${code} đã cân bằng kho, không được phép hủy theo quy định.`);
+                    if (window.KiotConfirm) {
+                        window.KiotConfirm.alert(`Phiếu kiểm <strong>${code}</strong> đã cân bằng kho, không được phép hủy theo quy định.`, 'Cảnh báo');
+                    } else {
+                        alert(`Phiếu kiểm ${code} đã cân bằng kho, không được phép hủy theo quy định.`);
+                    }
                     return;
                 }
                 if (status === 'HUY') {
-                    alert(`Phiếu kiểm ${code} đã được hủy trước đó.`);
+                    if (window.KiotConfirm) {
+                        window.KiotConfirm.alert(`Phiếu kiểm <strong>${code}</strong> đã được hủy trước đó.`, 'Thông báo');
+                    } else {
+                        alert(`Phiếu kiểm ${code} đã được hủy trước đó.`);
+                    }
                     return;
                 }
 
-                if (confirm(`Bạn có chắc chắn muốn hủy phiếu kiểm ${code}?\nPhiếu tạm sau khi hủy sẽ không thể mở lại. Tồn kho không bị ảnh hưởng.`)) {
+                const doCancel = () => {
                     fetch(`${cancelUrl}/${id}`, { method: 'POST' })
                     .then(r => r.json())
                     .then(res => {
@@ -582,6 +590,17 @@
                         }
                     })
                     .catch(() => toast('Lỗi kết nối máy chủ.'));
+                };
+
+                if (window.KiotConfirm) {
+                    window.KiotConfirm.show({
+                        title: 'Hủy phiếu kiểm kho',
+                        message: `Bạn có chắc chắn muốn hủy phiếu kiểm <strong style="color: #111827;">${code}</strong>? Thao tác này không thể hoàn tác.<br><span class="text-muted small">Phiếu tạm sau khi hủy sẽ không thể mở lại. Tồn kho không bị ảnh hưởng.</span>`,
+                        confirmText: 'Đồng ý hủy',
+                        onConfirm: doCancel
+                    });
+                } else if (confirm(`Bạn có chắc chắn muốn hủy phiếu kiểm ${code}?\nPhiếu tạm sau khi hủy sẽ không thể mở lại. Tồn kho không bị ảnh hưởng.`)) {
+                    doCancel();
                 }
             };
         });

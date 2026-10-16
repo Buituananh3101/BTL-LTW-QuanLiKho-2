@@ -65,6 +65,7 @@
   - Nút **Chọn theo nhóm**: Modal chọn nhóm nạp hàng loạt sản phẩm Chưa kiểm.
   - 4 Tab lọc: Tất cả, Khớp, Lệch, Chưa kiểm (hiển thị số lượng trên tab).
   - Lưới hàng hóa: `table-layout: fixed;`, cột Tên hàng cố định 280px tự xuống dòng.
+  - **Xác nhận xóa dòng hàng**: Nhấp icon thùng rác kích hoạt modal xác nhận KiotViet ("Bỏ qua" / "Đồng ý xóa"), ngăn xóa nhầm dữ liệu.
 - **Cột phải (Panel thông tin & Thao tác)**:
   - Nút gập mở panel F4. Bộ chọn Ngày giờ `#fDate` & `#dtPop` không chớp tắt, đóng bằng Escape.
   - 2 Nút hành động đáy: **Lưu tạm (F9)** và **Cân bằng kho (F10)**.

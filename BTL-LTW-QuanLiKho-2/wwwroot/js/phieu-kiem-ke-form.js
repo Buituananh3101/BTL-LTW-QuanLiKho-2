@@ -29,6 +29,7 @@
     }
 
     const fmt = n => (Number(n) || 0).toLocaleString('vi-VN');
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const p2 = n => String(n).padStart(2, '0');
     const dDate = d => `${p2(d.getDate())}/${p2(d.getMonth() + 1)}/${d.getFullYear()}`;
     const dTime = d => `${p2(d.getHours())}:${p2(d.getMinutes())}`;
@@ -408,6 +409,7 @@
                 $('#bDone')?.click();
             } else if (e.key === 'Escape') {
                 $$('.pop.show').forEach(p => p.classList.remove('show'));
+                $('#ov')?.classList.remove('show');
             }
         };
 
@@ -598,10 +600,31 @@
             if (e.target.id === 'tpl') downloadSample();
             const del = e.target.closest('[data-del]');
             if (del && !isReadOnly) {
-                const i = parseInt(del.closest('tr').dataset.i);
-                FM.lines.splice(i, 1);
-                FM.dirty = true;
-                refreshAll();
+                const tr = del.closest('tr');
+                const i = parseInt(tr.dataset.i);
+                const l = FM.lines[i];
+                if (!l) return;
+
+                modal(
+                    'Xóa hàng hóa',
+                    `<div style="font-size: 14.5px; color: #374151; line-height: 1.55;">
+                        Bạn có chắc chắn muốn xóa hàng hóa <strong style="color: #111827;">${esc(l.name)}</strong>${l.code ? ` (<span style="color: #2563eb; font-weight: 500;">${esc(l.code)}</span>)` : ''}? Thao tác này không thể hoàn tác.
+                    </div>`,
+                    [
+                        { label: 'Bỏ qua', cls: 'btn' },
+                        {
+                            label: 'Đồng ý xóa',
+                            cls: 'btn danger',
+                            fn: () => {
+                                FM.lines.splice(i, 1);
+                                FM.dirty = true;
+                                refreshAll();
+                                toast(`Đã xóa "${l.name}" khỏi phiếu kiểm.`);
+                            }
+                        }
+                    ],
+                    true
+                );
             }
         });
 
@@ -804,8 +827,16 @@
     }
 
     /* ===== MODAL & TOAST TIỆN ÍCH ===== */
-    function modal(title, bodyHTML, buttons) {
-        $('#mTitle').textContent = title;
+    function modal(title, bodyHTML, buttons, isDanger = false) {
+        const titleText = $('#mTitleText');
+        const iconEl = $('#mIcon');
+        const titleEl = $('#mTitle');
+        if (titleText) titleText.textContent = title;
+        else if (titleEl) titleEl.textContent = title;
+        if (iconEl) iconEl.style.display = isDanger ? 'inline-block' : 'none';
+        if (titleEl) {
+            titleEl.style.color = isDanger ? '#dc2626' : '#111827';
+        }
         $('#mBody').innerHTML = bodyHTML;
         const mf = $('#mFoot');
         mf.innerHTML = '';
@@ -826,6 +857,7 @@
     $('#ov').onclick = e => {
         if (e.target === $('#ov')) $('#ov').classList.remove('show');
     };
+    $('#mClose')?.addEventListener('click', () => $('#ov')?.classList.remove('show'));
 
     function toast(msg) {
         const t = $('#toast');
