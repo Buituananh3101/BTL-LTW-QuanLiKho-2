@@ -638,9 +638,9 @@
 
     /* ===== TOAST THÔNG BÁO DÙNG CHUNG ===== */
     let toastTimer;
-    function toast(msg) {
+    function toast(msg, type) {
         if (window.KiotToast) {
-            KiotToast.info(msg);
+            window.KiotToast.show(msg, type || 'info');
             return;
         }
         const t = $('#toast');

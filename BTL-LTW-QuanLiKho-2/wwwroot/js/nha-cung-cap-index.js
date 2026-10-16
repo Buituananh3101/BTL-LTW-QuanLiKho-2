@@ -237,8 +237,8 @@
                 state.trangThai = '';
             } else if (val === 'active' || val === 'HOAT_DONG') {
                 state.trangThai = 'HOAT_DONG';
-            } else if (val === 'off' || val === 'NGUNG_HOAT_DONG') {
-                state.trangThai = 'NGUNG_HOAT_DONG';
+            } else if (val === 'off' || val === 'NGUNG_HOAT_DONG' || val === 'NGUNG_GIAO_DICH') {
+                state.trangThai = 'NGUNG_GIAO_DICH';
             } else {
                 state.trangThai = val;
             }
@@ -1162,7 +1162,7 @@
             tenCongTy: $('#nccTenCongTy').val().trim(),
             maSoThue: $('#nccMaSoThue').val().trim(),
             soCccd: $('#nccSoCccd').val().trim(),
-            trangThai: $('#nccTrangThaiSwitch').is(':checked') ? 'HOAT_DONG' : 'NGUNG_HOAT_DONG'
+            trangThai: $('#nccTrangThaiSwitch').is(':checked') ? 'HOAT_DONG' : 'NGUNG_GIAO_DICH'
         };
 
         const isEdit = id > 0;
@@ -1278,27 +1278,81 @@
         hideModal('nccModalOv');
     });
 
-    function toggleSupplierStatus(id) {
+    function openStatusConfirmModal(id, name, currentStatus) {
         if (!id) return;
+        const isCurrentlyActive = (currentStatus === 'HOAT_DONG');
+        $('#statusNccId').val(id);
+
+        const displayName = name || 'nhà cung cấp';
+        if (isCurrentlyActive) {
+            // Xác nhận Ngừng hoạt động
+            $('#statusNccTitle').css('color', '#d97706');
+            $('#statusNccTitleText').text('Ngừng hoạt động nhà cung cấp');
+            $('#statusNccIcon').attr('class', 'bi bi-slash-circle text-warning');
+            $('#statusNccConfirmMsg').html(`Bạn có chắc chắn muốn chuyển nhà cung cấp <strong style="color: #111827;">${displayName}</strong> sang trạng thái <strong style="color: #d97706;">Ngừng hoạt động</strong>?`);
+            $('#btnConfirmStatusNcc').css({
+                background: '#d97706',
+                borderColor: '#d97706',
+                color: '#fff'
+            }).text('Đồng ý');
+        } else {
+            // Xác nhận Kích hoạt lại
+            $('#statusNccTitle').css('color', '#0070F0');
+            $('#statusNccTitleText').text('Kích hoạt lại nhà cung cấp');
+            $('#statusNccIcon').attr('class', 'bi bi-check2-circle text-primary');
+            $('#statusNccConfirmMsg').html(`Bạn có chắc chắn muốn cho nhà cung cấp <strong style="color: #111827;">${displayName}</strong> <strong style="color: #0070F0;">hoạt động trở lại</strong>?`);
+            $('#btnConfirmStatusNcc').css({
+                background: '#0070F0',
+                borderColor: '#0070F0',
+                color: '#fff'
+            }).text('Đồng ý');
+        }
+
+        showModal('nccStatusConfirmOv');
+    }
+
+    $(document).on('click', '.btn-toggle-status-ncc', function (e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        const status = $(this).data('status') || ($(this).find('span').text().includes('Ngừng') ? 'HOAT_DONG' : 'NGUNG_GIAO_DICH');
+        let name = $(this).data('name');
+        if (!name) {
+            const $row = $(this).closest('tr.tbl-row');
+            if ($row.length) name = $row.find('td[data-col="ten"]').text().trim();
+            else {
+                const $detailRow = $(this).closest('tr.ncc-detail-tr');
+                if ($detailRow.length) {
+                    const rowId = $detailRow.attr('id')?.replace('nccDetailRow_', '');
+                    name = $(`tr.ncc-row[data-id="${rowId}"] td[data-col="ten"]`).text().trim();
+                }
+            }
+        }
+        openStatusConfirmModal(id, name, status);
+    });
+
+    $('#btnConfirmStatusNcc').on('click', function () {
+        const id = parseInt($('#statusNccId').val()) || 0;
+        if (!id) return;
+        const $btn = $(this);
+        $btn.prop('disabled', true);
+
         $.ajax({
             url: `/NhaCungCap/ToggleStatus?id=${id}`,
             type: 'POST',
             success: function (res) {
+                $btn.prop('disabled', false);
+                hideModal('nccStatusConfirmOv');
                 if (res.success) {
                     if (window.KiotToast) window.KiotToast.success(res.message);
                     loadTable();
                 }
             },
             error: function (xhr) {
+                $btn.prop('disabled', false);
+                hideModal('nccStatusConfirmOv');
                 if (window.KiotToast) window.KiotToast.error(xhr.responseJSON?.message || 'Không thể đổi trạng thái.');
             }
         });
-    }
-
-    $(document).on('click', '.btn-toggle-status-ncc', function (e) {
-        e.preventDefault();
-        const id = $(this).data('id');
-        toggleSupplierStatus(id);
     });
 
     /* ==========================================================================

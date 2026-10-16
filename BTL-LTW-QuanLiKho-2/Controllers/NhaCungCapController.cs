@@ -229,7 +229,9 @@ public class NhaCungCapController : BaseKhoController
                 TenCongTy = string.IsNullOrWhiteSpace(form.TenCongTy) ? null : form.TenCongTy.Trim(),
                 MaSoThue = string.IsNullOrWhiteSpace(form.MaSoThue) ? null : form.MaSoThue.Trim(),
                 SoCccd = string.IsNullOrWhiteSpace(form.SoCccd) ? null : form.SoCccd.Trim(),
-                TrangThai = string.IsNullOrWhiteSpace(form.TrangThai) ? "HOAT_DONG" : form.TrangThai,
+                TrangThai = (string.IsNullOrWhiteSpace(form.TrangThai) || form.TrangThai == "HOAT_DONG" || form.TrangThai == "ACTIVE")
+                    ? "HOAT_DONG"
+                    : "NGUNG_GIAO_DICH",
                 NgayTao = DateTime.Now,
                 NguoiTao = User.Identity?.Name ?? "Admin"
             };
@@ -298,7 +300,9 @@ public class NhaCungCapController : BaseKhoController
         ncc.SoCccd = string.IsNullOrWhiteSpace(form.SoCccd) ? null : form.SoCccd.Trim();
         if (!string.IsNullOrWhiteSpace(form.TrangThai))
         {
-            ncc.TrangThai = form.TrangThai;
+            ncc.TrangThai = (form.TrangThai == "HOAT_DONG" || form.TrangThai == "ACTIVE")
+                ? "HOAT_DONG"
+                : "NGUNG_GIAO_DICH";
         }
 
         await _context.SaveChangesAsync();
@@ -332,17 +336,25 @@ public class NhaCungCapController : BaseKhoController
     [HttpPost]
     public async Task<IActionResult> ToggleStatus(int id)
     {
-        var ncc = await _context.DonViCapHangs.FindAsync(id);
-        if (ncc == null) return NotFound(new { message = "Không tìm thấy nhà cung cấp." });
+        try
+        {
+            var ncc = await _context.DonViCapHangs.FindAsync(id);
+            if (ncc == null) return NotFound(new { message = "Không tìm thấy nhà cung cấp." });
 
-        ncc.TrangThai = (ncc.TrangThai == "HOAT_DONG") ? "NGUNG_HOAT_DONG" : "HOAT_DONG";
-        await _context.SaveChangesAsync();
+            ncc.TrangThai = (ncc.TrangThai == "HOAT_DONG") ? "NGUNG_GIAO_DICH" : "HOAT_DONG";
+            await _context.SaveChangesAsync();
 
-        string msg = ncc.TrangThai == "HOAT_DONG"
-            ? $"Đã kích hoạt lại nhà cung cấp \"{ncc.TenDonVi}\"."
-            : $"Đã chuyển nhà cung cấp \"{ncc.TenDonVi}\" sang trạng thái Ngừng hoạt động.";
+            string msg = ncc.TrangThai == "HOAT_DONG"
+                ? $"Đã kích hoạt lại nhà cung cấp \"{ncc.TenDonVi}\"."
+                : $"Đã chuyển nhà cung cấp \"{ncc.TenDonVi}\" sang trạng thái Ngừng hoạt động.";
 
-        return Json(new { success = true, trangThai = ncc.TrangThai, message = msg });
+            return Json(new { success = true, trangThai = ncc.TrangThai, message = msg });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lỗi khi chuyển trạng thái nhà cung cấp id={Id}", id);
+            return StatusCode(500, new { success = false, message = "Lỗi khi cập nhật trạng thái: " + ex.Message });
+        }
     }
 
     // 9. Tạo nhanh Nhóm nhà cung cấp
@@ -449,7 +461,7 @@ public class NhaCungCapController : BaseKhoController
             }
         }
 
-        // 3. Lọc theo Trạng thái (HOAT_DONG / NGUNG_HOAT_DONG hoặc active / off)
+        // 3. Lọc theo Trạng thái (HOAT_DONG / NGUNG_GIAO_DICH / NGUNG_HOAT_DONG hoặc active / off)
         if (!string.IsNullOrWhiteSpace(filter.TrangThai))
         {
             string st = filter.TrangThai.Trim().ToUpper();
@@ -457,9 +469,9 @@ public class NhaCungCapController : BaseKhoController
             {
                 query = query.Where(d => d.TrangThai == "HOAT_DONG");
             }
-            else if (st == "NGUNG_HOAT_DONG" || st == "OFF")
+            else if (st == "NGUNG_HOAT_DONG" || st == "NGUNG_GIAO_DICH" || st == "OFF")
             {
-                query = query.Where(d => d.TrangThai == "NGUNG_HOAT_DONG");
+                query = query.Where(d => d.TrangThai == "NGUNG_GIAO_DICH" || d.TrangThai == "NGUNG_HOAT_DONG");
             }
             else if (st != "ALL")
             {

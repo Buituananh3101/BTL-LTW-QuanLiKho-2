@@ -33,7 +33,11 @@
   };
 
   let toastTimer;
-  function showToast(msg) {
+  function showToast(msg, type) {
+    if (window.KiotToast) {
+      window.KiotToast.show(msg, type || 'success');
+      return;
+    }
     const t = $('#hhToast');
     if (!t) return;
     t.textContent = msg;

@@ -284,3 +284,31 @@
     </div>
   </div>
 </div>
+
+<!-- ========================================================================
+     MODAL CON 4: XÁC NHẬN CHUYỂN TRẠNG THÁI (NGỪNG HOẠT ĐỘNG / KÍCH HOẠT LẠI)
+     ======================================================================== -->
+<div class="hh-ov" id="nccStatusConfirmOv">
+  <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="statusNccTitle" style="max-width: 480px;">
+    <div class="hh-m-head" style="border-bottom: 1px solid var(--hh-line-l); padding-bottom: 12px;">
+      <h2 id="statusNccTitle" style="color: #d97706; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 18px;">
+        <i class="bi bi-slash-circle" id="statusNccIcon" style="font-size: 20px;"></i>
+        <span id="statusNccTitleText">Ngừng hoạt động nhà cung cấp</span>
+      </h2>
+      <button type="button" class="hh-x" data-close="nccStatusConfirmOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div class="hh-m-body" style="padding: 20px 24px; font-size: 14.5px; line-height: 1.5;">
+      <input type="hidden" id="statusNccId" value="0" />
+      <div id="statusNccConfirmMsg" style="color: #374151;">
+        Bạn có chắc chắn muốn chuyển nhà cung cấp <strong id="statusNccName" style="color: #111827;"></strong> sang trạng thái <strong id="statusNccTargetText" style="color: #d97706;">Ngừng hoạt động</strong>?
+      </div>
+    </div>
+    <div class="hh-m-foot" style="background: #f9fafb; border-top: 1px solid var(--hh-line-l); padding: 12px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+      <button type="button" class="hh-btn" data-close="nccStatusConfirmOv">Bỏ qua</button>
+      <button type="button" class="hh-btn" id="btnConfirmStatusNcc" style="background: #d97706; color: #fff; border: 1px solid #d97706; font-weight: 500;">Đồng ý</button>
+    </div>
+  </div>
+</div>
+

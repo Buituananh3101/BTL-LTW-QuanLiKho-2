@@ -17,198 +17,204 @@
     <div class="ncc-detail-content p-3 bg-white">
         <!-- ================= TAB 1: THÔNG TIN ================= -->
         <div class="ncc-tab-pane ncc-tab-info">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                    <h4 class="fw-bold mb-1 d-flex align-items-center gap-2">
-                        <span>@ncc.TenDonVi</span>
-                        <span class="text-muted fs-6 fw-normal">(@ncc.MaNcc)</span>
-                        @if (ncc.TrangThai == "HOAT_DONG")
-                        {
-                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill fs-7 py-1 px-2">Đang hoạt động</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill fs-7 py-1 px-2">Ngừng hoạt động</span>
-                        }
-                    </h4>
-                    <div class="text-muted small d-flex flex-wrap gap-3 mt-1">
-                        <span>Người tạo: <strong class="text-dark">@(string.IsNullOrWhiteSpace(ncc.NguoiTao) ? "Admin" : ncc.NguoiTao)</strong></span>
-                        <span>Ngày tạo: <strong class="text-dark">@ncc.NgayTao.ToString("dd/MM/yyyy HH:mm")</strong></span>
-                        <span>Nhóm NCC: <strong class="text-dark">@(string.IsNullOrWhiteSpace(ncc.TenNhomNcc) ? "Chưa có nhóm" : ncc.TenNhomNcc)</strong></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Grid 3 khối thông tin chi tiết -->
-            <div class="row g-3 mb-3">
-                <!-- Khối 1: Thông tin liên lạc -->
-                <div class="col-md-4">
-                    <div class="border rounded-2 p-3 h-100 bg-light-subtle">
-                        <div class="fw-semibold text-secondary small mb-2 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
-                            <i class="bi bi-geo-alt me-1 text-primary"></i> Thông tin liên hệ
-                        </div>
-                        <div class="d-flex flex-column gap-2 small">
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Điện thoại:</span>
-                                <span class="fw-semibold text-dark">@(string.IsNullOrWhiteSpace(ncc.DienThoai) ? "---" : ncc.DienThoai)</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Email:</span>
-                                <span class="text-dark">@(string.IsNullOrWhiteSpace(ncc.Email) ? "---" : ncc.Email)</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Địa chỉ:</span>
-                                <span class="text-dark text-end" style="max-width: 60%;">@(string.IsNullOrWhiteSpace(ncc.DiaChi) ? "---" : ncc.DiaChi)</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Khu vực:</span>
-                                <span class="text-dark text-end">@(string.IsNullOrWhiteSpace(ncc.KhuVuc) ? "---" : ncc.KhuVuc)</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Phường/Xã:</span>
-                                <span class="text-dark text-end">@(string.IsNullOrWhiteSpace(ncc.PhuongXa) ? "---" : ncc.PhuongXa)</span>
-                            </div>
+            <div class="ncc-detail-fixed-wrap">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h4 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                            <span>@ncc.TenDonVi</span>
+                            <span class="text-muted fs-6 fw-normal">(@ncc.MaNcc)</span>
+                            @if (ncc.TrangThai == "HOAT_DONG")
+                            {
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill fs-7 py-1 px-2">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill fs-7 py-1 px-2">Ngừng hoạt động</span>
+                            }
+                        </h4>
+                        <div class="text-muted small d-flex flex-wrap gap-3 mt-1">
+                            <span>Người tạo: <strong class="text-dark">@(string.IsNullOrWhiteSpace(ncc.NguoiTao) ? "Admin" : ncc.NguoiTao)</strong></span>
+                            <span>Ngày tạo: <strong class="text-dark">@ncc.NgayTao.ToString("dd/MM/yyyy HH:mm")</strong></span>
+                            <span>Nhóm NCC: <strong class="text-dark">@(string.IsNullOrWhiteSpace(ncc.TenNhomNcc) ? "Chưa có nhóm" : ncc.TenNhomNcc)</strong></span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Khối 2: Thông tin xuất hóa đơn -->
-                <div class="col-md-4">
-                    <div class="border rounded-2 p-3 h-100 bg-light-subtle">
-                        <div class="fw-semibold text-secondary small mb-2 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
-                            <i class="bi bi-receipt me-1 text-primary"></i> Thông tin xuất hóa đơn
+                <!-- Grid 3 khối thông tin chi tiết -->
+                <div class="ncc-attr-grid">
+                    <!-- Khối 1: Thông tin liên lạc -->
+                    <div class="ncc-attr-col">
+                        <div class="border rounded-2 p-3 h-100 bg-light-subtle">
+                            <div class="fw-semibold text-secondary small mb-2 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                                <i class="bi bi-geo-alt me-1 text-primary"></i> Thông tin liên hệ
+                            </div>
+                            <div class="d-flex flex-column gap-2 small">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Điện thoại:</span>
+                                    <span class="fw-semibold text-dark">@(string.IsNullOrWhiteSpace(ncc.DienThoai) ? "---" : ncc.DienThoai)</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Email:</span>
+                                    <span class="text-dark">@(string.IsNullOrWhiteSpace(ncc.Email) ? "---" : ncc.Email)</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Địa chỉ:</span>
+                                    <span class="text-dark text-end" style="max-width: 60%;">@(string.IsNullOrWhiteSpace(ncc.DiaChi) ? "---" : ncc.DiaChi)</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Khu vực:</span>
+                                    <span class="text-dark text-end">@(string.IsNullOrWhiteSpace(ncc.KhuVuc) ? "---" : ncc.KhuVuc)</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Phường/Xã:</span>
+                                    <span class="text-dark text-end">@(string.IsNullOrWhiteSpace(ncc.PhuongXa) ? "---" : ncc.PhuongXa)</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="d-flex flex-column gap-2 small">
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Tên công ty:</span>
-                                <span class="text-dark fw-semibold text-end" style="max-width: 65%;">@(string.IsNullOrWhiteSpace(Model.TenCongTy) ? "---" : Model.TenCongTy)</span>
+                    </div>
+
+                    <!-- Khối 2: Thông tin xuất hóa đơn -->
+                    <div class="ncc-attr-col">
+                        <div class="border rounded-2 p-3 h-100 bg-light-subtle">
+                            <div class="fw-semibold text-secondary small mb-2 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                                <i class="bi bi-receipt me-1 text-primary"></i> Thông tin xuất hóa đơn
                             </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Mã số thuế:</span>
-                                <span class="text-dark fw-semibold">@(string.IsNullOrWhiteSpace(Model.MaSoThue) ? "---" : Model.MaSoThue)</span>
+                            <div class="d-flex flex-column gap-2 small">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Tên công ty:</span>
+                                    <span class="text-dark fw-semibold text-end" style="max-width: 65%;">@(string.IsNullOrWhiteSpace(Model.TenCongTy) ? "---" : Model.TenCongTy)</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Mã số thuế:</span>
+                                    <span class="text-dark fw-semibold">@(string.IsNullOrWhiteSpace(Model.MaSoThue) ? "---" : Model.MaSoThue)</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Số CMND/CCCD:</span>
+                                    <span class="text-dark">@(string.IsNullOrWhiteSpace(Model.SoCccd) ? "---" : Model.SoCccd)</span>
+                                </div>
                             </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Số CMND/CCCD:</span>
-                                <span class="text-dark">@(string.IsNullOrWhiteSpace(Model.SoCccd) ? "---" : Model.SoCccd)</span>
+                        </div>
+                    </div>
+
+                    <!-- Khối 3: Ghi chú -->
+                    <div class="ncc-attr-col">
+                        <div class="border rounded-2 p-3 h-100 bg-light-subtle">
+                            <div class="fw-semibold text-secondary small mb-2 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                                <i class="bi bi-chat-left-text me-1 text-primary"></i> Ghi chú
+                            </div>
+                            <div class="small text-muted" style="white-space: pre-wrap; min-height: 80px;">
+                                @(string.IsNullOrWhiteSpace(Model.GhiChu) ? "Không có ghi chú nào cho nhà cung cấp này." : Model.GhiChu)
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Khối 3: Ghi chú -->
-                <div class="col-md-4">
-                    <div class="border rounded-2 p-3 h-100 bg-light-subtle">
-                        <div class="fw-semibold text-secondary small mb-2 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
-                            <i class="bi bi-chat-left-text me-1 text-primary"></i> Ghi chú
-                        </div>
-                        <div class="small text-muted" style="white-space: pre-wrap; min-height: 80px;">
-                            @(string.IsNullOrWhiteSpace(Model.GhiChu) ? "Không có ghi chú nào cho nhà cung cấp này." : Model.GhiChu)
-                        </div>
+                <!-- Footer Action Bar -->
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top ncc-detail-footer">
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-danger btn-sm btn-delete-ncc" data-id="@ncc.MaDonViCapHang" data-name="@ncc.TenDonVi">
+                            <i class="bi bi-trash me-1"></i> Xóa
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm btn-toggle-status-ncc" data-id="@ncc.MaDonViCapHang" data-status="@ncc.TrangThai" data-name="@ncc.TenDonVi">
+                            <i class="bi @(ncc.TrangThai == "HOAT_DONG" ? "bi-slash-circle" : "bi-check2-circle") me-1"></i>
+                            <span>@(ncc.TrangThai == "HOAT_DONG" ? "Ngừng hoạt động" : "Kích hoạt lại")</span>
+                        </button>
                     </div>
-                </div>
-            </div>
-
-            <!-- Footer Action Bar -->
-            <div class="d-flex justify-content-between align-items-center pt-3 border-top ncc-detail-footer">
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-outline-danger btn-sm btn-delete-ncc" data-id="@ncc.MaDonViCapHang" data-name="@ncc.TenDonVi">
-                        <i class="bi bi-trash me-1"></i> Xóa
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm btn-toggle-status-ncc" data-id="@ncc.MaDonViCapHang" data-status="@ncc.TrangThai">
-                        <i class="bi @(ncc.TrangThai == "HOAT_DONG" ? "bi-slash-circle" : "bi-check2-circle") me-1"></i>
-                        <span>@(ncc.TrangThai == "HOAT_DONG" ? "Ngừng hoạt động" : "Kích hoạt lại")</span>
-                    </button>
-                </div>
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-primary btn-sm btn-edit-ncc" data-id="@ncc.MaDonViCapHang">
-                        <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary btn-sm btn-edit-ncc" data-id="@ncc.MaDonViCapHang">
+                            <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- ================= TAB 2: LỊCH SỬ NHẬP/TRẢ HÀNG ================= -->
         <div class="ncc-tab-pane ncc-tab-history" style="display: none;">
-            @if (!Model.LichSuPhieuNhaps.Any())
-            {
-                <div class="text-center py-4 text-muted">
-                    <i class="bi bi-inbox fs-3 mb-2 d-block"></i>
-                    <span>Chưa có giao dịch nhập/trả hàng nào với nhà cung cấp này.</span>
-                </div>
-            }
-            else
-            {
-                <div class="table-responsive border rounded-2 mb-3">
-                    <table class="table table-sm table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 140px;">Mã phiếu</th>
-                                <th style="width: 160px;">Thời gian</th>
-                                <th>Kho nhận</th>
-                                <th style="width: 140px;" class="text-center">Trạng thái</th>
-                                <th style="width: 150px;" class="text-end">Tổng tiền</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var p in Model.LichSuPhieuNhaps)
-                            {
+            <div class="ncc-detail-fixed-wrap">
+                @if (!Model.LichSuPhieuNhaps.Any())
+                {
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox fs-3 mb-2 d-block"></i>
+                        <span>Chưa có giao dịch nhập/trả hàng nào với nhà cung cấp này.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive border rounded-2 mb-3">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
                                 <tr>
-                                    <td>
-                                        <span class="fw-semibold text-primary">@p.MaPhieuHienThi</span>
-                                    </td>
-                                    <td class="text-muted small">@p.NgayNhap.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>@(string.IsNullOrWhiteSpace(p.TenKho) ? "Kho Phú Quốc" : p.TenKho)</td>
-                                    <td class="text-center">
-                                        @if (p.TrangThai == "DA_XAC_NHAN" || p.TrangThai == "HOAN_THANH" || p.TrangThai == "DA_NHAP")
-                                        {
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle">Đã hoàn thành</span>
-                                        }
-                                        else if (p.TrangThai == "HUY")
-                                        {
-                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Đã hủy</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Phiếu tạm</span>
-                                        }
-                                    </td>
-                                    <td class="text-end fw-semibold text-dark">
-                                        @p.TongTien.ToString("N0", viCulture) đ
-                                    </td>
+                                    <th style="width: 140px;">Mã phiếu</th>
+                                    <th style="width: 160px;">Thời gian</th>
+                                    <th>Kho nhận</th>
+                                    <th style="width: 140px;" class="text-center">Trạng thái</th>
+                                    <th style="width: 150px;" class="text-end">Tổng tiền</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-                <div class="text-muted small text-end">
-                    Hiển thị 10 phiếu nhập gần nhất
-                </div>
-            }
+                            </thead>
+                            <tbody>
+                                @foreach (var p in Model.LichSuPhieuNhaps)
+                                {
+                                    <tr>
+                                        <td>
+                                            <span class="fw-semibold text-primary">@p.MaPhieuHienThi</span>
+                                        </td>
+                                        <td class="text-muted small">@p.NgayNhap.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>@(string.IsNullOrWhiteSpace(p.TenKho) ? "Kho Phú Quốc" : p.TenKho)</td>
+                                        <td class="text-center">
+                                            @if (p.TrangThai == "DA_XAC_NHAN" || p.TrangThai == "HOAN_THANH" || p.TrangThai == "DA_NHAP")
+                                            {
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle">Đã hoàn thành</span>
+                                            }
+                                            else if (p.TrangThai == "HUY")
+                                            {
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Đã hủy</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Phiếu tạm</span>
+                                            }
+                                        </td>
+                                        <td class="text-end fw-semibold text-dark">
+                                            @p.TongTien.ToString("N0", viCulture) đ
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-muted small text-end">
+                        Hiển thị 10 phiếu nhập gần nhất
+                    </div>
+                }
+            </div>
         </div>
 
         <!-- ================= TAB 3: NỢ CẦN TRẢ NHÀ CUNG CẤP ================= -->
         <div class="ncc-tab-pane ncc-tab-debt" style="display: none;">
-            <div class="row g-3 mb-3">
-                <div class="col-md-6">
-                    <div class="p-3 border rounded-2 bg-light">
-                        <div class="text-muted small mb-1">Nợ cần trả hiện tại</div>
-                        <div class="fs-4 fw-bold @(ncc.NoCanTraHienTai > 0 ? "text-danger" : "text-dark")">
-                            @ncc.NoCanTraHienTai.ToString("N0", viCulture) đ
+            <div class="ncc-detail-fixed-wrap">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-2 bg-light">
+                            <div class="text-muted small mb-1">Nợ cần trả hiện tại</div>
+                            <div class="fs-4 fw-bold @(ncc.NoCanTraHienTai > 0 ? "text-danger" : "text-dark")">
+                                @ncc.NoCanTraHienTai.ToString("N0", viCulture) đ
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-2 bg-light">
+                            <div class="text-muted small mb-1">Tổng tiền hàng đã mua</div>
+                            <div class="fs-4 fw-bold text-dark">
+                                @ncc.TongMua.ToString("N0", viCulture) đ
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="p-3 border rounded-2 bg-light">
-                        <div class="text-muted small mb-1">Tổng tiền hàng đã mua</div>
-                        <div class="fs-4 fw-bold text-dark">
-                            @ncc.TongMua.ToString("N0", viCulture) đ
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="text-muted small p-3 border rounded-2 bg-light-subtle">
-                <i class="bi bi-info-circle me-1 text-primary"></i> Công nợ nhà cung cấp được tính toán tự động dựa trên tổng giá trị các đơn nhập hàng đã hoàn thành và các phiếu chi thanh toán cho nhà cung cấp.
+                <div class="text-muted small p-3 border rounded-2 bg-light-subtle">
+                    <i class="bi bi-info-circle me-1 text-primary"></i> Công nợ nhà cung cấp được tính toán tự động dựa trên tổng giá trị các đơn nhập hàng đã hoàn thành và các phiếu chi thanh toán cho nhà cung cấp.
+                </div>
             </div>
         </div>
     </div>

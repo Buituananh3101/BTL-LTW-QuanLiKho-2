@@ -1,6 +1,6 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-16 – Bổ Sung Cột Sao Yêu Thích & Lọc Sao Header Nhà Cung Cấp (Phiên 70)
+Cập nhật lần cuối: 2026-10-16 – Modal Xác Nhận Ngừng Hoạt Động Nhà Cung Cấp (Phiên 74)
 
 ---
 
@@ -16,6 +16,77 @@ Cập nhật lần cuối: 2026-10-16 – Bổ Sung Cột Sao Yêu Thích & Lọ
 4. Xây dựng `PhieuNhapController` và View giao diện (`Views/PhieuNhap/`) theo phong cách KiotViet.
 
 ---
+
+- **Modal Xác Nhận Ngừng Hoạt Động / Kích Hoạt Lại Nhà Cung Cấp (Phiên 74)**:
+  - **Nhu cầu**: Khi nhấn nút "Ngừng hoạt động" hoặc "Kích hoạt lại" trên thanh thao tác của nhà cung cấp, hệ thống phải mở hộp thoại (modal) hỏi xác nhận trước khi thực hiện thay vì chuyển trạng thái ngay lập tức.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Giao diện Modal (`Views/NhaCungCap/_NhaCungCapModal.cshtml`)**:
+      * Bổ sung `#nccStatusConfirmOv` (`class="hh-ov"` với `class="hh-modal small"`) chuẩn giao diện KiotViet.
+      * Header hiển thị tiêu đề và icon ngữ cảnh tương ứng: màu cam cảnh báo (`bi-slash-circle`) khi Ngừng hoạt động, màu xanh lam (`bi-check2-circle`) khi Kích hoạt lại.
+      * Body hiển thị câu hỏi xác nhận rõ ràng với tên nhà cung cấp in đậm: *"Bạn có chắc chắn muốn chuyển nhà cung cấp [Tên NCC] sang trạng thái Ngừng hoạt động?"*.
+      * Footer gồm 2 nút: "Bỏ qua" và "Đồng ý".
+    + **Căn giữa & Hiệu ứng mượt mà (`wwwroot/css/nha-cung-cap.css`)**:
+      * Áp dụng `align-items: center !important; z-index: 1065;` cho `#nccDeleteOv, #nccStatusConfirmOv, #nccPromptOv, #nccEditGroupOv`, kết hợp hiệu ứng scale và backdrop-filter blur mượt mà chuẩn `hang-hoa-form.css`.
+    + **Tương tác JavaScript (`wwwroot/js/nha-cung-cap-index.js`)**:
+      * Viết hàm `openStatusConfirmModal(id, name, currentStatus)`: nạp ID, tên, điều chỉnh tiêu đề, thông điệp và màu nút "Đồng ý" theo ngữ cảnh trạng thái hiện tại.
+      * Sự kiện click `.btn-toggle-status-ncc` lấy `id`, `name`, `status` và gọi `openStatusConfirmModal`.
+      * Nút `#btnConfirmStatusNcc` thực hiện gọi AJAX `POST /NhaCungCap/ToggleStatus?id=...`, đóng modal và tải lại bảng kèm thông báo Toast.
+    + **Đồng bộ Razor View (`_NhaCungCapDetail.cshtml`, `_NhaCungCapTable.cshtml`)**:
+      * Bổ sung thuộc tính `data-name` vào tất cả nút `.btn-toggle-status-ncc`.
+    + **Kiểm tra**:
+      * C# syntax test compile đạt **0 Errors**.
+      * JavaScript syntax check `node -c` đạt **0 Errors**.
+      * Cập nhật tài liệu đặc tả `docs/specs/nha-cung-cap.md` và `PROGRESS.md`.
+
+- **Sửa Lỗi DbUpdateException Khi Chuyển Trạng Thái Ngừng Hoạt Động Nhà Cung Cấp (Phiên 73)**:
+  - **Nhu cầu**: Khi nhấn nút "Ngừng hoạt động" trên panel chi tiết nhà cung cấp, ứng dụng phát sinh ngoại lệ `Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes` và dừng ở dòng `await _context.SaveChangesAsync()`.
+  - **Nguyên nhân cốt lõi**:
+    + Trong bảng CSDL `DonViCapHang`, ràng buộc kiểm tra `[CK_DonViCapHang_TrangThai]` quy định nghiêm ngặt: `CHECK (([TrangThai]='NGUNG_GIAO_DICH' OR [TrangThai]='HOAT_DONG'))`.
+    + Trong code `NhaCungCapController.cs` (Action `ToggleStatus`), lệnh gán trạng thái dùng chuỗi `"NGUNG_HOAT_DONG"` thay vì `"NGUNG_GIAO_DICH"`, dẫn đến vi phạm ràng buộc CHECK trên SQL Server.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Backend (`NhaCungCapController.cs`)**:
+      * Chuẩn hóa Action `ToggleStatus`: gán `ncc.TrangThai = (ncc.TrangThai == "HOAT_DONG") ? "NGUNG_GIAO_DICH" : "HOAT_DONG";` khớp chuẩn CSDL, bọc try-catch trả về thông báo JSON thân thiện.
+      * Chuẩn hóa Action `Create` và `Edit`: ánh xạ các giá trị `NGUNG_HOAT_DONG` / `OFF` về giá trị hợp lệ `NGUNG_GIAO_DICH`.
+      * Nâng cấp Action `Filter`: hỗ trợ lọc cả `NGUNG_GIAO_DICH` và `NGUNG_HOAT_DONG`.
+    + **Frontend (`nha-cung-cap-index.js`)**:
+      * Đồng bộ giá trị payload modal lưu NCC và bộ lọc Pills trạng thái về `NGUNG_GIAO_DICH`.
+    + **Kiểm tra**:
+      * C# syntax test compile đạt **0 Errors**.
+      * JavaScript syntax check `node -c` đạt **0 Errors**.
+      * Đồng bộ tài liệu `docs/specs/nha-cung-cap.md` và `PROGRESS.md`.
+
+- **Thống Nhất Giao Diện Thông Báo Toàn Hệ Thống & Bỏ Kẻ Dọc Xanh (Phiên 72)**:
+  - **Nhu cầu**:
+    + Bỏ đường kẻ dọc xanh bên trái (`border-left`) trên thông báo Toast, trả lại giao diện dạng viên bo góc tròn tối màu, tối giản, sang trọng theo đúng chuẩn KiotViet.
+    + Thống nhất kiểu dáng và cơ chế hiển thị của toàn bộ thông báo (Toast) trên tất cả các phân hệ (Nhà cung cấp, Hàng hóa, Kiểm kho, Xuất hủy).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bỏ đường kẻ dọc bên trái trên Toast (`wwwroot/css/site.css`)**:
+      * Loại bỏ thuộc tính `border-left` trên `.kiot-toast.success`, `.kiot-toast.error`, `.kiot-toast.warning`, `.kiot-toast.info`.
+      * Thiết lập `border: none !important; border-left: none !important; background: #111827; color: #ffffff; border-radius: 8px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);` tạo nên khối capsule thông báo hoàn chỉnh, sắc nét, không bị nhô hay lệch mép bo tròn.
+    + **Đồng Bộ CSS Phân Hệ Hàng Hóa & Kiểm Kho (`hang-hoa-form.css`, `kiem-kho.css`)**:
+      * Đồng bộ các class toast cục bộ `.hh-toast` và `.toast-box` về cùng chuẩn kích thước, padding `10px 22px`, font-size `14px`, font-weight `500`, border-radius `8px`, và loại bỏ hoàn toàn viền kẻ dọc.
+    + **Hợp Nhất Cơ Chế Gọi Toast (`site.js`, `hang-hoa-form.js`, `phieu-kiem-ke-form.js`, `phieu-kiem-ke-index.js`, `xuat-huy-form.js`)**:
+      * Trong `site.js`: Bổ sung hỗ trợ tham số `type` trong `window.showToast(msg, type)` và `window.toast(msg, type)`, chuẩn hóa icon `bi-info-circle-fill text-info` sáng rõ trên nền tối.
+      * Trong `hang-hoa-form.js`, `phieu-kiem-ke-form.js`, `phieu-kiem-ke-index.js`, `xuat-huy-form.js`: Điều hướng toàn bộ các hàm gọi `showToast` và `toast` thông qua `window.KiotToast.show(msg, type)`, bảo đảm 100% thông báo trên mọi trang đều hiển thị icon tương ứng (xanh cho thành công, đỏ cho lỗi, vàng cho cảnh báo, lam cho thông tin) và chung một phong cách giao diện duy nhất.
+    + **Kiểm tra biên dịch & Cú pháp**: `dotnet build` đạt 0 Errors, `node -c` trên toàn bộ 6 file JavaScript đạt 0 Errors.
+
+- **Cố Định Độ Rộng 3 Card Chi Tiết & Tắt Toast Sao Nhà Cung Cấp (Phiên 71)**:
+  - **Nhu cầu**:
+    + Tắt thông báo Toast khi click đánh dấu sao yêu thích ở bảng nhà cung cấp (thao tác đổi màu sao diễn ra âm thầm, tức thì, tránh làm phiền người dùng).
+    + Khóa cố định độ rộng của 3 card thông tin chi tiết (Thông tin liên hệ, Thông tin xuất hóa đơn, Ghi chú & công nợ) và thanh nút thao tác đáy ở mức 992px (~320px/card), không để chúng bị kéo giãn biến dạng bề ngang khi người dùng bật nhiều cột trong bảng khiến khung viền xanh dài ra.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tắt Toast Thông Báo Đánh Dấu Sao (`wwwroot/js/nha-cung-cap-index.js`)**:
+      * Trong hàm `toggleFavoriteSupplier`, loại bỏ các lệnh gọi `window.KiotToast.success` và `window.KiotToast.info`. AJAX cập nhật trạng thái sao trên CSDL và UI cập nhật màu icon ngay lập tức mà không bật popup toast.
+    + **Cố Định Độ Rộng Khối Chi Tiết (`wwwroot/css/nha-cung-cap.css`)**:
+      * Thêm class `.ncc-detail-fixed-wrap` với `width: 992px; max-width: 100%; box-sizing: border-box;`.
+      * Thêm flex layout `.ncc-attr-grid` (`width: 992px; gap: 16px;`) và `.ncc-attr-col` (`width: 320px; min-width: 320px; max-width: 320px; flex: 0 0 320px;`) thay thế cho grid Bootstrap `col-md-4` (vốn tính theo 33.3% chiều rộng container).
+      * Cố định độ rộng `.product-detail-footer` ở mức 992px và đặt `.product-detail-footer-left, .product-detail-footer-right { position: static !important; }` để thanh nút thao tác đáy (Xóa, Ngừng hoạt động, Chỉnh sửa) luôn nằm gọn gàng ngay dưới 3 card.
+      * Thêm media query `@media (max-width: 1040px)` để chuyển về dạng cột 100% khi xem trên màn hình nhỏ.
+    + **Đồng Bộ Razor View (`_NhaCungCapTable.cshtml` & `_NhaCungCapDetail.cshtml`)**:
+      * Thay thế `row g-3 product-attr-grid` và `col-md-4` bằng `ncc-attr-grid` và `ncc-attr-col`.
+      * Bọc toàn bộ tiêu đề, thuộc tính và thanh nút thao tác trong `ncc-detail-fixed-wrap` cho cả 3 Tab (Thông tin, Lịch sử, Nợ cần trả) trên cả 2 view.
+    + **Kiểm tra**:
+      * Cú pháp View và CSS hoàn chỉnh, giao diện giữ nguyên tỷ lệ 320px/card độc lập hoàn toàn với độ dài khung viền xanh.
 
 - **Bổ Sung Cột Sao Yêu Thích & Lọc Sao Header Nhà Cung Cấp (Phiên 70)**:
   - **Nhu cầu**: Bổ sung cột đánh dấu sao (star / favorite bookmark) cho danh sách nhà cung cấp (`NhaCungCap`), đồng bộ chuẩn trải nghiệm KiotViet giống hệt phân hệ Hàng hóa (`HangHoa`) và Kiểm kho (`PhieuKiemKe`). Cho phép đánh dấu sao từng nhà cung cấp và bấm vào sao ở tiêu đề bảng để lọc nhanh danh sách nhà cung cấp đã đánh dấu sao.
@@ -740,6 +811,21 @@ Cập nhật lần cuối: 2026-10-16 – Bổ Sung Cột Sao Yêu Thích & Lọ
 ---
 
 ## Nhật ký phiên
+- **2026-10-16 (Phiên 72 - Tối)**:
+  - Thống nhất giao diện thông báo toàn hệ thống & Bỏ kẻ dọc xanh bên trái:
+    - Loại bỏ triệt để `border-left` trên `.kiot-toast` trong `site.css`, giải quyết triệt để lỗi kẻ dọc xanh/đỏ/vàng bị nhô ra ngoài góc bo tròn.
+    - Đồng bộ kiểu dáng `.hh-toast` và `.toast-box` trong `hang-hoa-form.css`, `kiem-kho.css`.
+    - Thống nhất cơ chế hiển thị Toast toàn hệ thống thông qua `window.KiotToast` (`site.js`, `hang-hoa-form.js`, `phieu-kiem-ke-form.js`, `phieu-kiem-ke-index.js`, `xuat-huy-form.js`).
+- **2026-10-16 (Phiên 71 - Tối)**:
+  - Cố định độ rộng 3 card thông tin chi tiết nhà cung cấp & Tắt thông báo toast khi đánh dấu sao:
+    - Loại bỏ toast notification trong `toggleFavoriteSupplier` (`nha-cung-cap-index.js`), thao tác click sao diễn ra êm mượt và âm thầm.
+    - Cố định độ rộng 3 card chi tiết ở mức 992px (320px/card) bằng flex layout `.ncc-attr-grid` và `.ncc-attr-col`, bọc trong `.ncc-detail-fixed-wrap` trên cả `_NhaCungCapTable.cshtml` và `_NhaCungCapDetail.cshtml`, bảo đảm 3 card không bị kéo giãn biến dạng khi khung xanh dãn dài do bật nhiều cột.
+    - Cố định thanh nút thao tác footer đáy ngay dưới 3 card.
+- **2026-10-16 (Phiên 70 - Tối)**:
+  - Bổ sung Cột sao Yêu thích & Lọc sao Header cho Nhà cung cấp:
+    - Thêm cột `DaDanhDau` trong bảng `DonViCapHang`, model `DonViCapHang.cs`, migration SQL `11_bo_sung_dadanhdau_donvicaphang.sql`.
+    - Thêm action `ToggleFavorite` trong `NhaCungCapController.cs`, cập nhật lọc sao header `DaDanhDau` trong `IndexVM` và `FilterParams`.
+    - Bổ sung cột sao cố định trên header và từng dòng bảng `_NhaCungCapTable.cshtml`, JS tương tác `nha-cung-cap-index.js`.
 - **2026-10-16 (Phiên 59 - Chiều)**:
   - Đồng bộ hiển thị cột Mã nhà cung cấp (`span.text-break`) và mũi tên sắp xếp 3 trạng thái header giống bảng Phiếu kiểm kho (`_NhaCungCapTable.cshtml`, `NhaCungCapIndexVM.cs`, `NhaCungCapController.cs`, `Index.cshtml`, `nha-cung-cap-index.js`).
   - Biên dịch kiểm tra: `dotnet build -t:CoreCompile` 0 Errors, cú pháp JS 0 lỗi.

@@ -30,7 +30,7 @@
   - `MaDonViCapHang` INT IDENTITY PK.
   - `TenDonVi` NVARCHAR(150) NOT NULL UNIQUE.
   - `DienThoai` VARCHAR(15) NULL, `DiaChi` NVARCHAR(255) NULL.
-  - `TrangThai` VARCHAR(20) NOT NULL DEFAULT 'HOAT_DONG'.
+  - `TrangThai` VARCHAR(20) NOT NULL DEFAULT 'HOAT_DONG' (`HOAT_DONG` / `NGUNG_GIAO_DICH`, tuân thủ check constraint `CK_DonViCapHang_TrangThai`).
   - `MaNcc` VARCHAR(30) NULL (tự sinh `NCC00001` nếu để trống).
   - `Email` NVARCHAR(100) NULL, `KhuVuc` NVARCHAR(100) NULL, `PhuongXa` NVARCHAR(100) NULL.
   - `MaNhomNcc` INT NULL (FK đến `NhomNhaCungCap`).
@@ -48,17 +48,20 @@
 | **1. Nạp ban đầu** | Vào menu "Mua hàng" ➜ "Nhà cung cấp" | GET `/NhaCungCap` | `Index()` nạp nhóm, danh sách trang 1, tính tổng mua & nợ ➜ Render `Index.cshtml` |
 | **2. Lọc & Tìm kiếm** | Gõ tìm kiếm (F3) / Nhóm / Thời gian / Trạng thái | Debounce 300ms ➜ AJAX `GET /NhaCungCap/Filter` | `Filter(...)` lọc LINQ, tính nợ/tổng mua ➜ Render `_NhaCungCapTable.cshtml` |
 | **3. Phân trang & Sắp xếp** | Click số trang hoặc tiêu đề cột | Gán page/sort ➜ AJAX `GET /NhaCungCap/Filter` | `.OrderBy()`, `.Skip().Take()` ➜ Cập nhật bảng và phân trang |
-| **4. Xem chi tiết (Inline Drawer)** | Click vào 1 dòng NCC trên bảng | Bung dòng chi tiết `tr.product-detail-row` trượt êm, viền xanh `selected`. Tab 1 sẵn, Tab 2 & 3 AJAX | Nạp thông tin NCC, lịch sử phiếu nhập, công nợ qua `GetDetail` |
+| **4. Xem chi tiết (Inline Drawer)** | Click vào 1 dòng NCC trên bảng | Bung dòng chi tiết `tr.product-detail-row` trượt êm, viền xanh `selected` khép kín hình chữ nhật. 3 card thuộc tính cố định 992px (320px/card) không dãn theo khung xanh. Tab 1 sẵn, Tab 2 & 3 AJAX | Nạp thông tin NCC, lịch sử phiếu nhập, công nợ qua `GetDetail` |
 | **5. Thêm mới NCC** | Bấm "+ Nhà cung cấp", điền form, bấm "Lưu" | Form validate ➜ AJAX `POST /NhaCungCap/Create` | Tự sinh `MaNcc`, lưu DB ➜ Trả JSON `{success: true}` ➜ Reload bảng |
 | **6. Sửa NCC** | Bấm "Chỉnh sửa" trong chi tiết hoặc dòng | AJAX `GET /NhaCungCap/GetItem?id=X` ➜ Đổ vào modal | AJAX `POST /NhaCungCap/Edit?id=X` ➜ Cập nhật DB ➜ Reload bảng & detail |
 | **7. Xóa NCC** | Bấm nút Xóa trong panel chi tiết | Modal `KiotConfirm` xác nhận | Kiểm tra `PhieuNhaps.Any()`. Nếu đã có GD ➜ Báo lỗi, gợi ý "Ngừng hoạt động" |
 | **8. Quản lý Nhóm NCC** | Bấm "+ Tạo mới" hoặc ✎ sửa/xóa trong dropdown nhóm | Mở `KiotPrompt` nhập tên nhóm | `CreateGroupQuick`, `UpdateGroupQuick`, `DeleteGroupQuick` |
-| **9. Đánh dấu sao** | Click sao dòng hoặc sao header | Click sao dòng: Toggle AJAX `/NhaCungCap/ToggleFavorite`. Sao header: Lọc các NCC đã đánh dấu sao | Cập nhật `DaDanhDau`, trả JSON `{success, isFavorite}` |
+| **9. Đánh dấu sao** | Click sao dòng hoặc sao header | Click sao dòng: Toggle AJAX `/NhaCungCap/ToggleFavorite` tức thì âm thầm (bỏ toast). Sao header: Lọc các NCC đã đánh dấu sao | Cập nhật `DaDanhDau`, trả JSON `{success, isFavorite}` |
+| **10. Chuyển đổi trạng thái** | Bấm "Ngừng hoạt động" hoặc "Kích hoạt lại" | Mở modal `#nccStatusConfirmOv` xác nhận hành động ➜ Bấm "Đồng ý" | `ToggleStatus(id)` chuyển đổi `HOAT_DONG` ⇋ `NGUNG_GIAO_DICH` |
 
 ---
 
 ## 3. Khối Lego Tái sử dụng (Tuân thủ Luật 10 & 03-giao-dien-layout.md)
-- [x] **Cột Sao Yêu Thích**: Cột sao cố định (`th-star`, `cell-star`), toggle sao và lọc danh sách sao trên header.
+- [x] **Modal Xác nhận Ngừng hoạt động**: `#nccStatusConfirmOv` căn giữa, chuyển cảnh mượt mà, hỏi xác nhận trước khi đổi trạng thái.
+- [x] **Cột Sao Yêu Thích**: Cột sao cố định (`th-star`, `cell-star`), toggle sao âm thầm và lọc danh sách sao trên header.
+- [x] **Panel Chi tiết Cố định**: `.ncc-detail-fixed-wrap`, `.ncc-attr-grid`, `.ncc-attr-col` cố định 3 card 992px (320px/card), viền khép kín hình chữ nhật.
 - [x] **Hiển thị Cột (`#colMenu`)**: Bật/tắt 12 cột, chuẩn `#productTableContainer`, lưu `localStorage` (`kiot_ncc_columns_v2`).
 - [x] **Bộ lọc Thời gian**: `<partial name="_KiotDateFilter" ... />` kết hợp `KiotFilter.initDateFilter`.
 - [x] **Bộ lọc Nhóm NCC**: `<partial name="_KiotMultiSelectFilter" ... />` hỗ trợ sửa/xóa ✎ tại chỗ.
@@ -67,7 +70,7 @@
 - [x] **Khối Accordion trong Form**: `.kiot-sec`, `.kiot-sec-h`, `.kiot-chev` cho 3 khối thông tin.
 - [x] **Modal con KiotPrompt & KiotConfirm**: Thêm nhanh nhóm, sửa nhóm, xác nhận xóa NCC.
 - [x] **Format tiền tệ**: class `.kiot-num` cho khoảng Tổng mua và Nợ hiện tại.
-- [x] **Thông báo Toast**: `showToast(msg)`.
+- [x] **Thông báo Toast**: `window.KiotToast` dùng chung toàn hệ thống, dạng viên bo tròn tối màu, không viền kẻ dọc.
 
 ---
 

@@ -2076,34 +2076,43 @@ tr.product-detail-row > td {
   color: #dc2626 !important;
 }
 
-/* Toast Notification dùng chung toàn hệ thống */
+/* Toast Notification dùng chung toàn hệ thống (Chuẩn KiotViet: viên bo tròn tối màu, không viền kẻ dọc) */
 .kiot-toast {
   position: fixed;
   left: 50%;
   bottom: 28px;
   transform: translateX(-50%) translateY(20px);
   background: #111827;
-  color: #fff;
+  color: #ffffff;
   padding: 10px 22px;
   border-radius: 8px;
+  border: none !important;
   opacity: 0;
   pointer-events: none;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 9999;
   font-size: 14px;
   font-weight: 500;
+  line-height: 1.4;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  max-width: 90vw;
+  box-sizing: border-box;
 }
 .kiot-toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
-.kiot-toast.success { background: #0f172a; border-left: 4px solid #10b981; }
-.kiot-toast.error { background: #0f172a; border-left: 4px solid #ef4444; }
-.kiot-toast.warning { background: #0f172a; border-left: 4px solid #f59e0b; }
+.kiot-toast.success,
+.kiot-toast.error,
+.kiot-toast.warning,
+.kiot-toast.info {
+  background: #111827;
+  border: none !important;
+  border-left: none !important;
+}
 
 /* ========================================================================
    KIOTVIET UNIVERSAL FORM COMPONENTS: Collapsible, Numbers, Split, Combobox, Prompt

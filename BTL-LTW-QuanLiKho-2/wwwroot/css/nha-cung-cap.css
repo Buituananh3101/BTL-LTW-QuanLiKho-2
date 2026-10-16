@@ -156,3 +156,65 @@
     border-left: 3px solid #0070f3 !important;
     border-right: 3px solid #0070f3 !important;
 }
+
+/* 7. Khối thông tin chi tiết nhà cung cấp có độ rộng cố định, không co giãn theo độ dài khung xanh */
+.ncc-detail-fixed-wrap {
+    width: 992px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.ncc-attr-grid {
+    display: flex;
+    gap: 16px;
+    width: 992px;
+    max-width: 100%;
+    margin-bottom: 1rem;
+    box-sizing: border-box;
+}
+
+.ncc-attr-col {
+    width: 320px;
+    min-width: 320px;
+    max-width: 320px;
+    flex: 0 0 320px;
+    box-sizing: border-box;
+}
+
+.ncc-detail-fixed-wrap .product-detail-footer {
+    width: 992px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.ncc-detail-fixed-wrap .product-detail-footer-left,
+.ncc-detail-fixed-wrap .product-detail-footer-right {
+    position: static !important;
+}
+
+@media (max-width: 1040px) {
+    .ncc-attr-grid {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+    .ncc-attr-col {
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        flex: 1 1 100%;
+    }
+    .ncc-detail-fixed-wrap,
+    .ncc-detail-fixed-wrap .product-detail-footer {
+        width: 100%;
+    }
+}
+
+/* Centering và hiển thị mượt mà cho các modal con xác nhận & prompt Nhà cung cấp */
+#nccDeleteOv,
+#nccStatusConfirmOv,
+#nccPromptOv,
+#nccEditGroupOv {
+    z-index: 1065;
+    align-items: center !important;
+}
+

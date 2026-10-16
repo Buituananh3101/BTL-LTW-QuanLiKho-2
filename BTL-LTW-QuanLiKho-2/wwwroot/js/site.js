@@ -34,7 +34,7 @@ window.KiotToast = (function () {
         } else if (type === 'warning') {
             iconHtml = '<i class="bi bi-exclamation-triangle-fill text-warning fs-6"></i>';
         } else {
-            iconHtml = '<i class="bi bi-info-circle-fill text-primary fs-6"></i>';
+            iconHtml = '<i class="bi bi-info-circle-fill text-info fs-6"></i>';
         }
 
         el.innerHTML = `${iconHtml}<span>${msg}</span>`;
@@ -54,8 +54,8 @@ window.KiotToast = (function () {
 })();
 
 // Bí danh tương thích ngược cho toàn bộ các hàm gọi cũ trong dự án
-window.showToast = function (msg) {
-    window.KiotToast.show(msg, 'success');
+window.showToast = function (msg, type) {
+    window.KiotToast.show(msg, type || 'success');
 };
 window.toast = function (msg, type) {
     window.KiotToast.show(msg, type || 'info');

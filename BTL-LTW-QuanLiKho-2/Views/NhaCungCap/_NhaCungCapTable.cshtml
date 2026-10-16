@@ -225,136 +225,142 @@
                                     <div class="product-detail-tab-content">
                                         <!-- ================= TAB 1: THÔNG TIN ================= -->
                                         <div class="tab-pane-content tab-info">
-                                            <div class="mb-3">
-                                                <h4 class="product-detail-title mb-1">@item.TenDonVi</h4>
-                                                <div class="text-muted small mb-2 d-flex flex-wrap align-items-center gap-2">
-                                                    <span>Mã NCC: <strong class="text-dark">@item.MaNcc</strong></span>
-                                                    <span>•</span>
-                                                    <span>Nhóm: <strong class="text-dark">@(string.IsNullOrWhiteSpace(item.TenNhomNcc) ? "Chưa có" : item.TenNhomNcc)</strong></span>
-                                                    <span>•</span>
-                                                    <span>Người tạo: <strong class="text-dark">@(string.IsNullOrWhiteSpace(item.NguoiTao) ? "Admin" : item.NguoiTao)</strong></span>
-                                                    <span>•</span>
-                                                    <span>Ngày tạo: @item.NgayTao.ToString("dd/MM/yyyy HH:mm")</span>
-                                                    <span>•</span>
-                                                    @if (item.TrangThai == "HOAT_DONG")
-                                                    {
-                                                        <span class="badge bg-light text-success border border-success-subtle">Đang hoạt động</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="badge bg-light text-secondary border">Ngừng hoạt động</span>
-                                                    }
-                                                </div>
-                                            </div>
-
-                                            <!-- Grid thông tin thuộc tính 3 cột chuẩn HangHoa (.product-attr-grid) -->
-                                            <div class="row g-3 mb-3 product-attr-grid">
-                                                <!-- Cột 1: Thông tin liên hệ -->
-                                                <div class="col-md-4">
-                                                    <div class="border rounded-2 p-3 h-100 bg-white">
-                                                        <div class="fw-semibold text-secondary small mb-3 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
-                                                            <i class="bi bi-person-lines-fill me-1 text-primary"></i> Thông tin liên hệ
-                                                        </div>
-                                                        <div class="attr-item">
-                                                            <div class="attr-label">Điện thoại</div>
-                                                            <div class="attr-value">@(string.IsNullOrWhiteSpace(item.DienThoai) ? "---" : item.DienThoai)</div>
-                                                        </div>
-                                                        <div class="attr-item">
-                                                            <div class="attr-label">Email</div>
-                                                            <div class="attr-value">@(string.IsNullOrWhiteSpace(item.Email) ? "---" : item.Email)</div>
-                                                        </div>
-                                                        <div class="attr-item">
-                                                            <div class="attr-label">Địa chỉ</div>
-                                                            <div class="attr-value">@(string.IsNullOrWhiteSpace(item.DiaChi) ? "---" : item.DiaChi)</div>
-                                                        </div>
-                                                        <div class="attr-item">
-                                                            <div class="attr-label">Khu vực / Tỉnh thành</div>
-                                                            <div class="attr-value">@(string.IsNullOrWhiteSpace(item.KhuVuc) ? "---" : item.KhuVuc)</div>
-                                                        </div>
-                                                        <div class="attr-item mb-0">
-                                                            <div class="attr-label">Phường / Xã</div>
-                                                            <div class="attr-value">@(string.IsNullOrWhiteSpace(item.PhuongXa) ? "---" : item.PhuongXa)</div>
-                                                        </div>
+                                            <div class="ncc-detail-fixed-wrap">
+                                                <div class="mb-3">
+                                                    <h4 class="product-detail-title mb-1">@item.TenDonVi</h4>
+                                                    <div class="text-muted small mb-2 d-flex flex-wrap align-items-center gap-2">
+                                                        <span>Mã NCC: <strong class="text-dark">@item.MaNcc</strong></span>
+                                                        <span>•</span>
+                                                        <span>Nhóm: <strong class="text-dark">@(string.IsNullOrWhiteSpace(item.TenNhomNcc) ? "Chưa có" : item.TenNhomNcc)</strong></span>
+                                                        <span>•</span>
+                                                        <span>Người tạo: <strong class="text-dark">@(string.IsNullOrWhiteSpace(item.NguoiTao) ? "Admin" : item.NguoiTao)</strong></span>
+                                                        <span>•</span>
+                                                        <span>Ngày tạo: @item.NgayTao.ToString("dd/MM/yyyy HH:mm")</span>
+                                                        <span>•</span>
+                                                        @if (item.TrangThai == "HOAT_DONG")
+                                                        {
+                                                            <span class="badge bg-light text-success border border-success-subtle">Đang hoạt động</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-light text-secondary border">Ngừng hoạt động</span>
+                                                        }
                                                     </div>
                                                 </div>
 
-                                                <!-- Cột 2: Thông tin xuất hóa đơn -->
-                                                <div class="col-md-4">
-                                                    <div class="border rounded-2 p-3 h-100 bg-white">
-                                                        <div class="fw-semibold text-secondary small mb-3 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
-                                                            <i class="bi bi-receipt me-1 text-primary"></i> Thông tin xuất hóa đơn
-                                                        </div>
-                                                        <div class="attr-item">
-                                                            <div class="attr-label">Tên công ty</div>
-                                                            <div class="attr-value">@(string.IsNullOrWhiteSpace(item.TenCongTy) ? "---" : item.TenCongTy)</div>
-                                                        </div>
-                                                        <div class="attr-item">
-                                                            <div class="attr-label">Mã số thuế</div>
-                                                            <div class="attr-value">@(string.IsNullOrWhiteSpace(item.MaSoThue) ? "---" : item.MaSoThue)</div>
-                                                        </div>
-                                                        <div class="attr-item mb-0">
-                                                            <div class="attr-label">Số CMND/CCCD</div>
-                                                            <div class="attr-value">@(string.IsNullOrWhiteSpace(item.SoCccd) ? "---" : item.SoCccd)</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Cột 3: Ghi chú & Công nợ -->
-                                                <div class="col-md-4">
-                                                    <div class="border rounded-2 p-3 h-100 bg-white d-flex flex-column">
-                                                        <div class="fw-semibold text-secondary small mb-3 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
-                                                            <i class="bi bi-chat-left-text me-1 text-primary"></i> Ghi chú & Công nợ
-                                                        </div>
-                                                        <div class="attr-item flex-grow-1">
-                                                            <div class="attr-label">Ghi chú</div>
-                                                            <div class="attr-value text-muted" style="white-space: pre-wrap; font-weight: normal;">@(string.IsNullOrWhiteSpace(item.GhiChu) ? "Chưa có ghi chú nào." : item.GhiChu)</div>
-                                                        </div>
-                                                        <div class="pt-2 border-top mt-auto">
-                                                            <div class="d-flex justify-content-between py-1">
-                                                                <span class="text-muted small">Nợ cần trả hiện tại:</span>
-                                                                <span class="fw-bold @(item.NoCanTraHienTai > 0 ? "text-danger" : "text-dark")">@item.NoCanTraHienTai.ToString("N0", viCulture)</span>
+                                                <!-- Grid thông tin thuộc tính 3 cột cố định (.ncc-attr-grid) -->
+                                                <div class="ncc-attr-grid">
+                                                    <!-- Cột 1: Thông tin liên hệ -->
+                                                    <div class="ncc-attr-col">
+                                                        <div class="border rounded-2 p-3 h-100 bg-white">
+                                                            <div class="fw-semibold text-secondary small mb-3 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                                                                <i class="bi bi-person-lines-fill me-1 text-primary"></i> Thông tin liên hệ
                                                             </div>
-                                                            <div class="d-flex justify-content-between py-1">
-                                                                <span class="text-muted small">Tổng mua:</span>
-                                                                <span class="fw-bold text-dark">@item.TongMua.ToString("N0", viCulture)</span>
+                                                            <div class="attr-item">
+                                                                <div class="attr-label">Điện thoại</div>
+                                                                <div class="attr-value">@(string.IsNullOrWhiteSpace(item.DienThoai) ? "---" : item.DienThoai)</div>
+                                                            </div>
+                                                            <div class="attr-item">
+                                                                <div class="attr-label">Email</div>
+                                                                <div class="attr-value">@(string.IsNullOrWhiteSpace(item.Email) ? "---" : item.Email)</div>
+                                                            </div>
+                                                            <div class="attr-item">
+                                                                <div class="attr-label">Địa chỉ</div>
+                                                                <div class="attr-value">@(string.IsNullOrWhiteSpace(item.DiaChi) ? "---" : item.DiaChi)</div>
+                                                            </div>
+                                                            <div class="attr-item">
+                                                                <div class="attr-label">Khu vực / Tỉnh thành</div>
+                                                                <div class="attr-value">@(string.IsNullOrWhiteSpace(item.KhuVuc) ? "---" : item.KhuVuc)</div>
+                                                            </div>
+                                                            <div class="attr-item mb-0">
+                                                                <div class="attr-label">Phường / Xã</div>
+                                                                <div class="attr-value">@(string.IsNullOrWhiteSpace(item.PhuongXa) ? "---" : item.PhuongXa)</div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>
 
-                                            <!-- Thanh nút thao tác cuối dòng chi tiết chuẩn HangHoa -->
-                                            <div class="d-flex justify-content-between align-items-center pt-3 border-top product-detail-footer">
-                                                <div class="d-flex gap-2 product-detail-footer-left">
-                                                    <button type="button" class="btn btn-outline-secondary btn-sm btn-delete-ncc" data-id="@item.MaDonViCapHang" data-name="@item.TenDonVi">
-                                                        <i class="bi bi-trash me-1"></i> Xóa
-                                                    </button>
-                                                    <button type="button" class="btn btn-outline-secondary btn-sm btn-toggle-status-ncc" data-id="@item.MaDonViCapHang" data-status="@item.TrangThai">
-                                                        <i class="bi @(item.TrangThai == "HOAT_DONG" ? "bi-slash-circle" : "bi-check2-circle") me-1"></i>
-                                                        <span>@(item.TrangThai == "HOAT_DONG" ? "Ngừng hoạt động" : "Cho hoạt động lại")</span>
-                                                    </button>
+                                                    <!-- Cột 2: Thông tin xuất hóa đơn -->
+                                                    <div class="ncc-attr-col">
+                                                        <div class="border rounded-2 p-3 h-100 bg-white">
+                                                            <div class="fw-semibold text-secondary small mb-3 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                                                                <i class="bi bi-receipt me-1 text-primary"></i> Thông tin xuất hóa đơn
+                                                            </div>
+                                                            <div class="attr-item">
+                                                                <div class="attr-label">Tên công ty</div>
+                                                                <div class="attr-value">@(string.IsNullOrWhiteSpace(item.TenCongTy) ? "---" : item.TenCongTy)</div>
+                                                            </div>
+                                                            <div class="attr-item">
+                                                                <div class="attr-label">Mã số thuế</div>
+                                                                <div class="attr-value">@(string.IsNullOrWhiteSpace(item.MaSoThue) ? "---" : item.MaSoThue)</div>
+                                                            </div>
+                                                            <div class="attr-item mb-0">
+                                                                <div class="attr-label">Số CMND/CCCD</div>
+                                                                <div class="attr-value">@(string.IsNullOrWhiteSpace(item.SoCccd) ? "---" : item.SoCccd)</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Cột 3: Ghi chú & Công nợ -->
+                                                    <div class="ncc-attr-col">
+                                                        <div class="border rounded-2 p-3 h-100 bg-white d-flex flex-column">
+                                                            <div class="fw-semibold text-secondary small mb-3 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                                                                <i class="bi bi-chat-left-text me-1 text-primary"></i> Ghi chú & Công nợ
+                                                            </div>
+                                                            <div class="attr-item flex-grow-1">
+                                                                <div class="attr-label">Ghi chú</div>
+                                                                <div class="attr-value text-muted" style="white-space: pre-wrap; font-weight: normal;">@(string.IsNullOrWhiteSpace(item.GhiChu) ? "Chưa có ghi chú nào." : item.GhiChu)</div>
+                                                            </div>
+                                                            <div class="pt-2 border-top mt-auto">
+                                                                <div class="d-flex justify-content-between py-1">
+                                                                    <span class="text-muted small">Nợ cần trả hiện tại:</span>
+                                                                    <span class="fw-bold @(item.NoCanTraHienTai > 0 ? "text-danger" : "text-dark")">@item.NoCanTraHienTai.ToString("N0", viCulture)</span>
+                                                                </div>
+                                                                <div class="d-flex justify-content-between py-1">
+                                                                    <span class="text-muted small">Tổng mua:</span>
+                                                                    <span class="fw-bold text-dark">@item.TongMua.ToString("N0", viCulture)</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div class="d-flex gap-2 product-detail-footer-right">
-                                                    <button type="button" class="btn btn-primary btn-sm btn-edit-ncc" data-id="@item.MaDonViCapHang">
-                                                        <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
-                                                    </button>
+
+                                                <!-- Thanh nút thao tác cuối dòng chi tiết chuẩn HangHoa -->
+                                                <div class="d-flex justify-content-between align-items-center pt-3 border-top product-detail-footer">
+                                                    <div class="d-flex gap-2 product-detail-footer-left">
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm btn-delete-ncc" data-id="@item.MaDonViCapHang" data-name="@item.TenDonVi">
+                                                            <i class="bi bi-trash me-1"></i> Xóa
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm btn-toggle-status-ncc" data-id="@item.MaDonViCapHang" data-status="@item.TrangThai" data-name="@item.TenDonVi">
+                                                            <i class="bi @(item.TrangThai == "HOAT_DONG" ? "bi-slash-circle" : "bi-check2-circle") me-1"></i>
+                                                            <span>@(item.TrangThai == "HOAT_DONG" ? "Ngừng hoạt động" : "Cho hoạt động lại")</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="d-flex gap-2 product-detail-footer-right">
+                                                        <button type="button" class="btn btn-primary btn-sm btn-edit-ncc" data-id="@item.MaDonViCapHang">
+                                                            <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <!-- ================= TAB 2: LỊCH SỬ NHẬP/TRẢ HÀNG ================= -->
                                         <div class="tab-pane-content tab-history" style="display: none;">
-                                            <div class="text-center py-4 text-muted ncc-dyn-container" data-loaded="0">
-                                                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                                                <span>Đang tải lịch sử giao dịch...</span>
+                                            <div class="ncc-detail-fixed-wrap">
+                                                <div class="text-center py-4 text-muted ncc-dyn-container" data-loaded="0">
+                                                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                                    <span>Đang tải lịch sử giao dịch...</span>
+                                                </div>
                                             </div>
                                         </div>
 
                                         <!-- ================= TAB 3: NỢ CẦN TRẢ ================= -->
                                         <div class="tab-pane-content tab-debt" style="display: none;">
-                                            <div class="text-center py-4 text-muted ncc-dyn-container" data-loaded="0">
-                                                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                                                <span>Đang tải công nợ...</span>
+                                            <div class="ncc-detail-fixed-wrap">
+                                                <div class="text-center py-4 text-muted ncc-dyn-container" data-loaded="0">
+                                                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                                    <span>Đang tải công nợ...</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
