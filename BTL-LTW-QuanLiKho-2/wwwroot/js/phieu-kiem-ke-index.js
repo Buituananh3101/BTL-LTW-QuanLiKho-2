@@ -15,6 +15,8 @@
     const noteUrl = app.dataset.noteUrl;
     const cancelUrl = app.dataset.cancelUrl;
     const exportUrl = app.dataset.exportUrl;
+    const toggleStarUrl = app.dataset.toggleStarUrl || '/PhieuKiemKe/ToggleFavorite';
+    let isStarredFilterActive = app.dataset.isStarred === 'true';
     let currentWhId = parseInt(app.dataset.warehouseId) || 0;
 
     // Trạng thái bộ lọc (Mặc định ALL - Toàn thời gian chuẩn Hàng hóa)
@@ -27,6 +29,9 @@
         statuses: ['NHAP', 'DA_DIEU_CHINH'],
         creatorIds: [],
         creatorNames: {},
+        daDanhDau: isStarredFilterActive,
+        sortBy: app.dataset.sortBy || '',
+        sortDir: app.dataset.sortDir || '',
         page: 1,
         size: 15,
         cols: { ma: 1, tg: 1, tt: 1, cl: 1, tang: 1, giam: 1, cb: 1, slt: 1, ghi: 1, st: 1, kho: 1 },
@@ -307,20 +312,35 @@
         F.statuses.forEach(s => params.append('Statuses', s));
         F.creatorIds.forEach(id => params.append('CreatorIds', id));
 
+        if (F.daDanhDau) {
+            params.append('DaDanhDau', 'true');
+        }
+
+        if (F.sortBy) {
+            params.append('SortBy', F.sortBy);
+            params.append('SortDir', F.sortDir || 'asc');
+        }
+
         params.append('Page', F.page);
         params.append('PageSize', F.size);
+
+        const wrap = $('#tableWrapper');
+        if (wrap) wrap.style.opacity = '0.6';
 
         fetch(`${filterUrl}?${params.toString()}`, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(res => res.text())
         .then(html => {
-            const wrap = $('#tableWrapper');
-            if (wrap) wrap.innerHTML = html;
+            if (wrap) {
+                wrap.innerHTML = html;
+                wrap.style.opacity = '1';
+            }
             applyColumnVisibility();
             bindTableEvents();
         })
         .catch(err => {
+            if (wrap) wrap.style.opacity = '1';
             console.error('Lỗi khi tải bảng kiểm kho:', err);
             toast('Không thể tải dữ liệu bảng kiểm kho.');
         });
@@ -424,6 +444,11 @@
             }
             F.statuses.forEach(s => p.append('Statuses', s));
             F.creatorIds.forEach(id => p.append('CreatorIds', id));
+            if (F.daDanhDau) p.append('DaDanhDau', 'true');
+            if (F.sortBy) {
+                p.append('SortBy', F.sortBy);
+                p.append('SortDir', F.sortDir || 'asc');
+            }
             window.location.href = `${exportUrl}?${p.toString()}`;
             toast('Đang xuất file dữ liệu...');
         }
@@ -788,11 +813,14 @@
             resetLink.onclick = () => {
                 F.q = '';
                 F.mode = 'preset';
-                F.preset = 'thangnay';
+                F.preset = 'ALL';
                 F.from = null;
                 F.to = null;
                 F.statuses = ['NHAP', 'DA_DIEU_CHINH'];
                 F.creatorIds = [];
+                F.daDanhDau = false;
+                F.sortBy = '';
+                F.sortDir = '';
                 F.page = 1;
                 const sInp = $('#keywordSearch') || $('#q');
                 if (sInp) sInp.value = '';
@@ -810,22 +838,10 @@
             };
         }
 
-        // Click dòng -> mở/đóng chi tiết dòng inline hoặc đánh dấu sao
+        // Click dòng -> mở/đóng chi tiết dòng inline (trừ checkbox, star, input, button, a)
         wrap.onclick = e => {
-            const st = e.target.closest('[data-star]');
-            if (st) {
-                const icon = $('i', st);
-                if (icon) {
-                    const isStarred = icon.classList.contains('bi-star-fill');
-                    icon.classList.toggle('bi-star-fill', !isStarred);
-                    icon.classList.toggle('bi-star', isStarred);
-                    st.classList.toggle('starred', !isStarred);
-                }
-                return;
-            }
-
             const row = e.target.closest('tr.tbl-row');
-            if (row && !e.target.closest('input') && !e.target.closest('button') && !e.target.closest('a')) {
+            if (row && !e.target.closest('input') && !e.target.closest('button') && !e.target.closest('a') && !e.target.closest('.cell-star, .star-btn')) {
                 const id = row.dataset.id;
                 const dtl = $(`#dtl-${id}`, wrap);
                 if (dtl) {
@@ -946,6 +962,99 @@
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 3000);
     }
+
+    /* ===== TÍNH NĂNG ĐÁNH DẤU SAO (CHUẨN HÀNG HÓA) ===== */
+    window.toggleFavoriteStockTake = function (e, id, el) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        const cell = el || (e ? e.target.closest('.cell-star, .star-btn') : null);
+        const btn = cell ? (cell.classList.contains('star-btn') ? cell : cell.querySelector('.star-btn')) : null;
+        if (!btn || !id) return;
+
+        fetch(`${toggleStarUrl}?id=${id}`, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res && res.success) {
+                if (res.isFavorite) {
+                    btn.classList.add('starred');
+                    btn.setAttribute('title', 'Bỏ đánh dấu sao');
+                    btn.innerHTML = '<i class="bi bi-star-fill"></i>';
+                } else {
+                    btn.classList.remove('starred');
+                    btn.setAttribute('title', 'Đánh dấu sao');
+                    btn.innerHTML = '<i class="bi bi-star"></i>';
+
+                    if (F.daDanhDau) {
+                        const tr = btn.closest('tr');
+                        const dtl = document.getElementById(`dtl-${id}`);
+                        if (dtl) dtl.remove();
+                        if (tr) {
+                            tr.remove();
+                            if ($$('#stockTakeTable tbody tr.tbl-row').length === 0) {
+                                loadTable();
+                            }
+                        }
+                    }
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Lỗi khi cập nhật đánh dấu sao:', err);
+            toast('Có lỗi khi cập nhật đánh dấu sao.');
+        });
+    };
+
+    window.toggleStarHeaderFilter = function (e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        F.daDanhDau = !F.daDanhDau;
+        F.page = 1;
+        loadTable();
+    };
+
+    document.addEventListener('click', e => {
+        const headerStar = e.target.closest('#starHeaderFilter');
+        if (headerStar) {
+            window.toggleStarHeaderFilter(e);
+            return;
+        }
+        const starBtn = e.target.closest('.star-btn:not(#starHeaderFilter)');
+        if (starBtn && starBtn.dataset.id) {
+            window.toggleFavoriteStockTake(e, starBtn.dataset.id, starBtn);
+            return;
+        }
+    });
+
+    // Sắp xếp cột 3 trạng thái (ASC -> DESC -> Bỏ sắp xếp) chuẩn Danh sách hàng hóa
+    $jq(document).on('click', '#stockTakeTable thead th.sortable-th', function (e) {
+        e.preventDefault();
+        const col = $jq(this).data('col');
+        if (!col) return;
+
+        if (F.sortBy === col) {
+            if (F.sortDir === 'asc') {
+                F.sortDir = 'desc';
+            } else if (F.sortDir === 'desc') {
+                F.sortBy = '';
+                F.sortDir = '';
+            } else {
+                F.sortDir = 'asc';
+            }
+        } else {
+            F.sortBy = col;
+            F.sortDir = 'asc';
+        }
+
+        F.page = 1;
+        loadTable();
+    });
 
     // Khởi tạo ban đầu
     bindSidebarEvents();

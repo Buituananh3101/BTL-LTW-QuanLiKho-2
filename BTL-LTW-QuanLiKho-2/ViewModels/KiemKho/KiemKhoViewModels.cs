@@ -6,7 +6,8 @@ namespace BTL_LTW_QuanLiKho_2.ViewModels;
 public class PhieuKiemKeListItemVM
 {
     public int MaPhieuKiemKe { get; set; }
-    public string MaPhieuHienThi => MaChungTuHelper.FormatMaKiemKe(MaPhieuKiemKe);
+    public string? MaPhieu { get; set; }
+    public string MaPhieuHienThi => !string.IsNullOrWhiteSpace(MaPhieu) ? MaPhieu : MaChungTuHelper.FormatMaKiemKe(MaPhieuKiemKe);
     public DateTime ThoiDiemChot { get; set; }
     public DateTime? NgayCanBang { get; set; }
     public string TrangThai { get; set; } = "NHAP";
@@ -39,6 +40,7 @@ public class PhieuKiemKeListItemVM
     public decimal SlLechTang { get; set; }
     public decimal SlLechGiam { get; set; }
     public decimal TongGiaTriLech { get; set; }
+    public bool DaDanhDau { get; set; }
     public List<PhieuKiemKeLineVM> Lines { get; set; } = new();
 }
 
@@ -52,6 +54,9 @@ public class PhieuKiemKeFilterVM
     public int? CreatorId { get; set; }
     public List<int> CreatorIds { get; set; } = new();
     public int? WarehouseId { get; set; }
+    public bool DaDanhDau { get; set; } = false;
+    public string? SortBy { get; set; }
+    public string? SortDir { get; set; }
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 15;
 }
@@ -59,6 +64,7 @@ public class PhieuKiemKeFilterVM
 public class PhieuKiemKeIndexVM
 {
     public PhieuKiemKeFilterVM Filter { get; set; } = new();
+    public bool DaDanhDauFilter => Filter.DaDanhDau;
     public List<PhieuKiemKeListItemVM> Items { get; set; } = new();
     public int TotalCount { get; set; }
     public int TotalPages => Math.Max(1, (int)Math.Ceiling(TotalCount / (double)Filter.PageSize));
@@ -73,6 +79,8 @@ public class PhieuKiemKeIndexVM
     public string CurrentWarehouseName { get; set; } = "";
     public List<WarehouseItemVM> Warehouses { get; set; } = new();
     public List<CreatorItemVM> Creators { get; set; } = new();
+    public string? SortBy { get; set; }
+    public string? SortDir { get; set; }
 }
 
 public class WarehouseItemVM
@@ -90,7 +98,8 @@ public class CreatorItemVM
 public class PhieuKiemKeFormVM
 {
     public int MaPhieuKiemKe { get; set; }
-    public string MaPhieuHienThi => MaPhieuKiemKe > 0 ? MaChungTuHelper.FormatMaKiemKe(MaPhieuKiemKe) : "Mã phiếu tự động";
+    public string? MaPhieu { get; set; }
+    public string MaPhieuHienThi => !string.IsNullOrWhiteSpace(MaPhieu) ? MaPhieu : (MaPhieuKiemKe > 0 ? MaChungTuHelper.FormatMaKiemKe(MaPhieuKiemKe) : "Mã phiếu tự động");
 
     [Required(ErrorMessage = "Vui lòng chọn kho")]
     public int MaKho { get; set; }
@@ -153,6 +162,7 @@ public class ProductSearchItemVM
 public class SaveStockTakeRequest
 {
     public int MaPhieuKiemKe { get; set; }
+    public string? MaPhieu { get; set; }
     public int MaKho { get; set; }
     public int MaNvlap { get; set; }
     public DateTime ThoiDiemChot { get; set; }

@@ -580,12 +580,16 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
             entity.ToTable("PhieuKiemKe");
 
             entity.Property(e => e.GhiChu).HasMaxLength(500);
+            entity.Property(e => e.MaPhieu).HasMaxLength(30).IsUnicode(false);
+            entity.HasIndex(e => e.MaPhieu, "UQ_PhieuKiemKe_MaPhieu").IsUnique();
             entity.Property(e => e.MaNvlap).HasColumnName("MaNVLap");
             entity.Property(e => e.ThoiDiemChot).HasDefaultValueSql("(sysdatetime())", "DF_PhieuKiemKe_ThoiDiemChot");
             entity.Property(e => e.TrangThai)
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasDefaultValue("NHAP", "DF_PhieuKiemKe_TrangThai");
+            entity.Property(e => e.DaDanhDau)
+                .HasDefaultValue(false, "DF_PhieuKiemKe_DaDanhDau");
 
             entity.HasOne(d => d.MaKhoNavigation).WithMany(p => p.PhieuKiemKes)
                 .HasForeignKey(d => d.MaKho)

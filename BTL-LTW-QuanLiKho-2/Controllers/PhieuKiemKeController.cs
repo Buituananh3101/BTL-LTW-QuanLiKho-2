@@ -77,6 +77,51 @@ public class PhieuKiemKeController : BaseKhoController
         return View(model);
     }
 
+    // GET: PhieuKiemKe/GetNextCode
+    [HttpGet]
+    public async Task<IActionResult> GetNextCode()
+    {
+        var code = await SinhMaPhieuTuDongAsync();
+        return Json(new { success = true, code });
+    }
+
+    private async Task<string> SinhMaPhieuTuDongAsync()
+    {
+        var existingCodes = await _context.PhieuKiemKes
+            .Where(p => p.MaPhieu != null && p.MaPhieu.StartsWith("PKK"))
+            .Select(p => p.MaPhieu!)
+            .ToListAsync();
+
+        int maxNum = 0;
+        foreach (var code in existingCodes)
+        {
+            if (code.Length > 3 && int.TryParse(code[3..], out int num))
+            {
+                if (num > maxNum) maxNum = num;
+            }
+        }
+
+        int maxId = await _context.PhieuKiemKes.MaxAsync(p => (int?)p.MaPhieuKiemKe) ?? 0;
+        int nextNum = Math.Max(maxNum, maxId) + 1;
+        return MaChungTuHelper.FormatMaKiemKe(nextNum);
+    }
+
+    // AJAX Action bật/tắt đánh dấu sao phiếu kiểm kho (giống HangHoa)
+    [AcceptVerbs("GET", "POST")]
+    public async Task<IActionResult> ToggleFavorite(int id)
+    {
+        var item = await _context.PhieuKiemKes.FindAsync(id);
+        if (item == null)
+        {
+            return NotFound(new { success = false, message = "Không tìm thấy phiếu kiểm kho." });
+        }
+
+        item.DaDanhDau = !item.DaDanhDau;
+        await _context.SaveChangesAsync();
+
+        return Json(new { success = true, isFavorite = item.DaDanhDau, maPhieuKiemKe = item.MaPhieuKiemKe });
+    }
+
     // GET: PhieuKiemKe/Filter (AJAX partial)
     public async Task<IActionResult> Filter(PhieuKiemKeFilterVM filter)
     {
@@ -131,30 +176,30 @@ public class PhieuKiemKeController : BaseKhoController
             query = query.Where(p => p.MaNvlap == filter.CreatorId.Value);
         }
 
+        // Lọc theo đánh dấu sao (Favorite / Starred)
+        if (filter.DaDanhDau)
+        {
+            query = query.Where(p => p.DaDanhDau);
+        }
+
         // Tìm kiếm mã hoặc ghi chú
         if (!string.IsNullOrWhiteSpace(filter.Q))
         {
             var q = filter.Q.Trim();
-            // Cho phép tìm theo số ID (ví dụ 1, 2) hoặc mã hiển thị PKK000001
+            // Cho phép tìm theo số ID (ví dụ 1, 2) hoặc mã hiển thị PKK000001 hoặc mã nhập tay
             if (int.TryParse(q.Replace("PKK", "").TrimStart('0'), out int searchId))
             {
-                query = query.Where(p => p.MaPhieuKiemKe == searchId || (p.GhiChu != null && p.GhiChu.Contains(q)));
+                query = query.Where(p => p.MaPhieuKiemKe == searchId || (p.MaPhieu != null && p.MaPhieu.Contains(q)) || (p.GhiChu != null && p.GhiChu.Contains(q)));
             }
             else
             {
-                query = query.Where(p => p.GhiChu != null && p.GhiChu.Contains(q));
+                query = query.Where(p => (p.MaPhieu != null && p.MaPhieu.Contains(q)) || (p.GhiChu != null && p.GhiChu.Contains(q)));
             }
         }
 
-        int totalCount = await query.CountAsync();
+        var rawEntities = await query.ToListAsync();
 
-        var pagedItems = await query
-            .OrderByDescending(p => p.ThoiDiemChot)
-            .Skip((filter.Page - 1) * filter.PageSize)
-            .Take(filter.PageSize)
-            .ToListAsync();
-
-        var listItems = pagedItems.Select(p =>
+        var allListItems = rawEntities.Select(p =>
         {
             var details = p.ChiTietPhieuKiemKes.ToList();
             var tongThucTe = details.Where(d => d.SoLuongThucTe.HasValue).Sum(d => d.SoLuongThucTe!.Value);
@@ -182,6 +227,7 @@ public class PhieuKiemKeController : BaseKhoController
             return new PhieuKiemKeListItemVM
             {
                 MaPhieuKiemKe = p.MaPhieuKiemKe,
+                MaPhieu = p.MaPhieu,
                 ThoiDiemChot = p.ThoiDiemChot,
                 NgayCanBang = ngayCanBang,
                 TrangThai = p.TrangThai,
@@ -195,9 +241,87 @@ public class PhieuKiemKeController : BaseKhoController
                 SlLechTang = slLechTang,
                 SlLechGiam = slLechGiam,
                 TongGiaTriLech = tongGiaTriLech,
+                DaDanhDau = p.DaDanhDau,
                 Lines = lines
             };
         }).ToList();
+
+        // Sắp xếp cột 3 trạng thái (ASC, DESC, None) tương tự Danh sách hàng hóa
+        if (!string.IsNullOrWhiteSpace(filter.SortBy) && !string.IsNullOrWhiteSpace(filter.SortDir))
+        {
+            bool isAsc = string.Equals(filter.SortDir, "asc", StringComparison.OrdinalIgnoreCase);
+            switch (filter.SortBy.Trim().ToLower())
+            {
+                case "ma":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.MaPhieuHienThi).ToList()
+                        : allListItems.OrderByDescending(x => x.MaPhieuHienThi).ToList();
+                    break;
+                case "tg":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.ThoiDiemChot).ToList()
+                        : allListItems.OrderByDescending(x => x.ThoiDiemChot).ToList();
+                    break;
+                case "tt":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.TongThucTe).ToList()
+                        : allListItems.OrderByDescending(x => x.TongThucTe).ToList();
+                    break;
+                case "cl":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.TongChenhLech).ToList()
+                        : allListItems.OrderByDescending(x => x.TongChenhLech).ToList();
+                    break;
+                case "tang":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.SlLechTang).ToList()
+                        : allListItems.OrderByDescending(x => x.SlLechTang).ToList();
+                    break;
+                case "giam":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.SlLechGiam).ToList()
+                        : allListItems.OrderByDescending(x => x.SlLechGiam).ToList();
+                    break;
+                case "cb":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.NgayCanBang ?? DateTime.MinValue).ToList()
+                        : allListItems.OrderByDescending(x => x.NgayCanBang ?? DateTime.MinValue).ToList();
+                    break;
+                case "slt":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.TongThucTe).ToList()
+                        : allListItems.OrderByDescending(x => x.TongThucTe).ToList();
+                    break;
+                case "ghi":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.GhiChu ?? "").ToList()
+                        : allListItems.OrderByDescending(x => x.GhiChu ?? "").ToList();
+                    break;
+                case "st":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.TenTrangThai).ToList()
+                        : allListItems.OrderByDescending(x => x.TenTrangThai).ToList();
+                    break;
+                case "kho":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.TenKho).ToList()
+                        : allListItems.OrderByDescending(x => x.TenKho).ToList();
+                    break;
+                default:
+                    allListItems = allListItems.OrderByDescending(x => x.ThoiDiemChot).ToList();
+                    break;
+            }
+        }
+        else
+        {
+            allListItems = allListItems.OrderByDescending(x => x.ThoiDiemChot).ToList();
+        }
+
+        int totalCount = allListItems.Count;
+        var pagedItems = allListItems
+            .Skip((filter.Page - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToList();
 
         var warehouses = await _context.Khos
             .Where(k => k.TrangThai == "HOAT_DONG")
@@ -216,12 +340,14 @@ public class PhieuKiemKeController : BaseKhoController
         return new PhieuKiemKeIndexVM
         {
             Filter = filter,
-            Items = listItems,
+            Items = pagedItems,
             TotalCount = totalCount,
             CurrentWarehouseId = currentWhId,
             CurrentWarehouseName = currentWh?.TenKho ?? "Kho trung tâm",
             Warehouses = warehouses,
-            Creators = creators
+            Creators = creators,
+            SortBy = filter.SortBy,
+            SortDir = filter.SortDir
         };
     }
 
@@ -276,6 +402,7 @@ public class PhieuKiemKeController : BaseKhoController
         var model = new PhieuKiemKeFormVM
         {
             MaPhieuKiemKe = 0,
+            MaPhieu = "",
             MaKho = whId,
             TenKho = kho?.TenKho ?? $"Kho {whId}",
             MaNvlap = userId,
@@ -339,6 +466,7 @@ public class PhieuKiemKeController : BaseKhoController
         var model = new PhieuKiemKeFormVM
         {
             MaPhieuKiemKe = pkk.MaPhieuKiemKe,
+            MaPhieu = pkk.MaPhieu,
             MaKho = pkk.MaKho,
             TenKho = pkk.MaKhoNavigation?.TenKho ?? $"Kho {pkk.MaKho}",
             MaNvlap = pkk.MaNvlap,
@@ -387,6 +515,7 @@ public class PhieuKiemKeController : BaseKhoController
         var model = new PhieuKiemKeFormVM
         {
             MaPhieuKiemKe = pkk.MaPhieuKiemKe,
+            MaPhieu = pkk.MaPhieu,
             MaKho = pkk.MaKho,
             TenKho = pkk.MaKhoNavigation?.TenKho ?? $"Kho {pkk.MaKho}",
             MaNvlap = pkk.MaNvlap,
@@ -453,6 +582,27 @@ public class PhieuKiemKeController : BaseKhoController
                 await _context.SaveChangesAsync();
             }
 
+            // Xử lý mã kiểm kho (tự động hoặc nhập tay)
+            string codeToSet;
+            if (!string.IsNullOrWhiteSpace(req.MaPhieu))
+            {
+                codeToSet = req.MaPhieu.Trim().ToUpper();
+                bool exists = await _context.PhieuKiemKes.AnyAsync(p => p.MaPhieu == codeToSet && p.MaPhieuKiemKe != pkk.MaPhieuKiemKe);
+                if (exists)
+                {
+                    return BadRequest(new { success = false, message = $"Mã kiểm kho '{codeToSet}' đã tồn tại trong hệ thống. Vui lòng chọn mã khác." });
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(pkk.MaPhieu))
+            {
+                codeToSet = pkk.MaPhieu;
+            }
+            else
+            {
+                codeToSet = await SinhMaPhieuTuDongAsync();
+            }
+            pkk.MaPhieu = codeToSet;
+
             // Thêm chi tiết và đóng băng đơn giá chốt
             var hangIds = req.Lines.Select(l => l.MaHang).Distinct().ToList();
             var hangMap = await _context.HangHoas
@@ -480,7 +630,8 @@ public class PhieuKiemKeController : BaseKhoController
             {
                 success = true,
                 id = pkk.MaPhieuKiemKe,
-                code = MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe),
+                code = pkk.MaPhieu ?? MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe),
+                maPhieu = pkk.MaPhieu ?? MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe),
                 message = "Lưu tạm phiếu kiểm kho thành công!"
             });
         }
@@ -547,6 +698,27 @@ public class PhieuKiemKeController : BaseKhoController
                 _context.PhieuKiemKes.Add(pkk);
                 await _context.SaveChangesAsync();
             }
+
+            // Xử lý mã kiểm kho (tự động hoặc nhập tay)
+            string codeToSet;
+            if (!string.IsNullOrWhiteSpace(req.MaPhieu))
+            {
+                codeToSet = req.MaPhieu.Trim().ToUpper();
+                bool exists = await _context.PhieuKiemKes.AnyAsync(p => p.MaPhieu == codeToSet && p.MaPhieuKiemKe != pkk.MaPhieuKiemKe);
+                if (exists)
+                {
+                    return BadRequest(new { success = false, message = $"Mã kiểm kho '{codeToSet}' đã tồn tại trong hệ thống. Vui lòng chọn mã khác." });
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(pkk.MaPhieu))
+            {
+                codeToSet = pkk.MaPhieu;
+            }
+            else
+            {
+                codeToSet = await SinhMaPhieuTuDongAsync();
+            }
+            pkk.MaPhieu = codeToSet;
 
             // Đọc lại tồn kho thực tế hiện tại từ vw_TonKhoHienTai
             var stockMap = await _context.VwTonKhoHienTais
@@ -628,7 +800,8 @@ public class PhieuKiemKeController : BaseKhoController
             {
                 success = true,
                 id = pkk.MaPhieuKiemKe,
-                code = MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe),
+                code = pkk.MaPhieu ?? MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe),
+                maPhieu = pkk.MaPhieu ?? MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe),
                 message = "Cân bằng kho thành công! Số lượng tồn kho đã được cập nhật chính xác."
             });
         }

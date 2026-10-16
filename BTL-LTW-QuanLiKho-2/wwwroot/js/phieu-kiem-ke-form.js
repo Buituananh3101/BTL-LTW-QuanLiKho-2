@@ -37,7 +37,7 @@
 
     const FM = {
         id: cfg.id || 0,
-        code: cfg.code || '',
+        code: ($('#fCode') && $('#fCode').value.trim()) ? $('#fCode').value.trim() : (cfg.code || ''),
         warehouseId: cfg.warehouseId || 1,
         created: cfg.created ? new Date(cfg.created) : new Date(),
         note: cfg.note || ($('#fNote') ? $('#fNote').value : ''),
@@ -406,6 +406,8 @@
             } else if (e.key === 'F10' && !isReadOnly) {
                 e.preventDefault();
                 $('#bDone')?.click();
+            } else if (e.key === 'Escape') {
+                $$('.pop.show').forEach(p => p.classList.remove('show'));
             }
         };
 
@@ -499,14 +501,36 @@
         const dI = $('#fDate');
         const dtPop = $('#dtPop');
         if (dI && dtPop && !isReadOnly) {
-            const showDatePicker = () => {
+            let lastFocusTime = 0;
+
+            const openDatePicker = () => {
                 DT.y = FM.created.getFullYear();
                 DT.m = FM.created.getMonth();
                 paintDt();
-                togglePop(dtPop, '#fDate');
+                $$('.pop.show').forEach(p => {
+                    if (p !== dtPop) p.classList.remove('show');
+                });
+                dtPop.dataset.owner = '#fDate';
+                dtPop.classList.add('show');
             };
-            dI.addEventListener('focus', showDatePicker);
-            dI.addEventListener('click', showDatePicker);
+
+            dI.addEventListener('focus', () => {
+                lastFocusTime = Date.now();
+                openDatePicker();
+            });
+
+            dI.addEventListener('click', () => {
+                // Chống hiện tượng double-fire giữa focus và click khi click chuột lần đầu
+                if (Date.now() - lastFocusTime < 300) {
+                    return;
+                }
+                // Nếu đã mở từ trước và click lại vào ô input: toggle đóng/mở
+                if (dtPop.classList.contains('show')) {
+                    dtPop.classList.remove('show');
+                } else {
+                    openDatePicker();
+                }
+            });
             dI.addEventListener('change', () => {
                 const m = dI.value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
                 if (m) {
@@ -553,6 +577,12 @@
                 FM.tab = t.dataset.t;
                 refreshAll();
             }
+        });
+
+        // Mã kiểm kho (nhập tay; để trống hệ thống tự động sinh khi lưu)
+        $('#fCode')?.addEventListener('input', e => {
+            FM.code = e.target.value.trim().toUpperCase();
+            FM.dirty = true;
         });
 
         // Ghi chú
@@ -686,6 +716,7 @@
 
         const payload = {
             maPhieuKiemKe: FM.id,
+            maPhieu: $('#fCode') ? $('#fCode').value.trim().toUpperCase() : (FM.code || ''),
             maKho: FM.warehouseId,
             thoiDiemChot: FM.created,
             ghiChu: $('#fNote') ? $('#fNote').value : FM.note,
@@ -738,6 +769,7 @@
                     fn: () => {
                         const payload = {
                             maPhieuKiemKe: FM.id,
+                            maPhieu: $('#fCode') ? $('#fCode').value.trim().toUpperCase() : (FM.code || ''),
                             maKho: FM.warehouseId,
                             thoiDiemChot: FM.created,
                             ghiChu: $('#fNote') ? $('#fNote').value : FM.note,

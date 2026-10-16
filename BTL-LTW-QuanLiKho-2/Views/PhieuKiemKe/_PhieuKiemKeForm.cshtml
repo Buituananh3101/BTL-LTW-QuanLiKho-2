@@ -99,16 +99,20 @@
                     </span>
                     <div class="v relw">
                         <input class="inp" id="fDate" value="@Model.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm")" 
-                               @(Model.IsReadOnly ? "disabled" : "") autocomplete="off" style="max-width:166px;height:34px;color:#4b5563">
+                               @(Model.IsReadOnly ? "disabled" : "") autocomplete="off" style="max-width:166px;height:34px;color:#4b5563;cursor:pointer;" title="Nhấp để chọn ngày giờ kiểm kho">
                         <div class="pop dtpop shadow-sm" id="dtPop"></div>
                     </div>
                 </div>
 
                 <!-- Mã kiểm kho -->
                 <div class="pr">
-                    <label>Mã kiểm kho</label>
+                    <label for="fCode">Mã kiểm kho</label>
                     <div class="v">
-                        <input class="inp" disabled value="@(Model.MaPhieuKiemKe > 0 ? Model.MaPhieuHienThi : "")" placeholder="Mã phiếu tự động">
+                        <input class="inp" id="fCode" 
+                               value="@(Model.MaPhieuKiemKe > 0 ? (!string.IsNullOrWhiteSpace(Model.MaPhieu) ? Model.MaPhieu : Model.MaPhieuHienThi) : (Model.MaPhieu ?? ""))" 
+                               placeholder="Mã phiếu tự động" 
+                               @(Model.IsReadOnly ? "disabled" : "") 
+                               autocomplete="off" style="max-width:166px;height:34px;color:#4b5563;text-transform:uppercase;">
                     </div>
                 </div>
 
@@ -215,7 +219,7 @@
     var configObj = new
     {
         id = Model.MaPhieuKiemKe,
-        code = Model.MaPhieuHienThi,
+        code = !string.IsNullOrWhiteSpace(Model.MaPhieu) ? Model.MaPhieu : (Model.MaPhieuKiemKe > 0 ? Model.MaPhieuHienThi : ""),
         warehouseId = Model.MaKho,
         created = Model.ThoiDiemChot.ToString("yyyy-MM-ddTHH:mm:ss"),
         note = Model.GhiChu ?? "",

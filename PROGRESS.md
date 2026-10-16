@@ -1,11 +1,11 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-16 – Khắc phục lỗi không nạp dữ liệu khi mở lại bản tạm Phiếu kiểm kho (Phiên 38)
+Cập nhật lần cuối: 2026-10-16 – Đồng bộ Tính năng Sắp xếp Cột 3 Trạng thái trong Kiểm kho (Phiên 42)
 
 ---
 
 ## Đang làm
-- Kiểm tra người dùng nghiệm thu chức năng mở lại và chỉnh sửa bản tạm kiểm kho.
+- Kiểm tra người dùng nghiệm thu tính năng sắp xếp cột 3 trạng thái trong danh sách phiếu kiểm kho.
 
 ---
 
@@ -15,6 +15,43 @@ Cập nhật lần cuối: 2026-10-16 – Khắc phục lỗi không nạp dữ 
 ---
 
 ## Đã xong
+- **Đồng bộ Tính năng Sắp xếp Cột 3 Trạng thái trong Kiểm kho Khớp 100% Danh sách Hàng hóa (Phiên 42)**:
+  - **Nhu cầu**: Người dùng muốn khi click vào tiêu đề của một cột trong bảng Phiếu kiểm kho thì sắp xếp dữ liệu xoay vòng 3 trạng thái (Tăng dần -> Giảm dần -> Bỏ sắp xếp) giống hệt bên module Danh sách hàng hóa.
+  - **Giải pháp thực hiện**:
+    + **ViewModels**: Bổ sung `SortBy` và `SortDir` vào `PhieuKiemKeFilterVM` và `PhieuKiemKeIndexVM` (`KiemKhoViewModels.cs`).
+    + **Backend (`PhieuKiemKeController.cs`)**: Trong `BuildIndexViewModel`, sau khi tải danh sách và tính toán các chỉ số chênh lệch (`TongThucTe`, `TongChenhLech`, `SlLechTang`, `SlLechGiam`), thực hiện switch-case sắp xếp toàn bộ dữ liệu theo 11 cột (`ma`, `tg`, `tt`, `cl`, `tang`, `giam`, `cb`, `slt`, `ghi`, `st`, `kho`) với hướng `asc` hoặc `desc`. Khi không có sort hoặc hủy sort, mặc định sắp xếp theo `ThoiDiemChot` giảm dần. Sau đó mới thực hiện phân trang `Skip().Take()`. Đồng bộ SortBy/SortDir vào IndexVM và hỗ trợ cả khi xuất file CSV.
+    + **Giao diện (`_PhieuKiemKeTable.cshtml`)**: Bổ sung class `.sortable-th`, `.num` (cho 5 cột số lượng để căn lề phải chuẩn xác), cấu trúc `.th-content > .th-title-wrap > .th-text + .sort-icon` (`bi-arrow-up` / `bi-arrow-down`) và `.is-sorted.sorted-asc / .sorted-desc` tương thích hoàn toàn với hệ thống CSS KiotViet trong `site.css`.
+    + **Script (`phieu-kiem-ke-index.js`)**: Quản lý `F.sortBy` và `F.sortDir`. Bắt sự kiện click vào `#stockTakeTable thead th.sortable-th` xoay vòng 3 trạng thái: Chưa sort -> ASC -> DESC -> Bỏ sort (về mặc định). Gửi `SortBy` và `SortDir` trong AJAX `loadTable()`, hỗ trợ giảm độ mờ `opacity: 0.6` khi đang tải, reset sort khi bấm link xóa bộ lọc.
+  - **Kiểm tra biên dịch**: `dotnet build` đạt 0 Errors, cú pháp `node -c phieu-kiem-ke-index.js` 0 lỗi.
+- **Đồng bộ Toàn diện Tính năng Đánh dấu Sao trong Kiểm kho khớp 100% Danh sách Hàng hóa (Phiên 41)**:
+  - **Nhu cầu**: Trước đó cột sao trên bảng kiểm kho chỉ hiển thị icon tĩnh, click chỉ đổi trạng thái DOM cục bộ không lưu vào CSDL, và icon sao trên header không có tính năng lọc danh sách phiếu được đánh dấu.
+  - **Giải pháp thực hiện**:
+    + **CSDL**: Tạo Migration `migrations/sql/09_bo_sung_dadanhdau_phieukiemke.sql` bổ sung cột `DaDanhDau BIT NOT NULL CONSTRAINT DF_PhieuKiemKe_DaDanhDau DEFAULT 0` vào bảng `PhieuKiemKe`. Đồng bộ Entity `PhieuKiemKe.cs` và DbContext Fluent API.
+    + **Backend**: Bổ sung action `ToggleFavorite(int id)` (GET/POST) trong `PhieuKiemKeController.cs` cập nhật trường `DaDanhDau` và lưu CSDL; bổ sung lọc `query.Where(p => p.DaDanhDau)` khi `filter.DaDanhDau == true`; đồng bộ `PhieuKiemKeListItemVM`, `PhieuKiemKeFilterVM`, `PhieuKiemKeIndexVM`.
+    + **Giao diện (`_PhieuKiemKeTable.cshtml`)**:
+      - Header: Thêm nút sao lọc `.star-btn.star-header-filter` (`onclick="toggleStarHeaderFilter(event)"`). Khi kích hoạt lọc, sao đổi sang màu cam vàng `#f97316` (`.starred`, `bi-star-fill`) và tooltip "Bỏ lọc sao (Hiển thị tất cả)".
+      - Dòng bảng: Thay thế nút bấm cũ bằng `<td class="cell-star" onclick="toggleFavoriteStockTake(event, @item.MaPhieuKiemKe, this)">` bọc `.star-btn`, hiển thị sao cam `bi-star-fill` khi được đánh dấu và sao xám `bi-star` khi chưa đánh dấu (hover cam `#f97316`).
+    + **Script (`phieu-kiem-ke-index.js`)**:
+      - Xây dựng `window.toggleFavoriteStockTake` gọi API `/PhieuKiemKe/ToggleFavorite` lưu trạng thái realtime vào CSDL, cập nhật icon và tự động xóa dòng khỏi bảng nếu đang ở chế độ lọc sao.
+      - Xây dựng `window.toggleStarHeaderFilter` bật/tắt bộ lọc sao và gọi `loadTable()`.
+      - Chặn nổi bọt click sao không làm mở accordion chi tiết `tr.dtl`; tự động reset cờ lọc sao khi nhấn "vào đây" xóa bộ lọc.
+  - **Kiểm tra biên dịch**: `dotnet build` đạt 0 Errors, cú pháp `node -c phieu-kiem-ke-index.js` 0 lỗi.
+- **Hỗ trợ Nhập tay và Tự động sinh Mã kiểm kho (Phiên 40)**:
+  - **Nhu cầu**: Trước đó ô Mã kiểm kho bị khóa cứng (`disabled`), người dùng không thể tự nhập mã chứng từ theo quy ước quản lý riêng.
+  - **Giải pháp**:
+    + **CSDL**: Tạo Migration `migrations/sql/08_bo_sung_maphieu_kiemke.sql` bổ sung cột `MaPhieu VARCHAR(30) NULL` vào bảng `PhieuKiemKe`, cập nhật dữ liệu cũ và tạo Filtered Unique Index `UQ_PhieuKiemKe_MaPhieu`.
+    + **Backend**: Cập nhật Entity `PhieuKiemKe`, `QuanLyKhoPhuQuocLtwContext`, các ViewModel (`KiemKhoViewModels.cs`). Xây dựng hàm `SinhMaPhieuTuDongAsync()` và endpoint `/PhieuKiemKe/GetNextCode`. Cập nhật `SaveDraft` và `Complete` kiểm tra trùng lặp mã kiểm kho khi người dùng tự nhập tay hoặc tự động gán mã tiếp theo nếu để trống. Cập nhật bộ lọc tìm kiếm theo mã phiếu nhập tay.
+    + **Giao diện & Script**: Mở khóa ô nhập mã `#fCode` (chữ in hoa, placeholder "Mã phiếu tự động"). Tinh gọn giao diện (không cần nút phụ, ngầm hiểu nếu để trống ô mã thì hệ thống sẽ tự động sinh mã dạng `PKK...` khi lưu tạm hoặc cân bằng). Tự động gửi `maPhieu` từ ô input.
+  - **Kiểm tra biên dịch**: `dotnet build` đạt 0 Errors, cú pháp `node -c phieu-kiem-ke-form.js` 0 lỗi.
+- **Khắc phục Lỗi Chớp Tắt khi Click vào Bộ chọn Ngày Giờ Lập Phiếu Kiểm Kho (Phiên 39)**:
+  - **Nguyên nhân cốt lõi**:
+    + Ô input ngày giờ `#fDate` gắn hàm `showDatePicker` trên cả 2 sự kiện: `focus` và `click`. Trong khi đó, `showDatePicker` lại gọi hàm `togglePop(dtPop, '#fDate')`.
+    + Khi người dùng dùng chuột nhấp vào ô `#fDate` lần đầu: trình duyệt kích hoạt sự kiện `focus` trước (gọi `togglePop` -> popup chuyển từ đóng sang mở `.show`), ngay sau đó 1-5ms trình duyệt tiếp tục kích hoạt sự kiện `click` của cú nhấp chuột đó (gọi `togglePop` lần 2 -> popup thấy đang mở nên chuyển sang đóng gỡ `.show`). Kết quả là popup vừa ló lên đã bị dập tắt ngay lập tức ("hiện lên rồi ẩn luôn").
+  - **Giải pháp**:
+    + Tách hàm `openDatePicker()` chuyên trách hiển thị popup (đảm bảo luôn thêm class `.show`, nạp dữ liệu lịch và giờ chính xác, không dùng `togglePop`).
+    + Bổ sung biến kiểm soát thời gian `lastFocusTime`: Sự kiện `click` kiểm tra khoảng cách thời gian `Date.now() - lastFocusTime < 300ms`, nếu là sự kiện click của chính lần đầu nhận focus thì bỏ qua không toggle đóng.
+    + Khi ô input đã mở từ trước mà người dùng click lại, hỗ trợ toggle đóng/mở mượt mà; hỗ trợ phím `Escape` đóng nhanh tất cả popup; bổ sung `cursor: pointer` và tooltip trực quan cho ô `#fDate`.
+  - **Kiểm tra biên dịch**: `dotnet build` đạt 0 Errors, cú pháp `node -c phieu-kiem-ke-form.js` 0 lỗi.
 - **Sửa lỗi không nạp dữ liệu mặt hàng khi mở lại bản tạm Phiếu kiểm kho (Phiên 38)**:
   - **Nguyên nhân cốt lõi**:
     + Trong `_PhieuKiemKeForm.cshtml`, thẻ script cấu hình `<script id="stockTakeConfig" type="application/json">` trước đó tự lắp ráp chuỗi JSON thủ công bằng nội suy Razor `Select(l => $"{{\"pid\":{l.MaHang}... \"sys\":{l.SoLuongTheoSo}... \"cost\":{l.DonGia}}}")`.
@@ -267,6 +304,13 @@ Cập nhật lần cuối: 2026-10-16 – Khắc phục lỗi không nạp dữ 
 ---
 
 ## Nhật ký phiên
+- **2026-10-16 (Phiên 40 - Sáng)**:
+  - **Hỗ trợ vừa tự động sinh mã vừa nhập tay Mã kiểm kho**:
+    - Chạy script Migration `08_bo_sung_maphieu_kiemke.sql` bổ sung cột `MaPhieu VARCHAR(30) NULL` vào bảng `PhieuKiemKe`, cập nhật mã mặc định `PKK00000X` và tạo Filtered Unique Index `UQ_PhieuKiemKe_MaPhieu`.
+    - Cập nhật Model `PhieuKiemKe`, DbContext `QuanLyKhoPhuQuocLtwContext`, các ViewModel (`KiemKhoViewModels.cs`).
+    - Bổ sung hàm `SinhMaPhieuTuDongAsync()` và Action API `/PhieuKiemKe/GetNextCode`. Cập nhật `SaveDraft`, `Complete`, `Index` (tìm kiếm theo mã tùy chỉnh).
+    - Mở khóa ô nhập mã `#fCode` (`_PhieuKiemKeForm.cshtml`), giao diện tối giản sạch sẽ; ngầm hiểu nếu để trống ô mã hệ thống sẽ tự động sinh mã dạng `PKK...` khi lưu (`phieu-kiem-ke-form.js`).
+    - Biên dịch kiểm tra: `dotnet build` 0 Errors, cú pháp JavaScript 0 lỗi.
 - **2026-10-16 (Phiên 38 - Sáng)**:
   - **Sửa lỗi không nạp dữ liệu mặt hàng khi mở lại bản tạm Phiếu kiểm kho**:
     - **Nguyên nhân**: `<script id="stockTakeConfig">` trong `_PhieuKiemKeForm.cshtml` dùng Razor nội suy chuỗi thủ công; trên Windows văn hóa `vi-VN`, các số thập phân `decimal` (`sys`, `act`, `cost`) bị in dấu phẩy `,` (`10,00`), đồng thời `JavaScriptStringEncode` sinh ký tự `\'` làm `JSON.parse` trên client bị `SyntaxError` và bảng hàng hóa kiểm kho bị rỗng. Đồng thời `PhieuKiemKeController.Edit` trả về nhầm `View("Create")`.
@@ -379,6 +423,32 @@ Cập nhật lần cuối: 2026-10-16 – Khắc phục lỗi không nạp dữ 
     - Kiểm tra cú pháp JS: `node -c` 0 lỗi. Đồng bộ `docs/specs/danh-sach-hang-hoa.md`.
 - **2026-10-15 (Phiên 15 - Sáng)**:
   - Tinh gọn thanh công cụ Quản lý Hàng hóa: Gỡ bỏ nút Cài đặt (`bi-gear`) trên thanh công cụ của trang Hàng hóa (`Index.cshtml`), giữ lại 2 nút tiện ích tiêu chuẩn là Tải lại bảng (`bi-arrow-clockwise`) và Trợ giúp (`bi-question-circle`).
+- **2026-10-16 (Phiên 41 - Sáng)**:
+  - Đồng bộ Toàn diện Tính năng Đánh dấu Sao trong Kiểm kho khớp 100% Danh sách Hàng hóa:
+    - CSDL: Tạo Migration `migrations/sql/09_bo_sung_dadanhdau_phieukiemke.sql` bổ sung cột `DaDanhDau BIT NOT NULL CONSTRAINT DF_PhieuKiemKe_DaDanhDau DEFAULT 0` vào bảng `PhieuKiemKe`. Đồng bộ Entity `PhieuKiemKe.cs` và `QuanLyKhoPhuQuocLtwContext.cs`.
+    - Backend: Bổ sung Action `ToggleFavorite(int id)` trong `PhieuKiemKeController.cs`, cập nhật lọc `query.Where(p => p.DaDanhDau)` trong `BuildIndexViewModel`, đồng bộ các ViewModel `PhieuKiemKeListItemVM`, `PhieuKiemKeFilterVM`, `PhieuKiemKeIndexVM`.
+    - Giao diện: Thêm nút sao lọc trên header `_PhieuKiemKeTable.cshtml` (`.star-header-filter`, `onclick="toggleStarHeaderFilter(event)"`); đồng bộ cột sao từng dòng sang `<td class="cell-star" onclick="toggleFavoriteStockTake(event, ...)">` bọc `.star-btn` hiển thị màu cam `#f97316` khi đánh dấu (`bi-star-fill`).
+    - JavaScript: Thêm `toggleFavoriteStockTake` gọi API `/PhieuKiemKe/ToggleFavorite` cập nhật realtime và fade out dòng khi đang lọc sao; thêm `toggleStarHeaderFilter` kích hoạt lọc sao; chặn click sao mở accordion `tr.dtl`.
+    - Kiểm tra biên dịch: 0 lỗi. Đồng bộ `docs/specs/kiem-kho.md`.
+- **2026-10-16 (Phiên 40 - Sáng)**:
+  - Hỗ trợ Nhập tay và Tự động sinh Mã kiểm kho:
+    - CSDL: Tạo Migration `08_bo_sung_maphieu_kiemke.sql` bổ sung cột `MaPhieu VARCHAR(30) NULL` vào bảng `PhieuKiemKe` kèm Filtered Unique Index `UQ_PhieuKiemKe_MaPhieu`.
+    - Backend: Mở khóa ô nhập mã kiểm kho, cập nhật logic tự động sinh mã hoặc kiểm tra trùng lặp mã khi lưu tạm / cân bằng kho.
+    - Kiểm tra biên dịch: 0 lỗi. Đồng bộ `docs/specs/kiem-kho.md`.
+- **2026-10-16 (Phiên 39 - Sáng)**:
+  - Khắc phục lỗi chớp tắt popup chọn ngày giờ khi click lần đầu (`phieu-kiem-ke-form.js`, `_PhieuKiemKeForm.cshtml`):
+    - Tách hàm `openDatePicker()` hiển thị ngày giờ trực tiếp (không dùng `togglePop`).
+    - Bổ sung biến kiểm soát thời gian `lastFocusTime` ngăn chặn hiện tượng double-fire giữa `focus` và `click` khi click lần đầu; giữ nguyên popup mở khi nhận focus.
+    - Hỗ trợ toggle đóng/mở khi click lại sau đó; hỗ trợ phím `Escape` đóng nhanh các popup; bổ sung `cursor: pointer` cho ô `#fDate`.
+  - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-16 (Phiên 38 - Sáng)**:
+  - Sửa lỗi không nạp dữ liệu mặt hàng khi mở lại bản tạm Phiếu kiểm kho (`_PhieuKiemKeForm.cshtml`, `PhieuKiemKeController.cs`):
+    - Chuẩn hóa chuỗi JSON cấu hình `stockTakeConfig` dùng `JsonSerializer.Serialize` tránh lỗi dấu phẩy thập phân tiếng Việt (`vi-VN`) làm hỏng cú pháp JSON.
+    - Sửa Action `Edit` trả về đúng `View("Edit", model)`.
+  - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-16 (Phiên 37 - Sáng)**:
+  - Khắc phục ngoại lệ đọc ô Excel an toàn trong ClosedXML (`ExcelHelper.cs`, `HangHoaExcelService.cs`):
+    - Bổ sung hàm `GetCellValueAsString` chuyển đổi an toàn theo `cell.Value.Type` tránh `InvalidCastException`.
   - Kiểm tra biên dịch: 0 lỗi.
 - **2026-10-15 (Phiên 36 - Đêm)**:
   - Sửa lỗi Lặp Tiêu đề Tháng trong Bộ chọn Ngày Giờ Lập Phiếu Kiểm kho (`phieu-kiem-ke-form.js`): Gỡ bỏ khối `<div class="cal-h">Tháng MM/YYYY</div>` trùng lặp trong hàm `calHTML`, giữ lại tiêu đề duy nhất chuẩn mực nằm giữa 2 nút chuyển tháng trên thanh điều hướng `.dtnav`, hiển thị ngay phía trên lưới ngày `T2 T3 T4...`, khắc phục dứt điểm hiện tượng hiển thị 2 dòng tháng liên tiếp và làm chiều cao lịch khớp hoàn hảo với khung giờ 230px bên phải.
@@ -427,6 +497,12 @@ Cập nhật lần cuối: 2026-10-16 – Khắc phục lỗi không nạp dữ 
   - Kiểm tra biên dịch: 0 lỗi.
 - **2026-10-15 (Phiên 20 - Sáng)**:
   - Tinh chỉnh kích thước thẻ thuộc tính hàng hóa mini (`.kiot-attr-chip`): Giảm font-size xuống 11px, giảm padding còn 1.5px (chiều cao chip ~20px), bo góc 4px và thu nhỏ khoảng cách margin/gap giúp thẻ thuộc tính hiển thị vừa vặn, thanh thoát và không chiếm dụng diện tích.
+- **2026-10-16 (Phiên 42 - Sáng)**:
+  - Đồng bộ Chuẩn hóa Tính năng Sắp xếp Cột 3 Trạng thái (3-State Column Sorting) trong Danh sách Phiếu Kiểm kho:
+    - Bổ sung `SortBy` và `SortDir` vào `PhieuKiemKeFilterVM` và `PhieuKiemKeIndexVM`.
+    - Xử lý sắp xếp 11 cột (`ma`, `tg`, `tt`, `cl`, `tang`, `giam`, `cb`, `slt`, `ghi`, `st`, `kho`) trong `PhieuKiemKeController.BuildIndexViewModel` trước khi phân trang.
+    - Cập nhật header `_PhieuKiemKeTable.cshtml` với class `.sortable-th`, `.num`, icon mũi tên `bi-arrow-up` / `bi-arrow-down` và trạng thái `.is-sorted`.
+    - Viết script quản lý chu trình 3 trạng thái click trong `phieu-kiem-ke-index.js`, đồng bộ qua AJAX `loadTable` và xuất file CSV.
   - Kiểm tra biên dịch: 0 lỗi.
 - **2026-10-15 (Phiên 19 - Sáng)**:
   - Tối ưu hiển thị Thẻ Thuộc tính Hàng hóa:
