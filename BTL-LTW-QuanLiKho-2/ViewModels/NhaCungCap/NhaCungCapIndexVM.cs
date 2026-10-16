@@ -15,4 +15,5 @@ public class NhaCungCapIndexVM
 
     public decimal TongNoToanBo { get; set; }
     public decimal TongMuaToanBo { get; set; }
+    public bool DaDanhDauFilter => Filter?.DaDanhDau ?? false;
 }

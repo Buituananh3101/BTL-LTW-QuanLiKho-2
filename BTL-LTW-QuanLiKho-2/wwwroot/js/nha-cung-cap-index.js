@@ -18,6 +18,7 @@
         noTu: null,
         noDen: null,
         trangThai: 'HOAT_DONG',
+        daDanhDau: false,
         sortBy: $('#kiotContainer').data('sort-by') || '',
         sortDir: $('#kiotContainer').data('sort-dir') || '',
         page: 1,
@@ -54,6 +55,9 @@
         }
         if (state.trangThai) {
             params.append('TrangThai', state.trangThai);
+        }
+        if (state.daDanhDau) {
+            params.append('DaDanhDau', 'true');
         }
         if (state.thoiGian) {
             params.append('ThoiGian', state.thoiGian);
@@ -472,7 +476,7 @@
         const $menu = $('#colMenu');
         if (!$menu.length) return;
 
-        let visibleCols = 1; // 1 cột checkbox luôn hiển thị
+        let visibleCols = 2; // 1 cột checkbox + 1 cột sao luôn hiển thị
         $menu.find('input[data-c]').each(function () {
             const col = $(this).data('c');
             const isChecked = $(this).is(':checked');
@@ -534,6 +538,75 @@
     }
 
     /* ==========================================================================
+       5.2. ĐÁNH DẤU SAO VÀ LỌC SAO HEADER (STAR BOOKMARK)
+       ========================================================================== */
+    window.toggleFavoriteSupplier = function (e, id, el) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        const $cell = $(el);
+        const $btn = $cell.hasClass('star-btn') ? $cell : $cell.find('.star-btn');
+        if (!$btn.length || !id) return;
+
+        $.ajax({
+            url: '/NhaCungCap/ToggleFavorite',
+            type: 'POST',
+            data: { id: id },
+            success: function (res) {
+                if (res && res.success) {
+                    if (res.isFavorite) {
+                        $btn.addClass('starred')
+                            .attr('title', 'Bỏ đánh dấu sao')
+                            .html('<i class="bi bi-star-fill"></i>');
+                    } else {
+                        $btn.removeClass('starred')
+                            .attr('title', 'Đánh dấu sao')
+                            .html('<i class="bi bi-star"></i>');
+
+                        if (state.daDanhDau) {
+                            const $tr = $btn.closest('tr');
+                            const $detail = $('#detail-' + id);
+                            $detail.remove();
+                            $tr.fadeOut(250, function () {
+                                $(this).remove();
+                                if ($('#supplierTable tbody tr.product-row').length === 0) {
+                                    loadTable();
+                                }
+                            });
+                        }
+                    }
+                }
+            },
+            error: function (xhr) {
+                console.error('Lỗi khi cập nhật đánh dấu sao:', xhr);
+                if (window.KiotToast) {
+                    window.KiotToast.error('Có lỗi khi cập nhật đánh dấu sao.');
+                }
+            }
+        });
+    };
+
+    window.toggleStarHeaderFilter = function (e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        state.daDanhDau = !state.daDanhDau;
+        state.page = 1;
+        loadTable();
+    };
+
+    $(document).on('click', '#supplierTable .star-btn:not(#starHeaderFilter)', function (e) {
+        const id = $(this).data('id');
+        window.toggleFavoriteSupplier(e, id, this);
+    });
+
+    $(document).on('click', '#supplierTable #starHeaderFilter', function (e) {
+        window.toggleStarHeaderFilter(e);
+    });
+
+    /* ==========================================================================
        6. MASTER-DETAIL ACCORDION (BUNG DÒNG CHI TIẾT & 3 TABS KHỚP CHUẨN HÀNG HÓA)
        ========================================================================== */
     function expandSupplierRow(id, toggle = true) {
@@ -576,9 +649,9 @@
         }
     }
 
-    // Click dòng bảng để mở chi tiết (trừ checkbox, link, button)
+    // Click dòng bảng để mở chi tiết (trừ checkbox, sao, link, button)
     $(document).on('click', '#supplierTable tr.product-row', function (e) {
-        if ($(e.target).closest('input, button, a, label, .cell-checkbox, .w-chk').length) return;
+        if ($(e.target).closest('input, button, a, label, .cell-checkbox, .cell-star, .star-btn, .w-chk').length) return;
         const id = $(this).data('id');
         if (id) expandSupplierRow(id, true);
     });
@@ -1281,6 +1354,7 @@
         state.noTu = null;
         state.noDen = null;
         state.trangThai = 'HOAT_DONG';
+        state.daDanhDau = false;
         state.sortBy = '';
         state.sortDir = '';
         state.page = 1;

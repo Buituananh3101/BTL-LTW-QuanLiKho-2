@@ -23,4 +23,6 @@ public class NhaCungCapItemVM
     public string? TenCongTy { get; set; }
     public string? MaSoThue { get; set; }
     public string? SoCccd { get; set; }
+    public bool DaDanhDau { get; set; }
+    public bool IsFavorite => DaDanhDau;
 }

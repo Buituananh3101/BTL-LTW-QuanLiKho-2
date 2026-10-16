@@ -277,6 +277,9 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
                 .IsUnicode(false)
                 .HasDefaultValue("HOAT_DONG", "DF_DonViCapHang_TrangThai");
 
+            entity.Property(e => e.DaDanhDau)
+                .HasDefaultValue(false, "DF_DonViCapHang_DaDanhDau");
+
             entity.HasOne(d => d.MaNhomNccNavigation).WithMany(p => p.DonViCapHangs)
                 .HasForeignKey(d => d.MaNhomNcc)
                 .OnDelete(DeleteBehavior.SetNull);

@@ -403,6 +403,22 @@ public class NhaCungCapController : BaseKhoController
         return Json(new { success = true, message = $"Đã xóa nhóm \"{group.TenNhom}\" thành công." });
     }
 
+    // 12. AJAX Action bật/tắt đánh dấu sao (nhà cung cấp yêu thích)
+    [AcceptVerbs("GET", "POST")]
+    public async Task<IActionResult> ToggleFavorite(int id)
+    {
+        var item = await _context.DonViCapHangs.FindAsync(id);
+        if (item == null)
+        {
+            return NotFound(new { success = false, message = "Không tìm thấy nhà cung cấp." });
+        }
+
+        item.DaDanhDau = !item.DaDanhDau;
+        await _context.SaveChangesAsync();
+
+        return Json(new { success = true, isFavorite = item.DaDanhDau, maDonViCapHang = item.MaDonViCapHang });
+    }
+
     #region Helper Query Building
     private IQueryable<NhaCungCapItemVM> BuildFilterQuery(NhaCungCapFilterParams filter)
     {
@@ -461,6 +477,12 @@ public class NhaCungCapController : BaseKhoController
             query = query.Where(d => d.NgayTao <= filter.ToDate.Value);
         }
 
+        // 5. Lọc theo Đánh dấu sao (yêu thích)
+        if (filter.DaDanhDau)
+        {
+            query = query.Where(d => d.DaDanhDau);
+        }
+
         // Ánh xạ sang NhaCungCapItemVM và tính tổng mua / nợ
         var mappedQuery = query.Select(d => new NhaCungCapItemVM
         {
@@ -475,6 +497,7 @@ public class NhaCungCapController : BaseKhoController
             KhuVuc = d.KhuVuc,
             PhuongXa = d.PhuongXa,
             TrangThai = d.TrangThai,
+            DaDanhDau = d.DaDanhDau,
             NgayTao = d.NgayTao,
             NguoiTao = d.NguoiTao,
             GhiChu = d.GhiChu,

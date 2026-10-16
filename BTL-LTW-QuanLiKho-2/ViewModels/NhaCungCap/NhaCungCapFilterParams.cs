@@ -12,4 +12,5 @@ public class NhaCungCapFilterParams : BaseFilterParams
     public decimal? NoTu { get; set; }
     public decimal? NoDen { get; set; }
     public string? TrangThai { get; set; }
+    public bool DaDanhDau { get; set; } = false;
 }

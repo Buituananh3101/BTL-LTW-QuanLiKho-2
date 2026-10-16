@@ -37,6 +37,8 @@ public partial class DonViCapHang
 
     public string TrangThai { get; set; } = "HOAT_DONG";
 
+    public bool DaDanhDau { get; set; } = false;
+
     public virtual NhomNhaCungCap? MaNhomNccNavigation { get; set; }
 
     public virtual ICollection<PhieuNhap> PhieuNhaps { get; set; } = new List<PhieuNhap>();

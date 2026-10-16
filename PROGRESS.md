@@ -1,6 +1,6 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-16 – Cố Định Độ Rộng Cột Nhà Cung Cấp & Khép Kín Chi Tiết/Chỉnh Sửa (Phiên 69)
+Cập nhật lần cuối: 2026-10-16 – Bổ Sung Cột Sao Yêu Thích & Lọc Sao Header Nhà Cung Cấp (Phiên 70)
 
 ---
 
@@ -16,6 +16,30 @@ Cập nhật lần cuối: 2026-10-16 – Cố Định Độ Rộng Cột Nhà C
 4. Xây dựng `PhieuNhapController` và View giao diện (`Views/PhieuNhap/`) theo phong cách KiotViet.
 
 ---
+
+- **Bổ Sung Cột Sao Yêu Thích & Lọc Sao Header Nhà Cung Cấp (Phiên 70)**:
+  - **Nhu cầu**: Bổ sung cột đánh dấu sao (star / favorite bookmark) cho danh sách nhà cung cấp (`NhaCungCap`), đồng bộ chuẩn trải nghiệm KiotViet giống hệt phân hệ Hàng hóa (`HangHoa`) và Kiểm kho (`PhieuKiemKe`). Cho phép đánh dấu sao từng nhà cung cấp và bấm vào sao ở tiêu đề bảng để lọc nhanh danh sách nhà cung cấp đã đánh dấu sao.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Cơ sở dữ liệu (Tuân thủ Rule 8)**:
+      * Bổ sung cột `DaDanhDau BIT NOT NULL CONSTRAINT DF_DonViCapHang_DaDanhDau DEFAULT 0` vào bảng `DonViCapHang`.
+      * Tạo file migration `migrations/sql/11_bo_sung_dadanhdau_donvicaphang.sql`.
+      * Cập nhật Model C# `Models/DonViCapHang.cs` (`public bool DaDanhDau { get; set; } = false;`) và cấu hình DbContext `QuanLyKhoPhuQuocLtwContext.cs`.
+    + **Backend & ViewModel**:
+      * Cập nhật `NhaCungCapItemVM.cs` (`DaDanhDau`, `IsFavorite => DaDanhDau`).
+      * Cập nhật `NhaCungCapFilterParams.cs` (`public bool DaDanhDau { get; set; } = false;`).
+      * Cập nhật `NhaCungCapIndexVM.cs` (`public bool DaDanhDauFilter => Filter?.DaDanhDau ?? false;`).
+      * Trong `NhaCungCapController.cs`: Bổ sung lọc `if (filter.DaDanhDau) query = query.Where(d => d.DaDanhDau);`, map `DaDanhDau = d.DaDanhDau`, và tạo action `[AcceptVerbs("GET", "POST")] public async Task<IActionResult> ToggleFavorite(int id)` trả JSON `{ success, isFavorite, maDonViCapHang }`.
+    + **Giao diện & Bảng dữ liệu (`_NhaCungCapTable.cshtml`)**:
+      * Header: Bổ sung `<th class="th-star" onclick="toggleStarHeaderFilter(event)">` với icon sao rỗng/đầy tùy theo trạng thái lọc `Model.DaDanhDauFilter`.
+      * Dòng tổng hợp `summary-row`: Thêm 1 ô trống tương ứng vị trí cột sao.
+      * Dòng dữ liệu `product-row`: Thêm `<td class="cell-star" onclick="toggleFavoriteSupplier(event, @item.MaDonViCapHang, this)">` với `.star-btn`.
+      * Nâng `colspan` mặc định từ 13 lên 14 (1 checkbox + 1 star + 12 cột dữ liệu).
+    + **JavaScript Tương tác (`nha-cung-cap-index.js`)**:
+      * Bổ sung `daDanhDau` vào `state` và gán param `DaDanhDau` khi `loadTable()`.
+      * Cập nhật `visibleCols = 2` (1 checkbox + 1 sao luôn hiển thị) trong `applyColumnVisibility()`.
+      * Triển khai hàm toàn cục `toggleFavoriteSupplier` (AJAX POST toggle sao, đổi icon, toast thông báo, tự động mờ dần dòng nếu đang bật lọc sao) và `toggleStarHeaderFilter` (bật/tắt lọc sao header).
+      * Cập nhật bộ loại trừ click dòng `#supplierTable tr.product-row` thêm `.cell-star, .star-btn` tránh mở nhầm chi tiết khi click sao.
+    + **Kiểm tra biên dịch & Kiểm thử**: `dotnet build` đạt 0 Errors, `node -c` đạt 0 Errors, API `ToggleFavorite` và bộ lọc `DaDanhDau=true` hoạt động chính xác 100%.
 
 - **Cố Định Độ Rộng Cột Nhà Cung Cấp & Khép Kín Chi Tiết/Chỉnh Sửa (Phiên 69)**:
   - **Nhu cầu**: Giữ nguyên độ rộng cột cố định cho bảng nhà cung cấp khi còn ít cột (không ép cột Tên hoặc bảng tràn hết 100% chiều ngang màn hình). Khi click vào dòng thì bung mở khối chi tiết nhà cung cấp cùng các nút thao tác (Chỉnh sửa, Xóa, Ngừng hoạt động) và đóng khung thành hình chữ nhật khép kín vừa vặn đúng bằng độ rộng các cột hiển thị.
