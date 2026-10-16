@@ -101,21 +101,7 @@ public class HangHoaController : BaseKhoController
             return File(GetDefaultPlaceholderSvg(), "image/svg+xml");
         }
 
-        string mime = "image/jpeg";
-        if (data.Length > 4 && data[0] == 0x89 && data[1] == 0x50 && data[2] == 0x4E && data[3] == 0x47)
-        {
-            mime = "image/png";
-        }
-        else if (data.Length > 2 && data[0] == 0x47 && data[1] == 0x49)
-        {
-            mime = "image/gif";
-        }
-        else if (data.Length > 12 && data[8] == 0x57 && data[9] == 0x45 && data[10] == 0x42 && data[11] == 0x50)
-        {
-            mime = "image/webp";
-        }
-
-        return File(data, mime);
+        return File(data, DetectImageMime(data));
     }
 
     private async Task<List<HangHoaItemVM>> BuildFilteredItemsListAsync(
@@ -542,15 +528,64 @@ public class HangHoaController : BaseKhoController
         };
     }
 
-    // Tạo nhanh nhóm hàng từ nút Tạo mới ở sidebar
+    // Tạo nhanh nhóm hàng từ nút Tạo mới ở sidebar hoặc modal form
     [HttpPost]
     public async Task<IActionResult> CreateGroupQuick([FromBody] QuickGroupRequest req)
     {
         if (string.IsNullOrWhiteSpace(req?.TenNhom)) return BadRequest(new { message = "Vui lòng nhập tên nhóm hàng." });
-        var group = new NhomHang { TenNhom = req.TenNhom.Trim() };
+        string name = req.TenNhom.Trim();
+
+        var existing = await _context.NhomHangs.FirstOrDefaultAsync(g => g.TenNhom.ToLower() == name.ToLower());
+        if (existing != null)
+        {
+            return Json(new { success = true, maNhom = existing.MaNhom, tenNhom = existing.TenNhom });
+        }
+
+        var group = new NhomHang { TenNhom = name };
         _context.NhomHangs.Add(group);
         await _context.SaveChangesAsync();
         return Json(new { success = true, maNhom = group.MaNhom, tenNhom = group.TenNhom });
+    }
+
+    // Cập nhật tên nhóm hàng trực tiếp từ dropdown
+    [HttpPost]
+    public async Task<IActionResult> UpdateGroupQuick([FromBody] UpdateGroupRequest req)
+    {
+        if (req == null || req.MaNhom <= 0) return BadRequest(new { message = "Mã nhóm hàng không hợp lệ." });
+        if (string.IsNullOrWhiteSpace(req.TenNhom)) return BadRequest(new { message = "Vui lòng nhập tên nhóm hàng." });
+
+        string trimmedName = req.TenNhom.Trim();
+        var group = await _context.NhomHangs.FindAsync(req.MaNhom);
+        if (group == null) return NotFound(new { message = "Không tìm thấy nhóm hàng." });
+
+        // Kiểm tra trùng tên với nhóm khác
+        bool isDuplicate = await _context.NhomHangs.AnyAsync(g => g.MaNhom != req.MaNhom && g.TenNhom.ToLower() == trimmedName.ToLower());
+        if (isDuplicate) return BadRequest(new { message = $"Tên nhóm hàng \"{trimmedName}\" đã tồn tại trên hệ thống." });
+
+        group.TenNhom = trimmedName;
+        await _context.SaveChangesAsync();
+        return Json(new { success = true, maNhom = group.MaNhom, tenNhom = group.TenNhom });
+    }
+
+    // Xóa nhóm hàng trực tiếp từ dropdown
+    [HttpPost]
+    public async Task<IActionResult> DeleteGroupQuick([FromBody] DeleteGroupRequest req)
+    {
+        if (req == null || req.MaNhom <= 0) return BadRequest(new { message = "Mã nhóm hàng không hợp lệ." });
+
+        var group = await _context.NhomHangs.FindAsync(req.MaNhom);
+        if (group == null) return NotFound(new { message = "Không tìm thấy nhóm hàng." });
+
+        // Kiểm tra ràng buộc xem có hàng hóa nào đang thuộc nhóm này không
+        bool hasProducts = await _context.HangHoas.AnyAsync(h => h.MaNhom == req.MaNhom);
+        if (hasProducts)
+        {
+            return BadRequest(new { message = $"Không thể xóa nhóm hàng \"{group.TenNhom}\" vì đang có sản phẩm thuộc nhóm này." });
+        }
+
+        _context.NhomHangs.Remove(group);
+        await _context.SaveChangesAsync();
+        return Json(new { success = true, message = $"Đã xóa nhóm hàng \"{group.TenNhom}\" thành công." });
     }
 
     // Tạo nhanh đơn vị tính từ modal form
@@ -606,12 +641,14 @@ public class HangHoaController : BaseKhoController
             for (int i = 0; i < sorted.Count; i++)
             {
                 if (sorted[i].LaAnhChinh) mainImgIdx = i;
-                imgList.Add("data:image/jpeg;base64," + Convert.ToBase64String(sorted[i].DuLieuAnh));
+                string mime = DetectImageMime(sorted[i].DuLieuAnh);
+                imgList.Add($"data:{mime};base64,{Convert.ToBase64String(sorted[i].DuLieuAnh)}");
             }
         }
         else if (item.HinhAnh != null && item.HinhAnh.Length > 0)
         {
-            imgList.Add("data:image/jpeg;base64," + Convert.ToBase64String(item.HinhAnh));
+            string mime = DetectImageMime(item.HinhAnh);
+            imgList.Add($"data:{mime};base64,{Convert.ToBase64String(item.HinhAnh)}");
         }
 
         string? imgBase64 = imgList.Count > 0 ? imgList[mainImgIdx] : null;
@@ -994,6 +1031,15 @@ public class HangHoaController : BaseKhoController
         await _context.SaveChangesAsync();
 
         return Json(new { success = true, message = $"Đã chuyển hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) sang trạng thái 'Ngừng bán'." });
+    }
+
+    private static string DetectImageMime(byte[]? data)
+    {
+        if (data == null || data.Length < 4) return "image/jpeg";
+        if (data[0] == 0x89 && data[1] == 0x50 && data[2] == 0x4E && data[3] == 0x47) return "image/png";
+        if (data.Length > 2 && data[0] == 0x47 && data[1] == 0x49) return "image/gif";
+        if (data.Length > 12 && data[8] == 0x57 && data[9] == 0x45 && data[10] == 0x42 && data[11] == 0x50) return "image/webp";
+        return "image/jpeg";
     }
 
     private static byte[]? ParseBase64Image(string? base64)

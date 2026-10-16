@@ -44,7 +44,7 @@
 ## 3. Quy chuẩn Giao diện & Bộ lọc
 
 ### 3.1. Cột lọc bên trái (Sidebar Filter):
-1. **Nhóm hàng**: Multi-select Tag Dropdown + ô tìm kiếm dính đỉnh + tạo nhanh.
+1. **Nhóm hàng**: Multi-select Tag Dropdown + ô tìm kiếm dính đỉnh + Tạo mới, Sửa và Xóa trực tiếp từ dropdown (icon ✎ khi hover).
 2. **Tồn kho**: Custom Single Select KiotViet (Tất cả / Còn hàng / Hết hàng / Dưới định mức tồn).
 3. **Dự kiến hết hàng**: Hôm nay, 3 ngày tới, 7 ngày tới, Trong tháng, > 30 ngày.
 4. **Nhà cung cấp**: Multi-select tag dropdown theo NCC đã từng nhập.
@@ -66,4 +66,4 @@ Click header: Lần 1 Tăng dần (ASC `bi-arrow-up`) ➜ Lần 2 Giảm dần (
    - Khi nhập file, bắt buộc phải có cột "Tên hàng (*)". Xử lý trùng mã theo 3 chế độ: Cập nhật (ghi đè), Bỏ qua dòng trùng, Báo lỗi và dừng. Tự động sinh phiếu nhập `DAU_KY` nếu có tồn kho ban đầu.
 3. **Mã nội bộ & Retry**: Mã `HH` + 6 số tự tăng (`HH000001`), Unique, retry chống Race Condition.
 4. **Tồn kho theo kho làm việc**: Đọc động từ `vw_TonKhoHienTai` theo `CurrentWarehouseId`.
-5. **Tối ưu RAM ảnh**: Không `SELECT HinhAnh` ở danh sách. Dùng LINQ Projection `HasImage`.
+5. **Tối ưu RAM & Xử lý ảnh**: Không `SELECT HinhAnh` ở danh sách. Dùng LINQ Projection `HasImage`. Quá trình nén ảnh client tự động đổ nền trắng `#FFFFFF` trên Canvas nhằm triệt tiêu hoàn toàn lỗi ảnh trong suốt (PNG/WebP) bị chuyển thành nền đen khi nén JPEG; hỗ trợ Kéo-Thả (Drag & Drop) và Dán ảnh từ Clipboard (`Ctrl+V`); backend tự động nhận diện chính xác MIME type (`image/png`, `image/jpeg`, `image/webp`, `image/gif`).

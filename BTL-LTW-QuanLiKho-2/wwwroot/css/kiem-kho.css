@@ -1313,7 +1313,11 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.22s ease-out, visibility 0.22s ease-out, background-color 0.22s ease-out, backdrop-filter 0.22s ease-out;
+  transition: opacity 0.2s ease-in,
+              visibility 0s linear 0.2s,
+              background-color 0.2s ease-in,
+              backdrop-filter 0.2s ease-in,
+              -webkit-backdrop-filter 0.2s ease-in;
 }
 .ov.show {
   opacity: 1 !important;
@@ -1322,6 +1326,11 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
   background: rgba(15, 23, 42, 0.55) !important;
   backdrop-filter: blur(3px) !important;
   -webkit-backdrop-filter: blur(3px) !important;
+  transition: opacity 0.22s ease-out,
+              visibility 0s linear 0s,
+              background-color 0.22s ease-out,
+              backdrop-filter 0.22s ease-out,
+              -webkit-backdrop-filter 0.22s ease-out;
 }
 .modal-box {
   background: #fff;
@@ -1329,13 +1338,14 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
   width: min(480px, 94vw);
   box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.04);
   overflow: hidden;
-  transform: scale(0.92) translateY(12px);
+  transform: scale(0.94) translateY(8px);
   opacity: 0;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-out;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease-in;
 }
 .ov.show .modal-box {
   transform: scale(1) translateY(0);
   opacity: 1;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-out;
 }
 .modal-box .modal-head {
   display: flex;

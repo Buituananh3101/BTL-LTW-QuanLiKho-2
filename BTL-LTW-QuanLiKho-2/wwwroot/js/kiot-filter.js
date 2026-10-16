@@ -181,7 +181,21 @@ window.KiotFilter = (function ($) {
             });
         });
 
+        dropdown.on('click', '.kiot-item-edit-btn, .hh-item-edit-btn', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            const id = $(this).data('id') || $(this).closest('.kiot-ms-item').data('val');
+            const oldName = $(this).data('name') || $(this).closest('.kiot-ms-item').find('.kiot-ms-text, span').first().text().trim();
+            if (typeof window.handleEditNhomHang === 'function') {
+                window.handleEditNhomHang(id, oldName);
+            }
+        });
+
         dropdown.on('click', '.kiot-ms-item', function (e) {
+            if ($(e.target).closest('.kiot-item-edit-btn, .hh-item-edit-btn').length) {
+                return;
+            }
             e.stopPropagation();
             const checkbox = $(this).find('input[type="checkbox"]');
             if (!$(e.target).is('input[type="checkbox"]')) {
@@ -767,6 +781,7 @@ window.KiotFilter = (function ($) {
                             const sIdx = selected.indexOf(val);
                             if (sIdx >= 0) selected[sIdx] = newVal;
                             renderList($input.val());
+                            openDropdown();
                         },
                         onDelete: function () {
                             const idx = opt.items.indexOf(val);
@@ -774,6 +789,7 @@ window.KiotFilter = (function ($) {
                             const sIdx = selected.indexOf(val);
                             if (sIdx >= 0) selected.splice(sIdx, 1);
                             renderList($input.val());
+                            openDropdown();
                         }
                     });
                 }
@@ -796,8 +812,14 @@ window.KiotFilter = (function ($) {
             }
         });
 
-        // Click ra ngoài -> đóng
+        // Click ra ngoài -> đóng (ngoại trừ khi đang thao tác trong modal prompt / confirm / edit modal)
         $(document).on('click', function (e) {
+            if ($(e.target).closest('#kiotPromptOv, #kiotConfirmOv, #hhEditItemOv, #hhPromptOv, .kiot-prompt-ov, .kiot-confirm-ov, .modal-box').length > 0) {
+                return;
+            }
+            if ($('#kiotPromptOv.show, #kiotConfirmOv.show, #hhEditItemOv.show, #hhPromptOv.show, .kiot-prompt-ov.show, .kiot-confirm-ov.show').length > 0) {
+                return;
+            }
             if (!$wrap.is(e.target) && $wrap.has(e.target).length === 0) {
                 closeDropdown();
             }
