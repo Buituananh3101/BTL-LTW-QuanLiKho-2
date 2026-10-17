@@ -134,9 +134,9 @@
             {
                 foreach (var item in Model.Items)
                 {
-                    <tr class="tbl-row" data-id="@item.MaPhieuKiemKe">
-                        <td class="w-chk text-center" onclick="event.stopPropagation();">
-                            <input class="form-check-input" type="checkbox" data-sel="@item.MaPhieuKiemKe">
+                    <tr class="product-row tbl-row" data-id="@item.MaPhieuKiemKe" title="Nhấn để xem chi tiết phiếu kiểm kho">
+                        <td class="w-chk text-center cell-checkbox" onclick="event.stopPropagation();">
+                            <input class="form-check-input row-select" type="checkbox" data-sel="@item.MaPhieuKiemKe" value="@item.MaPhieuKiemKe">
                         </td>
                         <td class="w-star text-center cell-star" style="cursor: pointer;" onclick="toggleFavoriteStockTake(event, @item.MaPhieuKiemKe, this)">
                             <span class="star-btn @(item.DaDanhDau ? "starred" : "")" data-id="@item.MaPhieuKiemKe" title="@(item.DaDanhDau ? "Bỏ đánh dấu sao" : "Đánh dấu sao")">
@@ -172,10 +172,11 @@
                     </tr>
 
                     <!-- Khối chi tiết bung ra (Inline Drawer / Accordion) -->
-                    <tr class="dtl" id="dtl-@item.MaPhieuKiemKe" style="display: none;">
+                    <tr class="product-detail-row dtl" id="dtl-@item.MaPhieuKiemKe" style="display: none;">
                         <td colspan="13" class="p-0 border-0">
-                            <div class="dp kiot-detail-panel-wrap shadow-sm" data-d="@item.MaPhieuKiemKe">
-                                <div class="dp-tabs kiot-detail-tabs"><button type="button" class="dp-tab kiot-detail-tab-btn active" data-tab="info">Thông tin</button></div>
+                            <div class="product-detail-panel-wrap" style="display: none;">
+                                <div class="product-detail-panel dp shadow-sm" data-d="@item.MaPhieuKiemKe">
+                                    <div class="dp-tabs"><button type="button" class="dp-tab active" data-tab="info">Thông tin</button></div>
                                 <h2 class="d-flex align-items-center gap-2">
                                     <span class="fw-bold" style="font-size: 18px; color: #1e293b;">@item.MaPhieuHienThi</span>
                                     @if (item.TrangThai == "DA_DIEU_CHINH")
@@ -306,8 +307,9 @@
                                     }
                                 </div>
                             </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </td>
+                </tr>
                 }
             }
         </tbody>

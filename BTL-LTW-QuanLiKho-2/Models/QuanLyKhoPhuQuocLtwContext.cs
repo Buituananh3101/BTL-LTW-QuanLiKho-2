@@ -176,6 +176,8 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
             entity.Property(e => e.MaCtphieuNhap).HasColumnName("MaCTPhieuNhap");
             entity.Property(e => e.DonGiaNhap).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.SoLuong).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.GiamGia).HasColumnType("decimal(18, 2)").HasDefaultValue(0m, "DF_ChiTietPhieuNhap_GiamGia");
+            entity.Property(e => e.ThanhTien).HasColumnType("decimal(18, 2)").HasDefaultValue(0m, "DF_ChiTietPhieuNhap_ThanhTien");
 
             entity.HasOne(d => d.MaHangNavigation).WithMany(p => p.ChiTietPhieuNhaps)
                 .HasForeignKey(d => d.MaHang)
@@ -638,6 +640,14 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
             entity.HasIndex(e => new { e.MaKho, e.TrangThai }, "IX_PhieuNhap_Kho_TrangThai");
 
             entity.Property(e => e.GhiChu).HasMaxLength(500);
+            entity.Property(e => e.MaPhieu).HasMaxLength(30).IsUnicode(false);
+            entity.HasIndex(e => e.MaPhieu, "UQ_PhieuNhap_MaPhieu").IsUnique();
+            entity.Property(e => e.DaDanhDau).HasDefaultValue(false, "DF_PhieuNhap_DaDanhDau");
+            entity.Property(e => e.SoHoaDon).HasMaxLength(50);
+            entity.Property(e => e.GiamGia).HasColumnType("decimal(18, 2)").HasDefaultValue(0m, "DF_PhieuNhap_GiamGia");
+            entity.Property(e => e.TongTien).HasColumnType("decimal(18, 2)").HasDefaultValue(0m, "DF_PhieuNhap_TongTien");
+            entity.Property(e => e.CanTraNcc).HasColumnType("decimal(18, 2)").HasDefaultValue(0m, "DF_PhieuNhap_CanTraNcc");
+            entity.Property(e => e.MaDatHangNhap).HasMaxLength(30);
             entity.Property(e => e.LoaiPhieuNhap)
                 .HasMaxLength(20)
                 .IsUnicode(false)

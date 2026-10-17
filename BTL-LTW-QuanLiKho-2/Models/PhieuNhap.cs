@@ -25,6 +25,20 @@ public partial class PhieuNhap
 
     public string? GhiChu { get; set; }
 
+    public string? MaPhieu { get; set; }
+
+    public bool DaDanhDau { get; set; } = false;
+
+    public string? SoHoaDon { get; set; }
+
+    public decimal GiamGia { get; set; } = 0;
+
+    public decimal TongTien { get; set; } = 0;
+
+    public decimal CanTraNcc { get; set; } = 0;
+
+    public string? MaDatHangNhap { get; set; }
+
     public virtual ICollection<ChiTietPhieuNhap> ChiTietPhieuNhaps { get; set; } = new List<ChiTietPhieuNhap>();
 
     public virtual DonViCapHang? MaDonViCapHangNavigation { get; set; }

@@ -1,0 +1,51 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.NhapHang.NhapHangIndexVM
+@using BTL_LTW_QuanLiKho_2.ViewModels.Common
+
+<!-- CỘT BÊN TRÁI: TIÊU ĐỀ "NHẬP HÀNG" + CÁC KHỐI BỘ LỌC KIOTVIET (MODULAR LEGO) -->
+<aside class="kiot-sidebar-col" id="sidebarFilterCol">
+    <!-- Header cho sidebar khi mở ở mobile/zoom -->
+    <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+        <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc nhập hàng</div>
+        <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
+    </div>
+
+    <!-- Tiêu đề sidebar Desktop -->
+    <div class="kiot-sidebar-title d-none d-lg-flex">
+        Nhập hàng
+    </div>
+
+    <div class="kiot-filter-box" id="side">
+        <!-- 1. Trạng thái chứng từ -->
+        <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Trạng thái", "dotSt", new() {
+            new("NHAP", "Phiếu tạm", Model.Filter.Statuses.Contains("NHAP")),
+            new("DA_XAC_NHAN", "Đã nhập hàng", Model.Filter.Statuses.Contains("DA_XAC_NHAN")),
+            new("HUY", "Đã hủy", Model.Filter.Statuses.Contains("HUY"))
+        })' />
+
+        <!-- 2. Thời gian -->
+        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("date", "Thời gian", false)' />
+
+        <!-- 3. Người tạo -->
+        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NguoiTao", "nguoitao", "Người tạo", "Chọn người tạo", true, "dotUser") {
+            Items = Model.NhanViens.Select(nv => new KiotMultiSelectItemVM(nv.Value, nv.Text, Model.Filter.CreatorId?.ToString() == nv.Value)).ToList()
+        }' />
+
+        <!-- 4. Số hóa đơn -->
+        <div class="f-block position-relative">
+            <h6>Số hóa đơn <span class="filter-dot" id="dotShd"></span></h6>
+            <div class="kiot-search-input-wrap">
+                <input type="text" id="invoiceNumberFilter" class="form-control form-control-sm" placeholder="Tìm theo số hóa đơn..." value="@Model.Filter.SoHoaDon" autocomplete="off" />
+            </div>
+        </div>
+
+        <!-- 5. Người nhập -->
+        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NguoiNhap", "nguoinhap", "Người nhập", "Chọn người nhập", true, "dotConfirmer") {
+            Items = Model.NhanViens.Select(nv => new KiotMultiSelectItemVM(nv.Value, nv.Text, Model.Filter.ConfirmerId?.ToString() == nv.Value)).ToList()
+        }' />
+
+        <!-- 6. Nhà cung cấp -->
+        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NhaCungCap", "ncc", "Nhà cung cấp", "Chọn nhà cung cấp", true, "dotNcc") {
+            Items = Model.NhaCungCaps.Select(ncc => new KiotMultiSelectItemVM(ncc.Value, ncc.Text, Model.Filter.NccId?.ToString() == ncc.Value)).ToList()
+        }' />
+    </div>
+</aside>

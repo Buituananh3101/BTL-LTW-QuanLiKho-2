@@ -1,0 +1,10 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.NhapHang.NhapHangFormVM
+@{
+    ViewData["Title"] = "Chi tiết phiếu nhập hàng " + Model.MaPhieuHienThi;
+}
+
+<partial name="_NhapHangForm" model="Model" />
+
+@section Scripts {
+    <script src="~/js/nhap-hang-form.js" asp-append-version="true"></script>
+}

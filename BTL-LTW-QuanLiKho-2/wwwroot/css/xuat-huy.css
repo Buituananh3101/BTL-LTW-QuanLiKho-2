@@ -163,3 +163,53 @@
     width: 100%;
     box-sizing: border-box;
 }
+
+.dp-tabs {
+    display: flex;
+    gap: 24px;
+    border-bottom: 1px solid #e2e8f0;
+    margin: 0 -20px 14px;
+    padding: 0 20px;
+    position: static !important;
+    width: auto !important;
+}
+
+.dp-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 4px 8px;
+    margin-bottom: -1px;
+    color: #64748b;
+    font-weight: 500;
+    font-size: 13.5px;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    cursor: pointer;
+    outline: none !important;
+    transition: all 0.15s ease-in-out;
+}
+
+.dp-tab:hover {
+    color: #0070f3 !important;
+}
+
+.dp-tab.active {
+    color: #0070f3 !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid #0070f3 !important;
+}
+
+/* Khối thông tin chi tiết phiếu xuất hủy có độ rộng cố định 992px chuẩn KiotViet & Nhà cung cấp */
+.xh-detail-fixed-wrap {
+    width: 992px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 1040px) {
+    .xh-detail-fixed-wrap {
+        width: 100%;
+    }
+}
+

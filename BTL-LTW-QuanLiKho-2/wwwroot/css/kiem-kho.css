@@ -443,7 +443,8 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
 .star.on .ic { fill: #f5a524; stroke: #f5a524; }
 
 /* Khối chi tiết bung mở khi click dòng: Cạnh đáy và 2 bên khép kín hình chữ nhật */
-.tbl tr.dtl > td {
+.tbl tr.dtl > td,
+.tbl tr.product-detail-row > td {
   padding: 0 !important;
   border-top: none !important;
   border-bottom: 2px solid #0070f3 !important;
@@ -453,10 +454,8 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
 }
 .dp {
   padding: 16px 20px 20px;
-  position: sticky;
-  left: 0;
+  background: #ffffff;
   width: 100%;
-  max-width: min(1200px, calc(100vw - 320px));
   box-sizing: border-box;
 }
 .dp-tabs {
@@ -465,6 +464,8 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
   border-bottom: 1px solid var(--line);
   margin: 0 -20px 14px;
   padding: 0 20px;
+  position: static !important;
+  width: auto !important;
 }
 .dp-tab {
   display: inline-flex;

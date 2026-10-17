@@ -184,9 +184,9 @@
     function initRowDetail() {
         kiemKhoRowDetail = KiotFilter.initRowDetail({
             tableSelector: '#stockTakeTable',
-            rowSelector: 'tr.tbl-row',
+            rowSelector: 'tr.product-row, tr.tbl-row',
             detailRowSelector: '#dtl-{id}',
-            wrapSelector: '.dp, .kiot-detail-panel-wrap',
+            wrapSelector: '.product-detail-panel-wrap, .kiot-detail-panel-wrap',
             tabBtnSelector: '.dp-tab',
             tabPaneSelector: '.dp-pane',
             excludeClickSelector: 'input, button, a, label, .w-chk, .w-star, .cell-star, .star-btn',

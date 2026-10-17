@@ -284,6 +284,12 @@
 }
 .hh-f input[type=text],
 .hh-f input[type=number],
+.hh-f input[type=email],
+.hh-f input[type=tel],
+.hh-f input[type=password],
+.hh-f input[type=search],
+.hh-f input[type=url],
+.hh-f input[type=date],
 .hh-f input:not([type]),
 .hh-f select {
   height: 38px;

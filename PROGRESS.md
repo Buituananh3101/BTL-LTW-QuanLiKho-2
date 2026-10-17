@@ -1,21 +1,88 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-16 – Áp Dụng Chuẩn Hiển Thị Nhà Cung Cấp Cho Phân Hệ Xuất Hủy (Phiên 77)
+Cập nhật lần cuối: 2026-10-17 – Xây Dựng Hoàn Chỉnh Mô-đun Nhập Hàng Chuẩn KiotViet (Phiên 82)
 
 ---
 
 ## Đang làm
-- Sẵn sàng tiếp tục các hạng mục nâng cấp giao diện hoặc xây dựng phân hệ kế tiếp theo yêu cầu người dùng.
+- Sẵn sàng kiểm thử thực tế mô-đun Nhập hàng cùng người dùng và nhận phản hồi trải nghiệm.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế màn hình danh sách xuất hủy, accordion chi tiết và tùy chọn ẩn/hiện cột cùng người dùng.
-2. Lập tài liệu đặc tả chi tiết `docs/specs/nhap-kho.md` theo chuẩn Hàng hóa, Nhà cung cấp & Kiểm kho.
-3. Xây dựng ViewModel cho Nhập kho (`NhapKhoIndexVM`, `NhapKhoFormVM`, `NhapKhoLineVM`...).
-4. Xây dựng `PhieuNhapController` và View giao diện (`Views/PhieuNhap/`) theo phong cách KiotViet.
+1. Kiểm tra trải nghiệm thực tế các luồng Nhập hàng (Lập phiếu tạm, Hoàn thành cập nhật kho động qua `vw_TonKhoHienTai`, Huỷ phiếu an toàn, Tìm kiếm F3, Export Excel).
+2. Xây dựng phân hệ Trả hàng nhập (Purchase Returns) theo yêu cầu.
 
 ---
+
+- **Xây Dựng Hoàn Chỉnh Mô-đun Nhập Hàng Chuẩn KiotViet (Phiên 82)**:
+  - **Nhu cầu**: Người dùng yêu cầu triển khai toàn diện chức năng Nhập hàng (Goods Receipt / Purchase Order) dựa trên trọn vẹn 100% các khối Lego đã đóng gói (Bộ lọc thời gian `_KiotDateFilter`, trạng thái `_KiotStatusFilter`, multi-select `_KiotMultiSelectFilter`, tìm kiếm hàng hóa F3 `f3-product-search.js`, thanh phân trang `_Pagination`, toggle sao không thông báo, viền xanh chữ nhật khép kín).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Cơ sở dữ liệu & Entity Models**:
+      * Thực thi Migration `migrations/sql/12_bo_sung_maphieu_dadanhdau_phieunhap.sql` bổ sung các cột `MaPhieu`, `DaDanhDau`, `SoHoaDon`, `GiamGia`, `TongTien`, `CanTraNcc`, `MaDatHangNhap` vào `PhieuNhap` và `GiamGia`, `ThanhTien` vào `ChiTietPhieuNhap`.
+      * Tạo Filtered Unique Index `UQ_PhieuNhap_MaPhieu` đảm bảo mã phiếu không trùng lặp.
+      * Đồng bộ `Models/PhieuNhap.cs`, `Models/ChiTietPhieuNhap.cs`, `Models/QuanLyKhoPhuQuocLtwContext.cs`.
+    + **ViewModels Đầy Đủ**:
+      * Xây dựng `ViewModels/NhapHang/NhapHangViewModels.cs` với `NhapHangListItemVM`, `NhapHangLineVM`, `NhapHangFilterVM`, `NhapHangIndexVM`, `NhapHangFormVM`, `SaveNhapHangRequest`, `SaveNoteRequest`, `QuickSupplierVM`.
+    + **Controller Nghiệp Vụ (`Controllers/NhapHangController.cs`)**:
+      * Kế thừa `BaseKhoController`, tích hợp `INhatKyThaoTacService` ghi log bảo mật.
+      * Cung cấp đầy đủ các Action: `Index`, `Filter` (AJAX partial), `ToggleFavorite` (silent toggle), `GetNextCode` (tự sinh mã `PN000001`), `Create`, `Edit`, `Details`, `Save` (POST JSON bọc trong `BeginTransactionAsync`), `Cancel` (kiểm tra an toàn tồn kho trước khi hủy phiếu hoàn thành), `SaveNote`, `SearchProducts` (F3 autocomplete), `SearchSuppliers`, `QuickCreateSupplier` và `Export` (Excel bằng ClosedXML).
+    + **Giao Diện Chuẩn KiotViet**:
+      * Màn hình 1 Danh sách (`Views/NhapHang/Index.cshtml`, `_NhapHangFilterSidebar.cshtml`, `_NhapHangTable.cshtml`): Bảng danh sách phiếu nhập với cột sao, checkbox, summary row, và drawer xem chi tiết dạng accordion viền chữ nhật `#0070f3` khép kín.
+      * Màn hình 2 Form 2 cột (`Views/NhapHang/Create.cshtml`, `Edit.cshtml`, `Details.cshtml`, `_NhapHangForm.cshtml`): Bên trái là bảng hàng nhập tích hợp F3 autocomplete và nhập Excel; bên phải là panel thông tin chứng từ thu gọn F4, tạo nhanh NCC bằng modal con.
+    + **Styles & Scripts**:
+      * `wwwroot/css/nhap-hang.css`: Định dạng chuẩn KiotViet, layout 2 cột, viền xanh chữ nhật không lem, badge trạng thái.
+      * `wwwroot/js/nhap-hang-index.js`: Lọc AJAX, sắp xếp cột, đổi sao silent không hiện toast, phân trang, hủy phiếu.
+      * `wwwroot/js/nhap-hang-form.js`: Tính toán tự động, F3/F4/F9/F10, đọc Excel bằng SheetJS, lưu tạm và hoàn thành.
+    + **Điều Hướng Hệ Thống**: Kết nối liên kết "Nhập hàng" trong `_Header.cshtml` và `_MainMenu.cshtml` về `/NhapHang/Index`.
+    + **Kiểm Tra & Biên Dịch**: `dotnet build --no-restore -t:CoreCompile` đạt **0 Errors**, `node -c` toàn bộ JavaScript đạt **0 Errors**.
+
+- **Cố Định Độ Rộng Khung Chi Tiết Xuất Hủy Chuẩn Nhà Cung Cấp (Phiên 81)**:
+  - **Nhu cầu**: Người dùng phản ánh khi mở dòng chi tiết phiếu xuất hủy, các thành phần (bảng sản phẩm hủy, ô tìm kiếm inline, ghi chú, tổng kết và các nút hành động) bị kéo dãn toàn bộ bề ngang theo bảng dữ liệu rộng nhiều cột, yêu cầu cố định độ rộng tương tự như phần Nhà cung cấp.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bổ Sung Khung Cố Định Vào Razor View (`Views/XuatHuy/_XuatHuyTable.cshtml`)**: Bọc toàn bộ nội dung chi tiết (tiêu đề, meta, bảng `dtl-tbl`, khối `dp-bottom` ghi chú & tổng kết, thanh nút `dp-actions`) bên dưới tab bar vào `<div class="xh-detail-fixed-wrap kiot-detail-fixed-wrap">`.
+    + **Chuẩn Hóa CSS Cố Định (`wwwroot/css/xuat-huy.css`)**:
+      * Khai báo `.xh-detail-fixed-wrap { width: 992px; max-width: 100%; box-sizing: border-box; }` đồng bộ với chuẩn `.ncc-detail-fixed-wrap` và `.kiot-detail-fixed-wrap`.
+      * Bổ sung responsive media query `@media (max-width: 1040px) { width: 100%; }` đảm bảo hiển thị hoàn hảo trên màn hình hẹp/thu phóng.
+      * Giữ nguyên viền xanh `#0070f3` khép kín 100% bề ngang dòng bảng, trong khi toàn bộ nội dung và nút bấm bên trong được căn chỉnh gọn gàng, ngay ngắn trong phạm vi 992px.
+    + **Kiểm Tra & Đồng Bộ Tài Liệu**:
+      * `dotnet build /t:Compile` đạt **0 Errors**.
+      * Đồng bộ đặc tả `docs/specs/xuat-huy.md` (6.885 ký tự, đảm bảo < 8.000 ký tự theo Rule 12).
+
+- **Khắc Phục Lỗi Giật Lắc Của Tab Thông Tin Khi Đóng Mở Dòng Chi Tiết (Phiên 80)**:
+  - **Nhu cầu**: Người dùng phản ánh tab "Thông tin" trong dòng chi tiết phiếu kiểm kho bị giật lắc qua lại ngang khi click mở/đóng chi tiết dòng.
+  - **Nguyên nhân cốt lõi**:
+    1. Tranh chấp CSS `position: sticky; left: 0; width: max-content;` trên `.dp-tabs` kết hợp với `margin: 0 -20px` khiến tab bị tính lại tọa độ liên tục khi kích thước khung thay đổi.
+    2. `.dp` có `padding` và `position: sticky` nhưng lại bị gán làm wrapper trượt trực tiếp bởi jQuery `slideDown/slideUp`, dẫn đến việc `overflow: hidden` tạm thời của jQuery làm mất/chuyển đổi context dính (sticky context) mỗi frame hoạt họa, gây giật nảy 20px.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tách Khung Bọc Animation Độc Lập (`_PhieuKiemKeTable.cshtml`)**: Tách biệt `<div class="product-detail-panel-wrap">` (chuyên dùng cho slideDown/slideUp không có padding/sticky) bọc bên ngoài `<div class="product-detail-panel dp">` (chứa nội dung tĩnh và padding).
+    + **Chuẩn Hóa CSS Cố Định Tab Bar (`site.css`, `kiem-kho.css`, `xuat-huy.css`)**:
+      * Loại bỏ `position: sticky; left: 0; width: max-content;` khỏi `.kiot-detail-tabs`, `.product-detail-tabs`, `.ncc-detail-tabs` và `.dp-tabs`.
+      * Thiết lập `.dp-tabs` ở `position: static !important; width: auto !important;` với `border-bottom` trải đều tự nhiên.
+      * Loại bỏ `position: sticky; left: 0;` và `max-width: min(1200px, calc(100vw - 320px))` khỏi `.dp`, giúp layout co giãn ổn định tuyệt đối.
+    + **Cập Nhật Selector Script (`phieu-kiem-ke-index.js`)**: Điều chỉnh `wrapSelector: '.product-detail-panel-wrap, .kiot-detail-panel-wrap'` để jQuery chỉ tác động lên wrapper trượt.
+    + **Kiểm tra biên dịch & cú pháp**: `dotnet build` đạt 0 Errors, `node -c` toàn bộ JavaScript đạt 0 Errors.
+
+- **Đóng Gói Nút Nhập / Xuất File Excel Danh Sách Hàng Hóa Chuẩn KiotViet (Phiên 79)**:
+  - **Nhu cầu**: Đóng gói các nút Import file và Xuất file riêng lẻ trên thanh toolbar danh sách hàng hóa thành một khối dropdown duy nhất chuẩn KiotViet gọn gàng và tái sử dụng.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tạo Partial View Dùng Chung (`_HangHoaExcelActions.cshtml`)**: Tạo `Views/HangHoa/_HangHoaExcelActions.cshtml` đóng gói dropdown thao tác file Excel chuẩn KiotViet (`.btn.btn-tool.dropdown-toggle`), gồm 3 tùy chọn:
+      * 📤 **Xuất file (Export)**: Mở modal `#hhExportModalOv` chọn cột và phạm vi xuất dữ liệu.
+      * 📥 **Nhập file (Import)**: Mở modal `#hhImportModalOv` kéo thả file Excel cập nhật hàng hóa.
+      * 📑 **Tải file mẫu nhập hàng (.xlsx)**: Liên kết trực tiếp tải mẫu chuẩn `DownloadTemplate`.
+    + **Tối Ưu Responsive & Tinh Gọn Toolbar (`Views/HangHoa/Index.cshtml`)**:
+      * Loại bỏ 25 dòng code HTML phân mảnh giữa desktop (2 nút riêng) và mobile (1 dropdown).
+      * Thay thế bằng 1 dòng `<partial name="_HangHoaExcelActions" />`, tự động co giãn hiển thị icon hoặc text linh hoạt trên mọi kích thước màn hình.
+    + **Kiểm tra biên dịch**: `dotnet build /t:Compile` đạt 0 Errors.
+    + **Đồng bộ đặc tả**: Cập nhật File Map trong `docs/specs/danh-sach-hang-hoa.md`.
+
+- **Sửa Lỗi Hiển Thị Ô Email Trong Modal Nhà Cung Cấp (Phiên 78)**:
+  - **Nhu cầu**: Sửa lỗi ô Email trong modal "Thêm mới nhà cung cấp" bị vuông góc sắc nhọn, chiều cao và đường viền lệch lạc so với các ô nhập liệu khác (Tên nhà cung cấp, Mã NCC, Điện thoại).
+  - **Nguyên nhân**: Trong `hang-hoa-form.css`, bộ chọn định kiểu `.hh-f input[type=text], .hh-f input[type=number]` chỉ áp dụng cho text và number, thiếu `input[type=email]`. Khiến ô input Email rơi về kiểu dáng mặc định của trình duyệt (border vuông 90 độ, không có `border-radius: 8px;`, thiếu `height: 38px;`, `padding: 0 12px;` và hiệu ứng focus).
+  - **Giải pháp & Kết quả thực hiện**:
+    + Trong `wwwroot/css/hang-hoa-form.css`: Bổ sung `input[type=email]`, `input[type=tel]`, `input[type=password]`, `input[type=search]`, `input[type=url]`, `input[type=date]` vào bộ chọn dùng chung `.hh-f`.
+    + Trong `wwwroot/css/nha-cung-cap.css`: Bổ sung khối quy tắc chuyên biệt đảm bảo toàn bộ input trong modal (đặc biệt là `.hh-f input[type=email]`) luôn đạt chuẩn kích thước `height: 38px`, bo tròn góc `border-radius: 8px;`, `padding: 0 12px;`, `font-size: 14.5px;` và viền sáng xanh khi focus.
+    + Kiểm tra biên dịch `dotnet build` đạt 0 Errors.
 
 - **Áp Dụng Chuẩn Hiển Thị Nhà Cung Cấp Cho Phân Hệ Xuất Hủy (Phiên 77)**:
   - **Nhu cầu**: Người dùng yêu cầu đồng bộ cấu trúc hiển thị, tùy chọn ẩn/hiện cột và hiệu ứng mở dòng chi tiết của phân hệ Nhà cung cấp sang phân hệ Xuất hủy (`XuatHuy`).
@@ -864,6 +931,15 @@ Cập nhật lần cuối: 2026-10-16 – Áp Dụng Chuẩn Hiển Thị Nhà C
 ---
 
 ## Nhật ký phiên
+- **2026-10-17 (Phiên 79 - Trưa)**:
+  - Đóng gói nút Nhập/Xuất file Excel trong Danh sách hàng hóa:
+    - Tạo partial view `Views/HangHoa/_HangHoaExcelActions.cshtml` gom các thao tác file (Xuất file, Nhập file, Tải file mẫu) vào 1 nút dropdown KiotViet duy nhất.
+    - Tinh gọn `Views/HangHoa/Index.cshtml`, loại bỏ 25 dòng mã phân mảnh giữa desktop và mobile, chuyển sang gọi 1 dòng partial lego.
+    - Cập nhật File Map trong đặc tả `docs/specs/danh-sach-hang-hoa.md`.
+- **2026-10-17 (Phiên 78 - Trưa)**:
+  - Sửa lỗi ô Email trong modal Thêm mới nhà cung cấp:
+    - Bổ sung selector `input[type=email]` (và các loại input liên quan) vào `.hh-f` trong `hang-hoa-form.css`.
+    - Bổ sung khối quy tắc chuyên biệt trong `nha-cung-cap.css` đảm bảo ô Email luôn có chiều cao 38px, bo tròn góc `border-radius: 8px;`, `padding: 0 12px;`, không còn bị lỗi viền vuông sắc nhọn.
 - **2026-10-16 (Phiên 72 - Tối)**:
   - Thống nhất giao diện thông báo toàn hệ thống & Bỏ kẻ dọc xanh bên trái:
     - Loại bỏ triệt để `border-left` trên `.kiot-toast` trong `site.css`, giải quyết triệt để lỗi kẻ dọc xanh/đỏ/vàng bị nhô ra ngoài góc bo tròn.

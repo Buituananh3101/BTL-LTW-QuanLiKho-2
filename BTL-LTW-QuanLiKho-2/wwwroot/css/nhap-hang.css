@@ -1,0 +1,549 @@
+/* ==========================================================================
+   CSS CHO MÔ-ĐUN NHẬP HÀNG (CHUẨN THỰC TẾ KIOTVIET)
+   ========================================================================== */
+
+/* 1. Master-Detail Inline Panel & Tabs */
+.dp-tabs {
+    display: flex;
+    gap: 24px;
+}
+.dp-tab {
+    cursor: pointer;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    border-bottom: 2px solid transparent !important;
+    padding: 8px 4px !important;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+.dp-tab:hover {
+    color: #0070f4 !important;
+}
+.dp-tab.active {
+    color: #0070f4 !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid #0070f4 !important;
+}
+
+/* 2. Bảng Nhập Hàng giữ độ rộng cột cố định, không ép tràn ngang */
+#receiptTable {
+    width: max-content !important;
+    min-width: 960px !important;
+    table-layout: fixed !important;
+}
+
+/* Đóng khung hình chữ nhật liền mạch khi mở chi tiết dòng (Chuẩn #0070f3) */
+#receiptTable tr.product-row.selected > td {
+    background-color: #ffffff !important;
+    border-top: 2px solid #0070f3 !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    border-right: none !important;
+}
+#receiptTable tr.product-row.selected > td:first-child {
+    border-left: 3px solid #0070f3 !important;
+}
+#receiptTable tr.product-row.selected > td.last-visible-col,
+#receiptTable tr.product-row.selected > td:last-child {
+    border-right: 3px solid #0070f3 !important;
+}
+
+#receiptTable tr.product-detail-row > td {
+    background-color: #ffffff !important;
+    padding: 0 !important;
+    border-top: none !important;
+    border-bottom: 2px solid #0070f3 !important;
+    border-left: 3px solid #0070f3 !important;
+    border-right: 3px solid #0070f3 !important;
+}
+
+/* 3. Khối chi tiết phiếu nhập có độ rộng cố định, không co giãn theo khung xanh */
+.receipt-detail-fixed-wrap {
+    width: 1040px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.receipt-attr-grid {
+    display: flex;
+    gap: 20px;
+    width: 1040px;
+    max-width: 100%;
+    margin-bottom: 1rem;
+    box-sizing: border-box;
+}
+
+.receipt-attr-col {
+    width: 320px;
+    min-width: 320px;
+    max-width: 320px;
+    flex: 0 0 320px;
+    box-sizing: border-box;
+}
+
+.receipt-detail-fixed-wrap .product-detail-footer {
+    width: 1040px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* 4. Badges trạng thái */
+.badge-phieu-tam {
+    background-color: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+.badge-da-nhap {
+    background-color: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+.badge-da-huy {
+    background-color: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+/* 5. Cột Ngôi sao */
+.th-star, .cell-star {
+    width: 36px;
+    min-width: 36px;
+    max-width: 36px;
+    text-align: center;
+}
+.star-btn {
+    cursor: pointer;
+    font-size: 15px;
+    color: #cbd5e1;
+    transition: color 0.15s ease, transform 0.1s ease;
+    display: inline-block;
+}
+.star-btn:hover {
+    color: #f59e0b;
+    transform: scale(1.15);
+}
+.star-btn.starred {
+    color: #f59e0b;
+}
+
+/* 6. Giao diện Lập / Sửa Phiếu Nhập (Screen 2: 2-column layout) */
+.nh-container {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 56px);
+    background: #f1f5f9;
+}
+
+.nh-form-wrap {
+    display: flex;
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Cột chính bên trái: Bảng hàng nhập */
+.nh-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 12px 16px;
+    overflow-y: auto;
+}
+
+/* Thanh công cụ top form */
+.nh-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    background: #ffffff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.nh-topbar .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: #1e293b;
+    text-decoration: none;
+    font-size: 16px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+.nh-topbar .back-btn:hover {
+    background: #f1f5f9;
+    color: #0070f4;
+}
+
+/* Khung tìm kiếm F3 */
+.nh-search-wrap {
+    position: relative;
+    flex: 1;
+    max-width: 520px;
+}
+.nh-search-wrap i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 14px;
+}
+.nh-search-input {
+    width: 100%;
+    height: 36px;
+    padding: 0 12px 0 34px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13.5px;
+    background: #f8fafc;
+    transition: all 0.2s;
+}
+.nh-search-input:focus {
+    background: #ffffff;
+    border-color: #0070f4;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 112, 244, 0.12);
+}
+
+/* Autocomplete Dropdown F3 */
+.nh-autocomplete-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    max-height: 380px;
+    overflow-y: auto;
+    z-index: 1050;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    display: none;
+}
+
+/* Khối bảng lưới các mặt hàng nhập */
+.nh-grid-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.nh-items-table {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: collapse;
+}
+
+.nh-items-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.nh-items-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    font-size: 13.5px;
+}
+
+.nh-items-table input.line-qty,
+.nh-items-table input.line-price,
+.nh-items-table input.line-discount {
+    height: 32px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 0 8px;
+    text-align: right;
+    font-size: 13.5px;
+    width: 100%;
+    max-width: 120px;
+    transition: border-color 0.15s;
+}
+.nh-items-table input:focus {
+    border-color: #0070f4;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 112, 244, 0.1);
+}
+
+/* Nút xóa dòng */
+.btn-line-del {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: color 0.15s;
+}
+.btn-line-del:hover {
+    color: #ef4444;
+}
+
+/* Cột tổng kết dòng dưới bảng */
+.nh-items-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #334155;
+}
+
+/* Nút tròn thu gọn / mở rộng panel bên phải (Phím tắt F4) */
+.nh-panel-toggle {
+    position: absolute;
+    right: 360px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 48px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-right: none;
+    border-radius: 24px 0 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    color: #64748b;
+    box-shadow: -2px 0 6px rgba(0,0,0,0.04);
+    transition: all 0.25s ease;
+}
+.nh-panel-toggle:hover {
+    background: #0070f4;
+    color: #ffffff;
+    border-color: #0070f4;
+}
+
+/* Cột bên phải: Thông tin chứng từ và thanh toán */
+.nh-panel {
+    width: 360px;
+    flex: 0 0 360px;
+    background: #ffffff;
+    border-left: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    transition: margin-right 0.25s ease;
+}
+
+.nh-panel.collapsed {
+    margin-right: -360px;
+}
+.nh-panel-wrap.panel-closed .nh-panel-toggle {
+    right: 0;
+    border-radius: 0 24px 24px 0;
+    border-right: 1px solid #cbd5e1;
+    border-left: none;
+    box-shadow: 2px 0 6px rgba(0,0,0,0.04);
+}
+
+.nh-panel-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;
+}
+
+.nh-field-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nh-field-row.row-horizontal {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nh-field-row label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+    margin-bottom: 0;
+}
+
+.nh-field-row input.form-control,
+.nh-field-row select.form-select {
+    height: 36px;
+    font-size: 13.5px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+}
+
+/* Hộp tìm kiếm và chọn NCC có nút + */
+.nh-supplier-wrap {
+    display: flex;
+    gap: 6px;
+    position: relative;
+}
+.nh-supplier-wrap .btn-add-ncc {
+    height: 36px;
+    width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #0070f4;
+    cursor: pointer;
+    font-size: 16px;
+    flex: 0 0 36px;
+}
+.nh-supplier-wrap .btn-add-ncc:hover {
+    background: #0070f4;
+    color: #ffffff;
+    border-color: #0070f4;
+}
+
+/* Dropdown Autocomplete NCC */
+.nh-supplier-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 42px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    max-height: 240px;
+    overflow-y: auto;
+    z-index: 1050;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+    display: none;
+}
+.nh-supplier-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s;
+}
+.nh-supplier-item:hover {
+    background: #eff6ff;
+}
+
+/* Khối tổng tiền phải trả */
+.nh-calc-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.nh-calc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13.5px;
+    color: #475569;
+}
+.nh-calc-row.total-row {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    padding-top: 8px;
+    border-top: 1px dashed #cbd5e1;
+}
+.nh-calc-row.total-row .pay-amount {
+    color: #0070f4;
+    font-size: 18px;
+}
+
+/* Hàng nút hành động dưới cùng panel */
+.nh-panel-actions {
+    padding: 14px 16px;
+    border-top: 1px solid #e2e8f0;
+    background: #ffffff;
+    display: flex;
+    gap: 10px;
+}
+.nh-btn-draft {
+    flex: 1;
+    height: 42px;
+    font-weight: 600;
+    font-size: 13.5px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s;
+}
+.nh-btn-draft:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+}
+.nh-btn-complete {
+    flex: 1;
+    height: 42px;
+    font-weight: 600;
+    font-size: 13.5px;
+    border: none;
+    background: #0070f4;
+    color: #ffffff;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.15s;
+}
+.nh-btn-complete:hover {
+    background: #005ecb;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .nh-form-wrap {
+        flex-direction: column;
+    }
+    .nh-panel {
+        width: 100%;
+        flex: auto;
+        border-left: none;
+        border-top: 1px solid #e2e8f0;
+    }
+    .nh-panel-toggle {
+        display: none;
+    }
+}

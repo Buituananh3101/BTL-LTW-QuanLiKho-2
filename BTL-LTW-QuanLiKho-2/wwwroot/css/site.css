@@ -1332,17 +1332,14 @@ tr.product-detail-row > td {
 /* Tabs Bar */
 .kiot-detail-tabs,
 .product-detail-tabs,
-.ncc-detail-tabs,
-.dp-tabs {
+.ncc-detail-tabs {
   display: flex;
   gap: 24px;
   padding: 0 24px;
   border-bottom: 1px solid #e2e8f0;
   background-color: #ffffff;
-  position: sticky;
-  left: 0;
-  width: max-content;
-  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
 .kiot-detail-tab-btn,
 .product-detail-tab-btn,
