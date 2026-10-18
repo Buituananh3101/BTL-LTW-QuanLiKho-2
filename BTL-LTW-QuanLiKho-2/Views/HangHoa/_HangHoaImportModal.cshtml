@@ -18,7 +18,12 @@
     <div class="hh-m-body" style="padding: 20px 24px;">
       <!-- Khối: Dropzone chọn file Excel -->
       <div class="mb-3">
-        <label class="fw-bold text-dark mb-2 d-block">Chọn file dữ liệu cần nhập (.xlsx)</label>
+        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-1">
+          <label class="fw-bold text-dark m-0">Chọn file dữ liệu cần nhập (.xlsx)</label>
+          <a href="@Url.Action("DownloadTemplate", "HangHoa")" class="text-primary small text-decoration-none fw-semibold" id="btnDownloadTemplateInModal" title="Tải file mẫu Excel (.xlsx)">
+            <i class="bi bi-download me-1"></i>Tải file mẫu nhập hàng (.xlsx)
+          </a>
+        </div>
         
         <div id="importDropzone" class="hh-dropzone" style="border: 2px dashed #cbd5e1; border-radius: 10px; padding: 28px 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f8fafc;">
           <input type="file" id="importFileInput" accept=".xlsx" style="display: none;" />
@@ -26,7 +31,7 @@
           <div id="dropzoneEmpty">
             <i class="bi bi-cloud-arrow-up text-primary" style="font-size: 40px; line-height: 1; display: block; margin-bottom: 8px;"></i>
             <div class="fw-semibold text-dark mb-1" style="font-size: 14.5px;">Kéo thả file .xlsx vào đây hoặc bấm để chọn file</div>
-            <div class="text-muted small">Hỗ trợ file Excel định dạng .xlsx, dung lượng tối đa 10MB</div>
+            <div class="text-muted small">Hỗ trợ file Excel định dạng .xlsx, dung lượng tối đa 10MB. Chưa có file mẫu? <a href="@Url.Action("DownloadTemplate", "HangHoa")" class="text-primary text-decoration-none fw-semibold">Tải tại đây</a></div>
           </div>
 
           <div id="dropzoneFileSelected" style="display: none; align-items: center; justify-content: space-between; background: #fff; padding: 10px 16px; border: 1px solid #e2e8f0; border-radius: 8px;">
@@ -94,11 +99,16 @@
     </div>
 
     <!-- Modal Footer -->
-    <div class="hh-m-foot" style="background: #f9fafb; border-top: 1px solid var(--hh-line-l); padding: 12px 24px; display: flex; justify-content: flex-end; gap: 10px;">
-      <button type="button" class="hh-btn" data-close="hhImportModalOv">Đóng</button>
-      <button type="button" class="hh-btn primary" id="btnExecuteImport" disabled>
-        <i class="bi bi-box-arrow-in-down me-1"></i> Thực hiện nhập
-      </button>
+    <div class="hh-m-foot" style="background: #f9fafb; border-top: 1px solid var(--hh-line-l); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center;">
+      <a href="@Url.Action("DownloadTemplate", "HangHoa")" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center" id="btnDownloadTemplateFoot" title="Tải về file Excel mẫu">
+        <i class="bi bi-download me-1"></i> Tải file mẫu (.xlsx)
+      </a>
+      <div class="d-flex gap-2">
+        <button type="button" class="hh-btn" data-close="hhImportModalOv">Đóng</button>
+        <button type="button" class="hh-btn primary" id="btnExecuteImport" disabled>
+          <i class="bi bi-box-arrow-in-down me-1"></i> Thực hiện nhập
+        </button>
+      </div>
     </div>
   </div>
 </div>

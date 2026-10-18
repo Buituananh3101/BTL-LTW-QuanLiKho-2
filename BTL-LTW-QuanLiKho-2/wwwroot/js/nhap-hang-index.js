@@ -33,8 +33,8 @@ $(function () {
         nccIds: [],
         nccNames: {},
         daDanhDau: isStarredFilterActive,
-        sortBy: $container.data('sort-by') || 'tg',
-        sortDir: $container.data('sort-dir') || 'desc',
+        sortBy: $container.data('sort-by') || '',
+        sortDir: $container.data('sort-dir') || '',
         page: 1,
         size: 15,
         openId: null
@@ -408,16 +408,26 @@ $(function () {
         });
     });
 
-    // Sắp xếp cột Sortable TH
-    $(document).on('click', '.sortable-th', function () {
+    // Sắp xếp cột 3 trạng thái (Tăng -> Giảm -> Bình thường) chuẩn KiotViet & Kiểm kho
+    $(document).on('click', '#receiptTable thead th.sortable-th', function (e) {
+        e.preventDefault();
         const col = $(this).data('col');
         if (!col) return;
+
         if (F.sortBy === col) {
-            F.sortDir = F.sortDir === 'asc' ? 'desc' : 'asc';
+            if (F.sortDir === 'asc') {
+                F.sortDir = 'desc';
+            } else if (F.sortDir === 'desc') {
+                F.sortBy = '';
+                F.sortDir = '';
+            } else {
+                F.sortDir = 'asc';
+            }
         } else {
             F.sortBy = col;
-            F.sortDir = 'desc';
+            F.sortDir = 'asc';
         }
+
         F.page = 1;
         loadTable();
     });

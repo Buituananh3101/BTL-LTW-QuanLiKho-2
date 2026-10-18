@@ -81,8 +81,8 @@ public class NhapHangFilterVM
     public string? SoHoaDon { get; set; }
     public bool DaDanhDau { get; set; } = false;
 
-    public string SortBy { get; set; } = "tg"; // ma, tg, ncc, cantra, st
-    public string SortDir { get; set; } = "desc";
+    public string? SortBy { get; set; }
+    public string? SortDir { get; set; }
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 15;
 }
@@ -92,8 +92,8 @@ public class NhapHangIndexVM
     public PagedResult<NhapHangListItemVM> PagedData { get; set; } = new();
     public NhapHangFilterVM Filter { get; set; } = new();
     public bool DaDanhDauFilter => Filter?.DaDanhDau ?? false;
-    public string SortBy => Filter?.SortBy ?? "tg";
-    public string SortDir => Filter?.SortDir ?? "desc";
+    public string? SortBy => string.IsNullOrWhiteSpace(Filter?.SortBy) ? null : Filter.SortBy;
+    public string? SortDir => string.IsNullOrWhiteSpace(Filter?.SortDir) ? null : Filter.SortDir;
 
     public decimal TongCanTraNcc { get; set; }
 

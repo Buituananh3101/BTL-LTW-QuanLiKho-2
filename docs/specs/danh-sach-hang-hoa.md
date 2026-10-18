@@ -11,7 +11,7 @@
 - **Service & Helper Excel**: `Services/IHangHoaExcelService.cs`, `HangHoaExcelService.cs`, `Helpers/ExcelHelper.cs` (ClosedXML tái sử dụng cho toàn dự án).
 - **Service tồn kho & tiện ích**: `Services/ITonKhoService.cs`, `TonKhoService.cs`, `MaChungTuHelper.cs`.
 - **ViewModel**: `ViewModels/HangHoa/` (`HangHoaForm.cs`, `HangHoaFilterParams.cs`, `ExportHangHoaRequest.cs`, `ImportHangHoaResult.cs`) kế thừa `BaseFilterParams.cs` và `PagedResultBase.cs`.
-- **View & Partial Layout**: `Views/HangHoa/Index.cshtml` (~115 dòng), `_HangHoaFilterSidebar.cshtml`, `_HangHoaExcelActions.cshtml` (dropdown đóng gói Nhập/Xuất), `_HangHoaTable.cshtml` (+ `_Pagination.cshtml`).
+- **View & Partial Layout**: `Views/HangHoa/Index.cshtml` (~115 dòng), `_HangHoaFilterSidebar.cshtml`, `_HangHoaExcelActions.cshtml` (2 nút Nhập file & Xuất file), `_HangHoaTable.cshtml` (+ `_Pagination.cshtml`).
 - **Modal Modun**: `_HangHoaModal.cshtml` (thêm/sửa 5 ảnh CSDL), `_HangHoaExportModal.cshtml` (xuất Excel), `_HangHoaImportModal.cshtml` (nhập Excel kéo thả).
 - **Styles & Scripts**: `wwwroot/js/kiot-filter.js` (thư viện giao diện KiotViet dùng chung), `wwwroot/js/hang-hoa-index.js` (script trang hàng hóa), `hang-hoa-form.js`, `hang-hoa-excel.js`.
 - **DbContext & Entity**: `QuanLyKhoPhuQuocLtwContext`, Entity (`HangHoa`, `HinhAnhHangHoa`, `NhomHang`, `DonViTinh`, `NguongTonKho`, `VwTonKhoHienTai`).

@@ -1,11 +1,11 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Chuẩn Hóa Giao Diện Ô Chọn Nhà Cung Cấp Chuẩn KiotViet Trong Phiên Nhập Hàng (Phiên 95)
+Cập nhật lần cuối: 2026-10-18 – Tách Nút Nhập File & Xuất File Riêng Biệt Trong Danh Sách Hàng Hóa (Phiên 97)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử giao diện ô chọn Nhà cung cấp, chức năng autocomplete căn trái, xóa nhanh và tạo mới NCC cùng người dùng.
+- Sẵn sàng kiểm thử thao tác nút Nhập file và Xuất file riêng biệt trên màn hình Danh sách hàng hóa cùng người dùng.
 
 ---
 
@@ -14,6 +14,38 @@ Cập nhật lần cuối: 2026-10-18 – Chuẩn Hóa Giao Diện Ô Chọn Nh�
 2. Xây dựng phân hệ Trả hàng nhập (Purchase Returns) theo yêu cầu.
 
 ---
+
+- **Tách Nút Nhập File & Xuất File Riêng Biệt Trong Danh Sách Hàng Hóa (Phiên 97)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "trong phần danh sách hàng hóa, tách nút nhập và xuất ra thành 1 nút nhập 1 nút xuất".
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tách Cụm Nút Trong `Views/HangHoa/_HangHoaExcelActions.cshtml`**: Thay thế dropdown gộp "Xuất / Nhập file" thành 2 nút bấm riêng biệt chuẩn KiotViet:
+      * **Nút Nhập file (`#btnOpenImportModal`)**: Icon `bi-box-arrow-in-down text-primary`, bấm 1 click mở ngay modal nhập hàng `#hhImportModalOv`.
+      * **Nút Xuất file (`#btnOpenExportModal`)**: Icon `bi-box-arrow-up text-success`, bấm 1 click mở ngay modal xuất file `#hhExportModalOv` chọn phạm vi và cột cần xuất.
+    + **Bổ Sung Tải File Mẫu Trong Modal Nhập Hàng (`Views/HangHoa/_HangHoaImportModal.cshtml`)**: Bổ sung liên kết tải file mẫu `.xlsx` ngay trên tiêu đề khung kéo thả và ở góc trái footer modal.
+    + **Tối Ưu Responsive (`Views/HangHoa/Index.cshtml`)**: Cả 2 nút sử dụng class `.btn.btn-tool` với `<span class="d-none d-sm-inline">`, hiển thị icon nhỏ gọn trên mobile và hiển thị nhãn đầy đủ trên tablet/desktop.
+    + **Kiểm Tra & Đồng Bộ**:
+      * `dotnet build /t:Compile` đạt **0 Errors**.
+      * Đồng bộ đặc tả `docs/specs/danh-sach-hang-hoa.md`.
+
+- **Nâng Cấp Sắp Xếp Cột Bảng Nhập Hàng Sang Chuẩn 3 Trạng Thái (Tăng -> Giảm -> Bình Thường) (Phiên 96)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "khi ấn vào headtable thì mới có 2 lần ấn tăng giảm. sửa lại thành 3 lần ấn tăng giảm bình thường".
+  - **Nguyên nhân cốt lõi**:
+    + Trước đây trong `nhap-hang-index.js`, sự kiện click `.sortable-th` chỉ chuyển đổi qua lại giữa 2 trạng thái (`asc` <-> `desc`), không thể hủy sắp xếp để trở về trạng thái sắp xếp mặc định của hệ thống.
+    + `SortBy` và `SortDir` trong `NhapHangFilterVM` có giá trị mặc định cứng là `"tg"` và `"desc"`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Chuẩn Hóa JS 3 Trạng Thái (`wwwroot/js/nhap-hang-index.js`)**:
+      * Chu trình 3 lần click: Lần 1: Tăng dần (`asc` - mũi tên lên), Lần 2: Giảm dần (`desc` - mũi tên xuống), Lần 3: Bình thường (`''` - không icon, quay về sắp xếp mặc định theo ngày tạo giảm dần).
+      * Bắt sự kiện trực tiếp `#receiptTable thead th.sortable-th` đồng bộ 100% với `HangHoa`, `NhaCungCap`, `PhieuKiemKe`.
+    + **Đồng Bộ ViewModel & Controller (`NhapHangViewModels.cs`, `NhapHangController.cs`)**:
+      * Đưa `SortBy` và `SortDir` trong `NhapHangFilterVM` về kiểu nullable (`string?`) với giá trị mặc định `null` (Bình thường trên lượt nạp đầu tiên).
+      * `NhapHangIndexVM.SortBy` và `SortDir` làm sạch chuỗi rỗng về `null`.
+      * Bổ sung trường hợp sắp xếp cho `tongsl` (Tổng số lượng) và `slmathang` (Số lượng mặt hàng) trong switch expression của `BuildIndexViewModel`.
+    + **Đồng Bộ Đặc Tả (`docs/specs/nhap-hang.md`)**:
+      * Cập nhật quy tắc sắp xếp 3 trạng thái, độ dài file 7.749 ký tự (< 8.000 ký tự).
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c nhap-hang-index.js` đạt **0 Errors**.
+
 
 - **Chuẩn Hóa Giao Diện Ô Chọn Nhà Cung Cấp Chuẩn KiotViet Trong Phiên Nhập Hàng (Phiên 95)**:
   - **Nhu cầu**: Người dùng phản ánh lỗi giao diện ô Nhà cung cấp trên panel bên phải màn hình Lập/Sửa phiếu nhập hàng (`/NhapHang/Create`, `/NhapHang/Edit`). Placeholder "Tìm nhà cung cấp..." bị đẩy sát về bên phải, thụt sâu tạo khoảng trắng vô nghĩa, nút `+` bị lệch và khi chọn NCC bị dính `text-align: right`.

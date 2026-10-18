@@ -48,6 +48,7 @@
   - Nút: `+ Nhập hàng` (`/NhapHang/Create`), `Xuất file ▾`, `Tùy chọn hiển thị cột` (dropdown 20 cột), `Tải lại`, `Trợ giúp`.
 - **Bảng dữ liệu (`_NhapHangTable` - Chuẩn Kiểm kho)**:
   - Bọc trong `<section id="content">` và `#tableContainer.kiot-table-wrapper` đảm bảo `.kiot-table-scroll-body` có chiều cao flex cố định, cuộn 2 chiều độc lập (dọc và ngang) mượt mà khi mở drawer chi tiết.
+  - Sắp xếp cột 3 trạng thái (Tăng -> Giảm -> Bình thường) chuẩn KiotViet: Click 1 sắp xếp Tăng dần (ASC), Click 2 Giảm dần (DESC), Click 3 quay về Bình thường (hủy sắp xếp, trở về mặc định theo thời gian giảm dần).
   - Bảng cuộn ngang `min-width: 1750px`, viền chữ nhật `#0070f3` khép kín (`2px` trên/dưới, `3px` hai bên) khi mở dòng.
   - Dữ liệu bắt đầu ngay sau `<thead>`, mã phiếu hiển thị dạng text đen chuẩn mực.
   - Badges trạng thái dùng Bootstrap subtle chuẩn: `bg-success-subtle text-success`, `bg-primary-subtle text-primary`, `bg-secondary-subtle text-secondary`.

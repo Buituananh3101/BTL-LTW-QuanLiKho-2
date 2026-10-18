@@ -1,29 +1,15 @@
 <!-- ========================================================================
-     ĐÓNG GÓI NÚT NHẬP / XUẤT FILE EXCEL HÀNG HÓA CHUẨN KIOTVIET (DROPDOWN LEGO)
-     Gộp các thao tác bảng tính (Import, Export, Tải file mẫu) vào 1 nút duy nhất,
-     tối ưu responsive trên cả Desktop, Tablet và Mobile.
+     NÚT NHẬP & XUẤT FILE EXCEL HÀNG HÓA CHUẨN KIOTVIET
+     Tách thành 2 nút độc lập: 1 nút Nhập file và 1 nút Xuất file
      ======================================================================== -->
-<div class="dropdown" id="wrapExcelActions">
-    <button class="btn btn-tool dropdown-toggle" type="button" id="btnExcelActionsDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Nhập / Xuất file Excel">
-        <i class="bi bi-file-earmark-spreadsheet me-1 text-success"></i>
-        <span class="d-none d-sm-inline">Xuất / Nhập file</span>
-    </button>
-    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="btnExcelActionsDropdown" style="min-width: 220px;">
-        <li>
-            <a class="dropdown-item py-2" href="javascript:void(0)" id="btnOpenExportModal" onclick="window.openExportModal();">
-                <i class="bi bi-box-arrow-up me-2 text-success"></i>Xuất file (Export)
-            </a>
-        </li>
-        <li>
-            <a class="dropdown-item py-2" href="javascript:void(0)" id="btnOpenImportModal" onclick="window.openImportModal();">
-                <i class="bi bi-box-arrow-in-down me-2 text-primary"></i>Nhập file (Import)
-            </a>
-        </li>
-        <li><hr class="dropdown-divider my-1"></li>
-        <li>
-            <a class="dropdown-item py-2" href="@Url.Action("DownloadTemplate", "HangHoa")" id="btnDownloadTemplate">
-                <i class="bi bi-download me-2 text-secondary"></i>Tải file mẫu nhập hàng (.xlsx)
-            </a>
-        </li>
-    </ul>
-</div>
+<!-- 1. Nút Nhập file -->
+<button type="button" class="btn btn-tool" id="btnOpenImportModal" onclick="window.openImportModal();" title="Nhập hàng hóa từ file Excel">
+    <i class="bi bi-box-arrow-in-down me-1 text-primary"></i>
+    <span class="d-none d-sm-inline">Nhập file</span>
+</button>
+
+<!-- 2. Nút Xuất file -->
+<button type="button" class="btn btn-tool" id="btnOpenExportModal" onclick="window.openExportModal();" title="Xuất danh sách hàng hóa ra Excel">
+    <i class="bi bi-box-arrow-up me-1 text-success"></i>
+    <span class="d-none d-sm-inline">Xuất file</span>
+</button>
