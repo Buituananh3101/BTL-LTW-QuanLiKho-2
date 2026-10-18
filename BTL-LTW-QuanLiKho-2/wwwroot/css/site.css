@@ -2731,6 +2731,28 @@ tr.product-detail-row > td {
 }
 
 /* ===== COMPONENT LEGO: F3 PRODUCT SEARCH AUTOCOMPLETE ===== */
+.nh-autocomplete-dropdown,
+.kiot-autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 520px;
+  width: 100%;
+  max-width: 680px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  max-height: 380px;
+  overflow-y: auto;
+  z-index: 1050;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  display: none;
+}
+.nh-autocomplete-dropdown.show,
+.kiot-autocomplete-dropdown.show {
+  display: block !important;
+}
+
 .kk-autocomplete-item {
   display: flex !important;
   align-items: center !important;

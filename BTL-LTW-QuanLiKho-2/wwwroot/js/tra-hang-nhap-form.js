@@ -230,98 +230,18 @@ $(function () {
         recalculateTotals();
     });
 
-    /* ===== 4. AUTOCOMPLETE HÀNG HÓA F3 ===== */
-    let sgList = [];
-    let sgIdx = 0;
-
-    function renderProductSuggest() {
-        const $box = $('#autocompleteDropdown');
-        if (!sgList.length) {
-            $box.hide().removeClass('show').empty();
-            return;
-        }
-
-        const html = sgList.map((p, i) => `
-            <div class="ac-item ${i === sgIdx ? 'active' : ''}" data-idx="${i}">
-                <div class="ac-thumb">${escapeHtml((p.name || '').trim().charAt(0))}</div>
-                <div class="ac-info">
-                    <b>${escapeHtml(p.name)}</b>
-                    <small>${escapeHtml(p.code)}</small>
-                </div>
-                <div class="ac-nums">
-                    Giá nhập: <b>${fmt(p.cost)}</b><br />
-                    Tồn kho: <b class="text-primary">${fmt(p.stock)}</b>
-                </div>
-            </div>
-        `).join('');
-
-        $box.html(html).show().addClass('show');
-    }
-
-    let searchDebounce;
-    $('#productSearchInput').on('input', function () {
-        clearTimeout(searchDebounce);
-        const q = $(this).val()?.trim() || '';
-        if (!q) {
-            sgList = [];
-            renderProductSuggest();
-            return;
-        }
-
-        searchDebounce = setTimeout(function () {
-            $.ajax({
-                url: searchProductsUrl,
-                type: 'GET',
-                data: { q: q, warehouseId: warehouseId },
-                success: function (data) {
-                    sgList = data || [];
-                    sgIdx = 0;
-                    renderProductSuggest();
-                }
-            });
-        }, 200);
-    });
-
-    $('#productSearchInput').on('keydown', function (e) {
-        if (e.key === 'ArrowDown' && sgList.length) {
-            e.preventDefault();
-            sgIdx = (sgIdx + 1) % sgList.length;
-            renderProductSuggest();
-        } else if (e.key === 'ArrowUp' && sgList.length) {
-            e.preventDefault();
-            sgIdx = (sgIdx - 1 + sgList.length) % sgList.length;
-            renderProductSuggest();
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            if (sgList.length && sgList[sgIdx]) {
-                addProductLine(sgList[sgIdx]);
-                $(this).val('');
-                sgList = [];
-                renderProductSuggest();
+    /* ===== 4. AUTOCOMPLETE HÀNG HÓA F3 DÙNG LEGO KIOTFILTER.INITPRODUCTSEARCH ===== */
+    if (!isReadOnly && window.KiotFilter && typeof KiotFilter.initProductSearch === 'function') {
+        KiotFilter.initProductSearch({
+            inputSelector: '#productSearchInput',
+            dropdownSelector: '#autocompleteDropdown',
+            apiUrl: searchProductsUrl,
+            getWarehouseId: function () { return warehouseId; },
+            onSelect: function (product) {
+                addProductLine(product);
             }
-        } else if (e.key === 'Escape') {
-            sgList = [];
-            renderProductSuggest();
-        }
-    });
-
-    $(document).on('mousedown', '.ac-item', function (e) {
-        e.preventDefault();
-        const idx = $(this).data('idx');
-        if (sgList[idx]) {
-            addProductLine(sgList[idx]);
-            $('#productSearchInput').val('').focus();
-            sgList = [];
-            renderProductSuggest();
-        }
-    });
-
-    $(document).on('click', function (e) {
-        if (!$(e.target).closest('#productSearchInput, #autocompleteDropdown').length) {
-            sgList = [];
-            renderProductSuggest();
-        }
-    });
+        });
+    }
 
     /* ===== 5. TÌM KIẾM & CHỌN NHÀ CUNG CẤP ===== */
     let supDebounce;

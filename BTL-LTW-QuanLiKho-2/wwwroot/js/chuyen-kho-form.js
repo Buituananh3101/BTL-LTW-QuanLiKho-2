@@ -40,18 +40,37 @@
         : null;
     if (dtPicker) createdDate = dtPicker.getDate();
 
-    // Cập nhật trạng thái hiển thị bảng / rỗng
+    // ===== QUẢN LÝ LƯỚI DÒNG HÀNG HÓA (LEGO KIOTDOCGRID) =====
+    const docGrid = (window.KiotFilter && typeof KiotFilter.initDocGrid === 'function')
+        ? KiotFilter.initDocGrid({
+            tableBodySelector: '#itemsTableBody',
+            emptyBoxSelector: '#emptyLineBox',
+            tableScrollSelector: '#tableScrollWrap',
+            rowSelector: 'tr.item-line-row',
+            sttSelector: '.row-stt',
+            btnRemoveSelector: '.btn-remove-line',
+            qtyInputSelector: '.line-qty',
+            onRecalc: function () {
+                recalcTotals();
+            }
+        })
+        : null;
+
     function checkEmptyState() {
-        const count = $('#itemsTableBody tr.item-line-row').length;
-        if (count === 0) {
-            $('#tableScrollWrap').hide();
-            $('#emptyLineBox').show();
+        if (docGrid) {
+            docGrid.checkEmpty();
         } else {
-            $('#emptyLineBox').hide();
-            $('#tableScrollWrap').show();
+            const count = $('#itemsTableBody tr.item-line-row').length;
+            if (count === 0) {
+                $('#tableScrollWrap').hide();
+                $('#emptyLineBox').show();
+            } else {
+                $('#emptyLineBox').hide();
+                $('#tableScrollWrap').show();
+            }
+            reindexRows();
+            recalcTotals();
         }
-        reindexRows();
-        recalcTotals();
     }
 
     // Đánh lại số thứ tự dòng
@@ -134,122 +153,17 @@
         checkEmptyState();
     }
 
-    // 1. Tìm kiếm Autocomplete hàng hóa (F3)
-    if (typeof initF3ProductSearch === 'function') {
-        initF3ProductSearch({
+    // 1. Tìm kiếm Autocomplete hàng hóa (F3) dùng Lego KiotFilter.initProductSearch
+    if (window.KiotFilter && typeof KiotFilter.initProductSearch === 'function') {
+        KiotFilter.initProductSearch({
             inputSelector: '#productSearchInput',
             dropdownSelector: '#autocompleteDropdown',
             apiUrl: urls.searchProducts,
             getWarehouseId: function () {
-                return currentWhId || Number($app.data('warehouse-id')) || 0;
+                return $('#fKhoXuat').val() || currentWhId || 1;
             },
             onSelect: function (product) {
                 addProduct(product);
-            }
-        });
-    } else {
-        let suggestList = [];
-        let activeSuggestIdx = 0;
-
-        function renderSuggestDropdown() {
-            const $drop = $('#autocompleteDropdown');
-            if (!suggestList.length) {
-                $drop.html('<div class="p-3 text-center text-muted small">Không tìm thấy hàng hóa phù hợp</div>').show().addClass('show');
-                return;
-            }
-
-            let html = '';
-            suggestList.forEach((p, idx) => {
-                const isAct = idx === activeSuggestIdx ? 'active' : '';
-                const name = p.name || p.tenHang || '';
-                const code = p.code || p.maHangNoiBo || '';
-                const unit = p.unit || p.tenDvt || '';
-                const cost = Number(p.cost !== undefined ? p.cost : (p.gia !== undefined ? p.gia : p.giaVon)) || 0;
-                const stock = Number(p.stock !== undefined ? p.stock : p.tonKho) || 0;
-                const firstLetter = (name || 'H').trim()[0].toUpperCase();
-
-                html += `
-                    <div class="kk-autocomplete-item ${isAct}" data-idx="${idx}">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="kk-item-thumb bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; border-radius: 6px;">
-                                ${firstLetter}
-                            </div>
-                            <div>
-                                <div class="fw-semibold text-dark text-truncate" style="max-width: 280px;">${name}</div>
-                                <div class="text-muted small">${code} ${unit ? '(' + unit + ')' : ''}</div>
-                            </div>
-                        </div>
-                        <div class="text-end ms-auto">
-                            <div class="text-primary fw-bold small">Tồn gửi: ${fmt(stock)}</div>
-                            <div class="text-muted small">Giá vốn: ${fmt(cost)}</div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            $drop.html(html).show().addClass('show');
-        }
-
-        let searchTimer = null;
-        $('#productSearchInput').on('input', function () {
-            clearTimeout(searchTimer);
-            const query = $(this).val().trim();
-            if (!query) {
-                suggestList = [];
-                $('#autocompleteDropdown').hide().removeClass('show').empty();
-                return;
-            }
-
-            searchTimer = setTimeout(function () {
-                $.get(urls.searchProducts, { q: query, whId: currentWhId }, function (data) {
-                    suggestList = data || [];
-                    activeSuggestIdx = 0;
-                    renderSuggestDropdown();
-                });
-            }, 200);
-        });
-
-        $('#productSearchInput').on('keydown', function (e) {
-            if (e.key === 'ArrowDown' && suggestList.length) {
-                e.preventDefault();
-                activeSuggestIdx = (activeSuggestIdx + 1) % suggestList.length;
-                renderSuggestDropdown();
-            } else if (e.key === 'ArrowUp' && suggestList.length) {
-                e.preventDefault();
-                activeSuggestIdx = (activeSuggestIdx - 1 + suggestList.length) % suggestList.length;
-                renderSuggestDropdown();
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                if (suggestList.length && suggestList[activeSuggestIdx]) {
-                    const item = suggestList[activeSuggestIdx];
-                    suggestList = [];
-                    $('#autocompleteDropdown').hide().removeClass('show').empty();
-                    addProduct(item);
-                    $(this).val('').focus();
-                }
-            } else if (e.key === 'Escape') {
-                suggestList = [];
-                $('#autocompleteDropdown').hide().removeClass('show').empty();
-            }
-        });
-
-        $(document).on('mousedown click', '.kk-autocomplete-item', function (e) {
-            e.preventDefault();
-            const idx = $(this).data('idx') !== undefined ? $(this).data('idx') : $(this).data('index');
-            if (suggestList && suggestList[idx]) {
-                const item = suggestList[idx];
-                suggestList = [];
-                $('#autocompleteDropdown').hide().removeClass('show').empty();
-                addProduct(item);
-                $('#productSearchInput').val('').focus();
-            }
-        });
-
-        // Đóng dropdown khi click ra ngoài
-        $(document).on('click', function (e) {
-            if (!$(e.target).closest('.nh-search-wrap').length) {
-                suggestList = [];
-                $('#autocompleteDropdown').hide().removeClass('show').empty();
             }
         });
     }

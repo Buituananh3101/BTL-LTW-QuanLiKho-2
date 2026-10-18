@@ -1413,6 +1413,307 @@ window.KiotFilter = (function ($) {
         };
     }
 
+    // 21. Khởi tạo Tìm kiếm Hàng hóa Autocomplete F3 Chuẩn KiotViet
+    function initProductSearch(options) {
+        const opt = $.extend({
+            inputSelector: '#productSearchInput',
+            dropdownSelector: '#autocompleteDropdown',
+            apiUrl: '/NhapHang/SearchProducts',
+            getWarehouseId: function () { return 1; },
+            onSelect: function (product) {},
+            debounceMs: 200,
+            placeholder: 'Tìm mặt hàng (F3)...'
+        }, options);
+
+        const $inp = $(opt.inputSelector);
+        const $dropdown = $(opt.dropdownSelector);
+        if (!$inp.length || !$dropdown.length) return null;
+
+        let searchTimeout = null;
+        let currentItems = [];
+        let activeIndex = -1;
+
+        function setActiveIndex(idx, scrollIntoView) {
+            if (!currentItems.length) {
+                activeIndex = -1;
+                return;
+            }
+            if (idx < 0) idx = currentItems.length - 1;
+            if (idx >= currentItems.length) idx = 0;
+            activeIndex = idx;
+
+            const $items = $dropdown.find('.kk-autocomplete-item');
+            $items.removeClass('active');
+            const $target = $items.filter(`[data-index="${activeIndex}"]`);
+            $target.addClass('active');
+
+            if (scrollIntoView && $target.length) {
+                const el = $dropdown[0], tel = $target[0];
+                if (tel.offsetTop < el.scrollTop) {
+                    el.scrollTop = tel.offsetTop;
+                } else if (tel.offsetTop + tel.offsetHeight > el.scrollTop + el.clientHeight) {
+                    el.scrollTop = tel.offsetTop + tel.offsetHeight - el.clientHeight;
+                }
+            }
+        }
+
+        function selectProduct(product) {
+            if (!product) return;
+            opt.onSelect(product);
+            $dropdown.removeClass('show').hide();
+            currentItems = [];
+            activeIndex = -1;
+            $inp.val('').focus();
+        }
+
+        // Phím F3 toàn cục focus ô tìm kiếm
+        const f3EventName = 'keydown.kiotF3_' + opt.inputSelector.replace(/[^a-zA-Z0-9_-]/g, '');
+        $(document).off(f3EventName).on(f3EventName, function (e) {
+            if (e.key === 'F3' || e.keyCode === 114) {
+                e.preventDefault();
+                $inp.focus().select();
+            }
+        });
+
+        // Gõ phím tìm kiếm debounce
+        $inp.off('input.kiotF3').on('input.kiotF3', function () {
+            const q = $(this).val().trim();
+            clearTimeout(searchTimeout);
+
+            if (q.length === 0) {
+                currentItems = [];
+                activeIndex = -1;
+                $dropdown.removeClass('show').hide();
+                return;
+            }
+
+            searchTimeout = setTimeout(function () {
+                const whId = typeof opt.getWarehouseId === 'function' ? opt.getWarehouseId() : opt.getWarehouseId;
+                $.ajax({
+                    url: opt.apiUrl,
+                    type: 'GET',
+                    data: { q: q, warehouseId: whId, whId: whId },
+                    success: function (items) {
+                        renderDropdown(items);
+                    },
+                    error: function () {
+                        currentItems = [];
+                        activeIndex = -1;
+                        $dropdown.removeClass('show').hide();
+                    }
+                });
+            }, opt.debounceMs);
+        });
+
+        // Phím điều hướng Up, Down, Enter, Escape
+        $inp.off('keydown.kiotF3Nav').on('keydown.kiotF3Nav', function (e) {
+            const isVisible = $dropdown.is(':visible') || $dropdown.hasClass('show');
+            if (!isVisible || !currentItems.length) {
+                if (e.key === 'Escape') {
+                    $dropdown.removeClass('show').hide();
+                }
+                return;
+            }
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setActiveIndex(activeIndex + 1, true);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setActiveIndex(activeIndex - 1, true);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (activeIndex >= 0 && activeIndex < currentItems.length) {
+                    selectProduct(currentItems[activeIndex]);
+                }
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                $dropdown.removeClass('show').hide();
+            }
+        });
+
+        // Focus lại nếu có text
+        $inp.off('focus.kiotF3').on('focus.kiotF3', function () {
+            if ($(this).val().trim().length > 0 && currentItems.length > 0) {
+                $dropdown.addClass('show').show();
+            }
+        });
+
+        function renderDropdown(items) {
+            $dropdown.empty();
+            currentItems = items || [];
+            activeIndex = currentItems.length > 0 ? 0 : -1;
+
+            if (!currentItems || currentItems.length === 0) {
+                $dropdown.append('<div class="p-3 text-center text-muted small">Không tìm thấy hàng hóa phù hợp</div>');
+                $dropdown.addClass('show').show();
+                return;
+            }
+
+            currentItems.forEach(function (item, idx) {
+                const tenHang = item.tenHang || item.TenHang || '';
+                const maHangNoiBo = item.maHangNoiBo || item.MaHangNoiBo || '';
+                const tenDvt = item.tenDvt || item.TenDvt || '';
+                const tenNhom = item.tenNhom || item.TenNhom || '';
+                const tonKho = parseFloat(item.tonKho !== undefined ? item.tonKho : (item.TonKho !== undefined ? item.TonKho : 0)) || 0;
+                const gia = parseFloat(item.gia !== undefined ? item.gia : (item.Gia !== undefined ? item.Gia : (item.giaVon !== undefined ? item.giaVon : 0))) || 0;
+                const maHang = item.maHang || item.MaHang || item.id || item.Id;
+
+                const firstChar = (tenHang.trim().length > 0) ? tenHang.trim()[0].toUpperCase() : 'H';
+                const unitText = tenDvt ? ` · ${escapeHtml(tenDvt)}` : '';
+                const isActive = idx === activeIndex ? ' active' : '';
+
+                const html = `
+                    <div class="kk-autocomplete-item${isActive}" 
+                         data-index="${idx}"
+                         data-id="${maHang}" 
+                         data-code="${escapeHtml(maHangNoiBo)}" 
+                         data-name="${escapeHtml(tenHang)}" 
+                         data-unit="${escapeHtml(tenDvt)}" 
+                         data-group="${escapeHtml(tenNhom)}" 
+                         data-stock="${tonKho}" 
+                         data-cost="${gia}">
+                        <div class="kk-item-main">
+                            <div class="kk-item-thumb">${firstChar}</div>
+                            <div class="kk-item-info">
+                                <div class="kk-item-name" title="${escapeHtml(tenHang)}">${escapeHtml(tenHang)}</div>
+                                <div class="kk-item-code">${escapeHtml(maHangNoiBo)}${unitText}</div>
+                            </div>
+                        </div>
+                        <div class="kk-item-meta">
+                            <div class="kk-item-stock">Tồn: <strong>${tonKho.toLocaleString('vi-VN')}</strong></div>
+                            <div class="kk-item-price">Giá: <b>${gia.toLocaleString('vi-VN')} đ</b></div>
+                        </div>
+                    </div>
+                `;
+                $dropdown.append(html);
+            });
+
+            $dropdown.addClass('show').show();
+        }
+
+        $dropdown.off('mouseenter.kiotF3').on('mouseenter.kiotF3', '.kk-autocomplete-item', function () {
+            const idx = parseInt($(this).data('index'), 10);
+            if (!isNaN(idx)) setActiveIndex(idx, false);
+        });
+
+        $dropdown.off('click.kiotF3').on('click.kiotF3', '.kk-autocomplete-item', function (e) {
+            e.stopPropagation();
+            const idx = parseInt($(this).data('index'), 10);
+            if (!isNaN(idx) && currentItems[idx]) {
+                selectProduct(currentItems[idx]);
+            } else {
+                const product = {
+                    maHang: $(this).data('id'),
+                    maHangNoiBo: $(this).data('code'),
+                    tenHang: $(this).data('name'),
+                    tenDvt: $(this).data('unit'),
+                    tenNhom: $(this).data('group'),
+                    tonKho: parseFloat($(this).data('stock')) || 0,
+                    gia: parseFloat($(this).data('cost')) || 0
+                };
+                selectProduct(product);
+            }
+        });
+
+        const docClickEvent = 'click.kiotF3_' + opt.inputSelector.replace(/[^a-zA-Z0-9_-]/g, '');
+        $(document).off(docClickEvent).on(docClickEvent, function (e) {
+            if (!$(e.target).closest($inp).length && !$(e.target).closest($dropdown).length) {
+                $dropdown.removeClass('show').hide();
+            }
+        });
+
+        return {
+            focus: () => $inp.focus(),
+            clear: () => { $inp.val(''); $dropdown.removeClass('show').hide(); },
+            close: () => $dropdown.removeClass('show').hide()
+        };
+    }
+
+    // 22. Quản lý Lưới Dòng Hàng Hóa Chứng Từ (Document Grid) Chuẩn KiotViet
+    function initDocGrid(options) {
+        const opt = $.extend({
+            tableBodySelector: '#itemsTableBody',
+            emptyBoxSelector: '#emptyLineBox',
+            tableScrollSelector: '#tableScrollWrap',
+            rowSelector: '.item-line-row',
+            sttSelector: '.row-stt',
+            btnRemoveSelector: '.btn-remove-line, [data-del], .del',
+            qtyInputSelector: '.line-qty, [data-qty], .qty',
+            onRecalc: null,
+            onRemove: null,
+            confirmDelete: false,
+            confirmTitle: 'Xác nhận xóa hàng hóa',
+            confirmMessage: 'Bạn có chắc chắn muốn bỏ sản phẩm này khỏi phiếu?'
+        }, options);
+
+        const $tbody = $(opt.tableBodySelector);
+        if (!$tbody.length) return null;
+
+        function updateSTT() {
+            $tbody.find(opt.rowSelector).each(function (idx) {
+                $(this).find(opt.sttSelector).text(idx + 1);
+            });
+        }
+
+        function checkEmptyState() {
+            const count = $tbody.find(opt.rowSelector).length;
+            if (count === 0) {
+                if (opt.tableScrollSelector) $(opt.tableScrollSelector).hide();
+                if (opt.emptyBoxSelector) $(opt.emptyBoxSelector).show();
+            } else {
+                if (opt.tableScrollSelector) $(opt.tableScrollSelector).show();
+                if (opt.emptyBoxSelector) $(opt.emptyBoxSelector).hide();
+            }
+            updateSTT();
+            if (typeof opt.onRecalc === 'function') {
+                opt.onRecalc(count);
+            }
+        }
+
+        $tbody.off('click.kiotDocDel').on('click.kiotDocDel', opt.btnRemoveSelector, function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const $row = $(this).closest(opt.rowSelector);
+            const rowId = $row.data('id') || $row.data('i');
+
+            function doRemove() {
+                $row.remove();
+                checkEmptyState();
+                if (typeof opt.onRemove === 'function') {
+                    opt.onRemove(rowId, $row);
+                }
+            }
+
+            if (opt.confirmDelete && window.KiotConfirm) {
+                KiotConfirm.show({
+                    title: opt.confirmTitle,
+                    message: opt.confirmMessage,
+                    confirmText: 'Xóa',
+                    confirmClass: 'btn-danger',
+                    onConfirm: doRemove
+                });
+            } else {
+                doRemove();
+            }
+        });
+
+        $tbody.off('input.kiotDocQty change.kiotDocQty').on('input.kiotDocQty change.kiotDocQty', opt.qtyInputSelector, function () {
+            if (typeof opt.onRecalc === 'function') {
+                opt.onRecalc($tbody.find(opt.rowSelector).length);
+            }
+        });
+
+        checkEmptyState();
+
+        return {
+            checkEmpty: checkEmptyState,
+            updateSTT: updateSTT,
+            recalc: () => { if (typeof opt.onRecalc === 'function') opt.onRecalc($tbody.find(opt.rowSelector).length); },
+            getCount: () => $tbody.find(opt.rowSelector).length
+        };
+    }
+
     return {
         debounce: debounce,
         escapeHtml: escapeHtml,
@@ -1433,6 +1734,14 @@ window.KiotFilter = (function ($) {
         initStatusFilter: initStatusFilter,
         initRowDetail: initRowDetail,
         initEntityActions: initEntityActions,
-        initDateTimePicker: initDateTimePicker
+        initDateTimePicker: initDateTimePicker,
+        initProductSearch: initProductSearch,
+        initDocGrid: initDocGrid
     };
 })(jQuery);
+
+// Global alias cho backwards compatibility
+if (typeof window !== 'undefined' && window.KiotFilter) {
+    window.initF3ProductSearch = window.KiotFilter.initProductSearch;
+}
+

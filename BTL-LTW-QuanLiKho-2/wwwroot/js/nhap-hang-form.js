@@ -14,16 +14,15 @@ $(function () {
     const searchSuppliersUrl = $app.data('search-suppliers-url') || '/NhapHang/SearchSuppliers';
     const quickSupplierUrl = $app.data('quick-supplier-url') || '/NhapHang/QuickCreateSupplier';
 
-    // 1. Khởi tạo Autocomplete tìm kiếm hàng hóa F3
-    if (!isReadOnly && typeof initF3ProductSearch === 'function') {
-        initF3ProductSearch({
+    // 1. Khởi tạo Autocomplete tìm kiếm hàng hóa F3 dùng Lego KiotFilter.initProductSearch
+    if (!isReadOnly && window.KiotFilter && typeof KiotFilter.initProductSearch === 'function') {
+        KiotFilter.initProductSearch({
             inputSelector: '#productSearchInput',
             dropdownSelector: '#autocompleteDropdown',
             apiUrl: $app.data('search-products-url') || '/NhapHang/SearchProducts',
             getWarehouseId: function () { return warehouseId; },
             onSelect: function (product) {
                 addProductLine(product);
-                $('#productSearchInput').val('').focus();
             }
         });
     }

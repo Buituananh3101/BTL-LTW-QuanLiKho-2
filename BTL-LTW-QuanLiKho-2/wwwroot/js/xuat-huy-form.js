@@ -257,84 +257,15 @@
         });
     }
 
-    /* ===== AUTOCOMPLETE TÌM KIẾM HÀNG HÓA (F3) ===== */
-    let sgList = [], sgIdx = 0, searchTimer = null;
-    function paintSuggest() {
-        const box = $('#suggest');
-        if (!box) return;
-        if (!sgList.length) {
-            box.classList.remove('show');
-            return;
-        }
-        box.innerHTML = sgList.map((p, i) => `
-            <div class="sg ${i === sgIdx ? 'act' : ''}" data-i="${i}">
-                <div class="th">${(p.tenHang.trim()[0] || 'H').toUpperCase()}</div>
-                <div class="nm">
-                    <b>${esc(p.tenHang)}</b>
-                    <small>${esc(p.maHangNoiBo)}</small>
-                </div>
-                <div class="nums">
-                    Giá vốn: <b>${fmt(p.giaVon)}</b><br>
-                    Tồn: <b>${fmt(p.tonKho)}</b>
-                </div>
-            </div>`).join('');
-        box.dataset.owner = '#fSearch';
-        box.classList.add('show');
-    }
-
-    const fSearch = $('#fSearch');
-    const suggest = $('#suggest');
-    if (fSearch && suggest && !isReadOnly) {
-        fSearch.addEventListener('input', () => {
-            clearTimeout(searchTimer);
-            const q = fSearch.value.trim();
-            if (!q) {
-                sgList = [];
-                paintSuggest();
-                return;
-            }
-            searchTimer = setTimeout(async () => {
-                try {
-                    const res = await fetch(`${searchUrl}?q=${encodeURIComponent(q)}&warehouseId=${FM.warehouseId}`);
-                    if (!res.ok) return;
-                    sgList = await res.json();
-                    sgIdx = 0;
-                    paintSuggest();
-                } catch (err) {
-                    console.error(err);
-                }
-            }, 250);
-        });
-
-        fSearch.addEventListener('keydown', e => {
-            if (!suggest.classList.contains('show')) return;
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                sgIdx = (sgIdx + 1) % sgList.length;
-                paintSuggest();
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                sgIdx = (sgIdx - 1 + sgList.length) % sgList.length;
-                paintSuggest();
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                if (sgList[sgIdx]) addProduct(sgList[sgIdx]);
-            } else if (e.key === 'Escape') {
-                suggest.classList.remove('show');
-            }
-        });
-
-        suggest.addEventListener('click', e => {
-            const item = e.target.closest('.sg');
-            if (item) {
-                const i = parseInt(item.dataset.i);
-                if (sgList[i]) addProduct(sgList[i]);
-            }
-        });
-
-        document.addEventListener('click', e => {
-            if (!e.target.closest('.searchbox')) {
-                suggest.classList.remove('show');
+    /* ===== AUTOCOMPLETE TÌM KIẾM HÀNG HÓA (F3) DÙNG LEGO KIOTPRODUCTSEARCH ===== */
+    if (!isReadOnly && window.KiotFilter && typeof KiotFilter.initProductSearch === 'function') {
+        KiotFilter.initProductSearch({
+            inputSelector: '#fSearch',
+            dropdownSelector: '#suggest',
+            apiUrl: searchUrl,
+            getWarehouseId: () => FM.warehouseId,
+            onSelect: function (product) {
+                addProduct(product);
             }
         });
     }

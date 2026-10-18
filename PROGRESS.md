@@ -1,18 +1,46 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Khắc Phục Lỗi Bấm Vào Thời Gian Không Hiện Ở Toàn Bộ Chức Năng (Phiên 137)
+Cập nhật lần cuối: 2026-10-18 – Triển Khai Giai Đoạn 2 Đóng Gói Lego: F3 Product Search & DocGrid Engine (Phiên 138)
 
 ---
 
 ## Đang làm
-- Đã khắc phục triệt để lỗi bấm vào phần thời gian không hiển thị trên toàn bộ các màn hình (cả bộ lọc thời gian Sidebar Index và bộ chọn ngày giờ lập phiếu Create/Edit).
-- Dự án sẵn sàng cho Giai đoạn 2 đóng gói Lego: Tìm kiếm nhanh Hàng hóa / Khách hàng / NCC (F3 Autocomplete) và Thao tác hàng loạt (Batch Actions).
+- Hoàn thành xuất sắc Giai đoạn 2 kế hoạch đóng gói Lego:
+  + Đóng gói `KiotFilter.initProductSearch` (Tìm kiếm hàng hóa Autocomplete F3, quét barcode, hiển thị tồn/giá, phím mũi tên) dùng chung toàn hệ thống, hợp nhất cả 5 form chứng từ (Kiểm kho, Nhập hàng, Xuất hủy, Chuyển kho, Trả hàng nhập).
+  + Đóng gói `KiotFilter.initDocGrid` (Quản lý lưới dòng chứng từ, tự động đánh STT, chuyển đổi trạng thái rỗng/có dữ liệu, bắt sự kiện xóa dòng qua KiotConfirm, tính toán realtime).
+  + Loại bỏ hoàn toàn mã nhúng file dư thừa `f3-product-search.js` trên 6 View (`ChuyenKho`, `NhapHang`, `TraHangNhap`).
+- Sẵn sàng chuẩn bị Giai đoạn 3: Đóng gói `KiotFilter.initImageUploader` (Quản lý 5 ảnh, kéo thả, nén Canvas, paste clipboard) và Combobox phân cấp danh mục.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế bộ chọn ngày giờ 2 cột và bộ lọc thời gian trên các chức năng.
-2. Triển khai Giai đoạn 2 theo kế hoạch đóng gói Lego (`ke-hoach-dong-goi-lego.md`).
+1. Kiểm tra trải nghiệm thực tế tìm kiếm F3 và lưới dòng chứng từ trên môi trường chạy thử.
+2. Triển khai Giai đoạn 3 theo kế hoạch đóng gói Lego (`ke-hoach-dong-goi-lego.md`).
+
+---
+
+- **Triển Khai Giai Đoạn 2 Đóng Gói Lego: F3 Product Search & DocGrid Engine (Phiên 138)**:
+  - **Nhu cầu**: Người dùng yêu cầu triển khai Giai đoạn 2 của Kế hoạch đóng gói Lego (`ke-hoach-dong-goi-lego.md`).
+  - **Mục tiêu Giai đoạn 2**:
+    1. Đóng gói Lego Tìm Kiếm Hàng Hóa Autocomplete F3 (`KiotFilter.initProductSearch`) vào `kiot-filter.js`, loại bỏ hơn 200 dòng code thủ công lặp lại ở `phieu-kiem-ke-form.js`, `xuat-huy-form.js`, `tra-hang-nhap-form.js`, `chuyen-kho-form.js`.
+    2. Đóng gói Lego Lưới Dòng Chứng Từ (`KiotFilter.initDocGrid`) vào `kiot-filter.js` để tự động hóa quản lý STT, empty state, xóa dòng kèm xác nhận KiotConfirm, và kích hoạt tính toán lại.
+    3. Loại bỏ hoàn toàn script `f3-product-search.js` lẻ tẻ trên các View.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`wwwroot/css/site.css`**: Bổ sung bộ style cho container dropdown `.nh-autocomplete-dropdown, .kiot-autocomplete-dropdown` định vị absolute, box-shadow, auto-scroll, z-index 1050.
+    + **`wwwroot/js/kiot-filter.js`**:
+      * Triển khai Lego block 17: `KiotFilter.initProductSearch({ inputSelector, dropdownSelector, apiUrl, getWarehouseId, onSelect, debounceMs })` tích hợp phím F3 toàn cục, debounce gõ phím, điều hướng Up/Down/Enter/Escape, click chọn, auto-hide khi click ngoài, và global alias `window.initF3ProductSearch` cho backward compatibility.
+      * Triển khai Lego block 18: `KiotFilter.initDocGrid({ tableBodySelector, emptyBoxSelector, tableScrollSelector, rowSelector, sttSelector, btnRemoveSelector, qtyInputSelector, onRecalc, onRemove, confirmDelete })`.
+    + **Tái cấu trúc 5 Form Chứng Từ**:
+      * `chuyen-kho-form.js`: Xóa bỏ hơn 120 dòng code fallback suggest thủ công; tích hợp `KiotFilter.initProductSearch` và `KiotFilter.initDocGrid`.
+      * `xuat-huy-form.js`: Xóa bỏ hơn 80 dòng code autocomplete thủ công; tích hợp `KiotFilter.initProductSearch`.
+      * `phieu-kiem-ke-form.js`: Xóa bỏ hơn 85 dòng code autocomplete thủ công; tích hợp `KiotFilter.initProductSearch`.
+      * `nhap-hang-form.js`: Chuyển sang sử dụng `KiotFilter.initProductSearch`.
+      * `tra-hang-nhap-form.js`: Xóa bỏ hơn 85 dòng code autocomplete thủ công; tích hợp `KiotFilter.initProductSearch`.
+    + **Dọn dẹp View**: Loại bỏ thẻ `<script src="~/js/components/f3-product-search.js">` khỏi 6 view (`ChuyenKho/Create`, `Edit`; `NhapHang/Create`, `Edit`; `TraHangNhap/Create`, `Edit`).
+    + **Đồng bộ tài liệu**: Cập nhật `.agent/rules/03-giao-dien-layout.md` bổ sung Lego 17 & 18, duy trì dung lượng 7.662 bytes (< 8.000 ký tự theo Rule 12).
+  - **Kiểm tra**:
+    + `node -c` xác nhận cú pháp 100% hợp lệ trên cả 6 file JavaScript.
+    + `dotnet build` biên dịch thành công hoàn hảo với **0 Errors**.
 
 ---
 
