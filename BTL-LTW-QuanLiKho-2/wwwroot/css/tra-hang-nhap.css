@@ -294,55 +294,143 @@
     color: #0f172a;
 }
 
-/* Popup calendar ngày giờ .dtpop */
-.dtpop .cal-day {
-    padding: 6px 0;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12.5px;
-    border: none;
-    background: transparent;
-}
-
-.dtpop .cal-day:hover {
-    background-color: #eff6ff;
-    color: #0070f3;
-}
-
-.dtpop .cal-day.today {
-    font-weight: 700;
-    color: #0070f3;
-}
-
-.dtpop .cal-day.selected {
-    background-color: #0070f3 !important;
-    color: #fff !important;
-    font-weight: 700;
-}
-
-.dtpop .cal-day.other-month {
-    color: #cbd5e1;
-}
-
-.dtpop .time-btn {
-    padding: 3px 6px;
-    border-radius: 4px;
-    border: 1px solid #e2e8f0;
+/* Popup calendar ngày giờ .dtpop (chuẩn 2 cột Kiểm tồn & Chuyển kho) */
+.dtpop {
+    display: none;
+    position: absolute;
+    top: 38px;
+    right: 0;
     background: #fff;
-    font-size: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.15);
+    padding: 12px;
+    z-index: 1060;
+    width: 320px;
+    flex-direction: row;
+    gap: 12px;
+    box-sizing: border-box;
+}
+
+.dtpop.show {
+    display: flex !important;
+}
+
+.times {
+    width: 90px;
+    height: 230px;
+    overflow-y: auto;
+    border-left: 1px solid #e2e8f0;
+    padding-left: 8px;
+}
+
+.times button {
+    display: block;
+    width: 100%;
+    border: 0;
+    background: none;
+    padding: 6px 4px;
+    font-size: 13px;
+    border-radius: 4px;
+    text-align: center;
     cursor: pointer;
+    color: #374151;
 }
 
-.dtpop .time-btn:hover {
-    border-color: #0070f3;
+.times button:hover {
+    background: #eef4ff;
     color: #0070f3;
-    background: #eff6ff;
 }
 
-.dtpop .time-btn.selected {
-    background-color: #0070f3;
+.times button.cur {
+    background: #0070f3;
     color: #fff;
+    font-weight: 600;
+}
+
+.dtnav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #1f2937;
+}
+
+.rp-nav {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: #4b5563;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rp-nav:hover {
+    background: #f3f6fb;
+    color: #0070f3;
     border-color: #0070f3;
+}
+
+.cal {
+    width: 200px;
+}
+
+.cal-h {
+    text-align: center;
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: #1f2937;
+}
+
+.cal-g {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    text-align: center;
+    font-size: 12px;
+}
+
+.cal-g .dow {
+    color: #94a3b8;
+    font-weight: 600;
+    padding: 4px 0;
+}
+
+.cal-g button.d {
+    width: 26px;
+    height: 26px;
+    margin: 1px auto;
+    border: 0;
+    background: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #334155;
+}
+
+.cal-g button.d:hover {
+    background: #eef4ff;
+    color: #0070f3;
+}
+
+.cal-g button.d.today {
+    border: 1px solid #0070f3;
+    font-weight: 600;
+}
+
+.cal-g button.d.sel {
+    background: #0070f3;
+    color: #fff;
+    font-weight: 600;
 }
 
 /* 2 Nút hành động Lưu tạm (F9) & Hoàn thành (F10) chuẩn Kiểm tồn */

@@ -63,6 +63,35 @@
                 <!-- Cụm nút Nhập file & Xuất file Excel chuẩn KiotViet -->
                 <partial name="_HangHoaExcelActions" />
 
+                <!-- Dropdown tùy chọn hiển thị cột chuẩn Nhập hàng & KiotViet -->
+                <div class="dropdown">
+                    <button class="btn btn-tool" type="button" id="btnColsDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Tùy chọn hiển thị cột">
+                        <i class="bi bi-view-list"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end shadow p-3" id="colMenu" style="min-width: 400px;">
+                        <h6 class="dropdown-header px-0 pt-0 text-dark fw-bold mb-2">Hiển thị cột</h6>
+                        <div class="row g-3">
+                            <div class="col-6 d-flex flex-column gap-2 small">
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="img" checked> Hình ảnh</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="mahang" checked> Mã hàng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tenhang" checked> Tên hàng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="nhomhang"> Nhóm hàng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="dvt"> Đơn vị tính</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="giaban" checked> Giá bán</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="giavon" checked> Giá vốn</label>
+                            </div>
+                            <div class="col-6 d-flex flex-column gap-2 small">
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tonkho" checked> Tồn kho</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="khachdat" checked> Khách đặt</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="vitri"> Vị trí</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ngaytao" checked> Thời gian tạo</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="dukienhethang" checked> Dự kiến hết hàng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="trangthai"> Trạng thái</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Các icon tiện ích KiotViet -->
                 <button type="button" class="btn btn-tool d-none d-sm-inline-flex" title="Tải lại bảng" id="btnReloadTable">
                     <i class="bi bi-arrow-clockwise"></i>

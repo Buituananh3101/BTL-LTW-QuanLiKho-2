@@ -18,6 +18,42 @@ $(document).ready(function () {
     const groupModalEl = document.getElementById('quickGroupModal');
     const groupModal = groupModalEl ? new bootstrap.Modal(groupModalEl) : null;
 
+    // Cấu hình ẩn / hiện cột mặc định khớp KiotViet (13 cột dữ liệu + 2 cột cố định: checkbox, star)
+    const DEFAULT_PRODUCT_COLS = {
+        img: 1,
+        mahang: 1,
+        tenhang: 1,
+        nhomhang: 0,
+        dvt: 0,
+        giaban: 1,
+        giavon: 1,
+        tonkho: 1,
+        khachdat: 1,
+        vitri: 0,
+        ngaytao: 1,
+        dukienhethang: 1,
+        trangthai: 0
+    };
+    let productColumnToggler = null;
+
+    function initColumnToggle() {
+        if (window.KiotFilter && typeof window.KiotFilter.initColumnToggle === 'function') {
+            productColumnToggler = window.KiotFilter.initColumnToggle({
+                menuSelector: '#colMenu',
+                tableSelector: '#productTable',
+                storageKey: 'kiot_hang_hoa_cols_v1',
+                defaultCols: DEFAULT_PRODUCT_COLS,
+                extraColsCount: 2 // checkbox + star
+            });
+        }
+    }
+
+    function applyColumnVisibility() {
+        if (productColumnToggler && typeof productColumnToggler.apply === 'function') {
+            productColumnToggler.apply();
+        }
+    }
+
     // 1. Thu gọn / Mở rộng (Kéo vào / Kéo ra) sidebar bên trái
     let animTimer = null;
     function toggleSidebar(forceState) {
@@ -651,21 +687,26 @@ $(document).ready(function () {
 
         $('.product-detail-row').not($detailRow).each(function () {
             const $other = $(this);
-            $other.find('.product-detail-panel-wrap').slideUp(150, function () {
+            $other.find('.product-detail-panel-wrap').stop(true, true).slideUp(150, function () {
                 $other.hide();
             });
         });
         $('.product-row').not(this).removeClass('selected');
 
         if (isCurrentlyOpen) {
-            $wrap.slideUp(150, function () {
+            $wrap.stop(true, true).slideUp(150, function () {
                 $detailRow.hide();
             });
             $(this).removeClass('selected');
         } else {
             $(this).addClass('selected');
+            const visibleCols = $('#productTable thead tr:first-child th:visible').length || 11;
+            $detailRow.find('> td').attr('colspan', visibleCols);
+            const $cells = $(this).children('td:visible');
+            $cells.removeClass('last-visible-col');
+            $cells.last().addClass('last-visible-col');
             $detailRow.show();
-            $wrap.hide().slideDown(150);
+            $wrap.stop(true, true).hide().slideDown(150);
         }
     });
 
@@ -837,6 +878,7 @@ $(document).ready(function () {
             },
             success: function (html) {
                 $('#productTableContainer').html(html).css('opacity', '1');
+                applyColumnVisibility();
             },
             error: function () {
                 $('#productTableContainer').css('opacity', '1');
@@ -883,4 +925,7 @@ $(document).ready(function () {
     };
 
     window.loadTable = loadTable;
+
+    // Khởi tạo ẩn / hiện cột
+    initColumnToggle();
 });

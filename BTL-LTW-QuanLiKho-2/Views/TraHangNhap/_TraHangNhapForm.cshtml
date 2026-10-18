@@ -216,22 +216,12 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="v relw" style="flex: 1 1 auto; justify-content: flex-end;">
-                        <input type="text" class="inp" id="fDateInp" value="@Model.NgayTra.ToString("dd/MM/yyyy HH:mm")" readonly style="max-width: 185px; width: 185px; height: 34px; font-size: 13.5px; cursor: pointer; text-align: right;" />
+                    <div class="v relw" style="flex: 1 1 auto; justify-content: flex-end; position: relative;">
+                        <input type="text" class="inp" id="fDateInp" value="@Model.NgayTra.ToString("dd/MM/yyyy HH:mm")" @(Model.IsReadOnly ? "disabled" : "") autocomplete="off" style="max-width: 175px; width: 175px; height: 34px; font-size: 13px; cursor: pointer; text-align: right; color: #4b5563;" title="Nhấp để chọn ngày giờ trả hàng" />
                         <input type="hidden" id="fDateIso" value="@Model.NgayTra.ToString("yyyy-MM-ddTHH:mm")" />
 
                         <!-- Popup chọn ngày giờ chuẩn Kiểm tồn -->
-                        <div class="pop dtpop shadow-sm" id="dtPop" style="display: none; position: absolute; top: 40px; right: 0; z-index: 60; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; width: 340px; padding: 12px;">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <button type="button" class="btn btn-sm btn-light p-1" id="btnPrevMonth"><i class="bi bi-chevron-left"></i></button>
-                                <span class="fw-bold small" id="lblMonthYear">Tháng @Model.NgayTra.Month / @Model.NgayTra.Year</span>
-                                <button type="button" class="btn btn-sm btn-light p-1" id="btnNextMonth"><i class="bi bi-chevron-right"></i></button>
-                            </div>
-                            <div class="cal-grid mb-2" id="calDays" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-size: 12px;"></div>
-                            <div class="time-list-wrap border-top pt-2" style="max-height: 120px; overflow-y: auto;">
-                                <div class="times d-flex flex-wrap gap-1" id="timeSlots"></div>
-                            </div>
-                        </div>
+                        <div class="pop dtpop shadow-sm" id="dtPop"></div>
                     </div>
                 </div>
 

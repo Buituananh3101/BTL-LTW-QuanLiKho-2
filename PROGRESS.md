@@ -1,19 +1,78 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Khắc Phục Lỗi LINQ Translation PadLeft Khi Lọc Tìm Kiếm Phiếu Trả Hàng Nhập (Phiên 132)
+Cập nhật lần cuối: 2026-10-18 – Loại Bỏ Mục Xuất Dùng Nội Bộ Khỏi Mega Menu Hàng Hóa (Phiên 135)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử trải nghiệm danh sách và tìm kiếm Phiếu trả hàng nhập (`/TraHangNhap`), đảm bảo tìm kiếm mã phiếu không còn lỗi dịch LINQ.
+- Sẵn sàng hỗ trợ các yêu cầu tiếp theo từ người dùng.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế và luồng nghiệp vụ phân hệ Nhà cung cấp và Trả hàng nhập trên trình duyệt.
+1. Kiểm tra trải nghiệm thực tế thao tác chọn ngày giờ trên form Trả hàng nhập (`/TraHangNhap/Create`).
 2. Kiểm tra lại toàn bộ luồng chuyển kho, xuất hủy, nhập hàng, bán hàng POS để đảm bảo tính đồng bộ hệ thống.
 
 ---
+
+- **Loại Bỏ Mục Xuất Dùng Nội Bộ Khỏi Mega Menu Hàng Hóa (Phiên 135)**:
+  - **Nhu cầu**: Người dùng yêu cầu kèm ảnh chụp màn hình menu Topbar (`media_1792331363909_2ddad512.png`): "bỏ cái xuất dùng nội bộ kia đi".
+  - **Nguyên nhân & Thực hiện**:
+    + Trong `Views/Shared/_MainMenu.cshtml`, nhóm "Kho hàng" thuộc mega dropdown "Hàng hóa" có một liên kết giữ chỗ tạm `<a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Xuất dùng nội bộ</a>`.
+    + Đã loại bỏ hoàn toàn dòng liên kết này khỏi `_MainMenu.cshtml`, giúp menu gọn gàng, chỉ giữ lại các chức năng thực tế của nhóm kho hàng: "Kiểm kho", "Chuyển kho", "Xuất hủy".
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+
+---
+
+- **Đồng Bộ Nút & Popup Chọn Ngày Giờ Trên Form Trả Hàng Nhập Chuẩn Kiểm Tồn (Phiên 134)**:
+  - **Nhu cầu**: Người dùng yêu cầu kèm ảnh chụp màn hình: "sửa lại nút thời gian dựa trên kiểm tồn" trên form Lập/Sửa phiếu Trả hàng nhập (`_TraHangNhapForm.cshtml`).
+  - **Nguyên nhân cốt lõi**:
+    + Popup chọn ngày giờ trước đó trong `_TraHangNhapForm.cshtml` và `tra-hang-nhap.css` sử dụng cấu trúc xếp chồng dọc tự phát (calendar ở trên, các nút bấm giờ nằm ngang dạng flex wrap ở dưới với thanh cuộn lộn xộn), không khớp với chuẩn 2 cột của Kiểm tồn (`PhieuKiemKe`) và Chuyển kho (`ChuyenKho`).
+    + Sự kiện mở/đóng popup chưa có cơ chế chống double-fire giữa `focus` và `click`, thiếu tính năng tự động cuộn đến khung giờ hiện tại (`.cur`) khi mở popup.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`Views/TraHangNhap/_TraHangNhapForm.cshtml`**:
+      * Chuẩn hóa ô nhập liệu `#fDateInp` (`max-width: 175px`, căn lề phải, font 13px, màu chữ `#4b5563`, hỗ trợ `autocomplete="off"`).
+      * Làm rỗng container `<div class="pop dtpop shadow-sm" id="dtPop"></div>` để toàn bộ giao diện điều hướng và các slot thời gian được sinh động linh hoạt từ JavaScript.
+    + **`wwwroot/css/tra-hang-nhap.css`**:
+      * Thay thế toàn bộ các class cũ `.cal-day` và `.time-btn` bằng bộ CSS chuẩn 2 cột của Kiểm tồn (`.dtpop`, `.dtpop.show`, `.times`, `.times button`, `.times button.cur`, `.dtnav`, `.rp-nav`, `.cal`, `.cal-h`, `.cal-g`, `.cal-g .dow`, `.cal-g button.d`, `.cal-g button.d.today`, `.cal-g button.d.sel`).
+      * Cột trái rộng 200px (tháng/năm điều hướng & lưới 7 ngày), cột phải rộng 90px cao 230px cuộn dọc với 48 mốc thời gian 30 phút (`00:00` đến `23:30`).
+    + **`wwwroot/js/tra-hang-nhap-form.js`**:
+      * Triển khai hàm `paintDt()` và `calHTML()` chuẩn Kiểm tồn.
+      * Tự động tính toán vị trí cuộn dọc (`scrollTop`) đưa khung giờ đang chọn `.cur` vào giữa khung nhìn của cột thời gian khi mở popup.
+      * Tích hợp cơ chế chống rung và double-fire `lastFocusTime < 300ms` giữa sự kiện `focus` và `click` trên ô nhập liệu.
+      * Hỗ trợ tự động cập nhật ngày giờ khi gõ tay định dạng `dd/MM/yyyy HH:mm`.
+      * Đồng bộ 100% dữ liệu 2 chiều giữa hiển thị `#fDateInp` và trường ẩn ISO `#fDateIso` gửi lên server.
+      * Đóng popup mượt mà khi chọn xong slot thời gian, hoặc khi click ra ngoài popup, hoặc khi nhấn phím `Escape`.
+    + **Kiểm tra**:
+      * `node -c tra-hang-nhap-form.js`: Không có lỗi cú pháp.
+      * `dotnet build -t:Compile`: Biên dịch thành công với **0 Errors**.
+
+---
+
+- **Thêm Tùy Chọn Ẩn Hiện Cột & Cố Định Độ Rộng Bảng Hàng Hóa Chuẩn Kiểm Tồn (Phiên 133)**:
+  - **Nhu cầu**:
+    + Người dùng yêu cầu: "dựa trên phần nhập hàng, thêm phần ẩn hiện cột cho danh sách hàng hóa".
+    + Tiếp tục hoàn thiện theo yêu cầu: "sửa lại dựa trên phần kiểm tồn, ko co lại khi thêm cột".
+  - **Nguyên nhân & Yêu cầu kỹ thuật**:
+    + Bảng hàng hóa trước đó kế thừa `.tbl { width: 100%; table-layout: fixed; }` từ `site.css`. Khi bật thêm cột, tổng chiều rộng bảng bị giới hạn trong 100% container, dẫn đến các cột đang hiển thị (như Tên hàng, Mã hàng, Giá bán, Giá vốn, Tồn kho) bị co rút (shrink) lại, chữ bị ngắt dòng mất thẩm mỹ.
+    + Cần đồng bộ cơ chế của phân hệ Kiểm tồn (`#stockTakeTable` trong `kiem-kho.css` và `_PhieuKiemKeTable.cshtml`): Áp dụng `width: max-content !important; min-width: 760px !important; table-layout: fixed !important;` và định nghĩa cả `width` lẫn `min-width` tường minh cho tất cả 15 cột. Khi thêm cột, bảng mở rộng tự nhiên sang phải và cuộn ngang mượt mà bằng thanh cuộn của container `.kiot-table-scroll-body`, không có bất kỳ cột nào bị co rút.
+    + Khung chi tiết dòng sản phẩm áp dụng `.kiot-detail-fixed-wrap` cố định 992px (chuẩn Nhà cung cấp & Kiểm tồn) để nội dung chi tiết không bị kéo dãn quá đà khi bảng mở rộng nhiều cột.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`Views/HangHoa/_HangHoaTable.cshtml`**:
+      * Thiết lập `style="width: max-content; min-width: 760px;"` trực tiếp trên thẻ `<table id="productTable">`.
+      * Khóa chặt độ rộng bằng cả `width` và `min-width` trên toàn bộ 15 cột: checkbox (36px), star (36px), ảnh (48px), mã hàng (130px), tên hàng (240px), nhóm hàng (140px), ĐVT (80px), giá bán (110px), giá vốn (110px), tồn kho (100px), khách đặt (100px), vị trí (110px), ngày tạo (145px), dự kiến hết hàng (160px), trạng thái (130px).
+      * Bổ sung `.kiot-detail-fixed-wrap` cho `.product-detail-tab-content` để nội dung 4 tab chi tiết cố định 992px chuẩn KiotViet.
+    + **`wwwroot/css/site.css`**:
+      * Định nghĩa rule `#productTable { width: max-content !important; min-width: 760px !important; table-layout: fixed !important; border-collapse: separate !important; border-spacing: 0 !important; }` khớp chuẩn `#stockTakeTable` của kiểm tồn.
+      * Cấu hình viền đóng khung hình chữ nhật liền mạch màu xanh `#0070f3` (`selected > td`, `last-visible-col`, `product-detail-row > td`).
+    + **`wwwroot/js/hang-hoa-index.js`**:
+      * Tối ưu hiệu ứng mở accordion bằng `.stop(true, true)` chống rung giật, đồng bộ cập nhật `colspan` và class `.last-visible-col` tức thì.
+    + **`docs/specs/danh-sach-hang-hoa.md`**: Đồng bộ mục 3.2 chuẩn bảng `width: max-content` từ kiểm tồn, độ dài 7.704 ký tự (tuân thủ Rule 12).
+    + **Kiểm tra**:
+      * `node -c hang-hoa-index.js` thành công 100%.
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+
 
 - **Khắc Phục Lỗi LINQ Translation PadLeft Khi Lọc Tìm Kiếm Phiếu Trả Hàng Nhập (Phiên 132)**:
   - **Nhu cầu**: Người dùng phản ánh kèm ảnh chụp màn hình ngoại lệ `System.InvalidOperationException: The LINQ expression could not be translated` tại dòng `await liveQuery.SumAsync(...)` trong `TraHangNhapController.cs`.

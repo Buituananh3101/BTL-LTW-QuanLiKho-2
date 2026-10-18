@@ -458,6 +458,35 @@ body {
   border-spacing: 0;
   table-layout: fixed;
 }
+/* Bảng Hàng hóa giữ độ rộng cột cố định chuẩn KiotViet & Kiểm kho, không co rút khi thêm cột */
+#productTable {
+  width: max-content !important;
+  min-width: 760px !important;
+  table-layout: fixed !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+#productTable tr.product-row.selected > td {
+  background-color: #ffffff !important;
+  border-top: 2px solid #0070f3 !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  border-right: none !important;
+}
+#productTable tr.product-row.selected > td:first-child {
+  border-left: 3px solid #0070f3 !important;
+}
+#productTable tr.product-row.selected > td.last-visible-col,
+#productTable tr.product-row.selected > td:last-child {
+  border-right: 3px solid #0070f3 !important;
+}
+#productTable tr.product-detail-row > td {
+  background-color: #ffffff !important;
+  padding: 0 !important;
+  border-top: none !important;
+  border-bottom: 2px solid #0070f3 !important;
+  border-left: 3px solid #0070f3 !important;
+  border-right: 3px solid #0070f3 !important;
+}
 .tbl thead th {
   position: sticky;
   top: 0;
