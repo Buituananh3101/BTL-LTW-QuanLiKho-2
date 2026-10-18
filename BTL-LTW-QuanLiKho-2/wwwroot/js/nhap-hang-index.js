@@ -342,24 +342,8 @@ $(function () {
                 excludeClickSelector: 'input, button, a, label, .cell-checkbox, .cell-star, .star-btn',
                 slideDuration: 150,
                 fadeDuration: 120,
-                onOpen: function (id, $row, $detailRow) {
+                onOpen: function (id) {
                     F.openId = id;
-                    setTimeout(function () {
-                        if ($detailRow && $detailRow.length && $row && $row.length) {
-                            const $scrollContainer = $detailRow.closest('.kiot-table-scroll-body');
-                            if ($scrollContainer.length) {
-                                const containerTop = $scrollContainer.offset().top;
-                                const containerHeight = $scrollContainer.height();
-                                const rowTop = $row.offset().top;
-                                const detailBottom = $detailRow.offset().top + $detailRow.outerHeight();
-
-                                if (detailBottom > containerTop + containerHeight) {
-                                    const scrollTarget = $scrollContainer.scrollTop() + (rowTop - containerTop) - 10;
-                                    $scrollContainer.animate({ scrollTop: Math.max(0, scrollTarget) }, 200);
-                                }
-                            }
-                        }
-                    }, 180);
                 },
                 onClose: function () {
                     F.openId = null;

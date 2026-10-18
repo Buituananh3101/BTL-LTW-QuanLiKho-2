@@ -1,19 +1,108 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Tách Nút Nhập File & Xuất File Riêng Biệt Trong Danh Sách Hàng Hóa (Phiên 97)
+Cập nhật lần cuối: 2026-10-18 – Đồng Bộ Bộ Chọn Thời Gian Popup Cho Phân Hệ Xuất Hủy (Phiên 101)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử thao tác nút Nhập file và Xuất file riêng biệt trên màn hình Danh sách hàng hóa cùng người dùng.
+- Sẵn sàng kiểm thử bộ chọn ngày giờ trên phân hệ Xuất hủy (`/XuatHuy/Create`, `/XuatHuy/Edit`).
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế các luồng Nhập hàng (Lập phiếu, F3 tìm kiếm, F4 thu gọn panel, F9 lưu tạm, F10 hoàn thành, Import Excel).
+1. Kiểm tra trải nghiệm thực tế các luồng Nhập hàng, Kiểm kho, Xuất hủy.
 2. Xây dựng phân hệ Trả hàng nhập (Purchase Returns) theo yêu cầu.
 
 ---
+
+- **Đồng Bộ Bộ Chọn Thời Gian Popup Cho Phân Hệ Xuất Hủy (Phiên 101)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "tiếp tục sửa cho phần xuất hủy".
+  - **Khảo sát hiện trạng**:
+    + Ô `#fDate` và popup `#dtPop` đã có sẵn trong `Views/XuatHuy/_XuatHuyForm.cshtml`.
+    + Trong `wwwroot/js/xuat-huy-form.js`, sự kiện click chọn giờ trước đó bị gán `dtPop.classList.remove('show')` làm popup bị tắt ngay khi chọn giờ, đồng thời dùng `scrollIntoView` gây rung giật màn hình.
+    + Thiếu sự kiện `focus`, thiếu chống double-fire `Date.now() - lastFocusTime < 300`, thiếu sự kiện `change` khi người dùng tự gõ tay, và thiếu phím tắt `Escape` đóng popup.
+    + Trong `Controllers/XuatHuyController.cs` (hàm `SaveDraft` và `Complete`), `req.NgayLap` chưa được chuẩn hóa chuyển đổi `DateTimeKind.Utc` sang `ToLocalTime()`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Nâng cấp Script (`wwwroot/js/xuat-huy-form.js`)**:
+      * Đổi định vị khung giờ trong `paintDt()` sang `timesEl.scrollTop` chuẩn xác, không gây rung giật cuộn cửa sổ.
+      * Tích hợp `focus`, chống double-fire, và hỗ trợ sự kiện `change` parse chuỗi ngày giờ gõ tay `dd/MM/yyyy HH:mm`.
+      * **Giữ popup luôn mở khi click chọn ngày hoặc chọn giờ**, người dùng có thể thoải mái chọn lại ngày/giờ nhiều lần liên tiếp.
+      * **Chỉ đóng popup khi click ra ngoài** (`document.addEventListener('click')`) hoặc khi bấm phím `Escape`.
+    + **Xử lý Backend (`Controllers/XuatHuyController.cs`)**:
+      * Chuẩn hóa `ngayLap = req.NgayLap.Kind == DateTimeKind.Utc ? req.NgayLap.ToLocalTime() : req.NgayLap` trong cả `SaveDraft` và `Complete`.
+    + **Đồng Bộ Đặc Tả (`docs/specs/xuat-huy.md`)**:
+      * Cập nhật mô tả popup ngày giờ trong mục Panel F4 (7.214 ký tự < 8.000 ký tự).
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c wwwroot/js/xuat-huy-form.js` đạt **0 Errors**.
+
+---
+
+- **Tích Hợp Bộ Chọn Thời Gian Lập Phiếu Nhập Hàng Chuẩn KiotViet / Kiểm Kho (Phiên 100)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm ảnh chụp: "phần nút thời gian này trong phần nhập hàng khi ấn vào ko hiện lên phần chọn thời gian".
+  - **Nguyên nhân**:
+    + Ô thời gian `#fDate` trong `Views/NhapHang/_NhapHangForm.cshtml` đang có thuộc tính `readonly` và `cursor: default`.
+    + Thiếu container popup `<div class="pop dtpop shadow-sm" id="dtPop"></div>`.
+    + Trong `wwwroot/js/nhap-hang-form.js` chưa có logic lắng nghe sự kiện, hàm render lịch tháng và danh sách khung giờ 30 phút (`paintDt`, `calHTML`), và chưa gửi `NgayLap` trong payload `submitDoc`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Nâng cấp View (`Views/NhapHang/_NhapHangForm.cshtml`)**:
+      * Bỏ thuộc tính `readonly`, đổi style thành `cursor: pointer;`, thêm `title="Nhấp để chọn ngày giờ nhập hàng"` và `autocomplete="off"`.
+      * Thêm `<div class="pop dtpop shadow-sm" id="dtPop"></div>` bên trong thẻ cha `.v.relw`.
+    + **Nâng cấp JS (`wwwroot/js/nhap-hang-form.js` & `wwwroot/js/phieu-kiem-ke-form.js`)**:
+      * Khởi tạo `createdDate` từ giá trị hiển thị ban đầu của `#fDate`.
+      * Xây dựng hàm `calHTML(y, m, sel)` và `paintDt()` render lịch tháng chuẩn tiếng Việt (Thứ 2 đến CN) kèm danh sách 48 khung giờ 30 phút.
+      * Tự động căn giữa khung giờ đang chọn bằng `timesEl.scrollTop` chuẩn xác mà không gây rung lắc/giật cuộn trang web.
+      * Gắn sự kiện `focus`, `click` (chống double-fire), `change` (parse người dùng gõ tay), chuyển tháng trước/sau `[data-dn]`, chọn ngày `button.d`, chọn giờ `[data-tm]`.
+      * **Giữ popup luôn mở khi click chọn ngày hoặc chọn giờ** (bỏ lệnh tự tắt `removeClass('show')`), giúp người dùng thoải mái thay đổi ngày/giờ liên tiếp.
+      * **Popup chỉ đóng lại khi người dùng click ra ngoài** (`$(document).on('click')`) hoặc khi bấm phím `Escape`. Bổ sung `e.stopPropagation()` trên `#fDate` và `#dtPop` để ngăn sự kiện nổi bọt lên `document` khi vẽ lại DOM ngày/giờ (nguyên nhân khiến popup bị đóng nhầm trước đó). Đồng bộ hoàn toàn cả 2 phân hệ Nhập hàng và Kiểm kho.
+      * Truyền `NgayLap: formatLocalIso(createdDate)` vào payload khi người dùng bấm Lưu tạm (F9) hoặc Hoàn thành (F10).
+    + **Xử lý Backend (`Controllers/NhapHangController.cs`)**:
+      * Chuẩn hóa gán `phieu.NgayLap` với kiểm tra múi giờ (`DateTimeKind.Utc ? ToLocalTime() : req.NgayLap.Value`), đảm bảo lưu đúng ngày giờ theo giờ Việt Nam.
+    + **Đồng Bộ Đặc Tả (`docs/specs/nhap-hang.md`)**:
+      * Cập nhật mô tả chi tiết bộ chọn thời gian datetime picker `.dtpop` (7.977 ký tự < 8.000 ký tự).
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c wwwroot/js/nhap-hang-form.js` & `phieu-kiem-ke-form.js` đạt **0 Errors**.
+
+
+
+- **Loại Bỏ Tính Năng Tự Động Cuộn Kéo Màn Hình Khi Mở Khối Chi Tiết (Phiên 99)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "bỏ phần tự động cuộn kéo phần chi tiết ra chính giữa màn hình đi".
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tắt `autoCenter` Trong `KiotFilter.initRowDetail` (`wwwroot/js/kiot-filter.js`)**:
+      * Đưa giá trị mặc định của `autoCenter` về `false`.
+      * Khi người dùng click mở dòng dữ liệu, khối chi tiết mở trượt nhẹ nhàng tại chỗ (`slideDown(150)`), tuyệt đối không tự động dịch chuyển thanh cuộn dọc (`scrollTop`) hay thanh cuộn ngang (`scrollLeft`).
+    + **Đồng Bộ Phân Hệ Nhập Hàng (`wwwroot/js/nhap-hang-index.js`)**:
+      * Loại bỏ hoàn toàn cấu hình và code can thiệp cuộn tự động. Giữ nguyên vị trí quan sát của người dùng.
+    + **Đồng Bộ Đặc Tả (`docs/specs/nhap-hang.md`)**:
+      * Cập nhật mô tả hành vi mở dòng tại chỗ, không dịch chuyển màn hình (7.816 ký tự < 8.000 ký tự).
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c kiot-filter.js` & `nhap-hang-index.js` đạt **0 Errors**.
+
+
+- **Tự Động Cuộn Kéo Khối Chi Tiết Ra Chính Giữa Màn Hình Khi Mở Dòng Bảng Nhập Hàng (Phiên 98)**:
+  - **Nhu cầu**: Người dùng phản ánh: "khi ấn vào hàng để hiển thị phần chỉ tiết thì ko tự động kéo phần chi tiết ra giữa màn hình".
+  - **Nguyên nhân cốt lõi**:
+    + Trước đây hàm cuộn chỉ kích hoạt khi đáy khối chi tiết vượt ra ngoài màn hình (`detailBottom > containerTop + containerHeight`), bỏ qua tất cả các dòng ở nửa trên bảng.
+    + Khi kích hoạt, hàm chỉ cuộn mép trên của dòng lên sát mép trên viewport (`- 10px`), không căn giữa màn hình.
+    + Nếu người dùng trước đó đã cuộn ngang để xem các cột thông tin bên phải, khối chi tiết 992px ở bên trái bị khuất một phần do không được tự động kéo về vị trí nhìn thấy.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Nâng Cấp Khối Lego `KiotFilter.initRowDetail` (`wwwroot/js/kiot-filter.js`)**:
+      * Bổ sung tính năng `autoCenter: true` mặc định cho khối Lego quản lý Master-Detail.
+      * Tích hợp hàm `scrollToCenter($row, $detailRow)`:
+        - Tính toán chính xác tọa độ đỉnh và chiều cao tổng thể của cả khối (`$row + $detailRow`).
+        - Căn giữa dọc: Nếu khối nằm gọn trong khung nhìn container, tự động cuộn sao cho khoảng cách lề trên và lề dưới bằng nhau (`targetScrollTop = blockTop - (containerHeight - blockHeight) / 2`). Nếu khối dài hơn màn hình, định vị dòng sát đỉnh kèm đệm 12px để người dùng xem từ trên xuống.
+        - Căn giữa ngang: Nếu container đang bị cuộn ngang sang phải, tự động kéo `scrollLeft` về 0 để toàn bộ bảng chi tiết 992px hiển thị trọn vẹn ở giữa vùng nhìn.
+        - Hiệu ứng cuộn êm ái qua `$scrollContainer.stop(true).animate(..., 250)`.
+    + **Đồng Bộ Phân Hệ Nhập Hàng (`wwwroot/js/nhap-hang-index.js`)**:
+      * Kích hoạt `autoCenter: true` thông qua cấu hình `KiotFilter.initRowDetail`, loại bỏ code cuộn thủ công rời rạc.
+    + **Đồng Bộ Đặc Tả (`docs/specs/nhap-hang.md`)**:
+      * Cập nhật mô tả trải nghiệm tự động kéo khối chi tiết ra chính giữa màn hình (7.840 ký tự < 8.000 ký tự).
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c kiot-filter.js` & `nhap-hang-index.js` đạt **0 Errors**.
+
 
 - **Tách Nút Nhập File & Xuất File Riêng Biệt Trong Danh Sách Hàng Hóa (Phiên 97)**:
   - **Nhu cầu**: Người dùng yêu cầu: "trong phần danh sách hàng hóa, tách nút nhập và xuất ra thành 1 nút nhập 1 nút xuất".

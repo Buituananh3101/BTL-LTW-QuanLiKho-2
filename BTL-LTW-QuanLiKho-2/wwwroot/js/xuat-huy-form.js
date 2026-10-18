@@ -93,22 +93,54 @@
             <div class="times">
                 ${times.map(t => `<button type="button" data-tm="${t}" class="${t === cur ? 'cur' : ''}">${t}</button>`).join('')}
             </div>`;
-        const c = $('.times .cur', pop);
-        if (c) c.scrollIntoView({ block: 'center' });
+        const timesEl = $('.times', pop);
+        const curEl = $('.times .cur', pop);
+        if (timesEl && curEl) {
+            timesEl.scrollTop = curEl.offsetTop - (timesEl.clientHeight / 2) + (curEl.clientHeight / 2);
+        }
     }
 
     const fDate = $('#fDate');
     const dtPop = $('#dtPop');
     if (fDate && dtPop && !isReadOnly) {
+        let lastFocusTime = 0;
+
+        const openDatePicker = () => {
+            DT.y = FM.created.getFullYear();
+            DT.m = FM.created.getMonth();
+            paintDt();
+            $$('.pop.show').forEach(p => {
+                if (p !== dtPop) p.classList.remove('show');
+            });
+            dtPop.classList.add('show');
+        };
+
+        fDate.addEventListener('focus', () => {
+            lastFocusTime = Date.now();
+            openDatePicker();
+        });
+
         fDate.addEventListener('click', e => {
             e.stopPropagation();
-            const isOpen = dtPop.classList.contains('show');
-            if (!isOpen) {
-                paintDt();
-                dtPop.classList.add('show');
-            } else {
-                dtPop.classList.remove('show');
+            if (Date.now() - lastFocusTime < 300) {
+                return;
             }
+            if (dtPop.classList.contains('show')) {
+                dtPop.classList.remove('show');
+            } else {
+                openDatePicker();
+            }
+        });
+
+        fDate.addEventListener('change', () => {
+            const m = fDate.value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
+            if (m) {
+                const d = new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5]);
+                if (!isNaN(d.getTime())) {
+                    FM.created = d;
+                }
+            }
+            fDate.value = `${dDate(FM.created)} ${dTime(FM.created)}`;
         });
 
         dtPop.addEventListener('click', e => {
@@ -136,7 +168,8 @@
                 const [h, m] = timeBtn.dataset.tm.split(':').map(Number);
                 FM.created.setHours(h, m, 0, 0);
                 fDate.value = `${dDate(FM.created)} ${dTime(FM.created)}`;
-                dtPop.classList.remove('show');
+                paintDt();
+                // Không tự tắt dtPop, chỉ tắt khi ấn ra ngoài
             }
         });
 
@@ -667,6 +700,13 @@
 
     /* ===== PHÍM TẮT F3, F4, F9, F10 ===== */
     window.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            $('#dtPop')?.classList.remove('show');
+            $('#suggest')?.classList.remove('show');
+            $('#notes')?.classList.remove('show');
+            closeModal();
+        }
+
         if (e.key === 'F3') {
             e.preventDefault();
             fSearch?.focus();

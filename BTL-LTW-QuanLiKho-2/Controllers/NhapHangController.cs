@@ -335,7 +335,9 @@ public class NhapHangController : BaseKhoController
             phieu.MaPhieu = maPhieu;
             phieu.LoaiPhieuNhap = "NHAP_KHO";
             phieu.MaKho = whId;
-            phieu.NgayLap = req.NgayLap ?? DateTime.Now;
+            phieu.NgayLap = req.NgayLap.HasValue 
+                ? (req.NgayLap.Value.Kind == DateTimeKind.Utc ? req.NgayLap.Value.ToLocalTime() : req.NgayLap.Value) 
+                : DateTime.Now;
             phieu.MaNvlap = req.MaNvlap.HasValue && req.MaNvlap.Value > 0 ? req.MaNvlap.Value : currentNvId;
             phieu.MaDonViCapHang = req.MaDonViCapHang > 0 ? req.MaDonViCapHang : null;
             phieu.SoHoaDon = string.IsNullOrWhiteSpace(req.SoHoaDon) ? null : req.SoHoaDon.Trim();

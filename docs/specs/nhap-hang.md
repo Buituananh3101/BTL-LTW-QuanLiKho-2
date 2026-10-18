@@ -52,7 +52,7 @@
   - Bảng cuộn ngang `min-width: 1750px`, viền chữ nhật `#0070f3` khép kín (`2px` trên/dưới, `3px` hai bên) khi mở dòng.
   - Dữ liệu bắt đầu ngay sau `<thead>`, mã phiếu hiển thị dạng text đen chuẩn mực.
   - Badges trạng thái dùng Bootstrap subtle chuẩn: `bg-success-subtle text-success`, `bg-primary-subtle text-primary`, `bg-secondary-subtle text-secondary`.
-  - Drawer chi tiết cố định 992px (`.kk-detail-fixed-wrap`), tab `Thông tin`, bảng con `.dtl-tbl` lọc nhanh `.fin`, `.dp-bottom` (`.dp-note` & `.sums`), `.dp-actions` (Hủy, Sao chép, Xuất file, Lưu, In, Mở phiếu/Xem chi tiết). Tự động cuộn mượt khi mở drawer sát mép đáy.
+  - Drawer chi tiết cố định 992px (`.kk-detail-fixed-wrap`), tab `Thông tin`, bảng con `.dtl-tbl` lọc nhanh `.fin`, `.dp-bottom` (`.dp-note` & `.sums`), `.dp-actions` (Hủy, Sao chép, Xuất file, Lưu, In, Mở phiếu/Xem chi tiết). Mở/đóng tại chỗ theo vị trí cuộn tự nhiên của người dùng, không tự động dịch chuyển màn hình.
 
 ### 2.2. Màn hình Lập / Sửa Phiếu Nhập Hàng (`_NhapHangForm`)
 - **Bố cục khung nhìn**: Vừa khít viewport (`height: 100%; overflow: hidden;`), bảng cuộn kèm sticky header; footer tổng mặt hàng, tổng số lượng và nút F9/F10 ghim đáy.
@@ -64,7 +64,7 @@
   - Bảng hàng hóa: Xóa (cột 1), STT (cột 2), Mã hàng, Tên hàng (kèm tồn kho), ĐVT, Số lượng (.qty), Đơn giá nhập (.qty), Giảm giá (.qty), Thành tiền.
 - **Panel thông tin (Phải - `.f-panel`)**:
   - Nút tròn F4 thu gọn/mở rộng panel (`.panel-toggle`) trượt mượt mà.
-  - Người tạo + ngày giờ nhập.
+  - Người tạo + ngày giờ nhập (bộ chọn popup `.dtpop` chuẩn Kiểm kho: lịch chọn ngày và khung giờ 30 phút, định dạng `dd/MM/yyyy HH:mm`, đóng khi click ngoài/Escape).
   - Nhà cung cấp: Input autocomplete căn trái, icon tìm kiếm, nút '✕' xóa chọn + nút '+' mở modal tạo mới NCC đầy đủ.
   - Mã phiếu nhập, Số HĐ đầu vào, Kho nhập, Trạng thái chứng từ.
   - Khối thanh toán: Tổng tiền hàng, Giảm giá, Cần trả NCC (bold to nổi bật).

@@ -939,10 +939,52 @@ window.KiotFilter = (function ($) {
             excludeClickSelector: 'input, button, a, label, .cell-checkbox, .cell-star, .star-btn, .w-chk, .kiot-item-edit-btn',
             slideDuration: 150,
             fadeDuration: 120,
+            autoCenter: false,                                 // Mặc định không tự động cuộn (giữ nguyên vị trí cuộn của người dùng)
             onOpen: null,                                      // callback(id, $row, $detailRow)
             onClose: null,                                     // callback(id, $row, $detailRow)
             onTabChange: null                                  // callback(tabName, id, $pane, $panel)
         }, options);
+
+        function scrollToCenter($row, $detailRow) {
+            if (!$row || !$row.length || !$detailRow || !$detailRow.length) return;
+            const $scrollContainer = $detailRow.closest('.kiot-table-scroll-body');
+            if (!$scrollContainer.length) return;
+
+            const containerHeight = $scrollContainer.innerHeight();
+            const containerTop = $scrollContainer.offset().top;
+            const currentScrollTop = $scrollContainer.scrollTop();
+
+            const rowTop = $row.offset().top;
+            const detailHeight = $detailRow.outerHeight();
+            const rowHeight = $row.outerHeight();
+            const blockHeight = rowHeight + detailHeight;
+
+            // Tọa độ đỉnh của dòng tính theo chiều dài cuộn thực tế của bảng
+            const blockTopInContainer = (rowTop - containerTop) + currentScrollTop;
+
+            let targetScrollTop;
+            if (blockHeight <= containerHeight) {
+                // Toàn bộ khối chi tiết (hàng + bảng con) nằm lọt trong container:
+                // Căn chính xác ra GIỮA màn hình (khoảng trống trên và dưới cân đối hoàn hảo)
+                targetScrollTop = blockTopInContainer - (containerHeight - blockHeight) / 2;
+            } else {
+                // Nếu bảng chi tiết dài hơn chiều cao màn hình:
+                // Đưa dòng lên sát mép trên kèm khoảng đệm 12px để người dùng xem từ trên xuống
+                targetScrollTop = blockTopInContainer - 12;
+            }
+
+            targetScrollTop = Math.max(0, targetScrollTop);
+
+            // Cuộn ngang: nếu trước đó người dùng cuộn ngang xem các cột bên phải
+            // thì tự động kéo về 0 để toàn bộ bảng chi tiết 992px hiển thị trọn vẹn ở giữa
+            const currentScrollLeft = $scrollContainer.scrollLeft();
+            const scrollProps = { scrollTop: targetScrollTop };
+            if (currentScrollLeft > 0) {
+                scrollProps.scrollLeft = 0;
+            }
+
+            $scrollContainer.stop(true).animate(scrollProps, 250);
+        }
 
         function getDetailRow(id, $row) {
             if (typeof opt.detailRowSelector === 'function') {
@@ -1000,6 +1042,14 @@ window.KiotFilter = (function ($) {
                 $row.addClass('selected open is-expanded');
                 $detailRow.show();
                 $wrap.hide().slideDown(opt.slideDuration);
+
+                // Tự động cuộn khối chi tiết nếu được cấu hình tường minh (mặc định false)
+                if (opt.autoCenter === true) {
+                    setTimeout(function () {
+                        scrollToCenter($row, $detailRow);
+                    }, opt.slideDuration + 30);
+                }
+
                 if (typeof opt.onOpen === 'function') {
                     opt.onOpen(id, $row, $detailRow);
                 }
@@ -1044,7 +1094,8 @@ window.KiotFilter = (function ($) {
         return {
             expand: function (id) { toggleRow(id, true); },
             collapse: function (id) { toggleRow(id, false); },
-            toggle: function (id) { toggleRow(id); }
+            toggle: function (id) { toggleRow(id); },
+            scrollToCenter: scrollToCenter
         };
     }
 

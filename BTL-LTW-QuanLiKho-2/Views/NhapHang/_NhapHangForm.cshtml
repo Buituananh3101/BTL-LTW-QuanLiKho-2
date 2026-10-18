@@ -195,7 +195,8 @@
                     <span class="l"><i class="bi bi-person text-secondary me-1"></i>@(string.IsNullOrEmpty(Model.TenNguoiLap) ? "admin" : Model.TenNguoiLap)</span>
                     <div class="v relw">
                         <input class="inp" id="fDate" value="@Model.NgayLap.ToString("dd/MM/yyyy HH:mm")" 
-                               @(Model.IsReadOnly ? "disabled" : "") readonly style="max-width:166px;height:34px;color:#4b5563;cursor:default;">
+                               @(Model.IsReadOnly ? "disabled" : "") autocomplete="off" style="max-width:166px;height:34px;color:#4b5563;cursor:pointer;" title="Nhấp để chọn ngày giờ nhập hàng">
+                        <div class="pop dtpop shadow-sm" id="dtPop"></div>
                     </div>
                 </div>
 

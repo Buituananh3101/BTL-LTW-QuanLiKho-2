@@ -91,8 +91,11 @@
             <div class="times">
                 ${times.map(t => `<button type="button" data-tm="${t}" class="${t === cur ? 'cur' : ''}">${t}</button>`).join('')}
             </div>`;
-        const c = $('.times .cur', pop);
-        if (c) c.scrollIntoView({ block: 'center' });
+        const timesEl = $('.times', pop);
+        const curEl = $('.times .cur', pop);
+        if (timesEl && curEl) {
+            timesEl.scrollTop = curEl.offsetTop - (timesEl.clientHeight / 2) + (curEl.clientHeight / 2);
+        }
     }
 
     /* ===== TÍNH TOÁN & VẼ GIAO DIỆN ===== */
@@ -567,7 +570,6 @@
                     FM.dirty = true;
                     dI.value = dFull(FM.created);
                     paintDt();
-                    dtPop.classList.remove('show');
                 }
             });
         }
