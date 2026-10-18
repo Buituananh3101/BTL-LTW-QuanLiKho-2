@@ -161,30 +161,16 @@
                             </span>
                         </td>
                         <td data-col="maphieu">
-                            <span class="text-break fw-semibold text-primary">@item.MaPhieuHienThi</span>
+                            <span class="text-break">@item.MaPhieuHienThi</span>
                         </td>
                         <td data-col="ngaylap">
                             @item.NgayLap.ToString("dd/MM/yyyy HH:mm")
                         </td>
                         <td data-col="khonguon">
-                            @if (Model.CurrentKhoId == item.MaKhoNguon)
-                            {
-                                <span class="wh"><b class="text-primary">@item.TenKhoNguon</b></span>
-                            }
-                            else
-                            {
-                                <span class="wh">@item.TenKhoNguon</span>
-                            }
+                            @item.TenKhoNguon
                         </td>
                         <td data-col="khodich">
-                            @if (Model.CurrentKhoId == item.MaKhoDich)
-                            {
-                                <span class="wh"><b class="text-primary">@item.TenKhoDich</b></span>
-                            }
-                            else
-                            {
-                                <span class="wh">@item.TenKhoDich</span>
-                            }
+                            @item.TenKhoDich
                         </td>
                         <td data-col="ngaychuyen">
                             @(item.ThoiDiemXuat?.ToString("dd/MM/yyyy HH:mm") ?? "---")
@@ -192,13 +178,13 @@
                         <td data-col="ngaynhan">
                             @(item.ThoiDiemNhan?.ToString("dd/MM/yyyy HH:mm") ?? "---")
                         </td>
-                        <td data-col="slchuyen" class="num text-end fw-semibold">
+                        <td data-col="slchuyen" class="num text-end">
                             @item.TongSoLuongChuyen.ToString("N0", viCulture)
                         </td>
-                        <td data-col="slnhan" class="num text-end @(item.CoNhanThieu ? "text-danger fw-bold" : "")">
+                        <td data-col="slnhan" class="num text-end">
                             @(item.TrangThai == "DA_NHAN" ? item.TongSoLuongNhan.ToString("N0", viCulture) : "---")
                         </td>
-                        <td data-col="giatri" class="num text-end text-dark fw-medium">
+                        <td data-col="giatri" class="num text-end text-dark">
                             @item.TongGiaTriChuyen.ToString("N0", viCulture)
                         </td>
                         <td data-col="ghi" class="text-truncate" style="max-width: 160px;" title="@item.GhiChu">
@@ -213,7 +199,7 @@
                     <tr class="product-detail-row dtl" id="dtl-@item.MaPhieuChuyen" style="display: none;">
                         <td colspan="13" class="p-0">
                             <div class="product-detail-panel-wrap" style="display: none;">
-                                <div class="product-detail-panel dp shadow-sm" data-d="@item.MaPhieuChuyen">
+                                <div class="product-detail-panel dp" data-d="@item.MaPhieuChuyen">
                                     <div class="dp-tabs"><button type="button" class="dp-tab active" data-tab="info">Thông tin</button></div>
                                     <div class="kk-detail-fixed-wrap kiot-detail-fixed-wrap">
                                         <h2 class="d-flex align-items-center gap-2">

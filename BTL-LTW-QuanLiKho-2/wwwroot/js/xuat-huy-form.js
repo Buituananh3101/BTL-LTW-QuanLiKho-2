@@ -534,10 +534,15 @@
     const pTg = $('#pTg');
     const panel = $('#panel');
     function togglePanel() {
+        const wrap = $('#formWrap') || $('.form-wrap');
         if (!panel || !pTg) return;
+
         panel.classList.toggle('collapsed');
         const isCollapsed = panel.classList.contains('collapsed');
+        wrap?.classList.toggle('panel-collapsed', isCollapsed);
         pTg.classList.toggle('collapsed', isCollapsed);
+
+        pTg.title = isCollapsed ? 'Mở rộng thông tin (Phím tắt F4)' : 'Thu gọn thông tin (Phím tắt F4)';
         const icon = $('#pTgIcon');
         if (icon) {
             icon.className = isCollapsed ? 'bi bi-chevron-left' : 'bi bi-chevron-right';

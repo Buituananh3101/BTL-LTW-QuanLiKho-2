@@ -49,9 +49,9 @@
   - Click lần 2: Giảm dần (DESC, hiện icon `bi-arrow-down`).
   - Click lần 3: Bỏ sắp xếp (về mặc định theo thời gian chốt mới nhất).
   - Áp dụng trên 11 cột (`ma`, `tg`, `tt`, `cl`, `tang`, `giam`, `cb`, `slt`, `ghi`, `st`, `kho`), hỗ trợ căn lề số học `.num` và đồng bộ qua AJAX/Export.
-- **Bung mở chi tiết (`tr.dtl`) & Hiển thị khi ít cột (Chuẩn Nhà cung cấp)**:
-  - Bảng `#stockTakeTable` cấu hình `width: max-content; min-width: 760px;` đồng bộ Nhà cung cấp (`#supplierTable`), không ép tràn cố định 1450px.
-  - Tái sử dụng `KiotFilter.initRowDetail` & `KiotFilter.initColumnToggle`: Tự động tính lại `colspan`, gán `.last-visible-col` cho ô hiển thị cuối cùng của mọi dòng; cột `th.last-visible-col` tự động co giãn (`width: auto`) giúp viền xanh `#0070f3` của dòng chính và dòng chi tiết (992px) luôn thẳng hàng, khép kín 100% hình chữ nhật khi người dùng ẩn bớt cột.
+- **Bung mở chi tiết (`tr.dtl`) & Hiển thị ổn định không rung giật (Chuẩn Nhà cung cấp)**:
+  - Bảng `#stockTakeTable` cấu hình `width: max-content; min-width: 760px; border-collapse: separate !important; border-spacing: 0 !important;` đồng bộ Nhà cung cấp (`#supplierTable`), không ép tràn cố định 1450px.
+  - Tối ưu Drawer ổn định tuyệt đối: loại bỏ xung đột hoạt ảnh đồng thời khi đóng mở nhiều dòng, dùng `.stop(true, true)` chống hàng đợi click dồn dập, gán `.last-visible-col` trực tiếp không gây DOM layout thrashing, loại bỏ negative margin trên `.dp-tabs`, tích hợp `scrollbar-gutter: stable` ngăn co giật ngang khi thanh cuộn xuất hiện.
   - Tái sử dụng khối Lego `KiotFilter.initEntityActions`: Nút Hủy (`.btn-cancel-doc`) qua modal xác nhận (chỉ hủy phiếu tạm). Các nút Sao chép, Xuất file, Mở phiếu, Lưu ghi chú, In.
 - **Xuất file Excel chuẩn KiotViet (`.xlsx`)**:
   - Hỗ trợ 2 chế độ qua `ClosedXML`:

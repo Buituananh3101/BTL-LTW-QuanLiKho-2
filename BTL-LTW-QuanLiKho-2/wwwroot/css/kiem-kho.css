@@ -390,7 +390,7 @@
   min-height: calc(100vh - 210px);
 }
 .tbl-scroll { overflow: auto; flex: 1; }
-table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
+table.tbl { border-collapse: separate; border-spacing: 0; width: 100%; min-width: max-content; }
 .tbl th {
   background: var(--head);
   padding: 11px 12px;
@@ -462,8 +462,8 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
   display: flex;
   gap: 24px;
   border-bottom: 1px solid var(--line);
-  margin: 0 -20px 14px;
-  padding: 0 20px;
+  margin: 0 0 14px;
+  padding: 0;
   position: static !important;
   width: auto !important;
 }
@@ -775,9 +775,10 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
   transform: translateY(-50%) scale(0.95);
 }
 .form-wrap.panel-collapsed .panel-toggle,
+.panel-toggle.collapsed,
 .f-panel.collapsed ~ .panel-toggle {
-  right: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  right: 8px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18) !important;
 }
 
 .f-top {
@@ -1544,6 +1545,12 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
   width: max-content !important;
   min-width: 760px !important;
   table-layout: fixed !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+.kiot-table-scroll-body {
+  scrollbar-gutter: stable;
 }
 
 /* Đóng khung hình chữ nhật liền mạch khi mở chi tiết dòng Kiểm kho */

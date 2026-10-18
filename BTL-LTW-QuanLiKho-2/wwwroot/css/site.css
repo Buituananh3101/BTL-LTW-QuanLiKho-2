@@ -439,6 +439,7 @@ body {
   overflow-x: auto;
   position: relative;
   width: 100%;
+  scrollbar-gutter: stable;
 }
 .kiot-table-pagination {
   flex-shrink: 0;

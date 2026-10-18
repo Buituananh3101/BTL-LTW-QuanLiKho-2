@@ -522,22 +522,27 @@ public class ChuyenKhoController : BaseKhoController
 
     // 11. Tìm kiếm hàng hóa (Autocomplete F3) kèm tồn kho kho gửi
     [HttpGet]
-    public async Task<IActionResult> SearchProducts(string? q)
+    public async Task<IActionResult> SearchProducts(string? q, int? warehouseId, int? whId)
     {
-        int whId = GetCurrentWarehouseId();
+        int wh = (warehouseId.HasValue && warehouseId.Value > 0)
+            ? warehouseId.Value
+            : ((whId.HasValue && whId.Value > 0) ? whId.Value : GetCurrentWarehouseId());
+
+        q = (q ?? "").Trim();
+
         var query = _context.HangHoas
             .AsNoTracking()
             .Include(h => h.MaDvtNavigation)
-            .Where(h => h.TrangThai == "HOAT_DONG");
+            .Include(h => h.MaNhomNavigation)
+            .Where(h => h.TrangThai == "DANG_BAN");
 
-        if (!string.IsNullOrWhiteSpace(q))
+        if (!string.IsNullOrEmpty(q))
         {
-            q = q.Trim().ToLower();
-            query = query.Where(h => h.MaHangNoiBo.ToLower().Contains(q) || h.TenHang.ToLower().Contains(q));
+            query = query.Where(h => h.TenHang.Contains(q) || h.MaHangNoiBo.Contains(q));
         }
 
-        var products = await query.Take(10).ToListAsync();
-        var tonKhoDict = await _tonKhoService.LayTonKhoTheoKhoAsync(whId);
+        var products = await query.Take(20).ToListAsync();
+        var tonKhoDict = await _tonKhoService.LayTonKhoTheoKhoAsync(wh);
 
         var result = products.Select(p => new
         {
@@ -546,8 +551,16 @@ public class ChuyenKhoController : BaseKhoController
             name = p.TenHang,
             unit = p.MaDvtNavigation?.TenDvt ?? "",
             cost = p.GiaVon,
-            stock = tonKhoDict.TryGetValue(p.MaHang, out var ton) ? ton : 0m
-        });
+            stock = tonKhoDict.TryGetValue(p.MaHang, out var ton) ? ton : 0m,
+            // Thêm các trường cho tương thích với component f3-product-search.js
+            maHang = p.MaHang,
+            maHangNoiBo = p.MaHangNoiBo,
+            tenHang = p.TenHang,
+            tenDvt = p.MaDvtNavigation?.TenDvt ?? "",
+            tenNhom = p.MaNhomNavigation?.TenNhom ?? "",
+            gia = p.GiaVon,
+            tonKho = tonKhoDict.TryGetValue(p.MaHang, out var ton2) ? ton2 : 0m
+        }).ToList();
 
         return Json(result);
     }

@@ -1002,7 +1002,7 @@ window.KiotFilter = (function ($) {
 
         function toggleRow(id, forceOpen) {
             const $tableEl = opt.tableSelector ? $(opt.tableSelector) : $(document);
-            const $row = $(opt.rowSelector).filter(function () {
+            const $row = $tableEl.find(opt.rowSelector).filter(function () {
                 return String($(this).data('id')) === String(id);
             });
             const $detailRow = getDetailRow(id, $row);
@@ -1011,19 +1011,22 @@ window.KiotFilter = (function ($) {
             const $wrap = $detailRow.find(opt.wrapSelector);
             const isCurrentlyOpen = $detailRow.is(':visible');
 
-            // Đóng các dòng chi tiết khác đang mở (hiệu ứng slideUp khớp KiotViet)
-            const allDetailRows = $(opt.tableSelector ? `${opt.tableSelector} tr.product-detail-row, ${opt.tableSelector} tr.kiot-detail-row, ${opt.tableSelector} tr.dtl` : 'tr.product-detail-row, tr.kiot-detail-row, tr.dtl');
+            if (isCurrentlyOpen && forceOpen === true) return;
+
+            // Đóng ngay lập tức các dòng chi tiết khác đang mở (tránh 2 hiệu ứng slide đồng thời làm rung giật bảng)
+            const allDetailRows = opt.tableSelector
+                ? $tableEl.find('tr.product-detail-row, tr.kiot-detail-row, tr.dtl')
+                : $('tr.product-detail-row, tr.kiot-detail-row, tr.dtl');
             allDetailRows.not($detailRow).each(function () {
                 const $other = $(this);
-                $other.find(opt.wrapSelector).slideUp(opt.slideDuration, function () {
-                    $other.hide();
-                });
+                $other.find(opt.wrapSelector).stop(true, true).hide();
+                $other.hide();
             });
-            $(opt.tableSelector ? `${opt.tableSelector} ${opt.rowSelector}` : opt.rowSelector).not($row).removeClass('selected open is-expanded');
+            $tableEl.find(opt.rowSelector).not($row).removeClass('selected open is-expanded');
 
             if (isCurrentlyOpen && forceOpen !== true) {
                 // Đóng dòng
-                $wrap.slideUp(opt.slideDuration, function () {
+                $wrap.stop(true, true).slideUp(opt.slideDuration, function () {
                     $detailRow.hide();
                 });
                 $row.removeClass('selected open is-expanded');
@@ -1035,16 +1038,15 @@ window.KiotFilter = (function ($) {
                 const visibleCols = $row.closest('table').find('thead tr:first-child th:visible').length || 1;
                 $detailRow.find('> td').attr('colspan', visibleCols);
 
-                // Gắn class last-visible-col cho ô hiển thị cuối cùng của mỗi dòng để khép kín hình chữ nhật
-                $row.closest('table').find('tr').each(function () {
-                    const $cells = $(this).children('th:visible, td:visible');
-                    $cells.removeClass('last-visible-col');
-                    $cells.last().addClass('last-visible-col');
-                });
+                // Gắn class last-visible-col cho ô hiển thị cuối cùng của dòng được chọn để khép kín hình chữ nhật
+                // Tối ưu: chỉ xử lý trực tiếp trên $row, không query find('tr') duyệt toàn bộ DOM gây giật
+                const $cells = $row.children('td:visible');
+                $cells.removeClass('last-visible-col');
+                $cells.last().addClass('last-visible-col');
 
                 $row.addClass('selected open is-expanded');
                 $detailRow.show();
-                $wrap.hide().slideDown(opt.slideDuration);
+                $wrap.stop(true, true).hide().slideDown(opt.slideDuration);
 
                 // Tự động cuộn khối chi tiết nếu được cấu hình tường minh (mặc định false)
                 if (opt.autoCenter === true) {
@@ -1059,8 +1061,10 @@ window.KiotFilter = (function ($) {
             }
         }
 
-        // Lắng nghe click dòng bảng
-        const clickSelector = opt.tableSelector ? `${opt.tableSelector} ${opt.rowSelector}` : opt.rowSelector;
+        // Lắng nghe click dòng bảng (chuẩn hóa selector tránh xung đột khi có dấu phẩy)
+        const clickSelector = opt.tableSelector
+            ? opt.rowSelector.split(',').map(s => `${opt.tableSelector} ${s.trim()}`).join(', ')
+            : opt.rowSelector;
         $(document).off('click.kiotRowDetail', clickSelector).on('click.kiotRowDetail', clickSelector, function (e) {
             if ($(e.target).closest(opt.excludeClickSelector).length) return;
             const id = $(this).data('id');

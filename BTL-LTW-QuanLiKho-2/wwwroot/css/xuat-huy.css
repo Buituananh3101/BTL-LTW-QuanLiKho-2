@@ -82,6 +82,13 @@
 }
 
 /* Panel bên phải - KiotViet Style */
+.form-wrap.panel-collapsed .panel-toggle,
+.panel-toggle.collapsed,
+.f-panel.collapsed ~ .panel-toggle {
+    right: 8px !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18) !important;
+}
+
 .xuat-huy-form-container .f-panel {
     background: #ffffff;
     border-left: 1px solid #e2e8f0;

@@ -189,7 +189,7 @@
             wrapSelector: '.product-detail-panel-wrap, .kiot-detail-panel-wrap',
             tabBtnSelector: '.dp-tab',
             tabPaneSelector: '.dp-pane',
-            excludeClickSelector: 'input, button, a, label, .w-chk, .w-star, .cell-star, .star-btn',
+            excludeClickSelector: 'input, button, a, label, .w-chk, .w-star, .cell-star, .star-btn, .cell-checkbox, .row-select',
             onOpen: function (id) {
                 F.openId = id;
             },

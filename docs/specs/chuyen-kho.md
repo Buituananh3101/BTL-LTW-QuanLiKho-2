@@ -75,8 +75,8 @@
 
 ### 4.2. Màn hình 2: Lập/Sửa phiếu (`/ChuyenKho/Create`, `/ChuyenKho/Edit/{id}`)
 - Layout 2 cột chuẩn KiotViet:
-  - Cột trái: Nút quay lại, ô tìm hàng F3 autocomplete (`f3-product-search.js`), bảng lưới hàng hóa có cảnh báo vượt tồn.
-  - Cột phải: Box chọn kho đích, ngày lập, mã phiếu, tổng SL chuyển, tổng giá trị chuyển, ghi chú.
+  - Cột trái: Nút quay lại, ô tìm hàng F3 autocomplete (icon chuẩn tách biệt chữ, không bị đè chữ), bảng lưới hàng hóa có cảnh báo vượt tồn.
+  - Cột phải: Box lộ trình `routebox` (Kho gửi -> Kho nhận), custom dropdown chọn kho nhận `.wh-custom-select-btn` (icon tòa nhà, checkmark), bộ chọn ngày giờ `.dtpop` chuẩn Kiểm tồn (lịch tháng + 48 khung giờ), mã phiếu, tổng SL chuyển, tổng giá trị chuyển, ghi chú.
   - Nút cố định đáy: "Lưu tạm" (`NHAP`) và "Chuyển hàng" (`DA_XUAT`).
 
 ### 4.3. Modal Nhận hàng (`/ChuyenKho/Receive`)
@@ -85,10 +85,10 @@
 
 ---
 
-## 5. Kế hoạch Các Bước Triển Khai
-1. **Bước 1**: Viết migration SQL `13_bo_sung_chuyen_kho.sql` và cập nhật `QuanLyKhoPhuQuocLtwContext`, các Model C#.
-2. **Bước 2**: Xây dựng ViewModel và `ChuyenKhoController.cs` (Kế thừa `BaseKhoController`, Transaction, chặn âm kho).
-3. **Bước 3**: Dựng giao diện Danh sách `Index`, `_ChuyenKhoFilterSidebar`, `_ChuyenKhoTable`, file CSS/JS.
-4. **Bước 4**: Dựng giao diện Lập/Sửa `Create`, `Edit`, `_ChuyenKhoForm`, tích hợp F3 search và cảnh báo tồn.
-5. **Bước 5**: Dựng `_ReceiveModal` nhận hàng và cập nhật menu `_MainMenu.cshtml`.
-6. **Bước 6**: Build kiểm tra, test luồng và đồng bộ `PROGRESS.md`.
+## 5. Kế hoạch Triển khai
+1. Migration SQL `13_bo_sung_chuyen_kho.sql` & cập nhật Model EF Core.
+2. ViewModel và `ChuyenKhoController.cs` (Transaction, chặn âm kho, BaseKhoController).
+3. Giao diện Danh sách `Index`, `_ChuyenKhoFilterSidebar`, `_ChuyenKhoTable`.
+4. Giao diện Lập/Sửa `Create`, `Edit`, `_ChuyenKhoForm` (F3 autocomplete, custom dtPop, toggle panel).
+5. Modal `_ReceiveModal` nhận hàng & cập nhật `_MainMenu.cshtml`.
+6. Biên dịch và đồng bộ `PROGRESS.md`.

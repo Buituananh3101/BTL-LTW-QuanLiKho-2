@@ -30,8 +30,8 @@
 
                 <!-- Ô tìm kiếm hàng hóa F3 autocomplete -->
                 <div class="searchbox focus-w relw nh-search-wrap">
-                    <i class="bi bi-search search-icon ms-2 text-muted"></i>
-                    <input id="productSearchInput" class="border-0 bg-transparent px-2 w-100" placeholder="Tìm hàng hóa theo mã hoặc tên (F3)" autocomplete="off">
+                    <i class="bi bi-search search-icon"></i>
+                    <input id="productSearchInput" placeholder="Tìm hàng hóa theo mã hoặc tên (F3)" autocomplete="off">
                     <div class="nh-autocomplete-dropdown shadow-sm" id="autocompleteDropdown"></div>
                 </div>
 
@@ -126,19 +126,46 @@
                 <!-- Lộ trình kho gửi -> kho nhận -->
                 <div class="routebox">
                     <div class="pr mb-2">
-                        <span class="l">Kho gửi</span>
+                        <span class="l"><i class="bi bi-box-arrow-up-right text-primary me-1"></i>Kho gửi</span>
                         <div class="v"><b class="text-primary fs-6">@Model.TenKhoNguon</b></div>
                     </div>
                     <div class="pr">
-                        <span class="l">Kho nhận <span class="text-danger">*</span></span>
+                        <span class="l"><i class="bi bi-box-arrow-in-down-left text-success me-1"></i>Kho nhận <span class="text-danger">*</span></span>
                         <div class="v">
-                            <select class="form-select form-select-sm" id="fKhoNhan" style="max-width: 210px; height: 34px;">
-                                <option value="">-- Chọn kho nhận --</option>
-                                @foreach (var k in Model.KhoNhanOptions)
-                                {
-                                    <option value="@k.Value" selected="@(Model.MaKhoDich.ToString() == k.Value ? "selected" : null)">@k.Text</option>
-                                }
-                            </select>
+                            <input type="hidden" id="fKhoNhan" value="@(Model.MaKhoDich > 0 ? Model.MaKhoDich.ToString() : "")" />
+                            <div class="dropdown w-100 d-flex justify-content-end" id="whDropdownWrap">
+                                <button class="btn btn-sm btn-white border dropdown-toggle wh-custom-select-btn d-flex align-items-center justify-content-between px-2"
+                                        type="button" id="btnSelectKhoNhan" data-bs-toggle="dropdown" aria-expanded="false"
+                                        style="min-width: 190px; max-width: 220px; height: 34px; background: #fff; font-size: 13px; border-color: #cbd5e1 !important; border-radius: 6px;">
+                                    <span class="wh-selected-text text-truncate @(Model.MaKhoDich > 0 ? "text-dark fw-medium" : "text-muted")">
+                                        @(Model.KhoNhanOptions.FirstOrDefault(k => k.Value == Model.MaKhoDich.ToString())?.Text ?? "-- Chọn kho nhận --")
+                                    </span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm p-1 wh-custom-dropdown-menu" aria-labelledby="btnSelectKhoNhan" style="min-width: 220px; max-height: 260px; overflow-y: auto; border-radius: 8px; border-color: #e2e8f0;">
+                                    <li class="px-2 py-1 text-uppercase text-muted fw-bold" style="font-size: 11px;">Chọn kho đích đến</li>
+                                    @foreach (var k in Model.KhoNhanOptions)
+                                    {
+                                        bool isCur = Model.MaKhoDich.ToString() == k.Value;
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center justify-content-between py-2 px-2 rounded-2 wh-item-opt @(isCur ? "active fw-semibold" : "")"
+                                               href="javascript:void(0)" data-id="@k.Value" data-name="@k.Text" style="font-size: 13px;">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="bi bi-buildings text-secondary"></i>
+                                                    <span>@k.Text</span>
+                                                </div>
+                                                @if (isCur)
+                                                {
+                                                    <i class="bi bi-check2 text-primary fw-bold wh-check-icon"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-check2 text-primary fw-bold wh-check-icon d-none"></i>
+                                                }
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -153,8 +180,9 @@
 
                 <div class="pr">
                     <span class="l">Thời gian</span>
-                    <div class="v">
-                        <input type="datetime-local" class="form-control form-control-sm" id="fDate" value="@Model.NgayLap.ToString("yyyy-MM-ddTHH:mm")" style="max-width: 190px;" />
+                    <div class="v relw">
+                        <input class="inp" id="fDate" value="@Model.NgayLap.ToString("dd/MM/yyyy HH:mm")" autocomplete="off" readonly style="max-width: 190px; height: 34px; color: #1e293b; cursor: pointer; background: #fff; text-align: center; font-size: 13px;" title="Nhấp để chọn ngày giờ chuyển hàng" />
+                        <div class="pop dtpop shadow-sm" id="dtPop"></div>
                     </div>
                 </div>
 
@@ -217,6 +245,3 @@
     </div>
 </div>
 
-@section Scripts {
-    <script src="~/js/chuyen-kho-form.js" asp-append-version="true"></script>
-}

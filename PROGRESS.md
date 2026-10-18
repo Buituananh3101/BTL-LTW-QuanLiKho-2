@@ -1,19 +1,146 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Đồng Bộ Toàn Diện Chi Tiết Phiếu Chuyển Hàng Theo Chuẩn Kiểm Tồn (Phiên 110)
+Cập nhật lần cuối: 2026-10-18 – Đồng Bộ Bộ Chọn Ngày Giờ Lập Phiếu Chuyển Hàng Chuẩn Kiểm Tồn (Phiên 117)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử trải nghiệm thực tế màn hình Chuyển hàng: bảng dữ liệu chuẩn KiotViet có summary-row, drawer chi tiết đồng bộ 100% với Kiểm tồn / Kiểm kho (tab underline .dp-tab, tiêu đề h2 + pill badge, thông tin meta ngăn cách gạch đứng | thanh mảnh, bảng sản phẩm .dtl-tbl, textarea ghi chú .dp-note và danh sách tổng kết .sums, bộ nút .dp-actions).
+- Sẵn sàng kiểm thử trải nghiệm bộ chọn ngày giờ lập phiếu chuyển hàng chuẩn KiotViet (khuôn mẫu Kiểm tồn & Nhập hàng): popup `.dtpop` lịch tháng + danh sách 48 khung giờ (00:00 - 23:30), chuyển tháng `<` `>`, chọn ngày và giờ tức thời, đóng tự động khi click ra ngoài, hiển thị định dạng `dd/MM/yyyy HH:mm`.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế các luồng Chuyển kho và Nhập hàng.
-2. Xây dựng phân hệ Trả hàng nhập (Purchase Returns) hoặc Xuất dùng nội bộ theo yêu cầu.
+1. Kiểm tra trải nghiệm thực tế các luồng Chuyển kho, Xuất hủy, Nhập hàng.
+2. Xây dựng phân hệ Trả hàng nhập (Purchase Returns) theo yêu cầu.
 
 ---
+
+- **Đồng Bộ Bộ Chọn Ngày Giờ Lập Phiếu Chuyển Hàng Chuẩn Kiểm Tồn (Phiên 117)**:
+  - **Nhu cầu**: Người dùng gửi ảnh `media_1792317438387_4e3a4eee.png` phản ánh: "sửa lại phần chọn thời gian này dựa trên phần chọn thời gian trong kiểm tồn".
+  - **Nguyên nhân**:
+    + Màn hình Lập/Sửa phiếu chuyển hàng (`/ChuyenKho/Create`, `/ChuyenKho/Edit`) đang dùng thẻ `<input type="datetime-local">` nguyên bản của trình duyệt. Popup lịch của trình duyệt thô cứng, hiển thị dạng cuộn giờ/phút AM-PM không đồng bộ với giao diện popup lịch KiotViet của hệ thống.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`_ChuyenKhoForm.cshtml`**: Thay thẻ `datetime-local` bằng cấu trúc chuẩn Kiểm tồn: ô input `.inp` hiển thị `dd/MM/yyyy HH:mm` kèm popup `.pop.dtpop.shadow-sm#dtPop` đặt trong container tương đối `.v.relw`.
+    + **`chuyen-kho-form.js`**:
+      * Triển khai toàn bộ logic chọn ngày giờ chuẩn Kiểm tồn & Nhập hàng: render lịch tháng `calHTML`, nút chuyển tháng `<` `>` (`.rp-nav`), lưới 7 ngày trong tuần `DOW`, đánh dấu ngày hôm nay (`.today`) và ngày đang chọn (`.sel`).
+      * Render cột danh sách 48 mốc thời gian cách nhau 30 phút (`.times button`), tự động cuộn đến giờ hiện tại.
+      * Tự động cập nhật `createdDate`, hiển thị ra ô input dạng `dd/MM/yyyy HH:mm`, gửi lên API dạng ISO chuẩn `formatLocalIso`.
+      * Tự động đóng popup khi click ra ngoài (`#dtPop`).
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+    + `node -c chuyen-kho-form.js` hoàn thành với **0 Errors**.
+    + Đồng bộ tài liệu đặc tả `docs/specs/chuyen-kho.md`.
+
+- **Sửa Lỗi Nút Đóng Mở Rightmenu (Panel Phải) Màn Hình Xuất Hủy (Phiên 116)**:
+  - **Nhu cầu**: Người dùng phản ánh: "nút đóng mở rightmenu phần xuất hủy lỗi" kèm ảnh chụp màn hình (`/XuatHuy/Create`). Khi thu gọn panel phải, nút tròn toggle `<` bị kẹt trôi lơ lửng ở vị trí `right: 425px` giữa màn hình thay vì bám sát vào mép phải.
+  - **Nguyên nhân cốt lõi**:
+    + Trong `xuat-huy-form.js`, hàm `togglePanel()` chỉ toggle class `collapsed` trên `#panel` và `#pTg`, nhưng thiếu việc toggle class `panel-collapsed` trên `#formWrap`.
+    + Trong `Views/XuatHuy/_XuatHuyForm.cshtml`, button `#pTg` được đặt trước `<aside id="panel">`, khiến selector CSS sibling combinator `.f-panel.collapsed ~ .panel-toggle` không bao giờ khớp.
+    + Trong `xuat-huy.css` và `kiem-kho.css`, thiếu selector trực tiếp `.panel-toggle.collapsed` với `right: 8px !important;`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Chuyển vị trí nút `#pTg` (`Views/XuatHuy/_XuatHuyForm.cshtml`)**: Đặt button `#pTg` ngay sau thẻ đóng `</aside>` để khớp tự nhiên selector CSS sibling `~`.
+    + **Bổ sung CSS định vị (`xuat-huy.css` & `kiem-kho.css`)**:
+      * Bổ sung `.form-wrap.panel-collapsed .panel-toggle, .panel-toggle.collapsed, .f-panel.collapsed ~ .panel-toggle { right: 8px !important; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18) !important; }`.
+    + **Nâng cấp JavaScript (`wwwroot/js/xuat-huy-form.js`)**:
+      * Trong `togglePanel()`, bổ sung `wrap?.classList.toggle('panel-collapsed', isCollapsed)`.
+      * Cập nhật tooltip `title` thành `Mở rộng thông tin (Phím tắt F4)` khi đóng và `Thu gọn thông tin (Phím tắt F4)` khi mở.
+      * Đổi icon chuẩn `bi-chevron-left` khi đóng và `bi-chevron-right` khi mở.
+    + **Kiểm tra**:
+      * `dotnet build /t:Compile` đạt **0 Errors**.
+      * `node -c xuat-huy-form.js` đạt **0 Errors**.
+      * Đồng bộ tài liệu đặc tả `docs/specs/xuat-huy.md` (7.472 ký tự < 8.000 ký tự theo Rule 12).
+
+
+- **Khắc Phục Lỗi Nút Đóng Mở Panel Phải (Right Menu) Trên Form Chuyển Hàng (Phiên 115)**:
+  - **Nhu cầu**: Người dùng phản ánh: "rightmenu đóng mở ko được" trên màn hình Lập/Sửa phiếu chuyển hàng (`/ChuyenKho/Create` và `/ChuyenKho/Edit/{id}`).
+  - **Nguyên nhân cốt lõi**:
+    + Trong `chuyen-kho-form.js`, sự kiện click `#btnToggleRightPanel` gán class sai: gọi `$panel.addClass('panel-collapsed')` thay vì `$panel.toggleClass('collapsed')`.
+    + Trong file CSS chuẩn `kiem-kho.css`, selector thu gọn panel là `.f-panel.collapsed` và selector dời nút toggle ra mép phải là `.form-wrap.panel-collapsed .panel-toggle`. Việc JS không gán class `panel-collapsed` cho `#ckFormWrap` và không gán `collapsed` cho `#rightPanel` khiến panel không bao giờ co lại về 0px và nút toggle bị kẹt tại `right: 425px`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`chuyen-kho.css`**: Định nghĩa tường minh các quy tắc đóng/mở `.f-panel.collapsed`, `#rightPanel.collapsed` co chiều rộng về `0 !important` có animation mượt mà `0.25s cubic-bezier(0.25, 1, 0.35, 1)`. Đồng thời định nghĩa nút `#btnToggleRightPanel` tự động trượt ra mép phải `right: 8px !important` khi panel thu gọn.
+    + **`chuyen-kho-form.js`**: Viết lại hàm `toggleRightPanel()` chuẩn chỉnh:
+      * Toggling đồng bộ class `collapsed` trên `#rightPanel` và `#btnToggleRightPanel`.
+      * Toggling class `panel-collapsed` trên `#ckFormWrap`.
+      * Cập nhật icon `bi-chevron-left` khi panel đóng và `bi-chevron-right` khi panel mở.
+      * Cập nhật tooltip `title` tương ứng và liên kết phím tắt toàn cục `F4`.
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile`: **0 Errors, 2 Warnings**.
+    + `node -c chuyen-kho-form.js`: **0 Errors**.
+    + Đồng bộ `docs/specs/chuyen-kho.md`.
+
+- **Sửa Lỗi Không Tìm Kiếm & Không Chọn Được Hàng Hóa Trên Form Chuyển Hàng (Phiên 114)**:
+  - **Nhu cầu**: Người dùng phản ánh: "vẫn lỗi tìm kiếm ko dược" trên form chuyển hàng (`/ChuyenKho/Create` và `/ChuyenKho/Edit/{id}`).
+  - **Nguyên nhân cốt lõi phát hiện**:
+    1. **Sai trạng thái trong truy vấn CSDL (`HangHoa`)**: Bảng `HangHoa` có ràng buộc kiểm tra `[CK_HangHoa_TrangThai]` chỉ nhận 2 giá trị `'DANG_BAN'` hoặc `'NGUNG_BAN'`. Trong Action `SearchProducts` của `ChuyenKhoController.cs`, code lọc `.Where(h => h.TrangThai == "HOAT_DONG")`, dẫn tới kết quả truy vấn SQL luôn trả về rỗng `[]` (0 hàng hóa).
+    2. **Thiếu CSS hiển thị dropdown Autocomplete**: Tệp `nhap-hang.css` định nghĩa `.nh-autocomplete-dropdown { display: none; }` nhưng thiếu quy tắc `.nh-autocomplete-dropdown.show { display: block !important; }`, khiến dropdown khi được thêm class `show` vẫn bị ẩn.
+    3. **Đồng bộ component F3 dùng chung**: `Create.cshtml` và `Edit.cshtml` chưa tích hợp tệp `f3-product-search.js` chuẩn KiotViet như bên Nhập hàng và Kiểm kho.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`ChuyenKhoController.cs`**:
+      * Đổi điều kiện truy vấn sang `.Where(h => h.TrangThai == "DANG_BAN")` và tìm kiếm trực tiếp `h.TenHang.Contains(q) || h.MaHangNoiBo.Contains(q)`.
+      * Bổ sung hỗ trợ cả 2 tham số `warehouseId` và `whId`.
+      * Trả về đầy đủ các trường dữ liệu (`maHang`, `maHangNoiBo`, `tenHang`, `tenDvt`, `tenNhom`, `gia`, `tonKho`, `id`, `code`, `name`, `unit`, `cost`, `stock`).
+    + **`Create.cshtml` & `Edit.cshtml`**: Nạp `f3-product-search.js` trước `chuyen-kho-form.js`.
+    + **`chuyen-kho-form.js`**:
+      * Tích hợp `initF3ProductSearch` chuẩn KiotViet (có phím tắt F3, debounce, điều hướng bàn phím mũi tên lên/xuống, Enter để chọn).
+      * Bổ sung cơ chế fallback nội bộ dùng `$drop.show()` và `$drop.hide()` đảm bảo luôn bật popup.
+      * Chuẩn hóa hàm `addProduct(item)` hỗ trợ mọi định dạng trường trả về từ API.
+    + **`chuyen-kho.css`**: Thêm quy tắc tường minh `.nh-autocomplete-dropdown.show { display: block !important; }`.
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile`: **0 Errors, 2 Warnings**.
+    + `node -c chuyen-kho-form.js`: **0 Errors**.
+    + Đồng bộ `docs/specs/chuyen-kho.md`.
+
+- **Sửa Lỗi Thanh Tìm Kiếm F3 & Nâng Cấp Dropdown Kho Nhận Chuẩn KiotViet (Phiên 113)**:
+  - **Nhu cầu**: Người dùng gửi ảnh `media_1792300655473_fa6347a9.png` phản ánh: "thanh tìm kiếm bị lỗi, dropdown kho nhận sửa giao diện".
+  - **Nguyên nhân**:
+    1. **Thanh tìm kiếm F3**: Thẻ `<input>` bị gán class Bootstrap `px-2` (`padding-left: 0.5rem !important`) và thẻ `<i>` bị gán `ms-2`, khiến icon kính lúp bị dời sang 18px trong khi chữ placeholder bắt đầu ở 8px, dẫn tới icon nằm đè lên chữ "Tìm".
+    2. **Dropdown Kho nhận**: Sử dụng thẻ `<select class="form-select">` nguyên bản của trình duyệt, hiển thị thô cứng, popup xanh không đồng bộ với thiết kế KiotViet.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`_ChuyenKhoForm.cshtml`**:
+      * Chuẩn hóa thanh tìm kiếm F3: bỏ `px-2 w-100 border-0` và `ms-2`, input có `padding: 0 16px 0 34px` và icon cố định ở `left: 10px`, căn chỉnh thẳng hàng hoàn hảo.
+      * Thay thế thẻ `<select>` bằng custom dropdown Bootstrap chuẩn KiotViet: nút bấm `.wh-custom-select-btn` nền trắng bo góc 6px, danh sách kho `.wh-custom-dropdown-menu` bo góc 8px đổ bóng `shadow-sm`, hiển thị icon tòa nhà `<i class="bi bi-buildings">` và checkmark `<i class="bi bi-check2">` cho kho đang chọn.
+    + **`chuyen-kho-form.js`**:
+      * Bổ sung sự kiện click `.wh-item-opt`: cập nhật giá trị hidden input `#fKhoNhan`, đổi tên hiển thị, chuyển dấu checkmark, xóa thông báo lỗi và viền đỏ nếu có.
+      * Tinh chỉnh `submitTransfer`: nếu chưa chọn kho nhận sẽ bôi đỏ viền nút dropdown `#btnSelectKhoNhan` và focus trực tiếp.
+    + **`chuyen-kho.css`**:
+      * Định kiểu hoàn chỉnh cho `.f-top .searchbox`, `.routebox`, `.wh-custom-select-btn`, `.wh-custom-dropdown-menu`.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 2 Warnings**.
+      * `node -c chuyen-kho-form.js` đạt **0 Errors**.
+      * Đồng bộ `docs/specs/chuyen-kho.md` (7.929 ký tự < 8.000 ký tự).
+
+- **Khắc Phục Triệt Để Hiện Tượng Rung Giật Khi Mở Chi Tiết Phiếu Kiểm Tồn (Phiên 112)**:
+  - **Nhu cầu**: Người dùng phản ánh: "trong phần kiểm tồn khi tôi mở phần chỉ tiết thì nó cứ giật giật, sửa lại cho ổn định".
+  - **Nguyên nhân cốt lõi phát hiện**:
+    1. **Xung đột mô hình đường viền bảng (Border Conflict)**: Trong `kiem-kho.css:393`, `table.tbl` bị gán `border-collapse: collapse;` (trong khi chuẩn toàn hệ thống là `separate`). Khi `slideDown` chạy, mỗi frame trình duyệt phải giải quyết xung đột viền 2px/3px và sticky header liên tục, làm các dòng trên dưới rung giật 2-3px.
+    2. **Xung đột hoạt ảnh đồng thời (Animation Clash)**: Trong `kiot-filter.js`, khi bấm dòng mới thì dòng cũ chạy `slideUp(150)` song song với dòng mới chạy `slideDown(150)`, hai dòng cùng co giãn chiều cao trong cùng `tbody` làm layout nhảy liên tục; ngoài ra thiếu `.stop(true, true)` khiến thao tác click nhanh bị dồn ứ hàng đợi animation.
+    3. **DOM Layout Thrashing**: Mỗi lần mở chi tiết, `kiot-filter.js` quét toàn bộ `find('tr')` bao gồm hàng trăm dòng sản phẩm trong bảng con `dtl-tbl` để xóa/gán class `.last-visible-col`, gây nghẽn main thread.
+    4. **Negative margin trên `.dp-tabs`**: `.dp-tabs` có `margin: 0 -20px 14px;` bên trong `.dp`, khi `.product-detail-panel-wrap` có `overflow: hidden;` lúc `slideDown`, trình duyệt tính toán lại subpixel tràn ngang gây giật lề.
+    5. **Thanh cuộn dọc xuất hiện đột ngột (Scrollbar Pop-in)**: Chi tiết cao ~500px khiến container bảng vượt quá chiều cao màn hình, thanh cuộn 17px nhảy vào làm co bảng đột ngột theo chiều ngang.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`kiem-kho.css`**: Đổi `table.tbl` và `#stockTakeTable` sang `border-collapse: separate !important; border-spacing: 0 !important;` chuẩn mực. Bỏ negative margin trên `.dp-tabs`. Thêm `scrollbar-gutter: stable;` cho `.kiot-table-scroll-body`.
+    + **`kiot-filter.js`**: Khi mở dòng mới, lập tức ẩn dòng cũ (`.stop(true, true).hide()`) không chạy đồng thời hai hiệu ứng slide. Thêm `.stop(true, true)` trên `$wrap`. Tối ưu gán `.last-visible-col` trực tiếp trên `$row.children('td:visible')`, loại bỏ hoàn toàn quét `find('tr')`. Chuẩn hóa selector click dòng bảng khi có nhiều class.
+    + **`site.css` & `chuyen-kho.css`**: Đồng bộ `scrollbar-gutter: stable;` và bỏ negative margin trên `.dp-tabs`.
+    + **`_PhieuKiemKeTable.cshtml` & `_ChuyenKhoTable.cshtml`**: Bỏ `shadow-sm` trên panel chi tiết tránh hiện tượng vẽ lại bóng (repaint artifact) trong bảng.
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile`: **0 Errors, 4 NuGet Warnings**.
+    + `node -c kiot-filter.js phieu-kiem-ke-index.js`: **0 Errors**.
+    + Đồng bộ `docs/specs/kiem-kho.md` (7.695 ký tự < 8.000 ký tự).
+
+- **Chuẩn Hóa Font & Màu Chữ Thường Cho Các Dòng Bảng Chuyển Hàng Giống Hàng Hóa (Phiên 111)**:
+  - **Nhu cầu**: Người dùng phản ánh qua ảnh chụp `media_1792299519860_cd6b7817.png` yêu cầu: "sửa font, màu các hàng hiển thị thành chữ thường giống danh sách hàng hóa hết".
+  - **Nguyên nhân**:
+    + Mã phiếu `maphieu` bị gán class `fw-semibold text-primary` làm chữ bị xanh và đậm.
+    + Cột `khonguon` và `khodich` bị bọc trong thẻ `<b class="text-primary">` khi trùng kho hiện tại, làm tên kho bị đậm và xanh.
+    + Cột `slchuyen`, `slnhan`, `giatri` bị gán các class in đậm `fw-semibold`, `fw-medium`, `text-danger fw-bold`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`_ChuyenKhoTable.cshtml`**:
+      * Đưa toàn bộ các ô dữ liệu trên từng dòng (`maphieu`, `khonguon`, `khodich`, `slchuyen`, `slnhan`, `giatri`) về chữ thường (regular font, color chuẩn `#1f2937`) giống hệt `_HangHoaTable.cshtml`.
+      * Gỡ bỏ hoàn toàn các class `fw-semibold`, `text-primary`, `fw-medium`, và thẻ `<b>`.
+    + **`chuyen-kho.css`**:
+      * Bổ sung luật CSS ép chuẩn `#transferTable tbody tr.product-row td` có `font-size: 13px !important; color: #1f2937 !important; font-weight: 400 !important;` đồng bộ tuyệt đối với Hàng hóa.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 2 Warnings**.
 
 - **Đồng Bộ Toàn Diện Chi Tiết Phiếu Chuyển Hàng Theo Chuẩn Kiểm Tồn (Phiên 110)**:
   - **Nhu cầu**: Người dùng yêu cầu: "sửa lại phần chi tiết trong phần chuyển hàng giống phần kiểm tồn, màu sắc chữ, font chữ, giao diện tương tác" kèm ảnh chụp màn hình drawer chuẩn của Kiểm tồn (`media_1792298582878_bd251676.png`).
