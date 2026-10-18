@@ -4,53 +4,11 @@ Cập nhật lần cuối: 2026-10-15 – Khắc phục triệt để lỗi hi�
 
 ---
 
-## Đã xong
-- **Khắc phục Triệt để Lỗi hiển thị Phân hệ Kiểm kho (Phiên 25)**:
-  - **Dropdown chọn ngày nhanh (`.quick`)**: Sửa lỗi menu bị cắt cụm vỡ nát do `overflow: hidden` của sidebar; cấu trúc lại dropdown cuộn dọc vừa khít 100% bề rộng nút/sidebar, phân 4 nhóm rõ ràng (`Theo ngày`, `Theo tuần`, `Theo tháng`, `Theo quý & năm`).
-  - **Khối ngày Tùy chỉnh (Inline Sidebar)**: Loại bỏ popup 2 tháng 640px tràn màn hình, thay thế bằng cụm input ngày inline trực quan (`inpFromDate`, `inpToDate`) kèm nút "Áp dụng" nằm gọn gàng bên dưới radio "Tùy chỉnh".
-  - **Khối Chi tiết dòng bung mở (`tr.dtl`)**:
-    + Sửa lỗi bảng số liệu `.sums` bị đè bẹp và cắt mép bên phải: Cố định độ rộng `.sums` 330px (`flex: 0 0 330px`), áp dụng Flexbox Bootstrap với `dp-note` chiếm phần còn lại (`flex-grow-1`).
-    + Giữ khối chi tiết luôn trong tầm nhìn khi cuộn ngang bảng 1450px: Định vị `.dp` với `position: sticky; left: 0; max-width: min(1200px, calc(100vw - 320px))` giúp toàn bộ bảng hàng hóa, ghi chú, tổng kết và cụm nút hành động (`.dp-actions`) luôn hiển thị trọn vẹn, không bị đẩy trôi ra ngoài mép màn hình.
-    + Thẩm mỹ chuẩn KiotViet: Thay đổi viền bao quanh toàn bộ dòng mở thô kệch thành dải viền bên trái `border-left: 4px solid var(--blue)` thanh thoát và nền `#f0f7ff`.
-  - **Bảng dữ liệu & Phân trang đáy**: Cấu trúc `#tableWrapper` với class `kiot-table-wrapper` chiếm trọn 100% flex column, giúp thanh phân trang `_Pagination.cshtml` luôn ghim sát đáy card trắng `#content`, loại bỏ hoàn toàn khoảng trắng mênh mông lửng lơ.
-  - **Kiểm tra biên dịch**: `dotnet build` đạt 0 Errors.
-- **Chuẩn hóa Giao diện Phân hệ Kiểm kho (PhieuKiemKe) theo khuôn mẫu Danh sách Hàng hóa (Phiên 24)**:
-  - **Khung giao diện chuẩn KiotViet (`.kiot-container`)**: Chuyển đổi toàn diện trang `Views/PhieuKiemKe/Index.cshtml` sang bố cục 2 cột tiêu chuẩn gồm `.kiot-sidebar-col` (bộ lọc) và `.kiot-main-col` (nội dung), tích hợp nút tròn toggle sidebar `#btnToggleSidebar` (phím tắt F4) ở ranh giới hai cột, animation mượt mà và backdrop che mờ trên mobile/zoom in.
-  - **Đồng bộ thanh công cụ (`.kiot-toolbar-row`)**: Tích hợp tiêu đề mobile, ô tìm kiếm mã phiếu `#keywordSearch` tích hợp phím tắt F3 debounce 300ms, nút Tạo mới `+ Kiểm kho` chuẩn Bootstrap primary, dropdown Xuất file (`btn-tool`) 2 chế độ (danh sách/chi tiết), dropdown Ẩn/Hiện cột, nút Tải lại bảng xoay animation (`bi-arrow-clockwise`) và nút Trợ giúp.
-  - **Đồng bộ hệ thống biểu tượng (Bootstrap Icons `bi bi-*`)**: Thay thế toàn bộ 39 SVG inline rải rác sang các biểu tượng Bootstrap Icons chuẩn mực (`bi-search`, `bi-plus-lg`, `bi-box-arrow-up`, `bi-star`, `bi-star-fill`, `bi-view-list`, `bi-arrow-clockwise`, `bi-trash`, `bi-copy`, `bi-printer`, `bi-pencil-square`, `bi-check-lg`).
-  - **Tái sử dụng Component phân trang LEGO (`_Pagination.cshtml`)**: Bổ sung thuộc tính `PagedData` (`PagedResult<PhieuKiemKeListItemVM>`) trong `PhieuKiemKeIndexVM`, loại bỏ hoàn toàn bộ phân trang HTML tự chế và tái sử dụng component phân trang dùng chung của hệ thống qua AJAX không reload trang.
-  - **Chuẩn hóa cấu trúc bảng (`_PhieuKiemKeTable.cshtml`)**: Bọc bảng trong `.kiot-table-scroll-body`, chuẩn hóa `table.tbl`, dòng dữ liệu `tr.tbl-row`, soft badges KiotViet cho trạng thái (Phiếu tạm, Đã cân bằng kho, Đã hủy) và khối Empty State chuẩn mực khi không tìm thấy kết quả.
-  - **Đồng bộ JavaScript (`phieu-kiem-ke-index.js`)**: Hỗ trợ phím tắt F3/F4, phân trang AJAX bắt sự kiện `.page-ajax`, xử lý đồng thời drawer sidebar mobile và desktop collapse.
-  - **Kiểm tra biên dịch & Đặc tả**: `dotnet build` đạt 0 Errors. Đồng bộ và tinh gọn `docs/specs/kiem-kho.md` đạt 6.987 ký tự (< 8.000 ký tự) theo Luật 12.
-- **Sửa lỗi & Ổn định hóa Phân hệ Kiểm kho (Phiên 23 - Sửa lỗi sau tích hợp)**:
-  - **Khắc phục lỗi khóa file biên dịch (Lock Process MSB3027)**: Đã giải phóng tiến trình cũ chạy ngầm (PID 4824) chiếm giữ binary `BTL-LTW-QuanLiKho-2.exe`. Lệnh `dotnet build` hoàn thành với 0 lỗi.
-  - **Khắc phục xung đột hiển thị bảng (Bootstrap 5 `.row` Clash)**: Đổi toàn bộ thẻ `<tr class="row">` thành `<tr class="tbl-row">` trong `_PhieuKiemKeTable.cshtml`, `kiem-kho.css` và `phieu-kiem-ke-index.js`, đồng thời bổ sung `display: table-row !important;` loại bỏ hoàn toàn hiện tượng vỡ nát cột bảng do Bootstrap Flexbox áp đặt.
-  - **Khắc phục sai lệch bộ lọc khoảng ngày (Date Filter Enum Mismatch)**: Mở rộng `ResolveDateRange` trong `PhieuKiemKeController.cs` để nhận diện cả định dạng preset tiếng Việt (`HOMNAY`, `THANGNAY`, `TUANNAY`...) và tiếng Anh (`TODAY`, `THIS_MONTH`...), đồng thời xử lý `ToLocalTime()` khi browser gửi UTC ISO string.
-  - **Chuẩn hóa múi giờ lưu chứng từ (`ThoiDiemChot`)**: Chuyển đổi an toàn sang giờ địa phương server trong các action `SaveDraft` và `Complete`.
-  - **Bổ sung View `Edit.cshtml`**: Tạo `Views/PhieuKiemKe/Edit.cshtml` bảo đảm cơ chế routing và View Engine tìm kiếm view an toàn.
-- **Nâng cấp và Hoàn thiện Phân hệ Kiểm kho (PhieuKiemKe) chuẩn 100% Prototype KiotViet**:
-  - **Giao diện Danh sách (`Index.cshtml`)**: Tách `_PhieuKiemKeFilterSidebar.cshtml` và `_PhieuKiemKeTable.cshtml`, tách toàn bộ JavaScript ra `wwwroot/js/phieu-kiem-ke-index.js`. Hỗ trợ lọc khoảng ngày nhanh / lịch 2 tháng tùy chỉnh, lọc trạng thái 3 checkbox, lọc người tạo dạng chip tags multi-select; hỗ trợ click dòng bung mở khối chi tiết `tr.dtl` inline ngay trong bảng với bộ lọc mã/tên hàng, lưu ghi chú, in và modal xác nhận hủy phiếu.
-  - **Giao diện Lập / Sửa phiếu (`Create.cshtml`, `Details.cshtml`)**: Chuẩn hóa `_PhieuKiemKeForm.cshtml`, tách toàn bộ JavaScript sang `wwwroot/js/phieu-kiem-ke-form.js`. Layout 2 cột KiotViet với panel thông tin phải gập mở, tìm kiếm autocomplete F3, nạp hàng theo nhóm (Lưới), 4 tabs phân loại (Tất cả, Khớp, Lệch, Chưa kiểm), nhập file Excel/CSV, widget Kiểm gần đây, phím tắt F9 (Lưu tạm) và F10 (Cân bằng kho).
-  - **Backend & Nghiệp vụ (`PhieuKiemKeController.cs`, `KiemKhoViewModels.cs`)**: Bổ sung API `HuyPhieu` (chặn tuyệt đối phiếu đã cân bằng theo Luật 6), `SaveNote` (lưu nhanh ghi chú từ dòng chi tiết bung mở), `GetItemDetails` (nạp chi tiết JSON), `Export` (xuất file CSV danh sách hoặc chi tiết), hỗ trợ `copyId` ở action `Create`. Bọc Transaction an toàn khi cân bằng kho, đọc tồn sổ sách từ `vw_TonKhoHienTai`, chốt giá vốn và sinh `PhieuDieuChinh`.
-  - **Kiểm tra biên dịch & Đặc tả**: `dotnet build` đạt 0 Errors và 0 Warnings. Đồng bộ tài liệu `docs/specs/kiem-kho.md` (< 8.000 ký tự) theo Luật 12.
-- **Chuẩn hóa Kiến trúc Danh mục CRUD dùng chung & Tinh gọn mô-đun Hàng hóa (Khuôn mẫu LEGO)**:
-  - Tầng Dùng chung (Shared Framework):
-    - `ViewModels/Common/BaseFilterParams.cs`: Chuẩn hóa bộ lọc tìm kiếm (`Q`, `Page`, `PageSize`, `SortBy`, `SortDir`, `FromDate`, `ToDate`, `GetSkipCount()`).
-    - `ViewModels/Common/PagedResult.cs`: `PagedResultBase` & `PagedResult<T>` chuẩn hóa cấu trúc kết quả phân trang kèm các thuộc tính tính toán (`StartItemIndex`, `EndItemIndex`, `TotalPages`, `HasPreviousPage`, `HasNextPage`).
-    - `Views/Shared/_Pagination.cshtml`: Partial View phân trang chuẩn KiotViet dùng chung cho toàn bộ các danh sách bảng trong hệ thống.
-    - `Helpers/ExcelHelper.cs`: Đóng gói toàn bộ tiện ích ClosedXML (đọc cell an toàn, định dạng header xanh KiotViet, vẽ viền, loại bỏ dấu tiếng Việt).
-    - `wwwroot/js/kiot-filter.js`: Thư viện JS tiện ích dùng chung (sidebar toggle, debounce tìm kiếm, single/multi custom select, tự động đảo hướng drop-up, phân trang AJAX).
-  - Tách Lớp Dịch vụ Excel (`IHangHoaExcelService` / `HangHoaExcelService`):
-    - Chuyển giao toàn bộ logic sinh file mẫu, xuất Excel tùy chọn cột, và nhập Excel 16 trường bọc Transaction sang Service độc lập.
-    - `HangHoaController.cs` giảm từ 1.944 dòng xuống 1.253 dòng (giảm ~36% dung lượng, controller chỉ điều phối).
-  - Tách View & Static JavaScript:
-    - Tách 7 khối lọc sidebar thành Partial View `Views/HangHoa/_HangHoaFilterSidebar.cshtml`.
-    - Tách ~1.400 dòng JavaScript inline từ `Index.cshtml` ra `wwwroot/js/hang-hoa-index.js`, nạp config qua data-attributes `#hangHoaConfig`.
-    - `Views/HangHoa/Index.cshtml` tinh gọn ngoạn mục từ 1.841 dòng (~85 KB) xuống còn 142 dòng (~7.8 KB).
-  - Dọn dẹp Dead Views: Xóa bỏ 5 view scaffolding cũ không dùng (`Create.cshtml`, `Edit.cshtml`, `Delete.cshtml`, `_Form.cshtml`, `_Info.cshtml`), giữ lại `Details.cshtml`.
-- **Tinh gọn Thanh công cụ Danh sách Hàng hóa (Gỡ bỏ nút Cài đặt)**:
-
-  - Gỡ bỏ nút Cài đặt rỗng (`bi-gear`) trên thanh công cụ của trang Hàng hóa (`Index.cshtml`), chỉ giữ lại các nút điều hướng và tiện ích tiêu chuẩn: Nút Tạo mới, Import file, Xuất file, Tải lại bảng (`bi-arrow-clockwise`) và Trợ giúp (`bi-question-circle`).
+- **Hoàn thiện Tùy chọn Ẩn/Hiện Cột KiotViet (Column Visibility) Đồng bộ File Xuất & Cố định Độ rộng Cột**:
+  - Đồng bộ 100% với File Xuất: Đã loại bỏ hoàn toàn các cột không có trong file xuất (Hình ảnh, Mã vạch, Khách đặt, Thời gian tạo, Dự kiến hết hàng) khỏi menu Ẩn/Hiện cột và bảng dữ liệu.
+  - Menu Ẩn/Hiện cột (`bi-grid-3x2-gap`): Gồm 11 checkbox chuẩn tương ứng 11 trường dữ liệu thực tế (Loại hàng, Nhóm hàng, Mã hàng, Tên hàng, Giá bán, Giá vốn, Tồn kho, Tồn nhỏ nhất, Tồn lớn nhất, Vị trí, Trạng thái).
+  - Tối ưu hiệu năng 0ms (Dynamic CSS): Áp dụng kỹ thuật chèn thẻ `<style id="hhDynamicColStyles">` để ẩn/hiện cột tức thì 0ms, không làm giật hay reload bảng, tự động làm sạch và lưu tùy chọn vào `localStorage`.
+  - Cố định độ rộng cột & Thanh cuộn ngang: Đặt `table-layout: fixed; width: max-content; min-width: 100%;` trên `.tbl` và kích thước cố định chặt chẽ cho toàn bộ các cột; khi bật nhiều cột vượt màn hình sẽ xuất hiện thanh cuộn ngang mượt mà, không bao giờ bị co ép méo mó.
 - **Hoàn thiện Chức năng Sắp xếp 3 trạng thái Header Bảng Hàng hóa & Cố định Icon không tràn viền**:
   - Hỗ trợ sắp xếp 8 cột: Mã hàng (`mahang`), Tên hàng (`tenhang`), Giá bán (`giaban`), Giá vốn (`giavon`), Tồn kho (`tonkho`), Khách đặt (`khachdat`), Thời gian tạo (`ngaytao`), Dự kiến hết hàng (`dukienhethang`).
   - Chu trình click 3 trạng thái: Lần 1 Tăng dần (ASC) -> Lần 2 Giảm dần (DESC) -> Lần 3 Bình thường (None). Click cột khác tự động chuyển sang cột mới từ Tăng dần.
@@ -168,7 +126,10 @@ Cập nhật lần cuối: 2026-10-15 – Khắc phục triệt để lỗi hi�
     - **Nén ảnh phía Client (Canvas Compression)**: Tự động nén ảnh chọn từ máy (cả thêm mới và thay thế ảnh chính) về kích thước tối đa 1000px, JPEG quality 0.85; giảm dung lượng payload JSON từ 10-25MB xuống ~200-500KB (giảm 95% thời gian truyền tải và ghi DB).
     - **Cập nhật tức thì (Optimistic UI)**: Khi lưu form thành công, JS lập tức cập nhật `src` của ảnh thumbnail, hover popover và tab detail trên bảng (`data-img-id`, `data-popover-img-id`, `data-detail-img-id`) ngay lập tức mà không phải chờ `loadTable()`, loại bỏ hoàn toàn độ trễ và hiện tượng giật/chớp màn hình.
     - **Smart Cache-Busting theo ImageVersion**: Bổ sung `ImageVersion` vào `HangHoaItemVM` (lấy theo `MaHinhAnh` IDENTITY của bảng `HinhAnhHangHoa`), bật lại `ResponseCache(Duration = 86400)` cho `GetImage`. Nhờ đó, trình duyệt tận dụng cache HTTP cho 14 sản phẩm còn lại trên bảng (0ms), chỉ tải lại duy nhất ảnh của sản phẩm vừa thay đổi.
-  - Tinh gọn giao diện dòng chi tiết sản phẩm: Loại bỏ nút `+ Thêm thuộc tính` và modal `quickAttrModal` khỏi dòng chi tiết inline trên bảng danh sách, giữ lại huy hiệu (badge) hiển thị thuộc tính; nghiệp vụ thêm/sửa/xóa thuộc tính được quản lý tập trung và trực quan bên trong modal Chỉnh sửa hàng hóa.
+  - Tinh gọn giao diện dòng chi tiết sản phẩm & thanh công cụ:
+    - Loại bỏ nút `+ Thêm thuộc tính` và modal `quickAttrModal` khỏi dòng chi tiết inline trên bảng danh sách, giữ lại huy hiệu (badge) hiển thị thuộc tính; nghiệp vụ thêm/sửa/xóa thuộc tính được quản lý tập trung và trực quan bên trong modal Chỉnh sửa hàng hóa.
+    - Gỡ bỏ nút "Cài đặt" (icon bánh răng `bi-gear`) trên thanh công cụ `kiot-actions-group` của bảng hàng hóa theo yêu cầu người dùng.
+    - **Tính năng Tùy chọn Ẩn / Hiện Cột (KiotViet Column Visibility)**: Thay thế nút Reload bằng nút icon `bi-grid-3x2-gap`, mở dropdown popup 2 cột gồm 16 checkbox đối xứng (Hình ảnh, Mã hàng, Mã vạch, Tên hàng, Nhóm hàng, Loại hàng, Giá bán, Giá vốn, Tồn kho, Vị trí, Khách đặt, Thời gian tạo, Dự kiến hết hàng, Định mức tồn ít nhất, Định mức tồn nhiều nhất, Trạng thái; đã loại bỏ "Liên kết kênh bán" và "Thương hiệu" theo yêu cầu). Áp dụng Dynamic CSS tức thì (0ms, không reload/nhấp nháy bảng), tự động lưu cấu hình người dùng vào `localStorage`.
   - Chuẩn hóa cấu trúc 5 ảnh hàng hóa: 1 ảnh to đại diện và 4 ảnh nhỏ bên phải:
     - **Layout & CSS**: Khắc phục hiện tượng hiển thị 5 thumbnail nhỏ bên phải bị tràn dài hơn ảnh to. Thiết kế chuẩn xác: 1 ảnh to đại diện bên trái (`200px x 200px`) và cột 4 ô thumbnail bên phải (`45px x 45px`, xếp đều vừa khít `height: 200px`).
     - **Tương tác**: Ảnh to luôn hiển thị ảnh đại diện chính (kèm badge "Ảnh chính", nút xóa `×` và hover "Bấm để đổi ảnh"). Cột bên phải hiển thị đúng 4 ảnh phụ (hoặc nút `+` thêm ảnh và ô placeholder trống khi chưa đủ 5 ảnh). Bấm vào bất kỳ ảnh nhỏ nào sẽ lập tức đổi (swap) làm ảnh chính, bấm `×` để xóa ảnh phụ tương ứng, và xóa ảnh to sẽ tự động đẩy ảnh phụ kế tiếp lên làm ảnh chính.
