@@ -11,6 +11,38 @@ namespace BTL_LTW_QuanLiKho_2.Helpers;
 public static class ExcelHelper
 {
     /// <summary>
+    /// Đọc an toàn giá trị của một ô Excel thành chuỗi (hỗ trợ cả ô Text, Number, DateTime, Boolean, Formula).
+    /// Tuyệt đối không ném ngoại lệ InvalidCastException khi kiểu dữ liệu ô trong Excel không phải Text.
+    /// </summary>
+    public static string GetCellValueAsString(IXLCell? cell)
+    {
+        if (cell == null || cell.IsEmpty()) return string.Empty;
+        try
+        {
+            switch (cell.Value.Type)
+            {
+                case XLDataType.Text:
+                    return cell.Value.GetText().Trim();
+                case XLDataType.Number:
+                    return cell.Value.GetNumber().ToString(CultureInfo.InvariantCulture).Trim();
+                case XLDataType.Boolean:
+                    return cell.Value.GetBoolean().ToString().Trim();
+                case XLDataType.DateTime:
+                    return cell.Value.GetDateTime().ToString("dd/MM/yyyy HH:mm:ss").Trim();
+                case XLDataType.TimeSpan:
+                    return cell.Value.GetTimeSpan().ToString().Trim();
+                default:
+                    return cell.GetFormattedString()?.Trim() ?? cell.Value.ToString().Trim();
+            }
+        }
+        catch
+        {
+            try { return cell.GetFormattedString()?.Trim() ?? string.Empty; }
+            catch { return string.Empty; }
+        }
+    }
+
+    /// <summary>
     /// Đọc giá trị chuỗi từ ô Excel an toàn, tự động Trim.
     /// </summary>
     public static string GetCellString(IXLWorksheet ws, int row, Dictionary<string, int> colMap, string key)
@@ -18,7 +50,7 @@ public static class ExcelHelper
         if (!colMap.TryGetValue(key, out int col)) return string.Empty;
         var cell = ws.Cell(row, col);
         if (cell.IsEmpty()) return string.Empty;
-        return cell.GetString()?.Trim() ?? string.Empty;
+        return GetCellValueAsString(cell);
     }
 
     /// <summary>
@@ -30,19 +62,26 @@ public static class ExcelHelper
         var cell = ws.Cell(row, col);
         if (cell.IsEmpty()) return defaultValue;
 
-        if (cell.DataType == XLDataType.Number)
+        try
         {
-            return Convert.ToDecimal(cell.GetDouble());
+            if (cell.Value.Type == XLDataType.Number)
+            {
+                return Convert.ToDecimal(cell.Value.GetNumber());
+            }
+
+            string str = GetCellValueAsString(cell);
+            if (string.IsNullOrEmpty(str)) return defaultValue;
+
+            str = str.Replace("₫", "").Replace("VND", "", StringComparison.OrdinalIgnoreCase).Replace(" ", "");
+            if (decimal.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val)) return val;
+            if (decimal.TryParse(str, NumberStyles.Any, new CultureInfo("vi-VN"), out val)) return val;
+
+            return defaultValue;
         }
-
-        string str = cell.GetString()?.Trim() ?? string.Empty;
-        if (string.IsNullOrEmpty(str)) return defaultValue;
-
-        str = str.Replace("₫", "").Replace("VND", "", StringComparison.OrdinalIgnoreCase).Replace(" ", "");
-        if (decimal.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val)) return val;
-        if (decimal.TryParse(str, NumberStyles.Any, new CultureInfo("vi-VN"), out val)) return val;
-
-        return defaultValue;
+        catch
+        {
+            return defaultValue;
+        }
     }
 
     /// <summary>
@@ -54,19 +93,26 @@ public static class ExcelHelper
         var cell = ws.Cell(row, col);
         if (cell.IsEmpty()) return null;
 
-        if (cell.DataType == XLDataType.Number)
+        try
         {
-            return Convert.ToDecimal(cell.GetDouble());
+            if (cell.Value.Type == XLDataType.Number)
+            {
+                return Convert.ToDecimal(cell.Value.GetNumber());
+            }
+
+            string str = GetCellValueAsString(cell);
+            if (string.IsNullOrEmpty(str)) return null;
+
+            str = str.Replace("₫", "").Replace("VND", "", StringComparison.OrdinalIgnoreCase).Replace(" ", "");
+            if (decimal.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val)) return val;
+            if (decimal.TryParse(str, NumberStyles.Any, new CultureInfo("vi-VN"), out val)) return val;
+
+            return null;
         }
-
-        string str = cell.GetString()?.Trim() ?? string.Empty;
-        if (string.IsNullOrEmpty(str)) return null;
-
-        str = str.Replace("₫", "").Replace("VND", "", StringComparison.OrdinalIgnoreCase).Replace(" ", "");
-        if (decimal.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val)) return val;
-        if (decimal.TryParse(str, NumberStyles.Any, new CultureInfo("vi-VN"), out val)) return val;
-
-        return null;
+        catch
+        {
+            return null;
+        }
     }
 
     /// <summary>

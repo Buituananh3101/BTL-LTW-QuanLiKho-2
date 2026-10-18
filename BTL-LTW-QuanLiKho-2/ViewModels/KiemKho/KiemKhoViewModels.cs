@@ -45,7 +45,7 @@ public class PhieuKiemKeListItemVM
 public class PhieuKiemKeFilterVM
 {
     public string? Q { get; set; }
-    public string DateFilterType { get; set; } = "THIS_MONTH"; // THIS_MONTH, TODAY, YESTERDAY, THIS_WEEK, LAST_WEEK, LAST_7_DAYS, LAST_MONTH, LAST_30_DAYS, THIS_QUARTER, THIS_YEAR, CUSTOM
+    public string DateFilterType { get; set; } = "ALL"; // ALL, HOM_NAY, HOM_QUA, TUAN_NAY, TUAN_TRUOC, 7_NGAY, THANG_NAY, THANG_TRUOC, 30_NGAY, CUSTOM
     public DateTime? FromDate { get; set; }
     public DateTime? ToDate { get; set; }
     public List<string> Statuses { get; set; } = new() { "NHAP", "DA_DIEU_CHINH" };

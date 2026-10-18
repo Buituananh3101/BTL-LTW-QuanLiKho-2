@@ -38,18 +38,18 @@
 ### 2.1. Màn hình Danh sách (`Index`)
 - **Toolbar (`.kiot-toolbar-row`)**: Ô tìm kiếm `#keywordSearch` (F3 debounce), nút `+ Kiểm kho` (`btn-primary`), nút `Xuất file` (dropdown danh sách/chi tiết), nút `Hiển thị cột`, tải lại bảng (`bi-arrow-clockwise`), trợ giúp.
 - **Sidebar (`.kiot-sidebar-col`)**:
-  - Tiêu đề "Kiểm kho", nút tròn F4 ở ranh giới giữa 2 cột thu gọn/mở rộng sidebar.
-  - Thời gian: Chọn nhanh (Hôm nay, Hôm qua, Tuần này, Tháng này, Quý, Năm) hoặc popup lịch 2 tháng tùy chỉnh.
+  - Tiêu đề "Phiếu kiểm kho", nút tròn F4 ở ranh giới giữa 2 cột thu gọn/mở rộng sidebar.
+  - Thời gian: Chuẩn 100% Danh sách Hàng hóa với 2 radio (Toàn thời gian / Tùy chỉnh), popup chọn nhanh 3 cột (Ngày, Tuần, Tháng + pill Toàn thời gian) và popup lịch 2 tháng Dual Calendar.
   - Trạng thái: Checkbox Phiếu tạm (`NHAP`), Đã cân bằng (`DA_DIEU_CHINH`), Đã hủy (`HUY`).
-  - Người tạo: Multi-select dạng chip tag, tìm kiếm theo tên.
+  - Người tạo: Multi-select chuẩn KiotViet (`.kiot-multiselect-box`, thẻ `.kiot-pill-tag`, badge `+N khác`, checkbox và tìm kiếm sticky `.kiot-ms-search`).
   - Hỗ trợ responsive mobile drawer qua `#btnMobileFilter` và `#sidebarBackdrop`.
 - **Bảng dữ liệu & Bung mở chi tiết (`tr.dtl`)**:
-  - Dòng chính `tr.tbl-row`: Hiển thị thông tin tổng hợp, sao (`bi-star`), checkbox chọn, soft badge KiotViet.
-  - Click dòng: Bung mở accordion inline `tr.dtl` hiển thị bảng hàng kiểm, ô lọc mã/tên hàng, ghi chú, tổng kết và các nút thao tác:
-    + **Hủy phiếu**: Chỉ áp dụng với phiếu tạm (`NHAP`), gọi API `HuyPhieu`.
+  - Dòng chính `tr.tbl-row`: Hiển thị thông tin tổng hợp dạng chữ thường tiêu chuẩn (Mã kiểm kho, các cột số lượng), sao (`bi-star`), checkbox chọn, soft badge KiotViet.
+  - Click dòng: Bung mở accordion inline `tr.dtl` chuẩn KiotViet với 5 cột (Mã hàng, Tên hàng, Tồn kho, Thực tế, SL lệch), ô lọc mã/tên hàng, textarea ghi chú, 4 chỉ số tổng kết số lượng và các nút thao tác:
+    + **Hủy**: Nút outline `Hủy` (chỉ hủy phiếu tạm `NHAP`; cảnh báo không được phép hủy phiếu đã cân bằng kho theo Luật 6).
     + **Sao chép**: Điều hướng sang `/PhieuKiemKe/Create?copyId={id}` nạp lại các sản phẩm.
     + **Xuất file**: Xuất CSV chi tiết cho riêng phiếu này.
-    + **Mở phiếu**: Mở form chỉnh sửa `/PhieuKiemKe/Edit/{id}`.
+    + **Mở phiếu**: Mở form chỉnh sửa `/PhieuKiemKe/Edit/{id}` (chỉ áp dụng với phiếu tạm `NHAP`).
     + **Lưu**: Lưu nhanh ghi chú qua API `SaveNote`.
     + **In**: In phiếu kiểm (`window.print()`).
   - **Phân trang**: Tái sử dụng component `_Pagination.cshtml` dùng chung qua AJAX.
@@ -58,15 +58,15 @@
 - **Cột trái (Lưới kiểm hàng)**:
   - Ô tìm kiếm F3: Autocomplete gợi ý hàng hóa (ảnh, tên, mã, giá, tồn). Quét trùng hàng tự động `+1` số Thực tế.
   - Nút **Chọn theo nhóm**: Modal chọn nhóm nạp hàng loạt sản phẩm ở trạng thái Chưa kiểm (`act = null`).
-  - 4 Tab lọc: Tất cả, Khớp, Lệch, Chưa kiểm (hiển thị số lượng trên tab).
-  - Lưới hàng hóa: STT, Mã, Tên, ĐVT, Tồn sổ sách, Thực tế (input `.qty`), SL lệch, Giá trị lệch, Nút xóa.
-  - Nhập file Excel/CSV: Đọc file nạp trực tiếp vào số Thực tế.
+  - 4 Tab lọc: Tất cả, Khớp, Lệch, Chưa kiểm (hiển thị số lượng trên tab), màu xanh KiotViet `#0070f4`.
+  - Lưới hàng hóa: STT, Mã (font chữ thường tiêu chuẩn), Tên, ĐVT, Tồn sổ sách, Thực tế (input `.qty`), SL lệch, Giá trị lệch, Nút xóa (`bi-trash`). Header nền `#f8fafc`, viền `#e2e8f0`, chữ xám `#475569`, font 13px weight 600 giống Hàng hóa.
+  - Nhập file Excel/CSV: Đọc file nạp trực tiếp vào số Thực tế; Empty State với icon `bi-file-earmark-spreadsheet` và nút chọn file.
 - **Cột phải (Panel thông tin & Thao tác)**:
-  - Nút gập mở panel tròn xanh.
-  - Người tạo, Ngày giờ kiểm, Mã phiếu, Kho kiểm, Trạng thái.
-  - Tổng kết: Tổng số thực tế, lệch tăng, lệch giảm, chênh lệch và giá trị chênh lệch.
+  - Nút gập mở panel tròn xanh (`bi-chevron-right` / `bi-chevron-left`).
+  - Người tạo, Bộ chọn Ngày giờ kiểm trực quan (`#fDate` & `#dtPop` tích hợp popup lịch tháng và khung giờ), Mã phiếu, Kho kiểm, Trạng thái (Soft Badges).
+  - Tổng kết: Tổng số thực tế, lệch tăng, lệch giảm, chênh lệch.
   - Ô ghi chú và widget **Kiểm gần đây**.
-  - 2 Nút hành động lớn: **LƯU TẠM (F9)** và **CÂN BẰNG KHO (F10)**.
+  - 2 Nút hành động đáy: **Lưu tạm (F9)** và **Cân bằng kho (F10)** bo góc 6px, chiều cao 56px, màu xanh KiotViet `#0070f4` và xanh lá `#10b981`.
 
 ---
 

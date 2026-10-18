@@ -20,8 +20,12 @@
     // Đọc cấu hình từ thẻ script JSON an toàn
     const cfgEl = $('#stockTakeConfig');
     let cfg = { id: 0, code: '', warehouseId: 1, created: new Date().toISOString(), note: '', isReadOnly: false, groups: [], lines: [] };
-    if (cfgEl) {
-        try { cfg = JSON.parse(cfgEl.textContent); } catch (e) { console.error('Lỗi parse stockTakeConfig:', e); }
+    if (cfgEl && cfgEl.textContent && cfgEl.textContent.trim()) {
+        try {
+            cfg = JSON.parse(cfgEl.textContent.trim());
+        } catch (e) {
+            console.error('Lỗi parse stockTakeConfig:', e, cfgEl.textContent);
+        }
     }
 
     const fmt = n => (Number(n) || 0).toLocaleString('vi-VN');
@@ -36,10 +40,10 @@
         code: cfg.code || '',
         warehouseId: cfg.warehouseId || 1,
         created: cfg.created ? new Date(cfg.created) : new Date(),
-        note: cfg.note || '',
+        note: cfg.note || ($('#fNote') ? $('#fNote').value : ''),
         tab: 'all',
         dirty: false,
-        lines: cfg.lines || [],
+        lines: Array.isArray(cfg.lines) ? cfg.lines : [],
         recent: [],
         cols: { dvt: 1, gt: 1 }
     };
@@ -47,6 +51,48 @@
     const fsys = l => Number(l.sys) || 0;
     const fcost = l => Number(l.cost) || 0;
     const fdiff = l => l.act == null ? null : (Number(l.act) - fsys(l));
+
+    /* ===== CHỌN NGÀY GIỜ LẬP PHIẾU ===== */
+    const DOW = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+    const DT = { y: FM.created.getFullYear(), m: FM.created.getMonth() };
+
+    function calHTML(y, m, sel) {
+        const first = new Date(y, m, 1), pad = (first.getDay() + 6) % 7, days = new Date(y, m + 1, 0).getDate(), today = sod(new Date()).getTime();
+        let h = `<div class="cal"><div class="cal-g">` + DOW.map(x => `<span class="dow">${x}</span>`).join('');
+        for (let i = 0; i < pad; i++) h += '<span></span>';
+        for (let d = 1; d <= days; d++) {
+            const t = new Date(y, m, d).getTime();
+            let c = 'd';
+            if (t === today) c += ' today';
+            if (t === sel) c += ' sel';
+            h += `<button type="button" class="${c}" data-t="${t}">${d}</button>`;
+        }
+        return h + '</div></div>';
+    }
+
+    function paintDt() {
+        const pop = $('#dtPop');
+        if (!pop) return;
+        const sel = sod(FM.created).getTime(), times = [];
+        for (let h = 0; h < 24; h++) {
+            for (const m of [0, 30]) times.push(`${p2(h)}:${p2(m)}`);
+        }
+        const cur = dTime(FM.created);
+        pop.innerHTML = `
+            <div style="flex:1">
+                <div class="dtnav">
+                    <button type="button" class="rp-nav" data-dn="-1"><i class="bi bi-chevron-left"></i></button>
+                    <span>Tháng ${DT.m + 1}/${DT.y}</span>
+                    <button type="button" class="rp-nav" data-dn="1"><i class="bi bi-chevron-right"></i></button>
+                </div>
+                ${calHTML(DT.y, DT.m, sel)}
+            </div>
+            <div class="times">
+                ${times.map(t => `<button type="button" data-tm="${t}" class="${t === cur ? 'cur' : ''}">${t}</button>`).join('')}
+            </div>`;
+        const c = $('.times .cur', pop);
+        if (c) c.scrollIntoView({ block: 'center' });
+    }
 
     /* ===== TÍNH TOÁN & VẼ GIAO DIỆN ===== */
     function counts() {
@@ -85,20 +131,20 @@
         const valDiff = d != null ? d * fcost(l) : null;
         return `
         <tr data-i="${i}">
-            <td class="w-del">${isReadOnly ? '' : '<button type="button" class="del" data-del title="Xóa dòng"><svg class="ic"><use href="#i-trash"/></svg></button>'}</td>
+            <td class="w-del">${isReadOnly ? '' : '<button type="button" class="del" data-del title="Xóa dòng"><i class="bi bi-trash"></i></button>'}</td>
             <td class="w-stt">${FM.lines.length - i}</td>
-            <td><strong>${l.code}</strong></td>
-            <td>${l.name}</td>
-            ${c.dvt ? `<td>${l.unit || ''}</td>` : ''}
-            <td class="r">${fmt(fsys(l))}</td>
-            <td class="r">
+            <td class="w-code"><span class="code-text" title="${l.code}">${l.code}</span></td>
+            <td class="w-name"><span class="name-text" title="${l.name}">${l.name}</span></td>
+            ${c.dvt ? `<td class="w-dvt text-center">${l.unit || ''}</td>` : ''}
+            <td class="w-sys r">${fmt(fsys(l))}</td>
+            <td class="w-act r">
                 <input class="qty ${l.act == null ? 'none' : ''}" ${isReadOnly ? 'disabled' : ''} inputmode="numeric" 
                        value="${l.act == null ? '' : l.act}" data-qty aria-label="Thực tế">
             </td>
-            <td class="r diff ${d != null && d < 0 ? 'neg' : ''}">
+            <td class="w-diff r diff ${d != null && d < 0 ? 'text-danger' : (d != null && d > 0 ? 'text-success' : '')}">
                 ${d == null ? '' : (d > 0 ? '+' : '') + fmt(d)}
             </td>
-            ${c.gt ? `<td class="r gt ${valDiff != null && valDiff < 0 ? 'neg' : ''}">
+            ${c.gt ? `<td class="w-gt r gt ${valDiff != null && valDiff < 0 ? 'text-danger' : (valDiff != null && valDiff > 0 ? 'text-success' : '')}">
                 ${valDiff == null ? '' : (valDiff > 0 ? '+' : '') + fmt(valDiff)}
             </td>` : ''}
         </tr>`;
@@ -114,23 +160,28 @@
                     <tr>
                         <th class="w-del"></th>
                         <th class="w-stt">STT</th>
-                        <th>Mã hàng</th>
-                        <th>Tên hàng</th>
-                        ${c.dvt ? '<th>ĐVT</th>' : ''}
-                        <th class="r">Tồn kho</th>
-                        <th class="r">Thực tế</th>
-                        <th class="r">SL lệch</th>
-                        ${c.gt ? '<th class="r">Giá trị lệch</th>' : ''}
+                        <th class="w-code">Mã hàng</th>
+                        <th class="w-name">Tên hàng</th>
+                        ${c.dvt ? '<th class="w-dvt">ĐVT</th>' : ''}
+                        <th class="w-sys r">Tồn kho</th>
+                        <th class="w-act r">Thực tế</th>
+                        <th class="w-diff r">SL lệch</th>
+                        ${c.gt ? '<th class="w-gt r">Giá trị lệch</th>' : ''}
                     </tr>
                 </thead>
             </table>
-            <div class="xl-empty">
-                <b>Thêm sản phẩm từ ô tìm kiếm hoặc file Excel</b>
-                <span>(Tải về file mẫu: <a href="javascript:void(0)" id="tpl">Excel file mẫu</a>)</span>
-                ${isReadOnly ? '' : `<button type="button" class="btn solid" id="pick" style="height:48px;font-size:16px;padding:0 24px">
-                    <svg class="ic"><use href="#i-sheet"/></svg> Chọn file dữ liệu
+            <div class="empty d-flex flex-column align-items-center justify-content-center py-5 text-center flex-grow-1">
+                <div class="ico mb-3"><i class="bi bi-file-earmark-spreadsheet fs-1 text-primary"></i></div>
+                <h5 class="fw-bold text-dark mb-1">Thêm sản phẩm từ ô tìm kiếm hoặc file Excel</h5>
+                <div class="text-muted small mb-3">
+                    (Tải về file mẫu: <a href="javascript:void(0)" id="tpl" class="text-primary text-decoration-none fw-semibold">Excel file mẫu</a>)
+                </div>
+                ${isReadOnly ? '' : `<button type="button" class="btn btn-primary d-inline-flex align-items-center gap-2 px-4 py-2 fw-semibold" id="pick" style="border-radius: 6px;">
+                    <i class="bi bi-box-arrow-in-down fs-5"></i><span>Chọn file dữ liệu</span>
                 </button>`}
-                <span class="muted">hoặc gõ tìm hàng ở ô phía trên, bấm phím tắt F3 để nhảy vào ô tìm</span>
+                <div class="text-muted smaller mt-3" style="font-size: 12.5px;">
+                    hoặc gõ tìm hàng ở ô phía trên, bấm phím tắt <strong>F3</strong> để nhảy vào ô tìm
+                </div>
             </div>`;
             return;
         }
@@ -143,13 +194,13 @@
                     <tr>
                         <th class="w-del"></th>
                         <th class="w-stt">STT</th>
-                        <th>Mã hàng</th>
-                        <th>Tên hàng</th>
-                        ${c.dvt ? '<th>ĐVT</th>' : ''}
-                        <th class="r">Tồn kho</th>
-                        <th class="r">Thực tế</th>
-                        <th class="r">SL lệch</th>
-                        ${c.gt ? '<th class="r">Giá trị lệch</th>' : ''}
+                        <th class="w-code">Mã hàng</th>
+                        <th class="w-name">Tên hàng</th>
+                        ${c.dvt ? '<th class="w-dvt">ĐVT</th>' : ''}
+                        <th class="w-sys r">Tồn kho</th>
+                        <th class="w-act r">Thực tế</th>
+                        <th class="w-diff r">SL lệch</th>
+                        ${c.gt ? '<th class="w-gt r">Giá trị lệch</th>' : ''}
                     </tr>
                 </thead>
                 <tbody>${rows}</tbody>
@@ -178,8 +229,8 @@
     function paintRecent() {
         $('#recent').innerHTML = FM.recent.map(r => `
             <li>
-                <svg class="ic"><use href="#i-${r.t === 'edit' ? 'pencil' : 'copy'}"/></svg>
-                <span><strong>${r.name}</strong> (${r.qty})</span>
+                <i class="bi bi-${r.t === 'edit' ? 'pencil' : 'copy'} text-primary me-2"></i>
+                <span>${r.name} (${r.qty})</span>
             </li>`).join('') || '<li class="muted">Chưa có thao tác</li>';
     }
 
@@ -326,12 +377,29 @@
             S.focus();
         }
 
-        // Phím tắt toàn cục: F3 tìm kiếm, F9 lưu tạm, F10 cân bằng kho
+        function togglePanel() {
+            const p = $('#panel');
+            const wrap = $('#formWrap') || $('.form-wrap');
+            if (!p) return;
+            p.classList.toggle('collapsed');
+            const isCollapsed = p.classList.contains('collapsed');
+            wrap?.classList.toggle('panel-collapsed', isCollapsed);
+            const tg = $('#pTg');
+            if (tg) {
+                tg.title = isCollapsed ? 'Mở rộng thông tin (F4)' : 'Thu gọn thông tin (F4)';
+                tg.innerHTML = `<i class="bi bi-${isCollapsed ? 'chevron-left' : 'chevron-right'}" id="pTgIcon"></i>`;
+            }
+        }
+
+        // Phím tắt toàn cục: F3 tìm kiếm, F4 đóng/mở panel, F9 lưu tạm, F10 cân bằng kho
         document.onkeydown = e => {
             if (e.key === 'F3' && S) {
                 e.preventDefault();
                 S.focus();
                 S.select();
+            } else if (e.key === 'F4') {
+                e.preventDefault();
+                togglePanel();
             } else if (e.key === 'F9' && !isReadOnly) {
                 e.preventDefault();
                 $('#bSave')?.click();
@@ -425,11 +493,58 @@
         $('#tNote')?.addEventListener('click', () => togglePop($('#notes'), '#tNote'));
 
         // Thu gọn / mở rộng panel phải
-        $('#pTg')?.addEventListener('click', () => {
-            const p = $('#panel');
-            p.classList.toggle('collapsed');
-            $('#pTg').innerHTML = `<svg class="ic"><use href="#i-${p.classList.contains('collapsed') ? 'chev-l' : 'chev-r'}"/></svg>`;
-        });
+        $('#pTg')?.addEventListener('click', togglePanel);
+
+        // Chọn ngày giờ kiểm kho
+        const dI = $('#fDate');
+        const dtPop = $('#dtPop');
+        if (dI && dtPop && !isReadOnly) {
+            const showDatePicker = () => {
+                DT.y = FM.created.getFullYear();
+                DT.m = FM.created.getMonth();
+                paintDt();
+                togglePop(dtPop, '#fDate');
+            };
+            dI.addEventListener('focus', showDatePicker);
+            dI.addEventListener('click', showDatePicker);
+            dI.addEventListener('change', () => {
+                const m = dI.value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
+                if (m) {
+                    const d = new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5]);
+                    if (!isNaN(d)) {
+                        FM.created = d;
+                        FM.dirty = true;
+                    }
+                }
+                dI.value = dFull(FM.created);
+            });
+            dtPop.addEventListener('click', e => {
+                const n = e.target.closest('[data-dn]');
+                const d = e.target.closest('button.d');
+                const t = e.target.closest('[data-tm]');
+                if (n) {
+                    const x = new Date(DT.y, DT.m + parseInt(n.dataset.dn), 1);
+                    DT.y = x.getFullYear();
+                    DT.m = x.getMonth();
+                    paintDt();
+                }
+                if (d) {
+                    const x = new Date(parseInt(d.dataset.t));
+                    FM.created = new Date(x.getFullYear(), x.getMonth(), x.getDate(), FM.created.getHours(), FM.created.getMinutes());
+                    FM.dirty = true;
+                    dI.value = dFull(FM.created);
+                    paintDt();
+                }
+                if (t) {
+                    const [h, m] = t.dataset.tm.split(':');
+                    FM.created = new Date(FM.created.getFullYear(), FM.created.getMonth(), FM.created.getDate(), parseInt(h), parseInt(m));
+                    FM.dirty = true;
+                    dI.value = dFull(FM.created);
+                    paintDt();
+                    dtPop.classList.remove('show');
+                }
+            });
+        }
 
         // 4 Tabs click
         $('#tabs')?.addEventListener('click', e => {
@@ -573,7 +688,7 @@
             maPhieuKiemKe: FM.id,
             maKho: FM.warehouseId,
             thoiDiemChot: FM.created,
-            ghiChu: FM.note,
+            ghiChu: $('#fNote') ? $('#fNote').value : FM.note,
             lines: FM.lines.map(l => ({
                 maHang: l.pid,
                 soLuongTheoSo: fsys(l),
@@ -625,7 +740,7 @@
                             maPhieuKiemKe: FM.id,
                             maKho: FM.warehouseId,
                             thoiDiemChot: FM.created,
-                            ghiChu: FM.note,
+                            ghiChu: $('#fNote') ? $('#fNote').value : FM.note,
                             lines: FM.lines.map(l => ({
                                 maHang: l.pid,
                                 soLuongTheoSo: fsys(l),

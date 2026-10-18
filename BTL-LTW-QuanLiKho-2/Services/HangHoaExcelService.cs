@@ -283,7 +283,7 @@ public class HangHoaExcelService : IHangHoaExcelService
             int lastCol = ws.Row(r).LastCellUsed()?.Address.ColumnNumber ?? 0;
             for (int col = 1; col <= lastCol; col++)
             {
-                string header = ws.Cell(r, col).GetString().Trim();
+                string header = ExcelHelper.GetCellValueAsString(ws.Cell(r, col));
                 if (string.IsNullOrEmpty(header)) continue;
                 string norm = ExcelHelper.RemoveDiacritics(header).Replace(" ", "").Replace("(*)", "").Replace("*", "");
 
@@ -327,7 +327,7 @@ public class HangHoaExcelService : IHangHoaExcelService
 
         if (startRow <= lastRow)
         {
-            string sampleCheck = ws.Cell(startRow, colMap["TenHang"]).GetString().ToLower();
+            string sampleCheck = ExcelHelper.GetCellValueAsString(ws.Cell(startRow, colMap["TenHang"])).ToLower();
             if (sampleCheck.Contains("bắt buộc") || sampleCheck.Contains("hướng dẫn") || sampleCheck.Contains("ví dụ"))
             {
                 startRow++;

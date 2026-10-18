@@ -1372,12 +1372,14 @@ body {
 .dual-cal-table td.range-start {
   background: var(--brand);
   color: #fff;
+  font-weight: 700;
   border-top-left-radius: 50%;
   border-bottom-left-radius: 50%;
 }
 .dual-cal-table td.range-end {
   background: var(--brand);
   color: #fff;
+  font-weight: 700;
   border-top-right-radius: 50%;
   border-bottom-right-radius: 50%;
 }

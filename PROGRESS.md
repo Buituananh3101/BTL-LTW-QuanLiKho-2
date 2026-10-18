@@ -1,6 +1,16 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-15 – Khắc phục triệt để lỗi hiển thị phân hệ Kiểm kho sau chuẩn hóa (Phiên 25)
+Cập nhật lần cuối: 2026-10-16 – Khắc phục lỗi không nạp dữ liệu khi mở lại bản tạm Phiếu kiểm kho (Phiên 38)
+
+---
+
+## Đang làm
+- Kiểm tra người dùng nghiệm thu chức năng mở lại và chỉnh sửa bản tạm kiểm kho.
+
+---
+
+## Việc kế tiếp
+- Tiếp tục rà soát và hoàn thiện các nghiệp vụ chứng từ kho tiếp theo (Nhập hàng, Xuất kho, Chuyển kho) dựa trên khuôn mẫu Hàng hóa và Kiểm kho.
 
 ---
 
@@ -92,6 +102,46 @@ Cập nhật lần cuối: 2026-10-15 – Khắc phục triệt để lỗi hi�
 ---
 
 ## Nhật ký phiên
+- **2026-10-16 (Phiên 38 - Sáng)**:
+  - **Sửa lỗi không nạp dữ liệu mặt hàng khi mở lại bản tạm Phiếu kiểm kho**:
+    - **Nguyên nhân**: `<script id="stockTakeConfig">` trong `_PhieuKiemKeForm.cshtml` dùng Razor nội suy chuỗi thủ công; trên Windows văn hóa `vi-VN`, các số thập phân `decimal` (`sys`, `act`, `cost`) bị in dấu phẩy `,` (`10,00`), đồng thời `JavaScriptStringEncode` sinh ký tự `\'` làm `JSON.parse` trên client bị `SyntaxError` và bảng hàng hóa kiểm kho bị rỗng. Đồng thời `PhieuKiemKeController.Edit` trả về nhầm `View("Create")`.
+    - **Khắc phục**: Dùng `System.Text.Json.JsonSerializer.Serialize` với `PropertyNamingPolicy = CamelCase` và `UnsafeRelaxedJsonEscaping` để đảm bảo 100% JSON chuẩn quốc tế; sửa `PhieuKiemKeController.Edit` trả về `View("Edit", model)`; bổ sung kiểm tra an toàn trong `phieu-kiem-ke-form.js`.
+    - Kiểm tra biên dịch: `dotnet build` 0 Errors, cú pháp JavaScript 0 lỗi.
+- **2026-10-16 (Phiên 36 - Sáng)**:
+  - **Chuẩn hóa Nút chọn Thời gian Kiểm kho khớp 100% Danh sách Hàng hóa**:
+    - **HTML & Giao diện** (`_PhieuKiemKeFilterSidebar.cshtml`):
+      + Khối 2 radio: Radio 1 (`#dateAll` / `#labelDateAll`) mặc định hiển thị "Toàn thời gian" kèm icon `bi-chevron-right`; Radio 2 (`#dateCustom` / `#labelDateCustom`) hiển thị "Tùy chỉnh" kèm icon `bi-calendar3`.
+      + Popup chọn nhanh `#popupDateQuick`: Tinh gọn chuẩn 3 cột KiotViet giống hệt Hàng hóa (Theo ngày: Hôm nay, Hôm qua; Theo tuần: Tuần này, Tuần trước, 7 ngày qua; Theo tháng: Tháng này, Tháng trước, 30 ngày qua; Pill dưới: Toàn thời gian).
+      + Popup lịch 2 tháng `#popupDateCalendar`: Tích hợp Dual Calendar 2 tháng cạnh nhau (`#dateCalBody1`, `#dateCalBody2`), dải ngày tô màu xanh (`.in-range`, `.range-start`, `.range-end`), nút chuyển tháng, phím "Hôm nay", "Bỏ qua", và "Áp dụng".
+    - **JavaScript & Tương tác** (`phieu-kiem-ke-index.js`):
+      + Tái sử dụng thư viện jQuery (`$jq = window.jQuery`) theo chuẩn `hang-hoa-index.js`.
+      + Khắc phục triệt để lỗi double-fire / synthetic click khi nhấp vào label "Tùy chỉnh", chặn đóng/mở popup chập chờn.
+      + Đồng bộ hóa định dạng ngày `YYYY-MM-DD` (`formatDateISO`) thay vì ISO UTC string, ngăn chặn sai lệch múi giờ ngày bắt đầu/kết thúc.
+      + Đồng bộ `paintFilters()`, `loadTable()`, `triggerExport()` với mã `DateFilterType` chuẩn (`ALL`, `HOM_NAY`, `HOM_QUA`, `TUAN_NAY`, `TUAN_TRUOC`, `7_NGAY`, `THANG_NAY`, `THANG_TRUOC`, `30_NGAY`, `CUSTOM`).
+    - **Backend & Specs**:
+      + Đổi giá trị mặc định của `PhieuKiemKeFilterVM.DateFilterType` thành `"ALL"` (`KiemKhoViewModels.cs`).
+      + Đồng bộ tài liệu đặc tả `docs/specs/kiem-kho.md` (< 8.000 ký tự) theo Luật 12.
+    - Kiểm tra biên dịch `dotnet build` đạt 0 lỗi.
+- **2026-10-15 (Phiên 35 - Đêm)**:
+  - **Đổi tiêu đề màn hình từ "Kiểm kho" thành "Phiếu kiểm kho" chuẩn KiotViet**:
+    - Cập nhật tiêu đề sidebar `.kiot-sidebar-title` trong `_PhieuKiemKeFilterSidebar.cshtml` thành "Phiếu kiểm kho", mobile header thành "Bộ lọc phiếu kiểm kho".
+    - Cập nhật tiêu đề trang `ViewData["Title"] = "Phiếu kiểm kho"` và mobile header `.kiot-mobile-title` trong `Index.cshtml`.
+    - Giữ nguyên nút thao tác chính `+ Kiểm kho` chuẩn mẫu KiotViet (nút thêm chứng từ).
+    - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-15 (Phiên 27 - Chiều)**:
+  - **Chuẩn hóa Bộ lọc Người tạo & Kiểu chữ Bảng Kiểm kho giống 100% Danh sách Hàng hóa**:
+    - Thay thế hoàn toàn khung `.ms` và `.mslist` cũ bằng `.kiot-multiselect-box` (`#boxNguoiTao`) và `.kiot-ms-dropdown` (`#dropdownNguoiTao`).
+    - Thẻ chọn: Hiển thị tối đa 3 thẻ `.kiot-pill-tag` màu xanh KiotViet (`#0070f4`), nút xóa `×` (`.tag-remove`); nếu chọn nhiều hơn 3 sẽ hiển thị huy hiệu `+N khác` (`.kiot-pill-more`).
+    - Dropdown: Tích hợp ô tìm kiếm sticky `.kiot-ms-search` (`Tìm người tạo...`), danh sách item `.kiot-ms-item` có checkbox bên trái và tên bên phải, tự động chuyển hướng `.drop-up` khi ở sát đáy sidebar qua `checkSidebarDropdownDirection()`.
+    - Đồng bộ màu chữ và kiểu chữ bảng Kiểm kho (`_PhieuKiemKeTable.cshtml`): Chuyển Mã kiểm kho từ màu xanh in đậm về chữ thường tiêu chuẩn, chuyển các cột số liệu (Tổng thực tế, Tổng chênh lệch, SL lệch tăng/giảm) từ in đậm và màu xanh/đỏ về kiểu chữ thường tiêu chuẩn đồng nhất với Danh sách hàng hóa.
+    - Dọn sạch các class `.ms`, `.chip`, `.mslist` thừa trong `kiem-kho.css`.
+    - Kiểm tra biên dịch `dotnet build` đạt 0 Errors.
+- **2026-10-15 (Phiên 26 - Chiều)**:
+  - **Chuẩn hóa Nút chọn Thời gian Kiểm kho giống 100% Danh sách Hàng hóa**:
+    - Thay thế 2 khối nút `.selbox` bằng 2 dòng radio `.form-check mb-1` (nhãn text + icon `bi-chevron-right` và `bi-calendar3`).
+    - Tích hợp 2 popup `.quick-date-popup` và `.dual-calendar-popup` định vị fixed bằng `getBoundingClientRect()`, khớp hoàn toàn trải nghiệm người dùng của module Hàng hóa.
+    - Bổ sung `ALL` / `TOANTHOIGIAN` vào `ResolveDateRange` trong `PhieuKiemKeController.cs`.
+    - Kiểm tra biên dịch `dotnet build` đạt 0 Errors.
 - **2026-10-15 (Phiên 25 - Chiều)**:
   - **Khắc phục Triệt để Lỗi hiển thị Phân hệ Kiểm kho sau chuẩn hóa**:
     - Thiết kế lại Dropdown chọn nhanh khoảng ngày `#quick` dọc chia 4 nhóm chuẩn KiotViet, vừa khít 100% bề rộng sidebar, cuộn mượt mà không bị `overflow: hidden` của sidebar cắt ngang.
@@ -167,6 +217,41 @@ Cập nhật lần cuối: 2026-10-15 – Khắc phục triệt để lỗi hi�
     - Kiểm tra cú pháp JS: `node -c` 0 lỗi. Đồng bộ `docs/specs/danh-sach-hang-hoa.md`.
 - **2026-10-15 (Phiên 15 - Sáng)**:
   - Tinh gọn thanh công cụ Quản lý Hàng hóa: Gỡ bỏ nút Cài đặt (`bi-gear`) trên thanh công cụ của trang Hàng hóa (`Index.cshtml`), giữ lại 2 nút tiện ích tiêu chuẩn là Tải lại bảng (`bi-arrow-clockwise`) và Trợ giúp (`bi-question-circle`).
+  - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-15 (Phiên 36 - Đêm)**:
+  - Sửa lỗi Lặp Tiêu đề Tháng trong Bộ chọn Ngày Giờ Lập Phiếu Kiểm kho (`phieu-kiem-ke-form.js`): Gỡ bỏ khối `<div class="cal-h">Tháng MM/YYYY</div>` trùng lặp trong hàm `calHTML`, giữ lại tiêu đề duy nhất chuẩn mực nằm giữa 2 nút chuyển tháng trên thanh điều hướng `.dtnav`, hiển thị ngay phía trên lưới ngày `T2 T3 T4...`, khắc phục dứt điểm hiện tượng hiển thị 2 dòng tháng liên tiếp và làm chiều cao lịch khớp hoàn hảo với khung giờ 230px bên phải.
+  - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-15 (Phiên 35 - Đêm)**:
+  - Sửa dứt điểm Lỗi Click không hiện Popup Lịch Tùy chỉnh Dual Calendar trong Kiểm kho (`phieu-kiem-ke-index.js`, `_PhieuKiemKeFilterSidebar.cshtml`):
+    - Gỡ bỏ `labelCustom.onclick` thừa gây ra synthetic double-fire click bật-tắt trong 1ms.
+    - Thêm cơ chế chống synthetic click `now - lastToggleTime < 250ms` trong `toggleFloatingPopup`.
+    - Bổ sung `if (e.target.closest('.dual-calendar-popup, .quick-date-popup')) return;` vào sự kiện click ngoài.
+  - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-15 (Phiên 34 - Đêm)**:
+  - Chuẩn hóa Giao diện Popup Lưu ý khi kiểm kho: Khắc phục lỗi popup `.pop.notes` bị co bẹp chiều ngang (~150px) khiến chữ bị ngắt vụn và chèn ép nút panel; đặt `width: 340px`, định vị `top: 44px; right: 0;`, `padding: 16px 18px`, `line-height: 1.55`, tiêu đề có icon `bi-info-circle` xanh KiotViet, đổ bóng nhẹ nhàng.
+  - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-15 (Phiên 33 - Đêm)**:
+  - Cố định độ rộng cột Tên hàng & Tự động xuống dòng trong Bảng Kiểm hàng (`_PhieuKiemKeForm.cshtml`, `kiem-kho.css`, `phieu-kiem-ke-form.js`):
+    - Đặt `table-layout: fixed;` cho `.grid-card table`.
+    - Cố định cột Tên hàng `.w-name`: `width: 280px; min-width: 280px; max-width: 280px;`, tự động xuống dòng (`word-break: break-word; overflow-wrap: anywhere; white-space: normal; line-height: 1.45;`), ngăn chặn triệt để hiện tượng tên dài không dấu cách làm giãn toác bảng.
+    - Cố định cột Mã hàng `.w-code`: `width: 120px; white-space: nowrap;`, loại bỏ class `.text-break` gây ngắt đôi mã sản phẩm.
+    - Đồng bộ độ rộng các cột số liệu chuẩn KiotViet: STT (46px), ĐVT (70px), Tồn kho (90px), Thực tế (110px), SL lệch (95px), Giá trị lệch (115px).
+    - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-15 (Phiên 32 - Đêm)**:
+  - Sửa lỗi Logic Lịch Tùy Chỉnh Dual Calendar & Chuẩn hóa đồng bộ theo Danh sách Hàng hóa (`phieu-kiem-ke-index.js`, `PhieuKiemKeController.cs`):
+    - Khắc phục lỗi lịch nhảy về năm 2000 khi chọn Tùy chỉnh lúc đang ở preset "Toàn thời gian", đồng bộ mở lịch tại tháng hiện tại.
+    - Đồng bộ hóa cơ chế chọn dải ngày 2 lần nhấp (Click range selection), phím Hôm nay, Áp dụng, Bỏ qua.
+    - Tối ưu Server-side `ResolveDateRange` xử lý chính xác `00:00:00` và hỗ trợ đầy đủ các mã bộ lọc ngày.
+    - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-15 (Phiên 31 - Đêm)**:
+  - Tinh gọn Thanh công cụ Form Kiểm kho: Gỡ bỏ nút In phiếu (`#tPrint`) trên thanh công cụ của màn hình Lập / Sửa phiếu kiểm kho ([`_PhieuKiemKeForm.cshtml`](file:///D:/CODE/BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2/Views/PhieuKiemKe/_PhieuKiemKeForm.cshtml)), giữ lại các nút tiện ích cần thiết (Nhập Excel/CSV, Ẩn/hiện cột, Lưu ý khi kiểm kho).
+  - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-15 (Phiên 28 - Đêm)**:
+  - Chuẩn hóa Chi tiết Phiếu kiểm kho bung mở inline khớp 100% mẫu KiotViet:
+    - Đổi tab `Thông tin phiếu` sang `Thông tin`; tinh giản meta bỏ hiển thị kho trùng lặp.
+    - Chuẩn hóa bảng chi tiết 5 cột (`Mã hàng`, `Tên hàng`, `Tồn kho`, `Thực tế`, `SL lệch`), bỏ cột `Giá trị lệch`.
+    - Tinh gọn textarea ghi chú và khối tổng kết phẳng 4 dòng (bỏ viền xám và bỏ dòng tổng giá trị lệch).
+    - Đồng bộ hệ thống nút hành động: Nút `Hủy` outline-secondary (kèm kiểm tra chặn hủy phiếu cân bằng kho), `Sao chép`, `Xuất file`, nút `Lưu` trắng viền xám (`bi-floppy`), và nút `In`.
   - Kiểm tra biên dịch: 0 lỗi.
 - **2026-10-15 (Phiên 22 - Sáng)**:
   - Tinh gọn cột Tên hàng (`_HangHoaTable.cshtml`):
