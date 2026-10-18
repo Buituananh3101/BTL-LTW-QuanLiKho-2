@@ -42,4 +42,6 @@ public partial class DonViCapHang
     public virtual NhomNhaCungCap? MaNhomNccNavigation { get; set; }
 
     public virtual ICollection<PhieuNhap> PhieuNhaps { get; set; } = new List<PhieuNhap>();
+
+    public virtual ICollection<PhieuTraHangNhap> PhieuTraHangNhaps { get; set; } = new List<PhieuTraHangNhap>();
 }

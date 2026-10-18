@@ -43,5 +43,9 @@ public partial class NhanVien
 
     public virtual ICollection<PhieuXuat> PhieuXuatMaNvxacNhanNavigations { get; set; } = new List<PhieuXuat>();
 
+    public virtual ICollection<PhieuTraHangNhap> PhieuTraHangNhapMaNvlapNavigations { get; set; } = new List<PhieuTraHangNhap>();
+
+    public virtual ICollection<PhieuTraHangNhap> PhieuTraHangNhapMaNvtraNavigations { get; set; } = new List<PhieuTraHangNhap>();
+
     public virtual TaiKhoan? TaiKhoan { get; set; }
 }

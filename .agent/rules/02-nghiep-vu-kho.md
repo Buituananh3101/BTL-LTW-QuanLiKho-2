@@ -19,6 +19,7 @@ Tồn kho = (Tổng Nhập đã xác nhận + Chuyển đến đã nhận + Đi�
    - Trạng thái `TrangThai = 'DA_DUYET'`.
    - `ChiTietPhieuDieuChinh.SoLuongDieuChinh > 0` → Tăng tồn kho tương ứng.
    - `ChiTietPhieuDieuChinh.SoLuongDieuChinh < 0` → Giảm tồn kho tương ứng.
+5. **Trả hàng nhập ([`PhieuTraHangNhap`](../../BTL-LTW-QuanLiKho-2/Models/PhieuTraHangNhap.cs))**: `TrangThai = 'DA_TRA_HANG'` → Trừ tồn tại `MaKho`. Hủy (`'HUY'`) tự hoàn tồn.
 
 ---
 
@@ -31,6 +32,9 @@ Các chứng từ trong hệ thống dùng mã chuỗi tiếng Việt không d�
 | **`PhieuNhap`** | `'NHAP'` | Phiếu tạm | `bg-primary` (Xanh dương) |
 | | `'DA_XAC_NHAN'` | Đã nhập kho (ảnh hưởng tồn) | `bg-success` (Xanh lá) |
 | | `'HUY'` | Đã hủy | `bg-secondary` (Xám) |
+| **`PhieuTraHangNhap`** | `'NHAP'` | Phiếu tạm | `bg-primary` |
+| | `'DA_TRA_HANG'` | Đã trả hàng (ảnh hưởng tồn) | `bg-success` |
+| | `'HUY'` | Đã hủy | `bg-secondary` |
 | **`PhieuXuat`** | `'NHAP'` | Phiếu tạm | `bg-primary` |
 | | `'DA_XAC_NHAN'` | Đã xuất kho (ảnh hưởng tồn) | `bg-success` |
 | | `'HUY'` | Đã hủy | `bg-secondary` |

@@ -1,19 +1,76 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Căn Phải Thời Gian & Cho Phép Nhập Tay / Tự Động Sinh Mã Chuyển Hàng Chuẩn Kiểm Kho (Phiên 119)
+Cập nhật lần cuối: 2026-10-18 – Cải Thiện Toàn Diện Leftmenu & Rightmenu Giao Diện Phiếu Trả Hàng Nhập (Phiên 121)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử trải nghiệm màn hình Lập/Sửa phiếu chuyển hàng (`/ChuyenKho/Create`, `/ChuyenKho/Edit`): ô Thời gian và Mã chuyển hàng căn lề phải sắc nét chuẩn Kiểm kho; ô Mã chuyển hàng cho phép nhập tay hoặc để trống tự động sinh mã `CKxxxxxx`, kiểm tra chống trùng mã thân thiện.
+- Sẵn sàng kiểm thử trải nghiệm phân hệ Trả hàng nhập (`/TraHangNhap`): Danh sách phiếu trả hàng nhập với Leftmenu MultiSelect (tag pills, hover buffer F4, mobile filter) và Form Lập/Sửa với Rightmenu trượt mượt mà F4, căn phải chuẩn 185px, nhập tay/tự động sinh mã phiếu, trừ tồn kho chính xác khi Hoàn thành.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế các luồng Chuyển kho, Xuất hủy, Nhập hàng.
-2. Xây dựng phân hệ Trả hàng nhập (Purchase Returns) theo yêu cầu.
+1. Kiểm tra trải nghiệm thực tế và luồng nghiệp vụ phân hệ Trả hàng nhập trên trình duyệt.
+2. Kiểm tra lại toàn bộ luồng chuyển kho, xuất hủy, nhập hàng, bán hàng POS để đảm bảo tính đồng bộ hệ thống.
 
 ---
+
+- **Cải Thiện Toàn Diện Leftmenu & Rightmenu Giao Diện Phiếu Trả Hàng Nhập (Phiên 121)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "tiếp tục cải thiện leftmenu rightmenu giao diện phiếu trả".
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Leftmenu (Cột lọc Sidebar trái danh sách `Index`)**:
+      * Triển khai hàm `setupMultiSelectDropdown` cho 3 bộ lọc: Người tạo (`#boxNguoiTao`), Người trả (`#boxNguoiTra`), Nhà cung cấp (`#boxNhaCungCap`).
+      * Hỗ trợ tìm kiếm realtime bên trong dropdown, render tag pills có nút xóa `×`, hiển thị `+N` khi chọn nhiều, cập nhật chấm xanh `.filter-dot` (`#dotUser`, `#dotPayer`, `#dotNcc`).
+      * Nút thò thụt sidebar `#btnToggleSidebar`: Bổ sung hover buffer chống flicker 120ms (chỉ hiện nút khi di chuột vào sidebar hoặc vào nút; khi thu gọn `sidebar-collapsed` luôn bám sát lề trái `8px`).
+      * Bổ sung phím tắt toàn cục `F4` (đóng/mở sidebar bộ lọc) và `F3` (focus ô tìm kiếm mã phiếu trả).
+      * Hỗ trợ đóng mở bộ lọc trên mobile (`#btnMobileFilter`, `#btnCloseSidebarMobile`, `#sidebarBackdrop`).
+      * Xử lý click ngoài tự động đóng các popup multiselect & advbox; gắn sự kiện nút `#resetF` khi empty state.
+    + **Rightmenu (Panel phải trên màn hình Lập/Sửa `_TraHangNhapForm.cshtml`)**:
+      * Căn lề phải sắc nét đồng bộ 185px cho toàn bộ các trường nhập liệu: Người trả & Thời gian trả (`#fDateInp` hiển thị `dd/MM/yyyy HH:mm`), Mã trả hàng nhập (`#txtDocCode`), Tiền NCC trả (`#orderPaidInput`), Giảm giá (`#orderDiscountInput`).
+      * Mã trả hàng nhập (`#txtDocCode`): Cho phép nhập tay mã tùy ý hoặc để trống tự động sinh mã `THNxxxxxx` chuẩn Kiểm kho; tự động viết hoa khi gõ; kiểm tra chống trùng lặp mã thân thiện trên server; gửi `MaPhieu` trong payload AJAX.
+      * Nút tròn `#btnToggleRightPanel` trượt mượt 0.25s cubic-bezier giữa `right: 425px` và `right: 8px` khi thu gọn; đồng bộ phím tắt `F4`.
+      * Tinh chỉnh CSS `#thnRightPanel .pr` chuẩn Kiểm kho & Chuyển kho (`border`, `padding`, `text-align: right`, `focus`).
+    + **Kiểm tra**:
+      * `node -c tra-hang-nhap-index.js` và `node -c tra-hang-nhap-form.js` đạt 0 lỗi cú pháp.
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+      * Đồng bộ đặc tả `docs/specs/tra-hang-nhap.md` (6.897 ký tự < 8.000 ký tự theo Rule 12).
+
+
+- **Xây Dựng Toàn Diện Phân Hệ Trả Hàng Nhập Chuẩn KiotViet & Prototype (Phiên 120)**:
+  - **Nhu cầu**: Người dùng cung cấp file prototype `prototype-trahangnhap.html` và yêu cầu: "lên kế hoạch lắp ráp để làm chức năng trả hàng", sau đó yêu cầu "triển khai kế hoạch".
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Cơ sở dữ liệu (Migration 14)**:
+      * Tạo file `migrations/sql/14_bo_sung_tra_hang_nhap.sql` và thực thi thành công trên SQL Server `.\SQLEXPRESS` (`QuanLyKhoPhuQuocLTW`).
+      * Tạo 2 bảng `PhieuTraHangNhap` (khóa ngoại `Kho`, `DonViCapHang`, `NhanVien`, tiền tố `THN{id:D6}`) và `ChiTietPhieuTraHangNhap` (khóa ngoại `HangHoa`, `ON DELETE CASCADE`).
+      * Cập nhật View cốt lõi `vw_BienDongKho` thêm nhánh 6 `TRA_HANG_NHAP`: khi `TrangThai = 'DA_TRA_HANG'` thì ghi nhận `SoLuongGiam = ct.SoLuong`. Khi phiếu bị hủy (`'HUY'`), View tự động loại trừ giúp hoàn lại tồn kho và công nợ NCC tức thì mà không cần sinh bút toán đảo.
+    + **Entity Framework & Models**:
+      * Tạo `Models/PhieuTraHangNhap.cs` và `Models/ChiTietPhieuTraHangNhap.cs`.
+      * Bổ sung navigation properties vào `Kho.cs`, `DonViCapHang.cs`, `NhanVien.cs`, `HangHoa.cs`.
+      * Cấu hình ánh xạ Fluent API và đăng ký `DbSet` trong `QuanLyKhoPhuQuocLtwContext.cs`.
+    + **Helper & ViewModels**:
+      * Thêm `FormatMaTraHangNhap` vào `Services/MaChungTuHelper.cs`.
+      * Xây dựng trọn bộ `ViewModels/TraHangNhap/TraHangNhapViewModels.cs` (`TraHangNhapIndexVM`, `TraHangNhapFilterVM`, `TraHangNhapListItemVM`, `TraHangNhapFormVM`, `TraHangNhapLineVM`, `SaveTraHangNhapRequest`, `QuickUpdateTraHangNoteRequest`).
+    + **Controller**:
+      * Xây dựng `Controllers/TraHangNhapController.cs` kế thừa `BaseKhoController`.
+      * Đầy đủ action: `Index`, `Filter` (AJAX phân trang/lọc), `Create`, `Edit`, `Details`, `Save` (bọc transaction `BeginTransactionAsync`, kiểm tra chặn xuất âm kho bằng `ITonKhoService.KiemTraXuatKhoAsync`, ghi `NhatKyThaoTac`), `Cancel`, `QuickUpdateNote`, `ToggleFavorite`, `SearchProduct`, `SearchSupplier`, `DownloadTemplate`, `ExportExcel`.
+    + **Giao diện & Views**:
+      * `_MainMenu.cshtml`: Kích hoạt liên kết menu `asp-controller="TraHangNhap" asp-action="Index"`.
+      * `Views/TraHangNhap/Index.cshtml`: Màn hình danh sách với F3 tìm kiếm, popup tìm kiếm nâng cao `#advbox`, nút xuất file, tùy chọn cột.
+      * `Views/TraHangNhap/_TraHangNhapFilterSidebar.cshtml`: Sidebar lọc thời gian `_KiotDateFilter`, checkbox trạng thái, dropdown người tạo, người trả, nhà cung cấp.
+      * `Views/TraHangNhap/_TraHangNhapTable.cshtml`: Bảng cuộn 2 chiều độc lập, hàng tổng hợp cố định, drawer chi tiết inline 992px, sub-filter và các nút tác vụ (Hủy, Sao chép, In, Mở sửa).
+      * `Views/TraHangNhap/_TraHangNhapForm.cshtml`, `Create.cshtml`, `Edit.cshtml`, `Details.cshtml`: Giao diện 2 cột toàn màn hình chuẩn KiotViet:
+        - Cột trái: Bảng hàng hóa, tìm kiếm F3 autocomplete, cảnh báo đỏ `.over` khi vượt tồn, nhập Excel/CSV, tải file mẫu `MauTraHangNhap.csv`.
+        - Cột phải: Panel 440px cố định trượt mượt mà 0.25s qua phím F4 (nút `.panel-toggle`), popup chọn ngày giờ `.dtpop` chuẩn Kiểm tồn, chọn NCC chip + modal tạo nhanh, giảm giá VND/%, tiền NCC trả (F8), nút ghim đáy Lưu tạm (F9) và Hoàn thành (F10).
+    + **CSS & JavaScript**:
+      * `wwwroot/css/tra-hang-nhap.css`: Định kiểu toàn diện cho danh sách, bảng, drawer chi tiết và form 2 cột.
+      * `wwwroot/js/tra-hang-nhap-index.js`: Xử lý AJAX filter, sorting, bookmark, chọn cột, drawer, in phiếu, cập nhật ghi chú nhanh.
+      * `wwwroot/js/tra-hang-nhap-form.js`: Xử lý bảng hàng trả, tìm F3, tính toán tổng tiền, F4 trượt mượt, popup lịch `.dtpop`, nạp CSV, phím tắt F3/F4/F8/F9/F10.
+    + **Kiểm tra & Đồng bộ tài liệu**:
+      * Cú pháp JavaScript: `node -c tra-hang-nhap-index.js` và `node -c tra-hang-nhap-form.js` đạt 0 lỗi.
+      * Biên dịch dự án: `dotnet build -t:Compile` đạt **Build succeeded. 0 Warning(s) nghiệp vụ, 0 Error(s)**.
+      * Tạo tài liệu đặc tả `docs/specs/tra-hang-nhap.md` (6.468 ký tự < 8.000 ký tự theo Rule 12).
+      * Đồng bộ `docs/quyet-dinh.md` (Phiên 119) và `.agent/rules/02-nghiep-vu-kho.md` (7.983 ký tự < 8.000 ký tự theo Rule 12).
+
 
 - **Căn Phải Thời Gian & Cho Phép Nhập Tay / Tự Động Sinh Mã Chuyển Hàng Chuẩn Kiểm Kho (Phiên 119)**:
   - **Nhu cầu**: Người dùng phản ánh: "trong phần chuyển kho, phần thời gian và mã chuyển hàng để dịch sang phải. phần mã chuyển hàng sửa thành tự động và nhâp tay nếu ko nhập tay thì tự động giống kiểm kho".
