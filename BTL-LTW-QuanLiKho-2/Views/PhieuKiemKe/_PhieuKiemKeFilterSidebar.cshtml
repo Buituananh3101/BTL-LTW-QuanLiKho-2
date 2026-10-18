@@ -1,0 +1,122 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.PhieuKiemKeIndexVM
+
+<!-- CỘT BÊN TRÁI: TIÊU ĐỀ "KIỂM KHO" + 3 KHỐI BỘ LỌC KIOTVIET -->
+<aside class="kiot-sidebar-col" id="sidebarFilterCol">
+    <!-- Header cho sidebar khi mở ở chế độ mobile/zoom in -->
+    <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+        <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc kiểm kho</div>
+        <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
+    </div>
+
+    <!-- Tiêu đề sidebar Desktop -->
+    <div class="kiot-sidebar-title d-none d-lg-flex">
+        Kiểm kho
+    </div>
+
+    <div class="kiot-filter-box" id="side">
+        <!-- 1. Thời gian tạo -->
+        <div class="f-block position-relative">
+            <h6>Thời gian <span class="filter-dot" id="dotDate"></span></h6>
+            <div class="radrow mb-2 d-flex align-items-center gap-2">
+                <input class="form-check-input mt-0" type="radio" name="dm" id="rdPreset" checked>
+                <div class="position-relative flex-grow-1">
+                    <button type="button" class="selbox w-100 d-flex justify-content-between align-items-center" id="presetBox">
+                        <span id="presetTxt">Tháng này</span>
+                        <i class="bi bi-chevron-down text-muted small"></i>
+                    </button>
+
+                    <!-- Dropdown chọn nhanh khoảng ngày (vừa khít 100% chiều rộng) -->
+                    <div class="pop quick shadow" id="quick" style="top: calc(100% + 4px); left: 0; right: 0; width: 100%;">
+                        <div class="quick-group">
+                            <div class="quick-group-title">Theo ngày</div>
+                            <button type="button" data-p="homnay">Hôm nay</button>
+                            <button type="button" data-p="homqua">Hôm qua</button>
+                        </div>
+                        <div class="quick-group">
+                            <div class="quick-group-title">Theo tuần</div>
+                            <button type="button" data-p="tuannay">Tuần này</button>
+                            <button type="button" data-p="tuantruoc">Tuần trước</button>
+                            <button type="button" data-p="7ngay">7 ngày qua</button>
+                        </div>
+                        <div class="quick-group">
+                            <div class="quick-group-title">Theo tháng</div>
+                            <button type="button" data-p="thangnay" class="cur">Tháng này</button>
+                            <button type="button" data-p="thangtruoc">Tháng trước</button>
+                            <button type="button" data-p="30ngay">30 ngày qua</button>
+                        </div>
+                        <div class="quick-group">
+                            <div class="quick-group-title">Theo quý & năm</div>
+                            <button type="button" data-p="quynay">Quý này</button>
+                            <button type="button" data-p="quytruoc">Quý trước</button>
+                            <button type="button" data-p="namnay">Năm nay</button>
+                            <button type="button" data-p="namtruoc">Năm trước</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="radrow d-flex align-items-center gap-2">
+                <input class="form-check-input mt-0" type="radio" name="dm" id="rdCustom">
+                <button type="button" class="selbox flex-grow-1 d-flex justify-content-between align-items-center" id="customBox">
+                    <span id="customTxt">Tùy chỉnh</span>
+                    <i class="bi bi-calendar3 text-muted small"></i>
+                </button>
+            </div>
+
+            <!-- Khối nhập khoảng ngày tùy chỉnh vừa vặn trong sidebar -->
+            <div class="custom-date-box mt-2 p-2 bg-light rounded border" id="customDateWrap" style="display: none;">
+                <div class="mb-1">
+                    <label class="small text-muted mb-0" style="font-size: 11.5px;">Từ ngày</label>
+                    <input type="date" class="form-control form-control-sm" id="inpFromDate">
+                </div>
+                <div class="mb-2">
+                    <label class="small text-muted mb-0" style="font-size: 11.5px;">Đến ngày</label>
+                    <input type="date" class="form-control form-control-sm" id="inpToDate">
+                </div>
+                <button type="button" class="btn btn-primary btn-sm w-100" id="btnApplyCustomDate">Áp dụng</button>
+            </div>
+
+            <!-- Fallback container ẩn cho logic lịch cũ nếu cần -->
+            <div class="pop rangepop" id="rangePop" style="display: none;"></div>
+        </div>
+
+        <!-- 2. Trạng thái chứng từ -->
+        <div class="f-block position-relative">
+            <h6>Trạng thái <span class="filter-dot" id="dotSt"></span></h6>
+            <div class="d-flex flex-column gap-2 small">
+                <label class="form-check-label d-flex align-items-center gap-2">
+                    <input class="form-check-input mt-0" type="checkbox" data-s="NHAP" @(Model.Filter.Statuses.Contains("NHAP") ? "checked" : "")> 
+                    <span>Phiếu tạm</span>
+                </label>
+                <label class="form-check-label d-flex align-items-center gap-2">
+                    <input class="form-check-input mt-0" type="checkbox" data-s="DA_DIEU_CHINH" @(Model.Filter.Statuses.Contains("DA_DIEU_CHINH") ? "checked" : "")> 
+                    <span>Đã cân bằng kho</span>
+                </label>
+                <label class="form-check-label d-flex align-items-center gap-2">
+                    <input class="form-check-input mt-0" type="checkbox" data-s="HUY" @(Model.Filter.Statuses.Contains("HUY") ? "checked" : "")> 
+                    <span>Đã hủy</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 3. Người tạo -->
+        <div class="f-block position-relative">
+            <h6>Người tạo <span class="filter-dot" id="dotUser"></span></h6>
+            <div class="position-relative">
+                <div class="ms" id="ms">
+                    <span id="msChips"></span>
+                    <input id="msIn" placeholder="Chọn người tạo" autocomplete="off" class="form-control form-control-sm">
+                </div>
+                <div class="pop mslist shadow" id="msList" style="top: calc(100% + 4px); left: 0; right: 0; width: 100%;">
+                    @foreach (var c in Model.Creators)
+                    {
+                        <button type="button" data-u-id="@c.MaNv" data-u-name="@c.TenNv" class="d-flex justify-content-between align-items-center">
+                            <span>@c.TenNv</span>
+                            <i class="bi bi-check2 d-none text-primary fw-bold"></i>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</aside>

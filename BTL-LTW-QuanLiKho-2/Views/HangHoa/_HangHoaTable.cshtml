@@ -209,11 +209,18 @@
                                                 <div class="text-muted small mb-2">
                                                     Nhóm hàng: <span class="text-dark fw-semibold">@(!string.IsNullOrEmpty(item.TenNhom) && item.TenNhom != "---" ? item.TenNhom : "Chưa có nhóm")</span>
                                                 </div>
-                                                <div class="d-flex flex-wrap gap-2">
-                                                    <span class="badge-kiot-tag">Hàng hóa thường</span>
-                                                    <span class="badge-kiot-tag">Bán trực tiếp</span>
-                                                    <span class="badge-kiot-tag badge-kiot-warning">Không tích điểm</span>
-                                                </div>
+                                                @if (item.ThuocTinhs.Any())
+                                                {
+                                                    <div class="product-detail-attrs d-flex flex-wrap gap-1 mt-1">
+                                                        @foreach (var attr in item.ThuocTinhs)
+                                                        {
+                                                            <span class="kiot-attr-chip" title="@attr.Ten: @attr.GiaTri">
+                                                                <span class="chip-label">@attr.Ten</span>
+                                                                <span class="chip-value">@attr.GiaTri</span>
+                                                            </span>
+                                                        }
+                                                    </div>
+                                                }
                                             </div>
                                         </div>
 
@@ -281,20 +288,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- Danh sách Thuộc tính động -->
-                                        @if (item.ThuocTinhs.Any())
-                                        {
-                                            <div class="mb-3">
-                                                <div class="d-flex flex-wrap gap-2">
-                                                    @foreach (var attr in item.ThuocTinhs)
-                                                    {
-                                                        <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 12px;">
-                                                            <strong class="text-secondary">@attr.Ten:</strong> @attr.GiaTri
-                                                        </span>
-                                                    }
-                                                </div>
-                                            </div>
-                                        }
+
 
                                         <!-- Thanh nút thao tác cuối dòng chi tiết -->
                                         <div class="d-flex justify-content-between align-items-center pt-3 border-top product-detail-footer">

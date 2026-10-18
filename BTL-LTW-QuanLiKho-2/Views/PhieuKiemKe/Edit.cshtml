@@ -1,0 +1,12 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.PhieuKiemKeFormVM
+@{
+    ViewData["Title"] = "Sửa phiếu kiểm kho " + Model.MaPhieuHienThi;
+}
+
+@await Html.PartialAsync("_PhieuKiemKeForm", Model)
+
+@section Scripts {
+    <!-- Thư viện SheetJS đọc Excel phía Client (tùy chọn) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="~/js/phieu-kiem-ke-form.js" asp-append-version="true"></script>
+}
