@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using BTL_LTW_QuanLiKho_2.Models;
 using BTL_LTW_QuanLiKho_2.ViewModels;
 using BTL_LTW_QuanLiKho_2.Services;
+using BTL_LTW_QuanLiKho_2.Helpers;
+using ClosedXML.Excel;
 
 namespace BTL_LTW_QuanLiKho_2.Controllers;
 
@@ -25,56 +27,60 @@ public class PhieuKiemKeController : BaseKhoController
 
     private (DateTime fromDate, DateTime toDate) ResolveDateRange(string? filterType, DateTime? customFrom, DateTime? customTo)
     {
-        var now = DateTime.Now;
-        var today = now.Date;
-
-        return (filterType ?? "").ToUpper() switch
-        {
-            "ALL" or "TOANTHOIGIAN" => (new DateTime(2000, 1, 1), now.AddYears(10)),
-            "TODAY" or "HOMNAY" or "HOM_NAY" => (today, today.AddDays(1).AddTicks(-1)),
-            "YESTERDAY" or "HOMQUA" or "HOM_QUA" => (today.AddDays(-1), today.AddTicks(-1)),
-            "THIS_WEEK" or "TUANNAY" or "TUAN_NAY" =>
-                (today.AddDays(-(int)(today.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)today.DayOfWeek - 1)),
-                 today.AddDays(7 - (today.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)today.DayOfWeek)).AddDays(1).AddTicks(-1)),
-            "LAST_WEEK" or "TUANTRUOC" or "TUAN_TRUOC" =>
-                (today.AddDays(-(int)(today.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)today.DayOfWeek - 1) - 7),
-                 today.AddDays(-(int)(today.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)today.DayOfWeek - 1)).AddTicks(-1)),
-            "LAST_7_DAYS" or "7NGAY" or "7_NGAY" => (today.AddDays(-6), now),
-            "THIS_MONTH" or "THANGNAY" or "THANG_NAY" => (new DateTime(now.Year, now.Month, 1), new DateTime(now.Year, now.Month, 1).AddMonths(1).AddTicks(-1)),
-            "LAST_MONTH" or "THANGTRUOC" or "THANG_TRUOC" =>
-                (new DateTime(now.Year, now.Month, 1).AddMonths(-1),
-                 new DateTime(now.Year, now.Month, 1).AddTicks(-1)),
-            "LAST_30_DAYS" or "30NGAY" or "30_NGAY" => (today.AddDays(-29), now),
-            "THIS_QUARTER" or "QUYNAY" or "QUY_NAY" =>
-            (
-                new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1),
-                new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1).AddMonths(3).AddTicks(-1)
-            ),
-            "LAST_QUARTER" or "QUYTRUOC" or "QUY_TRUOC" =>
-            (
-                new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1).AddMonths(-3),
-                new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1).AddTicks(-1)
-            ),
-            "THIS_YEAR" or "NAMNAY" or "NAM_NAY" => (new DateTime(now.Year, 1, 1), new DateTime(now.Year, 12, 31, 23, 59, 59)),
-            "LAST_YEAR" or "NAMTRUOC" or "NAM_TRUOC" => (new DateTime(now.Year - 1, 1, 1), new DateTime(now.Year - 1, 12, 31, 23, 59, 59)),
-            "CUSTOM" =>
-            (
-                customFrom.HasValue ? customFrom.Value.ToLocalTime().Date : new DateTime(now.Year, now.Month, 1),
-                customTo.HasValue ? customTo.Value.ToLocalTime().Date.AddDays(1).AddTicks(-1) : now
-            ),
-            _ => (
-                customFrom.HasValue && customTo.HasValue
-                    ? (customFrom.Value.ToLocalTime().Date, customTo.Value.ToLocalTime().Date.AddDays(1).AddTicks(-1))
-                    : (new DateTime(now.Year, now.Month, 1), new DateTime(now.Year, now.Month, 1).AddMonths(1).AddTicks(-1))
-            )
-        };
+        return DateRangeHelper.Resolve(filterType, customFrom, customTo);
     }
+
 
     // GET: PhieuKiemKe/Index
     public async Task<IActionResult> Index(PhieuKiemKeFilterVM filter)
     {
         var model = await BuildIndexViewModel(filter);
         return View(model);
+    }
+
+    // GET: PhieuKiemKe/GetNextCode
+    [HttpGet]
+    public async Task<IActionResult> GetNextCode()
+    {
+        var code = await SinhMaPhieuTuDongAsync();
+        return Json(new { success = true, code });
+    }
+
+    private async Task<string> SinhMaPhieuTuDongAsync()
+    {
+        var existingCodes = await _context.PhieuKiemKes
+            .Where(p => p.MaPhieu != null && p.MaPhieu.StartsWith("PKK"))
+            .Select(p => p.MaPhieu!)
+            .ToListAsync();
+
+        int maxNum = 0;
+        foreach (var code in existingCodes)
+        {
+            if (code.Length > 3 && int.TryParse(code[3..], out int num))
+            {
+                if (num > maxNum) maxNum = num;
+            }
+        }
+
+        int maxId = await _context.PhieuKiemKes.MaxAsync(p => (int?)p.MaPhieuKiemKe) ?? 0;
+        int nextNum = Math.Max(maxNum, maxId) + 1;
+        return MaChungTuHelper.FormatMaKiemKe(nextNum);
+    }
+
+    // AJAX Action bật/tắt đánh dấu sao phiếu kiểm kho (giống HangHoa)
+    [AcceptVerbs("GET", "POST")]
+    public async Task<IActionResult> ToggleFavorite(int id)
+    {
+        var item = await _context.PhieuKiemKes.FindAsync(id);
+        if (item == null)
+        {
+            return NotFound(new { success = false, message = "Không tìm thấy phiếu kiểm kho." });
+        }
+
+        item.DaDanhDau = !item.DaDanhDau;
+        await _context.SaveChangesAsync();
+
+        return Json(new { success = true, isFavorite = item.DaDanhDau, maPhieuKiemKe = item.MaPhieuKiemKe });
     }
 
     // GET: PhieuKiemKe/Filter (AJAX partial)
@@ -131,30 +137,30 @@ public class PhieuKiemKeController : BaseKhoController
             query = query.Where(p => p.MaNvlap == filter.CreatorId.Value);
         }
 
+        // Lọc theo đánh dấu sao (Favorite / Starred)
+        if (filter.DaDanhDau)
+        {
+            query = query.Where(p => p.DaDanhDau);
+        }
+
         // Tìm kiếm mã hoặc ghi chú
         if (!string.IsNullOrWhiteSpace(filter.Q))
         {
             var q = filter.Q.Trim();
-            // Cho phép tìm theo số ID (ví dụ 1, 2) hoặc mã hiển thị PKK000001
+            // Cho phép tìm theo số ID (ví dụ 1, 2) hoặc mã hiển thị PKK000001 hoặc mã nhập tay
             if (int.TryParse(q.Replace("PKK", "").TrimStart('0'), out int searchId))
             {
-                query = query.Where(p => p.MaPhieuKiemKe == searchId || (p.GhiChu != null && p.GhiChu.Contains(q)));
+                query = query.Where(p => p.MaPhieuKiemKe == searchId || (p.MaPhieu != null && p.MaPhieu.Contains(q)) || (p.GhiChu != null && p.GhiChu.Contains(q)));
             }
             else
             {
-                query = query.Where(p => p.GhiChu != null && p.GhiChu.Contains(q));
+                query = query.Where(p => (p.MaPhieu != null && p.MaPhieu.Contains(q)) || (p.GhiChu != null && p.GhiChu.Contains(q)));
             }
         }
 
-        int totalCount = await query.CountAsync();
+        var rawEntities = await query.ToListAsync();
 
-        var pagedItems = await query
-            .OrderByDescending(p => p.ThoiDiemChot)
-            .Skip((filter.Page - 1) * filter.PageSize)
-            .Take(filter.PageSize)
-            .ToListAsync();
-
-        var listItems = pagedItems.Select(p =>
+        var allListItems = rawEntities.Select(p =>
         {
             var details = p.ChiTietPhieuKiemKes.ToList();
             var tongThucTe = details.Where(d => d.SoLuongThucTe.HasValue).Sum(d => d.SoLuongThucTe!.Value);
@@ -182,6 +188,7 @@ public class PhieuKiemKeController : BaseKhoController
             return new PhieuKiemKeListItemVM
             {
                 MaPhieuKiemKe = p.MaPhieuKiemKe,
+                MaPhieu = p.MaPhieu,
                 ThoiDiemChot = p.ThoiDiemChot,
                 NgayCanBang = ngayCanBang,
                 TrangThai = p.TrangThai,
@@ -195,9 +202,87 @@ public class PhieuKiemKeController : BaseKhoController
                 SlLechTang = slLechTang,
                 SlLechGiam = slLechGiam,
                 TongGiaTriLech = tongGiaTriLech,
+                DaDanhDau = p.DaDanhDau,
                 Lines = lines
             };
         }).ToList();
+
+        // Sắp xếp cột 3 trạng thái (ASC, DESC, None) tương tự Danh sách hàng hóa
+        if (!string.IsNullOrWhiteSpace(filter.SortBy) && !string.IsNullOrWhiteSpace(filter.SortDir))
+        {
+            bool isAsc = string.Equals(filter.SortDir, "asc", StringComparison.OrdinalIgnoreCase);
+            switch (filter.SortBy.Trim().ToLower())
+            {
+                case "ma":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.MaPhieuHienThi).ToList()
+                        : allListItems.OrderByDescending(x => x.MaPhieuHienThi).ToList();
+                    break;
+                case "tg":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.ThoiDiemChot).ToList()
+                        : allListItems.OrderByDescending(x => x.ThoiDiemChot).ToList();
+                    break;
+                case "tt":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.TongThucTe).ToList()
+                        : allListItems.OrderByDescending(x => x.TongThucTe).ToList();
+                    break;
+                case "cl":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.TongChenhLech).ToList()
+                        : allListItems.OrderByDescending(x => x.TongChenhLech).ToList();
+                    break;
+                case "tang":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.SlLechTang).ToList()
+                        : allListItems.OrderByDescending(x => x.SlLechTang).ToList();
+                    break;
+                case "giam":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.SlLechGiam).ToList()
+                        : allListItems.OrderByDescending(x => x.SlLechGiam).ToList();
+                    break;
+                case "cb":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.NgayCanBang ?? DateTime.MinValue).ToList()
+                        : allListItems.OrderByDescending(x => x.NgayCanBang ?? DateTime.MinValue).ToList();
+                    break;
+                case "slt":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.TongThucTe).ToList()
+                        : allListItems.OrderByDescending(x => x.TongThucTe).ToList();
+                    break;
+                case "ghi":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.GhiChu ?? "").ToList()
+                        : allListItems.OrderByDescending(x => x.GhiChu ?? "").ToList();
+                    break;
+                case "st":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.TenTrangThai).ToList()
+                        : allListItems.OrderByDescending(x => x.TenTrangThai).ToList();
+                    break;
+                case "kho":
+                    allListItems = isAsc
+                        ? allListItems.OrderBy(x => x.TenKho).ToList()
+                        : allListItems.OrderByDescending(x => x.TenKho).ToList();
+                    break;
+                default:
+                    allListItems = allListItems.OrderByDescending(x => x.ThoiDiemChot).ToList();
+                    break;
+            }
+        }
+        else
+        {
+            allListItems = allListItems.OrderByDescending(x => x.ThoiDiemChot).ToList();
+        }
+
+        int totalCount = allListItems.Count;
+        var pagedItems = allListItems
+            .Skip((filter.Page - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToList();
 
         var warehouses = await _context.Khos
             .Where(k => k.TrangThai == "HOAT_DONG")
@@ -216,12 +301,14 @@ public class PhieuKiemKeController : BaseKhoController
         return new PhieuKiemKeIndexVM
         {
             Filter = filter,
-            Items = listItems,
+            Items = pagedItems,
             TotalCount = totalCount,
             CurrentWarehouseId = currentWhId,
             CurrentWarehouseName = currentWh?.TenKho ?? "Kho trung tâm",
             Warehouses = warehouses,
-            Creators = creators
+            Creators = creators,
+            SortBy = filter.SortBy,
+            SortDir = filter.SortDir
         };
     }
 
@@ -276,6 +363,7 @@ public class PhieuKiemKeController : BaseKhoController
         var model = new PhieuKiemKeFormVM
         {
             MaPhieuKiemKe = 0,
+            MaPhieu = "",
             MaKho = whId,
             TenKho = kho?.TenKho ?? $"Kho {whId}",
             MaNvlap = userId,
@@ -339,6 +427,7 @@ public class PhieuKiemKeController : BaseKhoController
         var model = new PhieuKiemKeFormVM
         {
             MaPhieuKiemKe = pkk.MaPhieuKiemKe,
+            MaPhieu = pkk.MaPhieu,
             MaKho = pkk.MaKho,
             TenKho = pkk.MaKhoNavigation?.TenKho ?? $"Kho {pkk.MaKho}",
             MaNvlap = pkk.MaNvlap,
@@ -387,6 +476,7 @@ public class PhieuKiemKeController : BaseKhoController
         var model = new PhieuKiemKeFormVM
         {
             MaPhieuKiemKe = pkk.MaPhieuKiemKe,
+            MaPhieu = pkk.MaPhieu,
             MaKho = pkk.MaKho,
             TenKho = pkk.MaKhoNavigation?.TenKho ?? $"Kho {pkk.MaKho}",
             MaNvlap = pkk.MaNvlap,
@@ -453,6 +543,27 @@ public class PhieuKiemKeController : BaseKhoController
                 await _context.SaveChangesAsync();
             }
 
+            // Xử lý mã kiểm kho (tự động hoặc nhập tay)
+            string codeToSet;
+            if (!string.IsNullOrWhiteSpace(req.MaPhieu))
+            {
+                codeToSet = req.MaPhieu.Trim().ToUpper();
+                bool exists = await _context.PhieuKiemKes.AnyAsync(p => p.MaPhieu == codeToSet && p.MaPhieuKiemKe != pkk.MaPhieuKiemKe);
+                if (exists)
+                {
+                    return BadRequest(new { success = false, message = $"Mã kiểm kho '{codeToSet}' đã tồn tại trong hệ thống. Vui lòng chọn mã khác." });
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(pkk.MaPhieu))
+            {
+                codeToSet = pkk.MaPhieu;
+            }
+            else
+            {
+                codeToSet = await SinhMaPhieuTuDongAsync();
+            }
+            pkk.MaPhieu = codeToSet;
+
             // Thêm chi tiết và đóng băng đơn giá chốt
             var hangIds = req.Lines.Select(l => l.MaHang).Distinct().ToList();
             var hangMap = await _context.HangHoas
@@ -480,7 +591,8 @@ public class PhieuKiemKeController : BaseKhoController
             {
                 success = true,
                 id = pkk.MaPhieuKiemKe,
-                code = MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe),
+                code = pkk.MaPhieu ?? MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe),
+                maPhieu = pkk.MaPhieu ?? MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe),
                 message = "Lưu tạm phiếu kiểm kho thành công!"
             });
         }
@@ -547,6 +659,27 @@ public class PhieuKiemKeController : BaseKhoController
                 _context.PhieuKiemKes.Add(pkk);
                 await _context.SaveChangesAsync();
             }
+
+            // Xử lý mã kiểm kho (tự động hoặc nhập tay)
+            string codeToSet;
+            if (!string.IsNullOrWhiteSpace(req.MaPhieu))
+            {
+                codeToSet = req.MaPhieu.Trim().ToUpper();
+                bool exists = await _context.PhieuKiemKes.AnyAsync(p => p.MaPhieu == codeToSet && p.MaPhieuKiemKe != pkk.MaPhieuKiemKe);
+                if (exists)
+                {
+                    return BadRequest(new { success = false, message = $"Mã kiểm kho '{codeToSet}' đã tồn tại trong hệ thống. Vui lòng chọn mã khác." });
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(pkk.MaPhieu))
+            {
+                codeToSet = pkk.MaPhieu;
+            }
+            else
+            {
+                codeToSet = await SinhMaPhieuTuDongAsync();
+            }
+            pkk.MaPhieu = codeToSet;
 
             // Đọc lại tồn kho thực tế hiện tại từ vw_TonKhoHienTai
             var stockMap = await _context.VwTonKhoHienTais
@@ -628,7 +761,8 @@ public class PhieuKiemKeController : BaseKhoController
             {
                 success = true,
                 id = pkk.MaPhieuKiemKe,
-                code = MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe),
+                code = pkk.MaPhieu ?? MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe),
+                maPhieu = pkk.MaPhieu ?? MaChungTuHelper.FormatMaKiemKe(pkk.MaPhieuKiemKe),
                 message = "Cân bằng kho thành công! Số lượng tồn kho đã được cập nhật chính xác."
             });
         }
@@ -843,39 +977,284 @@ public class PhieuKiemKeController : BaseKhoController
         });
     }
 
-    // GET: PhieuKiemKe/Export?type=list|detail
+    // GET: PhieuKiemKe/Export?type=list|detail&id=...
     [HttpGet]
-    public async Task<IActionResult> Export(string type, PhieuKiemKeFilterVM filter)
+    public async Task<IActionResult> Export(string? type, PhieuKiemKeFilterVM filter, int? id = null, string? format = "excel")
     {
+        if (id.HasValue && id.Value > 0)
+        {
+            filter.Q = null;
+            filter.Statuses = new();
+            filter.DateFilterType = "ALL";
+            filter.WarehouseId = null;
+        }
+
+        filter.Page = 1;
         filter.PageSize = 10000;
         var model = await BuildIndexViewModel(filter);
 
-        var csv = new System.Text.StringBuilder();
-        csv.AppendLine("\uFEFF"); // UTF-8 BOM
-
-        if (type == "detail")
+        if (id.HasValue && id.Value > 0)
         {
-            csv.AppendLine("Mã kiểm kho,Mã hàng,Tên hàng,Tồn kho,Thực tế,SL lệch,Giá trị lệch");
+            model.Items = model.Items.Where(p => p.MaPhieuKiemKe == id.Value).ToList();
+        }
+
+        bool isDetail = string.Equals(type, "detail", StringComparison.OrdinalIgnoreCase);
+
+        // Trường hợp người dùng yêu cầu rõ định dạng CSV qua query string (?format=csv)
+        if (string.Equals(format, "csv", StringComparison.OrdinalIgnoreCase))
+        {
+            var csv = new System.Text.StringBuilder();
+
+            if (isDetail)
+            {
+                csv.AppendLine("STT,Mã kiểm kho,Thời gian kiểm,Kho kiểm,Người tạo,Trạng thái,Mã hàng,Tên hàng,Đơn vị tính,Tồn kho,Thực tế,SL lệch,Đơn giá,Giá trị lệch,Ngày cân bằng,Ghi chú");
+                int stt = 1;
+                foreach (var item in model.Items)
+                {
+                    if (item.Lines.Any())
+                    {
+                        foreach (var line in item.Lines)
+                        {
+                            var diff = line.SlChenhLech;
+                            var valDiff = line.GiaTriLech;
+                            csv.AppendLine($"{stt++},\"{EscapeCsv(item.MaPhieuHienThi)}\",\"{item.ThoiDiemChot:dd/MM/yyyy HH:mm}\",\"{EscapeCsv(item.TenKho)}\",\"{EscapeCsv(item.TenNguoiLap)}\",\"{EscapeCsv(item.TenTrangThai)}\",\"{EscapeCsv(line.MaHangNoiBo)}\",\"{EscapeCsv(line.TenHang)}\",\"{EscapeCsv(line.TenDvt)}\",{line.SoLuongTheoSo},{(line.SoLuongThucTe.HasValue ? line.SoLuongThucTe.Value.ToString() : "")},{(diff.HasValue ? diff.Value.ToString() : "")},{line.DonGia},{(valDiff.HasValue ? valDiff.Value.ToString() : "")},\"{(item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "")}\",\"{EscapeCsv(item.GhiChu)}\"");
+                        }
+                    }
+                    else
+                    {
+                        csv.AppendLine($"{stt++},\"{EscapeCsv(item.MaPhieuHienThi)}\",\"{item.ThoiDiemChot:dd/MM/yyyy HH:mm}\",\"{EscapeCsv(item.TenKho)}\",\"{EscapeCsv(item.TenNguoiLap)}\",\"{EscapeCsv(item.TenTrangThai)}\",\"\",\"\",\"\",0,\"\",\"\",0,\"\",\"{(item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "")}\",\"{EscapeCsv(item.GhiChu)}\"");
+                    }
+                }
+                var bytes = System.Text.Encoding.UTF8.GetPreamble().Concat(System.Text.Encoding.UTF8.GetBytes(csv.ToString())).ToArray();
+                return File(bytes, "text/csv; charset=utf-8", $"ChiTietKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.csv");
+            }
+            else
+            {
+                csv.AppendLine("STT,Mã kiểm kho,Thời gian kiểm,Kho kiểm,Người tạo,Tổng thực tế,Tổng chênh lệch,SL lệch tăng,SL lệch giảm,Tổng giá trị lệch,Ngày cân bằng,Trạng thái,Ghi chú");
+                int stt = 1;
+                foreach (var item in model.Items)
+                {
+                    csv.AppendLine($"{stt++},\"{EscapeCsv(item.MaPhieuHienThi)}\",\"{item.ThoiDiemChot:dd/MM/yyyy HH:mm}\",\"{EscapeCsv(item.TenKho)}\",\"{EscapeCsv(item.TenNguoiLap)}\",{item.TongThucTe},{item.TongChenhLech},{item.SlLechTang},{item.SlLechGiam},{item.TongGiaTriLech},\"{(item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "")}\",\"{EscapeCsv(item.TenTrangThai)}\",\"{EscapeCsv(item.GhiChu)}\"");
+                }
+                var bytes = System.Text.Encoding.UTF8.GetPreamble().Concat(System.Text.Encoding.UTF8.GetBytes(csv.ToString())).ToArray();
+                return File(bytes, "text/csv; charset=utf-8", $"DanhSachKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.csv");
+            }
+        }
+
+        // Mặc định xuất file Excel (.xlsx) chuẩn KiotViet bằng ClosedXML
+        using var workbook = new XLWorkbook();
+        if (isDetail)
+        {
+            var ws = workbook.Worksheets.Add("ChiTietKiemKho");
+            var headers = new[]
+            {
+                "STT", "Mã kiểm kho", "Thời gian kiểm", "Kho kiểm", "Người tạo", "Trạng thái",
+                "Mã hàng", "Tên hàng", "ĐVT", "Tồn kho", "Thực tế", "SL lệch",
+                "Đơn giá", "Giá trị lệch", "Ngày cân bằng", "Ghi chú"
+            };
+
+            for (int i = 0; i < headers.Length; i++)
+            {
+                ws.Cell(1, i + 1).Value = headers[i];
+            }
+            ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
+            ws.Row(1).Height = 28;
+
+            int rowIdx = 2;
+            int stt = 1;
             foreach (var item in model.Items)
             {
-                foreach (var line in item.Lines)
+                if (item.Lines.Any())
                 {
-                    var diff = line.SlChenhLech;
-                    var valDiff = line.GiaTriLech;
-                    csv.AppendLine($"\"{item.MaPhieuHienThi}\",\"{line.MaHangNoiBo}\",\"{line.TenHang.Replace("\"", "\"\"")}\",{line.SoLuongTheoSo},{(line.SoLuongThucTe.HasValue ? line.SoLuongThucTe.Value.ToString() : "")},{(diff.HasValue ? diff.Value.ToString() : "")},{(valDiff.HasValue ? valDiff.Value.ToString() : "")}");
+                    foreach (var line in item.Lines)
+                    {
+                        ws.Cell(rowIdx, 1).Value = stt++;
+                        ws.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                        ws.Cell(rowIdx, 2).Value = item.MaPhieuHienThi;
+                        ws.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                        ws.Cell(rowIdx, 3).Value = item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm");
+                        ws.Cell(rowIdx, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                        ws.Cell(rowIdx, 4).Value = item.TenKho;
+                        ws.Cell(rowIdx, 5).Value = item.TenNguoiLap;
+
+                        ws.Cell(rowIdx, 6).Value = item.TenTrangThai;
+                        ws.Cell(rowIdx, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                        ws.Cell(rowIdx, 7).Value = line.MaHangNoiBo;
+                        ws.Cell(rowIdx, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                        ws.Cell(rowIdx, 8).Value = line.TenHang;
+
+                        ws.Cell(rowIdx, 9).Value = line.TenDvt;
+                        ws.Cell(rowIdx, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                        ws.Cell(rowIdx, 10).Value = line.SoLuongTheoSo;
+                        ws.Cell(rowIdx, 10).Style.NumberFormat.Format = "#,##0.##";
+
+                        if (line.SoLuongThucTe.HasValue)
+                        {
+                            ws.Cell(rowIdx, 11).Value = line.SoLuongThucTe.Value;
+                            ws.Cell(rowIdx, 11).Style.NumberFormat.Format = "#,##0.##";
+                        }
+                        else
+                        {
+                            ws.Cell(rowIdx, 11).Value = "";
+                        }
+
+                        if (line.SlChenhLech.HasValue)
+                        {
+                            ws.Cell(rowIdx, 12).Value = line.SlChenhLech.Value;
+                            ws.Cell(rowIdx, 12).Style.NumberFormat.Format = "#,##0.##";
+                        }
+                        else
+                        {
+                            ws.Cell(rowIdx, 12).Value = "";
+                        }
+
+                        ws.Cell(rowIdx, 13).Value = line.DonGia;
+                        ws.Cell(rowIdx, 13).Style.NumberFormat.Format = "#,##0";
+
+                        if (line.GiaTriLech.HasValue)
+                        {
+                            ws.Cell(rowIdx, 14).Value = line.GiaTriLech.Value;
+                            ws.Cell(rowIdx, 14).Style.NumberFormat.Format = "#,##0";
+                        }
+                        else
+                        {
+                            ws.Cell(rowIdx, 14).Value = "";
+                        }
+
+                        ws.Cell(rowIdx, 15).Value = item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "";
+                        ws.Cell(rowIdx, 15).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                        ws.Cell(rowIdx, 16).Value = item.GhiChu ?? "";
+
+                        rowIdx++;
+                    }
+                }
+                else
+                {
+                    ws.Cell(rowIdx, 1).Value = stt++;
+                    ws.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    ws.Cell(rowIdx, 2).Value = item.MaPhieuHienThi;
+                    ws.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    ws.Cell(rowIdx, 3).Value = item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm");
+                    ws.Cell(rowIdx, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    ws.Cell(rowIdx, 4).Value = item.TenKho;
+                    ws.Cell(rowIdx, 5).Value = item.TenNguoiLap;
+
+                    ws.Cell(rowIdx, 6).Value = item.TenTrangThai;
+                    ws.Cell(rowIdx, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    ws.Cell(rowIdx, 7).Value = "";
+                    ws.Cell(rowIdx, 8).Value = "(Phiếu chưa có danh sách hàng)";
+                    ws.Cell(rowIdx, 9).Value = "";
+                    ws.Cell(rowIdx, 10).Value = 0;
+                    ws.Cell(rowIdx, 11).Value = "";
+                    ws.Cell(rowIdx, 12).Value = "";
+                    ws.Cell(rowIdx, 13).Value = 0;
+                    ws.Cell(rowIdx, 14).Value = "";
+
+                    ws.Cell(rowIdx, 15).Value = item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "";
+                    ws.Cell(rowIdx, 15).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    ws.Cell(rowIdx, 16).Value = item.GhiChu ?? "";
+
+                    rowIdx++;
                 }
             }
-            return File(System.Text.Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", $"ChiTietKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.csv");
+
+            if (rowIdx > 2)
+            {
+                ExcelHelper.ApplyTableBorders(ws.Range(1, 1, rowIdx - 1, headers.Length));
+            }
+            ws.Columns().AdjustToContents();
+
+            using var ms = new MemoryStream();
+            workbook.SaveAs(ms);
+            return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"ChiTietKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
         else
         {
-            csv.AppendLine("Mã kiểm kho,Thời gian,Tổng thực tế,Tổng chênh lệch,SL lệch tăng,SL lệch giảm,Ngày cân bằng,SL thực tế,Ghi chú,Trạng thái,Kho");
+            var ws = workbook.Worksheets.Add("DanhSachPhieuKiem");
+            var headers = new[]
+            {
+                "STT", "Mã kiểm kho", "Thời gian kiểm", "Kho kiểm", "Người tạo",
+                "Tổng thực tế", "Tổng chênh lệch", "SL lệch tăng", "SL lệch giảm",
+                "Tổng giá trị lệch", "Ngày cân bằng", "Trạng thái", "Ghi chú"
+            };
+
+            for (int i = 0; i < headers.Length; i++)
+            {
+                ws.Cell(1, i + 1).Value = headers[i];
+            }
+            ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
+            ws.Row(1).Height = 28;
+
+            int rowIdx = 2;
+            int stt = 1;
             foreach (var item in model.Items)
             {
-                csv.AppendLine($"\"{item.MaPhieuHienThi}\",\"{item.ThoiDiemChot:dd/MM/yyyy HH:mm}\",{item.TongThucTe},{item.TongChenhLech},{item.SlLechTang},{item.SlLechGiam},\"{(item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "")}\",{item.TongThucTe},\"{item.GhiChu?.Replace("\"", "\"\"")}\",\"{item.TenTrangThai}\",\"{item.TenKho}\"");
+                ws.Cell(rowIdx, 1).Value = stt++;
+                ws.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws.Cell(rowIdx, 2).Value = item.MaPhieuHienThi;
+                ws.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws.Cell(rowIdx, 3).Value = item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm");
+                ws.Cell(rowIdx, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws.Cell(rowIdx, 4).Value = item.TenKho;
+                ws.Cell(rowIdx, 5).Value = item.TenNguoiLap;
+
+                ws.Cell(rowIdx, 6).Value = item.TongThucTe;
+                ws.Cell(rowIdx, 6).Style.NumberFormat.Format = "#,##0.##";
+
+                ws.Cell(rowIdx, 7).Value = item.TongChenhLech;
+                ws.Cell(rowIdx, 7).Style.NumberFormat.Format = "#,##0.##";
+
+                ws.Cell(rowIdx, 8).Value = item.SlLechTang;
+                ws.Cell(rowIdx, 8).Style.NumberFormat.Format = "#,##0.##";
+
+                ws.Cell(rowIdx, 9).Value = item.SlLechGiam;
+                ws.Cell(rowIdx, 9).Style.NumberFormat.Format = "#,##0.##";
+
+                ws.Cell(rowIdx, 10).Value = item.TongGiaTriLech;
+                ws.Cell(rowIdx, 10).Style.NumberFormat.Format = "#,##0";
+
+                ws.Cell(rowIdx, 11).Value = item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "";
+                ws.Cell(rowIdx, 11).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws.Cell(rowIdx, 12).Value = item.TenTrangThai;
+                ws.Cell(rowIdx, 12).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws.Cell(rowIdx, 13).Value = item.GhiChu ?? "";
+
+                rowIdx++;
             }
-            return File(System.Text.Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", $"DanhSachKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.csv");
+
+            if (rowIdx > 2)
+            {
+                ExcelHelper.ApplyTableBorders(ws.Range(1, 1, rowIdx - 1, headers.Length));
+            }
+            ws.Columns().AdjustToContents();
+
+            using var ms = new MemoryStream();
+            workbook.SaveAs(ms);
+            return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
+    }
+
+    private static string EscapeCsv(string? val)
+    {
+        if (string.IsNullOrEmpty(val)) return "";
+        return val.Replace("\"", "\"\"").Replace("\r", " ").Replace("\n", " ");
     }
 }
 

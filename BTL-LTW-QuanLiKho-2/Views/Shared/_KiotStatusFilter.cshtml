@@ -1,0 +1,21 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.Common.KiotStatusFilterVM
+@{
+    var title = Model?.Title ?? "Trạng thái";
+    var dotId = Model?.DotId ?? "dotSt";
+}
+
+<div class="f-block position-relative">
+    <h6>@title <span class="filter-dot" id="@dotId"></span></h6>
+    <div class="d-flex flex-column gap-2 small">
+        @if (Model?.Options != null)
+        {
+            foreach (var opt in Model.Options)
+            {
+                <label class="form-check-label d-flex align-items-center gap-2" style="cursor: pointer;">
+                    <input class="form-check-input mt-0" type="checkbox" data-s="@opt.Value" @(opt.Checked ? "checked" : "")> 
+                    <span>@opt.Label</span>
+                </label>
+            }
+        }
+    </div>
+</div>

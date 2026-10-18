@@ -267,53 +267,13 @@ public class HangHoaController : BaseKhoController
             }
         }
 
-        // 7. Lọc theo Thời gian tạo
-        var today = DateTime.Today;
-        if (tgTaoFilter == "HOM_NAY")
+        // 7. Lọc theo Thời gian tạo (dùng DateRangeHelper dùng chung)
+        if (tgTaoFilter != "ALL" || tgTaoFrom.HasValue || tgTaoTo.HasValue)
         {
-            query = query.Where(x => x.NgayTao >= today);
+            var (dateFrom, dateTo) = DateRangeHelper.Resolve(tgTaoFilter, tgTaoFrom, tgTaoTo);
+            query = query.Where(x => x.NgayTao >= dateFrom && x.NgayTao <= dateTo);
         }
-        else if (tgTaoFilter == "HOM_QUA")
-        {
-            query = query.Where(x => x.NgayTao >= today.AddDays(-1) && x.NgayTao < today);
-        }
-        else if (tgTaoFilter == "TUAN_NAY")
-        {
-            int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
-            var startOfWeek = today.AddDays(-diff);
-            query = query.Where(x => x.NgayTao >= startOfWeek);
-        }
-        else if (tgTaoFilter == "TUAN_TRUOC")
-        {
-            int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
-            var startOfWeek = today.AddDays(-diff);
-            var startOfLastWeek = startOfWeek.AddDays(-7);
-            query = query.Where(x => x.NgayTao >= startOfLastWeek && x.NgayTao < startOfWeek);
-        }
-        else if (tgTaoFilter == "7_NGAY")
-        {
-            query = query.Where(x => x.NgayTao >= today.AddDays(-7));
-        }
-        else if (tgTaoFilter == "THANG_NAY")
-        {
-            var startOfMonth = new DateTime(today.Year, today.Month, 1);
-            query = query.Where(x => x.NgayTao >= startOfMonth);
-        }
-        else if (tgTaoFilter == "THANG_TRUOC")
-        {
-            var startOfThisMonth = new DateTime(today.Year, today.Month, 1);
-            var startOfLastMonth = startOfThisMonth.AddMonths(-1);
-            query = query.Where(x => x.NgayTao >= startOfLastMonth && x.NgayTao < startOfThisMonth);
-        }
-        else if (tgTaoFilter == "30_NGAY")
-        {
-            query = query.Where(x => x.NgayTao >= today.AddDays(-30));
-        }
-        else if (tgTaoFrom.HasValue || tgTaoTo.HasValue)
-        {
-            if (tgTaoFrom.HasValue) query = query.Where(x => x.NgayTao >= tgTaoFrom.Value);
-            if (tgTaoTo.HasValue) query = query.Where(x => x.NgayTao <= tgTaoTo.Value.AddDays(1));
-        }
+
 
         // Tồn kho theo kho hiện tại
         var tonKhoDict = await _context.VwTonKhoHienTais

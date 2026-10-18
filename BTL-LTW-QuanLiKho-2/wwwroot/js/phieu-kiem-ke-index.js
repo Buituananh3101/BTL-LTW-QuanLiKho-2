@@ -15,6 +15,8 @@
     const noteUrl = app.dataset.noteUrl;
     const cancelUrl = app.dataset.cancelUrl;
     const exportUrl = app.dataset.exportUrl;
+    const toggleStarUrl = app.dataset.toggleStarUrl || '/PhieuKiemKe/ToggleFavorite';
+    let isStarredFilterActive = app.dataset.isStarred === 'true';
     let currentWhId = parseInt(app.dataset.warehouseId) || 0;
 
     // Trạng thái bộ lọc (Mặc định ALL - Toàn thời gian chuẩn Hàng hóa)
@@ -27,6 +29,9 @@
         statuses: ['NHAP', 'DA_DIEU_CHINH'],
         creatorIds: [],
         creatorNames: {},
+        daDanhDau: isStarredFilterActive,
+        sortBy: app.dataset.sortBy || '',
+        sortDir: app.dataset.sortDir || '',
         page: 1,
         size: 15,
         cols: { ma: 1, tg: 1, tt: 1, cl: 1, tang: 1, giam: 1, cb: 1, slt: 1, ghi: 1, st: 1, kho: 1 },
@@ -34,169 +39,13 @@
         openId: null
     };
 
-    function formatDateVN(date) {
-        if (!date) return '';
-        const d = new Date(date);
-        return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
-    }
+    const formatDateVN = KiotFilter.formatDateVN;
+    const formatDateISO = KiotFilter.formatDateISO;
 
-    function formatDateISO(date) {
-        if (!date) return '';
-        const d = new Date(date);
-        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-    }
 
-    /* ===== FLOATING POPUP ĐỊNH VỊ FIXED (CHUẨN HÀNG HÓA) ===== */
-    function toggleFloatingPopup(triggerElement, popupSelector) {
-        const popup = $jq(popupSelector);
-        if (popup.is(':visible')) {
-            popup.hide();
-            return;
-        }
-        $jq('.quick-date-popup, .dual-calendar-popup').hide();
-
-        const trigger = $jq(triggerElement);
-        const rect = trigger[0].getBoundingClientRect();
-        const popupWidth = popup.outerWidth() || (popupSelector.includes('Calendar') ? 540 : 330);
-
-        let left = rect.left;
-        let top = rect.bottom + 6;
-
-        const maxRight = $jq(window).width() - 10;
-        if (left + popupWidth > maxRight) {
-            left = maxRight - popupWidth;
-        }
-        if (left < 10) left = 10;
-
-        const popupHeight = popup.outerHeight() || 300;
-        if (top + popupHeight > $jq(window).height() - 10) {
-            top = Math.max(10, rect.top - popupHeight - 6);
-        }
-
-        popup.css({
-            position: 'fixed',
-            top: top + 'px',
-            left: left + 'px',
-            zIndex: 1060
-        }).show();
-    }
-
-    /* ===== LỊCH TÙY CHỈNH 2 THÁNG (DUAL CALENDAR - CHUẨN HÀNG HÓA) ===== */
-    const todayObj = new Date();
-    const calState = {
-        date: {
-            currentYear: todayObj.getFullYear(),
-            currentMonth: todayObj.getMonth(),
-            start: todayObj,
-            end: todayObj
-        }
-    };
-
-    function renderDualCalendar(target = 'date') {
-        const y = calState[target].currentYear;
-        const m = calState[target].currentMonth;
-        renderCalMonth(target, 1, y, m);
-        let y2 = y;
-        let m2 = m + 1;
-        if (m2 > 11) { m2 = 0; y2++; }
-        renderCalMonth(target, 2, y2, m2);
-        updateCalendarHeader(target);
-    }
-
-    function renderCalMonth(target, idx, year, month) {
-        const prefix = '#' + target;
-        $jq(`${prefix}MonthTitle${idx}`).text(`Tháng ${month + 1} ${year}`);
-        const tbody = $jq(`${prefix}CalBody${idx}`).empty();
-
-        const firstDayOfWeek = (new Date(year, month, 1).getDay() + 6) % 7;
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const daysInPrevMonth = new Date(year, month, 0).getDate();
-
-        let tr = $jq('<tr>');
-        let dayCount = 0;
-
-        for (let i = 0; i < firstDayOfWeek; i++) {
-            const d = daysInPrevMonth - firstDayOfWeek + i + 1;
-            tr.append(`<td class="text-muted empty-day">${d}</td>`);
-            dayCount++;
-        }
-
-        for (let day = 1; day <= daysInMonth; day++) {
-            const curDate = new Date(year, month, day);
-            const iso = curDate.getFullYear() + '-' + String(curDate.getMonth() + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
-            const td = $jq(`<td class="cal-day" data-target="${target}" data-iso="${iso}">${day}</td>`);
-
-            const s = calState[target].start;
-            const e = calState[target].end;
-            if (s && e) {
-                const curT = new Date(year, month, day).setHours(0, 0, 0, 0);
-                const sT = new Date(s).setHours(0, 0, 0, 0);
-                const eT = new Date(e).setHours(0, 0, 0, 0);
-                if (curT >= sT && curT <= eT) {
-                    td.addClass('in-range');
-                    if (curT === sT) td.addClass('range-start');
-                    if (curT === eT) td.addClass('range-end');
-                }
-            }
-
-            tr.append(td);
-            dayCount++;
-            if (dayCount % 7 === 0 || day === daysInMonth) {
-                tbody.append(tr);
-                tr = $jq('<tr>');
-            }
-        }
-    }
-
-    function updateCalendarHeader(target = 'date') {
-        const s = calState[target].start;
-        const e = calState[target].end;
-        const prefix = '#' + target;
-        if (s && e) {
-            $jq(`${prefix}CalFromText`).text(formatDateVN(s));
-            $jq(`${prefix}CalToText`).text(formatDateVN(e));
-        }
-    }
-
-    /* ===== TIỆN ÍCH ESCAPE & ĐỊNH HƯỚNG DROPDOWN ===== */
-    function escapeHtml(text) {
-        if (!text) return '';
-        return String(text)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    }
-
-    function checkSidebarDropdownDirection(box, dropdown) {
-        if (!box || !dropdown) return;
-        const boxRect = box.getBoundingClientRect();
-        const filterBox = box.closest('.kiot-filter-box');
-
-        let containerBottom = window.innerHeight;
-        let containerTop = 0;
-
-        if (filterBox) {
-            const filterRect = filterBox.getBoundingClientRect();
-            containerBottom = Math.min(filterRect.bottom, window.innerHeight);
-            containerTop = Math.max(filterRect.top, 0);
-        }
-
-        const spaceBelow = containerBottom - boxRect.bottom;
-        const spaceAbove = boxRect.top - containerTop;
-        const neededHeight = 220;
-
-        if (spaceBelow < neededHeight && spaceAbove > spaceBelow) {
-            dropdown.classList.add('drop-up');
-            const maxH = Math.min(250, Math.max(120, spaceAbove - 10));
-            dropdown.style.maxHeight = maxH + 'px';
-        } else {
-            dropdown.classList.remove('drop-up');
-            const maxH = Math.min(250, Math.max(120, spaceBelow - 10));
-            dropdown.style.maxHeight = maxH + 'px';
-        }
-    }
+    /* ===== TIỆN ÍCH DÙNG CHUNG TỪ KIOTFILTER ===== */
+    const escapeHtml = KiotFilter.escapeHtml;
+    const checkSidebarDropdownDirection = KiotFilter.checkSidebarDropdownDirection;
 
     function renderCreatorMultiSelect() {
         const box = $('#boxNguoiTao');
@@ -217,43 +66,11 @@
             if (chk) chk.checked = isSel;
         });
 
-        if (selectedIds.length === 0) {
-            box.innerHTML = '<span class="kiot-ms-placeholder">Chọn người tạo</span>';
-            return;
-        }
-
-        let html = '';
-        const maxVisible = 3;
-
-        if (selectedIds.length <= maxVisible) {
-            selectedIds.forEach(id => {
-                const name = F.creatorNames[id] || ('NV ' + id);
-                html += `
-                    <span class="kiot-pill-tag" data-val="${id}">
-                        <span class="tag-text">${escapeHtml(name)}</span>
-                        <span class="tag-remove" title="Bỏ chọn">&times;</span>
-                    </span>
-                `;
-            });
-        } else {
-            for (let i = 0; i < maxVisible; i++) {
-                const id = selectedIds[i];
-                const name = F.creatorNames[id] || ('NV ' + id);
-                html += `
-                    <span class="kiot-pill-tag" data-val="${id}">
-                        <span class="tag-text">${escapeHtml(name)}</span>
-                        <span class="tag-remove" title="Bỏ chọn">&times;</span>
-                    </span>
-                `;
-            }
-            const remaining = selectedIds.length - maxVisible;
-            const otherNames = selectedIds.slice(maxVisible).map(id => F.creatorNames[id] || ('NV ' + id)).join(', ');
-            html += `
-                <span class="kiot-pill-more" title="${escapeHtml(otherNames)}">+${remaining} khác</span>
-            `;
-        }
-
-        box.innerHTML = html;
+        const selectedItems = selectedIds.map(id => ({
+            val: id,
+            name: F.creatorNames[id] || ('NV ' + id)
+        }));
+        KiotFilter.renderTagPills(box, selectedItems, 'Chọn người tạo', 3);
     }
 
     /* ===== CẬP NHẬT GIAO DIỆN BỘ LỌC ===== */
@@ -307,20 +124,35 @@
         F.statuses.forEach(s => params.append('Statuses', s));
         F.creatorIds.forEach(id => params.append('CreatorIds', id));
 
+        if (F.daDanhDau) {
+            params.append('DaDanhDau', 'true');
+        }
+
+        if (F.sortBy) {
+            params.append('SortBy', F.sortBy);
+            params.append('SortDir', F.sortDir || 'asc');
+        }
+
         params.append('Page', F.page);
         params.append('PageSize', F.size);
+
+        const wrap = $('#tableWrapper');
+        if (wrap) wrap.style.opacity = '0.6';
 
         fetch(`${filterUrl}?${params.toString()}`, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(res => res.text())
         .then(html => {
-            const wrap = $('#tableWrapper');
-            if (wrap) wrap.innerHTML = html;
+            if (wrap) {
+                wrap.innerHTML = html;
+                wrap.style.opacity = '1';
+            }
             applyColumnVisibility();
             bindTableEvents();
         })
         .catch(err => {
+            if (wrap) wrap.style.opacity = '1';
             console.error('Lỗi khi tải bảng kiểm kho:', err);
             toast('Không thể tải dữ liệu bảng kiểm kho.');
         });
@@ -424,191 +256,36 @@
             }
             F.statuses.forEach(s => p.append('Statuses', s));
             F.creatorIds.forEach(id => p.append('CreatorIds', id));
+            if (F.daDanhDau) p.append('DaDanhDau', 'true');
+            if (F.sortBy) {
+                p.append('SortBy', F.sortBy);
+                p.append('SortDir', F.sortDir || 'asc');
+            }
             window.location.href = `${exportUrl}?${p.toString()}`;
             toast('Đang xuất file dữ liệu...');
         }
 
-        // Ẩn / hiện cột qua dropdown
-        const colMenu = $('#colMenu');
-        if (colMenu) {
-            colMenu.onchange = e => {
-                const col = e.target.dataset.c;
-                if (col) {
-                    F.cols[col] = e.target.checked ? 1 : 0;
-                    applyColumnVisibility();
-                }
-            };
-        }
+        // Ẩn / hiện cột qua dropdown dùng KiotFilter.initColumnToggle
+        KiotFilter.initColumnToggle('#colMenu', '#stockTakeTable', 'kiemkho_cols');
 
-        // 1. Popup Chọn nhanh thời gian (Quick Date - Chuẩn Hàng hóa)
-        $jq('#btnOpenDateQuick').on('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            $jq('#dateAll').prop('checked', true);
-            toggleFloatingPopup(this, '#popupDateQuick');
-        });
-
-        $jq('#labelDateAll').on('click', function (e) {
-            if ($jq(e.target).closest('#btnOpenDateQuick').length) return;
-            e.stopPropagation();
-            toggleFloatingPopup(this, '#popupDateQuick');
-        });
-
-        // 2. Popup Lịch 2 tháng (Dual Calendar - Chuẩn Hàng hóa)
-        $jq('#btnOpenDateCalendar').on('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            $jq('#dateCustom').prop('checked', true);
-            toggleFloatingPopup(this, '#popupDateCalendar');
-        });
-
-        $jq('#labelDateCustom').on('click', function (e) {
-            if ($jq(e.target).closest('#btnOpenDateCalendar').length) return;
-            e.stopPropagation();
-            $jq('#dateCustom').prop('checked', true);
-            toggleFloatingPopup(this, '#popupDateCalendar');
-        });
-
-        $jq('#dateCustom').on('click', function (e) {
-            e.stopPropagation();
-            toggleFloatingPopup(this, '#popupDateCalendar');
-        });
-
-        // 3. Radio Toàn thời gian thay đổi
-        $jq('#dateAll').on('change', function () {
-            if ($jq(this).is(':checked')) {
+        // Khởi tạo Bộ lọc Thời gian dùng KiotFilter.initDateFilter
+        KiotFilter.initDateFilter('date', function (from, to, text, val) {
+            if (val === 'CUSTOM') {
+                F.mode = 'custom';
+                F.preset = 'CUSTOM';
+                F.from = from ? new Date(from) : null;
+                F.to = to ? new Date(to) : null;
+            } else {
                 F.mode = 'preset';
-                F.preset = 'ALL';
+                F.preset = val || 'ALL';
                 F.from = null;
                 F.to = null;
-                $jq('#textDateRange').text('Toàn thời gian');
-                $jq('#textDateCustom').text('Tùy chỉnh');
-                $jq('#popupDateQuick .quick-date-btn, #popupDateQuick .quick-date-pill-all').removeClass('active');
-                F.page = 1;
-                paintFilters();
-                loadTable();
             }
-        });
-
-        // 4. Click chọn khoảng ngày trong popupDateQuick
-        $jq(document).on('click', '#popupDateQuick .quick-date-btn, #popupDateQuick .quick-date-pill-all', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            const val = $jq(this).data('val');
-            const text = $jq(this).text().trim();
-
-            F.mode = 'preset';
-            F.preset = val;
-            F.from = null;
-            F.to = null;
-            $jq('#textDateRange').text(text);
-            $jq('#textDateCustom').text('Tùy chỉnh');
-            $jq('#popupDateQuick').hide();
-            $jq('#dateAll').prop('checked', true);
-            $jq('#popupDateQuick').find('.quick-date-btn, .quick-date-pill-all').removeClass('active');
-            $jq(this).addClass('active');
-
             F.page = 1;
             paintFilters();
             loadTable();
         });
 
-        // 5. Dual Calendar interactions
-        let selectingStart = true;
-        $jq(document).on('click', '.cal-day[data-target="date"]', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            const target = $jq(this).data('target');
-            const iso = $jq(this).data('iso');
-            const clickedDate = new Date(iso);
-
-            if (selectingStart) {
-                calState[target].start = clickedDate;
-                calState[target].end = clickedDate;
-                selectingStart = false;
-            } else {
-                if (clickedDate < calState[target].start) {
-                    calState[target].end = calState[target].start;
-                    calState[target].start = clickedDate;
-                } else {
-                    calState[target].end = clickedDate;
-                }
-                selectingStart = true;
-            }
-            renderDualCalendar(target);
-        });
-
-        $jq(document).on('click', '.btn-cal-prev[data-target="date"]', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            const target = $jq(this).data('target');
-            calState[target].currentMonth--;
-            if (calState[target].currentMonth < 0) {
-                calState[target].currentMonth = 11;
-                calState[target].currentYear--;
-            }
-            renderDualCalendar(target);
-        });
-
-        $jq(document).on('click', '.btn-cal-next[data-target="date"]', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            const target = $jq(this).data('target');
-            calState[target].currentMonth++;
-            if (calState[target].currentMonth > 11) {
-                calState[target].currentMonth = 0;
-                calState[target].currentYear++;
-            }
-            renderDualCalendar(target);
-        });
-
-        $jq(document).on('click', '.btn-cal-today[data-target="date"]', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            const target = $jq(this).data('target');
-            const t = new Date();
-            calState[target].currentYear = t.getFullYear();
-            calState[target].currentMonth = t.getMonth();
-            calState[target].start = t;
-            calState[target].end = t;
-            selectingStart = true;
-            renderDualCalendar(target);
-        });
-
-        $jq(document).on('click', '.btn-close-popup', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            $jq('.dual-calendar-popup').hide();
-        });
-
-        $jq(document).on('click', '.btn-apply-calendar[data-target="date"]', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            const target = $jq(this).data('target');
-            const s = calState[target].start || new Date();
-            const eDate = calState[target].end || s;
-            const rangeText = `${formatDateVN(s)} - ${formatDateVN(eDate)}`;
-
-            $jq('#popupDateCalendar').hide();
-            $jq('#dateCustom').prop('checked', true);
-            F.mode = 'custom';
-            F.preset = 'CUSTOM';
-            F.from = s;
-            F.to = eDate;
-            $jq('#textDateRange').text('Toàn thời gian');
-            $jq('#textDateCustom').text(rangeText);
-            $jq('#popupDateQuick .quick-date-btn, #popupDateQuick .quick-date-pill-all').removeClass('active');
-            F.page = 1;
-            paintFilters();
-            loadTable();
-        });
 
         // 6. Đóng popup khi cuộn sidebar hoặc click ngoài hoặc phím ESC
         $jq('.kiot-filter-box').on('scroll', function () {
@@ -788,11 +465,14 @@
             resetLink.onclick = () => {
                 F.q = '';
                 F.mode = 'preset';
-                F.preset = 'thangnay';
+                F.preset = 'ALL';
                 F.from = null;
                 F.to = null;
                 F.statuses = ['NHAP', 'DA_DIEU_CHINH'];
                 F.creatorIds = [];
+                F.daDanhDau = false;
+                F.sortBy = '';
+                F.sortDir = '';
                 F.page = 1;
                 const sInp = $('#keywordSearch') || $('#q');
                 if (sInp) sInp.value = '';
@@ -810,22 +490,10 @@
             };
         }
 
-        // Click dòng -> mở/đóng chi tiết dòng inline hoặc đánh dấu sao
+        // Click dòng -> mở/đóng chi tiết dòng inline (trừ checkbox, star, input, button, a)
         wrap.onclick = e => {
-            const st = e.target.closest('[data-star]');
-            if (st) {
-                const icon = $('i', st);
-                if (icon) {
-                    const isStarred = icon.classList.contains('bi-star-fill');
-                    icon.classList.toggle('bi-star-fill', !isStarred);
-                    icon.classList.toggle('bi-star', isStarred);
-                    st.classList.toggle('starred', !isStarred);
-                }
-                return;
-            }
-
             const row = e.target.closest('tr.tbl-row');
-            if (row && !e.target.closest('input') && !e.target.closest('button') && !e.target.closest('a')) {
+            if (row && !e.target.closest('input') && !e.target.closest('button') && !e.target.closest('a') && !e.target.closest('.cell-star, .star-btn')) {
                 const id = row.dataset.id;
                 const dtl = $(`#dtl-${id}`, wrap);
                 if (dtl) {
@@ -935,21 +603,117 @@
 
     /* ===== TOAST TIỆN ÍCH ===== */
     function toast(msg) {
-        let t = $('#toast');
-        if (!t) {
-            t = document.createElement('div');
-            t.className = 'toast-box';
-            t.id = 'toast';
-            document.body.appendChild(t);
+        if (window.KiotToast) {
+            window.KiotToast.info(msg);
+        } else {
+            let t = $('#toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.className = 'toast-box';
+                t.id = 'toast';
+                document.body.appendChild(t);
+            }
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
         }
-        t.textContent = msg;
-        t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 3000);
     }
+
+    /* ===== TÍNH NĂNG ĐÁNH DẤU SAO (CHUẨN HÀNG HÓA) ===== */
+    window.toggleFavoriteStockTake = function (e, id, el) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        const cell = el || (e ? e.target.closest('.cell-star, .star-btn') : null);
+        const btn = cell ? (cell.classList.contains('star-btn') ? cell : cell.querySelector('.star-btn')) : null;
+        if (!btn || !id) return;
+
+        fetch(`${toggleStarUrl}?id=${id}`, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res && res.success) {
+                if (res.isFavorite) {
+                    btn.classList.add('starred');
+                    btn.setAttribute('title', 'Bỏ đánh dấu sao');
+                    btn.innerHTML = '<i class="bi bi-star-fill"></i>';
+                } else {
+                    btn.classList.remove('starred');
+                    btn.setAttribute('title', 'Đánh dấu sao');
+                    btn.innerHTML = '<i class="bi bi-star"></i>';
+
+                    if (F.daDanhDau) {
+                        const tr = btn.closest('tr');
+                        const dtl = document.getElementById(`dtl-${id}`);
+                        if (dtl) dtl.remove();
+                        if (tr) {
+                            tr.remove();
+                            if ($$('#stockTakeTable tbody tr.tbl-row').length === 0) {
+                                loadTable();
+                            }
+                        }
+                    }
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Lỗi khi cập nhật đánh dấu sao:', err);
+            toast('Có lỗi khi cập nhật đánh dấu sao.');
+        });
+    };
+
+    window.toggleStarHeaderFilter = function (e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        F.daDanhDau = !F.daDanhDau;
+        F.page = 1;
+        loadTable();
+    };
+
+    document.addEventListener('click', e => {
+        const headerStar = e.target.closest('#starHeaderFilter');
+        if (headerStar) {
+            window.toggleStarHeaderFilter(e);
+            return;
+        }
+        const starBtn = e.target.closest('.star-btn:not(#starHeaderFilter)');
+        if (starBtn && starBtn.dataset.id) {
+            window.toggleFavoriteStockTake(e, starBtn.dataset.id, starBtn);
+            return;
+        }
+    });
+
+    // Sắp xếp cột 3 trạng thái (ASC -> DESC -> Bỏ sắp xếp) chuẩn Danh sách hàng hóa
+    $jq(document).on('click', '#stockTakeTable thead th.sortable-th', function (e) {
+        e.preventDefault();
+        const col = $jq(this).data('col');
+        if (!col) return;
+
+        if (F.sortBy === col) {
+            if (F.sortDir === 'asc') {
+                F.sortDir = 'desc';
+            } else if (F.sortDir === 'desc') {
+                F.sortBy = '';
+                F.sortDir = '';
+            } else {
+                F.sortDir = 'asc';
+            }
+        } else {
+            F.sortBy = col;
+            F.sortDir = 'asc';
+        }
+
+        F.page = 1;
+        loadTable();
+    });
 
     // Khởi tạo ban đầu
     bindSidebarEvents();
     bindTableEvents();
     paintFilters();
-    renderDualCalendar();
 })();

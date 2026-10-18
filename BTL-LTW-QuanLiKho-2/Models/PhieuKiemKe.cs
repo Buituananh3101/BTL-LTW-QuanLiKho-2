@@ -7,6 +7,8 @@ public partial class PhieuKiemKe
 {
     public int MaPhieuKiemKe { get; set; }
 
+    public string? MaPhieu { get; set; }
+
     public int MaKho { get; set; }
 
     public int MaNvlap { get; set; }
@@ -16,6 +18,8 @@ public partial class PhieuKiemKe
     public string TrangThai { get; set; } = null!;
 
     public string? GhiChu { get; set; }
+
+    public bool DaDanhDau { get; set; }
 
     public virtual ICollection<ChiTietPhieuKiemKe> ChiTietPhieuKiemKes { get; set; } = new List<ChiTietPhieuKiemKe>();
 
