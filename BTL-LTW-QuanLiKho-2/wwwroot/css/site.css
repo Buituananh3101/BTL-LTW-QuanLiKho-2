@@ -440,6 +440,20 @@ body {
   position: relative;
   width: 100%;
 }
+.kiot-table-scroll-body::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.kiot-table-scroll-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.kiot-table-scroll-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.kiot-table-scroll-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
 .kiot-table-pagination {
   flex-shrink: 0;
   display: flex;
@@ -451,8 +465,8 @@ body {
   z-index: 25;
 }
 .tbl {
-  width: 100%;
-  min-width: 1100px;
+  width: max-content;
+  min-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
@@ -554,8 +568,110 @@ body {
   font-weight: 800;
   stroke-width: 1.5;
 }
-.col-product-name {
-  min-width: 180px;
+/* ==========================================================================
+   CHIỀU RỘNG CỐ ĐỊNH CÁC CỘT BẢNG HÀNG HÓA (KIOTVIET COLUMN SYSTEM)
+   - Cố định độ rộng từng cột, không bị co ép/méo mó khi ẩn/hiện cột.
+   - Khi bật thêm nhiều cột vượt quá chiều rộng màn hình, thanh cuộn ngang tự động xuất hiện.
+   ========================================================================== */
+#productTable th.th-checkbox,
+#productTable td.cell-checkbox {
+  width: 38px;
+  min-width: 38px;
+  max-width: 38px;
+  box-sizing: border-box;
+}
+
+#productTable th.th-star,
+#productTable td.cell-star {
+  width: 38px;
+  min-width: 38px;
+  max-width: 38px;
+  box-sizing: border-box;
+}
+
+#productTable .col-hinhanh {
+  width: 50px;
+  min-width: 50px;
+  max-width: 50px;
+  box-sizing: border-box;
+}
+
+#productTable .col-mahang {
+  width: 130px;
+  min-width: 130px;
+  max-width: 130px;
+  box-sizing: border-box;
+}
+
+#productTable .col-product-name,
+#productTable .col-tenhang {
+  width: 280px;
+  min-width: 280px;
+  max-width: 280px;
+  box-sizing: border-box;
+}
+
+#productTable .col-nhomhang {
+  width: 140px;
+  min-width: 140px;
+  max-width: 140px;
+  box-sizing: border-box;
+}
+
+#productTable .col-loaihang {
+  width: 110px;
+  min-width: 110px;
+  max-width: 110px;
+  box-sizing: border-box;
+}
+
+#productTable .col-giaban {
+  width: 115px;
+  min-width: 115px;
+  max-width: 115px;
+  box-sizing: border-box;
+}
+
+#productTable .col-giavon {
+  width: 115px;
+  min-width: 115px;
+  max-width: 115px;
+  box-sizing: border-box;
+}
+
+#productTable .col-tonkho {
+  width: 105px;
+  min-width: 105px;
+  max-width: 105px;
+  box-sizing: border-box;
+}
+
+#productTable .col-vitri {
+  width: 130px;
+  min-width: 130px;
+  max-width: 130px;
+  box-sizing: border-box;
+}
+
+#productTable .col-tontothieu {
+  width: 130px;
+  min-width: 130px;
+  max-width: 130px;
+  box-sizing: border-box;
+}
+
+#productTable .col-toncaonhat {
+  width: 140px;
+  min-width: 140px;
+  max-width: 140px;
+  box-sizing: border-box;
+}
+
+#productTable .col-trangthai {
+  width: 160px;
+  min-width: 160px;
+  max-width: 160px;
+  box-sizing: border-box;
 }
 .cell-product-name {
   word-break: break-word;
@@ -612,6 +728,7 @@ body {
 }
 .num {
   text-align: right;
+  white-space: nowrap;
 }
 
 /* Star bookmark button (KiotViet style) */
@@ -2059,4 +2176,76 @@ tr.product-detail-row > td {
 
 .kiot-btn-remove-attr:hover i {
   color: #dc2626 !important;
+}
+
+/* ==========================================================================
+   DROPDOWN TÙY CHỌN ẨN / HIỆN CỘT BẢNG HÀNG HÓA (KIOTVIET STYLE)
+   ========================================================================== */
+.kiot-col-config-menu {
+  min-width: 440px !important;
+  max-width: 480px;
+  padding: 16px 20px !important;
+  border-radius: 8px !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  background: #ffffff !important;
+  z-index: 1050;
+  margin-top: 6px !important;
+}
+
+.kiot-col-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 32px;
+  row-gap: 8px;
+}
+
+.kiot-col-subcol {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kiot-col-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  color: #1f2937;
+  cursor: pointer;
+  user-select: none;
+  margin: 0;
+  line-height: 1.4;
+  transition: color 0.15s ease;
+}
+
+.kiot-col-checkbox-item:hover {
+  color: #0066cc;
+}
+
+.kiot-col-checkbox-item input.form-check-input {
+  cursor: pointer;
+  margin: 0;
+  width: 17px;
+  height: 17px;
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  flex-shrink: 0;
+}
+
+.kiot-col-checkbox-item input.form-check-input:checked {
+  background-color: #0066cc;
+  border-color: #0066cc;
+}
+
+@media (max-width: 576px) {
+  .kiot-col-config-menu {
+    min-width: 290px !important;
+    max-width: 320px;
+    padding: 12px 14px !important;
+  }
+  .kiot-col-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 }
