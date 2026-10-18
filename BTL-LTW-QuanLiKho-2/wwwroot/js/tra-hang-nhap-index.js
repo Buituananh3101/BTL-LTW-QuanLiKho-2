@@ -287,7 +287,8 @@ $(function () {
                     const $targetRow = $(`#detail-row-${F.openId}`);
                     if ($targetRow.length) {
                         $targetRow.show();
-                        $(`.tbl-row[data-id="${F.openId}"]`).addClass('open selected');
+                        $targetRow.find('.product-detail-panel-wrap').show();
+                        $(`.tbl-row[data-id="${F.openId}"]`).addClass('open selected is-expanded');
                     }
                 }
             },
@@ -509,25 +510,33 @@ $(function () {
         fetchTable();
     });
 
-    /* ===== 6. MỞ / ĐÓNG CHI TIẾT DÒNG INLINE (ACCORDION DRAWER) ===== */
-    $(document).on('click', '#receiptTable tbody tr.tbl-row', function (e) {
-        if ($(e.target).closest('input[type="checkbox"], .star-btn, button, a').length) return;
+    /* ===== 6. MỞ / ĐÓNG CHI TIẾT DÒNG INLINE (ACCORDION DRAWER CHUYỂN ĐỘNG MƯỢT NHƯ NHÀ CUNG CẤP & KIOTVIET) ===== */
+    let returnRowDetailHandler = null;
 
-        const id = $(this).data('id');
-        const $detailRow = $(`#detail-row-${id}`);
-
-        if ($detailRow.is(':visible')) {
-            $detailRow.hide();
-            $(this).removeClass('open selected');
-            F.openId = null;
-        } else {
-            $('#receiptTable tbody tr.detail-row').hide();
-            $('#receiptTable tbody tr.tbl-row').removeClass('open selected');
-            $detailRow.show();
-            $(this).addClass('open selected');
-            F.openId = id;
+    function initRowDetail() {
+        if (window.KiotFilter && typeof window.KiotFilter.initRowDetail === 'function') {
+            returnRowDetailHandler = window.KiotFilter.initRowDetail({
+                tableSelector: '#receiptTable',
+                rowSelector: 'tr.product-row, tr.tbl-row',
+                detailRowSelector: '#detail-row-{id}',
+                wrapSelector: '.product-detail-panel-wrap',
+                tabBtnSelector: '.product-detail-tab-btn, .dp-tabs span',
+                tabPaneSelector: '.tab-pane-content, .tab-pane',
+                excludeClickSelector: 'input, button, a, label, .cell-checkbox, .cell-star, .star-btn',
+                slideDuration: 150,
+                fadeDuration: 120,
+                autoCenter: false,
+                onOpen: function (id) {
+                    F.openId = id;
+                },
+                onClose: function () {
+                    F.openId = null;
+                }
+            });
         }
-    });
+    }
+
+    initRowDetail();
 
     // Lọc con bên trong drawer
     $(document).on('input', '.detail-row .fl-code, .detail-row .fl-name', function () {

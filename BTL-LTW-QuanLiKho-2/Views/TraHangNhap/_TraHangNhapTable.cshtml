@@ -236,10 +236,11 @@
                     </tr>
 
                     <!-- ACCORDION DRAWER CHI TIẾT INLINE -->
-                    <tr class="detail-row" id="detail-row-@item.MaPhieuTraHang" style="display: none;">
+                    <tr class="product-detail-row dtl detail-row" id="detail-row-@item.MaPhieuTraHang" style="display: none;">
                         <td colspan="17" class="p-0">
-                            <div class="kk-detail-fixed-wrap" style="width: 100%; min-width: 820px; background: #fff; padding: 14px 20px;">
-                                <div class="detail-panel-inline">
+                            <div class="product-detail-panel-wrap" style="display: none;">
+                                <div class="ncc-detail-fixed-wrap thn-detail-fixed-wrap kiot-detail-fixed-wrap" style="padding: 16px 20px; background: #fff;">
+                                    <div class="detail-panel-inline">
                                     <div class="dp-tabs border-bottom mb-3 pb-2">
                                         <span class="text-primary fw-bold pb-2 border-bottom border-primary border-2">Thông tin</span>
                                     </div>
@@ -258,7 +259,7 @@
                                         </div>
                                         <div class="col-md-3 d-flex align-items-center gap-2">
                                             <span class="text-muted small text-nowrap">Người trả:</span>
-                                            <select class="form-select form-select-sm inp-payer" data-id="@item.MaPhieuTraHang" @(item.TrangThai == "HUY" ? "disabled" : "")>
+                                            <select class="form-select form-select-sm inp-payer" data-id="@item.MaPhieuTraHang" @(item.TrangThai == "HUY" ? "disabled" : "") style="border-radius: 6px; border-color: #cbd5e1; height: 32px; font-size: 13px;">
                                                 @foreach (var nv in Model.NhanViens)
                                                 {
                                                     <option value="@nv.Value" selected="@(item.MaNvtra?.ToString() == nv.Value)">@nv.Text</option>
@@ -279,13 +280,13 @@
                                     <table class="table table-bordered table-sm dtl-tbl mb-3">
                                         <thead class="table-light">
                                             <tr>
-                                                <th style="width: 140px;">Mã hàng</th>
+                                                <th style="width: 130px;">Mã hàng</th>
                                                 <th>Tên hàng</th>
-                                                <th class="text-center" style="width: 80px;">ĐVT</th>
-                                                <th class="text-end" style="width: 100px;">Số lượng</th>
-                                                <th class="text-end" style="width: 120px;">Giá nhập</th>
-                                                <th class="text-end" style="width: 120px;">Giá trả lại</th>
-                                                <th class="text-end" style="width: 140px;">Thành tiền</th>
+                                                <th class="text-center" style="width: 75px;">ĐVT</th>
+                                                <th class="text-end" style="width: 90px;">Số lượng</th>
+                                                <th class="text-end" style="width: 110px;">Giá nhập</th>
+                                                <th class="text-end" style="width: 110px;">Giá trả lại</th>
+                                                <th class="text-end" style="width: 130px;">Thành tiền</th>
                                             </tr>
                                             <tr class="sr">
                                                 <td><input type="text" class="form-control form-control-sm fl-code" placeholder="Tìm mã hàng" /></td>
@@ -391,8 +392,9 @@
                                     </div>
                                 </div>
                             </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </td>
+                </tr>
                 }
             }
             else

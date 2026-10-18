@@ -140,14 +140,33 @@ $(function () {
         });
     }
 
+    /* ===== 2.1. CHỌN NGƯỜI TRẢ TỪ DROPDOWN TÙY CHỈNH (ĐỒNG BỘ CHUYỂN KHO & KIOTVIET) ===== */
+    $(document).on('click', '.payer-item-opt', function (e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        const name = $(this).data('name');
+
+        $('#fPayer').val(id);
+        $('.payer-selected-text').text(name).removeClass('text-muted').addClass('text-dark fw-medium');
+        $('.payer-item-opt').removeClass('active fw-semibold');
+        $('.payer-item-opt .payer-check-icon').addClass('d-none');
+        $(this).addClass('active fw-semibold').find('.payer-check-icon').removeClass('d-none');
+
+        // Đóng dropdown Bootstrap nếu đang mở
+        const btn = document.getElementById('btnSelectPayer');
+        if (btn && window.bootstrap && window.bootstrap.Dropdown) {
+            const inst = bootstrap.Dropdown.getInstance(btn);
+            if (inst) inst.hide();
+        }
+    });
+
     /* ===== 3. QUẢN LÝ DANH SÁCH HÀNG HÓA TRẢ ===== */
     function checkEmptyState() {
         const hasRows = $('#itemsTableBody tr.line-item-row').length > 0;
+        $('#tableScrollWrap').show();
         if (hasRows) {
-            $('#tableScrollWrap').show();
             $('#emptyWrap').attr('style', 'display: none !important;');
         } else {
-            $('#tableScrollWrap').hide();
             $('#emptyWrap').attr('style', 'display: flex !important;');
         }
     }
@@ -542,46 +561,81 @@ $(function () {
         $(this).val('');
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = function (evt) {
-            try {
-                const text = evt.target.result;
-                const lines = text.split(/\r?\n/).slice(1);
-                let count = 0;
+        function processImportData(rows) {
+            let count = 0;
+            rows.forEach((r, idx) => {
+                if (!r || !r.length) return;
+                const code = String(r[0] ?? '').trim();
+                const qtyVal = r[1];
+                if (!code) return;
+                // Nếu dòng đầu là tiêu đề cột
+                if (idx === 0 && isNaN(Number(String(qtyVal).replace(/[^0-9.-]+/g, '')))) return;
 
-                lines.forEach(line => {
-                    const parts = line.split(',');
-                    if (parts.length >= 2) {
-                        const code = (parts[0] || '').trim();
-                        const qty = digits(parts[1]);
-                        const price = parts[2] ? digits(parts[2]) : null;
+                const qty = digits(qtyVal);
+                const price = (r[2] !== undefined && r[2] !== null && String(r[2]).trim() !== '') ? digits(r[2]) : null;
 
-                        if (code && qty > 0) {
-                            $.ajax({
-                                url: searchProductsUrl,
-                                type: 'GET',
-                                data: { q: code, warehouseId: warehouseId },
-                                async: false,
-                                success: function (res) {
-                                    if (res && res.length) {
-                                        const p = res.find(x => x.code.toLowerCase() === code.toLowerCase()) || res[0];
-                                        addProductLine(p, qty, price);
-                                        count++;
-                                    }
-                                }
-                            });
+                if (code && qty > 0) {
+                    $.ajax({
+                        url: searchProductsUrl,
+                        type: 'GET',
+                        data: { q: code, warehouseId: warehouseId },
+                        async: false,
+                        success: function (res) {
+                            if (res && res.length) {
+                                const p = res.find(x => x.code.toLowerCase() === code.toLowerCase()) || res[0];
+                                addProductLine(p, qty, price);
+                                count++;
+                            }
                         }
-                    }
-                });
-
-                if (window.KiotToast) {
-                    KiotToast.success(count > 0 ? `Đã thêm ${count} mặt hàng từ file.` : 'Không có dòng hợp lệ trong file.');
+                    });
                 }
-            } catch (err) {
-                if (window.KiotToast) KiotToast.error('Không thể đọc file: ' + err.message);
+            });
+
+            if (window.KiotToast) {
+                if (count > 0) {
+                    KiotToast.success(`Đã thêm ${count} mặt hàng từ file.`);
+                } else {
+                    KiotToast.warn('Không tìm thấy mặt hàng nào phù hợp trong file.');
+                }
             }
-        };
-        reader.readAsText(file);
+        }
+
+        const rd = new FileReader();
+        if (/\.csv$/i.test(file.name)) {
+            rd.onload = function (evt) {
+                try {
+                    const text = evt.target.result;
+                    const rows = String(text).replace(/^\uFEFF/, '').split(/\r?\n/).filter(Boolean).map(s => s.split(/[,;\t]/));
+                    processImportData(rows);
+                } catch (err) {
+                    if (window.KiotToast) KiotToast.error('Không thể đọc file CSV: ' + err.message);
+                }
+            };
+            rd.readAsText(file);
+        } else if (typeof XLSX !== 'undefined') {
+            rd.onload = function (evt) {
+                try {
+                    const wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
+                    const sheet = wb.Sheets[wb.SheetNames[0]];
+                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+                    processImportData(rows);
+                } catch (err) {
+                    if (window.KiotToast) KiotToast.error('Không thể đọc file Excel: ' + err.message);
+                }
+            };
+            rd.readAsArrayBuffer(file);
+        } else {
+            rd.onload = function (evt) {
+                try {
+                    const text = evt.target.result;
+                    const rows = String(text).replace(/^\uFEFF/, '').split(/\r?\n/).filter(Boolean).map(s => s.split(/[,;\t]/));
+                    processImportData(rows);
+                } catch (err) {
+                    if (window.KiotToast) KiotToast.error('Không thể đọc file: ' + err.message);
+                }
+            };
+            rd.readAsText(file);
+        }
     });
 
     /* ===== 9. GỬI DỮ LIỆU LƯU PHIẾU (F9 LƯU TẠM / F10 HOÀN THÀNH) ===== */

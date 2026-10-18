@@ -1,19 +1,132 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Chuẩn Hóa Nút Chọn File Dữ Liệu & Cụm Nút Hành Động Phiếu Trả Hàng Nhập Giống Kiểm Tồn (Phiên 124)
+Cập nhật lần cuối: 2026-10-18 – Đồng Bộ Chiều Cao 34px Cụm Nút Giảm Giá VND / % Khớp Ô Nhập Liệu (Phiên 131)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử trải nghiệm tương tác trên form Lập / Sửa phiếu Trả hàng nhập (`/TraHangNhap/Create` và `/TraHangNhap/Edit`): nút Chọn file dữ liệu trong Empty state chuẩn Kiểm tồn, 2 nút Lưu tạm (F9, xanh dương) & Hoàn thành (F10, xanh lá) xếp dọc chuẩn Kiểm tồn.
+- Sẵn sàng kiểm thử trải nghiệm cụm nút chuyển đổi Giảm giá VND / % trên màn hình Lập phiếu trả hàng nhập (`/TraHangNhap/Create`): chiều cao 34px cao đều tăm tắp với ô nhập liệu giảm giá.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế và luồng nghiệp vụ phân hệ Trả hàng nhập trên trình duyệt.
+1. Kiểm tra trải nghiệm thực tế và luồng nghiệp vụ phân hệ Nhà cung cấp và Trả hàng nhập trên trình duyệt.
 2. Kiểm tra lại toàn bộ luồng chuyển kho, xuất hủy, nhập hàng, bán hàng POS để đảm bảo tính đồng bộ hệ thống.
 
 ---
+
+- **Đồng Bộ Chiều Cao 34px Cụm Nút Giảm Giá VND / % Khớp Ô Nhập Liệu (Phiên 131)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm ảnh chụp màn hình (`media_1792327138276_310480fa.png`): "sửa lại phần VND % cho cao đều".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `_TraHangNhapForm.cshtml`, cụm nút bấm chọn đơn vị giảm giá (`#btnDiscVnd` và `#btnDiscPct`) sử dụng class `.btn-group-sm` và `py-0`, khiến chiều cao thực tế của nút chỉ đạt ~24px, trong khi ô nhập số tiền giảm giá `#orderDiscountInput` bên cạnh có chiều cao 34px, làm cho hàng Giảm giá bị lệch độ cao, mất cân đối.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`_TraHangNhapForm.cshtml` & `tra-hang-nhap.css`**:
+      * Thiết lập class `.disc-toggle-group` với chiều cao cố định chuẩn `height: 34px !important;`.
+      * Cấu hình 2 nút `#btnDiscVnd` và `#btnDiscPct` đạt chiều cao chuẩn 34px (`line-height: 32px`, `padding: 0 10px`, `font-size: 12px`, `font-weight: 600`), căn giữa hoàn hảo theo chiều dọc ngang.
+      * Khi hoạt động (`.active`), nút có nền xanh `#0a66e8`, chữ trắng; khi chưa chọn có viền mảnh `#cbd5e1`, nền trắng tinh tế.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+
+
+- **Khắc Phục Lỗi Bảng Hàng Hóa Trống Bị Ẩn Mất Trên Form Trả Hàng Nhập (Phiên 130)**:
+  - **Nhu cầu**: Người dùng phản ánh: "lỗi ko hiện gì" kèm ảnh chụp màn hình (`media_1792326925507_82aec926.png`) hiển thị toàn bộ khung lưới bảng hàng hóa bị trắng trơn.
+  - **Nguyên nhân cốt lõi**:
+    + Trong `tra-hang-nhap-form.js`, hàm `checkEmptyState()` trước đó khi kiểm tra `hasRows == false` đã thực thi lệnh `$('#tableScrollWrap').hide()`. Vì khối `#emptyWrap` được chuyển vào bên trong `#tableScrollWrap` (để nằm ngay dưới thẻ `table`), việc ẩn phần tử cha `#tableScrollWrap` đã kéo theo toàn bộ bảng tiêu đề lẫn nút "Chọn file dữ liệu" bị ẩn sạch.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`tra-hang-nhap-form.js`**: Cập nhật hàm `checkEmptyState()` luôn giữ `#tableScrollWrap` hiển thị (`$('#tableScrollWrap').show()`), chỉ điều khiển ẩn/hiện duy nhất khối `#emptyWrap` (`display: none !important;` khi có dòng hàng và `display: flex !important;` khi chưa có hàng).
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` đạt **0 Errors**.
+      * `node -c tra-hang-nhap-form.js` đạt **0 Errors**.
+
+
+- **Chuẩn Hóa Nút Chọn File Dữ Liệu & Vùng Trạng Thái Trống Khớp 100% Phân Hệ Kiểm Tồn (Phiên 129)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm ảnh chụp màn hình (`media_1792326355123_f5ee1b21.png`): "sửa lại nút chọn file dữ liệu dựa trên phần kiểm tồn".
+  - **Nguyên nhân cốt lõi**:
+    + Nút "Chọn file dữ liệu" trước đó có kích thước 42px, dùng icon hộp mũi tên `bi-box-arrow-in-down` và nằm trong vùng `.empty` có bong bóng tròn 100px ở trên, không khớp với thiết kế chuẩn của Kiểm tồn trong `prototype-kiemkho-full.html`.
+    + Khi bảng hàng hóa trống, toàn bộ phần header của bảng bị ẩn đi (`display: none`), khiến giao diện bên trái bị khoảng trắng quá lớn.
+    + Trình xử lý file trong `tra-hang-nhap-form.js` trước đó chỉ dùng `readAsText(file)` (chỉ đọc được CSV), khi người dùng chọn file `.xlsx` thật thì phát sinh lỗi dữ liệu nhị phân.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Giao diện Empty State (`_TraHangNhapForm.cshtml`)**:
+      * Đưa về chuẩn `.xl-empty` của Kiểm tồn: loại bỏ icon tròn lớn, giữ tiêu đề `<b>Thêm sản phẩm từ file excel</b>` (font 19px đậm), link tải file mẫu `Excel file`.
+      * Giữ cố định header của bảng (`itemsTable` `<thead>`) luôn hiển thị ở trên cùng, khối `.xl-empty` nằm ngay dưới header.
+      * Nâng cấp nút `#btnSelectFile` chuẩn Kiểm tồn: chiều cao 52px, font chữ 18px, padding 0 24px, bo góc 6px, nền xanh `#0a66e8`, icon bảng tính `bi-file-earmark-spreadsheet fs-5`, chữ "Chọn file dữ liệu".
+    + **Xử lý JavaScript (`tra-hang-nhap-form.js`)**:
+      * Nâng cấp hàm xử lý file hỗ trợ đầy đủ cả file `.xlsx` / `.xls` (qua thư viện `XLSX.read` của SheetJS) lẫn `.csv` (qua FileReader tách dòng), tự động phát hiện header và nạp hàng hóa vào bảng.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+      * `node -c tra-hang-nhap-form.js` đạt **0 Errors**.
+
+
+- **Chuẩn Hóa Giao Diện Dropdown Người Trả Trong Phiếu Trả Hàng Nhập Đồng Bộ Với Chuyển Kho & KiotViet (Phiên 128)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "sửa lại giao dienj phần dropdown cho đồng bộ" kèm ảnh chụp màn hình (`media_1792326315059_bf0d8dff.png`) hiển thị ô chọn Người trả trong right panel đang dùng thẻ `<select>` thô của trình duyệt với danh sách popup màu xanh Windows cũ kỹ.
+  - **Nguyên nhân cốt lõi**:
+    + Trong `_TraHangNhapForm.cshtml`, trường chọn Người trả trước đó là thẻ `<select class="inp" id="fPayer">`. Khi mở ra, trình duyệt hiển thị menu select nguyên bản của hệ điều hành với góc vuông, không có icon, màu hover mặc định gây lệch tông với giao diện hiện đại của hệ thống.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Form lập phiếu (`_TraHangNhapForm.cshtml`)**:
+      * Thay thế `<select id="fPayer">` bằng bộ nút custom dropdown Bootstrap chuẩn Chuyển kho (`#btnSelectPayer` kèm `data-bs-toggle="dropdown"`, class `.payer-custom-select-btn`), hiển thị text người trả kèm icon chevron mũi tên và bo góc 6px.
+      * Danh sách menu `.payer-custom-dropdown-menu` với bo góc 8px, hiệu ứng đổ bóng `box-shadow`, padding 7px 10px, tiêu đề phụ "CHỌN NHÂN VIÊN TRẢ", icon người dùng `bi-person`, icon tích chọn màu xanh `bi-check2` trên mục đang được chọn (`.active`).
+      * Trường ẩn `<input type="hidden" id="fPayer">` lưu trữ mã nhân viên trả, tương thích 100% với luồng submit dữ liệu cũ.
+    + **Bảng danh sách (`_TraHangNhapTable.cshtml`)**:
+      * Chuẩn hóa thẻ `<select class="inp-payer">` trong drawer chi tiết bảng danh sách với `border-radius: 6px; border-color: #cbd5e1; height: 32px;` đồng bộ.
+    + **CSS (`tra-hang-nhap.css`)**:
+      * Khai báo `.payer-custom-select-btn` và `.payer-custom-dropdown-menu` đồng bộ 100% với `.wh-custom-select-btn` của Chuyển kho: màu hover `#f1f5f9`, active `#e0f2fe`, viền focus `#0a66e8` với viền bóng 3px `rgba(10, 102, 232, 0.12)`.
+    + **JavaScript (`tra-hang-nhap-form.js`)**:
+      * Bổ sung sự kiện click `.payer-item-opt`: cập nhật giá trị `#fPayer`, đổi text trên nút chọn, đổi trạng thái active/check-icon và tự động đóng menu dropdown mượt mà.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+      * `node -c tra-hang-nhap-form.js` đạt **0 Errors**.
+
+- **Tích Hợp Accordion Mở/Đóng Chi Tiết Trả Hàng Nhập Chuyển Động Mượt Chuẩn Nhà Cung Cấp & Lego KiotFilter (Phiên 127)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "khi mở phần chi tiết thì nó phải chuyển động mượt như phần nhà cung cấp".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `tra-hang-nhap-index.js`, sự kiện click dòng bảng trước đó sử dụng lệnh thô jQuery `$detailRow.show()` và `$detailRow.hide()` trực tiếp trên thẻ `<tr>`. Do thẻ bảng HTML `<tr>` không hỗ trợ animation trượt tự nhiên, việc show/hide làm dòng bật/tắt giật cục lập tức, không có hiệu ứng trượt êm dịu (slideDown/slideUp) như phân hệ Nhà cung cấp.
+    + Trong `_TraHangNhapTable.cshtml`, thiếu khối bọc animation `.product-detail-panel-wrap` (chuẩn Lego KiotViet) bên trong ô `<td>`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bảng danh sách (`_TraHangNhapTable.cshtml`)**:
+      * Bổ sung thẻ bọc `<div class="product-detail-panel-wrap" style="display: none;">` ôm trọn khối `.ncc-detail-fixed-wrap`, cho phép jQuery tính toán và trượt độ cao mượt mà không làm vỡ cấu trúc bảng.
+    + **JavaScript (`tra-hang-nhap-index.js`)**:
+      * Tái sử dụng khối Lego `KiotFilter.initRowDetail` (tuân thủ Luật 10 trong `AGENTS.md`) với cấu hình: `tableSelector: '#receiptTable'`, `rowSelector: 'tr.product-row, tr.tbl-row'`, `detailRowSelector: '#detail-row-{id}'`, `wrapSelector: '.product-detail-panel-wrap'`, `slideDuration: 150`, `fadeDuration: 120`.
+      * Khi click mở dòng, thẻ bọc `.product-detail-panel-wrap` thực hiện `slideDown(150)` êm mượt; khi đóng hoặc chuyển dòng thực hiện `slideUp(150)` nhịp nhàng giống 100% Nhà cung cấp, Chuyển kho, Nhập hàng.
+      * Trong hàm nạp lại bảng AJAX `fetchTable()`, hỗ trợ duy trì hiển thị `.product-detail-panel-wrap` khi dòng đang được mở mà không bị chớp giật.
+    + **CSS (`tra-hang-nhap.css`)**:
+      * Bổ sung `.last-visible-col` cho viền phải 3px để đảm bảo khung chữ nhật bao quanh dòng chi tiết luôn khép kín đẹp mắt khi đóng mở.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+      * `node -c tra-hang-nhap-index.js` đạt **0 Errors**.
+
+- **Cố Định Độ Rộng 992px Khung Chi Tiết Trả Hàng Nhập Chuẩn Nhà Cung Cấp & KiotViet (Phiên 126)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "hiện tại phần chi tiết khi hiện các cột thì nó cứ kéo dài ra, bạn hãy sửa lại cố định giống phần nhà cung cấp".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `_TraHangNhapTable.cshtml`, thẻ bao quanh nội dung chi tiết trước đó chứa thuộc tính inline `style="width: 100%; min-width: 820px; ..."`. Khi người dùng bật nhiều cột trong "Tùy chọn cột", tổng độ rộng bảng mở rộng lên 1.500px - 1.800px khiến thuộc tính `width: 100%` ép khung chi tiết kéo dài hết cỡ, phá vỡ bố cục và đẩy các phần tử tài chính dạt sang bên phải.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bảng danh sách (`_TraHangNhapTable.cshtml`)**:
+      * Loại bỏ inline style `width: 100%; min-width: 820px;`, thay bằng class chuẩn KiotViet `.ncc-detail-fixed-wrap.thn-detail-fixed-wrap.kiot-detail-fixed-wrap` với `style="padding: 16px 20px; background: #fff;"`.
+      * Bổ sung class `.product-detail-row.dtl.detail-row` cho dòng `<tr>` chi tiết để tích hợp hoàn hảo với bộ quản lý cột động và kiểu dáng KiotViet.
+      * Tinh chỉnh độ rộng các cột trong bảng mặt hàng trả (`Mã hàng`: 130px, `ĐVT`: 75px, `Số lượng`: 90px, `Giá nhập`: 110px, `Giá trả lại`: 110px, `Thành tiền`: 130px, `Tên hàng`: co giãn tự do ~307px) vừa vặn tuyệt đối trong khung 992px.
+    + **CSS (`tra-hang-nhap.css`)**:
+      * Bổ sung định kiểu `.thn-detail-fixed-wrap, .ncc-detail-fixed-wrap` cố định `width: 992px !important; max-width: 100% !important; box-sizing: border-box !important;`.
+      * Tương thích responsive cho màn hình nhỏ `@media (max-width: 1040px) { width: 100% !important; }`.
+      * Bổ sung đường viền xanh 2 bên và đáy cho `#receiptTable tr.product-detail-row > td`.
+    + **JS Quản lý cột động (`kiot-filter.js`)**:
+      * Mở rộng selector tự động cập nhật `colspan` khi bật/tắt cột: thêm `tr.detail-row > td` để đồng bộ hoàn toàn giữa số cột hiển thị và dòng chi tiết.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+      * `node -c kiot-filter.js` đạt **0 Errors**.
+
+- **Đồng Bộ Font Chữ Thường & Màu Sắc Cột Công Nợ Nhà Cung Cấp Chuẩn Danh Sách Hàng Hóa (Phiên 125)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm ảnh chụp màn hình (`media_1792325335931_1712ad5a.png`): "sửa lại phần font, màu thành chữ thường giống danh sách hàng hóa".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `_NhaCungCapTable.cshtml`, cột "Nợ cần trả hiện tại" trước đó sử dụng `<span class="@(item.NoCanTraHienTai > 0 ? "text-danger fw-semibold" : "text-muted")">`, khiến các giá trị công nợ mang màu đỏ và font bán đậm (semi-bold), không đồng nhất với cột "Tổng mua" kế bên cũng như phong cách hiển thị dữ liệu số trong danh sách Hàng hóa (chữ thường, màu tối tiêu chuẩn `text-dark`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bảng danh sách (`_NhaCungCapTable.cshtml`)**:
+      * Chuẩn hóa thẻ ô dữ liệu cột Nợ cần trả: `<td data-col="no" class="num text-dark">@item.NoCanTraHienTai.ToString("N0", viCulture)</td>`.
+      * Bỏ hoàn toàn class `text-danger`, `fw-semibold`, `text-muted` trên các dòng dữ liệu để chuyển sang chữ thường (regular weight 400) và màu tối đồng bộ với Hàng hóa.
+      * Trong tab chi tiết mở rộng `tab-info`: chuẩn hóa hiển thị `Nợ cần trả hiện tại` sang `fw-bold text-dark`.
+    + **Modal/Drawer chi tiết (`_NhaCungCapDetail.cshtml`)**:
+      * Đưa khối tóm tắt công nợ trong tab `debt` về màu tối đồng bộ: `fs-4 fw-bold text-dark`.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` đạt **0 Errors**.
+
 
 - **Chuẩn Hóa Nút Chọn File Dữ Liệu & Cụm Nút Hành Động Phiếu Trả Hàng Nhập Giống Kiểm Tồn (Phiên 124)**:
   - **Nhu cầu**: Người dùng yêu cầu: "sửa lại các nút chọn file dữ liệu, hoàn thành giống phần kiểm tồn" kèm ảnh chụp màn hình (`media_1792323977134_8208938a.png`).

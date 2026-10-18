@@ -568,7 +568,7 @@ window.KiotFilter = (function ($) {
 
             // 1. Cập nhật colspan chính xác theo số cột hiển thị để không sinh cột ma
             const actualVisibleCols = currentTable.find('thead tr:first-child th:visible').length || (visibleCount + (opt.extraColsCount || 0));
-            currentTable.find('tr.product-detail-row > td, tr.kiot-detail-row > td, tr.dtl > td, tr.empty-row > td, tr:has(.empty) > td').attr('colspan', actualVisibleCols);
+            currentTable.find('tr.product-detail-row > td, tr.kiot-detail-row > td, tr.dtl > td, tr.detail-row > td, tr.empty-row > td, tr:has(.empty) > td').attr('colspan', actualVisibleCols);
 
             // 2. Gắn class last-visible-col cho ô hiển thị cuối cùng của mỗi dòng để khép kín hình chữ nhật
             currentTable.find('.last-visible-col').removeClass('last-visible-col');

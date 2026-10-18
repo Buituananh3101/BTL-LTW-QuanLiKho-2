@@ -183,10 +183,8 @@
                         <td data-col="masothue">
                             @(string.IsNullOrWhiteSpace(item.MaSoThue) ? "---" : item.MaSoThue)
                         </td>
-                        <td data-col="no" class="num">
-                            <span class="@(item.NoCanTraHienTai > 0 ? "text-danger fw-semibold" : "text-muted")">
-                                @item.NoCanTraHienTai.ToString("N0", viCulture)
-                            </span>
+                        <td data-col="no" class="num text-dark">
+                            @item.NoCanTraHienTai.ToString("N0", viCulture)
                         </td>
                         <td data-col="tongmua" class="num text-dark">
                             @item.TongMua.ToString("N0", viCulture)
@@ -313,7 +311,7 @@
                                                             <div class="pt-2 border-top mt-auto">
                                                                 <div class="d-flex justify-content-between py-1">
                                                                     <span class="text-muted small">Nợ cần trả hiện tại:</span>
-                                                                    <span class="fw-bold @(item.NoCanTraHienTai > 0 ? "text-danger" : "text-dark")">@item.NoCanTraHienTai.ToString("N0", viCulture)</span>
+                                                                    <span class="fw-bold text-dark">@item.NoCanTraHienTai.ToString("N0", viCulture)</span>
                                                                 </div>
                                                                 <div class="d-flex justify-content-between py-1">
                                                                     <span class="text-muted small">Tổng mua:</span>

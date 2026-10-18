@@ -29,17 +29,37 @@
 #receiptTable tr.tbl-row.open > td:last-child,
 #receiptTable tr.tbl-row.selected > td:last-child,
 #receiptTable tr.product-row.open > td:last-child,
-#receiptTable tr.product-row.selected > td:last-child {
+#receiptTable tr.product-row.selected > td:last-child,
+#receiptTable tr.tbl-row.open > td.last-visible-col,
+#receiptTable tr.tbl-row.selected > td.last-visible-col,
+#receiptTable tr.product-row.open > td.last-visible-col,
+#receiptTable tr.product-row.selected > td.last-visible-col {
     border-right: 3px solid #0070f3 !important;
 }
 
-#receiptTable tr.detail-row > td {
+#receiptTable tr.detail-row > td,
+#receiptTable tr.product-detail-row > td {
     background-color: #ffffff !important;
     padding: 0 !important;
     border-top: none !important;
     border-bottom: 2px solid #0070f3 !important;
     border-left: 3px solid #0070f3 !important;
     border-right: 3px solid #0070f3 !important;
+}
+
+/* Khung chi tiết cố định 992px chuẩn Nhà cung cấp & KiotViet (không kéo dài theo độ rộng bảng) */
+.thn-detail-fixed-wrap,
+.ncc-detail-fixed-wrap {
+    width: 992px !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: 1040px) {
+    .thn-detail-fixed-wrap,
+    .ncc-detail-fixed-wrap {
+        width: 100% !important;
+    }
 }
 
 /* 2. Dòng tổng hợp (Total row) */
@@ -371,23 +391,139 @@
     background: #0e9a3e !important;
 }
 
-/* Nút Chọn file dữ liệu trong Empty State chuẩn Kiểm tồn */
-#emptyWrap #btnSelectFile {
-    height: 42px;
-    padding: 0 20px;
-    font-size: 14px;
-    font-weight: 600;
-    border-radius: 6px;
-    background-color: #0a66e8 !important;
-    border-color: #0a66e8 !important;
-    box-shadow: 0 2px 6px rgba(10, 102, 232, 0.2);
-    display: inline-flex;
+/* Khối trạng thái trống & Nút Chọn file dữ liệu chuẩn Kiểm tồn (prototype-kiemkho-full.html) */
+.xl-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 14px;
+    padding: 60px 20px;
+    text-align: center;
 }
 
-#emptyWrap #btnSelectFile:hover {
-    background-color: #0852bd !important;
-    border-color: #0852bd !important;
+.xl-empty b {
+    font-size: 19px;
+    font-weight: 700;
+    color: #1f2937;
 }
+
+#emptyWrap #btnSelectFile,
+.xl-empty #btnSelectFile {
+    height: 52px !important;
+    padding: 0 24px !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    background-color: #0a66e8 !important;
+    border: none !important;
+    color: #fff !important;
+    box-shadow: 0 2px 6px rgba(10, 102, 232, 0.25) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+#emptyWrap #btnSelectFile:hover,
+.xl-empty #btnSelectFile:hover {
+    background-color: #0852bd !important;
+}
+
+/* 7. Dropdown Người trả tùy chỉnh chuẩn Chuyển kho & KiotViet */
+.payer-custom-select-btn,
+.wh-custom-select-btn {
+    border: 1px solid #cbd5e1 !important;
+    background-color: #ffffff !important;
+    transition: all 0.15s ease-in-out;
+}
+
+.payer-custom-select-btn:hover,
+.payer-custom-select-btn:focus,
+.payer-custom-select-btn[aria-expanded="true"],
+.wh-custom-select-btn:hover,
+.wh-custom-select-btn:focus,
+.wh-custom-select-btn[aria-expanded="true"] {
+    border-color: #0a66e8 !important;
+    box-shadow: 0 0 0 3px rgba(10, 102, 232, 0.12) !important;
+}
+
+.payer-custom-dropdown-menu,
+.wh-custom-dropdown-menu {
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    background-color: #ffffff !important;
+    z-index: 1050 !important;
+}
+
+.payer-custom-dropdown-menu .dropdown-item,
+.wh-custom-dropdown-menu .dropdown-item {
+    padding: 7px 10px;
+    font-size: 13px;
+    color: #334155;
+    transition: all 0.12s;
+    border-radius: 6px;
+    margin-bottom: 2px;
+}
+
+.payer-custom-dropdown-menu .dropdown-item:hover,
+.wh-custom-dropdown-menu .dropdown-item:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+}
+
+.payer-custom-dropdown-menu .dropdown-item.active,
+.wh-custom-dropdown-menu .dropdown-item.active {
+    background-color: #e0f2fe !important;
+    color: #0284c7 !important;
+}
+
+.payer-custom-dropdown-menu .dropdown-item.active .bi-person,
+.wh-custom-dropdown-menu .dropdown-item.active .bi-person {
+    color: #0284c7 !important;
+}
+
+/* 8. Cụm nút chuyển đổi Giảm giá VND / % cao đều 34px */
+.disc-toggle-group {
+    height: 34px !important;
+}
+
+.disc-toggle-group .btn,
+#btnDiscVnd,
+#btnDiscPct {
+    height: 34px !important;
+    line-height: 32px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+}
+
+#btnDiscVnd.btn-primary.active,
+#btnDiscPct.btn-primary.active {
+    background-color: #0a66e8 !important;
+    border-color: #0a66e8 !important;
+    color: #ffffff !important;
+}
+
+#btnDiscVnd.btn-outline-secondary,
+#btnDiscPct.btn-outline-secondary {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #64748b !important;
+}
+
+#btnDiscVnd.btn-outline-secondary:hover,
+#btnDiscPct.btn-outline-secondary:hover {
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+}
+
 
