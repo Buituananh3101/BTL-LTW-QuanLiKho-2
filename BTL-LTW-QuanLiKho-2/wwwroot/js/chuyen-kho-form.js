@@ -421,10 +421,10 @@
         const $icon = $('#rightPanelToggleIcon');
 
         $panel.toggleClass('collapsed');
-        $wrap.toggleClass('panel-collapsed');
-        $btn.toggleClass('collapsed');
-
         const isCollapsed = $panel.hasClass('collapsed');
+        $wrap.toggleClass('panel-collapsed', isCollapsed);
+        $btn.toggleClass('collapsed', isCollapsed);
+
         $btn.attr('title', isCollapsed ? 'Mở rộng thông tin (Phím tắt F4)' : 'Thu gọn thông tin (Phím tắt F4)');
         $icon.attr('class', isCollapsed ? 'bi bi-chevron-left' : 'bi bi-chevron-right');
     }

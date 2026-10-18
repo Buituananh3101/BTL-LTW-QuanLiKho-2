@@ -1,11 +1,11 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Đồng Bộ Bộ Chọn Ngày Giờ Lập Phiếu Chuyển Hàng Chuẩn Kiểm Tồn (Phiên 117)
+Cập nhật lần cuối: 2026-10-18 – Tối Ưu Đóng Mở Rightmenu (Panel Phải) Chuyển Hàng Mượt Chuẩn Kiểm Kho (Phiên 118)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử trải nghiệm bộ chọn ngày giờ lập phiếu chuyển hàng chuẩn KiotViet (khuôn mẫu Kiểm tồn & Nhập hàng): popup `.dtpop` lịch tháng + danh sách 48 khung giờ (00:00 - 23:30), chuyển tháng `<` `>`, chọn ngày và giờ tức thời, đóng tự động khi click ra ngoài, hiển thị định dạng `dd/MM/yyyy HH:mm`.
+- Sẵn sàng kiểm thử trải nghiệm đóng/mở panel phải (Right Menu) màn hình Lập/Sửa phiếu chuyển hàng (`/ChuyenKho/Create`, `/ChuyenKho/Edit`): animation 0.25s cubic-bezier(0.25, 1, 0.35, 1) mượt mà không giật cục, khung `.f-panel-inner` 440px cố định chống méo vỡ chữ, nút tròn F4 trượt đồng bộ mép panel.
 
 ---
 
@@ -14,6 +14,25 @@ Cập nhật lần cuối: 2026-10-18 – Đồng Bộ Bộ Chọn Ngày Giờ L
 2. Xây dựng phân hệ Trả hàng nhập (Purchase Returns) theo yêu cầu.
 
 ---
+
+- **Tối Ưu Đóng Mở Rightmenu (Panel Phải) Chuyển Hàng Mượt Chuẩn Kiểm Kho (Phiên 118)**:
+  - **Nhu cầu**: Người dùng phản ánh: "sửa lại phần đóng mở rightmenu trong chuyển hàng mượt như phần kiểm kho".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `chuyen-kho.css`, rule `.f-panel.collapsed` có các thuộc tính `max-width: 0 !important; opacity: 0 !important; pointer-events: none !important;`. Vì `max-width` không nằm trong danh sách transition và `opacity 0.2s` lệch pha với transition `0.25s cubic-bezier` của `width`, trình duyệt ngắt đột ngột chiều rộng ngay frame đầu tiên gây hiện tượng giật/nhảy hình.
+    + Thẻ con `.f-panel-inner` thiếu thiết lập chiều rộng cố định `width: 440px !important; min-width: 440px !important; flex-shrink: 0 !important;`, dẫn tới việc nội dung (chữ, nút, input) bị co rúm, gãy dòng trong quá trình panel co lại.
+    + Trong `Views/ChuyenKho/_ChuyenKhoForm.cshtml`, nút `#btnToggleRightPanel` đặt trước `<aside id="rightPanel">`, cản trở selector sibling `~`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`Views/ChuyenKho/_ChuyenKhoForm.cshtml`**: Di chuyển `#btnToggleRightPanel` đặt ngay sau `</aside>`, khớp chuẩn cấu trúc như Kiểm kho và Xuất hủy.
+    + **`wwwroot/css/chuyen-kho.css`**:
+      * Loại bỏ `opacity: 0 !important`, `max-width: 0 !important`, `pointer-events: none !important`.
+      * Bổ sung `.f-panel-inner` với `width: 440px !important; min-width: 440px !important; flex-shrink: 0 !important;` giúp bảo toàn layout tĩnh trong suốt quá trình panel trượt như cánh cửa trượt (curtain).
+      * Đồng bộ thời gian và đường cong gia tốc `0.25s cubic-bezier(0.25, 1, 0.35, 1)` cho cả `.f-panel` (thu hẹp width) và `.panel-toggle` (trượt right từ 425px về 8px).
+      * Bổ sung đầy đủ tổ hợp selector `.form-wrap.panel-collapsed .panel-toggle, .form-wrap.panel-collapsed #btnToggleRightPanel, #ckFormWrap.panel-collapsed #btnToggleRightPanel, .panel-toggle.collapsed, #btnToggleRightPanel.collapsed, .f-panel.collapsed ~ .panel-toggle, #rightPanel.collapsed ~ #btnToggleRightPanel { right: 8px !important; }`.
+    + **`wwwroot/js/chuyen-kho-form.js`**: Trong hàm `toggleRightPanel()`, gán tham số boolean xác định `$wrap.toggleClass('panel-collapsed', isCollapsed)` và `$btn.toggleClass('collapsed', isCollapsed)` đồng bộ tuyệt đối với `$panel.hasClass('collapsed')`.
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+    + `node -c chuyen-kho-form.js` hoàn thành với **0 Errors**.
+    + Đồng bộ tài liệu đặc tả `docs/specs/chuyen-kho.md` (7.967 ký tự < 8.000 ký tự theo Rule 12).
 
 - **Đồng Bộ Bộ Chọn Ngày Giờ Lập Phiếu Chuyển Hàng Chuẩn Kiểm Tồn (Phiên 117)**:
   - **Nhu cầu**: Người dùng gửi ảnh `media_1792317438387_4e3a4eee.png` phản ánh: "sửa lại phần chọn thời gian này dựa trên phần chọn thời gian trong kiểm tồn".
