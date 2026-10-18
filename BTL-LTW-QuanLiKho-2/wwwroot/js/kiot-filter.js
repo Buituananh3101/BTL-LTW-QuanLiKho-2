@@ -303,8 +303,13 @@ window.KiotFilter = (function ($) {
         const quickPopupSelector = `#popup${tgtCap}Quick`;
         const calPopupSelector = `#popup${tgtCap}Calendar`;
 
+        // Chặn nổi bọt khi click bên trong popup thời gian
+        $(`${quickPopupSelector}, ${calPopupSelector}`).on('click', function (e) {
+            e.stopPropagation();
+        });
+
         // Mở popup chọn nhanh
-        $(`#btnOpen${tgtCap}Quick, #label${tgtCap}All`).on('click', function (e) {
+        $(`#btnOpen${tgtCap}Quick, #label${tgtCap}All, #${target}All`).on('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
             $(`#${target}All`).prop('checked', true);
@@ -500,7 +505,8 @@ window.KiotFilter = (function ($) {
         });
 
         // Tự đóng khi click ra ngoài
-        $(document).on('click', function (e) {
+        const docDateEvent = `click.kiotDateFilter_${target}`;
+        $(document).off(docDateEvent).on(docDateEvent, function (e) {
             if (!$(e.target).closest(`.kiot-date-filter-block[data-date-target="${target}"], ${quickPopupSelector}, ${calPopupSelector}`).length) {
                 $(quickPopupSelector).hide();
                 $(calPopupSelector).hide();
@@ -1200,6 +1206,213 @@ window.KiotFilter = (function ($) {
         }
     }
 
+    // 20. Khởi tạo Bộ Chọn Ngày Giờ Lập Phiếu (DateTimePicker 24h) Chuẩn KiotViet
+    function initDateTimePicker(options) {
+        const opt = $.extend({
+            inputSelector: '#fDate',
+            popupSelector: '#dtPop',
+            initialDate: null,
+            isReadOnly: false,
+            stepMinutes: 30,
+            onChange: null
+        }, options);
+
+        const $inp = $(opt.inputSelector);
+        const $pop = $(opt.popupSelector);
+        if (!$inp.length || !$pop.length || opt.isReadOnly) return null;
+
+        let currentDate = opt.initialDate ? (opt.initialDate instanceof Date ? opt.initialDate : new Date(opt.initialDate)) : null;
+        if (!currentDate || isNaN(currentDate.getTime())) {
+            const rawVal = $inp.val();
+            if (rawVal) {
+                const parts = rawVal.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
+                if (parts) {
+                    const parsed = new Date(+parts[3], +parts[2] - 1, +parts[1], +parts[4], +parts[5]);
+                    if (!isNaN(parsed.getTime())) currentDate = parsed;
+                }
+            }
+        }
+        if (!currentDate || isNaN(currentDate.getTime())) {
+            currentDate = new Date();
+        }
+
+        const DOW = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+        const DT = { y: currentDate.getFullYear(), m: currentDate.getMonth() };
+
+        function p2(n) { return String(n).padStart(2, '0'); }
+        function sod(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+        function dTime(d) { return `${p2(d.getHours())}:${p2(d.getMinutes())}`; }
+        function dFull(d) {
+            return `${p2(d.getDate())}/${p2(d.getMonth() + 1)}/${d.getFullYear()} ${dTime(d)}`;
+        }
+        function formatISO(d) {
+            return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}T${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`;
+        }
+
+        function renderCal(y, m, sel) {
+            const first = new Date(y, m, 1);
+            const pad = (first.getDay() + 6) % 7;
+            const days = new Date(y, m + 1, 0).getDate();
+            const today = sod(new Date()).getTime();
+
+            let h = '<div class="cal"><div class="cal-g">' + DOW.map(x => `<span class="dow">${x}</span>`).join('');
+            for (let i = 0; i < pad; i++) h += '<span></span>';
+            for (let d = 1; d <= days; d++) {
+                const t = new Date(y, m, d).getTime();
+                let c = 'd';
+                if (t === today) c += ' today';
+                if (t === sel) c += ' sel';
+                h += `<button type="button" class="${c}" data-t="${t}">${d}</button>`;
+            }
+            return h + '</div></div>';
+        }
+
+        function renderPopup() {
+            if (!$pop.length) return;
+            const sel = sod(currentDate).getTime();
+            const times = [];
+            for (let h = 0; h < 24; h++) {
+                for (let m = 0; m < 60; m += opt.stepMinutes) {
+                    times.push(`${p2(h)}:${p2(m)}`);
+                }
+            }
+            const curH = currentDate.getHours();
+            const curM = currentDate.getMinutes();
+            const roundedM = Math.floor(curM / opt.stepMinutes) * opt.stepMinutes;
+            const curSlot = `${p2(curH)}:${p2(roundedM)}`;
+
+            $pop.html(`
+                <div style="flex:1">
+                    <div class="dtnav">
+                        <button type="button" class="rp-nav" data-dn="-1" title="Tháng trước"><i class="bi bi-chevron-left"></i></button>
+                        <span>Tháng ${DT.m + 1}/${DT.y}</span>
+                        <button type="button" class="rp-nav" data-dn="1" title="Tháng sau"><i class="bi bi-chevron-right"></i></button>
+                    </div>
+                    ${renderCal(DT.y, DT.m, sel)}
+                </div>
+                <div class="times">
+                    ${times.map(t => `<button type="button" data-tm="${t}" class="${t === curSlot ? 'cur' : ''}">${t}</button>`).join('')}
+                </div>
+            `);
+            const $times = $pop.find('.times');
+            const $cur = $times.find('.cur');
+            if ($times.length && $cur.length) {
+                $times[0].scrollTop = $cur[0].offsetTop - ($times[0].clientHeight / 2) + ($cur[0].clientHeight / 2);
+            }
+        }
+
+        let lastFocusTime = 0;
+        function openPopup() {
+            DT.y = currentDate.getFullYear();
+            DT.m = currentDate.getMonth();
+            renderPopup();
+            $('.pop.show, .dtpop.show').not($pop).removeClass('show');
+            $pop.attr('data-owner', opt.inputSelector).addClass('show');
+        }
+
+        function closePopup() {
+            $pop.removeClass('show');
+        }
+
+        $inp.on('focus', function () {
+            lastFocusTime = Date.now();
+            openPopup();
+        });
+
+        $inp.on('click', function (e) {
+            e.stopPropagation();
+            if (Date.now() - lastFocusTime < 300) return;
+            if ($pop.hasClass('show')) {
+                closePopup();
+            } else {
+                openPopup();
+            }
+        });
+
+        $inp.on('change', function () {
+            const val = $(this).val();
+            const m = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
+            if (m) {
+                const d = new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5]);
+                if (!isNaN(d.getTime())) {
+                    currentDate = d;
+                    if (typeof opt.onChange === 'function') {
+                        opt.onChange(currentDate, dFull(currentDate), formatISO(currentDate));
+                    }
+                }
+            }
+            $inp.val(dFull(currentDate));
+        });
+
+        $pop.off('click.kiotDtPop').on('click.kiotDtPop', function (e) {
+            e.stopPropagation();
+            const $n = $(e.target).closest('[data-dn]');
+            const $d = $(e.target).closest('button.d');
+            const $t = $(e.target).closest('[data-tm]');
+
+            if ($n.length) {
+                const dn = parseInt($n.data('dn'), 10);
+                const x = new Date(DT.y, DT.m + dn, 1);
+                DT.y = x.getFullYear();
+                DT.m = x.getMonth();
+                renderPopup();
+            }
+
+            if ($d.length) {
+                const tVal = parseInt($d.data('t'), 10);
+                const x = new Date(tVal);
+                currentDate = new Date(x.getFullYear(), x.getMonth(), x.getDate(), currentDate.getHours(), currentDate.getMinutes());
+                $inp.val(dFull(currentDate));
+                renderPopup();
+                if (typeof opt.onChange === 'function') {
+                    opt.onChange(currentDate, dFull(currentDate), formatISO(currentDate));
+                }
+            }
+
+            if ($t.length) {
+                const [h, m] = String($t.data('tm')).split(':');
+                currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), parseInt(h, 10), parseInt(m, 10));
+                $inp.val(dFull(currentDate));
+                renderPopup();
+                if (typeof opt.onChange === 'function') {
+                    opt.onChange(currentDate, dFull(currentDate), formatISO(currentDate));
+                }
+                closePopup();
+            }
+        });
+
+        const docEventNamespace = `click.kiotDtPop_${opt.popupSelector.replace(/[^a-zA-Z0-9_-]/g, '')}`;
+        $(document).off(docEventNamespace).on(docEventNamespace, function (e) {
+            if (!$(e.target).closest(`${opt.inputSelector}, ${opt.popupSelector}`).length) {
+                closePopup();
+            }
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.key === 'Escape' && $pop.hasClass('show')) {
+                closePopup();
+            }
+        });
+
+        if (!$inp.val() || !$inp.val().trim()) {
+            $inp.val(dFull(currentDate));
+        }
+
+        return {
+            getDate: () => currentDate,
+            setDate: function (d) {
+                currentDate = d instanceof Date ? d : new Date(d);
+                if (isNaN(currentDate.getTime())) currentDate = new Date();
+                $inp.val(dFull(currentDate));
+                renderPopup();
+            },
+            getText: () => dFull(currentDate),
+            getISO: () => formatISO(currentDate),
+            open: openPopup,
+            close: closePopup
+        };
+    }
+
     return {
         debounce: debounce,
         escapeHtml: escapeHtml,
@@ -1219,6 +1432,7 @@ window.KiotFilter = (function ($) {
         initValueFilter: initValueFilter,
         initStatusFilter: initStatusFilter,
         initRowDetail: initRowDetail,
-        initEntityActions: initEntityActions
+        initEntityActions: initEntityActions,
+        initDateTimePicker: initDateTimePicker
     };
 })(jQuery);

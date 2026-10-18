@@ -627,25 +627,10 @@ public class NhapHangController : BaseKhoController
 
         bool isDetail = string.Equals(type, "detail", StringComparison.OrdinalIgnoreCase);
 
-        using var workbook = new XLWorkbook();
+        // Mặc định xuất file Excel (.xlsx) chuẩn KiotViet bằng ClosedXML qua Lego ExcelHelper
         if (isDetail)
         {
-            var ws = workbook.Worksheets.Add("ChiTietNhapHang");
-            var headers = new[]
-            {
-                "STT", "Mã nhập hàng", "Thời gian", "Kho nhập", "Nhà cung cấp", "Người tạo",
-                "Số hóa đơn", "Mã hàng", "Tên hàng", "ĐVT", "Số lượng", "Đơn giá", "Giảm giá",
-                "Thành tiền", "Trạng thái", "Ghi chú"
-            };
-
-            for (int i = 0; i < headers.Length; i++)
-            {
-                ws.Cell(1, i + 1).Value = headers[i];
-            }
-            ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
-            ws.Row(1).Height = 28;
-
-            int rowIdx = 2;
+            var detailRows = new List<(int Stt, NhapHangListItemVM Item, NhapHangLineVM? Line)>();
             int stt = 1;
             foreach (var p in model.PagedData.Items)
             {
@@ -653,89 +638,57 @@ public class NhapHangController : BaseKhoController
                 {
                     foreach (var line in p.Lines)
                     {
-                        ws.Cell(rowIdx, 1).Value = stt++;
-                        ws.Cell(rowIdx, 2).Value = p.MaPhieuHienThi;
-                        ws.Cell(rowIdx, 3).Value = p.NgayLap.ToString("dd/MM/yyyy HH:mm");
-                        ws.Cell(rowIdx, 4).Value = p.TenKho;
-                        ws.Cell(rowIdx, 5).Value = p.TenNcc ?? "";
-                        ws.Cell(rowIdx, 6).Value = p.TenNguoiLap;
-                        ws.Cell(rowIdx, 7).Value = p.SoHoaDon ?? "";
-                        ws.Cell(rowIdx, 8).Value = line.MaHangNoiBo;
-                        ws.Cell(rowIdx, 9).Value = line.TenHang;
-                        ws.Cell(rowIdx, 10).Value = line.TenDvt;
-                        ws.Cell(rowIdx, 11).Value = line.SoLuong;
-                        ws.Cell(rowIdx, 12).Value = line.DonGiaNhap;
-                        ws.Cell(rowIdx, 13).Value = line.GiamGia;
-                        ws.Cell(rowIdx, 14).Value = line.ThanhTien;
-                        ws.Cell(rowIdx, 15).Value = p.TenTrangThai;
-                        ws.Cell(rowIdx, 16).Value = p.GhiChu ?? "";
-                        rowIdx++;
+                        detailRows.Add((stt++, p, line));
                     }
                 }
                 else
                 {
-                    ws.Cell(rowIdx, 1).Value = stt++;
-                    ws.Cell(rowIdx, 2).Value = p.MaPhieuHienThi;
-                    ws.Cell(rowIdx, 3).Value = p.NgayLap.ToString("dd/MM/yyyy HH:mm");
-                    ws.Cell(rowIdx, 4).Value = p.TenKho;
-                    ws.Cell(rowIdx, 5).Value = p.TenNcc ?? "";
-                    ws.Cell(rowIdx, 6).Value = p.TenNguoiLap;
-                    ws.Cell(rowIdx, 7).Value = p.SoHoaDon ?? "";
-                    ws.Cell(rowIdx, 15).Value = p.TenTrangThai;
-                    ws.Cell(rowIdx, 16).Value = p.GhiChu ?? "";
-                    rowIdx++;
+                    detailRows.Add((stt++, p, null));
                 }
             }
-            ws.Columns().AdjustToContents();
 
-            using var stream = new System.IO.MemoryStream();
-            workbook.SaveAs(stream);
-            var content = stream.ToArray();
-            return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"ChiTietNhapHang_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+            var bytes = ExcelHelper.Export("ChiTietNhapHang", detailRows, col => col
+                .AddCenter("STT", x => x.Stt)
+                .AddCenter("Mã nhập hàng", x => x.Item.MaPhieuHienThi)
+                .AddDateTime("Thời gian", x => x.Item.NgayLap)
+                .AddText("Kho nhập", x => x.Item.TenKho)
+                .AddText("Nhà cung cấp", x => x.Item.TenNcc ?? "")
+                .AddText("Người tạo", x => x.Item.TenNguoiLap)
+                .AddCenter("Số hóa đơn", x => x.Item.SoHoaDon ?? "")
+                .AddCenter("Mã hàng", x => x.Line?.MaHangNoiBo ?? "")
+                .AddText("Tên hàng", x => x.Line?.TenHang ?? "(Phiếu chưa có danh sách hàng)")
+                .AddCenter("ĐVT", x => x.Line?.TenDvt ?? "")
+                .AddNumber("Số lượng", x => x.Line?.SoLuong ?? 0)
+                .AddCurrency("Đơn giá", x => x.Line?.DonGiaNhap ?? 0)
+                .AddCurrency("Giảm giá", x => x.Line?.GiamGia ?? 0)
+                .AddCurrency("Thành tiền", x => x.Line?.ThanhTien ?? 0)
+                .AddCenter("Trạng thái", x => x.Item.TenTrangThai)
+                .AddText("Ghi chú", x => x.Item.GhiChu ?? "")
+            );
+
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"ChiTietNhapHang_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
         else
         {
-            var ws = workbook.Worksheets.Add("DanhSachNhapHang");
-            var headers = new[]
-            {
-                "STT", "Mã nhập hàng", "Thời gian", "Kho nhập", "Mã NCC", "Nhà cung cấp",
-                "Người tạo", "Người nhập", "Số hóa đơn", "Tổng tiền hàng", "Giảm giá", "Cần trả NCC",
-                "Trạng thái", "Ghi chú"
-            };
+            var summaryRows = model.PagedData.Items.Select((p, idx) => (Stt: idx + 1, Item: p));
+            var bytes = ExcelHelper.Export("DanhSachNhapHang", summaryRows, col => col
+                .AddCenter("STT", x => x.Stt)
+                .AddCenter("Mã nhập hàng", x => x.Item.MaPhieuHienThi)
+                .AddDateTime("Thời gian", x => x.Item.NgayLap)
+                .AddText("Kho nhập", x => x.Item.TenKho)
+                .AddCenter("Mã NCC", x => x.Item.MaNcc ?? "")
+                .AddText("Nhà cung cấp", x => x.Item.TenNcc ?? "")
+                .AddText("Người tạo", x => x.Item.TenNguoiLap)
+                .AddText("Người nhập", x => x.Item.TenNguoiXacNhan ?? "")
+                .AddCenter("Số hóa đơn", x => x.Item.SoHoaDon ?? "")
+                .AddCurrency("Tổng tiền hàng", x => x.Item.TongTien)
+                .AddCurrency("Giảm giá", x => x.Item.GiamGia)
+                .AddCurrency("Cần trả NCC", x => x.Item.CanTraNcc)
+                .AddCenter("Trạng thái", x => x.Item.TenTrangThai)
+                .AddText("Ghi chú", x => x.Item.GhiChu ?? "")
+            );
 
-            for (int i = 0; i < headers.Length; i++)
-            {
-                ws.Cell(1, i + 1).Value = headers[i];
-            }
-            ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
-            ws.Row(1).Height = 28;
-
-            int rowIdx = 2;
-            int stt = 1;
-            foreach (var p in model.PagedData.Items)
-            {
-                ws.Cell(rowIdx, 1).Value = stt++;
-                ws.Cell(rowIdx, 2).Value = p.MaPhieuHienThi;
-                ws.Cell(rowIdx, 3).Value = p.NgayLap.ToString("dd/MM/yyyy HH:mm");
-                ws.Cell(rowIdx, 4).Value = p.TenKho;
-                ws.Cell(rowIdx, 5).Value = p.MaNcc ?? "";
-                ws.Cell(rowIdx, 6).Value = p.TenNcc ?? "";
-                ws.Cell(rowIdx, 7).Value = p.TenNguoiLap;
-                ws.Cell(rowIdx, 8).Value = p.TenNguoiXacNhan ?? "";
-                ws.Cell(rowIdx, 9).Value = p.SoHoaDon ?? "";
-                ws.Cell(rowIdx, 10).Value = p.TongTien;
-                ws.Cell(rowIdx, 11).Value = p.GiamGia;
-                ws.Cell(rowIdx, 12).Value = p.CanTraNcc;
-                ws.Cell(rowIdx, 13).Value = p.TenTrangThai;
-                ws.Cell(rowIdx, 14).Value = p.GhiChu ?? "";
-                rowIdx++;
-            }
-            ws.Columns().AdjustToContents();
-
-            using var stream = new System.IO.MemoryStream();
-            workbook.SaveAs(stream);
-            var content = stream.ToArray();
-            return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachNhapHang_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachNhapHang_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
     }
 

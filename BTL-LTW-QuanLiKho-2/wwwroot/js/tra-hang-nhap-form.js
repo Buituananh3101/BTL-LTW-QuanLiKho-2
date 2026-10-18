@@ -40,166 +40,34 @@ $(function () {
 
     function p2(n) { return String(n).padStart(2, '0'); }
 
-    /* ===== 2. POPUP CHỌN NGÀY GIỜ CHUẨN KIỂM TỒN (.dtpop) ===== */
-    const $fDateInp = $('#fDateInp');
+    /* ===== 2. POPUP CHỌN NGÀY GIỜ (LEGO KIOTDATETIMEPICKER) ===== */
     const $fDateIso = $('#fDateIso');
-    const $dtPop = $('#dtPop');
-    let createdDate = new Date();
-
-    if ($fDateIso.length && $fDateIso.val()) {
-        const d = new Date($fDateIso.val());
-        if (!isNaN(d.getTime())) createdDate = d;
-    } else if ($fDateInp.length && $fDateInp.val()) {
-        const parts = $fDateInp.val().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
-        if (parts) {
-            const parsed = new Date(+parts[3], +parts[2] - 1, +parts[1], +parts[4], +parts[5]);
-            if (!isNaN(parsed.getTime())) createdDate = parsed;
-        }
-    }
-
-    const DOW = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-    const DT = { y: createdDate.getFullYear(), m: createdDate.getMonth() };
-
-    function sod(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
-    function dFull(d) {
-        return `${p2(d.getDate())}/${p2(d.getMonth() + 1)}/${d.getFullYear()} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
-    }
-    function dTime(d) {
-        return `${p2(d.getHours())}:${p2(d.getMinutes())}`;
-    }
     function formatLocalIso(d) {
         if (!d || isNaN(d.getTime())) return '';
+        const p2 = n => String(n).padStart(2, '0');
         return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}T${p2(d.getHours())}:${p2(d.getMinutes())}:00`;
     }
 
-    function syncDateDisplay() {
-        $fDateInp.val(dFull(createdDate));
-        $fDateIso.val(formatLocalIso(createdDate));
+    let createdDate = new Date();
+    if ($fDateIso.length && $fDateIso.val()) {
+        const d = new Date($fDateIso.val());
+        if (!isNaN(d.getTime())) createdDate = d;
     }
 
-    function calHTML(y, m, sel) {
-        const first = new Date(y, m, 1), pad = (first.getDay() + 6) % 7, days = new Date(y, m + 1, 0).getDate(), today = sod(new Date()).getTime();
-        let h = '<div class="cal"><div class="cal-g">' + DOW.map(x => `<span class="dow">${x}</span>`).join('');
-        for (let i = 0; i < pad; i++) h += '<span></span>';
-        for (let d = 1; d <= days; d++) {
-            const t = new Date(y, m, d).getTime();
-            let c = 'd';
-            if (t === today) c += ' today';
-            if (t === sel) c += ' sel';
-            h += `<button type="button" class="${c}" data-t="${t}">${d}</button>`;
-        }
-        return h + '</div></div>';
-    }
-
-    function paintDt() {
-        if (!$dtPop.length) return;
-        const sel = sod(createdDate).getTime(), times = [];
-        for (let h = 0; h < 24; h++) {
-            for (const m of [0, 30]) times.push(`${p2(h)}:${p2(m)}`);
-        }
-        const curH = createdDate.getHours();
-        const curM = createdDate.getMinutes();
-        const curSlot = `${p2(curH)}:${curM < 30 ? '00' : '30'}`;
-
-        $dtPop.html(`
-            <div style="flex:1">
-                <div class="dtnav">
-                    <button type="button" class="rp-nav" data-dn="-1"><i class="bi bi-chevron-left"></i></button>
-                    <span>Tháng ${DT.m + 1}/${DT.y}</span>
-                    <button type="button" class="rp-nav" data-dn="1"><i class="bi bi-chevron-right"></i></button>
-                </div>
-                ${calHTML(DT.y, DT.m, sel)}
-            </div>
-            <div class="times">
-                ${times.map(t => `<button type="button" data-tm="${t}" class="${t === curSlot ? 'cur' : ''}">${t}</button>`).join('')}
-            </div>
-        `);
-        const $times = $dtPop.find('.times');
-        const $cur = $times.find('.cur');
-        if ($times.length && $cur.length) {
-            $times[0].scrollTop = $cur[0].offsetTop - ($times[0].clientHeight / 2) + ($cur[0].clientHeight / 2);
-        }
-    }
-
-    if ($fDateInp.length && $dtPop.length && !isReadOnly) {
-        let lastFocusTime = 0;
-
-        const openDatePicker = () => {
-            DT.y = createdDate.getFullYear();
-            DT.m = createdDate.getMonth();
-            paintDt();
-            $('.pop.show').not($dtPop).removeClass('show');
-            $dtPop.addClass('show');
-        };
-
-        $fDateInp.on('focus', function () {
-            lastFocusTime = Date.now();
-            openDatePicker();
-        });
-
-        $fDateInp.on('click', function (e) {
-            e.stopPropagation();
-            if (Date.now() - lastFocusTime < 300) {
-                return;
+    const dtPicker = (window.KiotFilter && typeof KiotFilter.initDateTimePicker === 'function')
+        ? KiotFilter.initDateTimePicker({
+            inputSelector: '#fDateInp',
+            popupSelector: '#dtPop',
+            isReadOnly: isReadOnly,
+            onChange: function (d, text, iso) {
+                createdDate = d;
+                if ($fDateIso.length) $fDateIso.val(iso || formatLocalIso(d));
             }
-            if ($dtPop.hasClass('show')) {
-                $dtPop.removeClass('show');
-            } else {
-                openDatePicker();
-            }
-        });
-
-        $fDateInp.on('change', function () {
-            const m = $(this).val().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
-            if (m) {
-                const d = new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5]);
-                if (!isNaN(d.getTime())) {
-                    createdDate = d;
-                }
-            }
-            syncDateDisplay();
-        });
-
-        $dtPop.on('click', function (e) {
-            e.stopPropagation();
-            const $n = $(e.target).closest('[data-dn]');
-            const $d = $(e.target).closest('button.d');
-            const $t = $(e.target).closest('[data-tm]');
-
-            if ($n.length) {
-                const step = parseInt($n.data('dn'), 10);
-                const x = new Date(DT.y, DT.m + step, 1);
-                DT.y = x.getFullYear();
-                DT.m = x.getMonth();
-                paintDt();
-            }
-            if ($d.length) {
-                const t = parseInt($d.data('t'), 10);
-                const x = new Date(t);
-                createdDate = new Date(x.getFullYear(), x.getMonth(), x.getDate(), createdDate.getHours(), createdDate.getMinutes());
-                syncDateDisplay();
-                paintDt();
-            }
-            if ($t.length) {
-                const parts = $t.data('tm').split(':');
-                createdDate = new Date(createdDate.getFullYear(), createdDate.getMonth(), createdDate.getDate(), parseInt(parts[0], 10), parseInt(parts[1], 10));
-                syncDateDisplay();
-                paintDt();
-                $dtPop.removeClass('show');
-            }
-        });
-
-        $(document).on('click', function (e) {
-            if (!$(e.target).closest('#dtPop, #fDateInp').length) {
-                $dtPop.removeClass('show');
-            }
-        });
-
-        $(document).on('keydown', function (e) {
-            if (e.key === 'Escape' && $dtPop.hasClass('show')) {
-                $dtPop.removeClass('show');
-            }
-        });
+        })
+        : null;
+    if (dtPicker) {
+        createdDate = dtPicker.getDate();
+        if ($fDateIso.length) $fDateIso.val(dtPicker.getISO() || formatLocalIso(createdDate));
     }
 
     /* ===== 2.1. CHỌN NGƯỜI TRẢ TỪ DROPDOWN TÙY CHỈNH (ĐỒNG BỘ CHUYỂN KHO & KIOTVIET) ===== */

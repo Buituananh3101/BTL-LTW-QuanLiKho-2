@@ -80,4 +80,9 @@ Hệ thống đóng gói các thành phần lặp lại thành các "mảnh ghé
     - Cú pháp: `KiotFilter.initRowDetail({ tableSelector: '#myTable', rowSelector: 'tr.product-row', onTabChange: ... })` (click dòng bung drawer êm ái, chuyển tab, tự đồng bộ `colspan` và `.last-visible-col`).
 14. **Thao tác Thực thể Danh mục (`KiotFilter.initEntityActions`)**:
     - Cú pháp: `KiotFilter.initEntityActions({ editSelector: '...', deleteSelector: '...', statusSelector: '...', onEdit: ..., onDelete: ..., onToggleStatus: ... })` (chuẩn hóa sự kiện Sửa, Xóa, Đổi trạng thái).
+15. **Chọn Ngày Giờ Chứng Từ (`KiotFilter.initDateTimePicker`)**:
+    - HTML: `<input id="fDate" class="f-date" />` + `<div id="dtPop" class="pop dtpop"></div>`
+    - Client JS: `KiotFilter.initDateTimePicker({ inputSelector: '#fDate', popupSelector: '#dtPop', onChange: (d, text, iso) => ... })` (lịch tháng 2 chiều, slot giờ 24h, tự đồng bộ ô input `dd/MM/yyyy HH:mm`).
+16. **Bộ máy Xuất Excel ClosedXML (`ExcelHelper.Export` & `ExcelHelper.ExportToExcel`)**:
+    - Cú pháp: `ExcelHelper.Export("TenSheet", data, col => col.AddCenter("Mã", x => x.Ma).AddDateTime("Ngày", x => x.Ngay).AddNumber("SL", x => x.SL).AddCurrency("Tiền", x => x.Tien))` (tự động Header xanh KiotViet, kẻ viền bảng, format số/tiền/ngày, co giãn cột).
 

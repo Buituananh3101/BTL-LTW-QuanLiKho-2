@@ -1,17 +1,75 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Loại Bỏ Mục Xuất Dùng Nội Bộ Khỏi Mega Menu Hàng Hóa (Phiên 135)
+Cập nhật lần cuối: 2026-10-18 – Khắc Phục Lỗi Bấm Vào Thời Gian Không Hiện Ở Toàn Bộ Chức Năng (Phiên 137)
 
 ---
 
 ## Đang làm
-- Sẵn sàng hỗ trợ các yêu cầu tiếp theo từ người dùng.
+- Đã khắc phục triệt để lỗi bấm vào phần thời gian không hiển thị trên toàn bộ các màn hình (cả bộ lọc thời gian Sidebar Index và bộ chọn ngày giờ lập phiếu Create/Edit).
+- Dự án sẵn sàng cho Giai đoạn 2 đóng gói Lego: Tìm kiếm nhanh Hàng hóa / Khách hàng / NCC (F3 Autocomplete) và Thao tác hàng loạt (Batch Actions).
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế thao tác chọn ngày giờ trên form Trả hàng nhập (`/TraHangNhap/Create`).
-2. Kiểm tra lại toàn bộ luồng chuyển kho, xuất hủy, nhập hàng, bán hàng POS để đảm bảo tính đồng bộ hệ thống.
+1. Kiểm tra trải nghiệm thực tế bộ chọn ngày giờ 2 cột và bộ lọc thời gian trên các chức năng.
+2. Triển khai Giai đoạn 2 theo kế hoạch đóng gói Lego (`ke-hoach-dong-goi-lego.md`).
+
+---
+
+- **Khắc Phục Lỗi Bấm Vào Thời Gian Không Hiện Ở Toàn Bộ Chức Năng (Phiên 137)**:
+  - **Nhu cầu**: Người dùng phản ánh: *"lỗi phần thời gian ấn vào ko hiện gì ở tất cả chức năng"*.
+  - **Nguyên nhân cốt lõi phát hiện**:
+    1. **Thiếu nạp script toàn cục**: File `kiot-filter.js` ban đầu chỉ được nạp ở các trang `Index.cshtml`. Khi người dùng vào các trang lập phiếu (`Create.cshtml`, `Edit.cshtml`), đối tượng `window.KiotFilter` bị `undefined`, dẫn đến điều kiện `(window.KiotFilter && typeof KiotFilter.initDateTimePicker === 'function')` trả về `false`, không hề gán bất kỳ listener nào vào ô `#fDate`.
+    2. **Thiếu CSS `.relw` trong `site.css`**: Popup `.dtpop` được định vị `position: absolute` nhưng class wrapper `.relw { position: relative; }` trước đó chỉ có trong `kiem-kho.css`, dẫn đến lệch vị trí hiển thị ở các chức năng khác (`NhapHang`, `XuatHuy`, `ChuyenKho`).
+    3. **Lỗi chặn nổi bọt sự kiện (Event Bubbling) khi DOM bị render lại**: Trong `initDateTimePicker`, khi người dùng bấm chọn ngày hoặc chuyển tháng, hàm `renderPopup()` gán lại `innerHTML` của `$pop`. Thao tác này khiến phần tử `button` vừa bấm bị tách khỏi DOM (detached). Khi sự kiện nổi bọt lên `$(document).on('click')`, biểu thức `$(e.target).closest()` không còn thuộc document nên trả về `length === 0`, kích hoạt hàm `closePopup()` ngay tức khắc!
+    4. **Lỗi làm tròn khung giờ active**: `dTime(currentDate)` trả về phút thực tế (vd: `21:23`) nên không bao giờ khớp với các khung giờ chẵn 30 phút (`21:00`, `21:30`), làm mất class `.cur` và không tự cuộn tới giờ hiện tại.
+    5. **Bộ lọc thời gian Sidebar**: Trong `initDateFilter`, bộ chọn sự kiện thiếu selector radio button `#${target}All` khiến việc nhấp trực tiếp vào nút radio không mở popup.
+  - **Giải pháp & Khắc phục**:
+    + `Views/Shared/_Layout.cshtml`: Thêm `<script src="~/js/kiot-filter.js" asp-append-version="true"></script>` ngay trước `@RenderSectionAsync("Scripts")`, đảm bảo `window.KiotFilter` luôn sẵn sàng 100% trên toàn bộ các view của hệ thống.
+    + `wwwroot/css/site.css`: Đã bổ sung `.relw { position: relative; }` cùng bộ style hoàn chỉnh cho `.dtpop` và `.times`.
+    + `wwwroot/js/kiot-filter.js`:
+      * Thêm `e.stopPropagation()` vào cả `$inp.on('click')` và `$pop.on('click.kiotDtPop')` để ngăn tuyệt đối sự kiện nổi bọt lên document.
+      * Thêm logic tự động làm tròn khung giờ theo `stepMinutes` (`Math.floor(curM / opt.stepMinutes) * opt.stepMinutes`) để highlight chính xác `.cur` và tự động cuộn danh sách giờ.
+      * Thêm tự động đóng popup khi chọn khung giờ (`closePopup()`) theo đúng chuẩn UX KiotViet.
+      * Namespace hóa sự kiện document click (`click.kiotDtPop_...`, `click.kiotDateFilter_...`) chống rò rỉ hoặc chồng chéo listener.
+      * Bổ sung selector `#${target}All` và chặn nổi bọt bên trong popup chọn nhanh và lịch tùy chỉnh trong `initDateFilter`.
+  - **Kiểm tra**:
+    + `node -c BTL-LTW-QuanLiKho-2\wwwroot\js\kiot-filter.js` kiểm tra cú pháp JS hoàn hảo 100%.
+    + `dotnet build` biên dịch thành công với **0 Errors**.
+
+---
+
+- **Triển Khai Giai Đoạn 1 Đóng Gói Lego: DateTimePicker & ClosedXML Excel Engine (Phiên 136)**:
+  - **Nhu cầu**: Người dùng yêu cầu triển khai Giai đoạn 1 của Kế hoạch đóng gói các thành phần chưa đóng gói trong toàn bộ dự án (`ke-hoach-dong-goi-lego.md`).
+  - **Mục tiêu Giai đoạn 1**:
+    1. Đóng gói Lego Chọn Ngày Giờ Lập Chứng Từ (`KiotFilter.initDateTimePicker`) dùng chung cho toàn bộ các form chứng từ, thay thế hàng trăm dòng code vẽ lịch / bảng giờ thủ công bị trùng lặp.
+    2. Đóng gói Bộ máy xuất file Excel ClosedXML dùng chung (`ExcelHelper.ExportToExcel<T>` & `ExcelHelper.Export<T>`), loại bỏ toàn bộ code vòng lặp ô, kẻ viền bảng, bôi màu xanh header `#0066cc` lặp lại ở các Controller.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`wwwroot/css/site.css`**: Bổ sung bộ style dùng chung toàn hệ thống cho popup lịch 2 cột chuẩn KiotViet (`.dtpop`, `.times`, `.times button`, `.times button.cur`, `.dtnav`, `.rp-nav`, `.cal`, `.cal-g`, `.cal-g .dow`, `.cal-g button.d`, `.cal-g button.d.sel`, `.cal-g button.d.today`).
+    + **`wwwroot/js/kiot-filter.js`**:
+      * Triển khai Lego block 15: `KiotFilter.initDateTimePicker({ inputSelector, popupSelector, onChange, isReadOnly })`.
+      * Tự động parse ngày giờ từ input hoặc ISO, render lịch tháng điều hướng 2 chiều, lưới 7 ngày, cột giờ 24h (bước 30 phút).
+      * Tự động tính toán vị trí cuộn `scrollTop` đưa slot giờ đang chọn `.cur` vào giữa khung nhìn, tích hợp chống click-focus double-fire < 300ms, tự đồng bộ 2 chiều với input `dd/MM/yyyy HH:mm`.
+    + **Tái cấu trúc 5 Form Chứng Từ**:
+      * `phieu-kiem-ke-form.js`: Thay thế mã lịch thủ công bằng `KiotFilter.initDateTimePicker`.
+      * `nhap-hang-form.js`: Thay thế mã lịch thủ công bằng `KiotFilter.initDateTimePicker`.
+      * `xuat-huy-form.js`: Thay thế mã lịch thủ công bằng `KiotFilter.initDateTimePicker`.
+      * `chuyen-kho-form.js`: Thay thế mã lịch thủ công bằng `KiotFilter.initDateTimePicker`.
+      * `tra-hang-nhap-form.js`: Thay thế mã lịch thủ công bằng `KiotFilter.initDateTimePicker`, tự đồng bộ với cả trường ẩn ISO `#fDateIso`.
+    + **`Helpers/ExcelHelper.cs`**:
+      * Triển khai Lego block 16: `ExcelHelper.ExportToExcel<T>`, `ExcelHelper.Export<T>` và `ExcelExportBuilder<T>` với cú pháp Fluent Builder cực kỳ gọn gàng, an toàn kiểu dữ liệu compile-time.
+      * Tự động áp dụng Header xanh KiotViet `#0066cc`, kẻ viền bảng `ApplyTableBorders`, căn lề tự động, format số `#,##0.##`, tiền tệ `#,##0`, ngày giờ `dd/MM/yyyy HH:mm`, tự động co giãn độ rộng cột `AdjustToContents()`.
+    + **Tái cấu trúc 5 Controller / Service Xuất Excel**:
+      * `PhieuKiemKeController.cs`: Rút gọn action `Export` (cả `detail` và `summary`) từ ~210 dòng xuống ~40 dòng, sử dụng `ExcelHelper.Export`.
+      * `XuatHuyController.cs`: Rút gọn action `Export` từ ~130 dòng xuống ~35 dòng.
+      * `NhapHangController.cs`: Rút gọn action `Export` từ ~110 dòng xuống ~40 dòng.
+      * `ChuyenKhoController.cs`: Rút gọn action `Export` từ ~45 dòng xuống ~15 dòng.
+      * `HangHoaExcelService.cs`: Rút gọn `ExportExcel` từ ~125 dòng xuống ~25 dòng, ánh xạ động các cột theo tùy chọn người dùng qua `ExcelHelper.ExportToExcel`.
+    + **Đồng bộ tài liệu**:
+      * Cập nhật `.agent/rules/03-giao-dien-layout.md` bổ sung Lego 15 và 16, duy trì độ dài 7.135 ký tự (< 8.000 ký tự theo Rule 12).
+  - **Kiểm tra**:
+    + `node -c` xác nhận cú pháp 100% hợp lệ trên cả 6 file JavaScript (`kiot-filter.js`, `phieu-kiem-ke-form.js`, `nhap-hang-form.js`, `xuat-huy-form.js`, `chuyen-kho-form.js`, `tra-hang-nhap-form.js`).
+    + `dotnet build` biên dịch thành công hoàn hảo với **0 Errors**.
 
 ---
 

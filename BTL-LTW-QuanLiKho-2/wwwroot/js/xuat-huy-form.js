@@ -55,128 +55,19 @@
         recent: []
     };
 
-    /* ===== CHỌN NGÀY GIỜ LẬP PHIẾU (POPUP LỊCH 2 THÁNG) ===== */
-    const DOW = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-    const DT = { y: FM.created.getFullYear(), m: FM.created.getMonth() };
-
-    function calHTML(y, m, sel) {
-        const first = new Date(y, m, 1), pad = (first.getDay() + 6) % 7, days = new Date(y, m + 1, 0).getDate(), today = sod(new Date()).getTime();
-        let h = `<div class="cal"><div class="cal-g">` + DOW.map(x => `<span class="dow">${x}</span>`).join('');
-        for (let i = 0; i < pad; i++) h += '<span></span>';
-        for (let d = 1; d <= days; d++) {
-            const t = new Date(y, m, d).getTime();
-            let c = 'd';
-            if (t === today) c += ' today';
-            if (t === sel) c += ' sel';
-            h += `<button type="button" class="${c}" data-t="${t}">${d}</button>`;
-        }
-        return h + '</div></div>';
+    // ===== CHỌN NGÀY GIỜ LẬP PHIẾU (LEGO KIOTDATETIMEPICKER) =====
+    if (window.KiotFilter && typeof KiotFilter.initDateTimePicker === 'function') {
+        KiotFilter.initDateTimePicker({
+            inputSelector: '#fDate',
+            popupSelector: '#dtPop',
+            initialDate: FM.created,
+            isReadOnly: isReadOnly,
+            onChange: function (d) {
+                FM.created = d;
+            }
+        });
     }
 
-    function paintDt() {
-        const pop = $('#dtPop');
-        if (!pop) return;
-        const sel = sod(FM.created).getTime(), times = [];
-        for (let h = 0; h < 24; h++) {
-            for (const m of [0, 30]) times.push(`${p2(h)}:${p2(m)}`);
-        }
-        const cur = dTime(FM.created);
-        pop.innerHTML = `
-            <div style="flex:1">
-                <div class="dtnav">
-                    <button type="button" class="rp-nav" data-dn="-1"><i class="bi bi-chevron-left"></i></button>
-                    <span>Tháng ${DT.m + 1}/${DT.y}</span>
-                    <button type="button" class="rp-nav" data-dn="1"><i class="bi bi-chevron-right"></i></button>
-                </div>
-                ${calHTML(DT.y, DT.m, sel)}
-            </div>
-            <div class="times">
-                ${times.map(t => `<button type="button" data-tm="${t}" class="${t === cur ? 'cur' : ''}">${t}</button>`).join('')}
-            </div>`;
-        const timesEl = $('.times', pop);
-        const curEl = $('.times .cur', pop);
-        if (timesEl && curEl) {
-            timesEl.scrollTop = curEl.offsetTop - (timesEl.clientHeight / 2) + (curEl.clientHeight / 2);
-        }
-    }
-
-    const fDate = $('#fDate');
-    const dtPop = $('#dtPop');
-    if (fDate && dtPop && !isReadOnly) {
-        let lastFocusTime = 0;
-
-        const openDatePicker = () => {
-            DT.y = FM.created.getFullYear();
-            DT.m = FM.created.getMonth();
-            paintDt();
-            $$('.pop.show').forEach(p => {
-                if (p !== dtPop) p.classList.remove('show');
-            });
-            dtPop.classList.add('show');
-        };
-
-        fDate.addEventListener('focus', () => {
-            lastFocusTime = Date.now();
-            openDatePicker();
-        });
-
-        fDate.addEventListener('click', e => {
-            e.stopPropagation();
-            if (Date.now() - lastFocusTime < 300) {
-                return;
-            }
-            if (dtPop.classList.contains('show')) {
-                dtPop.classList.remove('show');
-            } else {
-                openDatePicker();
-            }
-        });
-
-        fDate.addEventListener('change', () => {
-            const m = fDate.value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
-            if (m) {
-                const d = new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5]);
-                if (!isNaN(d.getTime())) {
-                    FM.created = d;
-                }
-            }
-            fDate.value = `${dDate(FM.created)} ${dTime(FM.created)}`;
-        });
-
-        dtPop.addEventListener('click', e => {
-            e.stopPropagation();
-            const nav = e.target.closest('.rp-nav');
-            if (nav) {
-                const dn = parseInt(nav.dataset.dn);
-                DT.m += dn;
-                if (DT.m < 0) { DT.m = 11; DT.y--; }
-                if (DT.m > 11) { DT.m = 0; DT.y++; }
-                paintDt();
-                return;
-            }
-            const dayBtn = e.target.closest('button.d');
-            if (dayBtn) {
-                const t = parseInt(dayBtn.dataset.t);
-                const d = new Date(t);
-                FM.created.setFullYear(d.getFullYear(), d.getMonth(), d.getDate());
-                fDate.value = `${dDate(FM.created)} ${dTime(FM.created)}`;
-                paintDt();
-                return;
-            }
-            const timeBtn = e.target.closest('button[data-tm]');
-            if (timeBtn) {
-                const [h, m] = timeBtn.dataset.tm.split(':').map(Number);
-                FM.created.setHours(h, m, 0, 0);
-                fDate.value = `${dDate(FM.created)} ${dTime(FM.created)}`;
-                paintDt();
-                // Không tự tắt dtPop, chỉ tắt khi ấn ra ngoài
-            }
-        });
-
-        document.addEventListener('click', () => {
-            dtPop.classList.remove('show');
-        });
-    }
 
     /* ===== BẢNG LƯỚI HÀNG HÓA VÀ TỔNG HỢP ===== */
     function rowHTML(l, i) {
