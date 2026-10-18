@@ -591,15 +591,65 @@ public class ChuyenKhoController : BaseKhoController
         return Json(result);
     }
 
-    // 12. Xuất file Excel danh sách chuyển kho
+    // 12. Xuất file Excel danh sách hoặc chi tiết chuyển kho
     [HttpGet]
-    public async Task<IActionResult> Export(ChuyenKhoFilterVM filter)
+    public async Task<IActionResult> Export(string? type, ChuyenKhoFilterVM filter, int? id = null)
     {
         filter.Page = 1;
         filter.PageSize = 10000;
         var model = await BuildIndexViewModelAsync(filter);
 
-        var bytes = ExcelHelper.Export("ChuyenHang", model.PagedData.Items, col => col
+        if (id.HasValue && id.Value > 0)
+        {
+            model.PagedData.Items = model.PagedData.Items.Where(p => p.MaPhieuChuyen == id.Value).ToList();
+        }
+
+        bool isDetail = string.Equals(type, "detail", StringComparison.OrdinalIgnoreCase);
+
+        if (isDetail)
+        {
+            var detailRows = new List<(int Stt, ChuyenKhoListItemVM Item, ChuyenKhoLineVM? Line)>();
+            int stt = 1;
+            foreach (var p in model.PagedData.Items)
+            {
+                if (p.Lines.Any())
+                {
+                    foreach (var line in p.Lines)
+                    {
+                        detailRows.Add((stt++, p, line));
+                    }
+                }
+                else
+                {
+                    detailRows.Add((stt++, p, null));
+                }
+            }
+
+            var bytes = ExcelHelper.Export("ChiTietChuyenHang", detailRows, col => col
+                .AddCenter("STT", x => x.Stt)
+                .AddCenter("Mã chuyển hàng", x => x.Item.MaPhieuHienThi)
+                .AddDateTime("Thời gian tạo", x => x.Item.NgayLap)
+                .AddText("Kho gửi", x => x.Item.TenKhoNguon)
+                .AddText("Kho nhận", x => x.Item.TenKhoDich)
+                .AddCenter("Mã hàng", x => x.Line?.MaHangNoiBo ?? "")
+                .AddText("Tên hàng", x => x.Line?.TenHang ?? "(Phiếu chưa có danh sách hàng)")
+                .AddCenter("ĐVT", x => x.Line?.TenDvt ?? "")
+                .AddNumber("Số lượng chuyển", x => x.Line?.SoLuong ?? 0)
+                .AddNumber("Số lượng nhận", x => x.Line?.SoLuongNhan ?? (x.Item.TrangThai == "DA_NHAN" ? x.Line?.SoLuong ?? 0 : 0))
+                .AddCurrency("Đơn giá chuyển", x => x.Line?.DonGiaChuyen ?? 0)
+                .AddCurrency("Thành tiền", x => x.Line?.ThanhTien ?? 0)
+                .AddCenter("Trạng thái", x => x.Item.TenTrangThai)
+                .AddText("Ghi chú", x => x.Item.GhiChu ?? "")
+            );
+
+            string fileDetailName = id.HasValue && model.PagedData.Items.Any()
+                ? $"ChiTietChuyenHang_{model.PagedData.Items.First().MaPhieuHienThi}_{DateTime.Now:yyyyMMdd_HHmm}.xlsx"
+                : $"ChiTietChuyenHang_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDetailName);
+        }
+
+        var listBytes = ExcelHelper.Export("ChuyenHang", model.PagedData.Items, col => col
             .AddCenter("Mã chuyển hàng", x => x.MaPhieuHienThi)
             .AddDateTime("Thời gian tạo", x => x.NgayLap)
             .AddText("Kho gửi", x => x.TenKhoNguon)
@@ -614,7 +664,7 @@ public class ChuyenKhoController : BaseKhoController
             .AddText("Ghi chú", x => x.GhiChu ?? "")
         );
 
-        return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachChuyenHang_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+        return File(listBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachChuyenHang_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
     }
 
     #region Private Helpers

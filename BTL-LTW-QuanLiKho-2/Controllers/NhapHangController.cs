@@ -612,7 +612,133 @@ public class NhapHangController : BaseKhoController
         });
     }
 
-    // 14. Xuất file Excel danh sách hoặc chi tiết phiếu nhập
+    // 14. Tải file mẫu nhập hàng (.xlsx)
+    [HttpGet]
+    public IActionResult DownloadTemplate()
+    {
+        using var workbook = new XLWorkbook();
+        var ws = workbook.Worksheets.Add("MauNhapHang");
+
+        var headers = new[] { "Mã hàng (*)", "Số lượng (*)", "Đơn giá nhập (*)", "Giảm giá", "Ghi chú" };
+        for (int i = 0; i < headers.Length; i++)
+        {
+            ws.Cell(1, i + 1).Value = headers[i];
+        }
+
+        ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
+        ws.Row(1).Height = 26;
+
+        // Dữ liệu mẫu
+        ws.Cell(2, 1).Value = "HH000001";
+        ws.Cell(2, 2).Value = 10;
+        ws.Cell(2, 3).Value = 25000;
+        ws.Cell(2, 4).Value = 0;
+        ws.Cell(2, 5).Value = "Hàng nhập đợt 1";
+
+        ws.Cell(3, 1).Value = "HH000002";
+        ws.Cell(3, 2).Value = 24;
+        ws.Cell(3, 3).Value = 15000;
+        ws.Cell(3, 4).Value = 5000;
+        ws.Cell(3, 5).Value = "";
+
+        ExcelHelper.ApplyTableBorders(ws.Range(1, 1, 3, headers.Length));
+        ws.Columns().AdjustToContents();
+
+        using var ms = new MemoryStream();
+        workbook.SaveAs(ms);
+        return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_Nhap_Hang_KiotViet.xlsx");
+    }
+
+    // 15. Nhập danh sách hàng từ file Excel (Server-side ClosedXML)
+    [HttpPost]
+    public async Task<IActionResult> ImportExcel(IFormFile file, int warehouseId)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest(new { success = false, message = "Vui lòng chọn file Excel để nhập." });
+        }
+
+        warehouseId = warehouseId > 0 ? warehouseId : CurrentWarehouseId;
+
+        try
+        {
+            using var stream = file.OpenReadStream();
+            using var workbook = new XLWorkbook(stream);
+            var ws = workbook.Worksheets.FirstOrDefault();
+            if (ws == null)
+            {
+                return BadRequest(new { success = false, message = "File Excel không có dữ liệu." });
+            }
+
+            var stockMap = await _context.VwTonKhoHienTais
+                .Where(s => s.MaKho == warehouseId)
+                .ToDictionaryAsync(s => s.MaHang, s => s.SoLuongTon ?? 0);
+
+            var allHangHoa = await _context.HangHoas
+                .Include(h => h.MaDvtNavigation)
+                .ToDictionaryAsync(h => h.MaHangNoiBo.Trim().ToUpper(), h => h);
+
+            var items = new List<object>();
+            int lastRow = ws.LastRowUsed()?.RowNumber() ?? 0;
+
+            for (int r = 2; r <= lastRow; r++)
+            {
+                string code = ws.Cell(r, 1).GetString().Trim();
+                if (string.IsNullOrEmpty(code)) continue;
+
+                if (!allHangHoa.TryGetValue(code.ToUpper(), out var hang))
+                {
+                    if (int.TryParse(code.Replace("HH", "", StringComparison.OrdinalIgnoreCase).Replace("SP", "", StringComparison.OrdinalIgnoreCase), out int hhId))
+                    {
+                        hang = await _context.HangHoas.Include(h => h.MaDvtNavigation).FirstOrDefaultAsync(h => h.MaHang == hhId);
+                    }
+                }
+
+                if (hang == null) continue;
+
+                decimal sl = 1;
+                if (decimal.TryParse(ws.Cell(r, 2).GetString().Trim(), out var parsedSl) && parsedSl > 0)
+                {
+                    sl = parsedSl;
+                }
+
+                decimal gia = hang.GiaVon > 0 ? hang.GiaVon : hang.GiaBanThamKhao;
+                if (decimal.TryParse(ws.Cell(r, 3).GetString().Trim(), out var parsedGia) && parsedGia >= 0)
+                {
+                    gia = parsedGia;
+                }
+
+                decimal giamGia = 0;
+                if (decimal.TryParse(ws.Cell(r, 4).GetString().Trim(), out var parsedGiam) && parsedGiam >= 0)
+                {
+                    giamGia = parsedGiam;
+                }
+
+                decimal ton = stockMap.TryGetValue(hang.MaHang, out var currentTon) ? currentTon : 0;
+
+                items.Add(new
+                {
+                    maHang = hang.MaHang,
+                    maHangNoiBo = hang.MaHangNoiBo,
+                    tenHang = hang.TenHang,
+                    tenDvt = hang.MaDvtNavigation?.TenDvt ?? "Cái",
+                    soLuong = sl,
+                    donGia = gia,
+                    gia = gia,
+                    giamGia = giamGia,
+                    tonKho = ton
+                });
+            }
+
+            return Ok(new { success = true, items, count = items.Count });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { success = false, message = "Lỗi đọc file Excel: " + ex.Message });
+        }
+    }
+
+    // 16. Xuất file Excel danh sách hoặc chi tiết phiếu nhập
     [HttpGet]
     public async Task<IActionResult> Export(string? type, NhapHangFilterVM filter, int? id = null)
     {

@@ -1333,7 +1333,22 @@
         if (window.KiotToast) {
             window.KiotToast.info('Đang chuẩn bị file dữ liệu Excel...');
         }
-        window.location.href = `/NhaCungCap/Index?export=excel&q=${encodeURIComponent(state.q)}`;
+        const params = new URLSearchParams();
+        if (state.q && state.q.trim()) params.append('Q', state.q.trim());
+        if (state.nhom && state.nhom.length > 0) {
+            params.append('NhomNcc', state.nhom.map(x => x.val).join(','));
+        }
+        if (state.tongMuaTu !== null && state.tongMuaTu !== undefined) params.append('TongMuaTu', state.tongMuaTu);
+        if (state.tongMuaDen !== null && state.tongMuaDen !== undefined) params.append('TongMuaDen', state.tongMuaDen);
+        if (state.noTu !== null && state.noTu !== undefined) params.append('NoTu', state.noTu);
+        if (state.noDen !== null && state.noDen !== undefined) params.append('NoDen', state.noDen);
+        if (state.trangThai) params.append('TrangThai', state.trangThai);
+        if (state.daDanhDau) params.append('DaDanhDau', 'true');
+        if (state.thoiGian) params.append('ThoiGian', state.thoiGian);
+        if (state.fromDate) params.append('FromDate', state.fromDate);
+        if (state.toDate) params.append('ToDate', state.toDate);
+
+        window.location.href = `/NhaCungCap/Export?${params.toString()}`;
     });
 
     // Nút Tải lại bảng

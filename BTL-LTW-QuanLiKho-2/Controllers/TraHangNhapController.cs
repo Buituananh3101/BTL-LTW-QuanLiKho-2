@@ -583,59 +583,84 @@ public class TraHangNhapController : BaseKhoController
         return File(bytes, "text/csv;charset=utf-8", "MauTraHangNhap.csv");
     }
 
-    // 14. Xuất file Excel danh sách phiếu trả
+    // 14. Xuất file Excel danh sách hoặc chi tiết phiếu trả hàng nhập (Chuẩn KiotViet ClosedXML)
     [HttpGet]
-    public async Task<IActionResult> ExportExcel(TraHangNhapFilterVM filter)
+    public async Task<IActionResult> ExportExcel(string? type, TraHangNhapFilterVM filter, int? id = null)
     {
         filter.Page = 1;
         filter.PageSize = 10000;
         var model = await BuildIndexViewModel(filter);
 
-        using var workbook = new XLWorkbook();
-        var worksheet = workbook.Worksheets.Add("TraHangNhap");
-
-        // Headers
-        var headers = new[]
+        if (id.HasValue && id.Value > 0)
         {
-            "Mã trả hàng nhập", "Thời gian", "Nhà cung cấp", "Chi nhánh", "Người trả",
-            "Người tạo", "Tổng số lượng", "Tổng tiền hàng", "Giảm giá", "NCC cần trả",
-            "NCC đã trả", "Ghi chú", "Trạng thái"
-        };
-
-        for (int i = 0; i < headers.Length; i++)
-        {
-            worksheet.Cell(1, i + 1).Value = headers[i];
-            worksheet.Cell(1, i + 1).Style.Font.Bold = true;
-            worksheet.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#E9F1FD");
+            model.PagedData.Items = model.PagedData.Items.Where(p => p.MaPhieuTraHang == id.Value).ToList();
         }
 
-        int row = 2;
-        foreach (var item in model.PagedData.Items)
+        bool isDetail = string.Equals(type, "detail", StringComparison.OrdinalIgnoreCase);
+
+        if (isDetail)
         {
-            worksheet.Cell(row, 1).Value = item.MaPhieuHienThi;
-            worksheet.Cell(row, 2).Value = item.NgayTra.ToString("dd/MM/yyyy HH:mm");
-            worksheet.Cell(row, 3).Value = item.TenNcc ?? "";
-            worksheet.Cell(row, 4).Value = item.TenKho;
-            worksheet.Cell(row, 5).Value = item.TenNguoiTra ?? "";
-            worksheet.Cell(row, 6).Value = item.TenNguoiLap;
-            worksheet.Cell(row, 7).Value = (double)item.TongSoLuong;
-            worksheet.Cell(row, 8).Value = (double)item.TongTienHang;
-            worksheet.Cell(row, 9).Value = (double)item.GiamGia;
-            worksheet.Cell(row, 10).Value = (double)item.CanThuNcc;
-            worksheet.Cell(row, 11).Value = (double)item.DaThuNcc;
-            worksheet.Cell(row, 12).Value = item.GhiChu ?? "";
-            worksheet.Cell(row, 13).Value = item.TenTrangThai;
-            row++;
+            var detailRows = new List<(int Stt, TraHangNhapListItemVM Item, TraHangNhapLineVM? Line)>();
+            int stt = 1;
+            foreach (var p in model.PagedData.Items)
+            {
+                if (p.Lines.Any())
+                {
+                    foreach (var line in p.Lines)
+                    {
+                        detailRows.Add((stt++, p, line));
+                    }
+                }
+                else
+                {
+                    detailRows.Add((stt++, p, null));
+                }
+            }
+
+            var bytes = ExcelHelper.Export("ChiTietTraHangNhap", detailRows, col => col
+                .AddCenter("STT", x => x.Stt)
+                .AddCenter("Mã trả hàng nhập", x => x.Item.MaPhieuHienThi)
+                .AddDateTime("Thời gian", x => x.Item.NgayTra)
+                .AddText("Chi nhánh", x => x.Item.TenKho)
+                .AddText("Nhà cung cấp", x => x.Item.TenNcc ?? "")
+                .AddText("Người trả", x => x.Item.TenNguoiTra ?? "")
+                .AddText("Người tạo", x => x.Item.TenNguoiLap)
+                .AddCenter("Mã hàng", x => x.Line?.MaHangNoiBo ?? "")
+                .AddText("Tên hàng", x => x.Line?.TenHang ?? "(Phiếu chưa có danh sách hàng)")
+                .AddCenter("ĐVT", x => x.Line?.TenDvt ?? "")
+                .AddNumber("Số lượng trả", x => x.Line?.SoLuong ?? 0)
+                .AddCurrency("Giá vốn", x => x.Line?.GiaVon ?? 0)
+                .AddCurrency("Giá trả lại", x => x.Line?.DonGiaTra ?? 0)
+                .AddCurrency("Thành tiền", x => x.Line?.ThanhTien ?? 0)
+                .AddCenter("Trạng thái", x => x.Item.TenTrangThai)
+                .AddText("Ghi chú", x => x.Item.GhiChu ?? "")
+            );
+
+            string fileDetailName = id.HasValue && model.PagedData.Items.Any()
+                ? $"ChiTietTraHangNhap_{model.PagedData.Items.First().MaPhieuHienThi}_{DateTime.Now:yyyyMMdd_HHmm}.xlsx"
+                : $"ChiTietTraHangNhap_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDetailName);
         }
 
-        worksheet.Columns().AdjustToContents();
+        var listBytes = ExcelHelper.Export("TraHangNhap", model.PagedData.Items, col => col
+            .AddCenter("Mã trả hàng nhập", x => x.MaPhieuHienThi)
+            .AddDateTime("Thời gian", x => x.NgayTra)
+            .AddText("Nhà cung cấp", x => x.TenNcc ?? "")
+            .AddText("Chi nhánh", x => x.TenKho)
+            .AddText("Người trả", x => x.TenNguoiTra ?? "")
+            .AddText("Người tạo", x => x.TenNguoiLap)
+            .AddNumber("Tổng số lượng", x => x.TongSoLuong)
+            .AddCurrency("Tổng tiền hàng", x => x.TongTienHang)
+            .AddCurrency("Giảm giá", x => x.GiamGia)
+            .AddCurrency("NCC cần trả", x => x.CanThuNcc)
+            .AddCurrency("NCC đã trả", x => x.DaThuNcc)
+            .AddCenter("Trạng thái", x => x.TenTrangThai)
+            .AddText("Ghi chú", x => x.GhiChu ?? "")
+        );
 
-        using var stream = new System.IO.MemoryStream();
-        workbook.SaveAs(stream);
-        stream.Position = 0;
-
-        string fileName = $"DanhSachTraHangNhap_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
-        return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        string fileName = $"DanhSachTraHangNhap_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+        return File(listBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
     }
 
     #region Private Helper Methods

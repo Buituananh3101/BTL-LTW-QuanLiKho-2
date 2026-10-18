@@ -1,17 +1,44 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Bỏ Gạch Chân Khi Hover Vào Nút Tạo Mới Trên Form Hàng Hóa (Phiên 141)
+Cập nhật lần cuối: 2026-10-18 – Sửa Lỗi & Chuẩn Hóa Phân Hệ Xuất Nhập File Excel / CSV – Giai Đoạn 1 (Phiên 142)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm tra trải nghiệm nút Tạo mới trên form Hàng hóa (`_HangHoaModal.cshtml`): khi di chuột vào nút "+ Tạo mới" nhóm hàng, đơn vị tính hay vị trí, nút không còn xuất hiện gạch chân, đổi màu mượt mà chuẩn KiotViet.
+- Sẵn sàng kiểm tra tính năng Xuất/Nhập file Excel trên 4 phân hệ đã sửa: Nhà cung cấp, Nhập hàng, Chuyển kho, Trả hàng nhập.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế các trang danh sách và form trên trình duyệt.
-2. Tiếp tục tinh gọn các trang danh sách còn lại (`nhap-hang-index.js`, `tra-hang-nhap-index.js`, `xuat-huy-index.js`) sử dụng `KiotFilter.createListPage`.
+1. Kiểm tra trải nghiệm thực tế tải file Excel trên trình duyệt (`/NhaCungCap`, `/NhapHang`, `/ChuyenKho`, `/TraHangNhap`).
+2. Xem xét triển khai Giai đoạn 2: Bổ sung Import & Template cho Chuyển kho, tối ưu Import server-side cho Trả hàng nhập.
+
+---
+
+- **Sửa Lỗi & Chuẩn Hóa Phân Hệ Xuất Nhập File Excel / CSV – Giai Đoạn 1 (Phiên 142)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "kiểm tra phần xuất nhập file excel csv trong tất cả các chức năng, lên kế hoạch sửa lỗi nếu có và chuẩn hóa" -> "triển khai giai đoạn 1".
+  - **Nguyên nhân cốt lõi**:
+    + Nút "Xuất file" Nhà cung cấp trên Topbar (`#btnExportExcel`) trỏ đến query `?export=excel` nhưng `NhaCungCapController` bỏ qua, trang chỉ reload mà không tải file.
+    + Nút "Xuất file" chi tiết trong drawer Chuyển kho trỏ đến `Export` không truyền ID, dẫn đến tải toàn bộ danh sách chuyển kho thay vì mặt hàng chi tiết.
+    + Nút "Xuất file" chi tiết trong drawer Trả hàng nhập chỉ gọi xuất 1 dòng tóm tắt danh sách thay vì các dòng hàng trả.
+    + Form Nhập hàng import bằng SheetJS client-side gán `MaHang: 0`, khi lưu phiếu (F9/F10) gây lỗi crash SQL Foreign Key `FK_ChiTietPhieuNhap_HangHoa`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`Controllers/NhaCungCapController.cs` & `nha-cung-cap-index.js`**:
+      * Bổ sung Action `Export(NhaCungCapFilterParams filter)` sử dụng Lego `ExcelHelper.Export` xuất `DanhSachNhaCungCap_{yyyyMMdd_HHmm}.xlsx` đầy đủ 11 cột chuẩn KiotViet.
+      * Cập nhật sự kiện click `#btnExportExcel` truyền toàn bộ các tham số lọc hiện hành (từ khóa, nhóm NCC, trạng thái, thời gian, công nợ).
+    + **`Controllers/NhapHangController.cs` & `nhap-hang-form.js`**:
+      * Bổ sung Action `DownloadTemplate()` xuất file `Mau_Nhap_Hang_KiotViet.xlsx` chuẩn ClosedXML.
+      * Bổ sung Action `ImportExcel(IFormFile file, int warehouseId)` xử lý phía server: tra cứu chính xác `MaHang` từ database, đơn vị tính, tồn kho hiện tại, loại bỏ triệt để lỗi gán `MaHang: 0`.
+      * Nâng cấp `nhap-hang-form.js` gọi AJAX FormData upload file lên server và điền dữ liệu an toàn vào form.
+    + **`Controllers/ChuyenKhoController.cs` & `_ChuyenKhoTable.cshtml`**:
+      * Nâng cấp `Export(string? type, ChuyenKhoFilterVM filter, int? id = null)` hỗ trợ xuất chi tiết phiếu chuyển (`ChiTietChuyenHang_{MaPhieu}.xlsx`: STT, Mã chuyển hàng, Thời gian, Kho gửi, Kho nhận, Mã hàng, Tên hàng, ĐVT, SL chuyển, SL nhận, Đơn giá, Thành tiền, Trạng thái, Ghi chú).
+      * Cập nhật nút "Xuất file" trong drawer truyền `new { type = "detail", id = item.MaPhieuChuyen }`.
+    + **`Controllers/TraHangNhapController.cs` & `_TraHangNhapTable.cshtml`**:
+      * Nâng cấp `ExportExcel(string? type, TraHangNhapFilterVM filter, int? id = null)` sử dụng Lego `ExcelHelper.Export` cho cả danh sách và chi tiết phiếu trả (`ChiTietTraHangNhap_{MaPhieu}.xlsx`: STT, Mã trả hàng, Thời gian, Chi nhánh, NCC, Người trả, Người tạo, Mã hàng, Tên hàng, ĐVT, SL trả, Giá vốn, Giá trả lại, Thành tiền, Trạng thái, Ghi chú).
+      * Cập nhật nút "Xuất file" trong drawer truyền `new { type = "detail", id = item.MaPhieuTraHang }`.
+  - **Kiểm tra**:
+    + `node -c nha-cung-cap-index.js` & `node -c nhap-hang-form.js` thành công 100%.
+    + `dotnet build -t:Compile` biên dịch hoàn tất với **0 Errors**.
 
 ---
 

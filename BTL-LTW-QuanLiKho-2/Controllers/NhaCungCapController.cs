@@ -29,6 +29,11 @@ public class NhaCungCapController : BaseKhoController
     [HttpGet]
     public async Task<IActionResult> Index(NhaCungCapFilterParams filter)
     {
+        if (Request.Query.ContainsKey("export") && string.Equals(Request.Query["export"], "excel", StringComparison.OrdinalIgnoreCase))
+        {
+            return await Export(filter);
+        }
+
         var nhomList = await _context.NhomNhaCungCaps.AsNoTracking().OrderBy(g => g.TenNhom).ToListAsync();
 
         var query = BuildFilterQuery(filter);
@@ -585,6 +590,49 @@ public class NhaCungCapController : BaseKhoController
         int take = filter.PageSize < 1 ? 15 : filter.PageSize;
 
         return query.Skip(skip).Take(take);
+    }
+
+    // 12. Xuất file Excel danh sách Nhà cung cấp (Chuẩn KiotViet ClosedXML)
+    [HttpGet]
+    public async Task<IActionResult> Export(NhaCungCapFilterParams filter)
+    {
+        var (dateFrom, dateTo) = DateRangeHelper.Resolve(filter.ThoiGian, filter.FromDate, filter.ToDate);
+        filter.FromDate = dateFrom;
+        filter.ToDate = dateTo;
+
+        var query = BuildFilterQuery(filter);
+        var list = await query.OrderByDescending(d => d.NgayTao).ToListAsync();
+
+        var rows = list.Select((ncc, idx) => (
+            Stt: idx + 1,
+            ncc.MaNcc,
+            ncc.TenDonVi,
+            DienThoai: ncc.DienThoai ?? "",
+            Email: ncc.Email ?? "",
+            TenNhom: ncc.TenNhomNcc ?? "Chưa phân nhóm",
+            DiaChi: ncc.DiaChi ?? "",
+            ncc.TongMua,
+            ncc.NoCanTraHienTai,
+            TrangThai: ncc.TrangThai == "HOAT_DONG" ? "Đang hoạt động" : "Ngừng hoạt động",
+            GhiChu: ncc.GhiChu ?? ""
+        ));
+
+        var bytes = ExcelHelper.Export("DanhSachNhaCungCap", rows, col => col
+            .AddCenter("STT", x => x.Stt)
+            .AddCenter("Mã NCC", x => x.MaNcc)
+            .AddText("Tên nhà cung cấp", x => x.TenDonVi)
+            .AddCenter("Điện thoại", x => x.DienThoai)
+            .AddText("Email", x => x.Email)
+            .AddText("Nhóm nhà cung cấp", x => x.TenNhom)
+            .AddText("Địa chỉ", x => x.DiaChi)
+            .AddCurrency("Tổng mua", x => x.TongMua)
+            .AddCurrency("Nợ hiện tại", x => x.NoCanTraHienTai)
+            .AddCenter("Trạng thái", x => x.TrangThai)
+            .AddText("Ghi chú", x => x.GhiChu)
+        );
+
+        string fileName = $"DanhSachNhaCungCap_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+        return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
     }
     #endregion
 }

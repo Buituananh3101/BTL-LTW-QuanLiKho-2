@@ -364,7 +364,7 @@
                                         <a href="@Url.Action("Create", "TraHangNhap", new { copyId = item.MaPhieuTraHang })" class="btn btn-sm btn-outline-secondary">
                                             <i class="bi bi-copy me-1"></i>Sao chép
                                         </a>
-                                        <a href="@Url.Action("ExportExcel", "TraHangNhap", new { q = item.MaPhieuHienThi })" class="btn btn-sm btn-outline-secondary">
+                                        <a href="@Url.Action("ExportExcel", "TraHangNhap", new { type = "detail", id = item.MaPhieuTraHang })" class="btn btn-sm btn-outline-secondary" target="_blank">
                                             <i class="bi bi-box-arrow-up me-1"></i>Xuất file
                                         </a>
                                         <span class="ms-auto"></span>
