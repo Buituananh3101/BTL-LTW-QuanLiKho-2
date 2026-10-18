@@ -1,21 +1,42 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Triển Khai Giai Đoạn 2 Đóng Gói Lego: F3 Product Search & DocGrid Engine (Phiên 138)
+Cập nhật lần cuối: 2026-10-18 – Triển Khai Giai Đoạn 3 Đóng Gói Lego: ImageUploader & Combobox Tree Phân Cấp (Phiên 139)
 
 ---
 
 ## Đang làm
-- Hoàn thành xuất sắc Giai đoạn 2 kế hoạch đóng gói Lego:
-  + Đóng gói `KiotFilter.initProductSearch` (Tìm kiếm hàng hóa Autocomplete F3, quét barcode, hiển thị tồn/giá, phím mũi tên) dùng chung toàn hệ thống, hợp nhất cả 5 form chứng từ (Kiểm kho, Nhập hàng, Xuất hủy, Chuyển kho, Trả hàng nhập).
-  + Đóng gói `KiotFilter.initDocGrid` (Quản lý lưới dòng chứng từ, tự động đánh STT, chuyển đổi trạng thái rỗng/có dữ liệu, bắt sự kiện xóa dòng qua KiotConfirm, tính toán realtime).
-  + Loại bỏ hoàn toàn mã nhúng file dư thừa `f3-product-search.js` trên 6 View (`ChuyenKho`, `NhapHang`, `TraHangNhap`).
-- Sẵn sàng chuẩn bị Giai đoạn 3: Đóng gói `KiotFilter.initImageUploader` (Quản lý 5 ảnh, kéo thả, nén Canvas, paste clipboard) và Combobox phân cấp danh mục.
+- Hoàn thành xuất sắc Giai đoạn 3 kế hoạch đóng gói Lego:
+  + Đóng gói `KiotFilter.initImageUploader` (Lego block 19) trong `kiot-filter.js`: Quản lý 5 ảnh (1 chính + 4 phụ), nén Canvas nền trắng `#FFFFFF` client-side, kéo thả drag & drop, dán clipboard `Ctrl + V`, đổi ảnh chính, xóa kèm `KiotConfirm`.
+  + Tái cấu trúc `hang-hoa-form.js`: Loại bỏ hơn 300 dòng code thủ công xử lý ảnh, nén Canvas, kéo-thả, paste; tích hợp gọn gàng `KiotFilter.initImageUploader`.
+  + Nâng cấp `KiotFilter.initCombobox` và `initSingleSelect`: Hỗ trợ hiển thị phân cấp cây danh mục (`item.level`), thụt lề 16px và icon nhánh cây `└─`.
+- Sẵn sàng chuẩn bị Giai đoạn 4: Đóng gói Khung điều khiển trang danh sách `KiotListPage` boilerplate.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế tìm kiếm F3 và lưới dòng chứng từ trên môi trường chạy thử.
-2. Triển khai Giai đoạn 3 theo kế hoạch đóng gói Lego (`ke-hoach-dong-goi-lego.md`).
+1. Kiểm tra trải nghiệm thực tế tải ảnh, kéo thả, paste clipboard ở modal Hàng hóa và combobox nhóm hàng trên môi trường chạy thử.
+2. Triển khai Giai đoạn 4 theo kế hoạch đóng gói Lego (`ke-hoach-dong-goi-lego.md`): Khung điều khiển trang danh sách `KiotListPage`.
+
+---
+
+- **Triển Khai Giai Đoạn 3 Đóng Gói Lego: ImageUploader & Combobox Tree Phân Cấp (Phiên 139)**:
+  - **Nhu cầu**: Người dùng yêu cầu triển khai Giai đoạn 3 của Kế hoạch đóng gói Lego (`ke-hoach-dong-goi-lego.md`).
+  - **Mục tiêu Giai đoạn 3**:
+    1. Đóng gói Lego Tải & Quản Lý Ảnh (`KiotFilter.initImageUploader`) vào `kiot-filter.js`: quản lý 5 ảnh (1 ảnh chính + 4 ảnh phụ), nén ảnh client-side bằng Canvas với nền trắng `#FFFFFF` chống lỗi nền đen khi nén PNG trong suốt sang JPEG, hỗ trợ kéo-thả trực tiếp, dán ảnh từ clipboard `Ctrl + V`, thay thế riêng ảnh chính, swap đổi ảnh phụ thành ảnh chính, xóa ảnh qua KiotConfirm.
+    2. Nâng cấp Dropdown Combobox (`KiotFilter.initCombobox`) hỗ trợ hiển thị phân cấp cây danh mục (Tree Select) dựa trên `level`, thụt lề 16px và tiền tố nhánh cây `└─`.
+    3. Tái cấu trúc `hang-hoa-form.js`: Thay thế toàn bộ hơn 300 dòng mã upload, drag-drop, paste và nén canvas thủ công bằng `KiotFilter.initImageUploader`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`wwwroot/js/kiot-filter.js`**:
+      * Triển khai Lego block 19: `KiotFilter.initImageUploader(options)` với đầy đủ options cấu hình, nén Canvas 2D khử răng cưa cao cấp, đổ nền trắng `#FFFFFF`, drag-drop, paste `Ctrl + V`, và các phương thức `getImages()`, `setImages()`, `clear()`, `render()`.
+      * Nâng cấp `KiotFilter.initCombobox`: Nhận diện thuộc tính `level` trong từng item, áp dụng thụt lề `padding-left: ${12 + level * 16}px` và tiền tố `<span class="kiot-tree-branch">└─</span>`.
+    + **`wwwroot/js/hang-hoa-form.js`**:
+      * Thay thế khối code upload ảnh thủ công (dòng 131–432) bằng 1 dòng khai báo `const imgUploader = KiotFilter.initImageUploader({...})`.
+      * Đồng bộ các phương thức `collectFormData()`, `resetForm()`, `doSave()` và tải form sửa `setImages()` qua `imgUploader`.
+      * Nâng cấp `initSingleSelect.syncOptions()` hỗ trợ phân cấp cây `data-level` đồng bộ.
+    + **Đồng bộ tài liệu**: Cập nhật `.agent/rules/03-giao-dien-layout.md` (7.668 bytes), `docs/quyet-dinh.md` (6.671 bytes), bảo đảm 100% tuân thủ hạn mức 8.000 ký tự theo Luật 12.
+  - **Kiểm tra**:
+    + `node -c` xác nhận cú pháp 100% hợp lệ trên cả `kiot-filter.js` và `hang-hoa-form.js`.
+    + `dotnet build` biên dịch thành công hoàn hảo với **0 Errors**.
 
 ---
 
