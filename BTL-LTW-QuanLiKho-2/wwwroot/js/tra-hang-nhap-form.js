@@ -145,10 +145,10 @@ $(function () {
         const hasRows = $('#itemsTableBody tr.line-item-row').length > 0;
         if (hasRows) {
             $('#tableScrollWrap').show();
-            $('#emptyWrap').hide();
+            $('#emptyWrap').attr('style', 'display: none !important;');
         } else {
             $('#tableScrollWrap').hide();
-            $('#emptyWrap').show();
+            $('#emptyWrap').attr('style', 'display: flex !important;');
         }
     }
 
@@ -242,7 +242,7 @@ $(function () {
                 <td class="w-dvt text-center text-muted col-dvt">${escapeHtml(p.unit || '---')}</td>
                 <td class="text-end">
                     <input type="text" class="inp text-end line-qty" value="${fmt(qty)}" inputmode="numeric" style="width: 90px; height: 32px;" />
-                    <span class="hint-over text-danger small d-block" style="display: none;">Vượt tồn (còn ${fmt(p.stock || 0)})</span>
+                    <span class="hint-over text-danger small" style="display: none;">Vượt tồn (còn ${fmt(p.stock || 0)})</span>
                 </td>
                 <td class="text-end text-muted col-giavon">
                     <span>${fmt(p.cost || 0)}</span>

@@ -66,13 +66,13 @@
 ### 2.2. Lập / Sửa Phiếu (`_TraHangNhapForm`)
 - **Vùng bảng hàng hóa (Trái - `.f-main`)**:
   - Nút quay lại, ô tìm kiếm F3 autocomplete (hiển thị mã, tên, giá vốn, tồn kho).
-  - Nạp Excel/CSV (kèm nút tải mẫu `MauTraHangNhap.csv`), empty state.
+  - Nạp Excel/CSV (kèm nút tải mẫu `MauTraHangNhap.csv`), empty state với nút "Chọn file dữ liệu" (`#btnSelectFile`, icon `bi-box-arrow-in-down`, bo góc 6px, nền xanh `#0a66e8`).
   - Bảng lưới: Nút xóa, STT, Mã, Tên, ĐVT, Số lượng (.qty - cảnh báo đỏ nếu vượt tồn), Giá nhập, Giá trả lại (.qty), Thành tiền.
 - **Panel thông tin (Phải - `.f-panel` / Rightmenu)**:
   - Khung 440px cố định `.f-panel-inner`, nút tròn toggle F4 trượt mượt mà 0.25s cubic-bezier (từ 425px về 8px khi thu gọn).
   - Căn lề phải sắc nét (chuẩn 185px) cho: Người trả & Thời gian trả (popup `.dtpop` chuẩn Kiểm tồn), Mã trả hàng nhập (cho phép nhập tay hoặc để trống tự động sinh mã, tự động viết hoa, kiểm tra chống trùng), Giảm giá (toggle VND / %), Tiền NCC trả (F8).
   - NCC autocomplete chip + modal tạo nhanh NCC.
-  - Ghim đáy: "Lưu tạm (F9)" & "Hoàn thành (F10)".
+  - Ghim đáy: Cụm 2 nút hành động `.f-actions` 56px xếp dọc icon/text chuẩn Kiểm tồn: "Lưu tạm (F9)" (`.save`, xanh dương `#0a66e8`) & "Hoàn thành (F10)" (`.done`, xanh lá `#12b34a`).
 
 ---
 

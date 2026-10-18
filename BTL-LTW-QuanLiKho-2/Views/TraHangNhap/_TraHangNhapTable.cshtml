@@ -5,7 +5,7 @@
 }
 
 <div class="kiot-table-scroll-body">
-    <table class="tbl" id="receiptTable" style="width: max-content; min-width: 1400px;">
+    <table class="tbl" id="receiptTable" style="width: max-content; min-width: 760px;">
         <thead>
             <tr>
                 <th style="width: 36px; min-width: 36px;" class="text-center th-checkbox">
@@ -16,124 +16,138 @@
                         <i class="bi @(Model.DaDanhDauFilter ? "bi-star-fill" : "bi-star")"></i>
                     </span>
                 </th>
-                <th data-col="ma" style="width: 150px; min-width: 150px;" class="sortable-th @(Model.SortBy == "maphieu" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Mã trả hàng nhập">
+                <th data-col="ma" style="width: 150px; min-width: 150px;" class="sortable-th @((Model.SortBy == "ma" || Model.SortBy == "maphieu") ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Mã trả hàng nhập">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Mã trả hàng nhập</span>
-                            @if (Model.SortBy == "maphieu" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
-                            else if (Model.SortBy == "maphieu" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                            @if ((Model.SortBy == "ma" || Model.SortBy == "maphieu") && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if ((Model.SortBy == "ma" || Model.SortBy == "maphieu") && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="tg" style="width: 145px; min-width: 145px;" class="sortable-th @(Model.SortBy == "ngaytra" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Thời gian">
+                <th data-col="tg" style="width: 145px; min-width: 145px;" class="sortable-th @((Model.SortBy == "tg" || Model.SortBy == "ngaytra") ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Thời gian">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Thời gian</span>
-                            @if (Model.SortBy == "ngaytra" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
-                            else if (Model.SortBy == "ngaytra" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                            @if ((Model.SortBy == "tg" || Model.SortBy == "ngaytra") && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if ((Model.SortBy == "tg" || Model.SortBy == "ngaytra") && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="tgtao" style="width: 145px; min-width: 145px;">
+                <th data-col="tgtao" style="width: 145px; min-width: 145px;" class="sortable-th @(Model.SortBy == "tgtao" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Thời gian tạo">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Thời gian tạo</span>
+                            @if (Model.SortBy == "tgtao" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "tgtao" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="ncc" style="width: 250px; min-width: 250px;" class="col-product-name sortable-th @(Model.SortBy == "tenncc" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Nhà cung cấp">
+                <th data-col="ncc" style="width: 250px; min-width: 250px;" class="col-product-name sortable-th @((Model.SortBy == "ncc" || Model.SortBy == "tenncc") ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Nhà cung cấp">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Nhà cung cấp</span>
-                            @if (Model.SortBy == "tenncc" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
-                            else if (Model.SortBy == "tenncc" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                            @if ((Model.SortBy == "ncc" || Model.SortBy == "tenncc") && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if ((Model.SortBy == "ncc" || Model.SortBy == "tenncc") && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="chinhanh" style="width: 140px; min-width: 140px;">
+                <th data-col="chinhanh" style="width: 140px; min-width: 140px;" class="sortable-th @(Model.SortBy == "chinhanh" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Chi nhánh">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Chi nhánh</span>
+                            @if (Model.SortBy == "chinhanh" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "chinhanh" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="nguoitra" style="width: 140px; min-width: 140px;">
+                <th data-col="nguoitra" style="width: 140px; min-width: 140px;" class="sortable-th @(Model.SortBy == "nguoitra" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Người trả">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Người trả</span>
+                            @if (Model.SortBy == "nguoitra" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "nguoitra" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="nguoitao" style="width: 140px; min-width: 140px;">
+                <th data-col="nguoitao" style="width: 140px; min-width: 140px;" class="sortable-th @(Model.SortBy == "nguoitao" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Người tạo">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Người tạo</span>
+                            @if (Model.SortBy == "nguoitao" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "nguoitao" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="tongsl" style="width: 120px; min-width: 120px;" class="num sortable-th @(Model.SortBy == "tongsoluong" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tổng số lượng">
+                <th data-col="tongsl" style="width: 120px; min-width: 120px;" class="num sortable-th @((Model.SortBy == "tongsl" || Model.SortBy == "tongsoluong") ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tổng số lượng">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Tổng SL</span>
-                            @if (Model.SortBy == "tongsoluong" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
-                            else if (Model.SortBy == "tongsoluong" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                            @if ((Model.SortBy == "tongsl" || Model.SortBy == "tongsoluong") && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if ((Model.SortBy == "tongsl" || Model.SortBy == "tongsoluong") && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="slmathang" style="width: 110px; min-width: 110px;" class="num">
+                <th data-col="slmathang" style="width: 110px; min-width: 110px;" class="num sortable-th @(Model.SortBy == "slmathang" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Số lượng mặt hàng">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">SL mặt hàng</span>
+                            @if (Model.SortBy == "slmathang" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "slmathang" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="tongtien" style="width: 140px; min-width: 140px;" class="num sortable-th @(Model.SortBy == "tongtienhang" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tổng tiền hàng">
+                <th data-col="tongtien" style="width: 140px; min-width: 140px;" class="num sortable-th @((Model.SortBy == "tongtien" || Model.SortBy == "tongtienhang") ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tổng tiền hàng">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Tổng tiền hàng</span>
-                            @if (Model.SortBy == "tongtienhang" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
-                            else if (Model.SortBy == "tongtienhang" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                            @if ((Model.SortBy == "tongtien" || Model.SortBy == "tongtienhang") && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if ((Model.SortBy == "tongtien" || Model.SortBy == "tongtienhang") && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="giamgia" style="width: 120px; min-width: 120px;" class="num">
+                <th data-col="giamgia" style="width: 120px; min-width: 120px;" class="num sortable-th @(Model.SortBy == "giamgia" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Giảm giá">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Giảm giá</span>
+                            @if (Model.SortBy == "giamgia" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (Model.SortBy == "giamgia" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="canthu" style="width: 140px; min-width: 140px;" class="num sortable-th @(Model.SortBy == "canthuncc" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo NCC cần trả">
+                <th data-col="canthu" style="width: 140px; min-width: 140px;" class="num sortable-th @((Model.SortBy == "canthu" || Model.SortBy == "canthuncc") ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo NCC cần trả">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">NCC cần trả</span>
-                            @if (Model.SortBy == "canthuncc" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
-                            else if (Model.SortBy == "canthuncc" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                            @if ((Model.SortBy == "canthu" || Model.SortBy == "canthuncc") && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if ((Model.SortBy == "canthu" || Model.SortBy == "canthuncc") && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="dathu" style="width: 140px; min-width: 140px;" class="num sortable-th @(Model.SortBy == "dathuncc" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo NCC đã trả">
+                <th data-col="dathu" style="width: 140px; min-width: 140px;" class="num sortable-th @((Model.SortBy == "dathu" || Model.SortBy == "dathuncc") ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo NCC đã trả">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">NCC đã trả</span>
-                            @if (Model.SortBy == "dathuncc" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
-                            else if (Model.SortBy == "dathuncc" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                            @if ((Model.SortBy == "dathu" || Model.SortBy == "dathuncc") && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if ((Model.SortBy == "dathu" || Model.SortBy == "dathuncc") && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="ghi" style="width: 180px; min-width: 180px;">
+                <th data-col="ghi" style="width: 180px; min-width: 180px;" class="sortable-th @((Model.SortBy == "ghi" || Model.SortBy == "ghichu") ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Ghi chú">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Ghi chú</span>
+                            @if ((Model.SortBy == "ghi" || Model.SortBy == "ghichu") && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if ((Model.SortBy == "ghi" || Model.SortBy == "ghichu") && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>
-                <th data-col="st" style="width: 135px; min-width: 135px;" class="text-center sortable-th @(Model.SortBy == "st" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Trạng thái">
+                <th data-col="st" style="width: 135px; min-width: 135px;" class="text-center sortable-th @((Model.SortBy == "st" || Model.SortBy == "trangthai") ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Trạng thái">
                     <div class="th-content justify-content-center">
                         <span class="th-title-wrap">
                             <span class="th-text">Trạng thái</span>
-                            @if (Model.SortBy == "st" && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
-                            else if (Model.SortBy == "st" && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                            @if ((Model.SortBy == "st" || Model.SortBy == "trangthai") && Model.SortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if ((Model.SortBy == "st" || Model.SortBy == "trangthai") && Model.SortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
                         </span>
                     </div>
                 </th>

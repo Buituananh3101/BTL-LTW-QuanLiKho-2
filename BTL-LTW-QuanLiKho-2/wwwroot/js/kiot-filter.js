@@ -278,7 +278,17 @@ window.KiotFilter = (function ($) {
     // 8. Quản lý Bộ lọc Thời gian & Lịch 2 tháng (Dual Calendar) dùng chung
     const calState = {};
 
-    function initDateFilter(target, onApplyCallback) {
+    function initDateFilter(targetOrOptions, onApplyCallback) {
+        let target = 'date';
+        let callback = onApplyCallback;
+
+        if (typeof targetOrOptions === 'object' && targetOrOptions !== null) {
+            target = targetOrOptions.target || 'date';
+            callback = targetOrOptions.onChange || targetOrOptions.onApply || onApplyCallback;
+        } else if (typeof targetOrOptions === 'string') {
+            target = targetOrOptions;
+        }
+
         const tgtCap = target.charAt(0).toUpperCase() + target.slice(1);
         const todayObj = new Date();
 
@@ -325,8 +335,8 @@ window.KiotFilter = (function ($) {
             $(`#${target}FromInput`).val('');
             $(`#${target}ToInput`).val('');
 
-            if (typeof onApplyCallback === 'function') {
-                onApplyCallback(null, null, labelText, val);
+            if (typeof callback === 'function') {
+                callback(null, null, labelText, val);
             }
         });
 
@@ -484,8 +494,8 @@ window.KiotFilter = (function ($) {
             $(`#${tgt}FromInput`).val(formatDateISO(s));
             $(`#${tgt}ToInput`).val(formatDateISO(eDate));
 
-            if (typeof onApplyCallback === 'function') {
-                onApplyCallback(formatDateISO(s), formatDateISO(eDate), rangeText, 'CUSTOM');
+            if (typeof callback === 'function') {
+                callback(formatDateISO(s), formatDateISO(eDate), rangeText, 'CUSTOM');
             }
         });
 

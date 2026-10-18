@@ -1,17 +1,72 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Cải Thiện Toàn Diện Leftmenu & Rightmenu Giao Diện Phiếu Trả Hàng Nhập (Phiên 121)
+Cập nhật lần cuối: 2026-10-18 – Chuẩn Hóa Nút Chọn File Dữ Liệu & Cụm Nút Hành Động Phiếu Trả Hàng Nhập Giống Kiểm Tồn (Phiên 124)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử trải nghiệm phân hệ Trả hàng nhập (`/TraHangNhap`): Danh sách phiếu trả hàng nhập với Leftmenu MultiSelect (tag pills, hover buffer F4, mobile filter) và Form Lập/Sửa với Rightmenu trượt mượt mà F4, căn phải chuẩn 185px, nhập tay/tự động sinh mã phiếu, trừ tồn kho chính xác khi Hoàn thành.
+- Sẵn sàng kiểm thử trải nghiệm tương tác trên form Lập / Sửa phiếu Trả hàng nhập (`/TraHangNhap/Create` và `/TraHangNhap/Edit`): nút Chọn file dữ liệu trong Empty state chuẩn Kiểm tồn, 2 nút Lưu tạm (F9, xanh dương) & Hoàn thành (F10, xanh lá) xếp dọc chuẩn Kiểm tồn.
 
 ---
 
 ## Việc kế tiếp
 1. Kiểm tra trải nghiệm thực tế và luồng nghiệp vụ phân hệ Trả hàng nhập trên trình duyệt.
 2. Kiểm tra lại toàn bộ luồng chuyển kho, xuất hủy, nhập hàng, bán hàng POS để đảm bảo tính đồng bộ hệ thống.
+
+---
+
+- **Chuẩn Hóa Nút Chọn File Dữ Liệu & Cụm Nút Hành Động Phiếu Trả Hàng Nhập Giống Kiểm Tồn (Phiên 124)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "sửa lại các nút chọn file dữ liệu, hoàn thành giống phần kiểm tồn" kèm ảnh chụp màn hình (`media_1792323977134_8208938a.png`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Nút "Chọn file dữ liệu" (Empty State)**:
+      * Trong `_TraHangNhapForm.cshtml`, nâng cấp vùng trống `#emptyWrap` theo chuẩn giao diện Kiểm tồn: icon `.ico mb-3 > i.bi-file-earmark-spreadsheet`, tiêu đề "Thêm sản phẩm từ ô tìm kiếm hoặc file Excel", link "Excel file mẫu", và nút `#btnSelectFile` với icon `bi-box-arrow-in-down fs-5`, chữ "Chọn file dữ liệu", nền xanh `#0a66e8`, bo góc 6px.
+      * Trong `tra-hang-nhap.css`, bổ sung CSS `#emptyWrap #btnSelectFile` chiều cao 42px, padding 0 20px, bo góc 6px, hiệu ứng đổ bóng và hover `#0852bd`.
+      * Trong `tra-hang-nhap-form.js`, cập nhật hàm `checkEmptyState()` sử dụng `.attr('style', 'display: none !important;')` và `display: flex !important;` để tương thích hoàn toàn với class `.d-flex` của Bootstrap khi ẩn/hiện bảng hàng hóa.
+    + **Cụm 2 nút hành động "Lưu tạm" & "Hoàn thành" (`.f-actions`)**:
+      * Trong `_TraHangNhapForm.cshtml`, loại bỏ các class Bootstrap ghi đè, chuẩn hóa cấu trúc 2 nút hành động theo đúng bản thiết kế Kiểm tồn:
+        - Nút Lưu tạm `#btnSaveDraft`: class `.save`, icon `bi-floppy fs-5 mb-1` xếp dọc trên text "Lưu tạm (F9)", nền xanh dương `#0a66e8`.
+        - Nút Hoàn thành `#btnSaveComplete`: class `.done`, icon `bi-check-lg fs-5 mb-1` xếp dọc trên text "Hoàn thành (F10)", nền xanh lá `#12b34a`.
+      * Trong `tra-hang-nhap.css`, thiết lập quy tắc `.f-actions button`: chiều cao 56px, `flex-direction: column`, căn giữa icon và text, bo góc 6px, font-weight 600, hiệu ứng hover chuyên nghiệp.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+      * `node -c tra-hang-nhap-form.js` đạt **0 Errors**.
+
+
+- **Khắc Phục Lỗi Leftmenu Không Thao Tác Được Trong Phân Hệ Trả Hàng Nhập (Phiên 123)**:
+  - **Nhu cầu**: Người dùng phản ánh: "leftmenu trong phần trả nhập hàng click ko hiện gì" kèm ảnh chụp màn hình (`media_1792323897920_7c682a36.png`).
+  - **Nguyên nhân cốt lõi**:
+    + Trong `tra-hang-nhap-index.js`, hàm `KiotFilter.initDateFilter` bị gọi sai chữ ký hàm: truyền vào object `{ scope: '#sidebarFilterCol', ... }` thay vì truyền `(target, callback)`. Do bên trong `kiot-filter.js`, hàm thực hiện `target.charAt(0)`, việc `target` là object đã ném ra lỗi `Uncaught TypeError: target.charAt is not a function`.
+    + Exception đồng bộ này đã làm dừng toàn bộ luồng khởi tạo JavaScript trong khối `$(function() { ... })`, khiến tất cả các hàm gắn sự kiện phía sau (chọn thời gian nhanh, popup dual calendar, multi-select dropdown Người tạo, Người trả, Nhà cung cấp, checkbox trạng thái, thu gọn sidebar F4) đều không được kích hoạt.
+    + Trong `TraHangNhapFilterVM.cs`, thuộc tính `DateFilterType` mặc định là `"THIS_MONTH"` trong khi giao diện sidebar hiển thị mặc định `"Toàn thời gian"` (`"ALL"`), gây lệch pha dữ liệu ban đầu.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`kiot-filter.js`**: Nâng cấp hàm `initDateFilter(targetOrOptions, onApplyCallback)` hỗ trợ linh hoạt cả 2 chữ ký hàm (chuỗi target hoặc object options), chống hoàn toàn lỗi crash TypeError trong tương lai.
+    + **`tra-hang-nhap-index.js`**:
+      * Chuẩn hóa lời gọi `KiotFilter.initDateFilter('date', function (from, to, text, val) { ... })` khớp chuẩn toàn hệ thống.
+      * Tích hợp `KiotFilter.initSidebar(...)` quản lý thu gọn/mở rộng sidebar, F4, và mobile drawer đồng bộ Lego KiotFilter.
+      * Khởi tạo `F.preset = 'ALL'` đồng bộ với ô radio "Toàn thời gian".
+      * Sửa `colToggler.applyColumns()` thành `colToggler.apply()`.
+    + **`TraHangNhapViewModels.cs`**: Cập nhật `DateFilterType` mặc định thành `"ALL"`.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` đạt **0 Errors**.
+      * `node -c` cả `kiot-filter.js` và `tra-hang-nhap-index.js` đều đạt **0 Errors**.
+
+- **Hoàn Thiện Sắp Xếp Tăng/Giảm Cột Bảng Trả Hàng Nhập Chuẩn KiotViet (Phiên 122)**:
+  - **Nhu cầu**: Người dùng phản ánh lỗi: "khi ấn lên header các cột thì chưa có sắp xếp tăng giảm bình thường" trên phân hệ Trả hàng nhập kèm ảnh chụp màn hình (`media_1792324091113_af4db32c.png`).
+  - **Nguyên nhân cốt lõi**:
+    + Trong `_TraHangNhapTable.cshtml`, các thẻ `<th>` dùng attribute `data-col="ma"`, `"tg"`, `"ncc"`, `"tongsl"`, `"tongtien"`, `"canthu"`, `"dathu"`, `"st"` nhưng lại kiểm tra điều kiện `@(Model.SortBy == "maphieu")`, `"ngaytra"`, `"tenncc"`, `"tongsoluong"`... Do lệch tên định danh, class `.is-sorted` và icon mũi tên `bi-arrow-up` / `bi-arrow-down` không được render ra giao diện.
+    + Một số cột (`tgtao`, `chinhanh`, `nguoitra`, `nguoitao`, `slmathang`, `giamgia`, `ghi`) chưa được gắn class `sortable-th` và cấu trúc `th-content` / `sort-icon`.
+    + Trong `TraHangNhapController.cs`, switch-case sắp xếp chỉ bắt các alias dài (`"maphieu"`, `"ngaytra"`...), không bắt alias ngắn (`"ma"`, `"tg"`, `"ncc"`...), đồng thời thiếu hoàn toàn nhánh sắp xếp cho Trạng thái (`"st"`), Ghi chú (`"ghi"`), SL mặt hàng (`"slmathang"`), Giảm giá (`"giamgia"`), Chi nhánh (`"chinhanh"`), Người trả (`"nguoitra"`), Người tạo (`"nguoitao"`), Thời gian tạo (`"tgtao"`).
+    + Thẻ bảng `#receiptTable` trong `_TraHangNhapTable.cshtml` và `tra-hang-nhap.css` bị gán `min-width: 1400px;`, chưa đồng bộ chuẩn thu gọn 760px khi ít cột.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Controller (`Controllers/TraHangNhapController.cs`)**: Hỗ trợ đầy đủ toàn bộ các khóa cột ngắn và dài (`"ma"`, `"tg"`, `"tgtao"`, `"ncc"`, `"chinhanh"`, `"nguoitra"`, `"nguoitao"`, `"tongsl"`, `"slmathang"`, `"tongtien"`, `"giamgia"`, `"canthu"`, `"dathu"`, `"ghi"`, `"st"`), bổ sung order by theo `TrangThai`, `GhiChu`, `ChiTietPhieuTraHangNhaps.Count`, `GiamGia`, `MaKhoNavigation.TenKho`, `HoTen` người trả/người tạo.
+    + **View Table (`Views/TraHangNhap/_TraHangNhapTable.cshtml`)**:
+      * Đưa `#receiptTable` về chuẩn: `<table class="tbl" id="receiptTable" style="width: max-content; min-width: 760px;">`.
+      * Bổ sung đầy đủ class `sortable-th`, cấu trúc `th-content`, `th-title-wrap`, `th-text`, và icon mũi tên `sort-icon` (`bi-arrow-up` / `bi-arrow-down`) cho tất cả các cột dữ liệu.
+      * Chuẩn hóa logic kiểm tra khớp cả mã ngắn và mã dài: `@((Model.SortBy == "<col>" || Model.SortBy == "<col_alias>") ? ...)`.
+    + **CSS (`wwwroot/css/tra-hang-nhap.css`)**: Cập nhật `#receiptTable` sang `min-width: 760px !important;`.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile --no-restore` đạt **0 Errors, 2 Warnings**.
+      * `node -c tra-hang-nhap-index.js` đạt **0 Errors**.
 
 ---
 
@@ -30,6 +85,9 @@ Cập nhật lần cuối: 2026-10-18 – Cải Thiện Toàn Diện Leftmenu & 
       * Mã trả hàng nhập (`#txtDocCode`): Cho phép nhập tay mã tùy ý hoặc để trống tự động sinh mã `THNxxxxxx` chuẩn Kiểm kho; tự động viết hoa khi gõ; kiểm tra chống trùng lặp mã thân thiện trên server; gửi `MaPhieu` trong payload AJAX.
       * Nút tròn `#btnToggleRightPanel` trượt mượt 0.25s cubic-bezier giữa `right: 425px` và `right: 8px` khi thu gọn; đồng bộ phím tắt `F4`.
       * Tinh chỉnh CSS `#thnRightPanel .pr` chuẩn Kiểm kho & Chuyển kho (`border`, `padding`, `text-align: right`, `focus`).
+    + **Khắc phục lỗi cảnh báo "Vượt tồn" hiển thị sai & Lỗi lưu phiếu**:
+      * *Lỗi "Vượt tồn"*: Do thẻ cảnh báo tồn kho có class Bootstrap `d-block` (`display: block !important;`), ghi đè thuộc tính inline `style="display: none;"` và hàm jQuery `.toggle(false)`. Khi số lượng là 1 (tồn 97), dòng chữ "Vượt tồn (còn 97)" vẫn bị ép hiện ra. Đã gỡ bỏ class `d-block`, chuyển sang định nghĩa `.hint-over { display: block; }` trong CSS (không có `!important`) để ẩn/hiện chính xác.
+      * *Lỗi "Lỗi khi lưu phiếu trả hàng."*: Action `Save` trước đó gắn `[ValidateAntiForgeryToken]` nhưng request là JSON body AJAX không có form token nên ASP.NET Core trả về HTTP 400. Đã gỡ bỏ `[ValidateAntiForgeryToken]` ở `Save`, `QuickUpdateNote`, `Cancel` đồng bộ chuẩn các controller khác trong hệ thống.
     + **Kiểm tra**:
       * `node -c tra-hang-nhap-index.js` và `node -c tra-hang-nhap-form.js` đạt 0 lỗi cú pháp.
       * `dotnet build -t:Compile` hoàn thành với **0 Errors**.

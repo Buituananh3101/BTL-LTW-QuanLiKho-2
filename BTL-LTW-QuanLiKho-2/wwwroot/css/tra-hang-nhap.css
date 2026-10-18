@@ -3,7 +3,7 @@
 /* 1. Bảng dữ liệu Trả hàng nhập */
 #receiptTable {
     width: max-content !important;
-    min-width: 1400px !important;
+    min-width: 760px !important;
     table-layout: fixed !important;
     border-collapse: separate;
     border-spacing: 0;
@@ -189,6 +189,7 @@
 }
 
 .hint-over {
+    display: block;
     font-size: 11px;
     color: #dc2626;
     margin-top: 2px;
@@ -323,3 +324,70 @@
     color: #fff;
     border-color: #0070f3;
 }
+
+/* 2 Nút hành động Lưu tạm (F9) & Hoàn thành (F10) chuẩn Kiểm tồn */
+.f-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+.f-actions button {
+    flex: 1;
+    height: 56px;
+    border: 0;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 13.5px;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transition: all 0.15s ease;
+}
+
+.f-actions .save,
+.f-actions #btnSaveDraft {
+    background: #0a66e8 !important;
+}
+
+.f-actions .save:hover,
+.f-actions #btnSaveDraft:hover {
+    background: #0852bd !important;
+}
+
+.f-actions .done,
+.f-actions #btnSaveComplete {
+    background: #12b34a !important;
+}
+
+.f-actions .done:hover,
+.f-actions #btnSaveComplete:hover {
+    background: #0e9a3e !important;
+}
+
+/* Nút Chọn file dữ liệu trong Empty State chuẩn Kiểm tồn */
+#emptyWrap #btnSelectFile {
+    height: 42px;
+    padding: 0 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 6px;
+    background-color: #0a66e8 !important;
+    border-color: #0a66e8 !important;
+    box-shadow: 0 2px 6px rgba(10, 102, 232, 0.2);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#emptyWrap #btnSelectFile:hover {
+    background-color: #0852bd !important;
+    border-color: #0852bd !important;
+}
+

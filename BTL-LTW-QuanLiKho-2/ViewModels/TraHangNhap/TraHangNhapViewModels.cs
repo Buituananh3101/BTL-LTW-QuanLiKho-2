@@ -73,7 +73,7 @@ public class TraHangNhapFilterVM
     public string? Q { get; set; }
     public string? AdvSup { get; set; }
     public string? AdvProd { get; set; }
-    public string DateFilterType { get; set; } = "THIS_MONTH";
+    public string DateFilterType { get; set; } = "ALL";
     public DateTime? FromDate { get; set; }
     public DateTime? ToDate { get; set; }
     public List<string> Statuses { get; set; } = new() { "NHAP", "DA_TRA_HANG" };

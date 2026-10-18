@@ -278,7 +278,6 @@ public class TraHangNhapController : BaseKhoController
 
     // 8. Lưu phiếu trả hàng (POST JSON: "Lưu tạm" hoặc "Hoàn thành")
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Save([FromBody] SaveTraHangNhapRequest req)
     {
         if (req == null || req.Lines == null || req.Lines.Count == 0)
@@ -431,7 +430,6 @@ public class TraHangNhapController : BaseKhoController
 
     // 9. Cập nhật nhanh Ghi chú, Người trả, Ngày trả từ Drawer chi tiết
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> QuickUpdateNote([FromBody] QuickUpdateTraHangNoteRequest req)
     {
         if (req == null || req.MaPhieuTraHang <= 0)
@@ -468,7 +466,6 @@ public class TraHangNhapController : BaseKhoController
 
     // 10. Hủy phiếu trả hàng (Phiếu tạm hoặc Phiếu đã hoàn thành)
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Cancel(int id)
     {
         var phieu = await _context.PhieuTraHangNhaps
@@ -747,21 +744,52 @@ public class TraHangNhapController : BaseKhoController
         // Sắp xếp
         query = (filter.SortBy?.ToLower(), filter.SortDir?.ToLower()) switch
         {
-            ("maphieu", "asc") => query.OrderBy(p => p.MaPhieu ?? ("THN" + p.MaPhieuTraHang.ToString().PadLeft(6, '0'))),
-            ("maphieu", "desc") => query.OrderByDescending(p => p.MaPhieu ?? ("THN" + p.MaPhieuTraHang.ToString().PadLeft(6, '0'))),
-            ("ngaytra", "asc") => query.OrderBy(p => p.NgayTra),
-            ("ngaytra", "desc") => query.OrderByDescending(p => p.NgayTra),
-            ("tenncc", "asc") => query.OrderBy(p => p.MaDonViCapHangNavigation != null ? p.MaDonViCapHangNavigation.TenDonVi : ""),
-            ("tenncc", "desc") => query.OrderByDescending(p => p.MaDonViCapHangNavigation != null ? p.MaDonViCapHangNavigation.TenDonVi : ""),
-            ("tongsoluong", "asc") => query.OrderBy(p => p.TongSoLuong),
-            ("tongsoluong", "desc") => query.OrderByDescending(p => p.TongSoLuong),
-            ("tongtienhang", "asc") => query.OrderBy(p => p.TongTienHang),
-            ("tongtienhang", "desc") => query.OrderByDescending(p => p.TongTienHang),
-            ("canthuncc", "asc") => query.OrderBy(p => p.CanThuNcc),
-            ("canthuncc", "desc") => query.OrderByDescending(p => p.CanThuNcc),
-            ("dathuncc", "asc") => query.OrderBy(p => p.DaThuNcc),
-            ("dathuncc", "desc") => query.OrderByDescending(p => p.DaThuNcc),
-            _ => query.OrderByDescending(p => p.MaPhieuTraHang)
+            ("ma", "asc") or ("maphieu", "asc") => query.OrderBy(p => p.MaPhieu ?? ("THN" + p.MaPhieuTraHang.ToString())),
+            ("ma", "desc") or ("maphieu", "desc") => query.OrderByDescending(p => p.MaPhieu ?? ("THN" + p.MaPhieuTraHang.ToString())),
+
+            ("tg", "asc") or ("ngaytra", "asc") => query.OrderBy(p => p.NgayTra),
+            ("tg", "desc") or ("ngaytra", "desc") => query.OrderByDescending(p => p.NgayTra),
+
+            ("tgtao", "asc") => query.OrderBy(p => p.NgayLap),
+            ("tgtao", "desc") => query.OrderByDescending(p => p.NgayLap),
+
+            ("ncc", "asc") or ("tenncc", "asc") => query.OrderBy(p => p.MaDonViCapHangNavigation != null ? p.MaDonViCapHangNavigation.TenDonVi : ""),
+            ("ncc", "desc") or ("tenncc", "desc") => query.OrderByDescending(p => p.MaDonViCapHangNavigation != null ? p.MaDonViCapHangNavigation.TenDonVi : ""),
+
+            ("chinhanh", "asc") => query.OrderBy(p => p.MaKhoNavigation.TenKho),
+            ("chinhanh", "desc") => query.OrderByDescending(p => p.MaKhoNavigation.TenKho),
+
+            ("nguoitra", "asc") => query.OrderBy(p => p.MaNvtraNavigation != null ? p.MaNvtraNavigation.HoTen : ""),
+            ("nguoitra", "desc") => query.OrderByDescending(p => p.MaNvtraNavigation != null ? p.MaNvtraNavigation.HoTen : ""),
+
+            ("nguoitao", "asc") => query.OrderBy(p => p.MaNvlapNavigation.HoTen),
+            ("nguoitao", "desc") => query.OrderByDescending(p => p.MaNvlapNavigation.HoTen),
+
+            ("tongsl", "asc") or ("tongsoluong", "asc") => query.OrderBy(p => p.TongSoLuong),
+            ("tongsl", "desc") or ("tongsoluong", "desc") => query.OrderByDescending(p => p.TongSoLuong),
+
+            ("slmathang", "asc") => query.OrderBy(p => p.ChiTietPhieuTraHangNhaps.Count),
+            ("slmathang", "desc") => query.OrderByDescending(p => p.ChiTietPhieuTraHangNhaps.Count),
+
+            ("tongtien", "asc") or ("tongtienhang", "asc") => query.OrderBy(p => p.TongTienHang),
+            ("tongtien", "desc") or ("tongtienhang", "desc") => query.OrderByDescending(p => p.TongTienHang),
+
+            ("giamgia", "asc") => query.OrderBy(p => p.GiamGia),
+            ("giamgia", "desc") => query.OrderByDescending(p => p.GiamGia),
+
+            ("canthu", "asc") or ("canthuncc", "asc") => query.OrderBy(p => p.CanThuNcc),
+            ("canthu", "desc") or ("canthuncc", "desc") => query.OrderByDescending(p => p.CanThuNcc),
+
+            ("dathu", "asc") or ("dathuncc", "asc") => query.OrderBy(p => p.DaThuNcc),
+            ("dathu", "desc") or ("dathuncc", "desc") => query.OrderByDescending(p => p.DaThuNcc),
+
+            ("ghi", "asc") => query.OrderBy(p => p.GhiChu ?? ""),
+            ("ghi", "desc") => query.OrderByDescending(p => p.GhiChu ?? ""),
+
+            ("st", "asc") or ("trangthai", "asc") => query.OrderBy(p => p.TrangThai),
+            ("st", "desc") or ("trangthai", "desc") => query.OrderByDescending(p => p.TrangThai),
+
+            _ => query.OrderByDescending(p => p.NgayTra).ThenByDescending(p => p.MaPhieuTraHang)
         };
 
         int totalItems = await query.CountAsync();

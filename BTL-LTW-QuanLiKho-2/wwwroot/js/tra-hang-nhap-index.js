@@ -24,7 +24,7 @@ $(function () {
         advSup: '',
         advProd: '',
         mode: 'preset',
-        preset: 'THIS_MONTH',
+        preset: 'ALL',
         from: null,
         to: null,
         statuses: ['NHAP', 'DA_TRA_HANG'],
@@ -279,8 +279,8 @@ $(function () {
                 $wrapper.html(html);
                 $wrapper.removeClass('opacity-50 pointer-events-none');
 
-                if (colToggler) {
-                    colToggler.applyColumns();
+                if (colToggler && typeof colToggler.apply === 'function') {
+                    colToggler.apply();
                 }
 
                 if (F.openId) {
@@ -311,20 +311,37 @@ $(function () {
             tableSelector: '#receiptTable'
         });
 
-        KiotFilter.initDateFilter({
-            scope: '#sidebarFilterCol',
-            defaultMode: 'preset',
-            defaultPreset: 'THIS_MONTH',
-            onChange: function (dateState) {
-                F.mode = dateState.mode;
-                F.preset = dateState.preset;
-                F.from = dateState.from;
-                F.to = dateState.to;
+        if (typeof KiotFilter.initDateFilter === 'function') {
+            KiotFilter.initDateFilter('date', function (from, to, text, val) {
+                if (val === 'CUSTOM') {
+                    F.mode = 'custom';
+                    F.preset = 'CUSTOM';
+                    F.from = from || null;
+                    F.to = to || null;
+                } else {
+                    F.mode = 'preset';
+                    F.preset = val || 'ALL';
+                    F.from = null;
+                    F.to = null;
+                }
                 F.page = 1;
                 paintFilters();
                 fetchTable();
-            }
-        });
+            });
+        }
+
+        if (typeof KiotFilter.initSidebar === 'function') {
+            KiotFilter.initSidebar({
+                containerSelector: '#kiotContainer',
+                btnToggleSelector: '#btnToggleSidebar',
+                iconSelector: '#sidebarToggleIcon',
+                mobileBtnSelector: '#btnMobileFilter',
+                mobileCloseSelector: '#btnCloseSidebarMobile',
+                backdropSelector: '#sidebarBackdrop',
+                sidebarColSelector: '#sidebarFilterCol',
+                storageKey: 'kiot_sidebar_tra_hang_nhap'
+            });
+        }
     }
 
     /* ===== 4. LẮNG NGHE SỰ KIỆN TRÊN SIDEBAR ===== */
@@ -422,18 +439,7 @@ $(function () {
         window.location.href = url;
     });
 
-    // Thu gọn sidebar (F4) & Hover buffer chống flicker
-    function toggleSidebar() {
-        $('#kiotContainer').toggleClass('sidebar-collapsed');
-        const isCollapsed = $('#kiotContainer').hasClass('sidebar-collapsed');
-        $('#sidebarToggleIcon').attr('class', isCollapsed ? 'bi bi-chevron-right' : 'bi bi-chevron-left');
-        $('#btnToggleSidebar').attr('title', isCollapsed ? 'Mở rộng bộ lọc (F4)' : 'Thu gọn bộ lọc (F4)');
-    }
-
-    $('#btnToggleSidebar').on('click', function () {
-        toggleSidebar();
-    });
-
+    // Hover buffer chống flicker nút toggle sidebar
     let toggleHoverTimer = null;
     $('#sidebarFilterCol, #btnToggleSidebar').on('mouseenter', function () {
         clearTimeout(toggleHoverTimer);
@@ -447,28 +453,6 @@ $(function () {
         }, 120);
     });
 
-    // Phím tắt F4 & F3 toàn cục cho màn hình danh sách
-    $(document).on('keydown', function (e) {
-        if (e.key === 'F4') {
-            e.preventDefault();
-            toggleSidebar();
-        } else if (e.key === 'F3') {
-            e.preventDefault();
-            $('#keywordSearch').focus().select();
-        }
-    });
-
-    // Mở / đóng bộ lọc trên mobile
-    $('#btnMobileFilter').on('click', function () {
-        $('#sidebarFilterCol').addClass('show');
-        $('#sidebarBackdrop').addClass('show');
-    });
-
-    $('#btnCloseSidebarMobile, #sidebarBackdrop').on('click', function () {
-        $('#sidebarFilterCol').removeClass('show');
-        $('#sidebarBackdrop').removeClass('show');
-    });
-
     // Reset bộ lọc khi nhấn vào empty state
     $(document).on('click', '#resetF', function (e) {
         e.preventDefault();
@@ -479,7 +463,7 @@ $(function () {
         F.advProd = '';
         $('#advProd').val('');
         F.mode = 'preset';
-        F.preset = 'THIS_MONTH';
+        F.preset = 'ALL';
         F.from = null;
         F.to = null;
         F.statuses = ['NHAP', 'DA_TRA_HANG'];

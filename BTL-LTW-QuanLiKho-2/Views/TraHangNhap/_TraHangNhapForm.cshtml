@@ -122,7 +122,7 @@
                                             @if (!Model.IsReadOnly)
                                             {
                                                 <input type="text" class="inp text-end line-qty @(isOver ? "over" : "")" value="@line.SoLuong.ToString("N0", viCulture)" inputmode="numeric" style="width: 90px; height: 32px;" />
-                                                <span class="hint-over text-danger small d-block" style="@(isOver ? "" : "display:none;")">Vượt tồn (còn @line.TonKho.ToString("N0", viCulture))</span>
+                                                <span class="hint-over text-danger small" style="@(isOver ? "" : "display:none;")">Vượt tồn (còn @line.TonKho.ToString("N0", viCulture))</span>
                                             }
                                             else
                                             {
@@ -152,19 +152,21 @@
                     </table>
                 </div>
 
-                <!-- Trạng thái trống (Empty State) chuẩn Kiểm kho -->
-                <div class="empty-wrap" id="emptyWrap" style="@(Model.Lines != null && Model.Lines.Any() ? "display: none;" : "")">
-                    <div class="xl-empty text-center py-5">
-                        <i class="bi bi-file-earmark-spreadsheet text-primary" style="font-size: 52px;"></i>
-                        <b class="d-block fs-6 mt-2">Thêm sản phẩm từ file excel</b>
-                        <small class="text-muted d-block mb-3">(Tải về file mẫu: <a href="javascript:void(0)" id="btnDownloadTemplate" class="text-primary text-decoration-none fw-semibold">Excel file</a>)</small>
-                        @if (!Model.IsReadOnly)
-                        {
-                            <button type="button" class="btn btn-primary px-4 py-2" id="btnSelectFile" style="background-color: #0070f4; border-color: #0070f4;">
-                                <i class="bi bi-file-earmark-arrow-up me-1"></i>Chọn file dữ liệu
-                            </button>
-                        }
-                        <small class="text-muted d-block mt-3">Hoặc tìm hàng ở ô phía trên (F3), nhập mã hoặc tên rồi Enter.</small>
+                <!-- Trạng thái trống (Empty State) chuẩn Kiểm tồn -->
+                <div class="empty d-flex flex-column align-items-center justify-content-center py-5 text-center flex-grow-1" id="emptyWrap" style="@(Model.Lines != null && Model.Lines.Any() ? "display: none !important;" : "")">
+                    <div class="ico mb-3"><i class="bi bi-file-earmark-spreadsheet fs-1 text-primary"></i></div>
+                    <h5 class="fw-bold text-dark mb-1">Thêm sản phẩm từ ô tìm kiếm hoặc file Excel</h5>
+                    <div class="text-muted small mb-3">
+                        (Tải về file mẫu: <a href="javascript:void(0)" id="btnDownloadTemplate" class="text-primary text-decoration-none fw-semibold">Excel file mẫu</a>)
+                    </div>
+                    @if (!Model.IsReadOnly)
+                    {
+                        <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-2 px-4 py-2 fw-semibold" id="btnSelectFile" style="border-radius: 6px; background-color: #0a66e8; border-color: #0a66e8;">
+                            <i class="bi bi-box-arrow-in-down fs-5"></i><span>Chọn file dữ liệu</span>
+                        </button>
+                    }
+                    <div class="text-muted smaller mt-3" style="font-size: 12.5px;">
+                        hoặc tìm hàng ở ô phía trên (F3), nhập mã hoặc tên rồi Enter.
                     </div>
                 </div>
 
@@ -309,16 +311,16 @@
                 <!-- Spacer đẩy nút xuống đáy -->
                 <div class="flex-grow-1" style="min-height: 20px;"></div>
 
-                <!-- Nút hành động đáy form chuẩn KiotViet (F9 & F10) -->
+                <!-- 2 Nút hành động đáy form chuẩn Kiểm tồn (F9 & F10) -->
                 @if (!Model.IsReadOnly)
                 {
-                    <div class="f-actions d-flex gap-2 mt-auto pt-2">
-                        <button type="button" class="btn btn-outline-primary flex-fill py-2 fw-bold" id="btnSaveDraft" title="Lưu tạm phiếu trả hàng (F9)" style="height: 52px;">
-                            <i class="bi bi-floppy fs-5 me-1"></i>
+                    <div class="f-actions">
+                        <button type="button" class="save" id="btnSaveDraft" title="Lưu tạm phiếu trả hàng (F9)">
+                            <i class="bi bi-floppy fs-5 mb-1"></i>
                             <span>Lưu tạm (F9)</span>
                         </button>
-                        <button type="button" class="btn btn-primary flex-fill py-2 fw-bold" id="btnSaveComplete" title="Hoàn thành trả hàng và trừ tồn kho (F10)" style="height: 52px; background-color: #0070f4; border-color: #0070f4;">
-                            <i class="bi bi-check-lg fs-5 me-1"></i>
+                        <button type="button" class="done" id="btnSaveComplete" title="Hoàn thành trả hàng và trừ tồn kho (F10)">
+                            <i class="bi bi-check-lg fs-5 mb-1"></i>
                             <span>Hoàn thành (F10)</span>
                         </button>
                     </div>
