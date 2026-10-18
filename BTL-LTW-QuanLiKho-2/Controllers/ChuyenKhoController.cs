@@ -88,7 +88,7 @@ public class ChuyenKhoController : BaseKhoController
             TenKhoNguon = khoNguon?.TenKho ?? "Kho chính",
             NgayLap = DateTime.Now,
             TrangThai = "NHAP",
-            MaPhieu = await SinhMaPhieuTuDongAsync()
+            MaPhieu = ""
         };
 
         if (copyId.HasValue && copyId.Value > 0)
@@ -222,19 +222,24 @@ public class ChuyenKhoController : BaseKhoController
 
             if (isNew)
             {
-                string maPhieu = !string.IsNullOrWhiteSpace(request.MaPhieu)
-                    ? request.MaPhieu.Trim().ToUpper()
-                    : await SinhMaPhieuTuDongAsync();
-
-                // Kiểm tra trùng mã
-                if (await _context.PhieuChuyenKhos.AnyAsync(p => p.MaPhieu == maPhieu))
+                string codeToSet;
+                if (!string.IsNullOrWhiteSpace(request.MaPhieu))
                 {
-                    maPhieu = await SinhMaPhieuTuDongAsync();
+                    codeToSet = request.MaPhieu.Trim().ToUpper();
+                    bool exists = await _context.PhieuChuyenKhos.AnyAsync(p => p.MaPhieu == codeToSet);
+                    if (exists)
+                    {
+                        return BadRequest(new { success = false, message = $"Mã chuyển hàng '{codeToSet}' đã tồn tại trong hệ thống. Vui lòng chọn mã khác." });
+                    }
+                }
+                else
+                {
+                    codeToSet = await SinhMaPhieuTuDongAsync();
                 }
 
                 phieu = new PhieuChuyenKho
                 {
-                    MaPhieu = maPhieu,
+                    MaPhieu = codeToSet,
                     MaKhoNguon = whId,
                     MaKhoDich = request.MaKhoDich,
                     MaNvlap = CurrentNhanVienId,
@@ -264,6 +269,26 @@ public class ChuyenKhoController : BaseKhoController
                     return BadRequest(new { success = false, message = "Phiếu này đã được xuất hoặc nhận, không thể chỉnh sửa." });
                 }
 
+                string codeToSet;
+                if (!string.IsNullOrWhiteSpace(request.MaPhieu))
+                {
+                    codeToSet = request.MaPhieu.Trim().ToUpper();
+                    bool exists = await _context.PhieuChuyenKhos.AnyAsync(p => p.MaPhieu == codeToSet && p.MaPhieuChuyen != phieu.MaPhieuChuyen);
+                    if (exists)
+                    {
+                        return BadRequest(new { success = false, message = $"Mã chuyển hàng '{codeToSet}' đã tồn tại trong hệ thống. Vui lòng chọn mã khác." });
+                    }
+                }
+                else if (!string.IsNullOrWhiteSpace(phieu.MaPhieu))
+                {
+                    codeToSet = phieu.MaPhieu;
+                }
+                else
+                {
+                    codeToSet = await SinhMaPhieuTuDongAsync();
+                }
+
+                phieu.MaPhieu = codeToSet;
                 phieu.MaKhoDich = request.MaKhoDich;
                 phieu.GhiChu = request.GhiChu?.Trim();
                 if (request.NgayLap.HasValue) phieu.NgayLap = request.NgayLap.Value;

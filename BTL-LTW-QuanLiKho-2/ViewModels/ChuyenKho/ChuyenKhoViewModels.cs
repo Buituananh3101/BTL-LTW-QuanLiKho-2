@@ -132,6 +132,8 @@ public class ChuyenKhoFormVM
 
     public bool IsEdit => MaPhieuChuyen.HasValue && MaPhieuChuyen.Value > 0;
     public bool IsCopy { get; set; }
+    public bool IsReadOnly => TrangThai != "NHAP";
+    public string MaPhieuHienThi => !string.IsNullOrWhiteSpace(MaPhieu) ? MaPhieu : (MaPhieuChuyen.HasValue ? MaChungTuHelper.FormatMaChuyenKho(MaPhieuChuyen.Value) : "");
 }
 
 public class SaveChuyenKhoRequest

@@ -7,12 +7,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using BTL_LTW_QuanLiKho_2.Models;
 using BTL_LTW_QuanLiKho_2.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using BTL_LTW_QuanLiKho_2.ViewModels;
 using BTL_LTW_QuanLiKho_2.ViewModels.Common;
 using BTL_LTW_QuanLiKho_2.ViewModels.NhaCungCap;
 
 namespace BTL_LTW_QuanLiKho_2.Controllers;
 
+[Authorize]
 public class NhaCungCapController : BaseKhoController
 {
     private readonly ILogger<NhaCungCapController> _logger;

@@ -514,6 +514,7 @@
 
         const payload = {
             MaPhieuChuyen: docId > 0 ? docId : null,
+            MaPhieu: ($('#txtDocCode').val() || '').trim().toUpperCase() || null,
             MaKhoDich: khoNhanId,
             NgayLap: formatLocalIso(createdDate),
             GhiChu: $('#fNote').val() || null,
@@ -565,6 +566,16 @@
             });
         } else {
             submitTransfer('SEND');
+        }
+    });
+
+    // Tự động viết hoa mã chuyển hàng khi người dùng nhập tay
+    $('#txtDocCode').on('input', function () {
+        const start = this.selectionStart;
+        const end = this.selectionEnd;
+        this.value = this.value.toUpperCase();
+        if (start !== null && end !== null) {
+            this.setSelectionRange(start, end);
         }
     });
 

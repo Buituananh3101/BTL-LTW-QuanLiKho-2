@@ -519,3 +519,63 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18) !important;
 }
 
+/* 8. Khối thông tin chứng từ panel phải (Người lập, Thời gian, Mã chuyển hàng) căn phải chuẩn Kiểm kho */
+.f-panel .pr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 36px;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.f-panel .pr > label,
+.f-panel .pr > span.l {
+    color: #4b5563;
+    white-space: nowrap;
+    font-size: 13.5px;
+    margin-bottom: 0;
+}
+
+.f-panel .pr .v {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    font-weight: 500;
+    font-size: 13.5px;
+    text-align: right;
+}
+
+.f-panel .pr .v.relw {
+    position: relative;
+}
+
+.f-panel .pr .inp {
+    max-width: 190px;
+    width: 190px;
+    height: 34px;
+    text-align: right;
+    padding: 0 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #1e293b;
+    background: #ffffff;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.f-panel .pr .inp:focus {
+    border-color: #0a66e8;
+    box-shadow: 0 0 0 2px rgba(10, 102, 232, 0.15);
+}
+
+.f-panel .pr .inp[disabled] {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #64748b;
+    cursor: not-allowed;
+}
+

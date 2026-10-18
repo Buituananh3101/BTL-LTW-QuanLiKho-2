@@ -1,11 +1,11 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Tối Ưu Đóng Mở Rightmenu (Panel Phải) Chuyển Hàng Mượt Chuẩn Kiểm Kho (Phiên 118)
+Cập nhật lần cuối: 2026-10-18 – Căn Phải Thời Gian & Cho Phép Nhập Tay / Tự Động Sinh Mã Chuyển Hàng Chuẩn Kiểm Kho (Phiên 119)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử trải nghiệm đóng/mở panel phải (Right Menu) màn hình Lập/Sửa phiếu chuyển hàng (`/ChuyenKho/Create`, `/ChuyenKho/Edit`): animation 0.25s cubic-bezier(0.25, 1, 0.35, 1) mượt mà không giật cục, khung `.f-panel-inner` 440px cố định chống méo vỡ chữ, nút tròn F4 trượt đồng bộ mép panel.
+- Sẵn sàng kiểm thử trải nghiệm màn hình Lập/Sửa phiếu chuyển hàng (`/ChuyenKho/Create`, `/ChuyenKho/Edit`): ô Thời gian và Mã chuyển hàng căn lề phải sắc nét chuẩn Kiểm kho; ô Mã chuyển hàng cho phép nhập tay hoặc để trống tự động sinh mã `CKxxxxxx`, kiểm tra chống trùng mã thân thiện.
 
 ---
 
@@ -14,6 +14,31 @@ Cập nhật lần cuối: 2026-10-18 – Tối Ưu Đóng Mở Rightmenu (Panel
 2. Xây dựng phân hệ Trả hàng nhập (Purchase Returns) theo yêu cầu.
 
 ---
+
+- **Căn Phải Thời Gian & Cho Phép Nhập Tay / Tự Động Sinh Mã Chuyển Hàng Chuẩn Kiểm Kho (Phiên 119)**:
+  - **Nhu cầu**: Người dùng phản ánh: "trong phần chuyển kho, phần thời gian và mã chuyển hàng để dịch sang phải. phần mã chuyển hàng sửa thành tự động và nhâp tay nếu ko nhập tay thì tự động giống kiểm kho".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `Views/ChuyenKho/_ChuyenKhoForm.cshtml`, ô `#fDate` có inline style `text-align: center;` thay vì căn lề phải (`text-align: right;`).
+    + Ô `#txtDocCode` sử dụng class `form-control form-control-sm text-center` và bị khóa cứng `disabled`, luôn bị điền sẵn mã sinh trước (`CK000003`) khi tạo mới, không cho phép người dùng tùy biến nhập mã tay hay hiển thị placeholder `"Mã phiếu tự động"` chuẩn Kiểm kho (`PhieuKiemKe`).
+    + Trong `wwwroot/js/chuyen-kho-form.js`, hàm `submitTransfer` hoàn toàn thiếu trường `MaPhieu` trong object `payload` gửi lên server.
+    + Trong `Controllers/ChuyenKhoController.cs`:
+      * Action `Create` tự gán trước `MaPhieu = await SinhMaPhieuTuDongAsync()` vào ViewModel làm mất placeholder.
+      * Action `Save` nếu phát hiện trùng mã nhập tay thì tự động ghi đè bằng `SinhMaPhieuTuDongAsync()` một cách âm thầm thay vì thông báo lỗi tiếng Việt thân thiện cho người dùng; đồng thời thiếu cập nhật mã khi sửa phiếu tạm (`!isNew`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`_ChuyenKhoForm.cshtml`**:
+      * Đổi `#fDate` sang `text-align: right;`, `color: #1e293b;`, `width: 190px;` đồng bộ mép phải với dropdown kho nhận và số liệu tổng kết.
+      * Đổi `#txtDocCode` từ `form-control` sang `class="inp"`, `placeholder="Mã phiếu tự động"`, bỏ `disabled` (chỉ disabled khi `Model.IsReadOnly`), căn phải `text-align: right;`, `text-transform: uppercase;`.
+    + **`ChuyenKhoViewModels.cs`**: Bổ sung `IsReadOnly => TrangThai != "NHAP";` và `MaPhieuHienThi` vào `ChuyenKhoFormVM`.
+    + **`ChuyenKhoController.cs`**:
+      * Trong `Create`: Đặt `MaPhieu = ""` để form hiển thị placeholder `"Mã phiếu tự động"`.
+      * Trong `Save`: Chuẩn hóa mã nhập tay (`Trim().ToUpper()`), kiểm tra trùng lặp trên bảng `PhieuChuyenKho` (loại trừ chính phiếu nếu đang sửa). Nếu trùng, trả về lỗi: `Mã chuyển hàng '{codeToSet}' đã tồn tại trong hệ thống. Vui lòng chọn mã khác.` Nếu để trống, tự động sinh mã `CK000001`... khi tạo mới hoặc giữ nguyên mã cũ khi sửa.
+    + **`chuyen-kho-form.js`**: Bổ sung `MaPhieu: ($('#txtDocCode').val() || '').trim().toUpperCase() || null` vào `payload` gửi đi; thêm event listener tự động viết hoa khi gõ vào `#txtDocCode`.
+    + **`chuyen-kho.css`**: Bổ sung selector `.f-panel .pr`, `.f-panel .pr .v` (`justify-content: flex-end; align-items: center;`) và `.f-panel .pr .inp` căn phải sắc nét, border/focus chuẩn KiotViet.
+    + **Kiểm tra**:
+      * `node -c chuyen-kho-form.js` đạt 0 lỗi cú pháp.
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+      * Cập nhật đặc tả `docs/specs/chuyen-kho.md` đạt 7.950 ký tự (< 8.000 ký tự theo Rule 12).
+
 
 - **Tối Ưu Đóng Mở Rightmenu (Panel Phải) Chuyển Hàng Mượt Chuẩn Kiểm Kho (Phiên 118)**:
   - **Nhu cầu**: Người dùng phản ánh: "sửa lại phần đóng mở rightmenu trong chuyển hàng mượt như phần kiểm kho".

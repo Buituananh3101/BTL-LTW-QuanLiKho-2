@@ -76,7 +76,7 @@
 ### 4.2. Màn hình 2: Lập/Sửa phiếu (`/ChuyenKho/Create`, `/ChuyenKho/Edit/{id}`)
 - Layout 2 cột chuẩn KiotViet:
   - Cột trái: Nút quay lại, ô tìm hàng F3 autocomplete (icon chuẩn tách biệt chữ, không bị đè chữ), bảng lưới hàng hóa có cảnh báo vượt tồn.
-  - Cột phải: Box lộ trình `routebox` (Kho gửi -> Kho nhận), custom dropdown chọn kho nhận `.wh-custom-select-btn` (icon tòa nhà, checkmark), bộ chọn ngày giờ `.dtpop` chuẩn Kiểm tồn (lịch tháng + 48 khung giờ), mã phiếu, tổng SL chuyển, tổng giá trị chuyển, ghi chú.
+  - Cột phải: Box lộ trình `routebox` (Kho gửi -> Kho nhận), dropdown kho nhận `.wh-custom-select-btn`, thời gian `.dtpop` & mã chuyển hàng `.inp` căn phải đồng bộ Kiểm kho (nhập tay hoặc để trống tự sinh `CK000001`...), tổng SL, tổng giá trị, ghi chú.
   - Thu gọn/mở rộng panel phải mượt mà 0.25s chuẩn Kiểm kho (F4, `.f-panel-inner` 440px cố định chống giật méo nội dung, nút trượt đồng bộ mép).
   - Nút cố định đáy: "Lưu tạm" (`NHAP`) và "Chuyển hàng" (`DA_XUAT`).
 
