@@ -6,343 +6,33 @@
 <link rel="stylesheet" href="~/css/hang-hoa-form.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/hang-hoa-excel.css" asp-append-version="true" />
 
+<!-- Cấu hình dữ liệu ban đầu cho JavaScript (tránh inline script trong view) -->
+<div id="hangHoaConfig"
+     data-page="@Model.Page"
+     data-sort-by="@(Model.SortBy ?? "")"
+     data-sort-dir="@(Model.SortDir ?? "")"
+     data-du-kien="@(Model.DuKienFilter ?? "ALL")"
+     data-tg-tao="@(Model.TgTaoFilter ?? "ALL")"
+     data-is-starred="@(Model.DaDanhDauFilter ? "true" : "false")"
+     style="display:none;"></div>
+
 <div class="kiot-container position-relative" id="kiotContainer">
-    <!-- CỘT BÊN TRÁI: TIÊU ĐỀ "HÀNG HÓA" + BỘ LỌC -->
-    <aside class="kiot-sidebar-col" id="sidebarFilterCol">
-        <!-- Header cho sidebar khi mở ở chế độ mobile/zoom in -->
-        <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-            <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc hàng hóa</div>
-            <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
-        </div>
-
-        <div class="kiot-sidebar-title d-none d-lg-flex">
-            Hàng hóa
-        </div>
-
-        <div class="kiot-filter-box">
-            <!-- 1. Nhóm hàng -->
-            <div class="f-block position-relative">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <h6 class="mb-0">Nhóm hàng <span class="filter-dot" id="dotNhomHang"></span></h6>
-                    <a href="javascript:void(0)" class="small text-primary text-decoration-none fw-semibold" id="btnOpenQuickGroupModal">
-                        Tạo mới
-                    </a>
-                </div>
-                <div class="position-relative">
-                    <div class="kiot-multiselect-box" id="boxNhomHang" data-filter="nhom">
-                        <span class="kiot-ms-placeholder">Chọn nhóm hàng</span>
-                    </div>
-                    <div class="kiot-ms-dropdown shadow" id="dropdownNhomHang">
-                        <div class="kiot-ms-search">
-                            <input type="text" placeholder="Tìm kiếm nhóm hàng..." autocomplete="off" />
-                        </div>
-                        @foreach (var g in Model.NhomHangs)
-                        {
-                            <div class="kiot-ms-item" data-val="@g.MaNhom" data-name="@g.TenNhom">
-                                <input type="checkbox" class="form-check-input" />
-                                <span>@g.TenNhom</span>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2. Tồn kho -->
-            <div class="f-block position-relative">
-                <h6>Tồn kho <span class="filter-dot" id="dotTonKho"></span></h6>
-                <div class="text-muted small mb-1">Tiêu chí tồn</div>
-                <div class="position-relative">
-                    <div class="kiot-single-select-box" id="boxTonKho">
-                        <span id="textTonKho">
-                            @(Model.TonKhoFilter == "CON_HANG" ? "Còn hàng trong kho" :
-                              Model.TonKhoFilter == "HET_HANG" ? "Hết hàng trong kho" :
-                              Model.TonKhoFilter == "DUOI_DINH_MUC" ? "Dưới định mức tồn ⚠️" : "Tất cả")
-                        </span>
-                        <i class="bi bi-chevron-down kiot-select-chevron"></i>
-                    </div>
-                    <div class="kiot-ss-dropdown shadow" id="dropdownTonKho">
-                        <div class="kiot-ss-item @(Model.TonKhoFilter == "ALL" || string.IsNullOrEmpty(Model.TonKhoFilter) ? "selected" : "")" data-val="ALL">
-                            <span>Tất cả</span>
-                            <i class="bi bi-check2 check-icon"></i>
-                        </div>
-                        <div class="kiot-ss-item @(Model.TonKhoFilter == "CON_HANG" ? "selected" : "")" data-val="CON_HANG">
-                            <span>Còn hàng trong kho</span>
-                            <i class="bi bi-check2 check-icon"></i>
-                        </div>
-                        <div class="kiot-ss-item @(Model.TonKhoFilter == "HET_HANG" ? "selected" : "")" data-val="HET_HANG">
-                            <span>Hết hàng trong kho</span>
-                            <i class="bi bi-check2 check-icon"></i>
-                        </div>
-                        <div class="kiot-ss-item @(Model.TonKhoFilter == "DUOI_DINH_MUC" ? "selected" : "")" data-val="DUOI_DINH_MUC">
-                            <span>Dưới định mức tồn ⚠️</span>
-                            <i class="bi bi-check2 check-icon"></i>
-                        </div>
-                    </div>
-                </div>
-                <select class="form-select filter-change d-none" id="filterTonKho">
-                    <option value="ALL" selected="@(Model.TonKhoFilter == "ALL")">Tất cả</option>
-                    <option value="CON_HANG" selected="@(Model.TonKhoFilter == "CON_HANG")">Còn hàng trong kho</option>
-                    <option value="HET_HANG" selected="@(Model.TonKhoFilter == "HET_HANG")">Hết hàng trong kho</option>
-                    <option value="DUOI_DINH_MUC" selected="@(Model.TonKhoFilter == "DUOI_DINH_MUC")">Dưới định mức tồn ⚠️</option>
-                </select>
-            </div>
-
-            <!-- 3. Dự kiến hết hàng -->
-            <div class="f-block position-relative">
-                <h6>Dự kiến hết hàng <span class="filter-dot" id="dotDuKien"></span></h6>
-                <div class="form-check mb-1">
-                    <input class="form-check-input" type="radio" name="duKienFilter" id="dkAll" checked />
-                    <label class="form-check-label d-flex justify-content-between align-items-center" for="dkAll" id="labelDkAll" style="cursor: pointer;">
-                        <span id="textDkRange">Toàn thời gian</span>
-                        <i class="bi bi-chevron-right text-muted small" id="btnOpenDkQuick"></i>
-                    </label>
-                </div>
-
-                <!-- Popup chọn nhanh thời gian Dự kiến hết hàng (3 cột như Screenshot 3) -->
-                <div class="quick-date-popup" id="popupDkQuick">
-                    <div class="quick-date-grid">
-                        <div class="quick-date-col">
-                            <div class="quick-date-col-title">Theo ngày</div>
-                            <div class="quick-date-btn" data-target="dk" data-val="NGAY_MAI">Ngày mai</div>
-                            <div class="quick-date-btn" data-target="dk" data-val="NGAY_KIA">Ngày kia</div>
-                            <div class="quick-date-btn" data-target="dk" data-val="3_NGAY">3 ngày tới</div>
-                            <div class="quick-date-btn" data-target="dk" data-val="5_NGAY">5 ngày tới</div>
-                            <div class="quick-date-btn" data-target="dk" data-val="7_NGAY">7 ngày tới</div>
-                        </div>
-                        <div class="quick-date-col">
-                            <div class="quick-date-col-title">Theo tuần</div>
-                            <div class="quick-date-btn" data-target="dk" data-val="TUAN_NAY">Tuần này</div>
-                            <div class="quick-date-btn" data-target="dk" data-val="TUAN_TOI">Tuần tới</div>
-                            <div class="quick-date-btn" data-target="dk" data-val="2_TUAN">2 tuần tới</div>
-                        </div>
-                        <div class="quick-date-col">
-                            <div class="quick-date-col-title">Theo tháng</div>
-                            <div class="quick-date-btn" data-target="dk" data-val="THANG_NAY">Tháng này</div>
-                            <div class="quick-date-btn" data-target="dk" data-val="THANG_TOI">Tháng tới</div>
-                            <div class="quick-date-btn" data-target="dk" data-val="30_NGAY">30 ngày tới</div>
-                            <div class="quick-date-btn" data-target="dk" data-val="2_THANG">2 tháng tới</div>
-                            <div class="quick-date-btn" data-target="dk" data-val="3_THANG">3 tháng tới</div>
-                        </div>
-                    </div>
-                    <button type="button" class="quick-date-pill-all" data-target="dk" data-val="ALL">Toàn thời gian</button>
-                </div>
-
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="duKienFilter" id="dkCustom" />
-                    <label class="form-check-label d-flex justify-content-between align-items-center" for="dkCustom" style="cursor: pointer;">
-                        <span id="textDkCustom">Tùy chỉnh</span>
-                        <i class="bi bi-calendar3 text-muted small" id="btnOpenDkCalendar"></i>
-                    </label>
-                </div>
-
-                <!-- Popup Lịch 2 tháng cạnh nhau cho Tùy chỉnh (Screenshot 2) -->
-                <div class="dual-calendar-popup" id="popupDkCalendar">
-                    <div class="dual-calendar-header">
-                        Từ ngày: <span class="fw-bold text-primary" id="dkCalFromText">12/10/2026</span> - Đến ngày: <span class="fw-bold text-primary" id="dkCalToText">12/10/2026</span>
-                    </div>
-                    <div class="dual-calendar-body">
-                        <!-- Tháng 1 -->
-                        <div class="dual-cal-month">
-                            <div class="dual-cal-nav">
-                                <button type="button" class="btn-cal-prev" data-target="dk">‹</button>
-                                <span id="dkMonthTitle1">Tháng 10 2026</span>
-                                <button type="button" class="btn-cal-next" data-target="dk">›</button>
-                            </div>
-                            <table class="dual-cal-table">
-                                <thead><tr><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>T7</th><th>CN</th></tr></thead>
-                                <tbody id="dkCalBody1"></tbody>
-                            </table>
-                        </div>
-                        <!-- Tháng 2 -->
-                        <div class="dual-cal-month">
-                            <div class="dual-cal-nav">
-                                <button type="button" class="btn-cal-prev" data-target="dk">‹</button>
-                                <span id="dkMonthTitle2">Tháng 11 2026</span>
-                                <button type="button" class="btn-cal-next" data-target="dk">›</button>
-                            </div>
-                            <table class="dual-cal-table">
-                                <thead><tr><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>T7</th><th>CN</th></tr></thead>
-                                <tbody id="dkCalBody2"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="dual-calendar-footer">
-                        <a href="javascript:void(0)" class="text-primary small text-decoration-none fw-bold btn-cal-today" data-target="dk">Hôm nay</a>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-3 btn-close-popup">Bỏ qua</button>
-                            <button type="button" class="btn btn-primary btn-sm py-1 px-3 btn-apply-calendar" data-target="dk">Áp dụng</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 4. Thời gian tạo -->
-            <div class="f-block position-relative">
-                <h6>Thời gian tạo <span class="filter-dot" id="dotTgTao"></span></h6>
-                <div class="form-check mb-1">
-                    <input class="form-check-input" type="radio" name="tgTaoFilter" id="tgtAll" checked />
-                    <label class="form-check-label d-flex justify-content-between align-items-center" for="tgtAll" id="labelTgtAll" style="cursor: pointer;">
-                        <span id="textTgtRange">Toàn thời gian</span>
-                        <i class="bi bi-chevron-right text-muted small" id="btnOpenTgtQuick"></i>
-                    </label>
-                </div>
-
-                <!-- Popup chọn nhanh thời gian tạo -->
-                <div class="quick-date-popup" id="popupTgtQuick">
-                    <div class="quick-date-grid">
-                        <div class="quick-date-col">
-                            <div class="quick-date-col-title">Theo ngày</div>
-                            <div class="quick-date-btn" data-target="tgt" data-val="HOM_NAY">Hôm nay</div>
-                            <div class="quick-date-btn" data-target="tgt" data-val="HOM_QUA">Hôm qua</div>
-                        </div>
-                        <div class="quick-date-col">
-                            <div class="quick-date-col-title">Theo tuần</div>
-                            <div class="quick-date-btn" data-target="tgt" data-val="TUAN_NAY">Tuần này</div>
-                            <div class="quick-date-btn" data-target="tgt" data-val="TUAN_TRUOC">Tuần trước</div>
-                            <div class="quick-date-btn" data-target="tgt" data-val="7_NGAY">7 ngày qua</div>
-                        </div>
-                        <div class="quick-date-col">
-                            <div class="quick-date-col-title">Theo tháng</div>
-                            <div class="quick-date-btn" data-target="tgt" data-val="THANG_NAY">Tháng này</div>
-                            <div class="quick-date-btn" data-target="tgt" data-val="THANG_TRUOC">Tháng trước</div>
-                            <div class="quick-date-btn" data-target="tgt" data-val="30_NGAY">30 ngày qua</div>
-                        </div>
-                    </div>
-                    <button type="button" class="quick-date-pill-all" data-target="tgt" data-val="ALL">Toàn thời gian</button>
-                </div>
-
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="tgTaoFilter" id="tgtCustom" />
-                    <label class="form-check-label d-flex justify-content-between align-items-center" for="tgtCustom" style="cursor: pointer;">
-                        <span id="textTgtCustom">Tùy chỉnh</span>
-                        <i class="bi bi-calendar3 text-muted small" id="btnOpenTgtCalendar"></i>
-                    </label>
-                </div>
-
-                <!-- Popup Lịch 2 tháng cho Thời gian tạo (Screenshot 2) -->
-                <div class="dual-calendar-popup" id="popupTgtCalendar">
-                    <div class="dual-calendar-header">
-                        Từ ngày: <span class="fw-bold text-primary" id="tgtCalFromText">12/10/2026</span> - Đến ngày: <span class="fw-bold text-primary" id="tgtCalToText">12/10/2026</span>
-                    </div>
-                    <div class="dual-calendar-body">
-                        <!-- Tháng 1 -->
-                        <div class="dual-cal-month">
-                            <div class="dual-cal-nav">
-                                <button type="button" class="btn-cal-prev" data-target="tgt">‹</button>
-                                <span id="tgtMonthTitle1">Tháng 10 2026</span>
-                                <button type="button" class="btn-cal-next" data-target="tgt">›</button>
-                            </div>
-                            <table class="dual-cal-table">
-                                <thead><tr><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>T7</th><th>CN</th></tr></thead>
-                                <tbody id="tgtCalBody1"></tbody>
-                            </table>
-                        </div>
-                        <!-- Tháng 2 -->
-                        <div class="dual-cal-month">
-                            <div class="dual-cal-nav">
-                                <button type="button" class="btn-cal-prev" data-target="tgt">‹</button>
-                                <span id="tgtMonthTitle2">Tháng 11 2026</span>
-                                <button type="button" class="btn-cal-next" data-target="tgt">›</button>
-                            </div>
-                            <table class="dual-cal-table">
-                                <thead><tr><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>T7</th><th>CN</th></tr></thead>
-                                <tbody id="tgtCalBody2"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="dual-calendar-footer">
-                        <a href="javascript:void(0)" class="text-primary small text-decoration-none fw-bold btn-cal-today" data-target="tgt">Hôm nay</a>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-3 btn-close-popup">Bỏ qua</button>
-                            <button type="button" class="btn btn-primary btn-sm py-1 px-3 btn-apply-calendar" data-target="tgt">Áp dụng</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 5. Nhà cung cấp -->
-            <div class="f-block position-relative">
-                <h6>Nhà cung cấp <span class="filter-dot" id="dotNcc"></span></h6>
-                <div class="position-relative">
-                    <div class="kiot-multiselect-box" id="boxNcc" data-filter="ncc">
-                        <span class="kiot-ms-placeholder">Chọn nhà cung cấp</span>
-                    </div>
-                    <div class="kiot-ms-dropdown shadow" id="dropdownNcc">
-                        <div class="kiot-ms-search">
-                            <input type="text" placeholder="Tìm nhà cung cấp..." autocomplete="off" />
-                        </div>
-                        @foreach (var s in Model.DonViCapHangs)
-                        {
-                            <div class="kiot-ms-item" data-val="@s.TenDonVi" data-name="@s.TenDonVi">
-                                <input type="checkbox" class="form-check-input" />
-                                <span>@s.TenDonVi</span>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <!-- 6. Vị trí -->
-            <div class="f-block position-relative">
-                <h6>Vị trí <span class="filter-dot" id="dotViTri"></span></h6>
-                <div class="position-relative">
-                    <div class="kiot-multiselect-box" id="boxViTri" data-filter="vitri">
-                        <span class="kiot-ms-placeholder">Chọn vị trí</span>
-                    </div>
-                    <div class="kiot-ms-dropdown shadow" id="dropdownViTri">
-                        <div class="kiot-ms-search">
-                            <input type="text" placeholder="Tìm vị trí..." autocomplete="off" />
-                        </div>
-                        @foreach (var vt in Model.ViTris)
-                        {
-                            <div class="kiot-ms-item" data-val="@vt" data-name="@vt">
-                                <input type="checkbox" class="form-check-input" />
-                                <span>@vt</span>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <!-- 7. Loại hàng -->
-            <div class="f-block position-relative">
-                <h6>Loại hàng <span class="filter-dot" id="dotLoaiHang"></span></h6>
-                <div class="position-relative">
-                    <div class="kiot-multiselect-box" id="boxLoaiHang" data-filter="loaihang">
-                        <span class="kiot-ms-placeholder">Chọn loại hàng</span>
-                    </div>
-                    <div class="kiot-ms-dropdown shadow" id="dropdownLoaiHang">
-                        <div class="kiot-ms-item" data-val="Hàng hóa" data-name="Hàng hóa">
-                            <input type="checkbox" class="form-check-input" />
-                            <span>Hàng hóa</span>
-                        </div>
-                        <div class="kiot-ms-item" data-val="Dịch vụ" data-name="Dịch vụ">
-                            <input type="checkbox" class="form-check-input" />
-                            <span>Dịch vụ</span>
-                        </div>
-                        <div class="kiot-ms-item" data-val="Combo - đóng gói" data-name="Combo - đóng gói">
-                            <input type="checkbox" class="form-check-input" />
-                            <span>Combo - đóng gói</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </aside>
+    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + 7 BỘ LỌC KIOTVIET (PARTIAL VIEW) -->
+    <partial name="_HangHoaFilterSidebar" model="Model" />
 
     <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
     <div class="kiot-sidebar-backdrop" id="sidebarBackdrop"></div>
 
-    <!-- Nút tròn thu gọn / mở rộng ở ranh giới giữa sidebar và bảng (KiotViet style - chỉ dùng cho desktop) -->
+    <!-- Nút tròn thu gọn / mở rộng ở ranh giới giữa sidebar và bảng (Phím tắt F4) -->
     <button type="button" class="kiot-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
         <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
     </button>
 
-    <!-- CỘT BÊN PHẢI: THANH TÌM KIẾM THẲNG HÀNG VỚI DANH SÁCH + BẢNG HÀNG HÓA -->
+    <!-- 2. CỘT BÊN PHẢI: THANH TÌM KIẾM + TOOLBAR + BẢNG HÀNG HÓA -->
     <main class="kiot-main-col">
-        <!-- Toolbar trên cùng: Thanh tìm kiếm thẳng hàng với list bảng bên dưới -->
+        <!-- Toolbar trên cùng: Thanh tìm kiếm thẳng hàng với bảng bên dưới -->
         <div class="kiot-toolbar-row">
-            <!-- Tiêu đề + Nút phễu bộ lọc trên mobile / zoom in (chuẩn theo ảnh mẫu KiotViet) -->
+            <!-- Tiêu đề + Nút phễu bộ lọc trên mobile / zoom in -->
             <div class="kiot-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
                 <span class="kiot-mobile-title fw-bold fs-6 text-dark">Hàng hóa</span>
                 <button type="button" class="btn btn-sm btn-outline-primary kiot-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc hàng hóa">
@@ -352,12 +42,11 @@
 
             <div class="kiot-search-box">
                 <i class="bi bi-search"></i>
-                <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã, tên hàng" value="@Model.Q" autocomplete="off" />
-                <i class="bi bi-arrow-left-right" title="Tìm kiếm nâng cao"></i>
+                <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã, tên hàng (F3)" value="@Model.Q" autocomplete="off" />
             </div>
 
             <div class="kiot-actions-group">
-                <!-- Dropdown + Tạo mới (Click vào bất kỳ vị trí nào của nút đều mở menu tùy chọn) -->
+                <!-- Dropdown + Tạo mới hàng hóa -->
                 <div class="dropdown">
                     <button class="btn btn-primary dropdown-toggle kiot-btn-create d-inline-flex align-items-center" type="button" id="btnDropdownCreate" data-bs-toggle="dropdown" aria-expanded="false" title="Thêm mới">
                         <i class="bi bi-plus-lg me-1"></i><span class="d-none d-md-inline">Tạo mới</span>
@@ -379,7 +68,7 @@
                     <i class="bi bi-box-arrow-up me-1"></i>Xuất file
                 </button>
 
-                <!-- Dropdown gom Import/Xuất trên Mobile/Zoom in (Icon bảng tính y hệt ảnh) -->
+                <!-- Dropdown gom Import/Xuất trên Mobile/Zoom in -->
                 <div class="dropdown d-inline-block d-md-none">
                     <button class="btn btn-tool" type="button" id="btnDropdownExcelMobile" data-bs-toggle="dropdown" aria-expanded="false" title="Nhập / Xuất Excel">
                         <i class="bi bi-table"></i>
@@ -499,15 +188,13 @@
 </div>
 
 <!-- ========================================================================
-     MODAL KIOTVIET: THÊM MỚI / CẬP NHẬT HÀNG HÓA CHUẨN PROTOTYPE (5 ẢNH CSDL)
+     CÁC MODAL KIOTVIET (THÊM/SỬA, XUẤT EXCEL, NHẬP EXCEL, TẠO NHÓM)
      ======================================================================== -->
 <partial name="_HangHoaModal" model="Model" />
 <partial name="_HangHoaExportModal" />
 <partial name="_HangHoaImportModal" />
 
-<!-- ========================================================================
-     MODAL TẠO NHANH NHÓM HÀNG
-     ======================================================================== -->
+<!-- Modal Tạo nhanh nhóm hàng -->
 <div class="modal fade" id="quickGroupModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content">

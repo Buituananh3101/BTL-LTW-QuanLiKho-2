@@ -1,6 +1,6 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-14 – Nâng cấp Form Thêm/Sửa Hàng hóa KiotViet 5 ảnh CSDL & Mô tả (Phiên 14)
+Cập nhật lần cuối: 2026-10-15 – Tinh gọn UI: Gỡ bỏ icon mũi tên hai chiều trong ô tìm kiếm Hàng hóa (Phiên 18)
 
 ---
 
@@ -92,7 +92,14 @@ Cập nhật lần cuối: 2026-10-14 – Nâng cấp Form Thêm/Sửa Hàng hó
 ---
 
 ## Nhật ký phiên
+- **2026-10-15 (Phiên 16 - Sáng)**:
+  - Chuẩn hóa Kiến trúc Danh mục CRUD dùng chung & Tinh gọn mô-đun Hàng hóa (Khuôn mẫu LEGO):
+    - **Tầng Dùng chung (Shared Foundation)**: Xây dựng `BaseFilterParams.cs`, `PagedResult<T>`, `_Pagination.cshtml`, `ExcelHelper.cs`, và `kiot-filter.js`. Mọi danh mục tiếp theo đều có thể tái sử dụng ngay lập tức mà không cần viết lại mã phân trang, bộ lọc hay định dạng Excel.
+    - **Tách Lớp Dịch vụ Excel**: Tạo `IHangHoaExcelService` và `HangHoaExcelService`, đăng ký DI vào `Program.cs`. Rút gọn `HangHoaController.cs` từ 1.944 dòng xuống 1.253 dòng (~36%).
+    - **Mô-đun hóa Giao diện & JavaScript**: Tách 7 khối lọc sidebar sang `_HangHoaFilterSidebar.cshtml`, chuyển ~1.400 dòng inline script sang `hang-hoa-index.js`, rút gọn `Views/HangHoa/Index.cshtml` từ 1.841 dòng (~85 KB) xuống 142 dòng (~7.8 KB). Dọn dẹp 5 file scaffold view cũ.
+    - Kiểm tra biên dịch: `dotnet build` 0 lỗi. Đồng bộ toàn bộ tài liệu quy chuẩn (`AGENTS.md`, `PROGRESS.md`, `quyet-dinh.md`, `specs/danh-sach-hang-hoa.md`).
 - **2026-10-14 (Phiên 15 - Chiều/Tối)**:
+
   - Hoàn thiện Chức năng Nhập & Xuất File Excel Hàng hóa chuẩn KiotViet (16 trường quản lý):
     - Tích hợp thư viện ClosedXML (v0.105.1); xây dựng các action `DownloadTemplate`, `ExportExcel`, `ImportExcel` và các ViewModel `ExportHangHoaRequest`, `ImportHangHoaResult`.
     - Dựng modal chọn cột xuất `#hhExportModalOv` hỗ trợ chọn phạm vi (tất cả / hàng đã chọn), nút tiện ích chọn bộ cột chuẩn để nhập lại, và cảnh báo nghiệp vụ khi bỏ chọn cột thiết yếu.
@@ -145,6 +152,15 @@ Cập nhật lần cuối: 2026-10-14 – Nâng cấp Form Thêm/Sửa Hàng hó
       - **Backend & Controller**: `HangHoaController.cs` nhận `sortBy` và `sortDir`, thực hiện sắp xếp động trên danh sách `allItems` trước khi phân trang, bảo toàn 100% dữ liệu lọc và tổng hợp.
       - **Giao diện**: Header bảng hiển thị icon mũi tên chỉ khi cột đang sắp xếp (`bi-arrow-up` hoặc `bi-arrow-down`), khi không sắp xếp sẽ ẩn hoàn toàn icon giúp tiêu đề gọn gàng sạch sẽ; hover đổi màu mềm mại (`#dbeafe`), ngăn bôi đen text khi click liên tục (`user-select: none`).
     - Kiểm tra cú pháp JS: `node -c` 0 lỗi. Đồng bộ `docs/specs/danh-sach-hang-hoa.md`.
+- **2026-10-15 (Phiên 15 - Sáng)**:
+  - Tinh gọn thanh công cụ Quản lý Hàng hóa: Gỡ bỏ nút Cài đặt (`bi-gear`) trên thanh công cụ của trang Hàng hóa (`Index.cshtml`), giữ lại 2 nút tiện ích tiêu chuẩn là Tải lại bảng (`bi-arrow-clockwise`) và Trợ giúp (`bi-question-circle`).
+  - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-15 (Phiên 18 - Sáng)**:
+  - Tinh gọn ô tìm kiếm trang Hàng hóa: Gỡ bỏ icon mũi tên hai chiều thừa (`bi-arrow-left-right`) trong ô tìm kiếm `#keywordSearch` (`Index.cshtml`), tinh chỉnh `padding-right: 12px` trong `site.css` giúp thanh tìm kiếm gọn gàng, thoáng mắt.
+  - Kiểm tra biên dịch: 0 lỗi.
+- **2026-10-15 (Phiên 17 - Sáng)**:
+  - Tinh gọn giao diện Hàng hóa: Gỡ bỏ biểu tượng cảnh báo `⚠️` (!) ở tùy chọn "Dưới định mức tồn" trong dropdown Tiêu chí tồn (`_HangHoaFilterSidebar.cshtml`) và trong ô hiển thị số lượng tồn kho trên bảng (`_HangHoaTable.cshtml`), đồng bộ đặc tả `danh-sach-hang-hoa.md`.
+  - Kiểm tra biên dịch: 0 lỗi.
 - **2026-10-14 (Phiên 14 - Chiều)**:
   - Tái thiết kế và nâng cấp toàn diện Modal Tạo/Sửa Hàng hóa theo prototype KiotViet `prototype-taohanghoa.html`:
     - CSDL: Nâng cấp lưu trữ từ 1 ảnh thành tối đa 5 ảnh lưu trực tiếp trong SQL Server qua bảng `dbo.HinhAnhHangHoa` (`migrations/sql/07_nang_cap_5_anh_va_mota_hanghoa.sql`) và bổ sung cột `MoTa` cho `dbo.HangHoa`.

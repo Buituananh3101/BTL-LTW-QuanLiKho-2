@@ -154,7 +154,7 @@
                         else if (item.TonToiThieu.HasValue && item.TonKho < item.TonToiThieu.Value)
                         {
                             <span class="text-danger fw-bold" title="Dưới định mức tồn">
-                                @item.TonKho.ToString("N0", viCulture) ⚠️
+                                @item.TonKho.ToString("N0", viCulture)
                             </span>
                         }
                         else
@@ -459,36 +459,5 @@
 </table>
 </div>
 
-<!-- Phân trang đáy bảng -->
-<div class="kiot-table-pagination d-flex justify-content-between align-items-center">
-    <div class="text-muted small">
-        Hiển thị <strong>@Model.Items.Count</strong> / <strong>@Model.TotalCount</strong> hàng hóa · Trang <strong>@Model.Page</strong> / <strong>@Model.TotalPages</strong>
-    </div>
-
-    @if (Model.TotalPages > 1)
-    {
-        <ul class="pagination pagination-sm mb-0">
-            <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
-                <a class="page-link page-ajax" href="javascript:void(0)" data-page="@(Model.Page - 1)">« Trước</a>
-            </li>
-
-            @for (int p = 1; p <= Model.TotalPages; p++)
-            {
-                if (p == 1 || p == Model.TotalPages || (p >= Model.Page - 2 && p <= Model.Page + 2))
-                {
-                    <li class="page-item @(p == Model.Page ? "active" : "")">
-                        <a class="page-link page-ajax" href="javascript:void(0)" data-page="@p">@p</a>
-                    </li>
-                }
-                else if (p == Model.Page - 3 || p == Model.Page + 3)
-                {
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                }
-            }
-
-            <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
-                <a class="page-link page-ajax" href="javascript:void(0)" data-page="@(Model.Page + 1)">Sau »</a>
-            </li>
-        </ul>
-    }
-</div>
+<!-- Phân trang đáy bảng (dùng chung _Pagination.cshtml) -->
+@await Html.PartialAsync("_Pagination", Model.PagedData, new ViewDataDictionary(ViewData) { { "ItemLabel", "hàng hóa" } })

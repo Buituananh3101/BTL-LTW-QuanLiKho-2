@@ -14,6 +14,7 @@ builder.Services.AddDbContext<QuanLyKhoPhuQuocLtwContext>(options =>
 builder.Services.AddScoped<BTL_LTW_QuanLiKho_2.Services.ITonKhoService, BTL_LTW_QuanLiKho_2.Services.TonKhoService>();
 builder.Services.AddScoped<BTL_LTW_QuanLiKho_2.Services.IBanHangService, BTL_LTW_QuanLiKho_2.Services.BanHangService>();
 builder.Services.AddScoped<BTL_LTW_QuanLiKho_2.Services.INhatKyThaoTacService, BTL_LTW_QuanLiKho_2.Services.NhatKyThaoTacService>();
+builder.Services.AddScoped<BTL_LTW_QuanLiKho_2.Services.IHangHoaExcelService, BTL_LTW_QuanLiKho_2.Services.HangHoaExcelService>();
 
 builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

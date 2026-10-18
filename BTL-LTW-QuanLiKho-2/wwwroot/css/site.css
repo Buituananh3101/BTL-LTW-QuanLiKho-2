@@ -952,7 +952,7 @@ body {
 }
 .kiot-search-box input {
   padding-left: 30px;
-  padding-right: 30px;
+  padding-right: 12px;
   height: 30px;
   border-radius: 6px;
   border: 1px solid var(--border);
@@ -973,15 +973,6 @@ body {
   color: #9ca3af;
   font-size: 12.5px;
   pointer-events: none;
-}
-.kiot-search-box .bi-arrow-left-right {
-  position: absolute;
-  right: 9px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #6b7280;
-  font-size: 12.5px;
-  cursor: pointer;
 }
 .kiot-actions-group {
   display: flex;
@@ -2015,13 +2006,10 @@ tr.product-detail-row > td {
   .kiot-search-box input {
     font-size: 12px;
     padding-left: 26px;
-    padding-right: 24px;
+    padding-right: 10px;
   }
   .kiot-search-box .bi-search {
     left: 7px;
-  }
-  .kiot-search-box .bi-arrow-left-right {
-    right: 7px;
   }
 }
 

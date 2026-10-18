@@ -7,12 +7,13 @@
 ## 1. Kiến trúc File & Bảng CSDL liên quan
 
 ### 1.1. Bản đồ File liên quan (File Map)
-- **Controller**: `Controllers/HangHoaController.cs` (`Index`, lọc AJAX `Filter`, `Create`, `Edit`, `GetItem`, `ToggleFavorite`, `Delete`, `NgungBan`, `GetImage`, `CreateDvtQuick`, `UpdateThuocTinh`, `DownloadTemplate`, `ExportExcel`, `ImportExcel`).
-- **ViewModel**: `ViewModels/HangHoa/` (`HangHoaForm.cs`, `QuickGroupRequest.cs`, `QuickDvtRequest.cs`, `ExportHangHoaRequest.cs`, `ImportHangHoaResult.cs`).
-- **View & Modal**: `Views/HangHoa/Index.cshtml`, `_HangHoaModal.cshtml` (form thêm/sửa 5 ảnh CSDL), `_HangHoaExportModal.cshtml` (chọn cột xuất Excel), `_HangHoaImportModal.cshtml` (nhập Excel kéo thả).
-- **Styles & Scripts**: `wwwroot/css/` (`hang-hoa-form.css`, `hang-hoa-excel.css`, `site.css`), `wwwroot/js/` (`hang-hoa-form.js`, `hang-hoa-excel.js`).
-- **Bảng dữ liệu**: `Views/HangHoa/_HangHoaTable.cshtml` (Bảng danh sách, accordion chi tiết, sắp xếp 3 trạng thái).
-- **Service & Helper**: `Services/ITonKhoService.cs`, `TonKhoService.cs`, `MaChungTuHelper.cs`.
+- **Controller**: `Controllers/HangHoaController.cs` (gọn nhẹ, nhận `HangHoaFilterParams`, gọi `IHangHoaExcelService`, xử lý CRUD AJAX).
+- **Service & Helper Excel**: `Services/IHangHoaExcelService.cs`, `HangHoaExcelService.cs`, `Helpers/ExcelHelper.cs` (ClosedXML tái sử dụng cho toàn dự án).
+- **Service tồn kho & tiện ích**: `Services/ITonKhoService.cs`, `TonKhoService.cs`, `MaChungTuHelper.cs`.
+- **ViewModel**: `ViewModels/HangHoa/` (`HangHoaForm.cs`, `HangHoaFilterParams.cs`, `ExportHangHoaRequest.cs`, `ImportHangHoaResult.cs`) kế thừa `BaseFilterParams.cs` và `PagedResultBase.cs`.
+- **View & Partial Layout**: `Views/HangHoa/Index.cshtml` (siêu gọn 140 dòng), `_HangHoaFilterSidebar.cshtml` (7 khối lọc KiotViet), `_HangHoaTable.cshtml` (Bảng dữ liệu + `_Pagination.cshtml` dùng chung).
+- **Modal Modun**: `_HangHoaModal.cshtml` (thêm/sửa 5 ảnh CSDL), `_HangHoaExportModal.cshtml` (xuất Excel), `_HangHoaImportModal.cshtml` (nhập Excel kéo thả).
+- **Styles & Scripts**: `wwwroot/js/kiot-filter.js` (thư viện giao diện KiotViet dùng chung), `wwwroot/js/hang-hoa-index.js` (script trang hàng hóa), `hang-hoa-form.js`, `hang-hoa-excel.js`.
 - **DbContext & Entity**: `QuanLyKhoPhuQuocLtwContext`, Entity (`HangHoa`, `HinhAnhHangHoa`, `NhomHang`, `DonViTinh`, `NguongTonKho`, `VwTonKhoHienTai`).
 
 ### 1.2. Bảng CSDL tham gia:
@@ -44,7 +45,7 @@
 
 ### 3.1. Cột lọc bên trái (Sidebar Filter):
 1. **Nhóm hàng**: Multi-select Tag Dropdown + ô tìm kiếm dính đỉnh + tạo nhanh.
-2. **Tồn kho**: Custom Single Select KiotViet (Tất cả / Còn hàng / Hết hàng / Dưới định mức ⚠️).
+2. **Tồn kho**: Custom Single Select KiotViet (Tất cả / Còn hàng / Hết hàng / Dưới định mức tồn).
 3. **Dự kiến hết hàng**: Hôm nay, 3 ngày tới, 7 ngày tới, Trong tháng, > 30 ngày.
 4. **Nhà cung cấp**: Multi-select tag dropdown theo NCC đã từng nhập.
 5. **Loại hàng**: Hàng hóa / Dịch vụ / Combo đóng gói.
