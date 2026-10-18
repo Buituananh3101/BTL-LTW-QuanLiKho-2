@@ -87,17 +87,98 @@
                     </ul>
                 </div>
 
-                <!-- Các icon tiện ích KiotViet -->
-                <button type="button" class="btn btn-tool d-none d-sm-inline-flex" title="Tải lại bảng" id="btnReloadTable">
-                    <i class="bi bi-arrow-clockwise"></i>
-                </button>
+                <!-- Nút Ẩn/Hiện cột KiotViet (Thay thế nút reload) -->
+                <div class="dropdown d-inline-block position-relative" id="dropdownColConfigWrap">
+                    <button type="button" class="btn btn-tool" id="btnColumnConfig" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Tùy chọn hiển thị cột">
+                        <i class="bi bi-grid-3x2-gap"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end shadow kiot-col-config-menu" aria-labelledby="btnColumnConfig">
+                        <div class="kiot-col-grid">
+                            <!-- Cột trái (6 cột) -->
+                            <div class="kiot-col-subcol">
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="loaihang" />
+                                    <span>Loại hàng</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="nhomhang" />
+                                    <span>Nhóm hàng</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="mahang" />
+                                    <span>Mã hàng</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="tenhang" />
+                                    <span>Tên hàng</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="giaban" />
+                                    <span>Giá bán</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="giavon" />
+                                    <span>Giá vốn</span>
+                                </label>
+                            </div>
+                            <!-- Cột phải (5 cột) -->
+                            <div class="kiot-col-subcol">
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="tonkho" />
+                                    <span>Tồn kho</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="tontothieu" />
+                                    <span>Tồn nhỏ nhất</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="toncaonhat" />
+                                    <span>Tồn lớn nhất</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="vitri" />
+                                    <span>Vị trí</span>
+                                </label>
+                                <label class="kiot-col-checkbox-item">
+                                    <input type="checkbox" class="form-check-input col-toggle-cb" data-col="trangthai" />
+                                    <span>Trạng thái</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <button type="button" class="btn btn-tool" title="Trợ giúp" onclick="alert('Hướng dẫn sử dụng Quản lý Hàng hóa');">
                     <i class="bi bi-question-circle"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Bảng danh sách hàng hóa (Partial View AJAX) -->
+        <!-- Dynamic CSS cho ẩn/hiện cột tức thì không bị nhấp nháy -->
+        <style id="hhDynamicColStyles"></style>
+        <script>
+            (function () {
+                var defCols = ['hinhanh', 'mahang', 'tenhang', 'giaban', 'giavon', 'tonkho', 'dukienhethang', 'trangthai'];
+                var allCols = [
+                    'hinhanh', 'mahang', 'mavach', 'tenhang', 'nhomhang', 'loaihang', 'giaban', 'giavon',
+                    'tonkho', 'vitri', 'khachdat', 'ngaytao', 'dukienhethang', 'tontothieu', 'toncaonhat', 'trangthai'
+                ];
+                var saved = null;
+                try {
+                    saved = JSON.parse(localStorage.getItem('kiot_hanghoa_columns'));
+                } catch (e) {}
+                var activeCols = Array.isArray(saved) && saved.length > 0 ? saved : defCols;
+                var hiddenCols = allCols.filter(function (c) { return activeCols.indexOf(c) === -1; });
+                var css = '';
+                for (var i = 0; i < hiddenCols.length; i++) {
+                    css += '#productTable .col-' + hiddenCols[i] + ' { display: none !important; }\n';
+                }
+                var styleEl = document.getElementById('hhDynamicColStyles');
+                if (styleEl) styleEl.textContent = css;
+            })();
+        </script>
+
+        <!-- Bảng danh sách hàng hóa -->
         <section id="content">
             <div id="productTableContainer">
                 <partial name="_HangHoaTable" model="Model" />
@@ -134,8 +215,1438 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/kiot-filter.js" asp-append-version="true"></script>
-    <script src="~/js/hang-hoa-index.js" asp-append-version="true"></script>
-    <script src="~/js/hang-hoa-form.js" asp-append-version="true"></script>
-    <script src="~/js/hang-hoa-excel.js" asp-append-version="true"></script>
+<script>
+$(document).ready(function () {
+    let currentPage = @Model.Page;
+    let currentSortBy = '@(Model.SortBy ?? "")';
+    let currentSortDir = '@(Model.SortDir ?? "")';
+    const groupModal = new bootstrap.Modal(document.getElementById('quickGroupModal'));
+
+    // 1. Thu gọn / Mở rộng (Kéo vào / Kéo ra) sidebar bên trái
+    let animTimer = null;
+    function toggleSidebar(forceState) {
+        const container = $('#kiotContainer');
+        const isCollapsed = container.hasClass('sidebar-collapsed');
+        const shouldCollapse = (typeof forceState === 'boolean') ? forceState : !isCollapsed;
+
+        // Bật trạng thái đang chuyển động để khóa tràn nội dung, chuyển động êm ái
+        clearTimeout(animTimer);
+        container.addClass('sidebar-animating');
+        animTimer = setTimeout(() => {
+            container.removeClass('sidebar-animating');
+        }, 420);
+
+        if (shouldCollapse) {
+            // Kéo vào (Thu gọn)
+            container.addClass('sidebar-collapsed');
+            $('#sidebarToggleIcon').removeClass('bi-chevron-left').addClass('bi-chevron-right');
+            $('#btnToggleSidebar').attr('title', 'Mở rộng bộ lọc (F4)');
+            localStorage.setItem('kiot_sidebar_state', 'collapsed');
+        } else {
+            // Kéo ra (Mở rộng)
+            container.removeClass('sidebar-collapsed');
+            $('#sidebarToggleIcon').removeClass('bi-chevron-right').addClass('bi-chevron-left');
+            $('#btnToggleSidebar').attr('title', 'Thu gọn bộ lọc (F4)');
+            localStorage.setItem('kiot_sidebar_state', 'expanded');
+        }
+    }
+
+    // Khôi phục trạng thái thu gọn / mở rộng nếu có lưu
+    if (localStorage.getItem('kiot_sidebar_state') === 'collapsed') {
+        toggleSidebar(true);
+    }
+
+    // Bấm nút kéo mở / thu gọn - phản hồi tức thì và tin cậy 100%
+    $('#btnToggleSidebar').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleSidebar();
+    });
+
+    // Hover buffer cho nút thò thụt khi sidebar đang mở (chống giật/flicker)
+    let toggleHoverTimer = null;
+    $('#sidebarFilterCol, #btnToggleSidebar').on('mouseenter', function () {
+        clearTimeout(toggleHoverTimer);
+        $('#btnToggleSidebar').addClass('btn-visible');
+    }).on('mouseleave', function () {
+        clearTimeout(toggleHoverTimer);
+        toggleHoverTimer = setTimeout(function () {
+            if (!$('#sidebarFilterCol:hover').length && !$('#btnToggleSidebar:hover').length) {
+                $('#btnToggleSidebar').removeClass('btn-visible');
+            }
+        }, 120);
+    });
+
+    // Phím tắt F4 để kéo vào / kéo ra
+    $(document).on('keydown', function (e) {
+        if (e.key === 'F4') {
+            e.preventDefault();
+            toggleSidebar();
+        }
+    });
+
+    // Mở / đóng bộ lọc dạng drawer trên Mobile / Zoom in
+    $('#btnMobileFilter').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#sidebarFilterCol').addClass('show-mobile');
+        $('#sidebarBackdrop').addClass('show');
+    });
+
+    function closeMobileSidebar() {
+        $('#sidebarFilterCol').removeClass('show-mobile');
+        $('#sidebarBackdrop').removeClass('show');
+    }
+
+    $('#btnCloseSidebarMobile, #sidebarBackdrop').on('click', function (e) {
+        e.preventDefault();
+        closeMobileSidebar();
+    });
+
+    // Filter states
+    let activeDuKienVal = '@(Model.DuKienFilter ?? "ALL")';
+    let activeTgTaoVal = '@(Model.TgTaoFilter ?? "ALL")';
+    let activeTgTaoFrom = '';
+    let activeTgTaoTo = '';
+    let isStarredFilterActive = @(Model.DaDanhDauFilter ? "true" : "false");
+
+    // Calendar state
+    const todayObj = new Date();
+    const calState = {
+        tgt: {
+            currentYear: todayObj.getFullYear(),
+            currentMonth: todayObj.getMonth(),
+            start: todayObj,
+            end: todayObj
+        },
+        dk: {
+            currentYear: todayObj.getFullYear(),
+            currentMonth: todayObj.getMonth(),
+            start: todayObj,
+            end: todayObj
+        }
+    };
+
+    function renderDualCalendar(target) {
+        const y = calState[target].currentYear;
+        const m = calState[target].currentMonth;
+        renderMonth(target, 1, y, m);
+        let y2 = y;
+        let m2 = m + 1;
+        if (m2 > 11) { m2 = 0; y2++; }
+        renderMonth(target, 2, y2, m2);
+        updateCalendarHeader(target);
+    }
+
+    function renderMonth(target, idx, year, month) {
+        const prefix = target === 'tgt' ? '#tgt' : '#dk';
+        $(`${prefix}MonthTitle${idx}`).text(`Tháng ${month + 1} ${year}`);
+        const tbody = $(`${prefix}CalBody${idx}`).empty();
+
+        const firstDayOfWeek = (new Date(year, month, 1).getDay() + 6) % 7; // 0=T2, 6=CN
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+        let tr = $('<tr>');
+        let dayCount = 0;
+
+        for (let i = 0; i < firstDayOfWeek; i++) {
+            const d = daysInPrevMonth - firstDayOfWeek + i + 1;
+            tr.append(`<td class="text-muted empty-day">${d}</td>`);
+            dayCount++;
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const curDate = new Date(year, month, day);
+            const iso = curDate.getFullYear() + '-' + String(curDate.getMonth() + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+            const td = $(`<td class="cal-day" data-target="${target}" data-iso="${iso}">${day}</td>`);
+
+            const s = calState[target].start;
+            const e = calState[target].end;
+            if (s && e) {
+                const curT = new Date(year, month, day).setHours(0,0,0,0);
+                const sT = new Date(s).setHours(0,0,0,0);
+                const eT = new Date(e).setHours(0,0,0,0);
+                if (curT === sT && curT === eT) {
+                    td.addClass('selected');
+                } else if (curT === sT) {
+                    td.addClass('range-start');
+                } else if (curT === eT) {
+                    td.addClass('range-end');
+                } else if (curT > sT && curT < eT) {
+                    td.addClass('in-range');
+                }
+            } else if (s) {
+                const curT = new Date(year, month, day).setHours(0,0,0,0);
+                const sT = new Date(s).setHours(0,0,0,0);
+                if (curT === sT) td.addClass('selected');
+            }
+
+            tr.append(td);
+            dayCount++;
+            if (dayCount % 7 === 0) {
+                tbody.append(tr);
+                tr = $('<tr>');
+            }
+        }
+
+        if (dayCount % 7 !== 0) {
+            let nextDay = 1;
+            while (dayCount % 7 !== 0) {
+                tr.append(`<td class="text-muted empty-day">${nextDay++}</td>`);
+                dayCount++;
+            }
+            tbody.append(tr);
+        }
+    }
+
+    function updateCalendarHeader(target) {
+        const prefix = target === 'tgt' ? '#tgt' : '#dk';
+        const s = calState[target].start;
+        const e = calState[target].end;
+        if (s) {
+            $(`${prefix}CalFromText`).text(formatDateVN(s));
+            $(`${prefix}CalToText`).text(formatDateVN(e || s));
+        }
+    }
+
+    function formatDateVN(d) {
+        if (!d) return '';
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        return `${day}/${month}/${d.getFullYear()}`;
+    }
+
+    function formatDateISO(d) {
+        if (!d) return '';
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        return `${d.getFullYear()}-${month}-${day}`;
+    }
+
+    // Init dual calendars
+    renderDualCalendar('tgt');
+    renderDualCalendar('dk');
+    $('#dotTonKho').css('display', $('#filterTonKho').val() !== 'ALL' ? 'inline-block' : 'none');
+
+    // Click on calendar day
+    $(document).on('click', '.cal-day', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        const target = $(this).data('target');
+        const iso = $(this).data('iso');
+        const clicked = new Date(iso + 'T00:00:00');
+
+        if (!calState[target].start || (calState[target].start && calState[target].end)) {
+            calState[target].start = clicked;
+            calState[target].end = null;
+        } else {
+            if (clicked < calState[target].start) {
+                calState[target].start = clicked;
+            } else {
+                calState[target].end = clicked;
+            }
+        }
+        renderDualCalendar(target);
+    });
+
+    // Calendar month navigation
+    $(document).on('click', '.btn-cal-prev', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        const target = $(this).data('target');
+        calState[target].currentMonth--;
+        if (calState[target].currentMonth < 0) {
+            calState[target].currentMonth = 11;
+            calState[target].currentYear--;
+        }
+        renderDualCalendar(target);
+    });
+
+    $(document).on('click', '.btn-cal-next', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        const target = $(this).data('target');
+        calState[target].currentMonth++;
+        if (calState[target].currentMonth > 11) {
+            calState[target].currentMonth = 0;
+            calState[target].currentYear++;
+        }
+        renderDualCalendar(target);
+    });
+
+    // Calendar "Hôm nay"
+    $(document).on('click', '.btn-cal-today', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        const target = $(this).data('target');
+        const t = new Date();
+        calState[target].currentYear = t.getFullYear();
+        calState[target].currentMonth = t.getMonth();
+        calState[target].start = t;
+        calState[target].end = t;
+        renderDualCalendar(target);
+    });
+
+    // Calendar "Áp dụng"
+    $(document).on('click', '.btn-apply-calendar', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        const target = $(this).data('target');
+        const s = calState[target].start || new Date();
+        const eDate = calState[target].end || s;
+        const rangeText = `${formatDateVN(s)} - ${formatDateVN(eDate)}`;
+
+        if (target === 'tgt') {
+            $('#popupTgtCalendar').hide();
+            $('#tgtCustom').prop('checked', true);
+            activeTgTaoVal = 'CUSTOM';
+            activeTgTaoFrom = formatDateISO(s);
+            activeTgTaoTo = formatDateISO(eDate);
+            $('#textTgtRange').text(rangeText);
+            $('#textTgtCustom').text(rangeText);
+        } else {
+            $('#popupDkCalendar').hide();
+            $('#dkCustom').prop('checked', true);
+            activeDuKienVal = 'CUSTOM';
+            $('#textDkRange').text(rangeText);
+            $('#textDkCustom').text(rangeText);
+        }
+        currentPage = 1;
+        loadTable();
+    });
+
+    function toggleFloatingPopup(triggerElement, popupSelector) {
+        const popup = $(popupSelector);
+        if (popup.is(':visible')) {
+            popup.hide();
+            return;
+        }
+        $('.quick-date-popup, .dual-calendar-popup').hide();
+
+        const trigger = $(triggerElement);
+        const rect = trigger[0].getBoundingClientRect();
+        const popupWidth = popup.outerWidth() || (popupSelector.includes('Calendar') ? 540 : 330);
+        
+        let left = rect.left;
+        let top = rect.bottom + 6;
+
+        const maxRight = $(window).width() - 10;
+        if (left + popupWidth > maxRight) {
+            left = maxRight - popupWidth;
+        }
+        if (left < 10) left = 10;
+
+        const popupHeight = popup.outerHeight() || 300;
+        if (top + popupHeight > $(window).height() - 10) {
+            top = Math.max(10, rect.top - popupHeight - 6);
+        }
+
+        popup.css({
+            position: 'fixed',
+            top: top + 'px',
+            left: left + 'px',
+            zIndex: 1060
+        }).show();
+    }
+
+    // 2. Mở Quick Date Popups cho Dự kiến & Thời gian tạo (Nổi fixed không bị che bởi scroll)
+    $('#btnOpenDkQuick').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#dkAll').prop('checked', true);
+        toggleFloatingPopup(this, '#popupDkQuick');
+    });
+
+    $('#labelDkAll').on('click', function (e) {
+        if ($(e.target).closest('#btnOpenDkQuick').length) return;
+        e.stopPropagation();
+        toggleFloatingPopup(this, '#popupDkQuick');
+    });
+
+    $('#btnOpenDkCalendar').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#dkCustom').prop('checked', true);
+        toggleFloatingPopup(this, '#popupDkCalendar');
+    });
+
+    $('#dkCustom').on('click', function (e) {
+        e.stopPropagation();
+        toggleFloatingPopup(this, '#popupDkCalendar');
+    });
+
+    $('#btnOpenTgtQuick').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#tgtAll').prop('checked', true);
+        toggleFloatingPopup(this, '#popupTgtQuick');
+    });
+
+    $('#labelTgtAll').on('click', function (e) {
+        if ($(e.target).closest('#btnOpenTgtQuick').length) return;
+        e.stopPropagation();
+        toggleFloatingPopup(this, '#popupTgtQuick');
+    });
+
+    $('#btnOpenTgtCalendar').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#tgtCustom').prop('checked', true);
+        toggleFloatingPopup(this, '#popupTgtCalendar');
+    });
+
+    $('#tgtCustom').on('click', function (e) {
+        e.stopPropagation();
+        toggleFloatingPopup(this, '#popupTgtCalendar');
+    });
+
+    // Tự động đóng popup ngày khi cuộn bộ lọc bên trái
+    $('.kiot-filter-box').on('scroll', function () {
+        $('.quick-date-popup, .dual-calendar-popup').hide();
+    });
+
+    // Reset khi click radio "Toàn thời gian"
+    $('#dkAll').on('change', function () {
+        if ($(this).is(':checked')) {
+            activeDuKienVal = 'ALL';
+            $('#textDkRange').text('Toàn thời gian');
+            $('#textDkCustom').text('Tùy chỉnh');
+            $('#popupDkQuick .quick-date-btn, #popupDkQuick .quick-date-pill-all').removeClass('active');
+            currentPage = 1;
+            loadTable();
+        }
+    });
+
+    $('#tgtAll').on('change', function () {
+        if ($(this).is(':checked')) {
+            activeTgTaoVal = 'ALL';
+            activeTgTaoFrom = '';
+            activeTgTaoTo = '';
+            $('#textTgtRange').text('Toàn thời gian');
+            $('#textTgtCustom').text('Tùy chỉnh');
+            $('#popupTgtQuick .quick-date-btn, #popupTgtQuick .quick-date-pill-all').removeClass('active');
+            currentPage = 1;
+            loadTable();
+        }
+    });
+
+    // Chọn option trong Quick Date Popup
+    $(document).on('click', '.quick-date-btn, .quick-date-pill-all', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        const target = $(this).data('target');
+        const val = $(this).data('val');
+        const text = $(this).text();
+        if (target === 'dk') {
+            activeDuKienVal = val;
+            $('#textDkRange').text(text);
+            $('#popupDkQuick').hide();
+            $('#dkAll').prop('checked', true);
+            $('#popupDkQuick').find('.quick-date-btn, .quick-date-pill-all').removeClass('active');
+            $(this).addClass('active');
+        } else {
+            activeTgTaoVal = val;
+            activeTgTaoFrom = '';
+            activeTgTaoTo = '';
+            $('#textTgtRange').text(text);
+            $('#popupTgtQuick').hide();
+            $('#tgtAll').prop('checked', true);
+            $('#popupTgtQuick').find('.quick-date-btn, .quick-date-pill-all').removeClass('active');
+            $(this).addClass('active');
+        }
+        currentPage = 1;
+        loadTable();
+    });
+
+    // Đóng popup lịch khi bấm Bỏ qua
+    $(document).on('click', '.btn-close-popup', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        $('.dual-calendar-popup').hide();
+    });
+
+    // 3. Multi-select Tags Dropdown cho Nhóm hàng, Nhà cung cấp, Vị trí, Loại hàng (KiotViet style)
+    const filterState = {
+        nhom: [],     // array of { val: '1', name: 'Bánh' }
+        ncc: [],      // array of { val: 'Công ty Pharmedic', name: 'Công ty Pharmedic' }
+        vitri: [],    // array of { val: 'Kho trung tâm', name: 'Kho trung tâm' }
+        loaihang: []  // array of { val: 'Hàng hóa', name: 'Hàng hóa' }
+    };
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    const filterPlaceholders = {
+        nhom: 'Chọn nhóm hàng',
+        ncc: 'Chọn nhà cung cấp',
+        vitri: 'Chọn vị trí',
+        loaihang: 'Chọn loại hàng'
+    };
+
+    const filterDotSelectors = {
+        nhom: '#dotNhomHang',
+        ncc: '#dotNcc',
+        vitri: '#dotViTri',
+        loaihang: '#dotLoaiHang'
+    };
+
+    function renderMultiSelectBox(key) {
+        const boxId = key === 'nhom' ? '#boxNhomHang' :
+                      key === 'ncc' ? '#boxNcc' :
+                      key === 'vitri' ? '#boxViTri' : '#boxLoaiHang';
+        const dropdownId = key === 'nhom' ? '#dropdownNhomHang' :
+                           key === 'ncc' ? '#dropdownNcc' :
+                           key === 'vitri' ? '#dropdownViTri' : '#dropdownLoaiHang';
+
+        const box = $(boxId);
+        const dropdown = $(dropdownId);
+        const selected = filterState[key] || [];
+        const placeholder = filterPlaceholders[key];
+        const dot = $(filterDotSelectors[key]);
+
+        // Cập nhật chấm xanh indicator
+        dot.css('display', selected.length > 0 ? 'inline-block' : 'none');
+
+        // Cập nhật trạng thái checkbox & selected trong dropdown
+        dropdown.find('.kiot-ms-item').each(function () {
+            const val = String($(this).data('val'));
+            const isSel = selected.some(x => String(x.val) === val);
+            $(this).toggleClass('selected', isSel);
+            $(this).find('input[type="checkbox"]').prop('checked', isSel);
+        });
+
+        // Chưa chọn mục nào: hiển thị placeholder
+        if (selected.length === 0) {
+            box.html(`<span class="kiot-ms-placeholder">${placeholder}</span>`);
+            return;
+        }
+
+        // Đã chọn: hiển thị tối đa 3 thẻ, nếu quá 3 thẻ thì thẻ thứ 4 là "+n khác"
+        let html = '';
+        const maxVisible = 3;
+
+        if (selected.length <= maxVisible) {
+            selected.forEach(item => {
+                html += `
+                    <span class="kiot-pill-tag" data-val="${escapeHtml(item.val)}">
+                        <span class="tag-text">${escapeHtml(item.name)}</span>
+                        <span class="tag-remove" title="Bỏ chọn">&times;</span>
+                    </span>
+                `;
+            });
+        } else {
+            for (let i = 0; i < maxVisible; i++) {
+                const item = selected[i];
+                html += `
+                    <span class="kiot-pill-tag" data-val="${escapeHtml(item.val)}">
+                        <span class="tag-text">${escapeHtml(item.name)}</span>
+                        <span class="tag-remove" title="Bỏ chọn">&times;</span>
+                    </span>
+                `;
+            }
+            const remaining = selected.length - maxVisible;
+            const otherNames = selected.slice(maxVisible).map(x => x.name).join(', ');
+            html += `
+                <span class="kiot-pill-more" title="${escapeHtml(otherNames)}">+${remaining} khác</span>
+            `;
+        }
+
+        box.html(html);
+    }
+
+    function checkSidebarDropdownDirection(box, dropdown) {
+        if (!box.length || !dropdown.length) return;
+
+        const boxRect = box[0].getBoundingClientRect();
+        const filterBox = box.closest('.kiot-filter-box');
+        
+        let containerBottom = $(window).height();
+        let containerTop = 0;
+
+        if (filterBox.length) {
+            const filterRect = filterBox[0].getBoundingClientRect();
+            containerBottom = Math.min(filterRect.bottom, $(window).height());
+            containerTop = Math.max(filterRect.top, 0);
+        }
+
+        const spaceBelow = containerBottom - boxRect.bottom;
+        const spaceAbove = boxRect.top - containerTop;
+
+        const neededHeight = 220; // Chiều cao tối đa cần thiết của dropdown
+
+        if (spaceBelow < neededHeight && spaceAbove > spaceBelow) {
+            dropdown.addClass('drop-up');
+            const maxH = Math.min(250, Math.max(120, spaceAbove - 10));
+            dropdown.css('max-height', maxH + 'px');
+        } else {
+            dropdown.removeClass('drop-up');
+            const maxH = Math.min(250, Math.max(120, spaceBelow - 10));
+            dropdown.css('max-height', maxH + 'px');
+        }
+    }
+
+    function setupMultiSelect(boxId, dropdownId, key) {
+        const box = $(boxId);
+        const dropdown = $(dropdownId);
+
+        // Click box: mở/đóng dropdown
+        box.on('click', function (e) {
+            if ($(e.target).closest('.tag-remove').length) return;
+            e.stopPropagation();
+            $('.kiot-ms-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
+            $('.kiot-multiselect-box').not(box).removeClass('open');
+            $('.quick-date-popup, .dual-calendar-popup').hide();
+
+            const willShow = !dropdown.hasClass('show');
+            if (willShow) {
+                checkSidebarDropdownDirection(box, dropdown);
+                dropdown.addClass('show');
+                box.addClass('open');
+                dropdown.find('.kiot-ms-search input').focus();
+            } else {
+                dropdown.removeClass('show drop-up').css('max-height', '');
+                box.removeClass('open');
+            }
+        });
+
+        // Click nút x trên pill tag: gỡ bỏ item
+        box.on('click', '.tag-remove', function (e) {
+            e.stopPropagation();
+            const val = String($(this).closest('.kiot-pill-tag').data('val'));
+            filterState[key] = (filterState[key] || []).filter(x => String(x.val) !== val);
+            renderMultiSelectBox(key);
+            currentPage = 1;
+            loadTable();
+        });
+
+        // Click vào badge +n khác: mở dropdown
+        box.on('click', '.kiot-pill-more', function (e) {
+            e.stopPropagation();
+            $('.kiot-ms-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
+            checkSidebarDropdownDirection(box, dropdown);
+            dropdown.addClass('show');
+            box.addClass('open');
+        });
+
+        // Click item trong dropdown: chọn/bỏ chọn
+        dropdown.on('click', '.kiot-ms-item', function (e) {
+            e.stopPropagation();
+
+            const val = String($(this).data('val'));
+            const name = $(this).data('name') || $(this).text().trim();
+            const idx = (filterState[key] || []).findIndex(x => String(x.val) === val);
+
+            if (idx >= 0) {
+                filterState[key].splice(idx, 1);
+            } else {
+                filterState[key].push({ val: val, name: name });
+            }
+
+            renderMultiSelectBox(key);
+            currentPage = 1;
+            loadTable();
+        });
+
+        // Tìm kiếm nhanh trong dropdown
+        dropdown.find('.kiot-ms-search input').on('input', function (e) {
+            e.stopPropagation();
+            const term = $(this).val().trim().toLowerCase();
+            dropdown.find('.kiot-ms-item').each(function () {
+                const text = ($(this).data('name') || $(this).text()).toLowerCase();
+                if (!term || text.includes(term)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        });
+    }
+
+    setupMultiSelect('#boxNhomHang', '#dropdownNhomHang', 'nhom');
+    setupMultiSelect('#boxNcc', '#dropdownNcc', 'ncc');
+    setupMultiSelect('#boxViTri', '#dropdownViTri', 'vitri');
+    setupMultiSelect('#boxLoaiHang', '#dropdownLoaiHang', 'loaihang');
+
+    // Khởi tạo hiển thị các box ban đầu
+    renderMultiSelectBox('nhom');
+    renderMultiSelectBox('ncc');
+    renderMultiSelectBox('vitri');
+    renderMultiSelectBox('loaihang');
+
+    // 3b. Single-select Dropdown cho Tiêu chí tồn (KiotViet style)
+    $('#boxTonKho').on('click', function (e) {
+        e.stopPropagation();
+        const box = $(this);
+        const dropdown = $('#dropdownTonKho');
+
+        $('.kiot-ms-dropdown, .kiot-ss-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
+        $('.kiot-multiselect-box, .kiot-single-select-box').not(box).removeClass('open');
+        $('.quick-date-popup, .dual-calendar-popup').hide();
+
+        const willShow = !dropdown.hasClass('show');
+        if (willShow) {
+            checkSidebarDropdownDirection(box, dropdown);
+            dropdown.addClass('show');
+            box.addClass('open');
+        } else {
+            dropdown.removeClass('show drop-up').css('max-height', '');
+            box.removeClass('open');
+        }
+    });
+
+    $('#dropdownTonKho').on('click', '.kiot-ss-item', function (e) {
+        e.stopPropagation();
+        const val = $(this).data('val');
+        const text = $(this).find('span').text().trim();
+
+        $('#textTonKho').text(text);
+        $('#dropdownTonKho .kiot-ss-item').removeClass('selected');
+        $(this).addClass('selected');
+
+        $('#dropdownTonKho').removeClass('show drop-up').css('max-height', '');
+        $('#boxTonKho').removeClass('open');
+
+        $('#filterTonKho').val(val).trigger('change');
+    });
+
+    // Lắng nghe cuộn sidebar để tự động đảo hướng drop-up/drop-down
+    $('.kiot-filter-box').on('scroll', function () {
+        const openDropdown = $('.kiot-ms-dropdown.show, .kiot-ss-dropdown.show');
+        if (openDropdown.length) {
+            const box = openDropdown.siblings('.kiot-multiselect-box, .kiot-single-select-box');
+            if (box.length) {
+                checkSidebarDropdownDirection(box, openDropdown);
+            }
+        }
+    });
+
+    // Đóng tất cả popup và dropdown khi click ra ngoài
+    $(document).on('click', function (e) {
+        // 1. Bỏ qua nếu phần tử click đã bị gỡ khỏi DOM (do re-render động khi click ngày/lọc)
+        if (!document.contains(e.target)) return;
+
+        // 2. Bỏ qua nếu click bên trong popup lịch hoặc quick-date
+        if ($(e.target).closest('.dual-calendar-popup, .quick-date-popup').length) return;
+
+        // 3. Nếu click ra ngoài f-block của popup đang mở, đóng các popup nổi
+        const $targetBlock = $(e.target).closest('.f-block');
+        if (!$targetBlock.length) {
+            $('.quick-date-popup').hide();
+            $('.dual-calendar-popup').hide();
+            $('.kiot-ms-dropdown, .kiot-ss-dropdown').removeClass('show drop-up').css('max-height', '');
+            $('.kiot-multiselect-box, .kiot-single-select-box').removeClass('open');
+        } else {
+            // Click vào f-block khác -> đóng popup/dropdown của các f-block khác
+            $('.dual-calendar-popup').not($targetBlock.find('.dual-calendar-popup')).hide();
+            $('.quick-date-popup').not($targetBlock.find('.quick-date-popup')).hide();
+            $('.kiot-ms-dropdown, .kiot-ss-dropdown').not($targetBlock.find('.kiot-ms-dropdown, .kiot-ss-dropdown')).removeClass('show drop-up').css('max-height', '');
+            $('.kiot-multiselect-box, .kiot-single-select-box').not($targetBlock.find('.kiot-multiselect-box, .kiot-single-select-box')).removeClass('open');
+        }
+    });
+
+    $(document).on('keydown', function (e) {
+        if (e.key === 'Escape') {
+            $('.kiot-ms-dropdown, .kiot-ss-dropdown').removeClass('show drop-up').css('max-height', '');
+            $('.kiot-multiselect-box, .kiot-single-select-box').removeClass('open');
+            $('.quick-date-popup, .dual-calendar-popup').hide();
+        }
+    });
+
+    // 4. Modal Tạo nhanh Nhóm hàng
+    $('#btnOpenQuickGroupModal').on('click', function () {
+        $('#quickGroupInput').val('');
+        groupModal.show();
+        setTimeout(() => $('#quickGroupInput').focus(), 300);
+    });
+
+    $('#btnSaveQuickGroup').on('click', function () {
+        const name = $('#quickGroupInput').val().trim();
+        if (!name) {
+            alert('Vui lòng nhập tên nhóm hàng.');
+            return;
+        }
+
+        $.ajax({
+            url: '/HangHoa/CreateGroupQuick',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ tenNhom: name }),
+            success: function (res) {
+                groupModal.hide();
+                // Bổ sung vào modal form Thêm/Sửa
+                $('#formMaNhom').append(`<option value="${res.maNhom}">${res.tenNhom}</option>`);
+
+                // Bổ sung vào dropdown nhóm hàng & tự động chọn
+                const itemHtml = `<div class="kiot-ms-item selected" data-val="${res.maNhom}" data-name="${res.tenNhom}">
+                    <input type="checkbox" class="form-check-input" checked />
+                    <span>${res.tenNhom}</span>
+                </div>`;
+                $('#dropdownNhomHang').append(itemHtml);
+
+                filterState.nhom.push({ val: String(res.maNhom), name: res.tenNhom });
+                renderMultiSelectBox('nhom');
+                currentPage = 1;
+                loadTable();
+            },
+            error: function (xhr) {
+                alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể tạo nhóm.'));
+            }
+        });
+    });
+
+    // 5. Phím tắt F3: focus ô tìm kiếm
+    $(document).on('keydown', function (e) {
+        if (e.key === 'F3') {
+            e.preventDefault();
+            $('#keywordSearch').focus().select();
+        }
+    });
+
+    // 6. Mở modal Thêm mới hàng hóa từ menu dropdown
+    $('#btnOpenCreateModal').on('click', function () {
+        if (typeof window.openCreateProductModal === 'function') {
+            window.openCreateProductModal();
+        }
+    });
+
+    // ========================================================================
+    // QUẢN LÝ THUỘC TÍNH ĐỘNG & VỊ TRÍ, TRỌNG LƯỢNG (KIOTVIET STYLE - IMAGE MATCH)
+    // ========================================================================
+    let availableAttributes = ['Màu sắc', 'Kích cỡ', 'Dung tích', 'Hương vị', 'Chất liệu', 'Xuất xứ'];
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text.toString()
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function renderDropdownItems(selectedName) {
+        if (!availableAttributes || availableAttributes.length === 0) {
+            return '<li class="text-muted small px-3 py-1 fst-italic">Chưa có thuộc tính mẫu</li>';
+        }
+        return availableAttributes.map(attr => {
+            const isSelected = (selectedName && attr.trim().toLowerCase() === selectedName.trim().toLowerCase());
+            return `
+                <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center py-2 px-3 kiot-attr-item ${isSelected ? 'active' : ''}" href="javascript:void(0)" data-name="${escapeHtml(attr)}">
+                        <span>${escapeHtml(attr)}</span>
+                        ${isSelected ? '<i class="bi bi-check2 text-primary fw-bold" style="font-size: 16px;"></i>' : ''}
+                    </a>
+                </li>
+            `;
+        }).join('');
+    }
+
+    function createAttrRowHtml(name = '', val = '') {
+        if (name && !availableAttributes.some(a => a.toLowerCase() === name.toLowerCase())) {
+            availableAttributes.push(name);
+        }
+
+        const displayName = name ? escapeHtml(name) : 'Chọn thuộc tính';
+        const isPlaceholder = !name;
+
+        return `
+            <div class="kiot-attr-row">
+                <!-- Dropdown Chọn thuộc tính -->
+                <div class="dropdown kiot-attr-dropdown" style="width: 220px; flex-shrink: 0;">
+                    <button class="btn btn-outline-secondary dropdown-toggle d-flex justify-content-between align-items-center w-100 bg-white border kiot-attr-btn ${isPlaceholder ? 'text-muted' : 'text-dark fw-semibold'}" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="height: 38px; border-color: #ced4da; border-radius: 6px; padding: 6px 12px;">
+                        <span class="kiot-attr-selected-text text-truncate">${displayName}</span>
+                        <i class="bi bi-chevron-down ms-1 text-muted kiot-attr-chevron" style="font-size: 11px;"></i>
+                    </button>
+                    <div class="dropdown-menu shadow-sm py-1 w-100 kiot-attr-menu" style="min-width: 220px; font-size: 13.5px; border-radius: 6px; border: 1px solid #dee2e6;">
+                        <div class="dropdown-header text-muted small py-1 px-3" style="font-weight: 500;">Chọn thuộc tính</div>
+                        <ul class="list-unstyled mb-0 kiot-attr-list-items" style="max-height: 200px; overflow-y: auto;">
+                            ${renderDropdownItems(name)}
+                        </ul>
+                        <div class="dropdown-divider my-1"></div>
+                        <a class="dropdown-item text-primary py-2 px-3 fw-semibold kiot-btn-create-attr d-flex align-items-center" href="javascript:void(0)">
+                            <i class="bi bi-plus-lg me-2" style="font-size: 12px;"></i>Tạo thuộc tính mới
+                        </a>
+                        <div class="kiot-attr-inline-form p-2 border-top bg-light" style="display: none;">
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control kiot-attr-new-name-input" placeholder="Tên thuộc tính..." />
+                                <button class="btn btn-primary kiot-btn-confirm-create-attr" type="button">Tạo</button>
+                                <button class="btn btn-outline-secondary kiot-btn-cancel-create-attr" type="button">×</button>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" class="kiot-attr-name-val" value="${escapeHtml(name)}" />
+                </div>
+
+                <!-- Ô nhập giá trị thuộc tính -->
+                <input type="text" class="form-control kiot-attr-val-input" placeholder="Nhập giá trị thuộc tính (VD: Đỏ, Xanh, XL)" value="${escapeHtml(val)}" style="height: 38px; border-radius: 6px; border-color: #ced4da;" />
+
+                <!-- Nút xóa thùng rác -->
+                <button type="button" class="btn btn-outline-secondary kiot-btn-remove-attr" title="Xóa thuộc tính">
+                    <i class="bi bi-trash text-muted" style="font-size: 15px;"></i>
+                </button>
+            </div>
+        `;
+    }
+
+    function renderAttributeRows(jsonStr, containerSelector, emptySelector) {
+        const $container = $(containerSelector);
+        const $empty = $(emptySelector);
+        $container.empty();
+        let list = [];
+        try {
+            if (jsonStr) {
+                list = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
+            }
+        } catch (e) {
+            list = [];
+        }
+
+        if (Array.isArray(list) && list.length > 0) {
+            list.forEach(item => {
+                const name = item.Ten || item.ten || '';
+                const val = item.GiaTri || item.giaTri || '';
+                if (name || val) {
+                    $container.append(createAttrRowHtml(name, val));
+                }
+            });
+            if ($container.children().length > 0) {
+                $empty.hide();
+                return;
+            }
+        }
+        $empty.show();
+    }
+
+    function collectAttributes(containerSelector) {
+        const result = [];
+        $(containerSelector).find('.kiot-attr-row').each(function () {
+            const name = $(this).find('.kiot-attr-name-val').val().trim();
+            const val = $(this).find('.kiot-attr-val-input').val().trim();
+            if (name || val) {
+                result.push({ ten: name, giaTri: val });
+            }
+        });
+        return result;
+    }
+
+    // Chọn thuộc tính từ dropdown
+    $(document).on('click', '.kiot-attr-item', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const name = $(this).data('name');
+        const dropdown = $(this).closest('.kiot-attr-dropdown');
+        
+        dropdown.find('.kiot-attr-name-val').val(name);
+        dropdown.find('.kiot-attr-selected-text').text(name);
+        dropdown.find('.kiot-attr-btn').removeClass('text-muted').addClass('text-dark fw-semibold');
+        
+        // Re-render items để cập nhật checkmark
+        dropdown.find('.kiot-attr-list-items').html(renderDropdownItems(name));
+
+        // Đóng dropdown
+        const btn = dropdown.find('.kiot-attr-btn')[0];
+        const bsDropdown = bootstrap.Dropdown.getInstance(btn) || new bootstrap.Dropdown(btn);
+        bsDropdown.hide();
+
+        // Focus vào ô giá trị
+        $(this).closest('.kiot-attr-row').find('.kiot-attr-val-input').focus();
+    });
+
+    // Bấm "+ Tạo thuộc tính mới"
+    $(document).on('click', '.kiot-btn-create-attr', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const menu = $(this).closest('.kiot-attr-menu');
+        $(this).hide();
+        const form = menu.find('.kiot-attr-inline-form');
+        form.show();
+        form.find('.kiot-attr-new-name-input').focus();
+    });
+
+    // Hủy tạo mới
+    $(document).on('click', '.kiot-btn-cancel-create-attr', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const menu = $(this).closest('.kiot-attr-menu');
+        menu.find('.kiot-attr-inline-form').hide();
+        menu.find('.kiot-btn-create-attr').show();
+    });
+
+    // Xác nhận tạo mới
+    $(document).on('click', '.kiot-btn-confirm-create-attr', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const form = $(this).closest('.kiot-attr-inline-form');
+        const input = form.find('.kiot-attr-new-name-input');
+        const newName = input.val().trim();
+        if (!newName) {
+            input.focus();
+            return;
+        }
+
+        if (!availableAttributes.some(a => a.toLowerCase() === newName.toLowerCase())) {
+            availableAttributes.push(newName);
+        }
+
+        const dropdown = $(this).closest('.kiot-attr-dropdown');
+        dropdown.find('.kiot-attr-name-val').val(newName);
+        dropdown.find('.kiot-attr-selected-text').text(newName);
+        dropdown.find('.kiot-attr-btn').removeClass('text-muted').addClass('text-dark fw-semibold');
+
+        // Cập nhật lại dropdown items
+        dropdown.find('.kiot-attr-list-items').html(renderDropdownItems(newName));
+        form.hide();
+        dropdown.find('.kiot-btn-create-attr').show();
+        input.val('');
+
+        // Đóng dropdown
+        const btn = dropdown.find('.kiot-attr-btn')[0];
+        const bsDropdown = bootstrap.Dropdown.getInstance(btn) || new bootstrap.Dropdown(btn);
+        bsDropdown.hide();
+
+        // Focus vào ô giá trị
+        dropdown.closest('.kiot-attr-row').find('.kiot-attr-val-input').focus();
+    });
+
+    $(document).on('keydown', '.kiot-attr-new-name-input', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            $(this).closest('.kiot-attr-inline-form').find('.kiot-btn-confirm-create-attr').click();
+        }
+    });
+
+    // Thêm dòng thuộc tính trong modal chính
+    $('#btnAddAttributeRow, #btnAddAttributeRowLink').on('click', function (e) {
+        e.preventDefault();
+        $('#noAttributeAlert').hide();
+        const newRow = $(createAttrRowHtml('', ''));
+        $('#attributeRowsContainer').append(newRow);
+        // Tự động mở dropdown chọn thuộc tính cho dòng mới (chuẩn như ảnh)
+        const btn = newRow.find('.kiot-attr-btn')[0];
+        if (btn) {
+            const bsDropdown = new bootstrap.Dropdown(btn);
+            bsDropdown.show();
+        }
+    });
+
+    // Thêm dòng thuộc tính trong modal cập nhật nhanh
+    $('#btnQuickModalAddRow').on('click', function (e) {
+        e.preventDefault();
+        $('#quickAttrEmptyAlert').hide();
+        const newRow = $(createAttrRowHtml('', ''));
+        $('#quickAttrRowsContainer').append(newRow);
+        const btn = newRow.find('.kiot-attr-btn')[0];
+        if (btn) {
+            const bsDropdown = new bootstrap.Dropdown(btn);
+            bsDropdown.show();
+        }
+    });
+
+    // Xóa dòng thuộc tính
+    $(document).on('click', '.kiot-btn-remove-attr', function () {
+        const row = $(this).closest('.kiot-attr-row');
+        const container = row.parent();
+        row.remove();
+        if (container.children('.kiot-attr-row').length === 0) {
+            if (container.attr('id') === 'attributeRowsContainer') {
+                $('#noAttributeAlert').show();
+            } else if (container.attr('id') === 'quickAttrRowsContainer') {
+                $('#quickAttrEmptyAlert').show();
+            }
+        }
+    });
+
+    // Nút Tạo mới Vị trí
+    $('#btnQuickAddLocation').on('click', function () {
+        const newLoc = prompt('Nhập tên vị trí kho mới (Ví dụ: Kệ C3 - Tầng 2):');
+        if (newLoc && newLoc.trim()) {
+            const val = newLoc.trim();
+            let exists = false;
+            $('#listViTriSuggestions option').each(function () {
+                if ($(this).val().toLowerCase() === val.toLowerCase()) exists = true;
+            });
+            if (!exists) {
+                $('#listViTriSuggestions').append(`<option value="${escapeHtml(val)}"></option>`);
+            }
+            $('#formViTri').val(val);
+        }
+    });
+
+    // Mở modal Sửa hàng hóa (kết nối với module modal KiotViet mới)
+    $(document).on('click', '.btn-edit-product', function () {
+        const id = $(this).data('id');
+        if (typeof window.openEditProductModal === 'function') {
+            window.openEditProductModal(id);
+        }
+    });
+
+    // Modal Xóa hàng hóa (kết nối với modal KiotViet đồng bộ)
+    $(document).on('click', '.btn-delete-product', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = $(this).data('id');
+        const name = $(this).data('name') || '';
+        if (typeof window.openDeleteProductModal === 'function') {
+            window.openDeleteProductModal(id, name);
+        }
+    });
+
+    // 7. Lọc dữ liệu qua AJAX
+    let searchTimeout = null;
+    $('#keywordSearch').on('input', function () {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function () {
+            currentPage = 1;
+            loadTable();
+        }, 300);
+    }).on('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            clearTimeout(searchTimeout);
+            currentPage = 1;
+            loadTable();
+        }
+    });
+
+    $('.filter-change').on('change', function () {
+        currentPage = 1;
+        loadTable();
+    });
+
+    // ========================================================================
+    // QUẢN LÝ ẨN / HIỆN CỘT BẢNG HÀNG HÓA (KIOTVIET COLUMN VISIBILITY)
+    // ========================================================================
+    const ALL_COLS = [
+        'loaihang', 'nhomhang', 'mahang', 'tenhang', 'giaban', 'giavon',
+        'tonkho', 'tontothieu', 'toncaonhat', 'vitri', 'trangthai'
+    ];
+    const DEFAULT_COLS = ['mahang', 'tenhang', 'giaban', 'giavon', 'tonkho', 'trangthai'];
+
+    function getActiveColumns() {
+        try {
+            const saved = JSON.parse(localStorage.getItem('kiot_hanghoa_columns'));
+            if (Array.isArray(saved) && saved.length > 0) {
+                const valid = saved.filter(c => ALL_COLS.includes(c));
+                if (valid.length > 0) return valid;
+            }
+        } catch (e) {}
+        return DEFAULT_COLS;
+    }
+
+    function applyColumnVisibility(activeCols) {
+        const hiddenCols = ALL_COLS.filter(c => !activeCols.includes(c));
+        let css = '';
+        hiddenCols.forEach(col => {
+            css += '#productTable .col-' + col + ' { display: none !important; }\n';
+        });
+        $('#hhDynamicColStyles').text(css);
+
+        // Đồng bộ trạng thái checkbox trong popup
+        $('.col-toggle-cb').each(function () {
+            const col = $(this).data('col');
+            $(this).prop('checked', activeCols.includes(col));
+        });
+    }
+
+    // Khởi tạo trạng thái checkbox theo cấu hình đã lưu
+    applyColumnVisibility(getActiveColumns());
+
+    // Bắt sự kiện khi click đổi checkbox cột
+    $(document).on('change', '.col-toggle-cb', function () {
+        const activeCols = [];
+        $('.col-toggle-cb:checked').each(function () {
+            activeCols.push($(this).data('col'));
+        });
+        localStorage.setItem('kiot_hanghoa_columns', JSON.stringify(activeCols));
+        applyColumnVisibility(activeCols);
+    });
+
+    // Phân trang AJAX
+    $(document).on('click', '.page-ajax', function (e) {
+        e.preventDefault();
+        const p = $(this).data('page');
+        if (p && p > 0) {
+            currentPage = p;
+            loadTable();
+        }
+    });
+
+    // Checkbox chọn tất cả
+    $(document).on('change', '#selectAllRows', function () {
+        $('.row-select').prop('checked', $(this).is(':checked'));
+    });
+
+    // Toggle mở/đóng chi tiết hàng hóa (KiotViet Inline Accordion)
+    $(document).on('click', '.product-row', function (e) {
+        // Không mở khi click vào checkbox, star, hoặc nút thao tác
+        if ($(e.target).closest('input[type="checkbox"], .star-btn, button, a.btn-delete-product').length) {
+            return;
+        }
+
+        const id = $(this).data('id');
+        const $detailRow = $('#detail-' + id);
+        const $wrap = $detailRow.find('.product-detail-panel-wrap');
+        const isCurrentlyOpen = $detailRow.is(':visible');
+
+        // Đóng các dòng chi tiết khác đang mở (dạng accordion như KiotViet)
+        $('.product-detail-row').not($detailRow).each(function () {
+            const $other = $(this);
+            $other.find('.product-detail-panel-wrap').slideUp(150, function () {
+                $other.hide();
+            });
+        });
+        $('.product-row').not(this).removeClass('selected');
+
+        if (isCurrentlyOpen) {
+            $wrap.slideUp(150, function () {
+                $detailRow.hide();
+            });
+            $(this).removeClass('selected');
+        } else {
+            $(this).addClass('selected');
+            $detailRow.show();
+            $wrap.hide().slideDown(150);
+        }
+    });
+
+    // Chuyển Tab bên trong chi tiết hàng hóa
+    $(document).on('click', '.product-detail-tab-btn', function (e) {
+        e.stopPropagation();
+        const tabName = $(this).data('tab');
+        const $panel = $(this).closest('.product-detail-panel');
+
+        $panel.find('.product-detail-tab-btn').removeClass('active');
+        $(this).addClass('active');
+
+        $panel.find('.tab-pane-content').hide();
+        $panel.find('.tab-' + tabName).fadeIn(120);
+    });
+
+    // Sao chép hàng hóa (mở modal KiotViet mới ở chế độ sao chép)
+    $(document).on('click', '.btn-copy-product', function (e) {
+        e.stopPropagation();
+        const id = $(this).data('id');
+        if (typeof window.openEditProductModal === 'function') {
+            window.openEditProductModal(id, true);
+        }
+    });
+
+    // Hàm toàn cục xử lý bấm đánh dấu sao ở từng dòng hàng hóa (AJAX)
+    window.toggleFavoriteProduct = function (e, id, el) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        const $cell = $(el);
+        const $btn = $cell.hasClass('star-btn') ? $cell : $cell.find('.star-btn');
+        if (!$btn.length || !id) return;
+
+        $.ajax({
+            url: '/HangHoa/ToggleFavorite',
+            type: 'POST',
+            data: { id: id },
+            success: function (res) {
+                if (res && res.success) {
+                    if (res.isFavorite) {
+                        $btn.addClass('starred')
+                            .attr('title', 'Bỏ đánh dấu sao')
+                            .html('<i class="bi bi-star-fill"></i>');
+                    } else {
+                        $btn.removeClass('starred')
+                            .attr('title', 'Đánh dấu sao')
+                            .html('<i class="bi bi-star"></i>');
+
+                        // Nếu đang lọc chỉ xem hàng có sao, bỏ sao sẽ ẩn dòng này đi
+                        if (isStarredFilterActive) {
+                            const $tr = $btn.closest('tr');
+                            const $detail = $('#detail-' + id);
+                            $detail.remove();
+                            $tr.fadeOut(250, function () {
+                                $(this).remove();
+                                if ($('#productTable tbody tr.product-row').length === 0) {
+                                    loadTable();
+                                }
+                            });
+                        }
+                    }
+                }
+            },
+            error: function (xhr) {
+                console.error('Lỗi khi cập nhật đánh dấu sao:', xhr);
+                alert('Có lỗi khi cập nhật đánh dấu sao.');
+            }
+        });
+    };
+
+    // Hàm toàn cục xử lý bấm ngôi sao ở Header để lọc nhanh hàng được đánh dấu sao
+    window.toggleStarHeaderFilter = function (e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        isStarredFilterActive = !isStarredFilterActive;
+        currentPage = 1;
+        loadTable();
+    };
+
+    // Bắt thêm sự kiện click trực tiếp làm dự phòng (delegated listener)
+    $(document).on('click', '.star-btn:not(#starHeaderFilter)', function (e) {
+        const id = $(this).data('id');
+        window.toggleFavoriteProduct(e, id, this);
+    });
+
+    $(document).on('click', '#starHeaderFilter', function (e) {
+        window.toggleStarHeaderFilter(e);
+    });
+
+    // 8. Sắp xếp cột 3 trạng thái khi click header (KiotViet style)
+    // Lần 1: Tăng dần (asc) -> Lần 2: Giảm dần (desc) -> Lần 3: Trả lại bình thường (none)
+    // Click cột khác: Hủy cột cũ, chuyển sang cột mới và bắt đầu tăng dần (asc)
+    $(document).on('click', '#productTable thead th.sortable-th', function (e) {
+        e.preventDefault();
+        const col = $(this).data('col');
+        if (!col) return;
+
+        if (currentSortBy === col) {
+            if (currentSortDir === 'asc') {
+                currentSortDir = 'desc'; // Lần 2: giảm dần
+            } else if (currentSortDir === 'desc') {
+                currentSortBy = '';      // Lần 3: trở lại bình thường
+                currentSortDir = '';
+            } else {
+                currentSortDir = 'asc';  // Lần 1: tăng dần
+            }
+        } else {
+            // Chuyển sang cột mới: hủy sắp xếp cột cũ, bắt đầu tăng dần
+            currentSortBy = col;
+            currentSortDir = 'asc';
+        }
+
+        currentPage = 1;
+        loadTable();
+    });
+
+    function loadTable() {
+        const q = $('#keywordSearch').val()?.trim() || '';
+        const nhom = (filterState.nhom || []).map(x => x.val).join(',');
+        const tonKho = $('#filterTonKho').val() || 'ALL';
+        const nhaCungCap = (filterState.ncc || []).map(x => x.val).join(';');
+        const viTri = (filterState.vitri || []).map(x => x.val).join(';');
+        const loaiHang = (filterState.loaihang || []).map(x => x.val).join(';');
+
+        let duKien = activeDuKienVal || 'ALL';
+        if ($('#dkCustom').is(':checked') && duKien === 'ALL') {
+            duKien = 'CUSTOM';
+        }
+
+        let tgTao = activeTgTaoVal || 'ALL';
+        let tgTaoFrom = '';
+        let tgTaoTo = '';
+        if ($('#tgtCustom').is(':checked')) {
+            tgTao = 'CUSTOM';
+            tgTaoFrom = activeTgTaoFrom;
+            tgTaoTo = activeTgTaoTo;
+        }
+
+        // Cập nhật chấm xanh indicator (inline-block nằm cùng hàng tiêu đề)
+        $('#dotNhomHang').css('display', filterState.nhom.length > 0 ? 'inline-block' : 'none');
+        $('#dotTonKho').css('display', tonKho !== 'ALL' ? 'inline-block' : 'none');
+        $('#dotDuKien').css('display', duKien !== 'ALL' ? 'inline-block' : 'none');
+        $('#dotTgTao').css('display', tgTao !== 'ALL' ? 'inline-block' : 'none');
+        $('#dotNcc').css('display', filterState.ncc.length > 0 ? 'inline-block' : 'none');
+        $('#dotViTri').css('display', filterState.vitri.length > 0 ? 'inline-block' : 'none');
+        $('#dotLoaiHang').css('display', filterState.loaihang.length > 0 ? 'inline-block' : 'none');
+
+        const hasAnyActiveFilter = filterState.nhom.length > 0 || tonKho !== 'ALL' || duKien !== 'ALL' || tgTao !== 'ALL' || filterState.ncc.length > 0 || filterState.vitri.length > 0 || filterState.loaihang.length > 0;
+        $('#btnMobileFilter').toggleClass('has-filter', hasAnyActiveFilter);
+
+        $.ajax({
+            url: '/HangHoa/Filter',
+            type: 'GET',
+            data: {
+                q: q,
+                nhom: nhom,
+                tonKhoFilter: tonKho,
+                nhaCungCap: nhaCungCap,
+                viTri: viTri,
+                loaiHang: loaiHang,
+                duKienFilter: duKien,
+                tgTaoFilter: tgTao,
+                tgTaoFrom: tgTaoFrom,
+                tgTaoTo: tgTaoTo,
+                daDanhDau: isStarredFilterActive,
+                sortBy: currentSortBy,
+                sortDir: currentSortDir,
+                page: currentPage
+            },
+            beforeSend: function () {
+                $('#productTableContainer').css('opacity', '0.6');
+            },
+            success: function (html) {
+                $('#productTableContainer').html(html).css('opacity', '1');
+            },
+            error: function () {
+                $('#productTableContainer').css('opacity', '1');
+                alert('Có lỗi khi tải danh sách hàng hóa.');
+            }
+        });
+    }
+
+    window.getCurrentFilterParams = function () {
+        const q = $('#keywordSearch').val()?.trim() || '';
+        const nhom = (filterState.nhom || []).map(x => x.val).join(',');
+        const tonKho = $('#filterTonKho').val() || 'ALL';
+        const nhaCungCap = (filterState.ncc || []).map(x => x.val).join(';');
+        const viTri = (filterState.vitri || []).map(x => x.val).join(';');
+        const loaiHang = (filterState.loaihang || []).map(x => x.val).join(';');
+
+        let duKien = activeDuKienVal || 'ALL';
+        if ($('#dkCustom').is(':checked') && duKien === 'ALL') {
+            duKien = 'CUSTOM';
+        }
+
+        let tgTao = activeTgTaoVal || 'ALL';
+        let tgTaoFrom = '';
+        let tgTaoTo = '';
+        if ($('#tgtCustom').is(':checked')) {
+            tgTao = 'CUSTOM';
+            tgTaoFrom = activeTgTaoFrom;
+            tgTaoTo = activeTgTaoTo;
+        }
+
+        return {
+            q: q,
+            nhom: nhom,
+            tonKho: tonKho,
+            nhaCungCap: nhaCungCap,
+            viTri: viTri,
+            loaiHang: loaiHang,
+            duKien: duKien,
+            tgTao: tgTao,
+            tgTaoFrom: tgTaoFrom,
+            tgTaoTo: tgTaoTo,
+            daDanhDau: isStarredFilterActive
+        };
+    };
+
+    window.loadTable = loadTable;
+});
+</script>
+<script src="~/js/hang-hoa-form.js" asp-append-version="true"></script>
+<script src="~/js/hang-hoa-excel.js" asp-append-version="true"></script>
 }
