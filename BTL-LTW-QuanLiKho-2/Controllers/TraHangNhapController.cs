@@ -711,8 +711,15 @@ public class TraHangNhapController : BaseKhoController
         if (!string.IsNullOrWhiteSpace(filter.Q))
         {
             string q = filter.Q.Trim().ToLower();
+            int searchId = 0;
+            bool isNumber = int.TryParse(q, out searchId);
+
+            int thnId = 0;
+            bool isThnNumber = q.StartsWith("thn") && int.TryParse(q.Substring(3).TrimStart('0'), out thnId);
+
             query = query.Where(p => (p.MaPhieu != null && p.MaPhieu.ToLower().Contains(q)) ||
-                                     ("thn" + p.MaPhieuTraHang.ToString().PadLeft(6, '0')).Contains(q));
+                                     (isNumber && p.MaPhieuTraHang == searchId) ||
+                                     (isThnNumber && p.MaPhieuTraHang == thnId));
         }
 
         // Tìm kiếm nâng cao NCC
@@ -744,8 +751,8 @@ public class TraHangNhapController : BaseKhoController
         // Sắp xếp
         query = (filter.SortBy?.ToLower(), filter.SortDir?.ToLower()) switch
         {
-            ("ma", "asc") or ("maphieu", "asc") => query.OrderBy(p => p.MaPhieu ?? ("THN" + p.MaPhieuTraHang.ToString())),
-            ("ma", "desc") or ("maphieu", "desc") => query.OrderByDescending(p => p.MaPhieu ?? ("THN" + p.MaPhieuTraHang.ToString())),
+            ("ma", "asc") or ("maphieu", "asc") => query.OrderBy(p => p.MaPhieu ?? p.MaPhieuTraHang.ToString()),
+            ("ma", "desc") or ("maphieu", "desc") => query.OrderByDescending(p => p.MaPhieu ?? p.MaPhieuTraHang.ToString()),
 
             ("tg", "asc") or ("ngaytra", "asc") => query.OrderBy(p => p.NgayTra),
             ("tg", "desc") or ("ngaytra", "desc") => query.OrderByDescending(p => p.NgayTra),

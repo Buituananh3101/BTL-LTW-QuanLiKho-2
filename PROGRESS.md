@@ -1,11 +1,11 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Đồng Bộ Chiều Cao 34px Cụm Nút Giảm Giá VND / % Khớp Ô Nhập Liệu (Phiên 131)
+Cập nhật lần cuối: 2026-10-18 – Khắc Phục Lỗi LINQ Translation PadLeft Khi Lọc Tìm Kiếm Phiếu Trả Hàng Nhập (Phiên 132)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử trải nghiệm cụm nút chuyển đổi Giảm giá VND / % trên màn hình Lập phiếu trả hàng nhập (`/TraHangNhap/Create`): chiều cao 34px cao đều tăm tắp với ô nhập liệu giảm giá.
+- Sẵn sàng kiểm thử trải nghiệm danh sách và tìm kiếm Phiếu trả hàng nhập (`/TraHangNhap`), đảm bảo tìm kiếm mã phiếu không còn lỗi dịch LINQ.
 
 ---
 
@@ -14,6 +14,19 @@ Cập nhật lần cuối: 2026-10-18 – Đồng Bộ Chiều Cao 34px Cụm N�
 2. Kiểm tra lại toàn bộ luồng chuyển kho, xuất hủy, nhập hàng, bán hàng POS để đảm bảo tính đồng bộ hệ thống.
 
 ---
+
+- **Khắc Phục Lỗi LINQ Translation PadLeft Khi Lọc Tìm Kiếm Phiếu Trả Hàng Nhập (Phiên 132)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm ảnh chụp màn hình ngoại lệ `System.InvalidOperationException: The LINQ expression could not be translated` tại dòng `await liveQuery.SumAsync(...)` trong `TraHangNhapController.cs`.
+  - **Nguyên nhân cốt lõi**:
+    + Trong `BuildIndexViewModel` của `TraHangNhapController.cs`, điều kiện lọc tìm kiếm mã phiếu `filter.Q` sử dụng biểu thức `("thn" + p.MaPhieuTraHang.ToString().PadLeft(6, '0')).Contains(q)`.
+    + Hàm `.PadLeft()` của C# không thể dịch sang câu lệnh SQL tương đương trong Entity Framework Core, dẫn đến khi gọi `SumAsync` (terminal operator), EF Core phát nổ ngoại lệ biên dịch query.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`TraHangNhapController.cs`**:
+      * Tách xử lý parse chuỗi tìm kiếm ra ngoài biểu thức LINQ (kiểm tra `int.TryParse` trực tiếp cho `searchId` và tách tiền tố `thn` cho `thnId`).
+      * Điều kiện `Where` chuyển sang so sánh số nguyên chuẩn `p.MaPhieuTraHang == searchId` và `p.MaPhieuTraHang == thnId` dịch 100% sang SQL.
+      * Tối ưu biểu thức sắp xếp `OrderBy` tránh nối chuỗi phức tạp trong SQL expression.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
 
 - **Đồng Bộ Chiều Cao 34px Cụm Nút Giảm Giá VND / % Khớp Ô Nhập Liệu (Phiên 131)**:
   - **Nhu cầu**: Người dùng phản ánh kèm ảnh chụp màn hình (`media_1792327138276_310480fa.png`): "sửa lại phần VND % cho cao đều".
