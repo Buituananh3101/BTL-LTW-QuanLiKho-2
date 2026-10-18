@@ -23,9 +23,9 @@ public class NhapHangListItemVM
 
     public string BadgeClass => TrangThai switch
     {
-        "PHIEU_TAM" or "NHAP" => "badge-phieu-tam",
-        "DA_XAC_NHAN" or "HOAN_THANH" => "badge-da-nhap",
-        _ => "badge-da-huy"
+        "PHIEU_TAM" or "NHAP" => "badge bg-primary-subtle text-primary border border-primary-subtle",
+        "DA_XAC_NHAN" or "HOAN_THANH" => "badge bg-success-subtle text-success border border-success-subtle",
+        _ => "badge bg-secondary-subtle text-secondary border border-secondary-subtle"
     };
 
     public int? MaDonViCapHang { get; set; }
@@ -68,12 +68,15 @@ public class NhapHangLineVM
 public class NhapHangFilterVM
 {
     public string? Q { get; set; }
-    public string DateFilterType { get; set; } = "THANG_NAY"; // THANG_NAY là mặc định chuẩn KiotViet
+    public string DateFilterType { get; set; } = "ALL"; // Mặc định Toàn thời gian khớp Kiểm kho
     public DateTime? FromDate { get; set; }
     public DateTime? ToDate { get; set; }
-    public List<string> Statuses { get; set; } = new();
+    public List<string> Statuses { get; set; } = new() { "NHAP", "DA_XAC_NHAN" };
+    public List<int> NccIds { get; set; } = new();
     public int? NccId { get; set; }
+    public List<int> CreatorIds { get; set; } = new();
     public int? CreatorId { get; set; }
+    public List<int> ConfirmerIds { get; set; } = new();
     public int? ConfirmerId { get; set; }
     public string? SoHoaDon { get; set; }
     public bool DaDanhDau { get; set; } = false;
@@ -135,6 +138,7 @@ public class NhapHangFormVM
     public List<NhapHangLineVM> Lines { get; set; } = new();
     public List<SelectListItem> NhanViens { get; set; } = new();
     public List<SelectListItem> NhaCungCaps { get; set; } = new();
+    public List<BTL_LTW_QuanLiKho_2.Models.NhomNhaCungCap> NhomNccList { get; set; } = new();
 }
 
 public class SaveNhapHangRequest
@@ -163,6 +167,7 @@ public class SaveNhapHangLineItem
 
 public class SaveNoteRequest
 {
+    public int MaPhieuNhap { get; set; }
     public string? GhiChu { get; set; }
 }
 

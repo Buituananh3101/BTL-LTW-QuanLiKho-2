@@ -7,8 +7,8 @@
 ## 1. CSDL, ViewModel & Cấu trúc File
 
 ### 1.1. Bảng CSDL tham gia:
-- [`PhieuXuat`](../../BTL-LTW-QuanLiKho-2/Models/PhieuXuat.cs): `MaPhieuXuat`, `MaPhieu`, `LoaiPhieuXuat: 'XUAT_HUY'`, `MaKho`, `MaNvlap`, `MaNvxacNhan`, `NgayLap`, `NgayXacNhan`, `TrangThai` (`NHAP`/`DA_XAC_NHAN`/`HUY`), `GhiChu`, `DaDanhDau`.
-- [`ChiTietPhieuXuat`](../../BTL-LTW-QuanLiKho-2/Models/ChiTietPhieuXuat.cs): `MaCtphieuXuat`, `MaPhieuXuat`, `MaHang`, `SoLuongXuat`, `DonGiaXuat`.
+- [`PhieuXuat`](../../BTL-LTW-QuanLiKho-2/Models/PhieuXuat.cs): `MaPhieuXuat`, `MaPhieu`, `LoaiPhieuXuat: 'XUAT_HUY'`, `MaKho`, `MaNvlap`, `MaNvxacNhan`, `NgayLap`, `NgayXacNhan`, `TrangThai` (`NHAP`/`DA_XAC_NHAN`/`HUY`), `GhiChu`, `DaDanhDau`. Filtered Index `UQ_PhieuXuat_MaDonBan` (`WHERE MaDonBan IS NOT NULL`).
+- [`ChiTietPhieuXuat`](../../BTL-LTW-QuanLiKho-2/Models/ChiTietPhieuXuat.cs): `MaCtphieuXuat`, `MaPhieuXuat`, `MaHang`, `SoLuongXuat`, `DonGiaXuat`. Filtered Index `UQ_ChiTietPhieuXuat_MaCTDonBan` (`WHERE MaCTDonBan IS NOT NULL`).
 - [`vw_BienDongKho`](../../migrations/sql/01_init_schema.sql): View tính biến động kho (tự trừ tồn kho khi `LoaiPhieuXuat = 'XUAT_HUY'` & `TrangThai = 'DA_XAC_NHAN'`).
 - [`NhatKyThaoTac`](../../BTL-LTW-QuanLiKho-2/Models/NhatKyThaoTac.cs): Ghi log kiểm toán.
 

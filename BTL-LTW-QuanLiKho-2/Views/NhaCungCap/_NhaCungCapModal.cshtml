@@ -1,4 +1,22 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.NhaCungCap.NhaCungCapIndexVM
+@using BTL_LTW_QuanLiKho_2.Models
+@using BTL_LTW_QuanLiKho_2.ViewModels.NhaCungCap
+@using BTL_LTW_QuanLiKho_2.ViewModels.NhapHang
+@model dynamic
+@{
+    IEnumerable<NhomNhaCungCap> nhomList = Enumerable.Empty<NhomNhaCungCap>();
+    if (Model is NhaCungCapIndexVM nccVm)
+    {
+        nhomList = nccVm.NhomNccList ?? nhomList;
+    }
+    else if (Model is NhapHangFormVM nhVm)
+    {
+        nhomList = nhVm.NhomNccList ?? nhomList;
+    }
+    else if (Model is IEnumerable<NhomNhaCungCap> list)
+    {
+        nhomList = list;
+    }
+}
 
 <!-- ========================================================================
      MODAL CHÍNH: TẠO & CẬP NHẬT NHÀ CUNG CẤP CHUẨN KIOTVIET (THEO HÀNG HÓA)
@@ -107,7 +125,7 @@
                       <input type="text" id="searchMaNhomNcc" placeholder="Tìm nhóm nhà cung cấp..." autocomplete="off" />
                     </div>
                     <div class="hh-cs-list" id="listMaNhomNcc">
-                      @foreach (var g in Model.NhomNccList)
+                      @foreach (var g in nhomList)
                       {
                         <div class="hh-cs-item" data-val="@g.MaNhomNcc">
                           <span>@g.TenNhom</span>
@@ -122,7 +140,7 @@
                 </div>
                 <select id="nccMaNhomNcc" style="display: none;">
                   <option value="">Chọn nhóm nhà cung cấp</option>
-                  @foreach (var g in Model.NhomNccList)
+                  @foreach (var g in nhomList)
                   {
                     <option value="@g.MaNhomNcc">@g.TenNhom</option>
                   }

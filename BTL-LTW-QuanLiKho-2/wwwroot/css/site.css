@@ -1382,7 +1382,11 @@ tr.product-detail-row > td {
 
 /* Khung chi tiết cố định 992px chuẩn KiotViet không bị kéo giãn khi hiển thị nhiều cột */
 .kiot-detail-fixed-wrap,
-.ncc-detail-fixed-wrap {
+.ncc-detail-fixed-wrap,
+.xh-detail-fixed-wrap,
+.kk-detail-fixed-wrap,
+.nh-detail-fixed-wrap,
+.receipt-detail-fixed-wrap {
   width: 992px;
   max-width: 100%;
   box-sizing: border-box;
@@ -1470,7 +1474,9 @@ tr.product-detail-row > td {
 .kiot-detail-fixed-wrap .product-detail-footer,
 .ncc-detail-fixed-wrap .kiot-detail-footer,
 .ncc-detail-fixed-wrap .product-detail-footer,
-.ncc-detail-fixed-wrap .ncc-detail-footer {
+.ncc-detail-fixed-wrap .ncc-detail-footer,
+.nh-detail-fixed-wrap .product-detail-footer,
+.receipt-detail-fixed-wrap .product-detail-footer {
   width: 992px;
   max-width: 100%;
 }
@@ -1481,16 +1487,20 @@ tr.product-detail-row > td {
 .ncc-detail-fixed-wrap .kiot-detail-footer-left,
 .ncc-detail-fixed-wrap .kiot-detail-footer-right,
 .ncc-detail-fixed-wrap .product-detail-footer-left,
-.ncc-detail-fixed-wrap .product-detail-footer-right {
+.ncc-detail-fixed-wrap .product-detail-footer-right,
+.nh-detail-fixed-wrap .product-detail-footer-left,
+.nh-detail-fixed-wrap .product-detail-footer-right,
+.receipt-detail-fixed-wrap .product-detail-footer-left,
+.receipt-detail-fixed-wrap .product-detail-footer-right {
   position: static !important;
 }
 
 @media (max-width: 1040px) {
-  .kiot-attr-grid, .ncc-attr-grid {
+  .kiot-attr-grid, .ncc-attr-grid, .nh-attr-grid, .receipt-attr-grid {
     flex-wrap: wrap;
     width: 100%;
   }
-  .kiot-attr-col, .ncc-attr-col {
+  .kiot-attr-col, .ncc-attr-col, .nh-attr-col, .receipt-attr-col {
     width: 100%;
     min-width: 100%;
   }
@@ -1500,7 +1510,11 @@ tr.product-detail-row > td {
   .ncc-detail-fixed-wrap,
   .ncc-detail-fixed-wrap .kiot-detail-footer,
   .ncc-detail-fixed-wrap .product-detail-footer,
-  .ncc-detail-fixed-wrap .ncc-detail-footer {
+  .ncc-detail-fixed-wrap .ncc-detail-footer,
+  .nh-detail-fixed-wrap,
+  .nh-detail-fixed-wrap .product-detail-footer,
+  .receipt-detail-fixed-wrap,
+  .receipt-detail-fixed-wrap .product-detail-footer {
     width: 100%;
   }
 }
@@ -2684,6 +2698,92 @@ tr.product-detail-row > td {
 .kiot-confirm-foot .btn-outline-secondary:hover {
   background-color: #f3f4f6 !important;
   color: #111827 !important;
+}
+
+/* ===== COMPONENT LEGO: F3 PRODUCT SEARCH AUTOCOMPLETE ===== */
+.kk-autocomplete-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  padding: 9px 14px !important;
+  cursor: pointer !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  background: #ffffff;
+  transition: background-color 0.15s ease;
+  text-decoration: none !important;
+}
+.kk-autocomplete-item:last-child {
+  border-bottom: none !important;
+}
+.kk-autocomplete-item:hover,
+.kk-autocomplete-item.active {
+  background-color: #eff6ff !important;
+}
+.kk-autocomplete-item .kk-item-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+.kk-autocomplete-item .kk-item-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: #e0f2fe;
+  color: #0284c7;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+.kk-autocomplete-item .kk-item-info {
+  flex: 1;
+  min-width: 0;
+}
+.kk-autocomplete-item .kk-item-name {
+  font-weight: 600;
+  font-size: 13.5px;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.35;
+}
+.kk-autocomplete-item .kk-item-code {
+  font-size: 12px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+.kk-autocomplete-item .kk-item-meta {
+  text-align: right;
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding-left: 12px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.kk-autocomplete-item .kk-item-stock {
+  color: #64748b;
+}
+.kk-autocomplete-item .kk-item-stock strong {
+  color: #0070f4;
+  font-weight: 600;
+}
+.kk-autocomplete-item .kk-item-price {
+  color: #475569;
+  font-weight: 500;
+}
+.kk-autocomplete-item .kk-item-price b {
+  color: #1e293b;
+  font-weight: 600;
 }
 
 

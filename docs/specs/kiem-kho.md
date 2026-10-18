@@ -50,7 +50,7 @@
   - Click lần 3: Bỏ sắp xếp (về mặc định theo thời gian chốt mới nhất).
   - Áp dụng trên 11 cột (`ma`, `tg`, `tt`, `cl`, `tang`, `giam`, `cb`, `slt`, `ghi`, `st`, `kho`), hỗ trợ căn lề số học `.num` và đồng bộ qua AJAX/Export.
 - **Bung mở chi tiết (`tr.dtl`)**:
-  - Tái sử dụng khối Lego `KiotFilter.initRowDetail`: Accordion viền xanh khép kín (`.last-visible-col`, colspan tự động), 5 cột (Mã, Tên, Tồn, Thực tế, Lệch), ghi chú inline, tổng kết số lượng.
+  - Tái sử dụng khối Lego `KiotFilter.initRowDetail`: Khung nội dung chi tiết cố định 992px (`.kk-detail-fixed-wrap.kiot-detail-fixed-wrap`) chuẩn Nhà cung cấp không bị kéo dãn; Accordion viền xanh khép kín (`.last-visible-col`, colspan tự động), 5 cột (Mã, Tên, Tồn, Thực tế, Lệch), ghi chú inline, tổng kết số lượng.
   - Tái sử dụng khối Lego `KiotFilter.initEntityActions`: Nút Hủy (`.btn-cancel-doc`) qua modal xác nhận chuẩn (chỉ hủy phiếu tạm). Các nút Sao chép, Xuất file, Mở phiếu, Lưu ghi chú, In.
 - **Ẩn / Hiện cột**: Tái sử dụng `KiotFilter.initColumnToggle` lưu `localStorage`, tự động tính lại `colspan` và gán `.last-visible-col` khép kín hình chữ nhật.
 - **Xuất file Excel chuẩn KiotViet (`.xlsx`)**:

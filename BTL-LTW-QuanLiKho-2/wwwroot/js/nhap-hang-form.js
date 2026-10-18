@@ -28,6 +28,38 @@ $(function () {
         });
     }
 
+    // Danh sách thao tác gần đây
+    const recentActions = [];
+    function logAction(type, name, qty) {
+        recentActions.unshift({ type, name, qty });
+        if (recentActions.length > 20) recentActions.pop();
+        renderRecentList();
+    }
+    function renderRecentList() {
+        if (!recentActions.length) {
+            $('#recentList').html('<li class="muted">Chưa có thao tác</li>');
+            return;
+        }
+        const html = recentActions.map(r => `
+            <li>
+                <i class="bi bi-${r.type === 'add' ? 'plus-circle' : 'pencil'} text-primary me-2"></i>
+                <span>${escapeHtml(r.name)} (${r.qty})</span>
+            </li>
+        `).join('');
+        $('#recentList').html(html);
+    }
+
+    function checkEmptyState() {
+        const hasRows = $('#itemsTableBody tr.line-item-row').length > 0;
+        if (hasRows) {
+            $('#tableScrollWrap').show();
+            $('#emptyLineBox').attr('style', 'display: none !important;');
+        } else {
+            $('#tableScrollWrap').hide();
+            $('#emptyLineBox').attr('style', 'display: flex !important;');
+        }
+    }
+
     // 2. Thêm hoặc cộng dồn mặt hàng vào bảng
     function addProductLine(product, qty, price, discount) {
         qty = parseFloat(qty) || 1;
@@ -38,38 +70,44 @@ $(function () {
         if (existingRow.length) {
             const $qtyInput = existingRow.find('.line-qty');
             const currentQty = parseFloat($qtyInput.val()) || 0;
-            $qtyInput.val(currentQty + qty).trigger('input');
+            const newQty = currentQty + qty;
+            $qtyInput.val(newQty).trigger('input');
             highlightRow(existingRow);
+            logAction('edit', product.tenHang, newQty);
             return;
         }
 
-        $('#emptyLineRow').remove();
+        const delColHtml = isReadOnly ? '' : `
+            <td class="w-del text-center">
+                <button type="button" class="del btn-line-del" title="Xóa dòng này">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
 
         const rowHtml = `
             <tr class="line-item-row" data-id="${product.maHang}" data-code="${product.maHangNoiBo}" data-name="${product.tenHang}" data-unit="${product.tenDvt || ''}">
-                <td class="text-center line-stt">1</td>
-                <td class="fw-medium text-primary">${product.maHangNoiBo}</td>
-                <td>
-                    <div class="fw-semibold text-dark">${product.tenHang}</div>
-                    <div class="text-muted small">Tồn kho: <strong class="text-primary">${(product.tonKho || 0).toLocaleString('vi-VN')}</strong></div>
+                ${delColHtml}
+                <td class="w-stt text-center line-stt">1</td>
+                <td class="w-code">
+                    <span class="code-text" title="${product.maHangNoiBo}">${product.maHangNoiBo}</span>
                 </td>
-                <td class="text-center text-muted">${product.tenDvt || '---'}</td>
+                <td class="w-name">
+                    <span class="name-text fw-semibold text-dark">${product.tenHang}</span>
+                    <div class="text-muted small col-tonkho">Tồn kho: <strong class="text-primary">${(product.tonKho || 0).toLocaleString('vi-VN')}</strong></div>
+                </td>
+                <td class="w-dvt text-center text-muted col-dvt">${product.tenDvt || '---'}</td>
                 <td class="text-end">
-                    <input type="number" class="line-qty form-control form-control-sm text-end" value="${qty}" min="1" step="any" />
+                    <input type="number" class="qty line-qty" value="${qty}" min="1" step="any" style="width: 80px;" />
                 </td>
                 <td class="text-end">
-                    <input type="text" class="line-price form-control form-control-sm text-end kiot-num" value="${price.toLocaleString('vi-VN')}" />
+                    <input type="text" class="qty line-price kiot-num" value="${price.toLocaleString('vi-VN')}" style="width: 100px;" />
                 </td>
-                <td class="text-end">
-                    <input type="text" class="line-discount form-control form-control-sm text-end kiot-num" value="${discount.toLocaleString('vi-VN')}" />
+                <td class="text-end col-giamgia">
+                    <input type="text" class="qty line-discount kiot-num" value="${discount.toLocaleString('vi-VN')}" style="width: 90px;" />
                 </td>
                 <td class="text-end fw-bold text-dark line-total">
                     ${((qty * price) - discount).toLocaleString('vi-VN')}
-                </td>
-                <td class="text-center">
-                    <button type="button" class="btn-line-del" title="Xóa dòng này">
-                        <i class="bi bi-trash"></i>
-                    </button>
                 </td>
             </tr>
         `;
@@ -77,7 +115,9 @@ $(function () {
         $('#itemsTableBody').append(rowHtml);
         const newRow = $('#itemsTableBody tr.line-item-row').last();
         highlightRow(newRow);
+        checkEmptyState();
         recalcAll();
+        logAction('add', product.tenHang, qty);
     }
 
     function highlightRow($row) {
@@ -96,21 +136,14 @@ $(function () {
         $row.find('.line-total').text(lineTotal.toLocaleString('vi-VN'));
 
         recalcAll();
+        const pName = $row.data('name') || '';
+        logAction('edit', pName, qty);
     });
 
     // Xóa dòng
     $(document).on('click', '.btn-line-del', function () {
         $(this).closest('tr.line-item-row').remove();
-        if ($('#itemsTableBody tr.line-item-row').length === 0) {
-            $('#itemsTableBody').html(`
-                <tr id="emptyLineRow">
-                    <td colspan="9" class="text-center py-5 text-muted">
-                        <i class="bi bi-box-seam fs-1 text-secondary opacity-50 d-block mb-2"></i>
-                        <span>Chưa có mặt hàng nào. Nhấn <strong>F3</strong> hoặc chọn từ danh sách để thêm hàng.</span>
-                    </td>
-                </tr>
-            `);
-        }
+        checkEmptyState();
         recalcAll();
     });
 
@@ -156,19 +189,69 @@ $(function () {
     // 5. Thu gọn / Mở rộng Panel bên phải (F4)
     $('#btnToggleRightPanel').on('click', function () {
         $('#rightPanel').toggleClass('collapsed');
-        $('#nhFormWrap').toggleClass('panel-closed');
+        $('#nhFormWrap').toggleClass('panel-closed panel-collapsed');
         const isCollapsed = $('#rightPanel').hasClass('collapsed');
+        $(this).attr('title', isCollapsed ? 'Mở rộng thông tin (Phím tắt F4)' : 'Thu gọn thông tin (Phím tắt F4)');
         $('#rightPanelToggleIcon').attr('class', isCollapsed ? 'bi bi-chevron-left' : 'bi bi-chevron-right');
     });
 
-    // 6. Tìm kiếm Nhà cung cấp Autocomplete
+    // 6. Tìm kiếm Nhà cung cấp Autocomplete & Quản lý chọn NCC
     let supplierSearchTimeout = null;
+    let currentSuppliers = [];
+    let activeSupplierIdx = -1;
     const $supInput = $('#supplierSearchInput');
     const $supDropdown = $('#supplierDropdown');
+    const $btnClearSup = $('#btnClearSupplier');
+
+    function setActiveSupplierIdx(idx, scrollIntoView) {
+        if (!currentSuppliers.length) {
+            activeSupplierIdx = -1;
+            return;
+        }
+        if (idx < 0) idx = currentSuppliers.length - 1;
+        if (idx >= currentSuppliers.length) idx = 0;
+        activeSupplierIdx = idx;
+
+        const $items = $supDropdown.find('.nh-supplier-item');
+        $items.removeClass('active');
+        const $target = $items.filter(`[data-index="${activeSupplierIdx}"]`);
+        $target.addClass('active');
+
+        if (scrollIntoView && $target.length) {
+            const dropdownEl = $supDropdown[0];
+            const targetEl = $target[0];
+            const targetTop = targetEl.offsetTop;
+            const targetBottom = targetTop + targetEl.offsetHeight;
+            const dropdownTop = dropdownEl.scrollTop;
+            const dropdownBottom = dropdownTop + dropdownEl.clientHeight;
+
+            if (targetTop < dropdownTop) {
+                dropdownEl.scrollTop = targetTop;
+            } else if (targetBottom > dropdownBottom) {
+                dropdownEl.scrollTop = targetBottom - dropdownEl.clientHeight;
+            }
+        }
+    }
+
+    function selectSupplier(id, name) {
+        $('#selectedSupplierId').val(id || '');
+        $supInput.val(name || '');
+        $btnClearSup.toggle(Boolean(id || name));
+        $supDropdown.hide();
+        currentSuppliers = [];
+        activeSupplierIdx = -1;
+    }
 
     $supInput.on('input focus', function () {
         const q = $(this).val().trim();
         clearTimeout(supplierSearchTimeout);
+
+        if (!$(this).val()) {
+            $('#selectedSupplierId').val('');
+            $btnClearSup.hide();
+        } else {
+            $btnClearSup.show();
+        }
 
         supplierSearchTimeout = setTimeout(function () {
             $.ajax({
@@ -179,27 +262,70 @@ $(function () {
                     renderSupplierDropdown(list);
                 },
                 error: function () {
+                    currentSuppliers = [];
+                    activeSupplierIdx = -1;
                     $supDropdown.hide();
                 }
             });
         }, 200);
     });
 
+    $supInput.on('keydown', function (e) {
+        if (!$supDropdown.is(':visible') || !currentSuppliers.length) {
+            if (e.key === 'Escape') $supDropdown.hide();
+            return;
+        }
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setActiveSupplierIdx(activeSupplierIdx + 1, true);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setActiveSupplierIdx(activeSupplierIdx - 1, true);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (activeSupplierIdx >= 0 && activeSupplierIdx < currentSuppliers.length) {
+                const s = currentSuppliers[activeSupplierIdx];
+                selectSupplier(s.maDonViCapHang, s.tenDonVi);
+            }
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            $supDropdown.hide();
+        }
+    });
+
     function renderSupplierDropdown(list) {
         $supDropdown.empty();
-        if (!list || list.length === 0) {
-            $supDropdown.append('<div class="p-3 text-center text-muted small">Không tìm thấy nhà cung cấp</div>');
+        currentSuppliers = list || [];
+        activeSupplierIdx = currentSuppliers.length > 0 ? 0 : -1;
+
+        if (!currentSuppliers || currentSuppliers.length === 0) {
+            $supDropdown.append(`
+                <div class="p-3 text-center text-muted small">
+                    <div class="mb-2">Không tìm thấy nhà cung cấp phù hợp</div>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="btnQuickAddFromDropdown" style="font-size: 12px; padding: 3px 10px;">
+                        <i class="bi bi-plus-lg me-1"></i>Thêm mới nhà cung cấp
+                    </button>
+                </div>
+            `);
             $supDropdown.show();
             return;
         }
 
-        list.forEach(function (s) {
+        currentSuppliers.forEach(function (s, idx) {
+            const tenDonVi = s.tenDonVi || '';
+            const maNcc = s.maNcc || '';
+            const phone = s.dienThoai || '';
+            const debt = parseFloat(s.noCanTra) || 0;
+            const subText = [maNcc, phone].filter(Boolean).join(' · ');
+            const isActive = idx === activeSupplierIdx ? ' active' : '';
+
             const html = `
-                <div class="nh-supplier-item" data-id="${s.maDonViCapHang}" data-code="${s.maNcc}" data-name="${s.tenDonVi}" data-phone="${s.dienThoai}">
-                    <div class="fw-bold text-dark">${s.tenDonVi}</div>
-                    <div class="small text-muted d-flex justify-content-between">
-                        <span>${s.maNcc} ${s.dienThoai ? '· ' + s.dienThoai : ''}</span>
-                        <span>Nợ: <strong class="text-danger">${(s.noCanTra || 0).toLocaleString('vi-VN')} đ</strong></span>
+                <div class="nh-supplier-item${isActive}" data-index="${idx}" data-id="${s.maDonViCapHang}" data-code="${escapeHtml(maNcc)}" data-name="${escapeHtml(tenDonVi)}" data-phone="${escapeHtml(phone)}">
+                    <div class="sup-name" title="${escapeHtml(tenDonVi)}">${escapeHtml(tenDonVi)}</div>
+                    <div class="sup-meta">
+                        <span>${escapeHtml(subText)}</span>
+                        <span class="sup-debt">Nợ: ${debt.toLocaleString('vi-VN')} đ</span>
                     </div>
                 </div>
             `;
@@ -208,12 +334,31 @@ $(function () {
         $supDropdown.show();
     }
 
+    $supDropdown.on('mouseenter', '.nh-supplier-item', function () {
+        const idx = parseInt($(this).data('index'), 10);
+        if (!isNaN(idx)) {
+            setActiveSupplierIdx(idx, false);
+        }
+    });
+
     $(document).on('click', '.nh-supplier-item', function () {
         const id = $(this).data('id');
         const name = $(this).data('name');
-        $('#selectedSupplierId').val(id);
-        $supInput.val(name);
+        selectSupplier(id, name);
+    });
+
+    $supDropdown.on('click', '#btnQuickAddFromDropdown', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
         $supDropdown.hide();
+        $('#btnOpenAddSupplier').click();
+    });
+
+    $btnClearSup.on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        selectSupplier('', '');
+        $supInput.focus();
     });
 
     $(document).on('click', function (e) {
@@ -222,52 +367,468 @@ $(function () {
         }
     });
 
-    // 7. Thêm nhanh Nhà cung cấp bằng Modal
-    $('#btnOpenAddSupplier').on('click', function () {
-        $('#quickSupplierForm')[0].reset();
-        const modal = new bootstrap.Modal(document.getElementById('quickSupplierModal'));
-        modal.show();
-        setTimeout(() => $('#qsName').focus(), 300);
+    // Helper escapeHtml
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.toString()
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // 7. Quản lý Modal Thêm mới Nhà Cung Cấp Đầy Đủ (Kế thừa từ Nhà Cung Cấp)
+    function showNccModal(id) {
+        const $m = $('#' + id);
+        $m.addClass('show');
+        $('body').addClass('modal-open');
+    }
+
+    function hideNccModal(id) {
+        const $m = $('#' + id);
+        $m.removeClass('show');
+        if (!$('.hh-ov.show').length) {
+            $('body').removeClass('modal-open');
+        }
+    }
+
+    $(document).on('click', '[data-close]', function () {
+        const target = $(this).data('close');
+        hideNccModal(target);
     });
 
-    $('#btnSubmitQuickSupplier').on('click', function () {
-        const ten = $('#qsName').val().trim();
-        if (!ten) {
-            if (window.KiotToast) KiotToast.error('Vui lòng nhập tên nhà cung cấp.');
-            $('#qsName').focus();
+    $(document).on('click', '.hh-ov', function (e) {
+        if (e.target === this) {
+            hideNccModal(this.id);
+        }
+    });
+
+    // Accordion Sections (.hh-sec)
+    $(document).on('click', '.hh-sec-h', function () {
+        $(this).closest('.hh-sec').toggleClass('open');
+    });
+
+    // Custom Combobox Nhóm NCC trong Modal
+    const nccGroupCombobox = (function () {
+        const $wrap = $('#wrapMaNhomNcc');
+        if (!$wrap.length) return { select: function(){}, updateUI: function(){}, sync: function(){} };
+
+        const $box = $('#boxMaNhomNcc');
+        const $input = $('#inputMaNhomNcc');
+        const $dropdown = $('#dropdownMaNhomNcc');
+        const $search = $('#searchMaNhomNcc');
+        const $list = $('#listMaNhomNcc');
+        const $select = $('#nccMaNhomNcc');
+
+        function open() {
+            $wrap.addClass('open');
+            $dropdown.show();
+            $search.val('').focus();
+            filterItems('');
+        }
+
+        function close() {
+            $wrap.removeClass('open');
+            $dropdown.hide();
+        }
+
+        function filterItems(keyword) {
+            const q = (keyword || '').toLowerCase().trim();
+            $list.find('.hh-cs-item').each(function () {
+                const text = $(this).find('span').text().toLowerCase();
+                $(this).toggle(text.includes(q));
+            });
+        }
+
+        function selectVal(val, text) {
+            $select.val(val).trigger('change');
+            $input.val(text || '');
+            $list.find('.hh-cs-item').removeClass('selected').filter(function () {
+                return String($(this).data('val')) === String(val);
+            }).addClass('selected');
+            close();
+        }
+
+        function syncFromSelect() {
+            const curVal = $select.val();
+            $list.empty();
+            $select.find('option').each(function () {
+                const v = $(this).val();
+                if (!v) return;
+                const t = $(this).text();
+                const isSel = (String(v) === String(curVal));
+                const $item = $(`
+                    <div class="hh-cs-item ${isSel ? 'selected' : ''}" data-val="${v}">
+                        <span>${escapeHtml(t)}</span>
+                        <button type="button" class="hh-item-edit-btn" data-type="nhom" data-id="${v}" data-val="${escapeHtml(t)}" title="Sửa nhóm" aria-label="Sửa nhóm ${escapeHtml(t)}">
+                            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                        </button>
+                        <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+                    </div>
+                `);
+                $list.append($item);
+            });
+            updateUI();
+        }
+
+        function updateUI() {
+            const curVal = $select.val();
+            const $selectedOpt = $select.find(`option[value="${curVal}"]`);
+            if (curVal && $selectedOpt.length) {
+                $input.val($selectedOpt.text());
+                $list.find('.hh-cs-item').removeClass('selected').filter(function () {
+                    return String($(this).data('val')) === String(curVal);
+                }).addClass('selected');
+            } else {
+                $input.val('');
+                $list.find('.hh-cs-item').removeClass('selected');
+            }
+        }
+
+        $box.on('click', function (e) {
+            e.stopPropagation();
+            if ($wrap.hasClass('open')) close();
+            else open();
+        });
+
+        $search.on('click', function (e) {
+            e.stopPropagation();
+        }).on('input', function () {
+            filterItems($(this).val());
+        }).on('keydown', function (e) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                close();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const $first = $list.find('.hh-cs-item:visible').first();
+                if ($first.length) {
+                    selectVal($first.data('val'), $first.find('span').text().trim());
+                }
+            }
+        });
+
+        $list.on('click', '.hh-cs-item', function (e) {
+            if ($(e.target).closest('.hh-item-edit-btn').length) return;
+            e.stopPropagation();
+            const v = $(this).data('val');
+            const t = $(this).find('span').text().trim();
+            selectVal(v, t);
+        });
+
+        $list.on('click', '.hh-item-edit-btn', function (e) {
+            e.stopPropagation();
+            const id = $(this).data('id') || $(this).closest('.hh-cs-item').data('val');
+            const val = $(this).data('val') || $(this).closest('.hh-cs-item').find('span').text().trim();
+            close();
+            openEditGroupModal(id, val);
+        });
+
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest($wrap).length) {
+                close();
+            }
+        });
+
+        return {
+            open,
+            close,
+            select: selectVal,
+            sync: syncFromSelect,
+            updateUI
+        };
+    })();
+
+    // Tạo nhanh nhóm NCC
+    $('#btnNewNhomNcc').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#nccPromptInput').val('');
+        $('#nccPromptErr').hide();
+        showNccModal('nccPromptOv');
+        setTimeout(() => $('#nccPromptInput').focus(), 40);
+    });
+
+    $('#nccPromptSave').on('click', function () {
+        submitCreateGroupQuick();
+    });
+
+    $('#nccPromptInput').on('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            submitCreateGroupQuick();
+        }
+    });
+
+    function submitCreateGroupQuick() {
+        const name = $('#nccPromptInput').val().trim();
+        if (!name) {
+            $('#nccPromptErr').text('Vui lòng nhập tên nhóm nhà cung cấp.').show();
+            $('#nccPromptInput').focus();
             return;
         }
 
-        const data = {
-            TenDonVi: ten,
-            MaNcc: $('#qsCode').val().trim(),
-            DienThoai: $('#qsPhone').val().trim(),
-            DiaChi: $('#qsAddress').val().trim()
-        };
-
         $.ajax({
-            url: quickSupplierUrl,
+            url: '/NhaCungCap/CreateGroupQuick',
             type: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify(data),
+            data: JSON.stringify({ tenNhom: name }),
             success: function (res) {
-                if (res.success && res.supplier) {
-                    $('#selectedSupplierId').val(res.supplier.maDonViCapHang);
-                    $supInput.val(res.supplier.tenDonVi);
-                    bootstrap.Modal.getInstance(document.getElementById('quickSupplierModal')).hide();
-                    if (window.KiotToast) KiotToast.success('Đã thêm mới nhà cung cấp!');
-                } else {
-                    if (window.KiotToast) KiotToast.error(res.message || 'Lỗi khi tạo nhà cung cấp.');
+                if (res.success) {
+                    hideNccModal('nccPromptOv');
+                    if (window.KiotToast) window.KiotToast.success(`Tạo nhóm "${res.tenNhom}" thành công.`);
+                    if (!$(`#nccMaNhomNcc option[value="${res.maNhomNcc}"]`).length) {
+                        $('#nccMaNhomNcc').append(`<option value="${res.maNhomNcc}">${escapeHtml(res.tenNhom)}</option>`);
+                    }
+                    nccGroupCombobox.sync();
+                    nccGroupCombobox.select(res.maNhomNcc, res.tenNhom);
                 }
             },
             error: function (xhr) {
-                const msg = xhr.responseJSON?.message || 'Không thể tạo nhà cung cấp.';
-                if (window.KiotToast) KiotToast.error(msg);
+                $('#nccPromptErr').text(xhr.responseJSON?.message || 'Không thể tạo nhóm.').show();
+            }
+        });
+    }
+
+    function openEditGroupModal(id, val) {
+        if (!id) return;
+        $('#nccEditGroupId').val(id);
+        $('#nccEditGroupInput').val(val || '');
+        $('#nccEditGroupErr').hide();
+        showNccModal('nccEditGroupOv');
+        setTimeout(() => $('#nccEditGroupInput').focus().select(), 40);
+    }
+
+    $('#btnEditGroupSave').on('click', function () {
+        submitUpdateGroup();
+    });
+
+    $('#nccEditGroupInput').on('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            submitUpdateGroup();
+        }
+    });
+
+    function submitUpdateGroup() {
+        const id = parseInt($('#nccEditGroupId').val()) || 0;
+        const newName = $('#nccEditGroupInput').val().trim();
+        if (!newName) {
+            $('#nccEditGroupErr').text('Vui lòng nhập tên nhóm nhà cung cấp.').show();
+            $('#nccEditGroupInput').focus();
+            return;
+        }
+
+        $.ajax({
+            url: '/NhaCungCap/UpdateGroupQuick',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ maNhomNcc: id, tenNhom: newName }),
+            success: function (res) {
+                if (res.success) {
+                    hideNccModal('nccEditGroupOv');
+                    if (window.KiotToast) window.KiotToast.success(`Đã đổi tên nhóm thành "${res.tenNhom}".`);
+                    $(`#nccMaNhomNcc option[value="${id}"]`).text(res.tenNhom);
+                    nccGroupCombobox.sync();
+                    if (String($('#nccMaNhomNcc').val()) === String(id)) {
+                        nccGroupCombobox.select(id, res.tenNhom);
+                    }
+                }
+            },
+            error: function (xhr) {
+                $('#nccEditGroupErr').text(xhr.responseJSON?.message || 'Không thể cập nhật nhóm.').show();
+            }
+        });
+    }
+
+    $('#btnEditGroupDelete').on('click', function () {
+        const id = parseInt($('#nccEditGroupId').val()) || 0;
+        if (!id) return;
+
+        $.ajax({
+            url: '/NhaCungCap/DeleteGroupQuick',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ maNhomNcc: id }),
+            success: function (res) {
+                if (res.success) {
+                    hideNccModal('nccEditGroupOv');
+                    if (window.KiotToast) window.KiotToast.success(res.message);
+                    $(`#nccMaNhomNcc option[value="${id}"]`).remove();
+                    nccGroupCombobox.sync();
+                    if (String($('#nccMaNhomNcc').val()) === String(id)) {
+                        nccGroupCombobox.select('', '');
+                    }
+                }
+            },
+            error: function (xhr) {
+                $('#nccEditGroupErr').text(xhr.responseJSON?.message || 'Không thể xóa nhóm này.').show();
             }
         });
     });
 
-    // 8. Nhập từ file Excel (SheetJS)
+    // Reset và mở Modal Nhà Cung Cấp
+    function resetSupplierModal() {
+        $('#nccId').val('0');
+        $('#nccTenDonVi').val('');
+        $('#nccFldTen').removeClass('invalid');
+        $('#nccMaNcc').val('');
+        $('#nccDienThoai').val('');
+        $('#nccEmail').val('');
+        $('#nccDiaChi').val('');
+        $('#nccKhuVuc').val('');
+        $('#nccPhuongXa').val('');
+        $('#nccMaNhomNcc').val('');
+        nccGroupCombobox.updateUI();
+        $('#nccGhiChu').val('');
+        $('#nccTenCongTy').val('');
+        $('#nccMaSoThue').val('');
+        $('#nccSoCccd').val('');
+        $('#nccStatusWrap').hide();
+        $('#btnDeleteNccInModal').hide();
+        $('#btnSaveAndNewNcc').show();
+        $('#nccModalTitle').text('Thêm mới nhà cung cấp');
+        $('#nccModalOv .hh-sec').addClass('open');
+    }
+
+    $('#nccTenDonVi').on('input', function () {
+        if ($(this).val().trim()) {
+            $('#nccFldTen').removeClass('invalid');
+        }
+    });
+
+    $('#btnOpenAddSupplier').on('click', function () {
+        resetSupplierModal();
+        showNccModal('nccModalOv');
+        setTimeout(() => $('#nccTenDonVi').focus(), 40);
+    });
+
+    // Submit Modal Nhà Cung Cấp (Lưu / Lưu & Thêm mới)
+    function submitSupplierModal(isSaveAndNew) {
+        const ten = $('#nccTenDonVi').val().trim();
+        if (!ten) {
+            $('#nccFldTen').addClass('invalid');
+            $('#nccTenDonVi').focus();
+            return;
+        }
+        $('#nccFldTen').removeClass('invalid');
+
+        const payload = {
+            maDonViCapHang: 0,
+            tenDonVi: ten,
+            maNcc: $('#nccMaNcc').val().trim(),
+            dienThoai: $('#nccDienThoai').val().trim(),
+            email: $('#nccEmail').val().trim(),
+            diaChi: $('#nccDiaChi').val().trim(),
+            khuVuc: $('#nccKhuVuc').val().trim(),
+            phuongXa: $('#nccPhuongXa').val().trim(),
+            maNhomNcc: parseInt($('#nccMaNhomNcc').val()) || null,
+            ghiChu: $('#nccGhiChu').val().trim(),
+            tenCongTy: $('#nccTenCongTy').val().trim(),
+            maSoThue: $('#nccMaSoThue').val().trim(),
+            soCccd: $('#nccSoCccd').val().trim(),
+            trangThai: 'HOAT_DONG'
+        };
+
+        const $btn = isSaveAndNew ? $('#btnSaveAndNewNcc') : $('#btnSaveNcc');
+        const oldHtml = $btn.html();
+        $btn.prop('disabled', true).text('Đang lưu...');
+
+        $.ajax({
+            url: '/NhaCungCap/Create',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (res) {
+                $btn.prop('disabled', false).html(oldHtml);
+                if (res.success) {
+                    if (window.KiotToast) KiotToast.success(res.message || 'Thêm nhà cung cấp thành công!');
+
+                    // Tự động gán NCC vừa tạo vào ô chọn NCC trên form Nhập hàng
+                    const newId = res.id || res.supplier?.maDonViCapHang;
+                    const newName = res.supplier?.tenDonVi || ten;
+                    selectSupplier(newId, newName);
+
+                    if (isSaveAndNew) {
+                        resetSupplierModal();
+                        $('#nccTenDonVi').focus();
+                    } else {
+                        hideNccModal('nccModalOv');
+                    }
+                } else {
+                    if (window.KiotToast) KiotToast.error(res.message || 'Lỗi khi lưu nhà cung cấp.');
+                }
+            },
+            error: function (xhr) {
+                $btn.prop('disabled', false).html(oldHtml);
+                const msg = xhr.responseJSON?.message || 'Không thể tạo nhà cung cấp.';
+                if (window.KiotToast) KiotToast.error(msg);
+            }
+        });
+    }
+
+    $('#btnSaveNcc').on('click', function () {
+        submitSupplierModal(false);
+    });
+
+    // 8. Tùy chọn hiển thị cột & Lưu ý
+    $('#tEye').on('click', function (e) {
+        e.stopPropagation();
+        $('#notes').removeClass('show');
+        $('#fCols').toggleClass('show');
+    });
+
+    $('#tNote').on('click', function (e) {
+        e.stopPropagation();
+        $('#fCols').removeClass('show');
+        $('#notes').toggleClass('show');
+    });
+
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#tEye, #fCols').length) {
+            $('#fCols').removeClass('show');
+        }
+        if (!$(e.target).closest('#tNote, #notes').length) {
+            $('#notes').removeClass('show');
+        }
+    });
+
+    $('#fCols input[type="checkbox"]').on('change', function () {
+        const colKey = $(this).data('fc');
+        const isChecked = $(this).is(':checked');
+        if (colKey === 'dvt') {
+            $('.col-dvt').toggle(isChecked);
+        } else if (colKey === 'tonkho') {
+            $('.col-tonkho').toggle(isChecked);
+        } else if (colKey === 'giamgia') {
+            $('.col-giamgia').toggle(isChecked);
+        }
+    });
+
+    // Nút Chọn file dữ liệu từ empty state
+    $('#btnPickExcel').on('click', function () {
+        $('#excelFileInput').click();
+    });
+
+    // Tải file mẫu Excel
+    $('#btnDownloadTemplate').on('click', function () {
+        if (typeof XLSX !== 'undefined') {
+            const sampleData = [
+                ['STT', 'Mã hàng', 'Tên hàng', 'ĐVT', 'Số lượng', 'Đơn giá', 'Giảm giá'],
+                [1, 'SP00001', 'Bia Sài Gòn Lager', 'Lon', 10, 12000, 0],
+                [2, 'SP00002', 'Nước ngọt Coca Cola 330ml', 'Lon', 24, 10000, 0]
+            ];
+            const ws = XLSX.utils.aoa_to_sheet(sampleData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'MauNhapHang');
+            XLSX.writeFile(wb, 'MauNhapHang_KiotViet.xlsx');
+        } else {
+            alert('Tính năng tải file mẫu đang chuẩn bị...');
+        }
+    });
+
+    // 9. Nhập từ file Excel (SheetJS)
     $('#btnImportExcel').on('click', function () {
         $('#excelFileInput').click();
     });

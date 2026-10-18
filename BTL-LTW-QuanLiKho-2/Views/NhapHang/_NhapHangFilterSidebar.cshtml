@@ -15,37 +15,29 @@
     </div>
 
     <div class="kiot-filter-box" id="side">
-        <!-- 1. Trạng thái chứng từ -->
+        <!-- 1. Thời gian -->
+        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("date", "Thời gian", false)' />
+
+        <!-- 2. Trạng thái chứng từ -->
         <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Trạng thái", "dotSt", new() {
             new("NHAP", "Phiếu tạm", Model.Filter.Statuses.Contains("NHAP")),
             new("DA_XAC_NHAN", "Đã nhập hàng", Model.Filter.Statuses.Contains("DA_XAC_NHAN")),
             new("HUY", "Đã hủy", Model.Filter.Statuses.Contains("HUY"))
         })' />
 
-        <!-- 2. Thời gian -->
-        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("date", "Thời gian", false)' />
-
         <!-- 3. Người tạo -->
         <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NguoiTao", "nguoitao", "Người tạo", "Chọn người tạo", true, "dotUser") {
-            Items = Model.NhanViens.Select(nv => new KiotMultiSelectItemVM(nv.Value, nv.Text, Model.Filter.CreatorId?.ToString() == nv.Value)).ToList()
+            Items = Model.NhanViens.Select(nv => new KiotMultiSelectItemVM(nv.Value, nv.Text, (Model.Filter.CreatorIds != null && Model.Filter.CreatorIds.Contains(int.TryParse(nv.Value, out var cid) ? cid : -1)) || Model.Filter.CreatorId?.ToString() == nv.Value)).ToList()
         }' />
 
-        <!-- 4. Số hóa đơn -->
-        <div class="f-block position-relative">
-            <h6>Số hóa đơn <span class="filter-dot" id="dotShd"></span></h6>
-            <div class="kiot-search-input-wrap">
-                <input type="text" id="invoiceNumberFilter" class="form-control form-control-sm" placeholder="Tìm theo số hóa đơn..." value="@Model.Filter.SoHoaDon" autocomplete="off" />
-            </div>
-        </div>
-
-        <!-- 5. Người nhập -->
+        <!-- 4. Người nhập -->
         <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NguoiNhap", "nguoinhap", "Người nhập", "Chọn người nhập", true, "dotConfirmer") {
-            Items = Model.NhanViens.Select(nv => new KiotMultiSelectItemVM(nv.Value, nv.Text, Model.Filter.ConfirmerId?.ToString() == nv.Value)).ToList()
+            Items = Model.NhanViens.Select(nv => new KiotMultiSelectItemVM(nv.Value, nv.Text, (Model.Filter.ConfirmerIds != null && Model.Filter.ConfirmerIds.Contains(int.TryParse(nv.Value, out var cid) ? cid : -1)) || Model.Filter.ConfirmerId?.ToString() == nv.Value)).ToList()
         }' />
 
-        <!-- 6. Nhà cung cấp -->
+        <!-- 5. Nhà cung cấp -->
         <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NhaCungCap", "ncc", "Nhà cung cấp", "Chọn nhà cung cấp", true, "dotNcc") {
-            Items = Model.NhaCungCaps.Select(ncc => new KiotMultiSelectItemVM(ncc.Value, ncc.Text, Model.Filter.NccId?.ToString() == ncc.Value)).ToList()
+            Items = Model.NhaCungCaps.Select(ncc => new KiotMultiSelectItemVM(ncc.Value, ncc.Text, (Model.Filter.NccIds != null && Model.Filter.NccIds.Contains(int.TryParse(ncc.Value, out var nid) ? nid : -1)) || Model.Filter.NccId?.ToString() == ncc.Value)).ToList()
         }' />
     </div>
 </aside>

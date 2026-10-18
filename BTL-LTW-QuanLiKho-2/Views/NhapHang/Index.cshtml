@@ -3,6 +3,7 @@
     ViewData["Title"] = "Nhập hàng";
 }
 
+<link href="~/css/kiem-kho.css" rel="stylesheet" asp-append-version="true" />
 <link href="~/css/nhap-hang.css" rel="stylesheet" asp-append-version="true" />
 
 <div class="kiot-container position-relative" id="kiotContainer"
@@ -38,16 +39,16 @@
                 </button>
             </div>
 
-            <!-- Ô tìm kiếm theo mã phiếu / mã hoặc tên hàng -->
+            <!-- Ô tìm kiếm theo mã phiếu nhập (F3) -->
             <div class="kiot-search-box">
                 <i class="bi bi-search"></i>
-                <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã, tên hàng (F3)" value="@Model.Filter.Q" autocomplete="off" />
+                <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã phiếu nhập (F3)" value="@Model.Filter.Q" autocomplete="off" />
             </div>
 
             <!-- Nhóm nút hành động KiotViet -->
             <div class="kiot-actions-group">
                 <!-- Nút + Nhập hàng -->
-                <a href="@Url.Action("Create", "NhapHang")" class="btn btn-success d-inline-flex align-items-center" id="btnNew" title="Lập phiếu nhập hàng mới" style="background-color: #059669; border-color: #059669;">
+                <a href="@Url.Action("Create", "NhapHang")" class="btn btn-primary d-inline-flex align-items-center" id="btnNew" title="Lập phiếu nhập hàng mới" style="background-color: #0070f4; border-color: #0070f4;">
                     <i class="bi bi-plus-lg me-1"></i><span>Nhập hàng</span>
                 </a>
 
@@ -70,40 +71,64 @@
                     </ul>
                 </div>
 
-                <!-- Dropdown Tùy chọn hiển thị cột -->
+                <!-- Dropdown Tùy chọn hiển thị cột (2 cột chuẩn KiotViet) -->
                 <div class="dropdown">
                     <button class="btn btn-tool" type="button" id="btnColsDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Tùy chọn hiển thị cột">
                         <i class="bi bi-view-list"></i>
                     </button>
-                    <div class="dropdown-menu dropdown-menu-end shadow p-3" id="colMenu" style="min-width: 210px;">
-                        <h6 class="dropdown-header px-0 pt-0 text-dark fw-bold">Hiển thị cột</h6>
-                        <div class="d-flex flex-column gap-2 small">
-                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ma" checked> Mã nhập hàng</label>
-                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tg" checked> Thời gian</label>
-                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="mancc" checked> Mã nhà CC</label>
-                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ncc" checked> Nhà cung cấp</label>
-                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="cantra" checked> Cần trả NCC</label>
-                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="st" checked> Trạng thái</label>
+                    <div class="dropdown-menu dropdown-menu-end shadow p-3" id="colMenu" style="min-width: 420px;">
+                        <h6 class="dropdown-header px-0 pt-0 text-dark fw-bold mb-2">Hiển thị cột</h6>
+                        <div class="row g-3">
+                            <div class="col-6 d-flex flex-column gap-2 small">
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ma" checked> Mã nhập hàng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="matra"> Mã trả hàng nhập</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tg" checked> Thời gian</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tgtao"> Thời gian tạo</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ngaycapnhat"> Ngày cập nhật</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="mancc" checked> Mã NCC</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ncc" checked> Nhà cung cấp</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="chinhanh"> Chi nhánh</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="nguoinhap"> Người nhập</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="nguoitao"> Người tạo</label>
+                            </div>
+                            <div class="col-6 d-flex flex-column gap-2 small">
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tongsl"> Tổng số lượng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="slmathang"> Số lượng mặt hàng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tongtien"> Tổng tiền hàng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="giamgia"> Giảm giá</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="cantra" checked> Cần trả NCC</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="chietkhautt"> Chiết khấu thanh toán</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tiendatra"> Tiền đã trả NCC</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ghi"> Ghi chú</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="st" checked> Trạng thái</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="sohoadon"> Số hóa đơn đầu vào</label>
+                            </div>
                         </div>
                     </div>
                 </div>
+
 
                 <!-- Tải lại bảng -->
                 <button type="button" class="btn btn-tool d-none d-sm-inline-flex" title="Tải lại bảng" id="btnReloadTable">
                     <i class="bi bi-arrow-clockwise"></i>
                 </button>
+                <!-- Trợ giúp -->
+                <button type="button" class="btn btn-tool" title="Trợ giúp" id="btnHelp" onclick="alert('Hướng dẫn: Màn hình Quản lý nhập hàng KiotViet');">
+                    <i class="bi bi-question-circle"></i>
+                </button>
             </div>
         </div>
 
-        <!-- Bảng danh sách phiếu nhập hàng và phân trang AJAX -->
-        <div id="tableContainer">
-            <partial name="_NhapHangTable" model="Model" />
-        </div>
+        <!-- Bảng danh sách phiếu nhập hàng (Partial View AJAX) -->
+        <section id="content">
+            <div id="tableContainer" class="kiot-table-wrapper">
+                <partial name="_NhapHangTable" model="Model" />
+            </div>
+        </section>
     </main>
 </div>
 
-<!-- Modal chung (Prompt / Confirm dialogs) -->
-<partial name="_KiotPromptModal" />
+
 
 @section Scripts {
     <script src="~/js/kiot-filter.js" asp-append-version="true"></script>

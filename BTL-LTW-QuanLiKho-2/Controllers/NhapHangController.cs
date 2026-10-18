@@ -468,9 +468,10 @@ public class NhapHangController : BaseKhoController
 
     // 10. Lưu nhanh ghi chú từ Drawer xem chi tiết
     [HttpPost]
-    public async Task<IActionResult> SaveNote(int id, [FromBody] SaveNoteRequest req)
+    public async Task<IActionResult> SaveNote(int? id, [FromBody] SaveNoteRequest? req)
     {
-        var phieu = await _context.PhieuNhaps.FindAsync(id);
+        int targetId = (id.HasValue && id.Value > 0) ? id.Value : (req?.MaPhieuNhap ?? 0);
+        var phieu = await _context.PhieuNhaps.FindAsync(targetId);
         if (phieu == null)
         {
             return NotFound(new { success = false, message = "Không tìm thấy phiếu nhập." });
@@ -798,21 +799,36 @@ public class NhapHangController : BaseKhoController
         }
 
         // 4. Lọc Nhà cung cấp
-        if (filter.NccId.HasValue && filter.NccId.Value > 0)
+        var nccIds = filter.NccIds?.Where(x => x > 0).ToList() ?? new List<int>();
+        if (filter.NccId.HasValue && filter.NccId.Value > 0 && !nccIds.Contains(filter.NccId.Value))
         {
-            query = query.Where(p => p.MaDonViCapHang == filter.NccId.Value);
+            nccIds.Add(filter.NccId.Value);
+        }
+        if (nccIds.Any())
+        {
+            query = query.Where(p => p.MaDonViCapHang.HasValue && nccIds.Contains(p.MaDonViCapHang.Value));
         }
 
         // 5. Lọc Người tạo
-        if (filter.CreatorId.HasValue && filter.CreatorId.Value > 0)
+        var creatorIds = filter.CreatorIds?.Where(x => x > 0).ToList() ?? new List<int>();
+        if (filter.CreatorId.HasValue && filter.CreatorId.Value > 0 && !creatorIds.Contains(filter.CreatorId.Value))
         {
-            query = query.Where(p => p.MaNvlap == filter.CreatorId.Value);
+            creatorIds.Add(filter.CreatorId.Value);
+        }
+        if (creatorIds.Any())
+        {
+            query = query.Where(p => creatorIds.Contains(p.MaNvlap));
         }
 
         // 6. Lọc Người nhập
-        if (filter.ConfirmerId.HasValue && filter.ConfirmerId.Value > 0)
+        var confirmerIds = filter.ConfirmerIds?.Where(x => x > 0).ToList() ?? new List<int>();
+        if (filter.ConfirmerId.HasValue && filter.ConfirmerId.Value > 0 && !confirmerIds.Contains(filter.ConfirmerId.Value))
         {
-            query = query.Where(p => p.MaNvxacNhan == filter.ConfirmerId.Value);
+            confirmerIds.Add(filter.ConfirmerId.Value);
+        }
+        if (confirmerIds.Any())
+        {
+            query = query.Where(p => p.MaNvxacNhan.HasValue && confirmerIds.Contains(p.MaNvxacNhan.Value));
         }
 
         // 7. Lọc Số hóa đơn
@@ -837,14 +853,34 @@ public class NhapHangController : BaseKhoController
         {
             ("ma", "asc") => query.OrderBy(p => p.MaPhieu),
             ("ma", "desc") => query.OrderByDescending(p => p.MaPhieu),
+            ("matra", "asc") => query.OrderBy(p => p.MaDatHangNhap ?? ""),
+            ("matra", "desc") => query.OrderByDescending(p => p.MaDatHangNhap ?? ""),
             ("tg", "asc") => query.OrderBy(p => p.NgayLap),
             ("tg", "desc") => query.OrderByDescending(p => p.NgayLap),
+            ("tgtao", "asc") => query.OrderBy(p => p.NgayLap),
+            ("tgtao", "desc") => query.OrderByDescending(p => p.NgayLap),
+            ("ngaycapnhat", "asc") => query.OrderBy(p => p.NgayXacNhan ?? p.NgayLap),
+            ("ngaycapnhat", "desc") => query.OrderByDescending(p => p.NgayXacNhan ?? p.NgayLap),
+            ("mancc", "asc") => query.OrderBy(p => p.MaDonViCapHangNavigation != null ? p.MaDonViCapHangNavigation.MaNcc : ""),
+            ("mancc", "desc") => query.OrderByDescending(p => p.MaDonViCapHangNavigation != null ? p.MaDonViCapHangNavigation.MaNcc : ""),
             ("ncc", "asc") => query.OrderBy(p => p.MaDonViCapHangNavigation != null ? p.MaDonViCapHangNavigation.TenDonVi : ""),
             ("ncc", "desc") => query.OrderByDescending(p => p.MaDonViCapHangNavigation != null ? p.MaDonViCapHangNavigation.TenDonVi : ""),
+            ("chinhanh", "asc") => query.OrderBy(p => p.MaKhoNavigation.TenKho),
+            ("chinhanh", "desc") => query.OrderByDescending(p => p.MaKhoNavigation.TenKho),
+            ("nguoitao", "asc") => query.OrderBy(p => p.MaNvlapNavigation.HoTen),
+            ("nguoitao", "desc") => query.OrderByDescending(p => p.MaNvlapNavigation.HoTen),
+            ("nguoinhap", "asc") => query.OrderBy(p => p.MaNvxacNhanNavigation != null ? p.MaNvxacNhanNavigation.HoTen : ""),
+            ("nguoinhap", "desc") => query.OrderByDescending(p => p.MaNvxacNhanNavigation != null ? p.MaNvxacNhanNavigation.HoTen : ""),
+            ("tongtien", "asc") => query.OrderBy(p => p.TongTien),
+            ("tongtien", "desc") => query.OrderByDescending(p => p.TongTien),
+            ("giamgia", "asc") => query.OrderBy(p => p.GiamGia),
+            ("giamgia", "desc") => query.OrderByDescending(p => p.GiamGia),
             ("cantra", "asc") => query.OrderBy(p => p.CanTraNcc),
             ("cantra", "desc") => query.OrderByDescending(p => p.CanTraNcc),
             ("st", "asc") => query.OrderBy(p => p.TrangThai),
             ("st", "desc") => query.OrderByDescending(p => p.TrangThai),
+            ("sohoadon", "asc") => query.OrderBy(p => p.SoHoaDon),
+            ("sohoadon", "desc") => query.OrderByDescending(p => p.SoHoaDon),
             _ => query.OrderByDescending(p => p.NgayLap).ThenByDescending(p => p.MaPhieuNhap)
         };
 
@@ -933,6 +969,11 @@ public class NhapHangController : BaseKhoController
             .Where(d => d.TrangThai == "HOAT_DONG")
             .OrderBy(d => d.TenDonVi)
             .Select(d => new SelectListItem { Value = d.MaDonViCapHang.ToString(), Text = d.TenDonVi })
+            .ToListAsync();
+
+        vm.NhomNccList = await _context.NhomNhaCungCaps
+            .AsNoTracking()
+            .OrderBy(g => g.TenNhom)
             .ToListAsync();
     }
 

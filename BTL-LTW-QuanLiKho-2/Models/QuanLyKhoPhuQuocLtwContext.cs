@@ -196,7 +196,7 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
 
             entity.ToTable("ChiTietPhieuXuat");
 
-            entity.HasIndex(e => e.MaCtdonBan, "UQ__ChiTietP__D45798D2234BC67A").IsUnique();
+            entity.HasIndex(e => e.MaCtdonBan, "UQ_ChiTietPhieuXuat_MaCTDonBan").IsUnique().HasFilter("([MaCTDonBan] IS NOT NULL)");
 
             entity.Property(e => e.MaCtphieuXuat).HasColumnName("MaCTPhieuXuat");
             entity.Property(e => e.MaCtdonBan).HasColumnName("MaCTDonBan");
@@ -685,7 +685,7 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
 
             entity.ToTable("PhieuXuat");
 
-            entity.HasIndex(e => e.MaDonBan, "UQ__PhieuXua__CDB61EB51063B35E").IsUnique();
+            entity.HasIndex(e => e.MaDonBan, "UQ_PhieuXuat_MaDonBan").IsUnique().HasFilter("([MaDonBan] IS NOT NULL)");
 
             entity.Property(e => e.GhiChu).HasMaxLength(500);
             entity.Property(e => e.MaPhieu).HasMaxLength(30).IsUnicode(false);

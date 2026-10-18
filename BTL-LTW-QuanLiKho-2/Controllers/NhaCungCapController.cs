@@ -252,7 +252,20 @@ public class NhaCungCapController : BaseKhoController
             }
 
             await trans.CommitAsync();
-            return Json(new { success = true, id = ncc.MaDonViCapHang, message = $"Thêm nhà cung cấp \"{ncc.TenDonVi}\" thành công." });
+            return Json(new
+            {
+                success = true,
+                id = ncc.MaDonViCapHang,
+                supplier = new
+                {
+                    maDonViCapHang = ncc.MaDonViCapHang,
+                    maNcc = ncc.MaNcc,
+                    tenDonVi = ncc.TenDonVi,
+                    dienThoai = ncc.DienThoai ?? "",
+                    noCanTra = 0
+                },
+                message = $"Thêm nhà cung cấp \"{ncc.TenDonVi}\" thành công."
+            });
         }
         catch (Exception ex)
         {
