@@ -18,6 +18,7 @@ $(function () {
     const searchProductsUrl = $app.data('search-products-url') || '/TraHangNhap/SearchProduct';
     const searchSuppliersUrl = $app.data('search-suppliers-url') || '/TraHangNhap/SearchSupplier';
     const templateUrl = $app.data('template-url') || '/TraHangNhap/DownloadTemplate';
+    const importUrl = $app.data('import-url') || '/TraHangNhap/ImportExcel';
 
     let discMode = 'vnd'; // 'vnd' hoặc 'pct'
     let discVal = 0;
@@ -407,85 +408,46 @@ $(function () {
     });
 
     $('#excelFileInput').on('change', function (e) {
-        const file = e.target.files[0];
-        $(this).val('');
-        if (!file) return;
+        const files = e.target.files;
+        if (!files || !files.length) return;
+        const file = files[0];
 
-        function processImportData(rows) {
-            let count = 0;
-            rows.forEach((r, idx) => {
-                if (!r || !r.length) return;
-                const code = String(r[0] ?? '').trim();
-                const qtyVal = r[1];
-                if (!code) return;
-                // Nếu dòng đầu là tiêu đề cột
-                if (idx === 0 && isNaN(Number(String(qtyVal).replace(/[^0-9.-]+/g, '')))) return;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('warehouseId', warehouseId);
 
-                const qty = digits(qtyVal);
-                const price = (r[2] !== undefined && r[2] !== null && String(r[2]).trim() !== '') ? digits(r[2]) : null;
+        if (window.KiotToast) KiotToast.info('Đang đối soát dữ liệu file với hệ thống...');
 
-                if (code && qty > 0) {
-                    $.ajax({
-                        url: searchProductsUrl,
-                        type: 'GET',
-                        data: { q: code, warehouseId: warehouseId },
-                        async: false,
-                        success: function (res) {
-                            if (res && res.length) {
-                                const p = res.find(x => x.code.toLowerCase() === code.toLowerCase()) || res[0];
-                                addProductLine(p, qty, price);
-                                count++;
-                            }
-                        }
+        $.ajax({
+            url: importUrl,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                if (res && res.success && res.items && res.items.length) {
+                    let importedCount = 0;
+                    res.items.forEach(item => {
+                        addProductLine(item, item.qty, item.price);
+                        importedCount++;
                     });
-                }
-            });
-
-            if (window.KiotToast) {
-                if (count > 0) {
-                    KiotToast.success(`Đã thêm ${count} mặt hàng từ file.`);
+                    if (window.KiotToast) {
+                        KiotToast.success(`Đã nạp thành công ${importedCount} mặt hàng từ file!`);
+                    }
                 } else {
-                    KiotToast.warn('Không tìm thấy mặt hàng nào phù hợp trong file.');
+                    if (window.KiotToast) {
+                        KiotToast.warning(res?.message || 'Không tìm thấy mặt hàng nào phù hợp trong file.');
+                    }
                 }
+            },
+            error: function (xhr) {
+                const msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Lỗi khi nhập file dữ liệu.';
+                if (window.KiotToast) KiotToast.error(msg);
+            },
+            complete: function () {
+                $('#excelFileInput').val('');
             }
-        }
-
-        const rd = new FileReader();
-        if (/\.csv$/i.test(file.name)) {
-            rd.onload = function (evt) {
-                try {
-                    const text = evt.target.result;
-                    const rows = String(text).replace(/^\uFEFF/, '').split(/\r?\n/).filter(Boolean).map(s => s.split(/[,;\t]/));
-                    processImportData(rows);
-                } catch (err) {
-                    if (window.KiotToast) KiotToast.error('Không thể đọc file CSV: ' + err.message);
-                }
-            };
-            rd.readAsText(file);
-        } else if (typeof XLSX !== 'undefined') {
-            rd.onload = function (evt) {
-                try {
-                    const wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
-                    const sheet = wb.Sheets[wb.SheetNames[0]];
-                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
-                    processImportData(rows);
-                } catch (err) {
-                    if (window.KiotToast) KiotToast.error('Không thể đọc file Excel: ' + err.message);
-                }
-            };
-            rd.readAsArrayBuffer(file);
-        } else {
-            rd.onload = function (evt) {
-                try {
-                    const text = evt.target.result;
-                    const rows = String(text).replace(/^\uFEFF/, '').split(/\r?\n/).filter(Boolean).map(s => s.split(/[,;\t]/));
-                    processImportData(rows);
-                } catch (err) {
-                    if (window.KiotToast) KiotToast.error('Không thể đọc file: ' + err.message);
-                }
-            };
-            rd.readAsText(file);
-        }
+        });
     });
 
     /* ===== 9. GỬI DỮ LIỆU LƯU PHIẾU (F9 LƯU TẠM / F10 HOÀN THÀNH) ===== */

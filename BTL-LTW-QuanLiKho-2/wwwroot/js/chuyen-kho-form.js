@@ -9,6 +9,8 @@
 
     const urls = {
         searchProducts: $app.data('search-products-url') || '/ChuyenKho/SearchProducts',
+        templateUrl: $app.data('template-url') || '/ChuyenKho/DownloadTemplate',
+        importUrl: $app.data('import-url') || '/ChuyenKho/ImportExcel',
         save: $app.data('save-url') || '/ChuyenKho/Save',
         index: $app.data('index-url') || '/ChuyenKho/Index'
     };
@@ -110,7 +112,7 @@
     }
 
     // Thêm hàng hóa vào bảng
-    function addProduct(item) {
+    function addProduct(item, customQty) {
         if (!item) return;
         const id = item.id || item.maHang;
         const code = item.code || item.maHangNoiBo || '';
@@ -118,17 +120,23 @@
         const unit = item.unit || item.tenDvt || '';
         const cost = Number(item.cost !== undefined ? item.cost : (item.gia !== undefined ? item.gia : item.giaVon)) || 0;
         const stock = Number(item.stock !== undefined ? item.stock : item.tonKho) || 0;
+        const qty = Number(customQty) > 0 ? Number(customQty) : 1;
 
         let $existing = $(`#itemsTableBody tr.item-line-row[data-id="${id}"]`);
         if ($existing.length) {
             const $qtyInput = $existing.find('.line-qty');
             const currentQty = Number($qtyInput.val().replace(/\D/g, '')) || 0;
-            $qtyInput.val(currentQty + 1);
-            if (window.KiotToast) {
-                KiotToast.success(`Đã tăng số lượng ${name} thành ${currentQty + 1}`);
+            const newQty = currentQty + qty;
+            $qtyInput.val(fmt(newQty));
+            const isOver = newQty > stock;
+            $qtyInput.toggleClass('over', isOver);
+            $existing.find('.hint-over').toggle(isOver);
+            if (window.KiotToast && !customQty) {
+                KiotToast.success(`Đã tăng số lượng ${name} thành ${newQty}`);
             }
         } else {
-            const isOver = 1 > stock;
+            const isOver = qty > stock;
+            const amount = qty * cost;
             const rowHtml = `
                 <tr class="item-line-row" data-id="${id}" data-cost="${cost}" data-stock="${stock}">
                     <td class="w-del text-center">
@@ -140,11 +148,11 @@
                     <td class="w-dvt">${unit}</td>
                     <td class="text-end num row-stock">${fmt(stock)}</td>
                     <td class="text-end">
-                        <input type="text" class="qty line-qty ${isOver ? 'over' : ''}" value="1" inputmode="numeric" />
+                        <input type="text" class="qty line-qty ${isOver ? 'over' : ''}" value="${fmt(qty)}" inputmode="numeric" />
                         <span class="hint-over" style="${isOver ? '' : 'display: none;'}">Vượt tồn</span>
                     </td>
                     <td class="text-end num row-cost">${fmt(cost)}</td>
-                    <td class="text-end num fw-bold text-dark row-amount">${fmt(cost)}</td>
+                    <td class="text-end num fw-bold text-dark row-amount">${fmt(amount)}</td>
                 </tr>
             `;
             $('#itemsTableBody').prepend(rowHtml);
@@ -371,6 +379,58 @@
         if (start !== null && end !== null) {
             this.setSelectionRange(start, end);
         }
+    });
+
+    // ===== NHẬP TỪ FILE EXCEL & TẢI MẪU =====
+    $('#btnDownloadTemplate').on('click', function () {
+        window.location.href = urls.templateUrl;
+    });
+
+    $('#btnPickExcel, #btnImportExcel').on('click', function () {
+        $('#excelFileInput').click();
+    });
+
+    $('#excelFileInput').on('change', function (e) {
+        const files = e.target.files;
+        if (!files || !files.length) return;
+        const file = files[0];
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('warehouseId', currentWhId);
+
+        if (window.KiotToast) KiotToast.info('Đang đối soát dữ liệu file với hệ thống...');
+
+        $.ajax({
+            url: urls.importUrl,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                if (res && res.success && res.items && res.items.length) {
+                    let importedCount = 0;
+                    res.items.forEach(item => {
+                        addProduct(item, item.qty || item.soLuong);
+                        importedCount++;
+                    });
+                    if (window.KiotToast) {
+                        KiotToast.success(`Đã nạp thành công ${importedCount} mặt hàng từ file!`);
+                    }
+                } else {
+                    if (window.KiotToast) {
+                        KiotToast.warning(res?.message || 'Không tìm thấy mặt hàng nào phù hợp trong file.');
+                    }
+                }
+            },
+            error: function (xhr) {
+                const msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Lỗi khi nhập file dữ liệu.';
+                if (window.KiotToast) KiotToast.error(msg);
+            },
+            complete: function () {
+                $('#excelFileInput').val('');
+            }
+        });
     });
 
     // Khởi tạo

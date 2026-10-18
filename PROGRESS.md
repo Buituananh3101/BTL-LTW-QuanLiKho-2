@@ -1,17 +1,46 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Sửa Lỗi & Chuẩn Hóa Phân Hệ Xuất Nhập File Excel / CSV – Giai Đoạn 1 (Phiên 142)
+Cập nhật lần cuối: 2026-10-18 – Chuẩn Hóa Phân Hệ Xuất Nhập File Excel / CSV – Giai Đoạn 2 (Phiên 143)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm tra tính năng Xuất/Nhập file Excel trên 4 phân hệ đã sửa: Nhà cung cấp, Nhập hàng, Chuyển kho, Trả hàng nhập.
+- Đã hoàn thành Giai đoạn 2: Tối ưu Import server-side (ClosedXML) và Template cho Trả hàng nhập & Chuyển kho.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế tải file Excel trên trình duyệt (`/NhaCungCap`, `/NhapHang`, `/ChuyenKho`, `/TraHangNhap`).
-2. Xem xét triển khai Giai đoạn 2: Bổ sung Import & Template cho Chuyển kho, tối ưu Import server-side cho Trả hàng nhập.
+1. Kiểm tra trải nghiệm thực tế Import/Export file Excel trên trình duyệt (`/ChuyenKho/Create`, `/TraHangNhap/Create`, `/NhapHang/Create`).
+2. Khảo sát giai đoạn 3 nếu cần (Kiểm kho, Xuất hủy hoặc Danh mục hàng hóa).
+
+---
+
+- **Chuẩn Hóa Phân Hệ Xuất Nhập File Excel / CSV – Giai Đoạn 2 (Phiên 143)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "triển khai giai đoạn 2" tiếp nối kế hoạch chuẩn hóa Excel/CSV toàn hệ thống.
+  - **Mục tiêu Giai đoạn 2**:
+    1. Chuẩn hóa phân hệ Trả hàng nhập (`TraHangNhap`): Loại bỏ triệt để vòng lặp AJAX đồng bộ client-side `$.ajax({ async: false })`, thay bằng API `ImportExcel` server-side (ClosedXML) hỗ trợ đồng thời cả `.xlsx` và `.csv`, tự động đối soát tồn kho nguồn và tra cứu mã hàng hóa.
+    2. Triển khai Import & File mẫu cho phân hệ Chuyển kho (`ChuyenKho`): Bổ sung `DownloadTemplate` xuất `Mau_Chuyen_Kho_KiotViet.xlsx` (kèm tuỳ chọn `.csv`), `ImportExcel` server-side đọc file và nạp số lượng kèm kiểm tra tồn kho nguồn, nút `#btnImportExcel` trên toolbar và empty state "Thêm sản phẩm từ file excel" với nút "Chọn file dữ liệu" (`#btnPickExcel`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`Controllers/TraHangNhapController.cs`**:
+      * Nâng cấp `DownloadTemplate(string? format)` hỗ trợ xuất file Excel `Mau_Tra_Hang_Nhap_KiotViet.xlsx` (ClosedXML) hoặc file CSV `MauTraHangNhap.csv`.
+      * Bổ sung Action `ImportExcel(IFormFile file, int warehouseId)`: Hỗ trợ tự động nhận diện cả `.csv` lẫn `.xlsx`/`.xls`, tra cứu danh mục `HangHoas`, lấy số dư tồn kho từ `VwTonKhoHienTais` theo kho gửi, trả về danh sách mặt hàng hợp lệ.
+    + **`Views/TraHangNhap/_TraHangNhapForm.cshtml` & `tra-hang-nhap-form.js`**:
+      * Bổ sung `data-import-url="@Url.Action("ImportExcel", "TraHangNhap")"` vào container.
+      * Thay thế toàn bộ đoạn xử lý `FileReader` và vòng lặp AJAX đồng bộ bằng 1 lệnh gọi AJAX FormData gửi file lên server, nạp trực tiếp danh sách hàng vào bảng.
+    + **`Controllers/ChuyenKhoController.cs`**:
+      * Bổ sung `DownloadTemplate(string? format)` xuất `Mau_Chuyen_Kho_KiotViet.xlsx` (ClosedXML) và `MauChuyenKho.csv`.
+      * Bổ sung `ImportExcel(IFormFile file, int warehouseId)`: Hỗ trợ đọc cả `.xlsx` và `.csv`, lấy số dư tồn kho nguồn qua `_tonKhoService.LayTonKhoTheoKhoAsync`, tự động map mã hàng nội bộ và trả về danh sách hàng chuyển.
+    + **`Views/ChuyenKho/_ChuyenKhoForm.cshtml` & `chuyen-kho-form.js`**:
+      * Bổ sung `data-template-url` và `data-import-url` trên container `#ckFormApp`.
+      * Bổ sung nút `#btnImportExcel` và input file ẩn `#excelFileInput` trên toolbar.
+      * Cập nhật empty state `#emptyLineBox` chuẩn KiotViet với nút "Chọn file dữ liệu" (`#btnPickExcel`) và link "Tải về file mẫu" (`#btnDownloadTemplate`).
+      * Nâng cấp `addProduct(item, customQty)` cho phép truyền số lượng từ file nạp, gắn các sự kiện tải mẫu và upload file AJAX FormData.
+    + **Đồng bộ tài liệu**:
+      * Cập nhật `docs/specs/tra-hang-nhap.md` (7.264 bytes) và `docs/specs/chuyen-kho.md` (7.607 bytes) bảo đảm tuân thủ Luật 12 dưới 8.000 ký tự.
+      * Cập nhật sổ quyết định `docs/quyet-dinh.md` (7.595 bytes).
+  - **Kiểm tra**:
+    + `node -c` xác nhận cú pháp 100% hợp lệ trên cả `tra-hang-nhap-form.js` và `chuyen-kho-form.js`.
+    + `dotnet build -t:Compile` biên dịch hoàn tất với **0 Errors**.
 
 ---
 
