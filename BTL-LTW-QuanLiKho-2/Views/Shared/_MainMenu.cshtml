@@ -71,12 +71,15 @@
       </div>
     </li>
 
-    <li>
+    <li class="@(controller == "NguoiDung" ? "active" : "")">
       <a href="#" onclick="return false;">Thiết lập</a>
       <div class="mega">
         <div class="mega-col">
           <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Kho</a>
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Người dùng</a>
+          @if (User.IsInRole("Quản lý"))
+          {
+            <a asp-controller="NguoiDung" asp-action="Index">Người dùng</a>
+          }
           <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Nhật ký thao tác</a>
         </div>
       </div>

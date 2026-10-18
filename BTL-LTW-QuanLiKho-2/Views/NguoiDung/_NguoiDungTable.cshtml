@@ -1,0 +1,189 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.PagedResult<BTL_LTW_QuanLiKho_2.ViewModels.NguoiDung.NguoiDungItemVM>
+@{
+    var sortBy = (ViewBag.SortBy as string)?.ToLower() ?? "";
+    var sortDir = (ViewBag.SortDir as string)?.ToLower() ?? "";
+}
+
+<div class="kiot-table-scroll-body">
+    <table class="tbl" id="userTable" style="width: 100%; min-width: 960px;">
+        <thead>
+            <tr>
+                <th style="width: 45px;" class="text-center">#</th>
+                <th data-col="tendangnhap" style="width: 140px;" class="sortable-th @(sortBy == "tendangnhap" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tên đăng nhập">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Tên đăng nhập</span>
+                            @if (sortBy == "tendangnhap" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "tendangnhap" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th data-col="hoten" style="width: 180px;" class="sortable-th @(sortBy == "hoten" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tên nhân viên">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Tên nhân viên</span>
+                            @if (sortBy == "hoten" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "hoten" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 120px;">Điện thoại</th>
+                <th style="width: 180px;">Email</th>
+                <th data-col="vaitro" style="width: 150px;" class="sortable-th @(sortBy == "vaitro" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Vai trò">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Vai trò</span>
+                            @if (sortBy == "vaitro" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "vaitro" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 220px;">Kho làm việc</th>
+                <th style="width: 140px;">Đăng nhập cuối</th>
+                <th data-col="trangthai" style="width: 130px;" class="text-center sortable-th @(sortBy == "trangthai" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Trạng thái">
+                    <div class="th-content justify-content-center">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Trạng thái</span>
+                            @if (sortBy == "trangthai" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "trangthai" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 110px;" class="text-center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Items == null || !Model.Items.Any())
+            {
+                <tr class="empty-row">
+                    <td colspan="10" class="text-center py-5 text-muted">
+                        <i class="bi bi-person-x fs-1 d-block mb-2 text-secondary"></i>
+                        Không tìm thấy người dùng nào phù hợp với bộ lọc.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                int stt = Model.StartItemIndex;
+                foreach (var u in Model.Items)
+                {
+                    <tr data-id="@u.MaTaiKhoan">
+                        <td class="text-center text-muted">@(stt++)</td>
+                        <td>
+                            <span class="text-break">@u.TenDangNhap</span>
+                            @if (u.IsCurrentUser)
+                            {
+                                <span class="badge bg-secondary-subtle text-secondary ms-1" style="font-size: 10px;">Bạn</span>
+                            }
+                        </td>
+                        <td>
+                            <span class="text-break">@u.HoTen</span>
+                            @if (!string.IsNullOrWhiteSpace(u.GhiChu))
+                            {
+                                <div class="text-muted small text-truncate" style="max-width: 200px; font-size: 11.5px;" title="@u.GhiChu">
+                                    <i class="bi bi-chat-left-text me-1"></i>@u.GhiChu
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            @(string.IsNullOrWhiteSpace(u.DienThoai) ? "---" : u.DienThoai)
+                        </td>
+                        <td>
+                            @(string.IsNullOrWhiteSpace(u.Email) ? "---" : u.Email)
+                        </td>
+                        <td>
+                            @if (u.TenVaiTro == "Quản lý")
+                            {
+                                <span class="badge bg-primary text-white px-2 py-1">
+                                    <i class="bi bi-shield-check me-1"></i>Quản lý
+                                </span>
+                            }
+                            else if (u.TenVaiTro.Contains("kho", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <span class="badge bg-warning text-dark px-2 py-1">
+                                    <i class="bi bi-box-seam me-1"></i>@u.TenVaiTro
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success text-white px-2 py-1">
+                                    <i class="bi bi-cart3 me-1"></i>@u.TenVaiTro
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                @if (u.TenVaiTro == "Quản lý")
+                                {
+                                    <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
+                                        <i class="bi bi-globe me-1"></i>Toàn bộ các kho
+                                    </span>
+                                }
+                                else if (u.DanhSachKho != null && u.DanhSachKho.Any())
+                                {
+                                    foreach (var kho in u.DanhSachKho)
+                                    {
+                                        <span class="badge bg-light text-dark border">
+                                            <i class="bi bi-geo-alt me-1 text-primary"></i>@kho
+                                        </span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-danger small fst-italic">Chưa phân công kho</span>
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            @(u.LanDangNhapCuoi.HasValue ? u.LanDangNhapCuoi.Value.ToString("dd/MM/yyyy HH:mm") : "---")
+                        </td>
+                        <td class="text-center">
+                            @if (u.TrangThai == "HOAT_DONG")
+                            {
+                                <span class="badge bg-light text-success border border-success-subtle">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-secondary border">Đang khóa</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <div class="d-inline-flex align-items-center gap-1">
+                                <button type="button" class="btn btn-sm btn-light border p-1 text-primary btn-edit-user" data-id="@u.MaTaiKhoan" title="Chỉnh sửa thông tin & phân quyền" style="width: 28px; height: 28px; line-height: 1;">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light border p-1 text-secondary btn-reset-pwd" data-id="@u.MaTaiKhoan" data-username="@u.TenDangNhap" title="Đặt lại mật khẩu" style="width: 28px; height: 28px; line-height: 1;">
+                                    <i class="bi bi-key"></i>
+                                </button>
+                                @if (u.IsCurrentUser)
+                                {
+                                    <button type="button" class="btn btn-sm btn-light border p-1 text-muted disabled" title="Không thể tự khóa tài khoản của chính mình" disabled style="width: 28px; height: 28px; line-height: 1;">
+                                        <i class="bi bi-slash-circle"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button"
+                                            class="btn btn-sm btn-light border p-1 @(u.TrangThai == "HOAT_DONG" ? "text-danger" : "text-success") btn-toggle-status"
+                                            data-id="@u.MaTaiKhoan"
+                                            data-username="@u.TenDangNhap"
+                                            data-status="@u.TrangThai"
+                                            title="@(u.TrangThai == "HOAT_DONG" ? "Khóa tài khoản này" : "Mở khóa tài khoản này")"
+                                            style="width: 28px; height: 28px; line-height: 1;">
+                                        <i class="bi @(u.TrangThai == "HOAT_DONG" ? "bi-lock" : "bi-unlock")"></i>
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Phân trang AJAX dùng chung -->
+@{
+    ViewData["ItemLabel"] = "người dùng";
+}
+<partial name="_Pagination" model="Model" />

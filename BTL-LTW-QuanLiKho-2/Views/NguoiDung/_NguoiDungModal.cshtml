@@ -1,0 +1,177 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.NguoiDung.NguoiDungIndexVM
+
+<!-- ========================================================================
+     MODAL CHÍNH: TẠO & CẬP NHẬT NGƯỜI DÙNG CHUẨN KIOTVIET (THEO HÀNG HÓA)
+     Cấu trúc KiotViet Modal (.hh-modal, .hh-fields, .hh-sec accordion, .hh-m-foot)
+     ======================================================================== -->
+
+<!-- Sprite icon SVG dùng cho modal -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></symbol>
+</svg>
+
+<div class="hh-ov" id="userModalOv">
+  <div class="hh-modal main" role="dialog" aria-modal="true" aria-labelledby="userModalTitle" style="max-width: 920px;">
+    <!-- Header Modal -->
+    <div class="hh-m-head">
+      <h2 id="userModalTitle">Thêm mới người dùng</h2>
+      <button type="button" class="hh-x" data-close="userModalOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+    </div>
+
+    <!-- Body Modal -->
+    <div class="hh-m-body" id="userModalBody">
+      <form id="userForm" onsubmit="return false;" autocomplete="off">
+        <input type="hidden" id="userMaTaiKhoan" value="0" />
+        <input type="hidden" id="userMaNv" value="0" />
+
+        <!-- Alert báo lỗi form -->
+        <div class="alert alert-danger py-2 px-3 small d-none mb-3" id="userFormAlert"></div>
+
+        <!-- KHỐI 1: CÁC TRƯỜNG THÔNG TIN TÀI KHOẢN & NHÂN SỰ -->
+        <div class="hh-fields" style="margin-bottom: 18px;">
+          <!-- Tên đăng nhập -->
+          <div class="hh-f" id="fldTenDangNhap">
+            <label for="userTenDangNhap">
+              <span>Tên đăng nhập <span style="color:var(--hh-danger)">*</span></span>
+              <span class="badge bg-secondary-subtle text-secondary d-none" id="badgeFixedUsername" style="font-size: 10px;">Cố định</span>
+            </label>
+            <input type="text" id="userTenDangNhap" placeholder="Viết liền không dấu (VD: thukho01)" autocomplete="off" />
+            <span class="hh-err" id="errTenDangNhap">Vui lòng nhập tên đăng nhập hợp lệ (3 - 50 ký tự).</span>
+          </div>
+
+          <!-- Mật khẩu -->
+          <div class="hh-f" id="fldMatKhau">
+            <label for="userMatKhau">
+              <span>Mật khẩu <span style="color:var(--hh-danger)" id="userMatKhauRequired">*</span></span>
+              <span class="text-muted smaller fw-normal" id="userMatKhauHint">(Tối thiểu 6 ký tự)</span>
+            </label>
+            <div style="position: relative;">
+              <input type="password" id="userMatKhau" placeholder="Tối thiểu 6 ký tự" autocomplete="new-password" style="padding-right: 38px;" />
+              <button type="button" id="btnToggleUserPw" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: 0; background: none; color: #6b7280; padding: 4px; cursor: pointer;" title="Hiện/ẩn mật khẩu">
+                <i class="bi bi-eye" id="iconUserPw"></i>
+              </button>
+            </div>
+            <span class="hh-err" id="errMatKhau">Mật khẩu ban đầu bắt buộc và tối thiểu 6 ký tự.</span>
+          </div>
+
+          <!-- Họ và tên nhân viên -->
+          <div class="hh-f" id="fldHoTen">
+            <label for="userHoTen">Họ và tên nhân viên <span style="color:var(--hh-danger)">*</span></label>
+            <input type="text" id="userHoTen" placeholder="Ví dụ: Nguyễn Văn A" autocomplete="off" />
+            <span class="hh-err" id="errHoTen">Vui lòng nhập họ và tên nhân viên.</span>
+          </div>
+
+          <!-- Vai trò người dùng -->
+          <div class="hh-f" id="fldVaiTro">
+            <label for="userMaVaiTro">Vai trò người dùng <span style="color:var(--hh-danger)">*</span></label>
+            <select id="userMaVaiTro">
+              @foreach (var vt in Model.VaiTroList)
+              {
+                <option value="@vt.MaVaiTro" data-name="@vt.TenVaiTro">@vt.TenVaiTro</option>
+              }
+            </select>
+          </div>
+
+          <!-- Số điện thoại -->
+          <div class="hh-f">
+            <label for="userDienThoai">Số điện thoại</label>
+            <input type="tel" id="userDienThoai" placeholder="Ví dụ: 0901234567" autocomplete="off" />
+          </div>
+
+          <!-- Email -->
+          <div class="hh-f">
+            <label for="userEmail">Email</label>
+            <input type="email" id="userEmail" placeholder="nguyenvana@khopro.vn" autocomplete="off" />
+          </div>
+        </div>
+
+        <!-- Ghi chú người dùng -->
+        <div class="mb-3">
+          <label for="userGhiChu" style="font-size: 13px; font-weight: 500; color: #374151; display: block; margin-bottom: 5px;">Ghi chú</label>
+          <textarea id="userGhiChu" rows="2" placeholder="Ghi chú thêm về người dùng / nhân sự này..." style="width: 100%; border: 1px solid var(--hh-line, #d1d5db); border-radius: 8px; padding: 8px 12px; font-size: 14px; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
+        </div>
+
+        <!-- KHỐI 2: SECTION ĐỊA CHỈ & THÔNG TIN CÁ NHÂN (ACCORDION GẬP MỞ) -->
+        <section class="hh-sec open">
+          <div class="hh-sec-h">
+            <div>
+              <h3>Địa chỉ cư trú</h3>
+              <p>Địa chỉ liên lạc hoặc nơi ở thường trú của nhân sự</p>
+            </div>
+            <svg class="hh-chev"><use href="#i-chev"/></svg>
+          </div>
+          <div class="hh-sec-b">
+            <div class="hh-row">
+              <div class="hh-f" style="flex: 1 1 100%;">
+                <label for="userDiaChi">Địa chỉ chi tiết</label>
+                <input type="text" id="userDiaChi" placeholder="Số nhà, đường phố, phường/xã, quận/huyện..." autocomplete="off" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- KHỐI 3: SECTION PHÂN QUYỀN CHI NHÁNH KHO (ACCORDION GẬP MỞ) -->
+        <section class="hh-sec open">
+          <div class="hh-sec-h">
+            <div>
+              <h3>Phân quyền chi nhánh kho</h3>
+              <p>Chỉ định các chi nhánh kho nhân viên được phép truy cập và làm việc</p>
+            </div>
+            <svg class="hh-chev"><use href="#i-chev"/></svg>
+          </div>
+          <div class="hh-sec-b">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="small fw-semibold text-dark">
+                Chi nhánh được phân công: <span class="badge bg-primary-subtle text-primary border ms-1" id="selectedWarehouseCount">0 kho</span>
+              </span>
+              <div class="d-flex align-items-center gap-2">
+                <button type="button" class="hh-link" id="btnSelectAllKho" style="font-weight: 600;">Chọn tất cả</button>
+                <span class="text-muted">|</span>
+                <button type="button" class="hh-link text-muted" id="btnDeselectAllKho">Bỏ chọn</button>
+              </div>
+            </div>
+
+            <!-- Lưới thẻ chi nhánh kho trực quan -->
+            <div class="kho-card-grid" id="listKhoCheckboxes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px;">
+              @foreach (var k in Model.KhoList)
+              {
+                <div class="kho-card-item" data-id="@k.MaKho" style="border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; background: #fff; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: flex-start; gap: 10px; user-select: none;">
+                  <input class="form-check-input user-kho-chk" type="checkbox" value="@k.MaKho" id="chkKho_@k.MaKho" style="width: 17px; height: 17px; margin-top: 2px; cursor: pointer;" />
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 13.5px; font-weight: 600; color: #1e293b; display: flex; justify-content: space-between; align-items: center;">
+                      <label for="chkKho_@k.MaKho" style="cursor: pointer; margin: 0;">@k.TenKho</label>
+                      <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 10px;">Hoạt động</span>
+                    </div>
+                    <div style="font-size: 12px; color: #64748b; line-height: 1.35; margin-top: 2px;">
+                      <i class="bi bi-geo-alt me-1 text-muted"></i>@(string.IsNullOrWhiteSpace(k.DiaChi) ? "Chưa cập nhật địa chỉ" : k.DiaChi)
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </section>
+      </form>
+    </div>
+
+    <!-- Footer Modal chuẩn KiotViet -->
+    <div class="hh-m-foot">
+      <!-- Checkbox trạng thái tài khoản bên trái góc chân modal (giống Bán trực tiếp của Hàng hóa) -->
+      <label class="hh-chk" style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; font-size: 14px; font-weight: 500;">
+        <input type="checkbox" id="userTrangThaiChk" checked style="width: 18px; height: 18px; accent-color: var(--hh-blue); cursor: pointer;" />
+        <span id="userTrangThaiText">Đang hoạt động</span>
+      </label>
+
+      <span class="sp"></span>
+
+      <button type="button" class="hh-btn" data-close="userModalOv">Bỏ qua</button>
+      <button type="button" class="hh-btn primary" id="btnSaveUser">
+        <i class="bi bi-check-lg me-1"></i>Lưu người dùng
+      </button>
+    </div>
+  </div>
+</div>

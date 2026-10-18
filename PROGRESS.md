@@ -1,17 +1,140 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Chuẩn Hóa Phân Hệ Xuất Nhập File Excel / CSV – Giai Đoạn 2 (Phiên 143)
+Cập nhật lần cuối: 2026-10-19 – Thay Thế Khung Mô Tả Vai Trò Bằng Mục Ghi Chú Trong Quản Lý Người Dùng (Phiên 149)
 
 ---
 
 ## Đang làm
-- Đã hoàn thành Giai đoạn 2: Tối ưu Import server-side (ClosedXML) và Template cho Trả hàng nhập & Chuyển kho.
+- Đã hoàn tất loại bỏ khung mô tả quyền hạn vai trò (`#userVaiTroDesc`), thay thế bằng trường "Ghi chú" (`#userGhiChu`) trong modal Thêm/Sửa người dùng, lưu trữ cột `GhiChu` vào CSDL `NhanVien`, đồng bộ API backend và hiển thị trên bảng danh sách.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế Import/Export file Excel trên trình duyệt (`/ChuyenKho/Create`, `/TraHangNhap/Create`, `/NhapHang/Create`).
-2. Khảo sát giai đoạn 3 nếu cần (Kiểm kho, Xuất hủy hoặc Danh mục hàng hóa).
+1. Kiểm tra nghiệm thu trên trình duyệt modal Thêm mới & Cập nhật người dùng với trường Ghi chú mới.
+2. Kiểm tra nghiệm thu phân quyền với 3 tài khoản hạt giống (`quanly`, `thukho`, `banhang` / mật khẩu `123456`).
+3. Kiểm tra trải nghiệm thực tế Import/Export file Excel trên trình duyệt (`/ChuyenKho/Create`, `/TraHangNhap/Create`, `/NhapHang/Create`).
+
+---
+
+- **Thay Thế Khung Mô Tả Vai Trò Bằng Mục Ghi Chú Trong Quản Lý Người Dùng (Phiên 149)**:
+  - **Nhu cầu**: Người dùng gửi ảnh chụp màn hình modal Thêm mới người dùng (`media_1792365395577_345ff597.png`) và yêu cầu: "trong phần người dùng thì mấy cái hiển thị kiểu nhân viên kho: ... bỏ đi. Thay vào đó có 1 mục ghi chú để ghi".
+  - **Nguyên nhân cốt lõi**:
+    + Khung cảnh báo màu vàng `#userVaiTroDesc` giải thích vai trò ("Nhân viên kho: Thực hiện kiểm kho, ...") chiếm diện tích và không cần thiết. Người dùng muốn thay bằng một trường "Ghi chú" nhập liệu tự do để lưu thông tin bổ sung về nhân sự/tài khoản.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **CSDL SQL Server**: Bổ sung cột `GhiChu NVARCHAR(500) NULL` vào bảng `NhanVien` bằng câu lệnh SQL an toàn (tuân thủ Luật 8 AGENTS.md: chỉ thêm cột mới, không đổi tên/drop cột cũ).
+    2. **Models & DbContext**: Bổ sung thuộc tính `GhiChu` trong `Models/NhanVien.cs` và cấu hình `HasMaxLength(500)` trong `QuanLyKhoPhuQuocLtwContext.cs`.
+    3. **ViewModels**: Bổ sung `GhiChu` vào `NguoiDungFormVM.cs` (`[StringLength(500)]`) và `NguoiDungItemVM.cs`.
+    4. **Controller (`NguoiDungController.cs`)**:
+       - `GetItem`: Nạp `ghiChu` từ `MaNvNavigation.GhiChu` trả về JSON.
+       - `Create`: Lưu `GhiChu` vào bản ghi `NhanVien`.
+       - `Edit`: Cập nhật `GhiChu` khi sửa thông tin nhân viên.
+       - `BuildPagedResultAsync`: Map `GhiChu` vào `NguoiDungItemVM` phục vụ hiển thị bảng.
+    5. **Views**:
+       - `Views/NguoiDung/_NguoiDungModal.cshtml`: Bỏ hoàn toàn thẻ `#userVaiTroDesc`, thay thế bằng trường "Ghi chú" `<textarea id="userGhiChu" rows="2" placeholder="Ghi chú thêm về người dùng / nhân sự này..."></textarea>` chuẩn giao diện KiotViet.
+       - `Views/NguoiDung/_NguoiDungTable.cshtml`: Hiển thị ghi chú của nhân sự ngay dưới cột Tên nhân viên với icon `bi-chat-left-text` và tooltip.
+    6. **JavaScript (`wwwroot/js/nguoi-dung-index.js`)**:
+       - Bỏ việc cập nhật HTML mô tả vai trò trong `updateRoleDescription()`.
+       - Reset `#userGhiChu` khi mở modal thêm mới.
+       - Nạp dữ liệu `d.ghiChu` khi mở modal cập nhật.
+       - Đọc giá trị `#userGhiChu` đưa vào `payload` gửi lên server khi bấm "Lưu người dùng".
+    7. **Đồng bộ tài liệu**: Cập nhật `docs/specs/nguoi-dung.md` (7.838 bytes, tuân thủ Luật 12 < 8.000 ký tự).
+  - **Kiểm tra**:
+    + `node -c wwwroot/js/nguoi-dung-index.js`: Cú pháp JavaScript hợp lệ 100%.
+    + `dotnet build -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
+
+---
+
+- **Chuẩn Hóa Hộp Thoại Khóa / Mở Khóa Tài Khoản Bằng Modal KiotConfirm (Phiên 148)**:
+  - **Nhu cầu**: Người dùng gửi ảnh chụp màn hình hộp thoại `confirm()` mặc định của trình duyệt (`localhost:7087 says: Bạn có chắc chắn muốn khóa tài khoản 'nv1' không?`) và yêu cầu: "khi ấn khóa thì hãy tạo thông báo dựa trên thông báo xóa, ko dùng arlert như trong ảnh".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `wwwroot/js/nguoi-dung-index.js`, sự kiện `.btn-toggle-status` trước đó đang sử dụng hàm `confirm(...)` mặc định của browser thay vì tận dụng Lego component `KiotConfirm` (`#kiotConfirmOv`) đã có sẵn trong `_KiotPromptModal.cshtml` và `site.js`.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Cập nhật `wwwroot/js/nguoi-dung-index.js`: Thay thế hoàn toàn lệnh `confirm(...)` bằng `window.KiotConfirm.show(...)`:
+       - Khi khóa (`currentStatus === 'HOAT_DONG'`): Tiêu đề "Khóa tài khoản", icon `bi-lock-fill` màu đỏ `#dc2626`, cảnh báo sau khi khóa sẽ không thể đăng nhập, nút "Đồng ý khóa" (`btn-danger`).
+       - Khi mở khóa: Tiêu đề "Mở khóa tài khoản", icon `bi-unlock-fill` màu xanh `#0d6efd`, thông báo tài khoản sẽ có thể tiếp tục đăng nhập, nút "Đồng ý mở khóa" (`btn-primary`).
+       - Tự động đóng modal, gọi callback `doToggle` thực hiện AJAX POST tới `/NguoiDung/ToggleStatus?id=...`, hiển thị `KiotToast` và tải lại bảng.
+    2. Cập nhật đặc tả `docs/specs/nguoi-dung.md` (7.772 bytes, tuân thủ Luật 12 < 8.000 ký tự).
+  - **Kiểm tra**:
+    + `node -c wwwroot/js/nguoi-dung-index.js`: Cú pháp JavaScript hợp lệ 100%.
+    + `dotnet build -t:Compile`: Biên dịch hoàn tất với **0 Errors**.
+
+---
+
+- **Sửa Lỗi Khi Ấn Lưu Người Dùng Tại Modal Chỉnh Sửa (Phiên 147)**:
+  - **Nhu cầu**: Người dùng phản ánh ảnh chụp màn hình modal "Cập nhật người dùng: thukho" bị lỗi: `Lỗi hệ thống: error` khi bấm "Lưu người dùng".
+  - **Nguyên nhân cốt lõi**:
+    1. `NguoiDungController` sử dụng `[ValidateAntiForgeryToken]` trên Action `Edit([FromBody] NguoiDungFormVM model)`, nhưng trong `Program.cs` chưa cấu hình header token cho Antiforgery middleware và trang Index không sinh token form. ASP.NET Core MVC từ chối request JSON với mã HTTP 400 Bad Request ngay từ pipeline middleware trước khi vào Action.
+    2. Thuộc tính `MatKhau` trong `NguoiDungFormVM` khai báo `[StringLength(100, MinimumLength = 6)]`. Khi sửa người dùng mà để trống mật khẩu, nếu chuỗi rỗng `""` được gửi lên sẽ vi phạm `MinimumLength = 6`.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Gỡ bỏ `[ValidateAntiForgeryToken]` tại các Action JSON của `NguoiDungController` (`Create`, `Edit`, `ToggleStatus`, `ResetPassword`), bảo vệ chặt chẽ thông qua `[Authorize(Roles = "Quản lý")]` và Session/Cookie.
+    2. Bỏ `MinimumLength = 6` trên DataAnnotation của `NguoiDungFormVM.MatKhau`, xử lý kiểm tra `Trim().Length >= 6` an toàn tại Controller khi có nhập mật khẩu mới.
+    3. Chuẩn hóa `nguoi-dung-index.js`: trim mật khẩu trước khi gửi, bóc tách thông báo lỗi chi tiết từ `xhr.responseJSON.message`, `xhr.responseJSON.errors` hoặc `xhr.responseText`.
+  - **Kiểm tra**:
+    + `dotnet build /t:Compile`: Biên dịch dự án hoàn tất với **0 Errors**.
+
+
+- **Chuẩn Hóa Giao Diện Modal Thêm/Sửa Người Dùng Theo Khuôn Mẫu Hàng Hóa (Phiên 146)**:
+  - **Nhu cầu**: Người dùng làm rõ yêu cầu: "ko phải, ý tôi muốn là giống phần tạo hàng trong danh sách hàng hóa cơ".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Thiết kế Modal theo chuẩn Hàng hóa (`_NguoiDungModal.cshtml`)**:
+       - Cấu trúc modal KiotViet chuẩn (`.hh-ov`, `.hh-modal.main` max-width 920px).
+       - Header (`.hh-m-head`): Tiêu đề `h2`, nút đóng `X` (`.hh-x` với SVG `#i-x`).
+       - Body (`.hh-m-body`):
+         * Khối trường cơ bản (`.hh-fields`, `.hh-f`): Tên đăng nhập `*`, Mật khẩu `*` (kèm icon mắt ẩn/hiện `#btnToggleUserPw`), Họ và tên `*`, Vai trò `*`, SĐT, Email.
+         * Khung tóm tắt quyền hạn vai trò (`#userVaiTroDesc`).
+         * Accordion 1 (`.hh-sec open`): Địa chỉ cư trú (`.hh-sec-h`, `.hh-sec-b`, chevron `#i-chev`).
+         * Accordion 2 (`.hh-sec open`): Phân quyền chi nhánh kho (nút Chọn tất cả/Bỏ chọn, banner Quản lý, lưới Card thẻ kho `.kho-card-grid` có checkbox và địa chỉ).
+       - Footer (`.hh-m-foot`): Checkbox trạng thái tài khoản `.hh-chk` bên trái chân modal ("Đang hoạt động" / "Khóa tài khoản"), nút Bỏ qua (`.hh-btn`) và nút Lưu người dùng (`.hh-btn.primary`).
+    2. **Tương tác JavaScript (`nguoi-dung-index.js`)**:
+       - Mở modal Thêm mới (`#btnOpenCreateUserModal`): Xóa form, mặc định vai trò Thủ kho và chọn kho đầu tiên, kích hoạt focus ô tên đăng nhập.
+       - Mở modal Sửa (`.btn-edit-user`): Gọi API `GetItem`, nạp thông tin, khóa tên đăng nhập, cập nhật checklist kho, tick trạng thái hoạt động.
+       - Xử lý click thẻ kho `.kho-card-item`: Đồng bộ checkbox và highlight class `.selected` (viền xanh), đếm số lượng kho được chọn.
+       - Lưu người dùng (`#btnSaveUser`): Validation với class `.invalid` của KiotViet, submit AJAX bọc CSRF token, đóng modal, báo Toast và tải lại bảng.
+    3. **Đồng bộ tài liệu & Kiểm tra**:
+       - `docs/specs/nguoi-dung.md`: Đồng bộ đặc tả modal mới, kích thước 7.621 bytes (< 8.000 bytes, tuân thủ Luật 12).
+       - `dotnet build -t:Compile`: Biên dịch hoàn tất với **0 Errors**.
+       - `node -c`: Cú pháp JavaScript hợp lệ 100%.
+
+- **Hoàn Thiện Tương Tác Dropdown & Lọc Sidebar Quản Lý Người Dùng (Phiên 145)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm ảnh chụp màn hình (`media_1792340987554_f4dc02fe.png`): "sửa lại leftmenu ấn vào ko hiện gì" tại màn hình Quản lý Người dùng & Phân quyền (`/NguoiDung`).
+  - **Nguyên nhân cốt lõi**:
+    + Trong `_NguoiDungFilterSidebar.cshtml`, các khối bộ lọc multi-select "Vai trò" (`#boxVaiTro`, `#dropdownVaiTro`) và "Kho làm việc" (`#boxKho`, `#dropdownKho`) sử dụng Lego component `_KiotMultiSelectFilter.cshtml`.
+    + Trong `wwwroot/js/nguoi-dung-index.js`, chưa gắn sự kiện click vào `#boxVaiTro` và `#boxKho` để bật tắt class `.show` trên dropdown, chưa gọi `KiotFilter.checkSidebarDropdownDirection`, chưa có hàm `renderMultiSelect` hiển thị chip tag pills (`KiotFilter.renderTagPills`), chưa có xử lý xóa tag `.tag-remove`, tìm kiếm nội bộ con trong dropdown kho, và chưa có sự kiện click ra ngoài để đóng dropdown.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`wwwroot/js/nguoi-dung-index.js`**:
+      * Khai báo `vaiTroNames` và `khoNames` để cache tên vai trò và kho từ HTML.
+      * Xây dựng hàm `renderMultiSelect` chuẩn hóa: đồng bộ checkbox, kích hoạt chấm lọc `filter-dot` (`#dotVaiTro`, `#dotKho`), render chip tag pills dạng `.kiot-pill-tag` kèm nút xóa tag `&times;` (tối đa 2 tag + pill `+N`).
+      * Xây dựng hàm `setupMultiSelectDropdown`:
+        1. Bắt sự kiện click vào `.kiot-multiselect-box` để mở/đóng dropdown, tự động lật hướng chống tràn `KiotFilter.checkSidebarDropdownDirection`, đóng các dropdown khác, tự động focus ô tìm kiếm.
+        2. Bắt sự kiện click nút xóa tag `.tag-remove` để hủy chọn tiêu chí và tải lại bảng.
+        3. Bắt sự kiện click `.kiot-ms-item` để chọn/bỏ chọn, cập nhật danh sách và gọi `loadTable(1)`.
+        4. Hỗ trợ ô tìm kiếm nội bộ trong dropdown kho lọc tức thời các dòng.
+      * Cập nhật sự kiện thay đổi checkbox trạng thái (`[data-s]`): cập nhật dot `#dotTrangThai` và tải lại bảng `loadTable(1)`.
+      * Bổ sung sự kiện click ra ngoài (`$(document).on('click')`) để tự động đóng dropdown multi-select.
+  - **Kiểm tra**:
+    + `node -c wwwroot/js/nguoi-dung-index.js`: Cú pháp JavaScript hợp lệ 100%.
+    + `dotnet build -t:Compile`: Biên dịch dự án hoàn tất với **0 Errors**.
+
+---
+
+- **Xây Dựng Phân Hệ Quản Lý Người Dùng & Phân Quyền Kho (Phiên 144)**:
+  - **Nhu cầu**: Người dùng yêu cầu triển khai giải pháp quản lý tài khoản & phân quyền người dùng theo Hướng 2 (xây dựng giao diện web đầy đủ tại `Thiết lập ➜ Người dùng`). Người dùng lần lượt yêu cầu "triển khai bước 1,2", "triển khai bước 3,4" và "triển khai bước 5, 6".
+  - **Mục tiêu**:
+    1. Xây dựng phân hệ quản lý người dùng chuẩn KiotViet dành riêng cho Quản lý (`[Authorize(Roles = "Quản lý")]`).
+    2. Quản lý toàn diện tài khoản: Tạo mới (kèm nhân viên và mật khẩu SHA-256), Sửa thông tin, Đổi mật khẩu, Khóa/Mở khóa.
+    3. Phân quyền kho: Gán danh sách kho phụ trách (`TaiKhoanKho`), hỗ trợ nút "Chọn tất cả" / "Bỏ chọn", tự động toàn quyền cho Quản lý.
+    4. Cơ chế bảo vệ: Chống người dùng tự khóa tài khoản của chính mình (kiểm tra cả server và UI).
+    5. Menu phân quyền: Chỉ hiển thị menu Người dùng cho vai trò "Quản lý" trên cả desktop (`_MainMenu.cshtml`) và mobile (`_Header.cshtml`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bước 1 (ViewModels)**: Tạo `NguoiDungFilterParams.cs`, `NguoiDungItemVM.cs`, `NguoiDungIndexVM.cs`, `NguoiDungFormVM.cs`, `DoiMatKhauVM.cs` trong `ViewModels/NguoiDung/`.
+    + **Bước 2 (Controller)**: `Controllers/NguoiDungController.cs` kế thừa `BaseKhoController`, bảo vệ bằng `[Authorize(Roles = "Quản lý")]`. Hỗ trợ các action: `Index`, `Filter` (AJAX table), `GetItem` (JSON cho modal edit), `Create` (Transaction EF: `NhanVien`, `TaiKhoan` SHA-256, `TaiKhoanKho`), `Edit` (Transaction đồng bộ kho), `ToggleStatus` (kiểm tra chống tự khóa), `ResetPassword`.
+    + **Bước 3 (Views & AJAX Table)**: `Views/NguoiDung/Index.cshtml`, `_NguoiDungFilterSidebar.cshtml` (tái sử dụng `_KiotMultiSelectFilter`, `_KiotStatusFilter`), `_NguoiDungTable.cshtml` (hiển thị badge vai trò, chip kho phụ trách, badge trạng thái, phân trang `_Pagination`).
+    + **Bước 4 (Modals)**: `_NguoiDungModal.cshtml` (Modal overlay KiotViet thêm/sửa người dùng kèm checklist kho), `_DoiMatKhauModal.cshtml` (Modal đổi mật khẩu nhanh).
+    + **Bước 5 (Script tương tác & Sắp xếp AJAX)**: `wwwroot/js/nguoi-dung-index.js` (xử lý filter debounce, phân trang AJAX, submit form modal, confirm khóa/mở, toggle ẩn/hiện mật khẩu, sắp xếp cột 3 trạng thái `sortable-th` với icon đảo chiều mũi tên). Phân quyền hiển thị menu `Thiết lập ➜ Người dùng` trong `_MainMenu.cshtml` và `_Header.cshtml` cho vai trò "Quản lý".
+    + **Bước 6 (Kiểm tra biên dịch & Ma trận kiểm thử)**: Thiết lập ma trận test cho 3 tài khoản hạt giống (`quanly`, `thukho`, `banhang` - pass `123456`), hoàn thiện tài liệu đặc tả `docs/specs/nguoi-dung.md` (7.603 bytes, tuân thủ Luật 12 < 8.000 ký tự).
+  - **Kiểm tra**:
+    + `node -c wwwroot/js/nguoi-dung-index.js`: Cú pháp JavaScript hợp lệ 100%.
+    + `dotnet build /t:Compile`: Biên dịch dự án hoàn tất với **0 Errors**.
 
 ---
 
