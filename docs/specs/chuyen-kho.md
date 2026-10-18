@@ -59,9 +59,16 @@
   - Trạng thái (Checkbox Lego: Phiếu tạm, Đang chuyển, Đã nhận, Đã hủy).
   - Thời gian (`_KiotDateFilter` + `KiotFilter.initDateFilter`).
 - **Topbar**: Tiêu đề "Chuyển hàng", ô tìm kiếm mã phiếu F3, nút "+ Chuyển hàng", "Xuất file", nút tùy chọn hiển thị cột (`#btnColsDropdown` + `#colMenu`).
-- **Bảng dữ liệu Master-Detail**:
+- **Bảng dữ liệu Master-Detail chuẩn Kiểm tồn & KiotViet (`PhieuKiemKe`)**:
   - Dòng cha + Dòng chi tiết viền chữ nhật `#0070f3` (`KiotFilter.initRowDetail`).
-  - Drawer chi tiết 992px: Lộ trình kho, bảng hàng hóa, cảnh báo nhận thiếu, ghi chú, thanh nút hành động ngữ cảnh theo trạng thái.
+  - Dòng tổng hợp `tr.summary-row` ngay dưới thead hiển thị tổng SL chuyển, tổng SL nhận, tổng Giá trị chuyển.
+  - Drawer chi tiết chuẩn Kiểm tồn (`PhieuKiemKe`):
+    - Tab bar `.dp-tabs` với nút tab `.dp-tab.active` gạch chân xanh KiotViet.
+    - Tiêu đề mã phiếu `h2` với mã in đậm `18px`, badge trạng thái bo tròn pill chuẩn mực.
+    - Hàng thông tin tóm tắt `.meta` thẳng hàng ngăn cách bằng gạch đứng `border-right: 1px solid #cfd5de`: Từ kho, Tới kho, Người tạo, Ngày tạo; gãy dòng `<i class="br"></i>` Người chuyển, Ngày chuyển, Người nhận, Ngày nhận.
+    - Bảng danh sách hàng hóa `.dtl-tbl` với header `#f8fafc`, hàng tìm kiếm nhanh `tr.fin` (`.dtl-search-code`, `.dtl-search-name`), định dạng số lượng và thành tiền canh phải sắc nét.
+    - Khối ghi chú và tóm tắt số liệu `.dp-bottom`: ô ghi chú `.dp-note` bên trái, danh sách số liệu `.sums` bên phải (không dùng thẻ đóng hộp).
+    - Hàng nút hành động `.dp-actions` phân cách gạch trên, các nút phụ bên trái, dồn nút chính sang phải qua `.ms-auto`.
   - Tùy chọn ẩn/hiển thị 11 cột lưu `localStorage` (`KiotFilter.initColumnToggle`).
   - Sắp xếp cột 3 trạng thái click-to-sort (ASC -> DESC -> Bỏ sắp xếp) với icon mũi tên trên 11 cột dữ liệu.
   - Phân trang AJAX (`_Pagination.cshtml`).

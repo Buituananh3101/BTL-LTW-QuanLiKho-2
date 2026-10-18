@@ -1,15 +1,26 @@
-/* chuyen-kho.css - Định kiểu cho phân hệ Chuyển kho chuẩn KiotViet */
+/* chuyen-kho.css - Định kiểu cho phân hệ Chuyển kho chuẩn KiotViet & Hàng hóa */
 
-/* 1. Bảng Chuyển kho giữ độ rộng chuẩn Master-Detail, không bị co rút */
-#transferTable, #transferTable.tbl {
-    min-width: 1450px !important;
+/* 1. Container bảng dữ liệu chuyển kho khớp #productTableContainer của Hàng hóa */
+#tableContainer {
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     width: 100%;
+    position: relative;
+}
+
+#transferTable {
+    width: max-content !important;
+    min-width: 760px !important;
     table-layout: fixed !important;
     border-collapse: separate;
     border-spacing: 0;
 }
 
-/* Đóng khung hình chữ nhật liền mạch khi mở chi tiết dòng (Chuẩn #0070f3 khớp Nhà cung cấp & Nhập hàng) */
+/* Đóng khung hình chữ nhật liền mạch khi mở chi tiết dòng (Chuẩn #0070f3 khớp Hàng hóa) */
 #transferTable tr.tbl-row.open > td,
 #transferTable tr.tbl-row.selected > td,
 #transferTable tr.product-row.open > td,
@@ -46,65 +57,180 @@
     border-right: 3px solid #0070f3 !important;
 }
 
-/* 2. Route box trực quan trong drawer và form */
-.route {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+/* 2. Drawer chi tiết phiếu chuyển kho - Đồng bộ 100% với Kiểm tồn / Kiểm kho */
+.dp {
+    padding: 16px 20px 20px;
+    background: #ffffff;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.route .box {
-    border: 1px solid #cfd5de;
-    border-radius: 6px;
-    padding: 6px 14px;
-    font-weight: 600;
-    background: #f8fafc;
-    color: #1e293b;
+.dp-tabs {
+    display: flex;
+    gap: 24px;
+    border-bottom: 1px solid var(--line, #e2e8f0);
+    margin: 0 -20px 14px;
+    padding: 0 20px;
+    position: static !important;
+    width: auto !important;
+}
+
+.dp-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 4px 8px;
+    margin-bottom: -1px;
+    color: #64748b;
+    font-weight: 500;
+    font-size: 13.5px;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    cursor: pointer;
+    outline: none !important;
+    transition: all 0.15s ease-in-out;
+}
+
+.dp-tab:hover {
+    color: var(--blue, #0a66e8) !important;
+}
+
+.dp-tab.active {
+    color: var(--blue, #0a66e8) !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid var(--blue, #0a66e8) !important;
+}
+
+.dp h2 {
+    margin: 0;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dp .meta {
+    margin: 8px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 0;
     font-size: 13.5px;
 }
 
-.routebox {
-    background: #f6f9ff;
-    border: 1px solid #dbe7fb;
-    border-radius: 8px;
-    padding: 12px 14px;
-    margin-bottom: 12px;
+.dp .meta span {
+    padding-right: 14px;
+    margin-right: 14px;
+    border-right: 1px solid var(--line-d, #cfd5de);
 }
 
-/* 3. Khung chi tiết cố định 992px khớp Kiểm kho, Nhập hàng & Nhà cung cấp */
-.ck-detail-fixed-wrap,
-.transfer-detail-fixed-wrap,
+.dp .meta span:last-child {
+    border: 0;
+}
+
+.dp .meta .br {
+    flex-basis: 100%;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+.dtl-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0 16px;
+}
+
+.dtl-tbl th {
+    background: #f8fafc;
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.dtl-tbl td {
+    padding: 8px 10px;
+    font-size: 13px;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.dtl-tbl th.r,
+.dtl-tbl td.r {
+    text-align: right;
+}
+
+.dtl-tbl .fin td {
+    padding: 6px 10px 10px;
+    border: 0;
+}
+
+.dp-bottom {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    margin-top: 14px;
+}
+
+.dp-bottom .dp-note {
+    flex: 1 1 auto;
+    min-width: 200px;
+    height: 105px;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+.dp-bottom .sums {
+    flex: 0 0 330px;
+    width: 330px;
+    box-sizing: border-box;
+}
+
+.sums div {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 14.5px;
+    gap: 16px;
+}
+
+.sums div span:first-child {
+    color: #374151;
+}
+
+.sums div span:last-child {
+    white-space: nowrap;
+    text-align: right;
+}
+
+.dp-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line, #e2e8f0);
+}
+
+.dp-actions .sp {
+    flex: 1;
+}
+
+.kk-detail-fixed-wrap,
 .kiot-detail-fixed-wrap {
-    width: 992px !important;
+    width: 992px;
     max-width: 100%;
     box-sizing: border-box;
 }
 
 @media (max-width: 1040px) {
-    .ck-detail-fixed-wrap,
-    .transfer-detail-fixed-wrap,
+    .kk-detail-fixed-wrap,
     .kiot-detail-fixed-wrap {
-        width: 100% !important;
+        width: 100%;
     }
 }
 
-.product-detail-panel.dp {
-    padding: 16px 20px;
-    background-color: #ffffff;
-}
-
-/* Dòng tìm kiếm nhanh sản phẩm trong Drawer */
-.dtl-tbl tr.fin td {
-    padding: 4px 6px;
-    background: #f8fafc;
-}
-
-.dtl-tbl tr.fin input {
-    height: 28px;
-    font-size: 12.5px;
-}
-
-/* 4. Ô nhập số lượng vượt tồn kho trong Form */
+/* 3. Ô nhập số lượng vượt tồn kho trong Form */
 .qty.over {
     border-color: #dc2626 !important;
     background-color: #fef2f2 !important;
@@ -120,7 +246,7 @@
     font-weight: 600;
 }
 
-/* 5. Thẻ kho hiển thị trên bảng */
+/* 4. Thẻ kho hiển thị trên bảng */
 .wh {
     display: inline-flex;
     align-items: center;
@@ -128,18 +254,7 @@
     white-space: nowrap;
 }
 
-/* 6. Dòng chi tiết bảng con */
-.dtl-tbl th {
-    background-color: #f1f5f9 !important;
-    font-size: 13px;
-    color: #475569;
-}
-
-.dtl-tbl td {
-    vertical-align: middle;
-}
-
-/* 7. Nút hành động đáy form */
+/* 5. Nút hành động đáy form lập/sửa */
 .ck-actions {
     display: flex;
     gap: 12px;

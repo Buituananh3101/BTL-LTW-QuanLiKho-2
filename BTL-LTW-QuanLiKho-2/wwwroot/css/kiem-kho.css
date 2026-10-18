@@ -1575,11 +1575,6 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
   border-right: 3px solid #0070f3 !important;
 }
 
-/* Cột hiển thị cuối cùng tự động co giãn để khớp trọn vẹn viền hình chữ nhật khi ít cột */
-#stockTakeTable th.last-visible-col {
-  width: auto !important;
-}
-
 #xuatHuyTable.tbl {
   min-width: 1100px !important;
   width: 100%;

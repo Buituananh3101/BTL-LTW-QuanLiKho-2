@@ -62,9 +62,9 @@
 }
 
 #receiptTable {
-    min-width: 1750px !important;
-    width: 100%;
-    table-layout: fixed;
+    width: max-content !important;
+    min-width: 760px !important;
+    table-layout: fixed !important;
     border-collapse: separate;
     border-spacing: 0;
 }

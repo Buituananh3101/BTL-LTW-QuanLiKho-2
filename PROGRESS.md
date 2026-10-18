@@ -1,17 +1,81 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Sửa Lỗi Hiển Thị Khi Ít Cột Bảng Phiếu Kiểm Kho Dựa Trên Chuẩn Nhà Cung Cấp (Phiên 107)
+Cập nhật lần cuối: 2026-10-18 – Đồng Bộ Toàn Diện Chi Tiết Phiếu Chuyển Hàng Theo Chuẩn Kiểm Tồn (Phiên 110)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử trải nghiệm thực tế màn hình Phiếu kiểm kho khi ẩn bớt cột và mở dòng chi tiết Master-Detail viền xanh chữ nhật khép kín hoàn hảo.
+- Sẵn sàng kiểm thử trải nghiệm thực tế màn hình Chuyển hàng: bảng dữ liệu chuẩn KiotViet có summary-row, drawer chi tiết đồng bộ 100% với Kiểm tồn / Kiểm kho (tab underline .dp-tab, tiêu đề h2 + pill badge, thông tin meta ngăn cách gạch đứng | thanh mảnh, bảng sản phẩm .dtl-tbl, textarea ghi chú .dp-note và danh sách tổng kết .sums, bộ nút .dp-actions).
 
 ---
 
 ## Việc kế tiếp
 1. Kiểm tra trải nghiệm thực tế các luồng Chuyển kho và Nhập hàng.
 2. Xây dựng phân hệ Trả hàng nhập (Purchase Returns) hoặc Xuất dùng nội bộ theo yêu cầu.
+
+---
+
+- **Đồng Bộ Toàn Diện Chi Tiết Phiếu Chuyển Hàng Theo Chuẩn Kiểm Tồn (Phiên 110)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "sửa lại phần chi tiết trong phần chuyển hàng giống phần kiểm tồn, màu sắc chữ, font chữ, giao diện tương tác" kèm ảnh chụp màn hình drawer chuẩn của Kiểm tồn (`media_1792298582878_bd251676.png`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tái cấu trúc HTML Drawer trong `Views/ChuyenKho/_ChuyenKhoTable.cshtml`**:
+      * Thay thế cấu trúc grid 4 cột và thẻ card bằng khuôn mẫu Drawer Kiểm tồn (`PhieuKiemKe`).
+      * Header tab: `.dp-tabs` với nút `.dp-tab.active` gạch chân màu xanh thương hiệu (`#0a66e8`).
+      * Tiêu đề: `h2` với mã phiếu `18px` in đậm và badge trạng thái pill bo tròn mềm mại (`bg-success-subtle`, `bg-primary-subtle`, `bg-warning-subtle`, `bg-secondary-subtle`).
+      * Thông tin tóm tắt: `.meta.text-muted.small` thẳng hàng ngăn cách bằng đường kẻ đứng mảnh `1px solid #cfd5de` (Từ kho, Tới kho, Người tạo, Ngày tạo) và ngắt dòng `<i class="br"></i>` (Người chuyển, Ngày chuyển, Người nhận, Ngày nhận).
+      * Bảng hàng hóa chuyển: `.dtl-tbl.table.table-sm.table-bordered` với hàng tìm kiếm nhanh `tr.fin` (`.dtl-search-code`, `.dtl-search-name`).
+      * Cảnh báo: Alert nhận thiếu và alert hướng dẫn chọn kho đích hiển thị gọn gàng dưới bảng.
+      * Khối đáy: `.dp-bottom` gồm textarea `.dp-note` (min-width 250px, cao 105px, bo góc 6px) bên trái và danh sách số liệu `.sums` bên phải (không đóng khung thẻ hộp).
+      * Hàng nút hành động: `.dp-actions` phân cách gạch viền trên, nút phụ bên trái (Hủy/Hủy chuyển, Sao chép, Xuất file), `.ms-auto` đẩy nút chính sang phải (Lưu ghi chú, In, Mở phiếu, Chuyển hàng, Nhận hàng).
+    + **Đồng bộ CSS & JavaScript (`chuyen-kho.css`, `chuyen-kho-index.js`)**:
+      * Bổ sung đầy đủ hệ thống CSS class của Kiểm tồn (`.dp`, `.dp-tabs`, `.dp-tab`, `.meta`, `.dtl-tbl`, `.dp-bottom`, `.sums`, `.dp-actions`, `.kk-detail-fixed-wrap`) vào `chuyen-kho.css`.
+      * Tương thích hoàn toàn với các event handler: lọc tìm hàng nhanh theo mã/tên trong drawer, lưu ghi chú `.btn-save-note`, hủy phiếu `.btn-cancel-transfer`, mở modal nhận hàng `.btn-open-receive`.
+    + **Kiểm tra & Biên dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 NuGet Warnings**.
+      * `node -c chuyen-kho-index.js` đạt **0 Errors**.
+      * Đồng bộ `docs/specs/chuyen-kho.md` (7.620 ký tự < 8.000 ký tự).
+
+- **Chuẩn Hóa Toàn Bộ Giao Diện & Drawer Phiếu Chuyển Hàng Đồng Bộ Theo Chuẩn Hàng Hóa (Phiên 109)**:
+  - **Nhu cầu**: Người dùng phản ánh "trong phần chuyển hàng, giao diện nhìn loạn quá, sửa lại dựa trên danh sách hàng hóa cho đồng bộ và đẹp" kèm ảnh chụp chi tiết (`media_1792297543540_26f709bb.png`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bảng danh sách chính (`Views/ChuyenKho/_ChuyenKhoTable.cshtml`)**:
+      * Bổ sung dòng tổng hợp `tr.summary-row` ngay dưới `<thead>` tính tổng SL chuyển, tổng SL nhận, tổng Giá trị chuyển đồng bộ 100% với `_HangHoaTable.cshtml`.
+      * Tinh chỉnh độ rộng các cột dữ liệu cân đối, kết hợp `style="width: max-content; min-width: 760px;"` giúp bảng tự động co lại đẹp mắt khi người dùng ẩn bớt cột.
+    + **Tái cấu trúc toàn diện Drawer chi tiết theo chuẩn Hàng hóa (`HangHoa`)**:
+      * Thay thế thanh tab cũ bằng `.product-detail-tabs` và `.product-detail-tab-btn` chuẩn của hệ thống.
+      * Chuẩn hóa tiêu đề `h4.product-detail-title` và badge trạng thái KiotViet.
+      * Loại bỏ khối lộ trình route box 2 badge kẹp mũi tên và dòng meta text dạng gạch đứng `|`. Thay bằng lưới thuộc tính 4 cột `.row.g-3.mb-3.product-attr-grid` (`.attr-item`, `.attr-label`, `.attr-value`): Cột 1 (Từ kho/Tới kho), Cột 2 (Người tạo/Thời gian tạo), Cột 3 (Người chuyển/Thời gian chuyển), Cột 4 (Người nhận/Thời gian nhận).
+      * Bọc bảng danh sách sản phẩm chuyển trong thẻ `.border.rounded-2.overflow-hidden.bg-white` với header nền `#f8fafc`, hàng tìm kiếm nhanh `tr.fin` gọn gàng, định dạng số lượng và thành tiền canh phải sắc nét.
+      * Khối ghi chú và tóm tắt số liệu 2 cột cân xứng: bên trái là textarea có nhãn rõ ràng, bên phải là thẻ tổng hợp bo tròn `.p-3.rounded-2.border` trên nền `#f8fafc`.
+      * Đồng bộ hàng nút thao tác chuẩn Hàng hóa `.product-detail-footer` chia làm 2 cụm: `.product-detail-footer-left` (Xóa/Hủy, Sao chép, Xuất file) và `.product-detail-footer-right` (Lưu ghi chú, In, Mở phiếu/Chuyển hàng/Nhận hàng).
+    + **Dọn dẹp Stylesheet & JavaScript (`chuyen-kho.css`, `chuyen-kho-index.js`)**:
+      * Loại bỏ các class custom thừa (`.route`, `.routebox`, `.dp`, `.dp-tabs`, `.dp-bottom`, `.dp-actions`), tái sử dụng toàn bộ hệ thống CSS chuẩn của `site.css`.
+      * Cập nhật `tabBtnSelector: '.product-detail-tab-btn, .dp-tab'` trong JavaScript.
+    + **Kiểm tra & Biên dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 NuGet Warnings**.
+      * `node -c chuyen-kho-index.js` đạt **0 Errors**.
+      * Đồng bộ `docs/specs/chuyen-kho.md` (7.495 ký tự < 8.000 ký tự).
+
+- **Sửa Lỗi Không Thu Gọn Bảng Khi Còn Ít Cột Cho Nhập Hàng, Chuyển Kho, Xuất Hủy Theo Chuẩn Nhà Cung Cấp (Phiên 108)**:
+  - **Nhu cầu**: Người dùng phản ánh lỗi: "lỗi khi còn ít cột nhưng nó lại ko thu gọn lại" kèm ảnh chụp màn hình phân hệ Nhập hàng (`media_1792296391805_48d14108.png`) khi chỉ bật 4 cột (Mã nhập hàng, Thời gian, Nhà cung cấp, Trạng thái), bảng bị kéo giãn to đùng tràn toàn màn hình thay vì thu gọn lại vừa vặn như chuẩn Nhà cung cấp.
+  - **Nguyên nhân cốt lõi**:
+    + `#receiptTable` bị khóa cứng `min-width: 1750px !important; width: 100%;` trong cả inline style và CSS `nhap-hang.css`.
+    + `#transferTable` bị khóa cứng `min-width: 1450px !important; width: 100%;` trong `chuyen-kho.css` và inline `min-width: 1550px`.
+    + `#xuatHuyTable` bị gán `min-width: 1100px !important;`.
+    + Các thẻ `<th>` thiếu `min-width` cố định tương ứng độ rộng cột, hoặc ô chi tiết `tr.dtl > td` bị gắn `border-0`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Nhập hàng (`Views/NhapHang/_NhapHangTable.cshtml` & `wwwroot/css/nhap-hang.css`)**:
+      * Đưa `#receiptTable` về chuẩn Nhà cung cấp: `<table class="tbl" id="receiptTable" style="width: max-content; min-width: 760px;">` và CSS `width: max-content !important; min-width: 760px !important; table-layout: fixed !important;`.
+      * Bổ sung `min-width` cho tất cả 22 cột `<th>`.
+      * Gỡ bỏ `border-0` ở ô `td[colspan="22"]` dòng chi tiết `tr.dtl`.
+    + **Chuyển kho (`Views/ChuyenKho/_ChuyenKhoTable.cshtml` & `wwwroot/css/chuyen-kho.css`)**:
+      * Đưa `#transferTable` về chuẩn: `<table class="tbl" id="transferTable" style="width: max-content; min-width: 760px;">` và CSS `width: max-content !important; min-width: 760px !important; table-layout: fixed !important;`.
+      * Bổ sung `min-width` cho tất cả 13 cột `<th>`.
+    + **Xuất hủy (`Views/XuatHuy/_XuatHuyTable.cshtml` & `wwwroot/css/xuat-huy.css`)**:
+      * Đưa `#xuatHuyTable` về: `style="width: max-content; min-width: 760px;"` và CSS `min-width: 760px !important;`.
+      * Bổ sung `min-width` cho toàn bộ 11 cột `<th>`.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile --no-restore` đạt **0 Errors, 2 Warnings**.
 
 ---
 

@@ -79,7 +79,7 @@
                 rowSelector: 'tr.product-row, tr.tbl-row',
                 detailRowSelector: '#dtl-{id}',
                 wrapSelector: '.product-detail-panel-wrap',
-                tabBtnSelector: '.dp-tab',
+                tabBtnSelector: '.product-detail-tab-btn, .dp-tab',
                 tabPaneSelector: '.tab-pane-content, .tab-pane',
                 excludeClickSelector: 'input, button, a, label, .cell-checkbox, .cell-star, .star-btn',
                 slideDuration: 150,

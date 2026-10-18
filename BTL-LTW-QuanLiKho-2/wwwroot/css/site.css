@@ -1300,11 +1300,6 @@ tr.product-row.selected > td:last-child {
   border-right: 3px solid #0070f3 !important; /* Cạnh phải hình chữ nhật */
 }
 
-/* Cột hiển thị cuối cùng tự động co giãn để khớp trọn vẹn viền hình chữ nhật khi ít cột */
-.tbl thead th.last-visible-col {
-  width: auto !important;
-}
-
 /* Dòng chi tiết mở rộng: Cạnh 2 bên và cạnh đáy khép kín hình chữ nhật */
 tr.kiot-detail-row > td,
 tr.product-detail-row > td {
