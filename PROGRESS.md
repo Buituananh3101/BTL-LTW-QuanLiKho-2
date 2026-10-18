@@ -1,21 +1,44 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Triển Khai Giai Đoạn 3 Đóng Gói Lego: ImageUploader & Combobox Tree Phân Cấp (Phiên 139)
+Cập nhật lần cuối: 2026-10-18 – Bỏ Gạch Chân Khi Hover Vào Nút Tạo Mới Trên Form Hàng Hóa (Phiên 141)
 
 ---
 
 ## Đang làm
-- Hoàn thành xuất sắc Giai đoạn 3 kế hoạch đóng gói Lego:
-  + Đóng gói `KiotFilter.initImageUploader` (Lego block 19) trong `kiot-filter.js`: Quản lý 5 ảnh (1 chính + 4 phụ), nén Canvas nền trắng `#FFFFFF` client-side, kéo thả drag & drop, dán clipboard `Ctrl + V`, đổi ảnh chính, xóa kèm `KiotConfirm`.
-  + Tái cấu trúc `hang-hoa-form.js`: Loại bỏ hơn 300 dòng code thủ công xử lý ảnh, nén Canvas, kéo-thả, paste; tích hợp gọn gàng `KiotFilter.initImageUploader`.
-  + Nâng cấp `KiotFilter.initCombobox` và `initSingleSelect`: Hỗ trợ hiển thị phân cấp cây danh mục (`item.level`), thụt lề 16px và icon nhánh cây `└─`.
-- Sẵn sàng chuẩn bị Giai đoạn 4: Đóng gói Khung điều khiển trang danh sách `KiotListPage` boilerplate.
+- Sẵn sàng kiểm tra trải nghiệm nút Tạo mới trên form Hàng hóa (`_HangHoaModal.cshtml`): khi di chuột vào nút "+ Tạo mới" nhóm hàng, đơn vị tính hay vị trí, nút không còn xuất hiện gạch chân, đổi màu mượt mà chuẩn KiotViet.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế tải ảnh, kéo thả, paste clipboard ở modal Hàng hóa và combobox nhóm hàng trên môi trường chạy thử.
-2. Triển khai Giai đoạn 4 theo kế hoạch đóng gói Lego (`ke-hoach-dong-goi-lego.md`): Khung điều khiển trang danh sách `KiotListPage`.
+1. Kiểm tra trải nghiệm thực tế các trang danh sách và form trên trình duyệt.
+2. Tiếp tục tinh gọn các trang danh sách còn lại (`nhap-hang-index.js`, `tra-hang-nhap-index.js`, `xuat-huy-index.js`) sử dụng `KiotFilter.createListPage`.
+
+---
+
+- **Bỏ Gạch Chân Khi Hover Vào Nút Tạo Mới Trên Form Hàng Hóa (Phiên 141)**:
+  - **Nhu cầu**: Người dùng yêu cầu kèm ảnh chụp màn hình (`media_1792337485927_9137a651.png`): "sửa giúp tôi khi trỏ con trỏ chuột vào chữ tạo mới thì ko hiện gạch chân nữa".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `wwwroot/css/hang-hoa-form.css`, class `.hh-link:hover` và `.hh-add-link:hover` có thuộc tính `text-decoration: underline;`, dẫn đến khi hover chuột vào nút "+ Tạo mới" (ở phần Nhóm hàng, Đơn vị tính, Vị trí), chữ bị gạch chân.
+  - **Giải pháp & Kết quả thực hiện**:
+    + Cập nhật `.hh-link:hover` và `.hh-add-link:hover` trong `hang-hoa-form.css`: gán `text-decoration: none;`, chuyển màu chữ sang xanh đậm hơn `#0852bd` với hiệu ứng chuyển tiếp mượt mà `transition: color 0.15s ease`.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` đạt **0 Errors**.
+
+
+- **Triển Khai Giai Đoạn 4 Đóng Gói Lego: Khung Trang Danh Sách Boilerplate KiotListPage (Phiên 140)**:
+  - **Nhu cầu**: Người dùng yêu cầu triển khai Giai đoạn 4 của Kế hoạch đóng gói Lego (`ke-hoach-dong-goi-lego.md`).
+  - **Mục tiêu Giai đoạn 4**:
+    1. Đóng gói Lego Khung Điều Khiển Trang Danh Sách (`KiotFilter.createListPage`) vào `kiot-filter.js`: Quản lý state tập trung `F`, nạp bảng AJAX `loadTable` với hiệu ứng mờ nhẹ opacity, tự động hóa phân trang AJAX `.page-ajax`, sắp xếp cột 3 trạng thái (Không sort -> ASC -> DESC -> Bỏ sort), lọc bookmark sao header `#starHeaderFilter` & toggle sao từng dòng `.star-btn`, tự động gắn `initColumnToggle`, phục hồi Master-Detail drawer `initRowDetail`, hotkeys toàn cục F3 / F4 và sidebar KiotViet.
+    2. Cung cấp các hooks mở rộng `buildParams(params, state)`, `onTableLoaded($wrap, state)`, `onPaintFilters(state)` cho phép từng màn hình bổ sung tiêu chí lọc riêng mà không phá vỡ khung chuẩn.
+    3. Tái cấu trúc thực nghiệm 2 file danh sách lớn: `chuyen-kho-index.js` (từ 458 dòng xuống 180 dòng) và `phieu-kiem-ke-index.js` (từ 755 dòng xuống 360 dòng), giảm hơn 50% mã nguồn lặp lại.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`wwwroot/js/kiot-filter.js`**: Triển khai Lego block 20 `KiotFilter.createListPage(options)` hoàn chỉnh, xuất ra ngoài return object của module.
+    + **`wwwroot/js/chuyen-kho-index.js`**: Tinh gọn toàn bộ boilerplate, chỉ giữ lại logic riêng của nghiệp vụ Chuyển kho (modal nhận hàng, hủy chuyển kho, lưu ghi chú drawer).
+    + **`wwwroot/js/phieu-kiem-ke-index.js`**: Tinh gọn toàn bộ boilerplate, giữ lại logic nghiệp vụ Kiểm kho (multiselect người tạo, hủy phiếu kiểm kho, lưu ghi chú drawer).
+    + **Đồng bộ tài liệu**: Cập nhật `.agent/rules/03-giao-dien-layout.md` (7.249 bytes), `docs/quyet-dinh.md` (7.153 bytes), bảo đảm 100% tuân thủ hạn mức 8.000 ký tự theo Luật 12.
+  - **Kiểm tra**:
+    + `node -c` xác nhận cú pháp 100% hợp lệ trên cả 3 file JavaScript (`kiot-filter.js`, `chuyen-kho-index.js`, `phieu-kiem-ke-index.js`).
+    + `dotnet build` biên dịch thành công hoàn hảo với **0 Errors**.
 
 ---
 

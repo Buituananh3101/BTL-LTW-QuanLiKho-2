@@ -246,9 +246,12 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease;
 }
 .hh-link:hover {
-  text-decoration: underline;
+  text-decoration: none;
+  color: #0852bd;
 }
 
 /* Top Form Grid */
@@ -1095,7 +1098,8 @@
   cursor: pointer;
 }
 .hh-add-link:hover {
-  text-decoration: underline;
+  text-decoration: none;
+  color: #0852bd;
 }
 
 /* Tab Mô tả */

@@ -2084,6 +2084,339 @@ window.KiotFilter = (function ($) {
         };
     }
 
+    // 22. KiotListPage – Bộ máy điều khiển trang danh sách chuẩn KiotViet (Boilerplate Engine)
+    function createListPage(options) {
+        const opt = $.extend({
+            containerSelector: '#kiotContainer',
+            filterUrl: '',
+            tableSelector: '#mainTable, .kiot-table, .tbl',
+            tableWrapperSelector: '#tableContainer, #tableWrapper',
+            searchInputSelector: '#keywordSearch, #filterSearch, #topSearch, input[name="Q"]',
+            storageKeyCols: '',
+            defaultCols: null,
+            extraColsCount: 2,
+            initialState: {},
+            dateFilterId: 'date',
+            rowDetailOptions: null,
+            toggleStarUrl: '',
+            buildParams: null,
+            onTableLoaded: null,
+            onPaintFilters: null
+        }, options);
+
+        const $container = $(opt.containerSelector);
+        const filterUrl = opt.filterUrl || $container.data('filter-url') || '';
+        const toggleStarUrl = opt.toggleStarUrl || $container.data('toggle-star-url') || '';
+        const isStarredInit = $container.data('is-starred') === true || $container.data('is-starred') === 'true';
+
+        // Khởi tạo state F tập trung
+        const F = $.extend({
+            q: $(opt.searchInputSelector).val() || '',
+            mode: 'preset',
+            preset: 'ALL',
+            fromDate: null,
+            toDate: null,
+            statuses: [],
+            starred: isStarredInit,
+            sortBy: $container.data('sort-by') || '',
+            sortDir: $container.data('sort-dir') || '',
+            page: 1,
+            pageSize: 15,
+            openId: null
+        }, opt.initialState);
+
+        let columnToggler = null;
+        let rowDetailHandler = null;
+        let searchTimer = null;
+
+        // 1. Quản lý ẩn/hiện cột
+        if (opt.storageKeyCols && opt.defaultCols && typeof initColumnToggle === 'function') {
+            columnToggler = initColumnToggle({
+                menuSelector: '#colMenu',
+                tableSelector: opt.tableSelector,
+                storageKey: opt.storageKeyCols,
+                defaultCols: opt.defaultCols,
+                extraColsCount: opt.extraColsCount
+            });
+        }
+
+        function applyColumnVisibility() {
+            if (columnToggler && typeof columnToggler.apply === 'function') {
+                columnToggler.apply();
+            }
+        }
+
+        // 2. Quản lý Accordion Drawer Master-Detail
+        function initRowDetailHandler() {
+            if (opt.rowDetailOptions && typeof initRowDetail === 'function') {
+                const rowDetailConfig = $.extend({
+                    tableSelector: opt.tableSelector,
+                    rowSelector: 'tr.product-row, tr.tbl-row',
+                    detailRowSelector: '#dtl-{id}',
+                    wrapSelector: '.product-detail-panel-wrap, .kiot-detail-panel-wrap',
+                    tabBtnSelector: '.product-detail-tab-btn, .dp-tab',
+                    tabPaneSelector: '.tab-pane-content, .tab-pane, .dp-pane',
+                    excludeClickSelector: 'input, button, a, label, .w-chk, .w-star, .cell-star, .star-btn, .cell-checkbox, .row-select',
+                    onOpen: function (id) {
+                        F.openId = id;
+                    },
+                    onClose: function () {
+                        F.openId = null;
+                    }
+                }, opt.rowDetailOptions);
+
+                rowDetailHandler = initRowDetail(rowDetailConfig);
+            }
+        }
+
+        // 3. Tải bảng dữ liệu qua AJAX
+        function loadTable() {
+            if (!filterUrl) return;
+            const $wrap = $(opt.tableWrapperSelector);
+            if ($wrap.length) $wrap.css('opacity', '0.6');
+
+            const params = new URLSearchParams();
+            if (F.q && F.q.trim()) params.append('Q', F.q.trim());
+
+            if (F.mode === 'preset' || (F.preset && !F.fromDate)) {
+                params.append('DateFilterType', F.preset || 'ALL');
+            } else {
+                params.append('DateFilterType', 'CUSTOM');
+            }
+
+            if (F.fromDate) {
+                const fromStr = typeof F.fromDate === 'string' ? F.fromDate : formatDateISO(F.fromDate);
+                if (fromStr) params.append('FromDate', fromStr);
+            }
+            if (F.toDate) {
+                const toStr = typeof F.toDate === 'string' ? F.toDate : formatDateISO(F.toDate);
+                if (toStr) params.append('ToDate', toStr);
+            }
+
+            if (Array.isArray(F.statuses)) {
+                F.statuses.forEach(s => params.append('Statuses', s));
+            }
+
+            if (F.starred) {
+                params.append('DaDanhDau', 'true');
+            }
+
+            if (F.sortBy) {
+                params.append('SortBy', F.sortBy);
+                params.append('SortDir', F.sortDir || 'asc');
+            }
+
+            params.append('Page', F.page);
+            params.append('PageSize', F.pageSize);
+
+            // Hook cho phép module riêng thêm tham số lọc đặc thù
+            if (typeof opt.buildParams === 'function') {
+                opt.buildParams(params, F);
+            }
+
+            const fetchUrl = filterUrl.includes('?') 
+                ? `${filterUrl}&${params.toString()}` 
+                : `${filterUrl}?${params.toString()}`;
+
+            $.ajax({
+                url: fetchUrl,
+                type: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                success: function (html) {
+                    if ($wrap.length) {
+                        $wrap.html(html).css('opacity', '1');
+                    }
+                    applyColumnVisibility();
+                    initRowDetailHandler();
+
+                    if (F.openId && rowDetailHandler && typeof rowDetailHandler.expand === 'function') {
+                        rowDetailHandler.expand(F.openId);
+                    }
+
+                    if (typeof opt.onTableLoaded === 'function') {
+                        opt.onTableLoaded($wrap, F);
+                    }
+                    paintFilters();
+                },
+                error: function () {
+                    if ($wrap.length) $wrap.css('opacity', '1');
+                    if (window.KiotToast) {
+                        KiotToast.error('Không thể tải dữ liệu bảng.');
+                    }
+                }
+            });
+        }
+
+        // 4. Vẽ lại các chỉ thị bộ lọc
+        function paintFilters() {
+            const $starHeader = $('#starHeaderFilter');
+            if ($starHeader.length) {
+                $starHeader.toggleClass('starred', !!F.starred);
+            }
+
+            if (typeof opt.onPaintFilters === 'function') {
+                opt.onPaintFilters(F);
+            }
+        }
+
+        // 5. Gắn sự kiện chuẩn hóa toàn hệ thống
+        // Ô tìm kiếm (Debounce + Enter)
+        const $searchInput = $(opt.searchInputSelector);
+        if ($searchInput.length) {
+            $searchInput.off('input.kiotList').on('input.kiotList', function () {
+                clearTimeout(searchTimer);
+                F.q = $(this).val();
+                searchTimer = setTimeout(() => {
+                    F.page = 1;
+                    loadTable();
+                }, 350);
+            });
+
+            $searchInput.off('keydown.kiotList').on('keydown.kiotList', function (e) {
+                if (e.key === 'Enter') {
+                    clearTimeout(searchTimer);
+                    F.q = $(this).val();
+                    F.page = 1;
+                    loadTable();
+                }
+            });
+        }
+
+        // Phân trang AJAX
+        $(document).off('click.kiotListPageAjax', '.page-ajax').on('click.kiotListPageAjax', '.page-ajax', function (e) {
+            e.preventDefault();
+            const p = parseInt($(this).data('page'));
+            if (p && p > 0 && p !== F.page) {
+                F.page = p;
+                loadTable();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        // Sắp xếp cột 3 trạng thái (Không sort -> ASC -> DESC -> Không sort)
+        $(document).off('click.kiotListSort', `${opt.tableSelector} thead th.sortable-th`).on('click.kiotListSort', `${opt.tableSelector} thead th.sortable-th`, function (e) {
+            e.preventDefault();
+            const col = $(this).data('col');
+            if (!col) return;
+
+            if (F.sortBy === col) {
+                if (F.sortDir === 'asc') {
+                    F.sortDir = 'desc';
+                } else if (F.sortDir === 'desc') {
+                    F.sortBy = '';
+                    F.sortDir = '';
+                } else {
+                    F.sortDir = 'asc';
+                }
+            } else {
+                F.sortBy = col;
+                F.sortDir = 'asc';
+            }
+
+            F.page = 1;
+            loadTable();
+        });
+
+        // Đánh dấu sao trên Header
+        $(document).off('click.kiotListStarHeader', '#starHeaderFilter').on('click.kiotListStarHeader', '#starHeaderFilter', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            F.starred = !F.starred;
+            F.page = 1;
+            loadTable();
+        });
+
+        // Đánh dấu sao trên dòng bảng
+        if (toggleStarUrl) {
+            $(document).off('click.kiotListStarRow', '.star-btn:not(#starHeaderFilter)').on('click.kiotListStarRow', '.star-btn:not(#starHeaderFilter)', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const $btn = $(this);
+                const id = $btn.data('id');
+                if (!id) return;
+
+                $.ajax({
+                    url: `${toggleStarUrl}?id=${id}`,
+                    type: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    success: function (res) {
+                        if (res && res.success) {
+                            if (res.isFavorite) {
+                                $btn.addClass('starred').attr('title', 'Bỏ đánh dấu sao').html('<i class="bi bi-star-fill"></i>');
+                            } else {
+                                $btn.removeClass('starred').attr('title', 'Đánh dấu sao').html('<i class="bi bi-star"></i>');
+                                if (F.starred) {
+                                    const $tr = $btn.closest('tr');
+                                    $(`#dtl-${id}`).remove();
+                                    $tr.remove();
+                                    if ($(`${opt.tableSelector} tbody tr.tbl-row, ${opt.tableSelector} tbody tr.product-row`).length === 0) {
+                                        loadTable();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        // Phím tắt toàn cục: F3 focus tìm kiếm & F4 gập mở sidebar
+        $(document).off('keydown.kiotListHotkeys').on('keydown.kiotListHotkeys', function (e) {
+            if (e.key === 'F3') {
+                e.preventDefault();
+                const $inp = $(opt.searchInputSelector);
+                if ($inp.length) {
+                    $inp.focus().select();
+                }
+            } else if (e.key === 'F4') {
+                const $toggleBtn = $('#btnToggleSidebar');
+                if ($toggleBtn.length) {
+                    e.preventDefault();
+                    $toggleBtn.trigger('click');
+                }
+            }
+        });
+
+        // Tự động khởi tạo Sidebar nếu có
+        if (typeof initSidebar === 'function' && $('#sidebarFilterCol').length) {
+            initSidebar({
+                containerSelector: opt.containerSelector,
+                sidebarSelector: '#sidebarFilterCol',
+                toggleBtnSelector: '#btnToggleSidebar',
+                mobileBtnSelector: '#btnMobileFilter',
+                closeMobileBtnSelector: '#btnCloseSidebarMobile',
+                backdropSelector: '#sidebarBackdrop'
+            });
+        }
+
+        // Tự động kết nối bộ lọc ngày tháng
+        if (opt.dateFilterId && typeof initDateFilter === 'function') {
+            initDateFilter(opt.dateFilterId, function (from, to, text, val) {
+                F.mode = val === 'CUSTOM' ? 'custom' : 'preset';
+                F.preset = val;
+                F.fromDate = from;
+                F.toDate = to;
+                F.page = 1;
+                loadTable();
+            });
+        }
+
+        initRowDetailHandler();
+        applyColumnVisibility();
+
+        return {
+            state: F,
+            loadTable: loadTable,
+            reload: function (resetPage) {
+                if (resetPage) F.page = 1;
+                loadTable();
+            },
+            paintFilters: paintFilters,
+            columnToggler: columnToggler,
+            rowDetail: rowDetailHandler
+        };
+    }
+
     return {
         debounce: debounce,
         escapeHtml: escapeHtml,
@@ -2107,7 +2440,8 @@ window.KiotFilter = (function ($) {
         initDateTimePicker: initDateTimePicker,
         initProductSearch: initProductSearch,
         initDocGrid: initDocGrid,
-        initImageUploader: initImageUploader
+        initImageUploader: initImageUploader,
+        createListPage: createListPage
     };
 })(jQuery);
 
