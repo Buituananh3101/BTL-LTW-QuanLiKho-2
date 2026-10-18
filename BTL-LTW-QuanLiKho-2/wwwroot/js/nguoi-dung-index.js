@@ -358,19 +358,25 @@
         updateWarehouseSelectionState();
     });
 
+    const ADMIN_DEFAULT_NOTE = 'Tài khoản có vai trò Quản lý mặc định có toàn quyền thao tác trên toàn bộ các chi nhánh kho trong hệ thống.';
+
     // 9. Cập nhật phân quyền theo Vai trò
     function updateRoleDescription() {
         const sel = $('#userMaVaiTro');
         const roleText = sel.find('option:selected').data('name') || sel.find('option:selected').text();
         const roleVal = parseInt(sel.val()) || 0;
-        const alertAdmin = $('#alertAdminAllKho');
+        const currentGhiChu = ($('#userGhiChu').val() || '').trim();
 
         if (roleText.includes('Quản lý') || roleVal === 1) {
-            alertAdmin.removeClass('d-none');
             $('.user-kho-chk').prop('checked', true);
             updateWarehouseSelectionState();
+            if (!currentGhiChu) {
+                $('#userGhiChu').val(ADMIN_DEFAULT_NOTE);
+            }
         } else {
-            alertAdmin.addClass('d-none');
+            if (currentGhiChu === ADMIN_DEFAULT_NOTE) {
+                $('#userGhiChu').val('');
+            }
         }
     }
 

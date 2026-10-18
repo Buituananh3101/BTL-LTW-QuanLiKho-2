@@ -1,11 +1,11 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-19 – Thay Thế Khung Mô Tả Vai Trò Bằng Mục Ghi Chú Trong Quản Lý Người Dùng (Phiên 149)
+Cập nhật lần cuối: 2026-10-19 – Đưa Thông Báo Quyền Quản Lý Vào Mục Ghi Chú & Bỏ Banner Xanh (Phiên 150)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất loại bỏ khung mô tả quyền hạn vai trò (`#userVaiTroDesc`), thay thế bằng trường "Ghi chú" (`#userGhiChu`) trong modal Thêm/Sửa người dùng, lưu trữ cột `GhiChu` vào CSDL `NhanVien`, đồng bộ API backend và hiển thị trên bảng danh sách.
+- Đã hoàn tất loại bỏ hoàn toàn banner thông báo màu xanh biển (`#alertAdminAllKho`) trong phần phân quyền chi nhánh kho, đồng thời tự động đưa nội dung thông báo này vào mục Ghi chú (`#userGhiChu`) của tài khoản Quản lý.
 
 ---
 
@@ -13,6 +13,20 @@ Cập nhật lần cuối: 2026-10-19 – Thay Thế Khung Mô Tả Vai Trò B�
 1. Kiểm tra nghiệm thu trên trình duyệt modal Thêm mới & Cập nhật người dùng với trường Ghi chú mới.
 2. Kiểm tra nghiệm thu phân quyền với 3 tài khoản hạt giống (`quanly`, `thukho`, `banhang` / mật khẩu `123456`).
 3. Kiểm tra trải nghiệm thực tế Import/Export file Excel trên trình duyệt (`/ChuyenKho/Create`, `/TraHangNhap/Create`, `/NhapHang/Create`).
+
+---
+
+- **Đưa Thông Báo Quyền Quản Lý Vào Mục Ghi Chú & Bỏ Banner Xanh (Phiên 150)**:
+  - **Nhu cầu**: Người dùng gửi ảnh chụp màn hình modal Cập nhật người dùng (`media_1792366090809_a902ac2f.png`) và yêu cầu: "cái thông báo màu xanh biển kia cũng cho vào ghi chú".
+  - **Nguyên nhân cốt lõi**:
+    + Trong phần "Phân quyền chi nhánh kho", banner thông báo màu xanh biển (`#alertAdminAllKho`: "Tài khoản có vai trò Quản lý mặc định có toàn quyền thao tác trên toàn bộ các chi nhánh kho trong hệ thống.") chiếm diện tích và không đồng bộ với mong muốn loại bỏ các alert banner để đưa nội dung vào trường Ghi chú.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`Views/NguoiDung/_NguoiDungModal.cshtml`**: Xóa hoàn toàn banner alert màu xanh biển `#alertAdminAllKho`.
+    2. **`wwwroot/js/nguoi-dung-index.js`**: Khai báo hằng số `ADMIN_DEFAULT_NOTE` chứa nội dung quyền quản trị kho; tự động đưa nội dung này vào ô `#userGhiChu` khi chọn vai trò Quản lý (nếu ghi chú đang trống) và tự động xóa nếu đổi sang vai trò khác.
+    3. **CSDL**: Cập nhật trường `GhiChu` của tài khoản `quanly` thành nội dung thông báo này để hiển thị sẵn trong modal cập nhật và trên bảng danh sách người dùng.
+  - **Kiểm tra**:
+    + `node -c wwwroot/js/nguoi-dung-index.js`: Cú pháp JavaScript hợp lệ 100%.
+    + `dotnet build -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
 
 ---
 
