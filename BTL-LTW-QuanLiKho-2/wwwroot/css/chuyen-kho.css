@@ -1,0 +1,185 @@
+/* chuyen-kho.css - Định kiểu cho phân hệ Chuyển kho chuẩn KiotViet */
+
+/* 1. Bảng Chuyển kho giữ độ rộng chuẩn Master-Detail, không bị co rút */
+#transferTable, #transferTable.tbl {
+    min-width: 1450px !important;
+    width: 100%;
+    table-layout: fixed !important;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Đóng khung hình chữ nhật liền mạch khi mở chi tiết dòng (Chuẩn #0070f3 khớp Nhà cung cấp & Nhập hàng) */
+#transferTable tr.tbl-row.open > td,
+#transferTable tr.tbl-row.selected > td,
+#transferTable tr.product-row.open > td,
+#transferTable tr.product-row.selected > td {
+    background-color: #ffffff !important;
+    border-top: 2px solid #0070f3 !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    border-right: none !important;
+}
+#transferTable tr.tbl-row.open > td:first-child,
+#transferTable tr.tbl-row.selected > td:first-child,
+#transferTable tr.product-row.open > td:first-child,
+#transferTable tr.product-row.selected > td:first-child {
+    border-left: 3px solid #0070f3 !important;
+}
+#transferTable tr.tbl-row.open > td.last-visible-col,
+#transferTable tr.tbl-row.open > td:last-child,
+#transferTable tr.tbl-row.selected > td.last-visible-col,
+#transferTable tr.tbl-row.selected > td:last-child,
+#transferTable tr.product-row.open > td.last-visible-col,
+#transferTable tr.product-row.open > td:last-child,
+#transferTable tr.product-row.selected > td.last-visible-col,
+#transferTable tr.product-row.selected > td:last-child {
+    border-right: 3px solid #0070f3 !important;
+}
+
+#transferTable tr.product-detail-row > td,
+#transferTable tr.dtl > td {
+    background-color: #ffffff !important;
+    padding: 0 !important;
+    border-top: none !important;
+    border-bottom: 2px solid #0070f3 !important;
+    border-left: 3px solid #0070f3 !important;
+    border-right: 3px solid #0070f3 !important;
+}
+
+/* 2. Route box trực quan trong drawer và form */
+.route {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.route .box {
+    border: 1px solid #cfd5de;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-weight: 600;
+    background: #f8fafc;
+    color: #1e293b;
+    font-size: 13.5px;
+}
+
+.routebox {
+    background: #f6f9ff;
+    border: 1px solid #dbe7fb;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+}
+
+/* 3. Khung chi tiết cố định 992px khớp Kiểm kho, Nhập hàng & Nhà cung cấp */
+.ck-detail-fixed-wrap,
+.transfer-detail-fixed-wrap,
+.kiot-detail-fixed-wrap {
+    width: 992px !important;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 1040px) {
+    .ck-detail-fixed-wrap,
+    .transfer-detail-fixed-wrap,
+    .kiot-detail-fixed-wrap {
+        width: 100% !important;
+    }
+}
+
+.product-detail-panel.dp {
+    padding: 16px 20px;
+    background-color: #ffffff;
+}
+
+/* Dòng tìm kiếm nhanh sản phẩm trong Drawer */
+.dtl-tbl tr.fin td {
+    padding: 4px 6px;
+    background: #f8fafc;
+}
+
+.dtl-tbl tr.fin input {
+    height: 28px;
+    font-size: 12.5px;
+}
+
+/* 4. Ô nhập số lượng vượt tồn kho trong Form */
+.qty.over {
+    border-color: #dc2626 !important;
+    background-color: #fef2f2 !important;
+    color: #dc2626 !important;
+}
+
+.hint-over {
+    font-size: 11px;
+    color: #dc2626;
+    display: block;
+    margin-top: 2px;
+    text-align: right;
+    font-weight: 600;
+}
+
+/* 5. Thẻ kho hiển thị trên bảng */
+.wh {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+/* 6. Dòng chi tiết bảng con */
+.dtl-tbl th {
+    background-color: #f1f5f9 !important;
+    font-size: 13px;
+    color: #475569;
+}
+
+.dtl-tbl td {
+    vertical-align: middle;
+}
+
+/* 7. Nút hành động đáy form */
+.ck-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 14px;
+}
+
+.ck-actions button {
+    flex: 1;
+    height: 72px;
+    border: 0;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 14.5px;
+    font-weight: 700;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s ease-in-out;
+}
+
+.ck-actions .btn-save-draft {
+    background: #0a66e8;
+}
+
+.ck-actions .btn-save-draft:hover {
+    background: #0852bd;
+}
+
+.ck-actions .btn-send-transfer {
+    background: #12b34a;
+}
+
+.ck-actions .btn-send-transfer:hover {
+    background: #0e9a3e;
+}
+
+.ck-actions button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}

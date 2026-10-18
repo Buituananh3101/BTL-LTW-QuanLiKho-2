@@ -1,0 +1,58 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.ChuyenKho.ChuyenKhoIndexVM
+@using BTL_LTW_QuanLiKho_2.ViewModels.Common
+
+<!-- CỘT BÊN TRÁI: TIÊU ĐỀ "CHUYỂN HÀNG" + BỘ LỌC KIOTVIET (MODULAR LEGO) -->
+<aside class="kiot-sidebar-col" id="sidebarFilterCol">
+    <!-- Header cho sidebar khi mở ở mobile/zoom -->
+    <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+        <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc chuyển hàng</div>
+        <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
+    </div>
+
+    <!-- Tiêu đề sidebar Desktop -->
+    <div class="kiot-sidebar-title d-none d-lg-flex">
+        Chuyển hàng
+    </div>
+
+    <div class="kiot-filter-box" id="side">
+        <!-- 1. Hướng chuyển (Khối đặc thù Chuyển kho) -->
+        <div class="kiot-filter-group mb-3">
+            <div class="kiot-filter-header d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold text-dark small">
+                    Hướng chuyển <i class="kiot-filter-dot @(Model.Filter.Dir != "all" && Model.CurrentKhoId != 0 ? "on" : "")" id="dDir"></i>
+                </span>
+            </div>
+            <div class="d-flex flex-column gap-2 small">
+                <label class="form-check-label d-flex align-items-center gap-2 cursor-pointer">
+                    <input type="radio" name="filterDir" value="all" class="form-check-input" @(Model.Filter.Dir == "all" ? "checked" : "") />
+                    <span>Tất cả</span>
+                </label>
+                <label class="form-check-label d-flex align-items-center gap-2 cursor-pointer">
+                    <input type="radio" name="filterDir" value="out" class="form-check-input" @(Model.Filter.Dir == "out" ? "checked" : "") />
+                    <span>Chuyển đi từ kho này</span>
+                </label>
+                <label class="form-check-label d-flex align-items-center gap-2 cursor-pointer">
+                    <input type="radio" name="filterDir" value="in" class="form-check-input" @(Model.Filter.Dir == "in" ? "checked" : "") />
+                    <span>Chuyển đến kho này</span>
+                </label>
+            </div>
+            @if (Model.CurrentKhoId == 0)
+            {
+                <div class="text-muted small mt-2" style="font-size: 11.5px; line-height: 1.35;">
+                    <i class="bi bi-info-circle me-1"></i>Chọn một kho cụ thể ở góc trên để lọc theo hướng chuyển.
+                </div>
+            }
+        </div>
+
+        <!-- 2. Trạng thái chứng từ (Lego KiotStatusFilter) -->
+        <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Trạng thái", "dSt", new() {
+            new("NHAP", "Phiếu tạm", Model.Filter.Statuses.Contains("NHAP")),
+            new("DA_XUAT", "Đang chuyển", Model.Filter.Statuses.Contains("DA_XUAT")),
+            new("DA_NHAN", "Đã nhận", Model.Filter.Statuses.Contains("DA_NHAN")),
+            new("HUY", "Đã hủy", Model.Filter.Statuses.Contains("HUY"))
+        })' />
+
+        <!-- 3. Thời gian tạo phiếu (Lego KiotDateFilter) -->
+        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("date", "Thời gian", false, "Tháng này")' />
+    </div>
+</aside>

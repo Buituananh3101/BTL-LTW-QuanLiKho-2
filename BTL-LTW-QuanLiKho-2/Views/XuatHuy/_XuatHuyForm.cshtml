@@ -74,27 +74,15 @@
         <!-- PANEL BÊN PHẢI (Thông tin chứng từ & Hành động) -->
         <aside class="f-panel" id="panel">
             <div class="f-panel-inner">
-                <!-- Người xuất hủy & Ngày giờ -->
+                <!-- Người tạo & Ngày giờ xuất -->
                 <div class="pr">
                     <span class="l">
-                        <i class="bi bi-person text-secondary me-1"></i>
-                        @if (!Model.IsReadOnly)
-                        {
-                            <select id="fNhanVien" class="inp" style="max-width: 135px; height: 32px; font-size: 13px; padding: 2px 6px;">
-                                @foreach (var nv in Model.NhanViens)
-                                {
-                                    <option value="@nv.MaNv" selected="@(nv.MaNv == (Model.MaNvxacNhan ?? Model.MaNvlap))">@nv.TenNv</option>
-                                }
-                            </select>
-                        }
-                        else
-                        {
-                            <strong>@(string.IsNullOrEmpty(Model.TenNguoiXacNhan) ? Model.TenNguoiLap : Model.TenNguoiXacNhan)</strong>
-                        }
+                        <i class="bi bi-person text-secondary me-1"></i>@(string.IsNullOrEmpty(Model.TenNguoiXacNhan) ? (string.IsNullOrEmpty(Model.TenNguoiLap) ? "admin" : Model.TenNguoiLap) : Model.TenNguoiXacNhan)
                     </span>
+                    <input type="hidden" id="fNhanVien" value="@(Model.MaNvxacNhan ?? Model.MaNvlap)" />
                     <div class="v relw">
                         <input class="inp" id="fDate" value="@Model.NgayLap.ToString("dd/MM/yyyy HH:mm")" 
-                               @(Model.IsReadOnly ? "disabled" : "") autocomplete="off" style="max-width:166px;height:34px;color:#4b5563;cursor:pointer;" title="Nhấp để chọn ngày giờ">
+                               @(Model.IsReadOnly ? "disabled" : "") autocomplete="off" style="max-width:166px;height:34px;color:#4b5563;cursor:pointer;" title="Nhấp để chọn ngày giờ xuất hủy">
                         <div class="pop dtpop shadow-sm" id="dtPop"></div>
                     </div>
                 </div>

@@ -27,6 +27,18 @@ public partial class PhieuChuyenKho
 
     public string? GhiChu { get; set; }
 
+    public string? MaPhieu { get; set; }
+
+    public bool DaDanhDau { get; set; }
+
+    public string? GhiChuNhan { get; set; }
+
+    public decimal TongSoLuongChuyen { get; set; }
+
+    public decimal TongSoLuongNhan { get; set; }
+
+    public decimal TongGiaTriChuyen { get; set; }
+
     public virtual ICollection<ChiTietPhieuChuyenKho> ChiTietPhieuChuyenKhos { get; set; } = new List<ChiTietPhieuChuyenKho>();
 
     public virtual Kho MaKhoDichNavigation { get; set; } = null!;

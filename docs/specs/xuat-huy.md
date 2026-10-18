@@ -61,7 +61,7 @@
 - Chế độ chỉ đọc (`IsReadOnly = true`): Ẩn ô tìm kiếm F3, khóa input, hiện banner xác nhận.
 - Header: Nút `← Xuất hủy`, ô `Tìm mặt hàng (F3)` gợi ý tức thì, nút tải mẫu và import Excel.
 - Bảng hàng (Trái): Trống hiện empty box thân thiện; có hàng hiện bảng STT, Mã, Tên, ĐVT, SL hủy, Giá vốn, Thành tiền, nút Xóa. Chọn trùng tăng SL lên 1.
-- Panel F4 (Phải): Dropdown người xuất hủy, ngày giờ (bộ chọn popup `.dtpop` chuẩn Kiểm kho / Nhập hàng: chọn ngày/giờ không tự tắt, đóng khi click ngoài/Escape, định vị scrollTop mượt mà), mã phiếu (`XH{0:D6}` tự sinh), badge trạng thái, tổng giá trị đỏ đậm, ghi chú. Hai nút đáy: `Lưu tạm (F9)`, `Hoàn thành (F10)`.
+- Panel F4 (Phải): Người tạo / xuất hủy (hiển thị tên tài khoản đăng nhập kèm icon người đồng bộ 100% với Kiểm kho và Nhập hàng, lưu `MaNvxacNhan` qua hidden input), ngày giờ (bộ chọn popup `.dtpop` chuẩn Kiểm kho / Nhập hàng: chọn ngày/giờ không tự tắt, đóng khi click ngoài/Escape, định vị scrollTop mượt mà), mã phiếu (`XH{0:D6}` tự sinh), badge trạng thái, tổng giá trị đỏ đậm, ghi chú. Hai nút đáy: `Lưu tạm (F9)`, `Hoàn thành (F10)`.
 
 ---
 

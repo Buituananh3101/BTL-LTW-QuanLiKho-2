@@ -1,0 +1,222 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.ChuyenKho.ChuyenKhoFormVM
+@using System.Globalization
+@{
+    var viCulture = CultureInfo.GetCultureInfo("vi-VN");
+}
+
+<link href="~/css/kiem-kho.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/nhap-hang.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/chuyen-kho.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="kk-container" id="ckFormApp"
+     data-search-products-url="@Url.Action("SearchProducts", "ChuyenKho")"
+     data-save-url="@Url.Action("Save", "ChuyenKho")"
+     data-index-url="@Url.Action("Index", "ChuyenKho")"
+     data-warehouse-id="@Model.MaKhoNguon"
+     data-id="@(Model.MaPhieuChuyen ?? 0)"
+     data-code="@(Model.MaPhieu ?? "")"
+     data-is-edit="@(Model.IsEdit ? "true" : "false")">
+
+    <div class="form-wrap" id="ckFormWrap">
+        <!-- VÙNG CHÍNH BÊN TRÁI (Bảng hàng chuyển & Ô tìm kiếm F3) -->
+        <div class="f-main">
+            <div class="f-top">
+                <a href="@Url.Action("Index", "ChuyenKho")" class="back" id="fBack" title="Quay lại danh sách" aria-label="Quay lại">
+                    <i class="bi bi-arrow-left fs-5"></i>
+                </a>
+                <h1 class="page-title" style="font-size: 20px; font-weight: 700; margin: 0; color: #1f2937;">
+                    @(Model.IsEdit ? "Sửa phiếu chuyển hàng" : "Chuyển hàng")
+                </h1>
+
+                <!-- Ô tìm kiếm hàng hóa F3 autocomplete -->
+                <div class="searchbox focus-w relw nh-search-wrap">
+                    <i class="bi bi-search search-icon ms-2 text-muted"></i>
+                    <input id="productSearchInput" class="border-0 bg-transparent px-2 w-100" placeholder="Tìm hàng hóa theo mã hoặc tên (F3)" autocomplete="off">
+                    <div class="nh-autocomplete-dropdown shadow-sm" id="autocompleteDropdown"></div>
+                </div>
+
+                <div class="tools relw">
+                    <button type="button" class="btn btn-tool" id="tNote" title="Lưu ý khi chuyển kho">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+
+                    <div class="pop notes shadow-sm" id="notes">
+                        <b><i class="bi bi-info-circle text-primary me-1"></i>Lưu ý khi chuyển kho</b>
+                        <ul>
+                            <li><b>Lưu tạm (F9)</b>: Phiếu ở trạng thái tạm, <b>không làm giảm tồn kho</b> của kho gửi.</li>
+                            <li><b>Chuyển hàng (F10)</b>: Tồn kho của kho gửi sẽ <b>giảm ngay lập tức</b>. Không cho phép chuyển vượt quá số lượng tồn kho.</li>
+                            <li><b>Kho nhận</b>: Sau khi hàng tới nơi, người dùng tại kho nhận sẽ kiểm đếm và bấm <b>Nhận hàng</b> để tăng tồn kho nhận.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khối bảng lưới hàng hóa chuyển -->
+            <div class="grid-card shadow-sm" id="gridCard">
+                <div id="tableScrollWrap" style="flex: 1; min-height: 0; overflow: auto; @(Model.Lines != null && Model.Lines.Any() ? "" : "display: none;")">
+                    <table class="tbl" id="itemsTable">
+                        <thead>
+                            <tr>
+                                <th class="w-del" style="width: 44px;"></th>
+                                <th class="w-stt" style="width: 50px;">STT</th>
+                                <th class="w-code" style="width: 130px;">Mã hàng</th>
+                                <th class="w-name">Tên hàng</th>
+                                <th class="w-dvt" style="width: 90px;">ĐVT</th>
+                                <th class="text-end" style="width: 120px;">Tồn kho gửi</th>
+                                <th class="text-end" style="width: 130px;">SL chuyển</th>
+                                <th class="text-end" style="width: 130px;">Giá vốn</th>
+                                <th class="text-end" style="width: 150px;">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsTableBody">
+                            @if (Model.Lines != null && Model.Lines.Any())
+                            {
+                                int idx = 0;
+                                foreach (var item in Model.Lines)
+                                {
+                                    idx++;
+                                    bool isOver = item.SoLuong > item.TonKho;
+                                    <tr class="item-line-row" data-id="@item.MaHang" data-cost="@item.DonGiaChuyen" data-stock="@item.TonKho">
+                                        <td class="w-del text-center">
+                                            <button type="button" class="del btn-remove-line" title="Xóa dòng"><i class="bi bi-trash"></i></button>
+                                        </td>
+                                        <td class="w-stt text-center row-stt">@idx</td>
+                                        <td class="w-code fw-semibold">@item.MaHangNoiBo</td>
+                                        <td class="w-name">@item.TenHang</td>
+                                        <td class="w-dvt">@item.TenDvt</td>
+                                        <td class="text-end num row-stock">@item.TonKho.ToString("N0", viCulture)</td>
+                                        <td class="text-end">
+                                            <input type="text" class="qty line-qty @(isOver ? "over" : "")" value="@item.SoLuong.ToString("G29")" inputmode="numeric" />
+                                            <span class="hint-over" style="@(isOver ? "" : "display: none;")">Vượt tồn</span>
+                                        </td>
+                                        <td class="text-end num row-cost">@item.DonGiaChuyen.ToString("N0", viCulture)</td>
+                                        <td class="text-end num fw-bold text-dark row-amount">@item.ThanhTien.ToString("N0", viCulture)</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Trạng thái trống (Empty State) -->
+                <div class="xl-empty" id="emptyLineBox" style="@(Model.Lines != null && Model.Lines.Any() ? "display: none;" : "")">
+                    <div class="empty-icon-wrap mb-2">
+                        <i class="bi bi-boxes" style="font-size: 48px; color: #94a3b8;"></i>
+                    </div>
+                    <b style="font-size: 16px; color: #1e293b;">Chưa có hàng hóa nào được chọn</b>
+                    <span class="text-muted small">Tìm hàng hóa ở thanh tìm kiếm phía trên (F3), nhập mã hoặc quét mã vạch để thêm vào phiếu chuyển.</span>
+                </div>
+
+                <!-- Footer tóm tắt số liệu hàng hóa -->
+                <div class="nh-items-footer d-flex justify-content-between align-items-center px-3 py-2 border-top bg-light">
+                    <div>Tổng mặt hàng: <strong class="text-dark" id="lblItemCount">@(Model.Lines?.Count ?? 0)</strong></div>
+                    <div>Tổng SL chuyển: <strong class="text-primary" id="lblTotalQty">@(Model.Lines?.Sum(l => l.SoLuong).ToString("N0", viCulture) ?? "0")</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NÚT TRÒN THU GỌN / MỞ RỘNG PANEL PHẢI (Phím tắt F4) -->
+        <button type="button" class="panel-toggle" id="btnToggleRightPanel" title="Thu gọn / mở rộng thông tin (Phím tắt F4)">
+            <i class="bi bi-chevron-right" id="rightPanelToggleIcon"></i>
+        </button>
+
+        <!-- PANEL BÊN PHẢI (Lộ trình, kho nhận, ngày lập, thanh toán) -->
+        <aside class="f-panel" id="rightPanel">
+            <div class="f-panel-inner d-flex flex-column h-100">
+                <!-- Lộ trình kho gửi -> kho nhận -->
+                <div class="routebox">
+                    <div class="pr mb-2">
+                        <span class="l">Kho gửi</span>
+                        <div class="v"><b class="text-primary fs-6">@Model.TenKhoNguon</b></div>
+                    </div>
+                    <div class="pr">
+                        <span class="l">Kho nhận <span class="text-danger">*</span></span>
+                        <div class="v">
+                            <select class="form-select form-select-sm" id="fKhoNhan" style="max-width: 210px; height: 34px;">
+                                <option value="">-- Chọn kho nhận --</option>
+                                @foreach (var k in Model.KhoNhanOptions)
+                                {
+                                    <option value="@k.Value" selected="@(Model.MaKhoDich.ToString() == k.Value ? "selected" : null)">@k.Text</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Người tạo & Thời gian -->
+                <div class="pr">
+                    <span class="l"><i class="bi bi-person text-secondary me-1"></i>Người lập</span>
+                    <div class="v text-muted small">
+                        @(User.Identity?.Name ?? "Nhân viên")
+                    </div>
+                </div>
+
+                <div class="pr">
+                    <span class="l">Thời gian</span>
+                    <div class="v">
+                        <input type="datetime-local" class="form-control form-control-sm" id="fDate" value="@Model.NgayLap.ToString("yyyy-MM-ddTHH:mm")" style="max-width: 190px;" />
+                    </div>
+                </div>
+
+                <!-- Mã phiếu chuyển -->
+                <div class="pr">
+                    <span class="l">Mã chuyển hàng</span>
+                    <div class="v">
+                        <input type="text" class="form-control form-control-sm text-center" id="txtDocCode" placeholder="Mã phiếu tự động" value="@Model.MaPhieu" disabled style="max-width: 190px; text-transform: uppercase;" />
+                    </div>
+                </div>
+
+                <!-- Trạng thái -->
+                <div class="pr">
+                    <span class="l">Trạng thái</span>
+                    <div class="v">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">Phiếu tạm</span>
+                    </div>
+                </div>
+
+                <!-- Tổng kết số liệu -->
+                <div class="pr border-top pt-2 mt-2">
+                    <span class="l">Tổng SL chuyển</span>
+                    <div class="v fw-bold text-dark fs-6" id="lblSummaryQty">
+                        @(Model.Lines?.Sum(l => l.SoLuong).ToString("N0", viCulture) ?? "0")
+                    </div>
+                </div>
+
+                <div class="pr">
+                    <span class="l">Tổng giá trị chuyển</span>
+                    <div class="v fw-bold text-primary fs-5" id="lblSummaryValue">
+                        @(Model.Lines?.Sum(l => l.ThanhTien).ToString("N0", viCulture) ?? "0")
+                    </div>
+                </div>
+
+                <!-- Ghi chú -->
+                <div class="mt-3">
+                    <label class="form-label text-muted small mb-1" for="fNote">Ghi chú</label>
+                    <textarea class="form-control" id="fNote" rows="3" placeholder="Nhập ghi chú phiếu chuyển (nếu có)..." style="resize: none; font-size: 13.5px;">@Model.GhiChu</textarea>
+                </div>
+
+                <!-- Báo lỗi dòng thông báo -->
+                <div class="err-line text-danger small mt-2" id="fErr"></div>
+
+                <!-- Spacer đẩy nút xuống đáy -->
+                <div class="flex-grow-1" style="min-height: 20px;"></div>
+
+                <!-- Nút hành động đáy form chuẩn KiotViet (F9 & F10) -->
+                <div class="f-actions ck-actions">
+                    <button type="button" class="btn-save-draft" id="btnSaveDraft" title="Lưu phiếu ở trạng thái tạm (F9)">
+                        <i class="bi bi-floppy fs-5"></i>
+                        <span>Lưu tạm (F9)</span>
+                    </button>
+                    <button type="button" class="btn-send-transfer" id="btnSendTransfer" title="Trừ tồn kho gửi và chuyển hàng (F10)">
+                        <i class="bi bi-truck fs-5"></i>
+                        <span>Chuyển hàng (F10)</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/chuyen-kho-form.js" asp-append-version="true"></script>
+}

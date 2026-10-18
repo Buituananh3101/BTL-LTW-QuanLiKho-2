@@ -49,10 +49,10 @@
   - Click lần 2: Giảm dần (DESC, hiện icon `bi-arrow-down`).
   - Click lần 3: Bỏ sắp xếp (về mặc định theo thời gian chốt mới nhất).
   - Áp dụng trên 11 cột (`ma`, `tg`, `tt`, `cl`, `tang`, `giam`, `cb`, `slt`, `ghi`, `st`, `kho`), hỗ trợ căn lề số học `.num` và đồng bộ qua AJAX/Export.
-- **Bung mở chi tiết (`tr.dtl`)**:
-  - Tái sử dụng khối Lego `KiotFilter.initRowDetail`: Khung nội dung chi tiết cố định 992px (`.kk-detail-fixed-wrap.kiot-detail-fixed-wrap`) chuẩn Nhà cung cấp không bị kéo dãn; Accordion viền xanh khép kín (`.last-visible-col`, colspan tự động), 5 cột (Mã, Tên, Tồn, Thực tế, Lệch), ghi chú inline, tổng kết số lượng.
-  - Tái sử dụng khối Lego `KiotFilter.initEntityActions`: Nút Hủy (`.btn-cancel-doc`) qua modal xác nhận chuẩn (chỉ hủy phiếu tạm). Các nút Sao chép, Xuất file, Mở phiếu, Lưu ghi chú, In.
-- **Ẩn / Hiện cột**: Tái sử dụng `KiotFilter.initColumnToggle` lưu `localStorage`, tự động tính lại `colspan` và gán `.last-visible-col` khép kín hình chữ nhật.
+- **Bung mở chi tiết (`tr.dtl`) & Hiển thị khi ít cột (Chuẩn Nhà cung cấp)**:
+  - Bảng `#stockTakeTable` cấu hình `width: max-content; min-width: 760px;` đồng bộ Nhà cung cấp (`#supplierTable`), không ép tràn cố định 1450px.
+  - Tái sử dụng `KiotFilter.initRowDetail` & `KiotFilter.initColumnToggle`: Tự động tính lại `colspan`, gán `.last-visible-col` cho ô hiển thị cuối cùng của mọi dòng; cột `th.last-visible-col` tự động co giãn (`width: auto`) giúp viền xanh `#0070f3` của dòng chính và dòng chi tiết (992px) luôn thẳng hàng, khép kín 100% hình chữ nhật khi người dùng ẩn bớt cột.
+  - Tái sử dụng khối Lego `KiotFilter.initEntityActions`: Nút Hủy (`.btn-cancel-doc`) qua modal xác nhận (chỉ hủy phiếu tạm). Các nút Sao chép, Xuất file, Mở phiếu, Lưu ghi chú, In.
 - **Xuất file Excel chuẩn KiotViet (`.xlsx`)**:
   - Hỗ trợ 2 chế độ qua `ClosedXML`:
     + **Xuất danh sách phiếu** (`type = "list"`): Xuất danh sách 13 cột theo bộ lọc hiện tại.

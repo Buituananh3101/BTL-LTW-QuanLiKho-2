@@ -1036,8 +1036,11 @@ window.KiotFilter = (function ($) {
                 $detailRow.find('> td').attr('colspan', visibleCols);
 
                 // Gắn class last-visible-col cho ô hiển thị cuối cùng của mỗi dòng để khép kín hình chữ nhật
-                $row.closest('table').find('.last-visible-col').removeClass('last-visible-col');
-                $row.children('td:visible').last().addClass('last-visible-col');
+                $row.closest('table').find('tr').each(function () {
+                    const $cells = $(this).children('th:visible, td:visible');
+                    $cells.removeClass('last-visible-col');
+                    $cells.last().addClass('last-visible-col');
+                });
 
                 $row.addClass('selected open is-expanded');
                 $detailRow.show();

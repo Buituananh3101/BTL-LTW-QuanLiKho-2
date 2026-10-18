@@ -13,6 +13,12 @@ public partial class ChiTietPhieuChuyenKho
 
     public decimal SoLuong { get; set; }
 
+    public decimal? SoLuongNhan { get; set; }
+
+    public decimal DonGiaChuyen { get; set; }
+
+    public decimal ThanhTien { get; set; }
+
     public virtual HangHoa MaHangNavigation { get; set; } = null!;
 
     public virtual PhieuChuyenKho MaPhieuChuyenNavigation { get; set; } = null!;

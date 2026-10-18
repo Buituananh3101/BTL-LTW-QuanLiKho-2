@@ -5,7 +5,7 @@
 }
 
 <div class="kiot-table-scroll-body">
-    <table class="tbl" id="stockTakeTable" style="min-width: 1450px;">
+    <table class="tbl" id="stockTakeTable" style="width: max-content; min-width: 760px;">
         <thead>
             <tr>
                 <th style="width: 36px;" class="text-center th-checkbox">
@@ -16,7 +16,7 @@
                         <i class="bi @(Model.DaDanhDauFilter ? "bi-star-fill" : "bi-star")"></i>
                     </span>
                 </th>
-                <th data-col="ma" style="width: 130px;" class="sortable-th @(Model.SortBy == "ma" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Mã kiểm kho">
+                <th data-col="ma" style="width: 130px; min-width: 130px;" class="sortable-th @(Model.SortBy == "ma" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Mã kiểm kho">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Mã kiểm kho</span>
@@ -25,7 +25,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="tg" style="width: 145px;" class="sortable-th @(Model.SortBy == "tg" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Thời gian">
+                <th data-col="tg" style="width: 145px; min-width: 145px;" class="sortable-th @(Model.SortBy == "tg" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Thời gian">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Thời gian</span>
@@ -34,7 +34,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="tt" style="width: 110px;" class="num r text-end sortable-th @(Model.SortBy == "tt" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tổng thực tế">
+                <th data-col="tt" style="width: 110px; min-width: 110px;" class="num r text-end sortable-th @(Model.SortBy == "tt" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tổng thực tế">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Tổng thực tế</span>
@@ -43,7 +43,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="cl" style="width: 120px;" class="num r text-end sortable-th @(Model.SortBy == "cl" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tổng chênh lệch">
+                <th data-col="cl" style="width: 120px; min-width: 120px;" class="num r text-end sortable-th @(Model.SortBy == "cl" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tổng chênh lệch">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Tổng chênh lệch</span>
@@ -52,7 +52,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="tang" style="width: 110px;" class="num r text-end sortable-th @(Model.SortBy == "tang" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo SL lệch tăng">
+                <th data-col="tang" style="width: 110px; min-width: 110px;" class="num r text-end sortable-th @(Model.SortBy == "tang" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo SL lệch tăng">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">SL lệch tăng</span>
@@ -61,7 +61,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="giam" style="width: 110px;" class="num r text-end sortable-th @(Model.SortBy == "giam" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo SL lệch giảm">
+                <th data-col="giam" style="width: 110px; min-width: 110px;" class="num r text-end sortable-th @(Model.SortBy == "giam" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo SL lệch giảm">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">SL lệch giảm</span>
@@ -70,7 +70,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="cb" style="width: 145px;" class="sortable-th @(Model.SortBy == "cb" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Ngày cân bằng">
+                <th data-col="cb" style="width: 145px; min-width: 145px;" class="sortable-th @(Model.SortBy == "cb" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Ngày cân bằng">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Ngày cân bằng</span>
@@ -79,7 +79,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="slt" style="width: 100px;" class="num r text-end sortable-th @(Model.SortBy == "slt" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo SL thực tế">
+                <th data-col="slt" style="width: 100px; min-width: 100px;" class="num r text-end sortable-th @(Model.SortBy == "slt" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo SL thực tế">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">SL thực tế</span>
@@ -88,7 +88,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="ghi" style="width: 180px;" class="sortable-th @(Model.SortBy == "ghi" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Ghi chú">
+                <th data-col="ghi" style="width: 180px; min-width: 180px;" class="sortable-th @(Model.SortBy == "ghi" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Ghi chú">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Ghi chú</span>
@@ -97,7 +97,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="st" style="width: 135px;" class="sortable-th @(Model.SortBy == "st" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Trạng thái">
+                <th data-col="st" style="width: 135px; min-width: 135px;" class="sortable-th @(Model.SortBy == "st" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Trạng thái">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Trạng thái</span>
@@ -106,7 +106,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="kho" style="width: 130px;" class="sortable-th @(Model.SortBy == "kho" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Kho">
+                <th data-col="kho" style="width: 130px; min-width: 130px;" class="sortable-th @(Model.SortBy == "kho" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Kho">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Kho</span>
@@ -173,7 +173,7 @@
 
                     <!-- Khối chi tiết bung ra (Inline Drawer / Accordion) -->
                     <tr class="product-detail-row dtl" id="dtl-@item.MaPhieuKiemKe" style="display: none;">
-                        <td colspan="13" class="p-0 border-0">
+                        <td colspan="13" class="p-0">
                             <div class="product-detail-panel-wrap" style="display: none;">
                                 <div class="product-detail-panel dp shadow-sm" data-d="@item.MaPhieuKiemKe">
                                     <div class="dp-tabs"><button type="button" class="dp-tab active" data-tab="info">Thông tin</button></div>

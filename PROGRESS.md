@@ -1,17 +1,137 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Đồng Bộ Bộ Chọn Thời Gian Popup Cho Phân Hệ Xuất Hủy (Phiên 101)
+Cập nhật lần cuối: 2026-10-18 – Sửa Lỗi Hiển Thị Khi Ít Cột Bảng Phiếu Kiểm Kho Dựa Trên Chuẩn Nhà Cung Cấp (Phiên 107)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử bộ chọn ngày giờ trên phân hệ Xuất hủy (`/XuatHuy/Create`, `/XuatHuy/Edit`).
+- Sẵn sàng kiểm thử trải nghiệm thực tế màn hình Phiếu kiểm kho khi ẩn bớt cột và mở dòng chi tiết Master-Detail viền xanh chữ nhật khép kín hoàn hảo.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế các luồng Nhập hàng, Kiểm kho, Xuất hủy.
-2. Xây dựng phân hệ Trả hàng nhập (Purchase Returns) theo yêu cầu.
+1. Kiểm tra trải nghiệm thực tế các luồng Chuyển kho và Nhập hàng.
+2. Xây dựng phân hệ Trả hàng nhập (Purchase Returns) hoặc Xuất dùng nội bộ theo yêu cầu.
+
+---
+
+- **Sửa Lỗi Hiển Thị Khi Ít Cột Bảng Phiếu Kiểm Kho Dựa Trên Chuẩn Nhà Cung Cấp (Phiên 107)**:
+  - **Nhu cầu**: Người dùng phản ánh lỗi trên màn hình Phiếu kiểm kho (`/PhieuKiemKe/Index`): khi ẩn bớt hầu hết các cột chỉ để lại 2 cột dữ liệu (Trạng thái, Kho), bảng bị co rút hẹp chỉ chiếm ~30% màn hình để lại khoảng trống trắng lớn bên phải; khi mở chi tiết dòng (Master-Detail), viền xanh `#0070f3` của dòng cha bị gập xuống ở cột Kho trong khi drawer chi tiết bung rộng 992px tạo thành bậc thang gãy khúc; yêu cầu sửa lại lỗi hiển thị khi ít cột dựa trên chuẩn hiển thị của phân hệ Nhà cung cấp (`NhaCungCap`).
+  - **Nguyên nhân cốt lõi**:
+    + Thẻ `<table id="stockTakeTable">` bị ép cứng inline `style="min-width: 1450px;"` và trong `kiem-kho.css` quy định `min-width: 1450px !important; width: 100%; table-layout: fixed;`.
+    + Toàn bộ 11 cột `<th>` đều có `width` cố định (`style="width: ...px;"`), khi chỉ còn 2 cột hiển thị (tổng ~337px), trình duyệt khóa cứng 4 ô ở 337px đầu tiên và để trống toàn bộ phần còn lại đến 1450px.
+    + Thẻ `td[colspan]` của dòng chi tiết `tr.dtl` bị gắn class `border-0` và chứa khối `.kk-detail-fixed-wrap` 992px ép drawer rộng 992px, trong khi ô `.last-visible-col` của dòng cha dừng ở 337px, làm viền phải của dòng cha và dòng con lệch nhau 655px.
+    + Trong `kiot-filter.js`, hàm `initRowDetail` khi mở dòng đã xóa sạch class `.last-visible-col` của toàn bảng kể cả `thead th`, khiến tiêu đề cột cuối cùng không được nhận diện.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Độ rộng Bảng & Khép kín Viền xanh (`Views/PhieuKiemKe/_PhieuKiemKeTable.cshtml` & `wwwroot/css/kiem-kho.css`)**:
+      * Đưa `#stockTakeTable` về chuẩn Nhà cung cấp (`#supplierTable`): `<table class="tbl" id="stockTakeTable" style="width: max-content; min-width: 760px;">` và CSS `width: max-content !important; min-width: 760px !important; table-layout: fixed !important;`.
+      * Bổ sung `min-width` đồng bộ cho toàn bộ 11 cột `<th>` tương ứng với `width`.
+      * Loại bỏ class `border-0` ở ô `td[colspan="13"]` của dòng `dtl`, khôi phục trọn vẹn viền xanh khép kín (viền trên 2px, 2 bên 3px, đáy 2px).
+      * Bổ sung quy tắc CSS cho cột hiển thị cuối cùng: `#stockTakeTable th.last-visible-col { width: auto !important; }` và `.tbl thead th.last-visible-col { width: auto !important; }` trong `site.css`. Khi ít cột, cột hiển thị cuối cùng tự động co giãn lấp đầy không gian bảng, đẩy viền phải của dòng cha thẳng hàng tuyệt đối 100% với viền phải của drawer 992px.
+    + **Tối ưu hóa Khối LEGO `KiotFilter.initRowDetail` (`wwwroot/js/kiot-filter.js`)**:
+      * Chuẩn hóa logic gán `.last-visible-col` khi mở dòng chi tiết: duyệt qua mọi dòng `tr` trong bảng (bao gồm cả `thead tr` và các dòng dữ liệu) để gán chính xác ô cuối cùng hiển thị, không xóa nhầm trên `thead`.
+    + **Đặc tả & Kiểm tra**:
+      * Đồng bộ tài liệu đặc tả `docs/specs/kiem-kho.md` (7.627 ký tự < 8.000 ký tự).
+      * `dotnet build -t:Compile` & `dotnet build` đạt **0 Errors, 4 Warnings**.
+      * `node -c` toàn bộ JavaScript đạt **0 Errors**.
+
+- **Chuẩn Hóa Hiển Thị Bảng Phiếu Chuyển Kho & Drawer Chi Tiết Dựa Trên Nhà Cung Cấp & Nhập Hàng (Phiên 106)**:
+  - **Nhu cầu**: Người dùng yêu cầu "sửa lại lỗi hiển thị phiếu chuyển kho dựa trên phiếu hiển thị nhà cung cấp" kèm ảnh chụp lỗi (bảng `#transferTable` bị co rút hẹp, khoảng trắng lớn bên phải, mất viền xanh chữ nhật, ẩn thiếu nhiều cột do lưu `localStorage` cũ, thiếu ô tìm kiếm nhanh hàng hóa trong drawer).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Khung bao bọc Flexbox (`Views/ChuyenKho/Index.cshtml`)**: Chuyển `class="kiot-table-wrapper"` từ `<section id="content">` vào `<div id="tableContainer">`, khôi phục thuộc tính flexbox kéo giãn bảng 100% không gian màn hình như `NhaCungCap` và `NhapHang`.
+    + **Bổ sung CSS Bảng & Viền xanh `#0070f3` (`wwwroot/css/chuyen-kho.css`)**:
+      * Bổ sung định kiểu cho `#transferTable, #transferTable.tbl`: `min-width: 1450px !important; width: 100%; table-layout: fixed !important; border-collapse: separate; border-spacing: 0;`.
+      * Tạo viền xanh chữ nhật liền mạch `#0070f3` bao quanh dòng cha và dòng chi tiết khi mở (viền trên 2px, viền 2 bên 3px kết hợp `.last-visible-col`, viền đáy 2px).
+      * Cố định độ rộng khung drawer `.ck-detail-fixed-wrap, .transfer-detail-fixed-wrap, .kiot-detail-fixed-wrap` ở `992px !important; max-width: 100%; box-sizing: border-box;` kèm responsive `@media (max-width: 1040px) { width: 100% !important; }`.
+    + **Hoàn thiện cấu trúc Drawer & Tìm kiếm nhanh hàng hóa (`Views/ChuyenKho/_ChuyenKhoTable.cshtml`)**:
+      * Loại bỏ `border-0` ở ô `td[colspan="13"]` của dòng `dtl` để không xung đột viền xanh.
+      * Tích hợp hàng tìm kiếm con `tr.fin` với `.dtl-search-code` (mã hàng) và `.dtl-search-name` (tên hàng) ngay trên danh sách mặt hàng chuyển.
+      * Cập nhật class khung chi tiết cố định thành `ck-detail-fixed-wrap kiot-detail-fixed-wrap`.
+    + **Tái cấu trúc JavaScript & Nâng cấp Khóa Storage (`wwwroot/js/chuyen-kho-index.js`)**:
+      * Nâng cấp `storageKey: 'kiot_chuyen_kho_cols_v2'` để tự động kích hoạt lại đầy đủ 11 cột hiển thị mặc định trên trình duyệt người dùng.
+      * Lưu trữ handler `transferRowDetailHandler = KiotFilter.initRowDetail(...)`, theo dõi `F.openId` và tự động re-expand dòng chi tiết sau mỗi lần nạp bảng bằng AJAX.
+      * Thêm trình lắng nghe `#selectAllRows` và `.row-select` đồng bộ chọn nhiều dòng.
+      * Thêm sự kiện tìm kiếm tức thì cho `.dtl-search-code, .dtl-search-name` tự động lọc dòng hàng hóa `tr.dtl-line-row` trong drawer.
+    + **Kiểm tra & Biên dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 NuGet Warnings**.
+      * `node -c BTL-LTW-QuanLiKho-2\wwwroot\js\chuyen-kho-index.js` đạt **0 Errors**.
+
+- **Bổ Sung Bật Tắt Cột & Sắp Xếp Click-To-Sort Header Bảng Chuyển Kho Giống Kiểm Kho (Phiên 105)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "thêm phần bật tắt ẩn hiện cột, ấn vào header cột sắp xếp giống phần kiểm kho".
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tùy chọn hiển thị cột (`#btnColsDropdown` + `#colMenu`)**:
+      * Bổ sung nút icon `bi-view-list` và menu dropdown chứa checkbox bật/tắt cho toàn bộ 11 cột dữ liệu vào toolbar của `Views/ChuyenKho/Index.cshtml`: Mã chuyển hàng, Thời gian, Từ kho, Tới kho, Ngày chuyển, Ngày nhận, SL chuyển, SL nhận, Giá trị chuyển, Ghi chú, Trạng thái.
+      * Tái sử dụng khối Lego chuẩn KiotViet `KiotFilter.initColumnToggle`: lưu cấu hình hiển thị vào `localStorage` (`storageKey: 'chuyenkho_cols'`), tự động đồng bộ ẩn/hiện các ô `[data-col]`, cập nhật `colspan` cho dòng rỗng và dòng chi tiết Drawer để không vỡ layout bảng.
+      * Tự động gọi `applyColumnVisibility()` khi khởi tạo và sau mỗi lần nạp bảng bằng AJAX trong `wwwroot/js/chuyen-kho-index.js`.
+    + **Sắp xếp 3 trạng thái khi nhấn vào header cột (Click-to-sort)**:
+      * Cập nhật toàn bộ 11 cột trong `Views/ChuyenKho/_ChuyenKhoTable.cshtml` thành `th.sortable-th` với icon mũi tên tăng/giảm (`bi-arrow-up`, `bi-arrow-down`) và các class căn lề chuẩn (`num r text-end`, `text-center`).
+      * Chu trình 3 trạng thái click-to-sort trong `wwwroot/js/chuyen-kho-index.js`: Tăng dần (`asc`) -> Giảm dần (`desc`) -> Bỏ sắp xếp (`null` / mặc định).
+      * Bổ sung các nhánh sắp xếp cho toàn bộ các cột còn lại trong `Controllers/ChuyenKhoController.cs`: `ngaychuyen` (`ThoiDiemXuat`), `ngaynhan` (`ThoiDiemNhan`), `slnhan` (`TongSoLuongNhan`), `ghi` (`GhiChu`), `st` (`TrangThai`).
+    + **Đặc tả & Kiểm tra**:
+      * Đồng bộ tài liệu đặc tả `docs/specs/chuyen-kho.md` (6.686 ký tự < 8.000 ký tự).
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c BTL-LTW-QuanLiKho-2\wwwroot\js\chuyen-kho-index.js` đạt **0 Errors**.
+
+- **Xây Dựng Hoàn Chỉnh Toàn Bộ Phân Hệ Chuyển Kho Chuẩn KiotViet & Prototype (Phiên 104)**:
+  - **Nhu cầu**: Người dùng cung cấp prototype `prototype-chuyenkho.html` và yêu cầu "triển khai toàn bộ" chức năng Chuyển kho (Stock Transfer).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Cơ sở dữ liệu & Entity Models (`migrations/sql/13_bo_sung_chuyen_kho.sql`)**:
+      * Bổ sung các cột mới vào `PhieuChuyenKho`: `MaPhieu` (`CK000001`), `DaDanhDau`, `GhiChuNhan`, `TongSoLuongChuyen`, `TongSoLuongNhan`, `TongGiaTriChuyen`.
+      * Bổ sung các cột mới vào `ChiTietPhieuChuyenKho`: `SoLuongNhan` (SL thực nhận), `DonGiaChuyen` (giá vốn), `ThanhTien`.
+      * Tạo Filtered Unique Index `UQ_PhieuChuyen_MaPhieu` chống trùng lặp mã phiếu.
+      * Nâng cấp View `vw_BienDongKho` nhánh `CHUYEN_NHAP` cộng tồn kho nhận theo `ISNULL(ct.SoLuongNhan, ct.SoLuong)` để xử lý chính xác nhận thiếu / thất thoát.
+      * Đồng bộ `Models/PhieuChuyenKho.cs`, `Models/ChiTietPhieuChuyenKho.cs`, `Models/QuanLyKhoPhuQuocLtwContext.cs`, `Services/MaChungTuHelper.cs`.
+    + **ViewModels & Controller Backend (`ChuyenKhoViewModels.cs`, `ChuyenKhoController.cs`)**:
+      * Kế thừa `BaseKhoController`, tích hợp `ITonKhoService` và `INhatKyThaoTacService`.
+      * Bọc các thao tác chứng từ và nhận hàng trong `BeginTransactionAsync`.
+      * Kiểm tra chặn xuất âm kho nguồn qua `_tonKhoService.KiemTraXuatKhoAsync(...)` khi chuyển sang trạng thái `DA_XUAT`.
+      * Cung cấp đầy đủ các Action: `Index`, `Filter` (AJAX partial), `ToggleFavorite` (silent toggle), `GetNextCode` (tự sinh mã `CKxxxxxx`), `Create`, `Edit`, `Save` (Lưu tạm `NHAP` / Chuyển hàng `DA_XUAT`), `Receive` (Nhận hàng kiểm soát thất thoát), `Cancel` (Hủy phiếu tạm hoặc hủy chuyển hoàn tồn), `SaveNote`, `SearchProducts` (F3 autocomplete), `Export` (Excel ClosedXML).
+    + **Giao Diện Razor Views & Frontend Scripts**:
+      * **Màn hình 1 Danh sách (`Views/ChuyenKho/Index.cshtml`, `_ChuyenKhoFilterSidebar.cshtml`, `_ChuyenKhoTable.cshtml`)**:
+        - Bộ lọc sidebar: Hướng chuyển 3 trạng thái (`all`, `out`, `in`), trạng thái (Phiếu tạm, Đang chuyển, Đã nhận, Đã hủy), thời gian (`_KiotDateFilter`).
+        - Bảng dữ liệu Master-Detail viền xanh chữ nhật `#0070f3` (`KiotFilter.initRowDetail`), inline drawer cố định 992px (`.ck-detail-fixed-wrap`), khối lộ trình chuyển `[Kho A] -> [Kho B]`, meta người lập/chuyển/nhận, cảnh báo nhận thiếu, thanh nút ngữ cảnh theo kho và trạng thái, phân trang AJAX.
+      * **Màn hình 2 Form Lập/Sửa (`Views/ChuyenKho/Create.cshtml`, `Edit.cshtml`, `_ChuyenKhoForm.cshtml`)**:
+        - Form 2 cột: Bảng hàng hóa tìm kiếm F3 autocomplete, cảnh báo vượt tồn màu đỏ tức thì (`hint-over`), panel phải lộ trình kho, nút F4 thu gọn, nút F9 Lưu tạm, F10 Chuyển hàng.
+      * **Modal Nhận hàng (`Views/ChuyenKho/_ReceiveModal.cshtml`)**:
+        - Bảng kiểm đếm số lượng thực nhận, chặn `SL nhận > SL chuyển`, bắt buộc nhập ghi chú lý do thất thoát nếu nhận thiếu.
+      * **Styles & Scripts**: `wwwroot/css/chuyen-kho.css`, `wwwroot/js/chuyen-kho-index.js`, `wwwroot/js/chuyen-kho-form.js`.
+      * **Menu hệ thống**: Kích hoạt liên kết `Chuyển kho` trong `Views/Shared/_MainMenu.cshtml`.
+    + **Đặc tả & Kiểm tra**:
+      * Đã tạo tài liệu đặc tả `docs/specs/chuyen-kho.md` (6.384 ký tự < 8.000 ký tự).
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c` toàn bộ JavaScript đạt **0 Errors**.
+
+- **Sửa Lỗi Biên Dịch CS1729 Cho Constructor KiotDateFilterVM (Phiên 103)**:
+  - **Nhu cầu**: Người dùng tải ảnh chụp lỗi Visual Studio: `CS1729 'KiotDateFilterVM' does not contain a constructor that takes 4 arguments` tại `Views/ChuyenKho/_ChuyenKhoFilterSidebar.cshtml` dòng 56.
+  - **Nguyên nhân**:
+    + Trong `_ChuyenKhoFilterSidebar.cshtml` gọi: `<partial name="_KiotDateFilter" model='new KiotDateFilterVM("date", "Thời gian", false, "thangnay")' />` (4 tham số).
+    + Tuy nhiên `ViewModels/Common/KiotDateFilterVM.cs` trước đó chỉ có 2 overload constructor (0 tham số và tối đa 3 tham số), thiếu overload nhận 4 tham số có `defaultText`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bổ sung constructor 4 tham số trong `ViewModels/Common/KiotDateFilterVM.cs`**:
+      * `public KiotDateFilterVM(string target, string title, bool showFuture, string defaultText)` gán `DefaultText = defaultText`.
+      * Tự động chuẩn hóa nếu truyền mã `"thangnay"` thành chuỗi tiếng Việt `"Tháng này"`.
+    + **Đồng bộ view (`Views/ChuyenKho/_ChuyenKhoFilterSidebar.cshtml`)**:
+      * Đổi tham số `"thangnay"` thành `"Tháng này"` chuẩn xác.
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings** (sạch lỗi biên dịch).
+
+---
+
+- **Đồng Bộ Ô Người Tạo / Xuất Hủy Chuẩn KiotViet (Phiên 102)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm ảnh chụp: "trong phần xuất hủy, nút dropdown chọn người đang lỗi, sửa lại cho đồng bộ".
+  - **Nguyên nhân**:
+    + Trên `Views/XuatHuy/_XuatHuyForm.cshtml`, dòng đầu panel dùng thẻ `<select id="fNhanVien">` native HTML với inline style `max-width: 135px; height: 32px`, bị lệch dòng và vỡ giao diện so với ô thời gian bên cạnh.
+    + Thẻ `<option selected="@(boolean)">` trong Razor bị lỗi render `selected="False"` dẫn đến trình duyệt chọn sai nhân viên (`Trần Thị Kho` thay vì tài khoản đăng nhập `Nguyễn Minh Quân`).
+    + Trong khi đó, cả 2 khuôn mẫu chuẩn **Kiểm kho** (`_PhieuKiemKeForm.cshtml`) và **Nhập hàng** (`_NhapHangForm.cshtml`) đều hiển thị người tạo dạng text gắn liền với tài khoản đăng nhập (quy chuẩn bảo mật audit trail của KiotViet).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Đồng bộ View (`Views/XuatHuy/_XuatHuyForm.cshtml`)**:
+      * Loại bỏ thẻ `<select>` native lỗi thời, chuyển sang hiển thị tên tài khoản đăng nhập kèm icon: `<i class="bi bi-person text-secondary me-1"></i>@(string.IsNullOrEmpty(Model.TenNguoiXacNhan) ? (string.IsNullOrEmpty(Model.TenNguoiLap) ? "admin" : Model.TenNguoiLap) : Model.TenNguoiXacNhan)`. Đồng bộ 100% từng pixel với Kiểm kho và Nhập hàng.
+      * Thêm `<input type="hidden" id="fNhanVien" value="@(Model.MaNvxacNhan ?? Model.MaNvlap)" />` để JavaScript `xuat-huy-form.js` (`maNvxacNhan: parseInt($('#fNhanVien').value)`) vẫn hoạt động trơn tru.
+    + **Đồng Bộ Đặc Tả (`docs/specs/xuat-huy.md`)**:
+      * Cập nhật mô tả hiển thị người tạo/xuất hủy trong mục Panel F4 (7.361 ký tự < 8.000 ký tự).
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c wwwroot/js/xuat-huy-form.js` đạt **0 Errors**.
 
 ---
 
@@ -1323,6 +1443,12 @@ Cập nhật lần cuối: 2026-10-18 – Đồng Bộ Bộ Chọn Thời Gian P
 ---
 
 ## Nhật ký phiên
+- **2026-10-18 (Phiên 107 - Sáng)**:
+  - Sửa lỗi hiển thị khi ít cột bảng Phiếu kiểm kho dựa trên chuẩn Nhà cung cấp:
+    - Đưa bảng `#stockTakeTable` về cấu hình `width: max-content; min-width: 760px; table-layout: fixed !important;` đồng bộ với `#supplierTable`.
+    - Bổ sung `min-width` đồng bộ cho toàn bộ 11 cột `<th>`, gỡ bỏ `border-0` ở ô `td[colspan]` của dòng chi tiết `tr.dtl`.
+    - Bổ sung quy tắc co giãn `th.last-visible-col { width: auto !important; }` giúp cột hiển thị cuối cùng lấp đầy bảng khi ít cột, triệt tiêu gãy khúc viền xanh `#0070f3`.
+    - Tối ưu `KiotFilter.initRowDetail` bảo toàn class `.last-visible-col` cho mọi dòng trong bảng bao gồm `thead tr`.
 - **2026-10-17 (Phiên 79 - Trưa)**:
   - Đóng gói nút Nhập/Xuất file Excel trong Danh sách hàng hóa:
     - Tạo partial view `Views/HangHoa/_HangHoaExcelActions.cshtml` gom các thao tác file (Xuất file, Nhập file, Tải file mẫu) vào 1 nút dropdown KiotViet duy nhất.

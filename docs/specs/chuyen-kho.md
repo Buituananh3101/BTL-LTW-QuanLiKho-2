@@ -58,10 +58,12 @@
   - Hướng chuyển (Radio: Tất cả, Chuyển đi từ kho này, Chuyển đến kho này).
   - Trạng thái (Checkbox Lego: Phiếu tạm, Đang chuyển, Đã nhận, Đã hủy).
   - Thời gian (`_KiotDateFilter` + `KiotFilter.initDateFilter`).
-- **Topbar**: Tiêu đề "Chuyển hàng", ô tìm kiếm mã phiếu F3, nút "+ Chuyển hàng", "Xuất file".
+- **Topbar**: Tiêu đề "Chuyển hàng", ô tìm kiếm mã phiếu F3, nút "+ Chuyển hàng", "Xuất file", nút tùy chọn hiển thị cột (`#btnColsDropdown` + `#colMenu`).
 - **Bảng dữ liệu Master-Detail**:
   - Dòng cha + Dòng chi tiết viền chữ nhật `#0070f3` (`KiotFilter.initRowDetail`).
   - Drawer chi tiết 992px: Lộ trình kho, bảng hàng hóa, cảnh báo nhận thiếu, ghi chú, thanh nút hành động ngữ cảnh theo trạng thái.
+  - Tùy chọn ẩn/hiển thị 11 cột lưu `localStorage` (`KiotFilter.initColumnToggle`).
+  - Sắp xếp cột 3 trạng thái click-to-sort (ASC -> DESC -> Bỏ sắp xếp) với icon mũi tên trên 11 cột dữ liệu.
   - Phân trang AJAX (`_Pagination.cshtml`).
 
 ### 4.2. Màn hình 2: Lập/Sửa phiếu (`/ChuyenKho/Create`, `/ChuyenKho/Edit/{id}`)
