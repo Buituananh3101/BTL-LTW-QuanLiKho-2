@@ -1697,6 +1697,19 @@ tr.product-detail-row > td {
   accent-color: #0070f4;
   cursor: pointer;
   pointer-events: none;
+  flex-shrink: 0;
+}
+.kiot-ms-item span,
+.kiot-ms-item .kiot-ms-text {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kiot-ms-item .kiot-item-edit-btn {
+  margin-left: auto;
+  margin-right: -4px;
+  flex-shrink: 0;
 }
 
 /* Single-select filter box (KiotViet style - Tiêu chí tồn) */
@@ -2089,3 +2102,401 @@ tr.product-detail-row > td {
 .kiot-toast.success { background: #0f172a; border-left: 4px solid #10b981; }
 .kiot-toast.error { background: #0f172a; border-left: 4px solid #ef4444; }
 .kiot-toast.warning { background: #0f172a; border-left: 4px solid #f59e0b; }
+
+/* ========================================================================
+   KIOTVIET UNIVERSAL FORM COMPONENTS: Collapsible, Numbers, Split, Combobox, Prompt
+   ======================================================================== */
+
+/* 1. Khối Accordion gập mở (.kiot-sec) */
+.kiot-sec {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  transition: border-color .15s ease;
+}
+.kiot-sec-h {
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+.kiot-sec.open .kiot-sec-h {
+  border-bottom: 1px solid #e5e7eb;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.kiot-sec-h h3 {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+.kiot-sec-h p {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 2px 0 0;
+}
+.kiot-sec-h .kiot-chev,
+.kiot-sec-h .hh-chev {
+  width: 18px;
+  height: 18px;
+  color: #6b7280;
+  transition: transform .2s ease;
+  flex-shrink: 0;
+}
+.kiot-sec.open .kiot-sec-h .kiot-chev,
+.kiot-sec.open .kiot-sec-h .hh-chev {
+  transform: rotate(180deg);
+}
+.kiot-sec-b {
+  padding: 16px;
+  display: none;
+}
+.kiot-sec.open .kiot-sec-b {
+  display: block;
+}
+
+/* 2. Ô nhập số định dạng hàng nghìn (.kiot-num) */
+.kiot-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+.kiot-num:focus {
+  border-color: #0070f4;
+  box-shadow: 0 0 0 3px rgba(0, 112, 244, 0.12);
+}
+
+/* 3. Nút lưu đa năng Split Button (.kiot-split) */
+.kiot-split {
+  display: inline-flex;
+  position: relative;
+}
+.kiot-split .btn-main {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+.kiot-split .caret {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.kiot-split .kiot-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  min-width: 170px;
+  display: none;
+  z-index: 1050;
+  padding: 4px 0;
+}
+.kiot-split .kiot-menu.show {
+  display: block;
+}
+.kiot-split .kiot-menu button,
+.kiot-split .kiot-menu a {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 14px;
+  border: none;
+  background: transparent;
+  font-size: 13.5px;
+  color: #374151;
+  cursor: pointer;
+  text-decoration: none;
+}
+.kiot-split .kiot-menu button:hover,
+.kiot-split .kiot-menu a:hover {
+  background: #eff6ff;
+  color: #0070f4;
+}
+
+/* 4. Dropdown Combobox có nút Bút chì ✎ Sửa trực tiếp (.kiot-combobox-wrap) */
+.kiot-combobox-wrap {
+  position: relative;
+  width: 100%;
+}
+.kiot-combobox-box {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  min-height: 38px;
+  padding: 4px 8px;
+  background: #ffffff;
+  cursor: text;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.kiot-combobox-box:focus-within,
+.kiot-combobox-wrap.open .kiot-combobox-box {
+  border-color: #0070f4;
+  box-shadow: 0 0 0 3px rgba(0, 112, 244, 0.12);
+}
+.kiot-combobox-input {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  font-size: 13.5px;
+  flex: 1 1 80px;
+  padding: 2px 4px;
+  min-width: 60px;
+  background: transparent;
+}
+.kiot-combobox-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  z-index: 1060;
+  display: none;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.kiot-combobox-wrap.open .kiot-combobox-dropdown {
+  display: block;
+}
+.kiot-combobox-item {
+  padding: 8px 12px;
+  font-size: 13.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  color: #374151;
+}
+.kiot-combobox-item:hover {
+  background-color: #eff6ff;
+  color: #0070f4;
+}
+.kiot-combobox-item.selected {
+  background-color: #eff6ff;
+  color: #0070f4;
+  font-weight: 600;
+}
+/* Icon cây bút chì ✎ sửa item trực tiếp */
+.kiot-item-edit-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: transparent !important;
+  color: #64748b !important;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-left: auto;
+  margin-right: 4px;
+}
+.kiot-item-edit-btn:hover {
+  background: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+.kiot-combobox-item:hover .kiot-item-edit-btn,
+.hh-multiselect-item:hover .hh-item-edit-btn,
+.hh-cs-item:hover .hh-item-edit-btn,
+.kiot-ms-item:hover .kiot-item-edit-btn {
+  display: inline-flex;
+}
+
+/* 5. Prompt Modal dùng chung toàn hệ thống (.kiot-prompt-ov) */
+.kiot-prompt-ov {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  z-index: 1090;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in,
+              visibility 0s linear 0.2s,
+              background-color 0.2s ease-in,
+              backdrop-filter 0.2s ease-in,
+              -webkit-backdrop-filter 0.2s ease-in;
+}
+.kiot-prompt-ov.show {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  background: rgba(15, 23, 42, 0.5) !important;
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+  transition: opacity 0.22s ease-out,
+              visibility 0s linear 0s,
+              background-color 0.22s ease-out,
+              backdrop-filter 0.22s ease-out,
+              -webkit-backdrop-filter 0.22s ease-out;
+}
+.kiot-prompt-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  width: 440px;
+  max-width: 90vw;
+  overflow: hidden;
+  transform: scale(0.94) translateY(8px);
+  opacity: 0;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease-in;
+}
+.kiot-prompt-ov.show .kiot-prompt-modal {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-out;
+}
+.kiot-prompt-head {
+  padding: 14px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.kiot-prompt-head h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: #1e293b;
+}
+.kiot-prompt-body {
+  padding: 18px;
+}
+.kiot-prompt-foot {
+  padding: 12px 18px;
+  background: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 6. Confirm Modal dùng chung toàn hệ thống (.kiot-confirm-ov - Hiển thị CENTER) */
+.kiot-confirm-ov {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  z-index: 1095;
+  display: flex;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in,
+              visibility 0s linear 0.2s,
+              background-color 0.2s ease-in,
+              backdrop-filter 0.2s ease-in,
+              -webkit-backdrop-filter 0.2s ease-in;
+}
+.kiot-confirm-ov.show {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  background: rgba(15, 23, 42, 0.55) !important;
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+  transition: opacity 0.22s ease-out,
+              visibility 0s linear 0s,
+              background-color 0.22s ease-out,
+              backdrop-filter 0.22s ease-out,
+              -webkit-backdrop-filter 0.22s ease-out;
+}
+.kiot-confirm-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  width: 480px;
+  max-width: 92vw;
+  overflow: hidden;
+  transform: scale(0.94) translateY(8px);
+  opacity: 0;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease-in;
+}
+.kiot-confirm-ov.show .kiot-confirm-modal {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-out;
+}
+.kiot-confirm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.kiot-confirm-body {
+  padding: 20px 24px;
+  color: #374151;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+.kiot-confirm-foot {
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.kiot-confirm-foot .btn {
+  height: 36px;
+  padding: 0 16px;
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.kiot-confirm-foot .btn-danger {
+  background-color: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+.kiot-confirm-foot .btn-danger:hover {
+  background-color: #b91c1c !important;
+  border-color: #b91c1c !important;
+}
+.kiot-confirm-foot .btn-outline-secondary {
+  border-color: #d1d5db !important;
+  color: #374151 !important;
+  background-color: #ffffff !important;
+}
+.kiot-confirm-foot .btn-outline-secondary:hover {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+}
+
+
+

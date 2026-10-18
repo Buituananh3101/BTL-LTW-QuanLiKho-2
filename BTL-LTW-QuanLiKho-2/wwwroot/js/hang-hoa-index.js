@@ -199,7 +199,21 @@ $(document).ready(function () {
             box.addClass('open');
         });
 
+        dropdown.on('click', '.kiot-item-edit-btn, .hh-item-edit-btn', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            const id = $(this).data('id') || $(this).closest('.kiot-ms-item').data('val');
+            const oldName = $(this).data('name') || $(this).closest('.kiot-ms-item').find('.kiot-ms-text, span').first().text().trim();
+            if (typeof window.handleEditNhomHang === 'function') {
+                window.handleEditNhomHang(id, oldName);
+            }
+        });
+
         dropdown.on('click', '.kiot-ms-item', function (e) {
+            if ($(e.target).closest('.kiot-item-edit-btn, .hh-item-edit-btn').length) {
+                return;
+            }
             e.stopPropagation();
             const val = String($(this).data('val'));
             const name = $(this).data('name') || $(this).text().trim();
@@ -289,6 +303,9 @@ $(document).ready(function () {
     $(document).on('click', function (e) {
         if (!document.contains(e.target)) return;
         if ($(e.target).closest('.dual-calendar-popup, .quick-date-popup').length) return;
+        // Chặn đóng dropdown nếu click xảy ra bên trong bất kỳ modal nào hoặc đang có modal hiển thị
+        if ($(e.target).closest('#kiotPromptOv, #kiotConfirmOv, #quickGroupModal, #hhModalOv, #hhEditItemOv, .kiot-prompt-ov, .kiot-confirm-ov, .modal-box').length) return;
+        if ($('#kiotPromptOv.show, #kiotConfirmOv.show, #quickGroupModal.show, #hhModalOv.show, #hhEditItemOv.show, .kiot-prompt-ov.show, .kiot-confirm-ov.show').length) return;
 
         const $targetBlock = $(e.target).closest('.f-block');
         if (!$targetBlock.length) {
@@ -306,6 +323,9 @@ $(document).ready(function () {
 
     $(document).on('keydown', function (e) {
         if (e.key === 'Escape') {
+            if ($('#kiotPromptOv.show, #kiotConfirmOv.show, #quickGroupModal.show, #hhModalOv.show, #hhEditItemOv.show, .kiot-prompt-ov.show, .kiot-confirm-ov.show').length) {
+                return;
+            }
             $('.kiot-ms-dropdown, .kiot-ss-dropdown').removeClass('show drop-up').css('max-height', '');
             $('.kiot-multiselect-box, .kiot-single-select-box').removeClass('open');
             $('.quick-date-popup, .dual-calendar-popup').hide();
@@ -337,9 +357,22 @@ $(document).ready(function () {
 
                 const itemHtml = `<div class="kiot-ms-item selected" data-val="${res.maNhom}" data-name="${res.tenNhom}">
                     <input type="checkbox" class="form-check-input" checked />
-                    <span>${res.tenNhom}</span>
+                    <span class="kiot-ms-text">${res.tenNhom}</span>
+                    <button type="button" class="kiot-item-edit-btn hh-item-edit-btn" data-id="${res.maNhom}" data-name="${res.tenNhom}" data-type="nhomhang" title="Sửa nhóm hàng" aria-label="Sửa ${res.tenNhom}">
+                        <i class="bi bi-pencil" style="font-size:12px;pointer-events:none;"></i>
+                    </button>
                 </div>`;
                 $('#dropdownNhomHang').append(itemHtml);
+
+                // Đồng bộ vào modal tạo/sửa hàng hóa
+                const formItemHtml = `<div class="hh-cs-item" data-val="${res.maNhom}">
+                    <span>${res.tenNhom}</span>
+                    <button type="button" class="hh-item-edit-btn" data-type="nhom" data-id="${res.maNhom}" data-val="${res.tenNhom}" title="Sửa nhóm hàng" aria-label="Sửa nhóm hàng ${res.tenNhom}">
+                        <svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>
+                    </button>
+                    <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+                </div>`;
+                $('#listMaNhom').append(formItemHtml);
 
                 filterState.nhom.push({ val: String(res.maNhom), name: res.tenNhom });
                 renderMultiSelectBox('nhom');
@@ -350,6 +383,185 @@ $(document).ready(function () {
                 alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể tạo nhóm.'));
             }
         });
+    });
+
+    // 4.1. Xử lý Sửa & Xóa Nhóm hàng dùng chung qua KiotPrompt
+    window.handleEditNhomHang = function (id, oldName) {
+        if (!id) return;
+        oldName = (oldName || '').trim();
+
+        if (window.KiotPrompt) {
+            window.KiotPrompt.open({
+                title: 'Sửa nhóm hàng',
+                label: 'Tên nhóm hàng',
+                value: oldName,
+                showDelete: true,
+                onSave: function (newName) {
+                    const errEl = document.getElementById('kiotPromptErr');
+                    const inputEl = document.getElementById('kiotPromptInput');
+
+                    if (!newName || newName.trim() === '') {
+                        if (errEl) {
+                            errEl.textContent = 'Vui lòng nhập tên nhóm hàng.';
+                            errEl.style.display = 'block';
+                        }
+                        if (inputEl) inputEl.classList.add('is-invalid');
+                        return false;
+                    }
+                    if (newName.trim().toLowerCase() === oldName.toLowerCase()) {
+                        window.KiotPrompt.close();
+                        setTimeout(() => {
+                            $('#dropdownNhomHang').addClass('show');
+                            $('#boxNhomHang').addClass('open');
+                        }, 50);
+                        return false;
+                    }
+
+                    $.ajax({
+                        url: '/HangHoa/UpdateGroupQuick',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ maNhom: parseInt(id), tenNhom: newName.trim() }),
+                        success: function (res) {
+                            if (res.success) {
+                                // 1. Cập nhật trong dropdown sidebar
+                                const $sidebarItem = $(`#dropdownNhomHang .kiot-ms-item[data-val="${id}"]`);
+                                $sidebarItem.attr('data-name', res.tenNhom);
+                                $sidebarItem.find('span.kiot-ms-text, span').first().text(res.tenNhom);
+                                $sidebarItem.find('.kiot-item-edit-btn').attr('data-name', res.tenNhom);
+
+                                // 2. Cập nhật trong modal tạo/sửa hàng hóa
+                                const $formItem = $(`#listMaNhom .hh-cs-item[data-val="${id}"]`);
+                                if ($formItem.length) {
+                                    $formItem.find('span').first().text(res.tenNhom);
+                                    $formItem.find('.hh-item-edit-btn').attr('data-val', res.tenNhom);
+                                }
+                                $(`#formMaNhom option[value="${id}"]`).text(res.tenNhom);
+                                if ($('#formMaNhom').val() == id) {
+                                    $('#inputMaNhom').val(res.tenNhom);
+                                }
+
+                                // 3. Cập nhật tags lọc nếu đang chọn nhóm này
+                                const selected = filterState.nhom.find(x => String(x.val) === String(id));
+                                if (selected) {
+                                    selected.name = res.tenNhom;
+                                    renderMultiSelectBox('nhom');
+                                }
+
+                                // 4. Tải lại bảng để đồng bộ dữ liệu
+                                currentPage = 1;
+                                loadTable();
+
+                                window.KiotPrompt.close();
+
+                                // Đảm bảo dropdown nhóm hàng giữ nguyên trạng thái mở
+                                setTimeout(() => {
+                                    $('#dropdownNhomHang').addClass('show');
+                                    $('#boxNhomHang').addClass('open');
+                                }, 50);
+
+                                if (typeof showToast === 'function') {
+                                    showToast('Đã cập nhật nhóm hàng: ' + res.tenNhom);
+                                }
+                            }
+                        },
+                        error: function (xhr) {
+                            if (errEl) {
+                                errEl.textContent = xhr.responseJSON?.message || 'Không thể cập nhật nhóm hàng.';
+                                errEl.style.display = 'block';
+                            }
+                            if (inputEl) inputEl.classList.add('is-invalid');
+                        }
+                    });
+                    return false;
+                },
+                onDelete: function () {
+                    $.ajax({
+                        url: '/HangHoa/DeleteGroupQuick',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ maNhom: parseInt(id) }),
+                        success: function (res) {
+                            if (res.success) {
+                                // 1. Xóa khỏi dropdown sidebar
+                                $(`#dropdownNhomHang .kiot-ms-item[data-val="${id}"]`).remove();
+
+                                // 2. Xóa khỏi modal tạo/sửa hàng hóa
+                                $(`#listMaNhom .hh-cs-item[data-val="${id}"]`).remove();
+                                $(`#formMaNhom option[value="${id}"]`).remove();
+                                if ($('#formMaNhom').val() == id) {
+                                    $('#formMaNhom').val('');
+                                    $('#inputMaNhom').val('');
+                                }
+
+                                // 3. Bỏ chọn khỏi bộ lọc nếu đang chọn
+                                const idx = filterState.nhom.findIndex(x => String(x.val) === String(id));
+                                if (idx >= 0) {
+                                    filterState.nhom.splice(idx, 1);
+                                    renderMultiSelectBox('nhom');
+                                    currentPage = 1;
+                                    loadTable();
+                                }
+
+                                // Giữ dropdown mở để người dùng quan sát kết quả
+                                setTimeout(() => {
+                                    $('#dropdownNhomHang').addClass('show');
+                                    $('#boxNhomHang').addClass('open');
+                                }, 50);
+
+                                if (typeof showToast === 'function') {
+                                    showToast(res.message || 'Đã xóa nhóm hàng.');
+                                }
+                            }
+                        },
+                        error: function (xhr) {
+                            const msg = xhr.responseJSON?.message || 'Không thể xóa nhóm hàng vì đang có hàng hóa thuộc nhóm.';
+                            if (window.KiotConfirm) {
+                                window.KiotConfirm.show({
+                                    title: 'Không thể xóa nhóm hàng',
+                                    icon: 'bi-exclamation-triangle',
+                                    iconColor: '#eab308',
+                                    message: msg,
+                                    isAlert: true,
+                                    confirmText: 'Đã hiểu',
+                                    confirmClass: 'btn btn-primary'
+                                });
+                            } else if (typeof showToast === 'function') {
+                                showToast(msg, 'error');
+                            } else {
+                                alert(msg);
+                            }
+
+                            setTimeout(() => {
+                                $('#dropdownNhomHang').addClass('show');
+                                $('#boxNhomHang').addClass('open');
+                            }, 50);
+                        }
+                    });
+                }
+            });
+        }
+    };
+
+    // Bắt sự kiện click nút bút chì Sửa nhóm hàng từ dropdown sidebar & modal form
+    $(document).on('click', '.kiot-item-edit-btn, .hh-item-edit-btn', function (e) {
+        const type = $(this).data('type');
+        if (type === 'nhomhang' || type === 'nhom' || $(this).closest('#dropdownNhomHang, #listMaNhom').length) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            const id = $(this).data('id') || $(this).closest('[data-val]').data('val');
+            const oldName = $(this).data('name') || $(this).data('val') || $(this).closest('.kiot-ms-item, .hh-cs-item').find('.kiot-ms-text, span').first().text().trim();
+            window.handleEditNhomHang(id, oldName);
+        }
+    });
+
+    $(document).on('click', '#kiotPromptCancel, #kiotPromptClose', function () {
+        setTimeout(() => {
+            $('#dropdownNhomHang').addClass('show');
+            $('#boxNhomHang').addClass('open');
+        }, 50);
     });
 
     // Phím tắt F3

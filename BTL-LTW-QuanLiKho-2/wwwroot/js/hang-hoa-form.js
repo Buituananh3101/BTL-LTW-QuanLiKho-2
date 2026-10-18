@@ -47,7 +47,12 @@
     const c = e.target.closest('[data-close]');
     if (c) {
       const target = $('#' + c.dataset.close);
-      if (target) hide(target);
+      if (target) {
+        hide(target);
+        if (target.id === 'hhEditItemOv' && editItemType === 'vitri') {
+          openLocationDropdown();
+        }
+      }
     }
   });
 
@@ -55,7 +60,12 @@
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
     const top = ['hhDeleteProductOv', 'hhEditItemOv', 'hhPickOv', 'hhPromptOv', 'hangHoaModalOv'].map(id => $('#' + id)).find(o => o && o.classList.contains('show'));
-    if (top) hide(top);
+    if (top) {
+      hide(top);
+      if (top.id === 'hhEditItemOv' && editItemType === 'vitri') {
+        openLocationDropdown();
+      }
+    }
   });
 
   /* ---------- Ô số có dấu phẩy phân cách ---------- */
@@ -179,9 +189,20 @@
     if (e.target.closest('#btnRemoveMainImg')) {
       e.stopPropagation();
       if (imgs.length > 0) {
-        imgs.splice(0, 1);
-        renderImgs();
-        showToast('Đã xóa ảnh chính');
+        const doRemove = () => {
+          imgs.splice(0, 1);
+          renderImgs();
+          showToast('Đã xóa ảnh chính');
+        };
+        if (window.KiotConfirm) {
+          window.KiotConfirm.show({
+            title: 'Xóa ảnh chính',
+            message: 'Bạn có chắc chắn muốn xóa ảnh đại diện chính này không? Thao tác này không thể hoàn tác.',
+            onConfirm: doRemove
+          });
+        } else if (confirm('Bạn có chắc chắn muốn xóa ảnh chính này không?')) {
+          doRemove();
+        }
       }
       return;
     }
@@ -199,9 +220,20 @@
     if (delBtn) {
       e.stopPropagation();
       const subIdx = +delBtn.dataset.delSub;
-      imgs.splice(subIdx + 1, 1);
-      renderImgs();
-      showToast('Đã xóa ảnh phụ');
+      const doRemove = () => {
+        imgs.splice(subIdx + 1, 1);
+        renderImgs();
+        showToast('Đã xóa ảnh phụ');
+      };
+      if (window.KiotConfirm) {
+        window.KiotConfirm.show({
+          title: 'Xóa ảnh phụ',
+          message: 'Bạn có chắc chắn muốn xóa ảnh phụ này không? Thao tác này không thể hoàn tác.',
+          onConfirm: doRemove
+        });
+      } else if (confirm('Bạn có chắc chắn muốn xóa ảnh phụ này không?')) {
+        doRemove();
+      }
       return;
     }
 
@@ -228,7 +260,7 @@
   });
 
   // Nén và tối ưu kích thước ảnh trên Canvas trước khi nạp (giảm từ 5MB xuống ~100-200KB, tăng tốc độ 10x)
-  function compressImage(file, maxDimension = 1000, quality = 0.85) {
+  function compressImage(file, maxDimension = 1200, quality = 0.88) {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = e => {
@@ -251,6 +283,17 @@
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
+
+          // Bật khử răng cưa chất lượng cao khi thu nhỏ ảnh
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+
+          // Đổ nền trắng tinh khiết toàn bộ canvas trước khi vẽ
+          // Khắc phục triệt để lỗi ảnh trong suốt (PNG, WebP, GIF) bị browser chuyển thành nền đen khi nén sang JPEG
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, width, height);
+
+          // Vẽ ảnh lên nền trắng
           ctx.drawImage(img, 0, 0, width, height);
           const compressed = canvas.toDataURL('image/jpeg', quality);
           resolve(compressed);
@@ -264,7 +307,7 @@
   }
 
   // Chọn ảnh từ máy tính (thêm mới)
-  $('#hhImgFile').addEventListener('change', async e => {
+  $('#hhImgFile')?.addEventListener('change', async e => {
     const files = [...e.target.files];
     if (!files.length) return;
 
@@ -310,6 +353,77 @@
     }
 
     e.target.value = '';
+  });
+
+  // Hỗ trợ Kéo & Thả ảnh trực tiếp vào khung ảnh chính
+  const mainImgEl = $('#hhImgMain');
+  if (mainImgEl) {
+    ['dragenter', 'dragover'].forEach(name => {
+      mainImgEl.addEventListener(name, e => {
+        e.preventDefault();
+        e.stopPropagation();
+        mainImgEl.classList.add('drag-over');
+      });
+    });
+    ['dragleave', 'drop'].forEach(name => {
+      mainImgEl.addEventListener(name, e => {
+        e.preventDefault();
+        e.stopPropagation();
+        mainImgEl.classList.remove('drag-over');
+      });
+    });
+    mainImgEl.addEventListener('drop', async e => {
+      const files = [...(e.dataTransfer?.files || [])].filter(f => f.type && f.type.startsWith('image/'));
+      if (!files.length) return;
+
+      for (const f of files) {
+        if (imgs.length >= MAX_IMG) {
+          showToast('Chỉ được chọn tối đa ' + MAX_IMG + ' ảnh.');
+          break;
+        }
+        if (f.size > 15 * 1024 * 1024) {
+          showToast('Ảnh "' + f.name + '" vượt quá dung lượng 15MB.');
+          continue;
+        }
+        const b64 = await compressImage(f);
+        if (b64 && imgs.length < MAX_IMG) {
+          imgs.push({ base64: b64, url: b64 });
+          renderImgs();
+        }
+      }
+    });
+  }
+
+  // Hỗ trợ Dán ảnh trực tiếp từ Clipboard (Ctrl + V) khi đang mở modal
+  window.addEventListener('paste', async e => {
+    const ov = $('#hhModalOv');
+    if (!ov || ov.classList.contains('hidden') || ov.style.display === 'none') return;
+
+    const active = document.activeElement;
+    if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA') && active.type !== 'file') {
+      return;
+    }
+
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (const item of items) {
+      if (item.type && item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) {
+          if (imgs.length >= MAX_IMG) {
+            showToast('Chỉ được chọn tối đa ' + MAX_IMG + ' ảnh.');
+            break;
+          }
+          const b64 = await compressImage(file);
+          if (b64 && imgs.length < MAX_IMG) {
+            imgs.push({ base64: b64, url: b64 });
+            renderImgs();
+            showToast('Đã thêm ảnh từ clipboard');
+          }
+        }
+      }
+    }
   });
 
   /* ---------- Modal Nhập Tên Nhanh (Nhóm / ĐVT / Vị trí / Thuộc tính) ---------- */
@@ -373,6 +487,11 @@
     if (field) field.classList.remove('invalid');
     if (err) err.style.display = 'none';
 
+    // Đảm bảo dropdown bên dưới được giữ nguyên trạng thái mở khi đang sửa
+    if (isVitri) {
+      openLocationDropdown();
+    }
+
     show($('#hhEditItemOv'));
     setTimeout(() => {
       if (inp) {
@@ -405,6 +524,7 @@
         if (sIdx >= 0) selectedLocations[sIdx] = newVal;
         renderLocationTags();
         renderLocationDropdown($('#formViTriSearch')?.value || '');
+        openLocationDropdown();
       } else {
         if (newVal !== editItemOldVal && knownAttributes[editItemOldVal]) {
           const vals = knownAttributes[editItemOldVal];
@@ -441,6 +561,7 @@
       }
       renderLocationTags();
       renderLocationDropdown($('#formViTriSearch')?.value || '');
+      openLocationDropdown();
 
       // Đồng bộ nếu có item ở menu lọc cột trái
       const sideItem = $(`#dropdownViTri .kiot-ms-item[data-val="${CSS.escape ? CSS.escape(editItemOldVal) : editItemOldVal}"]`);
@@ -479,28 +600,42 @@
 
   function handleEditItemDelete() {
     if (!editItemOldVal) return;
-    if (editItemType === 'vitri') {
-      availableLocations = availableLocations.filter(a => !ci(a, editItemOldVal));
-      selectedLocations = selectedLocations.filter(s => !ci(s, editItemOldVal));
-      renderLocationTags();
-      renderLocationDropdown($('#formViTriSearch')?.value || '');
+    const itemLabel = editItemType === 'vitri' ? 'vị trí' : 'thuộc tính';
+    const doDelete = () => {
+      if (editItemType === 'vitri') {
+        availableLocations = availableLocations.filter(a => !ci(a, editItemOldVal));
+        selectedLocations = selectedLocations.filter(s => !ci(s, editItemOldVal));
+        renderLocationTags();
+        renderLocationDropdown($('#formViTriSearch')?.value || '');
+        openLocationDropdown();
 
-      // Đồng bộ nếu có item ở menu lọc cột trái
-      const sideItem = $(`#dropdownViTri .kiot-ms-item[data-val="${CSS.escape ? CSS.escape(editItemOldVal) : editItemOldVal}"]`);
-      if (sideItem) sideItem.remove();
+        // Đồng bộ nếu có item ở menu lọc cột trái
+        const sideItem = $(`#dropdownViTri .kiot-ms-item[data-val="${CSS.escape ? CSS.escape(editItemOldVal) : editItemOldVal}"]`);
+        if (sideItem) sideItem.remove();
 
-      hide($('#hhEditItemOv'));
-      showToast('Đã xóa vị trí: ' + editItemOldVal);
-    } else {
-      delete knownAttributes[editItemOldVal];
-      $$('.hh-attr-row', attrRows).forEach(r => {
-        if (ci(getRowName(r), editItemOldVal)) {
-          setRowAttr(r, '');
-        }
+        hide($('#hhEditItemOv'));
+        showToast('Đã xóa vị trí: ' + editItemOldVal);
+      } else {
+        delete knownAttributes[editItemOldVal];
+        $$('.hh-attr-row', attrRows).forEach(r => {
+          if (ci(getRowName(r), editItemOldVal)) {
+            setRowAttr(r, '');
+          }
+        });
+        refreshAttrDropdowns();
+        hide($('#hhEditItemOv'));
+        showToast('Đã xóa thuộc tính: ' + editItemOldVal);
+      }
+    };
+
+    if (window.KiotConfirm) {
+      window.KiotConfirm.show({
+        title: `Xóa ${itemLabel}`,
+        message: `Bạn có chắc chắn muốn xóa ${itemLabel} <strong style="color: #111827;">${editItemOldVal}</strong> không? Thao tác này không thể hoàn tác.`,
+        onConfirm: doDelete
       });
-      refreshAttrDropdowns();
-      hide($('#hhEditItemOv'));
-      showToast('Đã xóa thuộc tính: ' + editItemOldVal);
+    } else if (confirm(`Bạn có chắc chắn muốn xóa ${itemLabel} "${editItemOldVal}" không?`)) {
+      doDelete();
     }
   }
 
@@ -535,6 +670,20 @@
           sel.value = res.maNhom;
           csMaNhom?.sync();
           $('#hhFldNhom').classList.remove('invalid');
+
+          const $sidebar = jQuery('#dropdownNhomHang');
+          if ($sidebar.length && !$sidebar.find(`.kiot-ms-item[data-val="${res.maNhom}"]`).length) {
+            $sidebar.append(`
+              <div class="kiot-ms-item" data-val="${res.maNhom}" data-name="${res.tenNhom}">
+                <input type="checkbox" class="form-check-input" />
+                <span class="kiot-ms-text">${res.tenNhom}</span>
+                <button type="button" class="kiot-item-edit-btn hh-item-edit-btn" data-id="${res.maNhom}" data-name="${res.tenNhom}" data-type="nhomhang" title="Sửa nhóm hàng" aria-label="Sửa ${res.tenNhom}">
+                  <i class="bi bi-pencil" style="font-size:12px;pointer-events:none;"></i>
+                </button>
+              </div>
+            `);
+          }
+
           showToast('Đã tạo nhóm hàng: ' + res.tenNhom);
         },
         error: function (xhr) {
@@ -770,6 +919,16 @@
     });
 
     list.addEventListener('click', e => {
+      const editBtn = e.target.closest('.hh-item-edit-btn, .kiot-item-edit-btn');
+      if (editBtn) {
+        e.stopPropagation();
+        const id = editBtn.dataset.id || editBtn.closest('[data-val]')?.dataset.val;
+        const val = editBtn.dataset.val || editBtn.closest('[data-val]')?.querySelector('span')?.textContent?.trim();
+        if (typeof window.handleEditNhomHang === 'function') {
+          window.handleEditNhomHang(id, val);
+        }
+        return;
+      }
       e.stopPropagation();
       const newItemBtn = e.target.closest('.hh-cs-new-item');
       if (newItemBtn) {
@@ -784,14 +943,21 @@
 
     function syncOptions() {
       list.innerHTML = '';
+      const isNhom = (wrap && wrap.id && wrap.id.includes('Nhom')) || (list && list.id && list.id.includes('Nhom'));
       Array.from(select.options).forEach(opt => {
         if (opt.value === '') return;
         const isSel = (String(select.value) === String(opt.value));
         const it = document.createElement('div');
         it.className = `hh-cs-item ${isSel ? 'selected' : ''}`;
         it.dataset.val = opt.value;
+        const editBtnHtml = isNhom ? `
+          <button type="button" class="hh-item-edit-btn" data-type="nhom" data-id="${opt.value}" data-val="${esc(opt.textContent.trim())}" title="Sửa nhóm hàng" aria-label="Sửa nhóm hàng ${esc(opt.textContent.trim())}">
+            <svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>
+          </button>
+        ` : '';
         it.innerHTML = `
           <span>${esc(opt.textContent.trim())}</span>
+          ${editBtnHtml}
           <svg class="hh-check-icon" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#2563eb;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 12l5 5L20 6"/></svg>
         `;
         list.appendChild(it);
@@ -1033,8 +1199,17 @@
     }
   });
 
-  // Đóng dropdown khi click ra ngoài
+  // Đóng dropdown khi click ra ngoài (ngoại trừ khi đang thao tác trong modal sửa/prompt/confirm)
   document.addEventListener('click', e => {
+    // 1. Không đóng dropdown nếu click xảy ra bên trong modal con (Sửa vị trí/thuộc tính, Prompt, Confirm, Delete, Pick...)
+    if (e.target.closest('#hhEditItemOv, #hhPromptOv, #kiotPromptOv, #kiotConfirmOv, #hhDeleteProductOv, #hhPickOv, .kiot-prompt-ov, .kiot-confirm-ov, .modal-box')) {
+      return;
+    }
+    // 2. Không đóng dropdown nếu đang có bất kỳ modal con nào đang hiển thị
+    if (document.querySelector('#hhEditItemOv.show, #hhPromptOv.show, #kiotPromptOv.show, #kiotConfirmOv.show, #hhDeleteProductOv.show, #hhPickOv.show, .kiot-prompt-ov.show, .kiot-confirm-ov.show')) {
+      return;
+    }
+
     if (!e.target.closest('#formViTriWrap') && !e.target.closest('#btnNewViTri')) {
       closeLocationDropdown();
     }
@@ -1302,8 +1477,23 @@
       return;
     }
     if (e.target.closest('.del')) {
-      r.remove();
-      refreshAttrDropdowns();
+      const attrName = getRowName(r);
+      const msg = attrName
+        ? `Bạn có chắc chắn muốn xóa dòng thuộc tính <strong style="color: #111827;">${attrName}</strong> không? Thao tác này không thể hoàn tác.`
+        : 'Bạn có chắc chắn muốn xóa dòng thuộc tính này không? Thao tác này không thể hoàn tác.';
+      const doRemove = () => {
+        r.remove();
+        refreshAttrDropdowns();
+      };
+      if (window.KiotConfirm) {
+        window.KiotConfirm.show({
+          title: 'Xóa dòng thuộc tính',
+          message: msg,
+          onConfirm: doRemove
+        });
+      } else if (confirm(attrName ? `Bạn có chắc chắn muốn xóa dòng thuộc tính "${attrName}" không?` : 'Bạn có chắc chắn muốn xóa dòng thuộc tính này không?')) {
+        doRemove();
+      }
       return;
     }
     if (e.target.closest('.hh-quick') && !e.target.closest('.hh-quick').disabled) {

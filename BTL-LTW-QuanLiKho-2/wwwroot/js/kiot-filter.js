@@ -181,7 +181,21 @@ window.KiotFilter = (function ($) {
             });
         });
 
+        dropdown.on('click', '.kiot-item-edit-btn, .hh-item-edit-btn', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            const id = $(this).data('id') || $(this).closest('.kiot-ms-item').data('val');
+            const oldName = $(this).data('name') || $(this).closest('.kiot-ms-item').find('.kiot-ms-text, span').first().text().trim();
+            if (typeof window.handleEditNhomHang === 'function') {
+                window.handleEditNhomHang(id, oldName);
+            }
+        });
+
         dropdown.on('click', '.kiot-ms-item', function (e) {
+            if ($(e.target).closest('.kiot-item-edit-btn, .hh-item-edit-btn').length) {
+                return;
+            }
             e.stopPropagation();
             const checkbox = $(this).find('input[type="checkbox"]');
             if (!$(e.target).is('input[type="checkbox"]')) {
@@ -657,6 +671,169 @@ window.KiotFilter = (function ($) {
         box.html(html);
     }
 
+    // 15. KiotCombobox – Dropdown vừa gõ vừa chọn kèm icon Bút chì ✎ sửa/xóa trực tiếp (Chuẩn KiotViet)
+    function initCombobox(options) {
+        const opt = $.extend({
+            wrapSelector: '',        // Container .kiot-combobox-wrap hoặc selector
+            boxSelector: '',         // Box chứa input .kiot-combobox-box
+            inputSelector: '',       // Ô input gõ tìm/nhập
+            dropdownSelector: '',    // Dropdown list .kiot-combobox-dropdown
+            listSelector: '',        // Khối chứa items .kiot-combobox-list
+            tagsSelector: '',        // Khối hiển thị tags đã chọn (nếu multi)
+            hiddenInputSelector: '', // Ô hidden lưu value gửi form
+            items: [],               // Mảng các chuỗi hoặc { val, text }
+            placeholder: 'Chọn hoặc nhập...',
+            allowAddNew: true,
+            allowEdit: true,
+            onSelect: null,
+            onAddNew: null,
+            onEditItem: null,
+            onDeleteItem: null
+        }, options);
+
+        const $wrap = $(opt.wrapSelector);
+        const $box = opt.boxSelector ? $(opt.boxSelector) : $wrap.find('.kiot-combobox-box, .hh-multiselect-box');
+        const $input = opt.inputSelector ? $(opt.inputSelector) : $wrap.find('input[type="text"]');
+        const $dropdown = opt.dropdownSelector ? $(opt.dropdownSelector) : $wrap.find('.kiot-combobox-dropdown, .hh-multiselect-dropdown');
+        const $list = opt.listSelector ? $(opt.listSelector) : $dropdown.find('.kiot-combobox-list, .hh-multiselect-list, .hh-cs-list');
+        const $tags = opt.tagsSelector ? $(opt.tagsSelector) : $box.find('.kiot-combobox-tags, .hh-multiselect-tags');
+        const $hidden = opt.hiddenInputSelector ? $(opt.hiddenInputSelector) : $wrap.find('input[type="hidden"]');
+
+        let selected = [];
+
+        function renderList(searchKw) {
+            if (!$list.length) return;
+            const kw = (searchKw || '').trim().toLowerCase();
+            const filtered = (opt.items || []).filter(item => {
+                const name = String(typeof item === 'object' ? item.text : item).toLowerCase();
+                return !kw || name.includes(kw);
+            });
+
+            if (filtered.length === 0) {
+                $list.html('<div class="p-2 text-center text-muted small">Không tìm thấy mục phù hợp</div>');
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(item => {
+                const val = typeof item === 'object' ? item.val : item;
+                const text = typeof item === 'object' ? item.text : item;
+                const isSel = selected.includes(val);
+
+                html += `
+                    <div class="kiot-combobox-item hh-multiselect-item ${isSel ? 'selected' : ''}" data-val="${escapeHtml(val)}">
+                        <span class="kiot-combobox-text hh-multiselect-text">${escapeHtml(text)}</span>
+                        ${opt.allowEdit ? `
+                        <button type="button" class="kiot-item-edit-btn hh-item-edit-btn" data-val="${escapeHtml(val)}" title="Sửa">
+                            <i class="bi bi-pencil" style="font-size:12px;pointer-events:none;"></i>
+                        </button>` : ''}
+                        ${isSel ? '<i class="bi bi-check-lg text-primary ms-2"></i>' : ''}
+                    </div>
+                `;
+            });
+            $list.html(html);
+        }
+
+        function openDropdown() {
+            $wrap.addClass('open');
+            $dropdown.show();
+            renderList($input.val());
+        }
+
+        function closeDropdown() {
+            $wrap.removeClass('open');
+            $dropdown.hide();
+        }
+
+        // Click box -> focus input & open
+        $box.on('click', function (e) {
+            if (e.target.closest('.tag-del, .hh-loc-tag-del, .tag-remove')) return;
+            $input.focus();
+            openDropdown();
+        });
+
+        $input.on('focus', function () {
+            openDropdown();
+        });
+
+        $input.on('input', function () {
+            openDropdown();
+            renderList($(this).val());
+        });
+
+        // Click item hoặc nút edit
+        $list.on('click', function (e) {
+            e.stopPropagation();
+            const editBtn = e.target.closest('.kiot-item-edit-btn, .hh-item-edit-btn');
+            if (editBtn) {
+                const val = editBtn.dataset.val;
+                if (opt.onEditItem) {
+                    opt.onEditItem(val, e);
+                } else if (window.KiotPrompt) {
+                    window.KiotPrompt.open({
+                        title: 'Sửa mục',
+                        label: 'Tên',
+                        value: val,
+                        showDelete: true,
+                        onSave: function (newVal) {
+                            const idx = opt.items.indexOf(val);
+                            if (idx >= 0) opt.items[idx] = newVal;
+                            const sIdx = selected.indexOf(val);
+                            if (sIdx >= 0) selected[sIdx] = newVal;
+                            renderList($input.val());
+                            openDropdown();
+                        },
+                        onDelete: function () {
+                            const idx = opt.items.indexOf(val);
+                            if (idx >= 0) opt.items.splice(idx, 1);
+                            const sIdx = selected.indexOf(val);
+                            if (sIdx >= 0) selected.splice(sIdx, 1);
+                            renderList($input.val());
+                            openDropdown();
+                        }
+                    });
+                }
+                return;
+            }
+
+            const item = e.target.closest('.kiot-combobox-item, .hh-multiselect-item');
+            if (item) {
+                const val = item.dataset.val;
+                const idx = selected.indexOf(val);
+                if (idx >= 0) {
+                    selected.splice(idx, 1);
+                } else {
+                    selected.push(val);
+                }
+                if ($hidden.length) $hidden.val(selected.join(';'));
+                if (opt.onSelect) opt.onSelect(val, selected);
+                renderList($input.val());
+                $input.val('').focus();
+            }
+        });
+
+        // Click ra ngoài -> đóng (ngoại trừ khi đang thao tác trong modal prompt / confirm / edit modal)
+        $(document).on('click', function (e) {
+            if ($(e.target).closest('#kiotPromptOv, #kiotConfirmOv, #hhEditItemOv, #hhPromptOv, .kiot-prompt-ov, .kiot-confirm-ov, .modal-box').length > 0) {
+                return;
+            }
+            if ($('#kiotPromptOv.show, #kiotConfirmOv.show, #hhEditItemOv.show, #hhPromptOv.show, .kiot-prompt-ov.show, .kiot-confirm-ov.show').length > 0) {
+                return;
+            }
+            if (!$wrap.is(e.target) && $wrap.has(e.target).length === 0) {
+                closeDropdown();
+            }
+        });
+
+        return {
+            open: openDropdown,
+            close: closeDropdown,
+            getSelected: () => selected,
+            setSelected: (arr) => { selected = arr || []; renderList(''); },
+            setItems: (newItems) => { opt.items = newItems || []; renderList($input.val()); }
+        };
+    }
+
     return {
         debounce: debounce,
         escapeHtml: escapeHtml,
@@ -671,6 +848,7 @@ window.KiotFilter = (function ($) {
         initDateFilter: initDateFilter,
         initColumnToggle: initColumnToggle,
         bindStarToggle: bindStarToggle,
-        bindPagination: bindPagination
+        bindPagination: bindPagination,
+        initCombobox: initCombobox
     };
 })(jQuery);

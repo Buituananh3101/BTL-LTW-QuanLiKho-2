@@ -33,6 +33,7 @@ public class KiotMultiSelectVM
     public string? DotId { get; set; }
     public string? HeaderActionText { get; set; }
     public string? HeaderActionId { get; set; }
+    public bool AllowEdit { get; set; } = false;
     public List<KiotMultiSelectItemVM> Items { get; set; } = new();
 
     public KiotMultiSelectVM() { }

@@ -18,6 +18,7 @@
         <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NhomHang", "nhom", "Nhóm hàng", "Chọn nhóm hàng", true) {
             HeaderActionText = "Tạo mới",
             HeaderActionId = "btnOpenQuickGroupModal",
+            AllowEdit = true,
             Items = Model.NhomHangs.Select(g => new KiotMultiSelectItemVM(g.MaNhom.ToString(), g.TenNhom)).ToList()
         }' />
 

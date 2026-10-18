@@ -1,0 +1,53 @@
+@* ========================================================================
+   _KiotPromptModal.cshtml - Modal con dùng chung toàn hệ thống
+   Phục vụ: Thêm mới nhanh hoặc Sửa trực tiếp (✎) / Xóa (Vị trí, Nhóm hàng, ĐVT, NCC, KH...)
+   Gọi bằng JavaScript 1 dòng: KiotPrompt.open({ title, label, value, showDelete, onSave, onDelete });
+   ======================================================================== *@
+
+<div class="kiot-prompt-ov" id="kiotPromptOv" role="dialog" aria-modal="true" aria-labelledby="kiotPromptTitle">
+    <div class="kiot-prompt-modal">
+        <div class="kiot-prompt-head">
+            <h3 id="kiotPromptTitle">Tạo mới</h3>
+            <button type="button" class="btn-close" id="kiotPromptClose" aria-label="Đóng"></button>
+        </div>
+        <div class="kiot-prompt-body">
+            <div class="mb-2">
+                <label for="kiotPromptInput" class="form-label fw-semibold text-secondary small" id="kiotPromptLabel">Tên</label>
+                <input type="text" id="kiotPromptInput" class="form-control" autocomplete="off" />
+                <div class="invalid-feedback" id="kiotPromptErr" style="display: none;">Vui lòng nhập thông tin.</div>
+            </div>
+        </div>
+        <div class="kiot-prompt-foot">
+            <div>
+                <button type="button" class="btn btn-outline-danger btn-sm" id="kiotPromptDelete" style="display: none;">
+                    <i class="bi bi-trash me-1"></i>Xóa
+                </button>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-light btn-sm px-3" id="kiotPromptCancel">Bỏ qua</button>
+                <button type="button" class="btn btn-primary btn-sm px-3" id="kiotPromptSave">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal xác nhận xóa / thông báo dùng chung toàn hệ thống (Chuẩn KiotViet, hiển thị chính giữa màn hình) -->
+<div class="kiot-confirm-ov" id="kiotConfirmOv" role="dialog" aria-modal="true" aria-labelledby="kiotConfirmTitleText">
+    <div class="kiot-confirm-modal">
+        <div class="kiot-confirm-head">
+            <h3 id="kiotConfirmTitle" class="d-flex align-items-center gap-2 m-0" style="color: #dc2626; font-size: 18px; font-weight: 700;">
+                <i class="bi bi-trash" id="kiotConfirmIcon" style="font-size: 19px;"></i>
+                <span id="kiotConfirmTitleText">Xóa</span>
+            </h3>
+            <button type="button" class="btn-close" id="kiotConfirmClose" aria-label="Đóng"></button>
+        </div>
+        <div class="kiot-confirm-body" id="kiotConfirmBody">
+            <div id="kiotConfirmMsg"></div>
+        </div>
+        <div class="kiot-confirm-foot">
+            <button type="button" class="btn btn-outline-secondary" id="kiotConfirmCancel">Bỏ qua</button>
+            <button type="button" class="btn btn-danger" id="kiotConfirmOk">Đồng ý xóa</button>
+        </div>
+    </div>
+</div>
+

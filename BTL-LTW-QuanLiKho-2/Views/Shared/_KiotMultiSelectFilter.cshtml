@@ -36,7 +36,13 @@
                 {
                     <div class="kiot-ms-item @(item.Selected ? "selected" : "")" data-val="@item.Value" data-name="@item.Text">
                         <input type="checkbox" class="form-check-input" @(item.Selected ? "checked" : "") />
-                        <span>@item.Text</span>
+                        <span class="kiot-ms-text">@item.Text</span>
+                        @if (Model?.AllowEdit == true)
+                        {
+                            <button type="button" class="kiot-item-edit-btn hh-item-edit-btn" data-id="@item.Value" data-name="@item.Text" data-type="@Model.Id.ToLower()" title="Sửa @(Model.Title.ToLower())" aria-label="Sửa @item.Text">
+                                <i class="bi bi-pencil" style="font-size:12px;pointer-events:none;"></i>
+                            </button>
+                        }
                     </div>
                 }
             }
