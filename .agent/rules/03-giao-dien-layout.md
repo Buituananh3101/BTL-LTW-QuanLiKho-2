@@ -21,38 +21,21 @@ Gồm Topbar cố định (`_Header`, `_MainMenu`), vùng thân `@RenderBody()`,
 - Vị trí: [`Views/Shared/_Header.cshtml`](../../BTL-LTW-QuanLiKho-2/Views/Shared/_Header.cshtml).
 - Gồm có: Logo thương hiệu **KhoPro**, ô dropdown chuyển đổi kho làm việc, chuông thông báo, menu cài đặt và thông tin người dùng đang đăng nhập.
 
-### 2.1. Cơ chế hoạt động của Warehouse Switcher (ViewComponent):
-1. **Triển khai qua ViewComponent**: `WarehouseSwitcherViewComponent` (`ViewComponents/WarehouseSwitcherViewComponent.cs`), render qua `Views/Shared/Components/WarehouseSwitcher/Default.cshtml`.
-2. Tự động kiểm tra quyền kho:
-   - Nếu là Quản lý hoặc chưa đăng nhập: Nạp tất cả kho đang hoạt động (`HOAT_DONG`).
-   - Nếu là Nhân viên: Chỉ nạp các kho được cấp quyền trong bảng `TaiKhoanKho`.
-3. Đọc kho đang chọn từ `Context.Session.GetInt32("CurrentWarehouseId")`.
-4. Khi người dùng click chọn kho khác:
-   ```javascript
-   function switchWorkingWarehouse(whId) {
-       fetch('/Account/SwitchWarehouse?warehouseId=' + whId, { method: 'POST' })
-           .then(() => window.location.reload());
-   }
-   ```
-5. Mọi Controller kế thừa BaseKhoController và sử dụng property CurrentWarehouseId đã được cung cấp sẵn.
-6. **Quy tắc "Tất cả kho" (Dành cho Admin)**:
-   - Mục "Tất cả kho" (`whId = null` hoặc `0`) chỉ dùng cho màn hình **Xem danh sách, Tra cứu và Báo cáo**.
-   - Khi thực hiện các thao tác biến động (Tạo phiếu nhập, Xuất kho, Kiểm kho), hệ thống bắt buộc người dùng chọn một kho làm việc cụ thể.
+### 2.1. Cơ chế hoạt động của Warehouse Switcher:
+1. `WarehouseSwitcherViewComponent`: Tự động nạp kho theo quyền người dùng (Quản lý: tất cả; Nhân viên: theo `TaiKhoanKho`).
+2. Lưu kho đang chọn vào `Session["CurrentWarehouseId"]`, Controller đọc qua `CurrentWarehouseId`.
+3. Khi đổi kho: gọi `POST /Account/SwitchWarehouse?warehouseId=X` rồi reload.
+4. "Tất cả kho" chỉ dùng để tra cứu/báo cáo; khi tạo chứng từ biến động bắt buộc chọn kho cụ thể.
 
 ---
 
 ## 3. Mega-Menu ngang (`_MainMenu.cshtml`)
-
 - Vị trí: [`Views/Shared/_MainMenu.cshtml`](../../BTL-LTW-QuanLiKho-2/Views/Shared/_MainMenu.cshtml).
-- Cấu trúc thanh menu ngang phong cách KiotViet:
+- Cấu trúc thanh menu ngang chuẩn KiotViet:
   1. **Tổng quan** (`/Home/Index`)
-  2. **Hàng hóa**: Danh sách hàng hóa (`/HangHoa/Index`), Nhóm hàng, Tồn kho, Kiểm kho (`/PhieuKiemKe/Index`), Chuyển kho, Xuất dùng nội bộ, Xuất hủy.
-  3. **Mua hàng**: Nhà cung cấp, Nhập hàng, Trả hàng nhập.
-  4. **Đơn hàng**: Hóa đơn bán hàng.
-  5. **Khách hàng**: Danh sách khách hàng.
-  6. **Báo cáo**: Tồn kho theo kho, Nhập - Xuất - Tồn, Hàng dưới định mức, Thẻ kho.
-  7. **Thiết lập**: Quản lý Kho, Người dùng & Phân quyền, Nhật ký thao tác.
-  8. **Nút "Bán hàng" (POS)**: Nằm bên phải thanh menu.
+  2. **Hàng hóa**: Danh sách hàng hóa (`/HangHoa/Index`), Kiểm kho (`/PhieuKiemKe/Index`), Chuyển kho, Xuất dùng nội bộ, Xuất hủy.
+  3. **Mua hàng**: Nhà cung cấp (`/NhaCungCap/Index`), Nhập hàng, Trả hàng nhập.
+  4. **Đơn hàng**, **Khách hàng**, **Báo cáo**, **Thiết lập** và Nút **Bán hàng** (POS).
 
 ---
 
@@ -104,4 +87,12 @@ Hệ thống đóng gói các thành phần lặp lại thành các "mảnh ghé
    - Cú pháp: `KiotFilter.initCombobox({ wrapSelector: '#wrap', items: [...], onEditItem: ... })` (vừa gõ tìm kiếm, vừa chọn, hover hiện icon bút chì ✎ sửa trực tiếp).
 10. **Modal con dùng chung (`_KiotPromptModal.cshtml` / `KiotPrompt`)**:
     - Cú pháp: `KiotPrompt.open({ title, label, value, showDelete, onSave, onDelete })` (tạo mới nhanh / sửa ✎ / xóa dùng chung toàn hệ thống).
+11. **Bộ lọc Khoảng giá trị Từ - Tới (`_KiotValueFilter.cshtml` & `KiotValueFilterVM`)**:
+    - Razor: `<partial name="_KiotValueFilter" model='new KiotValueFilterVM("TongMua", "Tổng mua", "Giá trị")' />`
+    - Client JS: `KiotFilter.initValueFilter("TongMua", (from, to) => { ... })`
+    - Giao diện: Cụm 2 ô nhập `.fromto` (badge `<b>Từ</b>` và `<b>Tới</b>`), class `.money` tự format hàng nghìn `1,000,000`, chấm xanh `.filter-dot` tự bật khi có giá trị.
+12. **Bộ lọc Trạng thái Checkbox / Pills (`_KiotStatusFilter.cshtml` & `KiotStatusFilterVM`)**:
+    - Razor: `<partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Trạng thái", "dotSt", options, KiotStatusRenderMode.Pills)' />`
+    - Client JS: `KiotFilter.initStatusFilter('#pillsStatus', val => { ... })`
+    - Hỗ trợ 2 chế độ: `Checkbox` (danh sách hộp kiểm) và `Pills` (hàng nút viên thuốc KiotViet).
 

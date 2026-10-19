@@ -7,6 +7,8 @@ public partial class PhieuXuat
 {
     public int MaPhieuXuat { get; set; }
 
+    public string? MaPhieu { get; set; }
+
     public int? MaDonBan { get; set; }
 
     public string LoaiPhieuXuat { get; set; } = "XUAT_BAN";
@@ -24,6 +26,8 @@ public partial class PhieuXuat
     public string TrangThai { get; set; } = null!;
 
     public string? GhiChu { get; set; }
+
+    public bool DaDanhDau { get; set; }
 
     public virtual ICollection<ChiTietPhieuXuat> ChiTietPhieuXuats { get; set; } = new List<ChiTietPhieuXuat>();
 

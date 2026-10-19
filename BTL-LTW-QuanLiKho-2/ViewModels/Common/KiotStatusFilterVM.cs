@@ -1,7 +1,7 @@
 namespace BTL_LTW_QuanLiKho_2.ViewModels.Common;
 
 /// <summary>
-/// Đại diện cho 1 lựa chọn trạng thái checkbox
+/// Đại diện cho 1 lựa chọn trạng thái
 /// </summary>
 public class KiotStatusOptionVM
 {
@@ -20,20 +20,42 @@ public class KiotStatusOptionVM
 }
 
 /// <summary>
-/// KiotStatusFilterVM – ViewModel cho component Bộ lọc Trạng thái chứng từ checkbox dùng chung trên Sidebar
+/// Chế độ hiển thị của bộ lọc trạng thái: Dạng nút viên thuốc (Pills) hoặc Hộp kiểm (Checkbox)
+/// </summary>
+public enum KiotStatusRenderMode
+{
+    Checkbox,
+    Pills
+}
+
+/// <summary>
+/// KiotStatusFilterVM – ViewModel cho component Bộ lọc Trạng thái chuẩn KiotViet dùng chung trên Sidebar
 /// </summary>
 public class KiotStatusFilterVM
 {
+    public string Id { get; set; } = "TrangThai";
     public string Title { get; set; } = "Trạng thái";
     public string DotId { get; set; } = "dotSt";
+    public string ContainerId { get; set; } = "pillsStatus";
+    public KiotStatusRenderMode RenderMode { get; set; } = KiotStatusRenderMode.Checkbox;
     public List<KiotStatusOptionVM> Options { get; set; } = new();
 
     public KiotStatusFilterVM() { }
 
-    public KiotStatusFilterVM(string title, string dotId, List<KiotStatusOptionVM> options)
+    public KiotStatusFilterVM(string title, string dotId, List<KiotStatusOptionVM> options, KiotStatusRenderMode renderMode = KiotStatusRenderMode.Checkbox, string containerId = "pillsStatus")
     {
         Title = title;
         DotId = dotId;
         Options = options;
+        RenderMode = renderMode;
+        ContainerId = containerId;
+    }
+
+    public KiotStatusFilterVM(string title, List<KiotStatusOptionVM> options, KiotStatusRenderMode renderMode = KiotStatusRenderMode.Checkbox)
+    {
+        Title = title;
+        DotId = "dotSt";
+        Options = options;
+        RenderMode = renderMode;
     }
 }

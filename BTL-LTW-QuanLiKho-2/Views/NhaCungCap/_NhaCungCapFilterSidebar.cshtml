@@ -1,0 +1,41 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.NhaCungCap.NhaCungCapIndexVM
+@using BTL_LTW_QuanLiKho_2.ViewModels.Common
+
+<!-- CỘT BÊN TRÁI: TIÊU ĐỀ "NHÀ CUNG CẤP" + BỘ LỌC 5 KHỐI LEGO CHUẨN KIOTVIET -->
+<aside class="kiot-sidebar-col" id="sidebarFilterCol">
+    <!-- Header cho sidebar khi mở ở chế độ mobile -->
+    <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+        <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc nhà cung cấp</div>
+        <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
+    </div>
+
+    <div class="kiot-sidebar-title d-none d-lg-flex">
+        Nhà cung cấp
+    </div>
+
+    <div class="kiot-filter-box">
+        <!-- 1. Nhóm nhà cung cấp -->
+        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NhomNcc", "nhom", "Nhóm nhà cung cấp", "Tất cả các nhóm", true) {
+            HeaderActionText = "Tạo mới",
+            HeaderActionId = "btnOpenQuickGroupNcc",
+            AllowEdit = true,
+            Items = Model.NhomNccList.Select(g => new KiotMultiSelectItemVM(g.MaNhomNcc.ToString(), g.TenNhom)).ToList()
+        }' />
+
+        <!-- 2. Tổng mua -->
+        <partial name="_KiotValueFilter" model='new KiotValueFilterVM("TongMua", "Tổng mua", "Giá trị")' />
+
+        <!-- 3. Thời gian tạo -->
+        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("date", "Thời gian", false)' />
+
+        <!-- 4. Nợ hiện tại -->
+        <partial name="_KiotValueFilter" model='new KiotValueFilterVM("No", "Nợ hiện tại", "Giá trị")' />
+
+        <!-- 5. Trạng thái -->
+        <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Trạng thái", "dotTrangThai", new List<KiotStatusOptionVM> {
+            new("all", "Tất cả"),
+            new("active", "Đang hoạt động", true),
+            new("off", "Ngừng hoạt động")
+        }, KiotStatusRenderMode.Pills) { ContainerId = "pillsStatus" }' />
+    </div>
+</aside>

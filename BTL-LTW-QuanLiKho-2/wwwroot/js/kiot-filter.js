@@ -525,11 +525,12 @@ window.KiotFilter = (function ($) {
         });
 
         function applyVisibility() {
+            const currentTable = $(tableSelector);
             menu.find('input[type="checkbox"]').each(function () {
                 const col = $(this).data('c');
                 const isChecked = $(this).is(':checked');
                 if (col) {
-                    table.find(`[data-col="${col}"], .col-${col}`).toggle(isChecked);
+                    currentTable.find(`[data-col="${col}"], .col-${col}`).toggle(isChecked);
                 }
             });
         }
@@ -834,6 +835,50 @@ window.KiotFilter = (function ($) {
         };
     }
 
+    // 16. Khởi tạo bộ lọc Khoảng giá trị (Từ - Tới) chuẩn KiotViet (.fromto / _KiotValueFilter)
+    function initValueFilter(id, onChangeCallback) {
+        const fromInput = $(`#filter${id}Tu`);
+        const toInput = $(`#filter${id}Den`);
+        const dot = $(`#dot${id}`);
+
+        const parseNum = val => {
+            if (!val) return null;
+            const cleaned = String(val).replace(/[^0-9.-]/g, '');
+            const n = parseFloat(cleaned);
+            return isNaN(n) ? null : n;
+        };
+
+        const updateHandler = debounce(function () {
+            const tu = parseNum(fromInput.val());
+            const den = parseNum(toInput.val());
+            if (dot.length) {
+                dot.toggleClass('active on', tu !== null || den !== null);
+            }
+            if (typeof onChangeCallback === 'function') {
+                onChangeCallback(tu, den);
+            }
+        }, 400);
+
+        fromInput.add(toInput).on('input', updateHandler);
+    }
+
+    // 17. Khởi tạo bộ lọc Trạng thái dạng Pills chuẩn KiotViet (.pills / .pill / _KiotStatusFilter)
+    function initStatusFilter(containerSelector, onSelectCallback) {
+        const container = $(containerSelector);
+        if (!container.length) return;
+
+        container.on('click', '.pill', function (e) {
+            e.preventDefault();
+            const btn = $(this);
+            container.find('.pill').removeClass('on');
+            btn.addClass('on');
+            const val = btn.data('st') !== undefined ? btn.data('st') : btn.data('val');
+            if (typeof onSelectCallback === 'function') {
+                onSelectCallback(val);
+            }
+        });
+    }
+
     return {
         debounce: debounce,
         escapeHtml: escapeHtml,
@@ -849,6 +894,8 @@ window.KiotFilter = (function ($) {
         initColumnToggle: initColumnToggle,
         bindStarToggle: bindStarToggle,
         bindPagination: bindPagination,
-        initCombobox: initCombobox
+        initCombobox: initCombobox,
+        initValueFilter: initValueFilter,
+        initStatusFilter: initStatusFilter
     };
 })(jQuery);

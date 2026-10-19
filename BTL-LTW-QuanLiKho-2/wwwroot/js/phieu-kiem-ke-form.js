@@ -859,8 +859,13 @@
     };
     $('#mClose')?.addEventListener('click', () => $('#ov')?.classList.remove('show'));
 
-    function toast(msg) {
+    function toast(msg, type) {
+        if (window.KiotToast) {
+            window.KiotToast.show(msg, type || 'info');
+            return;
+        }
         const t = $('#toast');
+        if (!t) return;
         t.textContent = msg;
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 3000);

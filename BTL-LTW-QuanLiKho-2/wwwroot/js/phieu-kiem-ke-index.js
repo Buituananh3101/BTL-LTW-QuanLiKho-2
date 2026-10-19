@@ -621,9 +621,9 @@
     });
 
     /* ===== TOAST TIỆN ÍCH ===== */
-    function toast(msg) {
+    function toast(msg, type) {
         if (window.KiotToast) {
-            window.KiotToast.info(msg);
+            window.KiotToast.show(msg, type || 'info');
         } else {
             let t = $('#toast');
             if (!t) {

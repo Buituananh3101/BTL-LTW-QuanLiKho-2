@@ -34,7 +34,7 @@ window.KiotToast = (function () {
         } else if (type === 'warning') {
             iconHtml = '<i class="bi bi-exclamation-triangle-fill text-warning fs-6"></i>';
         } else {
-            iconHtml = '<i class="bi bi-info-circle-fill text-primary fs-6"></i>';
+            iconHtml = '<i class="bi bi-info-circle-fill text-info fs-6"></i>';
         }
 
         el.innerHTML = `${iconHtml}<span>${msg}</span>`;
@@ -54,8 +54,8 @@ window.KiotToast = (function () {
 })();
 
 // Bí danh tương thích ngược cho toàn bộ các hàm gọi cũ trong dự án
-window.showToast = function (msg) {
-    window.KiotToast.show(msg, 'success');
+window.showToast = function (msg, type) {
+    window.KiotToast.show(msg, type || 'success');
 };
 window.toast = function (msg, type) {
     window.KiotToast.show(msg, type || 'info');
@@ -80,10 +80,16 @@ window.KiotNumber = (function () {
         return isNaN(num) ? '0' : num.toLocaleString('en-US');
     }
 
-    // Lắng nghe sự kiện toàn cục cho mọi ô có class .kiot-num hoặc .hh-num
+    // Lắng nghe sự kiện toàn cục cho mọi ô có class .kiot-num hoặc .hh-num hoặc .money
     document.addEventListener('input', function (e) {
         const el = e.target;
-        if (!el || !el.classList || (!el.classList.contains('kiot-num') && !el.classList.contains('hh-num'))) return;
+        if (!el || !el.classList) return;
+        if (el.classList.contains('money')) {
+            const d = el.value.replace(/\D/g, '');
+            el.value = d ? Number(d).toLocaleString('en-US') : '';
+            return;
+        }
+        if (!el.classList.contains('kiot-num') && !el.classList.contains('hh-num')) return;
         if (el.dataset.decimal === 'true' || el.id === 'formTrongLuong') {
             el.value = el.value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1') || '';
             return;
@@ -94,7 +100,7 @@ window.KiotNumber = (function () {
 
     document.addEventListener('focusin', function (e) {
         const el = e.target;
-        if (el && el.classList && (el.classList.contains('kiot-num') || el.classList.contains('hh-num'))) {
+        if (el && el.classList && (el.classList.contains('kiot-num') || el.classList.contains('hh-num') || el.classList.contains('money'))) {
             el.select();
         }
     });

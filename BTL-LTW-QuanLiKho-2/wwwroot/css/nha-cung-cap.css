@@ -1,0 +1,220 @@
+/* ==========================================================================
+   CSS CHO MÔ-ĐUN QUẢN LÝ NHÀ CUNG CẤP (CHUẨN KIOTVIET)
+   ========================================================================== */
+
+/* 1. Master-Detail Inline Panel */
+.ncc-detail-panel {
+    background: #ffffff;
+    border-left: 3px solid #0066cc;
+    border-bottom: 2px solid #e2e8f0;
+    margin: 4px 8px 12px 8px;
+    border-radius: 4px;
+}
+
+.ncc-detail-tabs {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0 16px;
+    gap: 8px;
+}
+
+.ncc-detail-tab-btn {
+    border: none;
+    background: transparent;
+    padding: 10px 16px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #64748b;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ncc-detail-tab-btn:hover {
+    color: #0066cc;
+}
+
+.ncc-detail-tab-btn.active {
+    color: #0066cc;
+    font-weight: 600;
+    border-bottom: 2px solid #0066cc;
+}
+
+/* 1.1 Drawer Tabs (.dp-tabs & .dp-tab) */
+.dp-tabs {
+    display: flex;
+    gap: 24px;
+}
+.dp-tab {
+    cursor: pointer;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    border-bottom: 2px solid transparent !important;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+.dp-tab:hover {
+    color: #0070f4 !important;
+}
+.dp-tab.active {
+    color: #0070f4 !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid #0070f4 !important;
+}
+
+/* 2. Highlight Row khi đang mở chi tiết */
+.ncc-row.is-expanded {
+    background-color: #f0f7ff !important;
+}
+
+.ncc-row:hover {
+    background-color: #f8fafc;
+}
+
+/* 3. Accordion Khối Lego (Chuẩn KiotViet) */
+.kiot-sec {
+    background-color: #ffffff;
+    transition: border-color 0.2s ease;
+}
+
+.kiot-sec:hover {
+    border-color: #cbd5e1;
+}
+
+.kiot-sec-h {
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+.kiot-sec-h:hover {
+    background-color: #f1f5f9 !important;
+}
+
+.kiot-chev {
+    font-size: 12px;
+    color: #64748b;
+    transition: transform 0.25s ease;
+}
+
+.kiot-sec.open .kiot-chev {
+    transform: rotate(180deg);
+}
+
+/* 4. Filter Dot Indicator */
+.filter-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background-color: #0066cc;
+    border-radius: 50%;
+    margin-left: 4px;
+    display: none;
+}
+
+.filter-dot.active {
+    display: inline-block;
+}
+
+/* 5. Custom Scrollbar cho Modal & Table */
+.kiot-table-scroll-body {
+    overflow-x: auto;
+    position: relative;
+    min-height: 250px;
+}
+
+.fs-7 {
+    font-size: 11.5px;
+}
+
+/* 6. Bảng NCC giữ độ rộng cột cố định, không ép tràn ngang */
+#supplierTable {
+    width: max-content !important;
+    min-width: 760px !important;
+    table-layout: fixed !important;
+}
+
+/* Đóng khung hình chữ nhật liền mạch khi mở chi tiết dòng NCC */
+#supplierTable tr.product-row.selected > td {
+    background-color: #ffffff !important;
+    border-top: 2px solid #0070f3 !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    border-right: none !important;
+}
+#supplierTable tr.product-row.selected > td:first-child {
+    border-left: 3px solid #0070f3 !important;
+}
+#supplierTable tr.product-row.selected > td.last-visible-col,
+#supplierTable tr.product-row.selected > td:last-child {
+    border-right: 3px solid #0070f3 !important;
+}
+
+#supplierTable tr.product-detail-row > td {
+    background-color: #ffffff !important;
+    padding: 0 !important;
+    border-top: none !important;
+    border-bottom: 2px solid #0070f3 !important;
+    border-left: 3px solid #0070f3 !important;
+    border-right: 3px solid #0070f3 !important;
+}
+
+/* 7. Khối thông tin chi tiết nhà cung cấp có độ rộng cố định, không co giãn theo độ dài khung xanh */
+.ncc-detail-fixed-wrap {
+    width: 992px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.ncc-attr-grid {
+    display: flex;
+    gap: 16px;
+    width: 992px;
+    max-width: 100%;
+    margin-bottom: 1rem;
+    box-sizing: border-box;
+}
+
+.ncc-attr-col {
+    width: 320px;
+    min-width: 320px;
+    max-width: 320px;
+    flex: 0 0 320px;
+    box-sizing: border-box;
+}
+
+.ncc-detail-fixed-wrap .product-detail-footer {
+    width: 992px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.ncc-detail-fixed-wrap .product-detail-footer-left,
+.ncc-detail-fixed-wrap .product-detail-footer-right {
+    position: static !important;
+}
+
+@media (max-width: 1040px) {
+    .ncc-attr-grid {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+    .ncc-attr-col {
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        flex: 1 1 100%;
+    }
+    .ncc-detail-fixed-wrap,
+    .ncc-detail-fixed-wrap .product-detail-footer {
+        width: 100%;
+    }
+}
+
+/* Centering và hiển thị mượt mà cho các modal con xác nhận & prompt Nhà cung cấp */
+#nccDeleteOv,
+#nccStatusConfirmOv,
+#nccPromptOv,
+#nccEditGroupOv {
+    z-index: 1065;
+    align-items: center !important;
+}
+

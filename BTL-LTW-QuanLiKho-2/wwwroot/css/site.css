@@ -1281,27 +1281,29 @@ tr.product-row {
 tr.product-row:hover > td {
   background-color: #f8fafc;
 }
-/* Dòng sản phẩm được chọn: Viền 2 bên đậm (3px), viền trên mảnh nhẹ (1px) */
+/* Dòng sản phẩm được chọn: Đóng khung thành hình chữ nhật khép kín với dòng chi tiết */
 tr.product-row.selected > td {
   background-color: #ffffff !important;
-  border-top: 1px solid #93c5fd !important; /* Viền trên mảnh */
-  border-bottom: 1px solid #f1f5f9 !important; /* Phân cách nhẹ với bảng chi tiết */
+  border-top: 2px solid #0070f3 !important; /* Cạnh trên hình chữ nhật */
+  border-bottom: 1px solid #f1f5f9 !important; /* Phân cách nhẹ với bảng chi tiết bên trong */
+  border-right: none !important;
 }
 tr.product-row.selected > td:first-child {
-  border-left: 3px solid #0070f3 !important; /* Viền bên trái ĐẬM */
+  border-left: 3px solid #0070f3 !important; /* Cạnh trái hình chữ nhật */
 }
+tr.product-row.selected > td.last-visible-col,
 tr.product-row.selected > td:last-child {
-  border-right: 3px solid #0070f3 !important; /* Viền bên phải ĐẬM */
+  border-right: 3px solid #0070f3 !important; /* Cạnh phải hình chữ nhật */
 }
 
-/* Dòng chi tiết mở rộng: Viền 2 bên đậm (3px), viền dưới mảnh (1px) */
+/* Dòng chi tiết mở rộng: Cạnh 2 bên và cạnh đáy khép kín hình chữ nhật */
 tr.product-detail-row > td {
   background-color: #ffffff !important;
   padding: 0 !important;
   border-top: none !important;
-  border-bottom: 1px solid #93c5fd !important; /* Viền dưới mảnh */
-  border-left: 3px solid #0070f3 !important; /* Viền bên trái ĐẬM */
-  border-right: 3px solid #0070f3 !important; /* Viền bên phải ĐẬM */
+  border-bottom: 2px solid #0070f3 !important; /* Cạnh đáy hình chữ nhật */
+  border-left: 3px solid #0070f3 !important; /* Cạnh trái hình chữ nhật */
+  border-right: 3px solid #0070f3 !important; /* Cạnh phải hình chữ nhật */
 }
 
 .product-detail-panel-wrap {
@@ -2074,34 +2076,43 @@ tr.product-detail-row > td {
   color: #dc2626 !important;
 }
 
-/* Toast Notification dùng chung toàn hệ thống */
+/* Toast Notification dùng chung toàn hệ thống (Chuẩn KiotViet: viên bo tròn tối màu, không viền kẻ dọc) */
 .kiot-toast {
   position: fixed;
   left: 50%;
   bottom: 28px;
   transform: translateX(-50%) translateY(20px);
   background: #111827;
-  color: #fff;
+  color: #ffffff;
   padding: 10px 22px;
   border-radius: 8px;
+  border: none !important;
   opacity: 0;
   pointer-events: none;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 9999;
   font-size: 14px;
   font-weight: 500;
+  line-height: 1.4;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  max-width: 90vw;
+  box-sizing: border-box;
 }
 .kiot-toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
-.kiot-toast.success { background: #0f172a; border-left: 4px solid #10b981; }
-.kiot-toast.error { background: #0f172a; border-left: 4px solid #ef4444; }
-.kiot-toast.warning { background: #0f172a; border-left: 4px solid #f59e0b; }
+.kiot-toast.success,
+.kiot-toast.error,
+.kiot-toast.warning,
+.kiot-toast.info {
+  background: #111827;
+  border: none !important;
+  border-left: none !important;
+}
 
 /* ========================================================================
    KIOTVIET UNIVERSAL FORM COMPONENTS: Collapsible, Numbers, Split, Combobox, Prompt
@@ -2170,6 +2181,94 @@ tr.product-detail-row > td {
 .kiot-num:focus {
   border-color: #0070f4;
   box-shadow: 0 0 0 3px rgba(0, 112, 244, 0.12);
+}
+
+/* 2.1. Khối nhập khoảng giá trị Từ - Tới chuẩn KiotViet (.fromto) */
+.sub {
+  font-size: 12.5px;
+  color: #64748b;
+  margin: 2px 0 6px;
+}
+.fromto {
+  display: flex;
+  align-items: center;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  overflow: hidden;
+  background: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.fromto:focus-within {
+  border-color: #0070f4;
+  box-shadow: 0 0 0 3px rgba(0, 112, 244, 0.12);
+}
+.fromto b {
+  background: #f1f3f6;
+  padding: 0 10px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  min-width: 44px;
+  justify-content: center;
+  color: #4b5563;
+  font-weight: 600;
+  user-select: none;
+  border-right: 1px solid #e5e7eb;
+}
+.fromto input {
+  border: 0;
+  outline: none;
+  height: 32px;
+  padding: 0 10px;
+  width: 100%;
+  min-width: 0;
+  text-align: right;
+  font-size: 13px;
+  background: transparent;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: #1e293b;
+}
+.fromto input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+/* 2.2. Khối nút viên thuốc Trạng thái chuẩn KiotViet (.pills & .pill) */
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pill {
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 16px;
+  background: #ffffff;
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+}
+.pill:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+.pill.on {
+  background: #0070f4;
+  border-color: #0070f4;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 112, 244, 0.3);
 }
 
 /* 3. Nút lưu đa năng Split Button (.kiot-split) */

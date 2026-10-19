@@ -2,20 +2,37 @@
 @{
     var title = Model?.Title ?? "Trạng thái";
     var dotId = Model?.DotId ?? "dotSt";
+    var containerId = !string.IsNullOrEmpty(Model?.ContainerId) ? Model.ContainerId : "pillsStatus";
+    var isPills = Model?.RenderMode == BTL_LTW_QuanLiKho_2.ViewModels.Common.KiotStatusRenderMode.Pills;
 }
 
-<div class="f-block position-relative">
+<div class="f-block position-relative kiot-status-filter-block">
     <h6>@title <span class="filter-dot" id="@dotId"></span></h6>
-    <div class="d-flex flex-column gap-2 small">
-        @if (Model?.Options != null)
-        {
-            foreach (var opt in Model.Options)
+    @if (isPills)
+    {
+        <div class="pills" id="@containerId">
+            @if (Model?.Options != null)
             {
-                <label class="form-check-label d-flex align-items-center gap-2" style="cursor: pointer;">
-                    <input class="form-check-input mt-0" type="checkbox" data-s="@opt.Value" @(opt.Checked ? "checked" : "")> 
-                    <span>@opt.Label</span>
-                </label>
+                foreach (var opt in Model.Options)
+                {
+                    <button type="button" class="pill @(opt.Checked ? "on" : "")" data-st="@opt.Value">@opt.Label</button>
+                }
             }
-        }
-    </div>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-column gap-2 small">
+            @if (Model?.Options != null)
+            {
+                foreach (var opt in Model.Options)
+                {
+                    <label class="form-check-label d-flex align-items-center gap-2" style="cursor: pointer;">
+                        <input class="form-check-input mt-0" type="checkbox" data-s="@opt.Value" @(opt.Checked ? "checked" : "")> 
+                        <span>@opt.Label</span>
+                    </label>
+                }
+            }
+        </div>
+    }
 </div>

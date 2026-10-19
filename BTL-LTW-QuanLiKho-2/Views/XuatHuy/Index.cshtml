@@ -1,0 +1,130 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.XuatHuyIndexVM
+@{
+    ViewData["Title"] = "Xuất hủy";
+}
+
+<link href="~/css/kiem-kho.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/xuat-huy.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="kiot-container position-relative" id="kiotContainer"
+     data-filter-url="@Url.Action("Filter", "XuatHuy")"
+     data-cancel-url="@Url.Action("Cancel", "XuatHuy")"
+     data-note-url="@Url.Action("UpdateNote", "XuatHuy")"
+     data-export-url="@Url.Action("Export", "XuatHuy")"
+     data-toggle-star-url="@Url.Action("ToggleFavorite", "XuatHuy")"
+     data-is-starred="@(Model.DaDanhDauFilter ? "true" : "false")"
+     data-warehouse-id="@Model.CurrentWarehouseId"
+     data-sort-by="@Model.SortBy"
+     data-sort-dir="@Model.SortDir">
+
+    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + BỘ LỌC KIOTVIET (PARTIAL VIEW) -->
+    <partial name="_XuatHuyFilterSidebar" model="Model" />
+
+    <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
+    <div class="kiot-sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Nút tròn thu gọn / mở rộng ở ranh giới giữa sidebar và bảng (Phím tắt F4) -->
+    <button type="button" class="kiot-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
+        <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
+    </button>
+
+    <!-- 2. CỘT BÊN PHẢI: THANH TÌM KIẾM + TOOLBAR + BẢNG XUẤT HỦY -->
+    <main class="kiot-main-col">
+        <!-- Toolbar trên cùng: Thanh tìm kiếm thẳng hàng với bảng bên dưới -->
+        <div class="kiot-toolbar-row">
+            <!-- Tiêu đề + Nút phễu bộ lọc trên mobile / zoom in -->
+            <div class="kiot-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
+                <span class="kiot-mobile-title fw-bold fs-6 text-dark">Xuất hủy</span>
+                <button type="button" class="btn btn-sm btn-outline-primary kiot-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc xuất hủy">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+
+            <!-- Ô tìm kiếm theo mã xuất hủy (F3) -->
+            <div class="kiot-search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã xuất hủy (F3)" value="@Model.Filter.Q" autocomplete="off" />
+            </div>
+
+            <!-- Nhóm nút hành động KiotViet -->
+            <div class="kiot-actions-group">
+                <!-- Nút + Xuất hủy -->
+                <a href="@Url.Action("Create", "XuatHuy")" class="btn btn-primary d-inline-flex align-items-center" id="btnNew" title="Lập phiếu xuất hủy mới">
+                    <i class="bi bi-plus-lg me-1"></i><span>Xuất hủy</span>
+                </a>
+
+                <!-- Dropdown Xuất file -->
+                <div class="dropdown">
+                    <button class="btn btn-tool dropdown-toggle" type="button" id="btnExportDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Xuất file">
+                        <i class="bi bi-box-arrow-up me-1"></i>Xuất file
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="btnExportDropdown">
+                        <li>
+                            <a class="dropdown-item py-2" href="javascript:void(0)" id="btnExpList" data-x="list">
+                                <i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i>Xuất danh sách xuất hủy
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2" href="javascript:void(0)" id="btnExpDetail" data-x="detail">
+                                <i class="bi bi-file-earmark-text me-2 text-primary"></i>Xuất chi tiết (từng dòng hàng)
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Dropdown Tùy chọn hiển thị cột -->
+                <div class="dropdown">
+                    <button class="btn btn-tool" type="button" id="btnColsDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Tùy chọn hiển thị cột">
+                        <i class="bi bi-view-list"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end shadow p-3" id="colMenu" style="min-width: 210px;">
+                        <h6 class="dropdown-header px-0 pt-0 text-dark fw-bold">Hiển thị cột</h6>
+                        <div class="d-flex flex-column gap-2 small">
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ma" checked> Mã xuất hủy</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="gt" checked> Tổng giá trị hủy</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tg" checked> Thời gian</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tgt"> Thời gian tạo</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="kho" checked> Chi nhánh</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="nxh"> Người xuất hủy</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="nt"> Người tạo</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ghi" checked> Ghi chú</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="st" checked> Trạng thái</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tải lại bảng -->
+                <button type="button" class="btn btn-tool d-none d-sm-inline-flex" title="Tải lại bảng" id="btnReloadTable">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách phiếu xuất hủy (Load AJAX qua Partial View) -->
+        <section id="content">
+            <div id="tableWrapper" class="kiot-table-wrapper">
+                <partial name="_XuatHuyTable" model="Model" />
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Modal xác nhận xóa / hủy chứng từ dùng chung KiotConfirm -->
+<div class="kiot-confirm-ov" id="kiotConfirmOv">
+    <div class="kiot-confirm-modal">
+        <div class="kiot-confirm-header">
+            <h5 class="kiot-confirm-title" id="kiotConfirmTitle">Xác nhận</h5>
+            <button type="button" class="btn-close" id="kiotConfirmCloseBtn" aria-label="Close"></button>
+        </div>
+        <div class="kiot-confirm-body" id="kiotConfirmMsg">Bạn có chắc chắn muốn thực hiện thao tác này?</div>
+        <div class="kiot-confirm-footer">
+            <button type="button" class="btn btn-secondary kiot-btn-cancel" id="kiotConfirmCancelBtn">Bỏ qua</button>
+            <button type="button" class="btn btn-danger kiot-btn-ok" id="kiotConfirmOkBtn">Đồng ý</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/kiot-filter.js" asp-append-version="true"></script>
+    <script src="~/js/xuat-huy-index.js" asp-append-version="true"></script>
+}

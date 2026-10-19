@@ -1398,15 +1398,22 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
   transform: translateX(-50%) translateY(20px);
   background: #111827;
   color: #fff;
-  padding: 10px 18px;
+  padding: 10px 22px;
   border-radius: 8px;
+  border: none !important;
   opacity: 0;
   pointer-events: none;
-  transition: 0.25s;
-  z-index: 1200;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 9999;
   font-size: 14px;
-  max-width: 80vw;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  font-weight: 500;
+  line-height: 1.4;
+  max-width: 90vw;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
 }
 .toast-box.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -1486,15 +1493,25 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
   position: relative;
 }
 
-/* Đảm bảo bảng kiểm kho có đủ min-width để cuộn ngang độc lập */
-#stockTakeTable.tbl {
+/* Đảm bảo bảng kiểm kho và xuất hủy có đủ min-width để cuộn ngang độc lập */
+#stockTakeTable.tbl,
+#supplierTable.tbl {
   min-width: 1450px !important;
   width: 100%;
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
 }
-#stockTakeTable.tbl th {
+#xuatHuyTable.tbl {
+  min-width: 1100px !important;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+#stockTakeTable.tbl th,
+#xuatHuyTable.tbl th,
+#supplierTable.tbl th {
   background: var(--brand-soft);
   color: #1e3a8a;
   font-weight: 600;
@@ -1504,11 +1521,14 @@ table.tbl { border-collapse: collapse; width: 100%; min-width: max-content; }
   top: 0;
   z-index: 20;
 }
-#stockTakeTable.tbl td {
+#stockTakeTable.tbl td,
+#xuatHuyTable.tbl td,
+#supplierTable.tbl td {
   font-size: 13px;
   padding: 10px 12px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
 }
+
 
 

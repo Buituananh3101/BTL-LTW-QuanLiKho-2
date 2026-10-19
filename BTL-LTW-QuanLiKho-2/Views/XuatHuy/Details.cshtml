@@ -1,0 +1,10 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.XuatHuyFormVM
+@{
+    ViewData["Title"] = "Chi tiết phiếu xuất hủy " + Model.MaPhieuHienThi;
+}
+
+@await Html.PartialAsync("_XuatHuyForm", Model)
+
+@section Scripts {
+    <script src="~/js/xuat-huy-form.js" asp-append-version="true"></script>
+}
