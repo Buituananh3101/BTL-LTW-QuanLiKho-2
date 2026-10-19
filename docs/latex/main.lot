@@ -1,0 +1,17 @@
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {1.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả yêu cầu chức năng của hệ thống}}{13}{table.caption.3}%
+\contentsline {table}{\numberline {1.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Ma trận phân quyền chức năng chi tiết theo vai trò}}{14}{table.caption.4}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {2.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả Use Case UC-01: Lập và Cân bằng Phiếu Kiểm kho}}{17}{table.caption.6}%
+\contentsline {table}{\numberline {2.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả Use Case UC-02: Điều chuyển kho nội bộ liên chi nhánh}}{18}{table.caption.7}%
+\contentsline {table}{\numberline {2.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả Use Case UC-03: Nhập hàng từ Nhà cung cấp}}{19}{table.caption.8}%
+\contentsline {table}{\numberline {2.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng HangHoa (Hàng hóa)}}{24}{table.caption.14}%
+\contentsline {table}{\numberline {2.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuKiemKe \& ChiTietPhieuKiemKe}}{24}{table.caption.15}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {4.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-01: Tính tồn tức thời sau Nhập hàng}}{32}{table.caption.21}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-02: Điều chuyển hàng hóa nội bộ}}{33}{table.caption.22}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-03: Cân bằng kiểm kê và Khóa chứng từ}}{33}{table.caption.23}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-04: Khắc phục lỗi Stacking Context Modal}}{34}{table.caption.24}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-05: Sửa lỗi Token AntiForgery trên AJAX JSON}}{34}{table.caption.25}%
+\addvspace {10\p@ }
