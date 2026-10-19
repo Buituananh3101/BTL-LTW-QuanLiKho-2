@@ -1,21 +1,47 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-19 – Khắc Phục Lỗi Stacking Context Giam Cầm Modal & Chuẩn Hóa Hệ Thống Z-Index Toàn Website (Phiên 161)
+Cập nhật lần cuối: 2026-10-19 – Xây Dựng Hệ Thống Modal Trợ Giúp KiotHelp Dùng Chung & Loại Bỏ Triệt Để Alert Trên Nút Trợ Giúp (Phiên 162)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất sửa triệt để lỗi Header/Navigation đè lên Modal & chuẩn hóa hệ thống z-index toàn diện:
-  + Gỡ bỏ `z-index: 1` trên `.app-main-body` trong `site.css`, giải phóng stacking context để các Modal, Backdrop và Drawer (`_NguoiDungModal`, `_KhoModal`, `_HangHoaModal`, `_DoiMatKhauModal`, `_NhaCungCapModal`,...) hiển thị trọn vẹn 100% trên đỉnh màn hình, che mờ header chuẩn KiotViet.
-  + Chuẩn hóa phân tầng Z-Index 6 lớp toàn hệ thống: Layer 1 (Nội dung 1-50) < Layer 2 (Dropdowns, Autocompletes 150-500) < Layer 3 (Header & Mega Menu 1020) < Layer 4 (Modals, Overlays 1050-1065) < Layer 5 (Prompts 1090-1095) < Layer 6 (Toasts 9999).
-  + Điều chỉnh toàn bộ in-page dropdowns (`.tk-autocomplete-dropdown`, `.nh-autocomplete-dropdown`, `.kiot-ms-dropdown`, `.kiot-ss-dropdown`, `.kiot-combobox-dropdown`, `.kiot-attr-menu`, `.dtpop`,...) về mức an toàn 150–500 để không bao giờ đè lên Mega Menu.
+- Đã hoàn tất xây dựng Modal Trợ giúp KiotHelp dùng chung và loại bỏ triệt để alert popup trên toàn bộ 11 màn hình chính:
+  + Gỡ bỏ 100% thuộc tính inline `onclick="alert(...)"` trên nút `btnHelp` tại `PhieuKiemKe/Index.cshtml` và `TraHangNhap/Index.cshtml`, chấm dứt hoàn toàn tình trạng hiện alert trình duyệt trước khi mở popup.
+  + Tạo partial dùng chung `Views/Shared/_KiotHelpModal.cshtml` tích hợp vào `_Layout.cshtml`, CSS phân tầng z-index 1070 trong `site.css`.
+  + Module JS toàn cục `KiotHelp` trong `site.js` chứa từ điển `HELP_MAP` và cơ chế tự động nhận diện màn hình (`detectScreenKey`) cho 11 phân hệ (`HangHoa`, `NhapHang`, `TraHangNhap`, `XuatHuy`, `ChuyenKho`, `PhieuKiemKe`, `TheKho`, `TonKho`, `NguoiDung`, `Kho`, `NhaCungCap`).
+  + Đồng bộ nút trợ giúp chuẩn `<button type="button" class="btn btn-tool btn-help" id="btnHelp" title="Hướng dẫn sử dụng (F1)"><i class="bi bi-question-circle"></i></button>` trên toàn bộ các trang.
+  + Hỗ trợ phím tắt `F1` để mở và `Esc` để đóng modal trợ giúp tức thì ở bất kỳ màn hình nào.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế khi mở Modal "Thêm mới người dùng" (`/NguoiDung`) và Modal "Thêm chi nhánh kho" (`/Kho`) – đảm bảo tiêu đề và nút đóng `✕` hiển thị rõ ràng trên header.
-2. Kiểm tra thao tác hover Mega Menu trên navbar khi các ô tìm kiếm hoặc dropdown bộ lọc đang hiển thị – đảm bảo Mega Menu luôn nổi phía trên.
-3. Kiểm tra tính năng Xuất file Excel Thẻ kho (`/BaoCao/ExportTheKho`) và In thẻ kho (`/BaoCao/TheKho`).
+1. Kiểm tra trải nghiệm thực tế khi bấm nút `?` hoặc phím `F1` trên từng màn hình: Kiểm kho, Trả hàng nhập, Hàng hóa, Chuyển kho, Thẻ kho, Tồn kho...
+2. Tiếp tục hoàn thiện các chức năng nâng cao theo yêu cầu người dùng.
+
+---
+
+- **Xây Dựng Hệ Thống Modal Trợ Giúp KiotHelp Dùng Chung & Loại Bỏ Triệt Để Alert (Phiên 162)**:
+  - **Nhu cầu**: Người dùng phản hồi: "cái phần như dấu ? hình vuông ở góc phải trên màn hình hiện tại ấn vào chưa hướng dẫn j. Bạn hãy cập nhật các nút trợ giúp đó" và "hiện tại khi ấn vào trợ giúp thì nó lại hiện alert rồi mới hiện form trợ giúp. bạn hãy sửa lại".
+  - **Nguyên nhân cốt lõi lỗi hiện alert trước modal**:
+    + Trong một số view CSHTML cũ (`PhieuKiemKe/Index.cshtml`, `TraHangNhap/Index.cshtml`), thẻ `<button id="btnHelp">` chứa thuộc tính inline HTML: `onclick="alert('Hướng dẫn: ...');"`.
+    + Khi người dùng click, trình duyệt ưu tiên kích hoạt sự kiện inline trước làm hiện popup `alert(...)`, sau khi người dùng bấm OK thì event mới bubble lên `document` để kích hoạt `KiotHelp.show()`.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Tạo component Lego dùng chung `Views/Shared/_KiotHelpModal.cshtml`**:
+       - Cấu trúc chuẩn KiotViet gồm: Header (Tiêu đề phân hệ + Badge màn hình + nút đóng `✕`), Subtitle tóm tắt, Danh sách phím tắt thao tác nhanh dạng `<kbd>`, Quy trình 3-4 bước nghiệp vụ cơ bản, Mẹo/Lưu ý vận hành (đã tinh gọn, bỏ dòng thông tin Tổng đài hỗ trợ theo yêu cầu).
+       - Tích hợp 1 lần duy nhất trong `Views/Shared/_Layout.cshtml`.
+    2. **Tạo kiểu CSS chuẩn KiotViet trong `wwwroot/css/site.css`**:
+       - Khối `.kiot-help-ov` có `z-index: 1070` (cao hơn cả Header và Modal thông thường), hiệu ứng zoom-in mượt mà, responsive tốt trên cả mobile/desktop.
+    3. **Xây dựng module JS toàn cục `KiotHelp` trong `wwwroot/js/site.js`**:
+       - Định nghĩa từ điển `HELP_MAP` hướng dẫn chi tiết cho 11 phân hệ: `HangHoa`, `NhapHang`, `TraHangNhap`, `XuatHuy`, `ChuyenKho`, `PhieuKiemKe`, `TheKho`, `TonKho`, `NguoiDung`, `Kho`, `NhaCungCap`.
+       - Hàm `detectScreenKey()` tự động nhận diện màn hình hiện tại dựa trên `window.location.pathname`.
+       - Bắt sự kiện click trên `#btnHelp, .btn-help, #btnHeaderHelp, a[title="Hỗ trợ"]` và phím tắt toàn cục `F1` / `Escape`.
+    4. **Gỡ bỏ triệt để 100% inline `onclick="alert(...)"` và chuẩn hóa nút trợ giúp trên toàn bộ 11 màn hình**:
+       - `Views/PhieuKiemKe/Index.cshtml`: Gỡ bỏ inline alert, chuyển sang `btn-help`.
+       - `Views/TraHangNhap/Index.cshtml`: Gỡ bỏ inline alert, chuyển sang `btn-help`.
+       - `Views/ChuyenKho/Index.cshtml`: Chuẩn hóa class `btn-help` và title `(F1)`.
+       - Bổ sung nút chuẩn vào thanh công cụ toolbar của: `Views/HangHoa/Index.cshtml`, `Views/NhapHang/Index.cshtml`, `Views/XuatHuy/Index.cshtml`, `Views/BaoCao/TheKho.cshtml`, `Views/BaoCao/TonKho.cshtml`, `Views/NguoiDung/Index.cshtml`, `Views/Kho/Index.cshtml`, `Views/NhaCungCap/Index.cshtml`.
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
 
 ---
 
