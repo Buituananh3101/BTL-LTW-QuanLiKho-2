@@ -1,19 +1,56 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-19 – Chuẩn Hóa README.md: Bỏ Nhắc Phú Quốc & Thống Nhất Tên Hệ Thống (Phiên 184)
+Cập nhật lần cuối: 2026-10-19 – Gỡ Bỏ Bảng Phân Công Công Việc Khỏi Báo Cáo LaTeX (Phiên 187)
 
 ---
 
 ## Đang làm
-- Hệ thống đã chuẩn hóa toàn bộ tài liệu hướng dẫn [`README.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/README.md) theo tên gọi chuẩn: **"KhoPro – Hệ Thống Quản Lý Kho Hàng Nội Bộ Đa Chi Nhánh"**.
-- Đã gỡ bỏ toàn bộ các tham chiếu địa danh cụ thể (Phú Quốc, đảo, phà biển, phường xã địa phương) trong phần mô tả, luồng nghiệp vụ và sơ đồ Mermaid.
-- Giữ nguyên các hướng dẫn kỹ thuật thiết lập CSDL, chạy ứng dụng và tài khoản kiểm thử demo.
+- Đã hoàn tất 100% việc gỡ bỏ phần Bảng phân công công việc khỏi Báo cáo LaTeX ([`docs/latex/main.tex`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/docs/latex/main.tex)) theo yêu cầu của người dùng:
+  + Gỡ bỏ phần `\section*{Bảng phân công công việc}` và toàn bộ bảng `tab:phan_cong_cong_viec`.
+  + Phần `Danh mục thuật ngữ và từ viết tắt` được chuyển tiếp tự nhiên lên Trang 3 ngay sau Lời nói đầu.
+  + Mục lục tự động (TOC) được đồng bộ: loại bỏ mục Bảng phân công công việc.
+  + Biên dịch 2 lượt XeLaTeX thành công: 75 trang chuẩn mực, **0 Lỗi**, **0 Overfull `\hbox`**, **0 Overfull `\vbox`**.
+  + Cập nhật gói nén [`docs/BaoCao_LaTeX_Overleaf.zip`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/docs/BaoCao_LaTeX_Overleaf.zip).
+  + Kiểm tra `dotnet build /t:Compile` đạt 0 Error.
 
 ---
 
 ## Việc kế tiếp
 1. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
 2. Chuẩn bị slide thuyết trình hoặc báo cáo bảo vệ đồ án.
+
+---
+
+- **Gỡ Bỏ Bảng Phân Công Công Việc Khỏi Báo Cáo LaTeX (Phiên 187)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "bỏ bảng phân công công việc trong báo cáo đi giúp tôi".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Gỡ bỏ section `Bảng phân công công việc` và bảng `tab:phan_cong_cong_viec` trong `docs/latex/main.tex`.
+    2. Chuyển `Danh mục thuật ngữ và từ viết tắt` lên trang 3.
+    3. Biên dịch 2 lượt XeLaTeX để cập nhật Mục lục và danh mục bảng biểu. Báo cáo đạt 75 trang chuẩn A4, 0 lỗi, 0 overfull.
+    4. Cập nhật gói nén `docs/BaoCao_LaTeX_Overleaf.zip`.
+    5. Kiểm tra `dotnet build` đạt 0 lỗi.
+
+---
+
+- **Thiết Lập Bảng Tiến Độ Quản Lý Dự Án Chi Tiết WBS 88 Đầu Việc (Phiên 186)**:
+  - **Nhu cầu**: Người dùng yêu cầu chia nhỏ và chi tiết hóa kế hoạch quản lý dự án tối đa cho 4 thành viên từ ngày 15/09/2026 đến 18/10/2026, bao gồm đầy đủ quá trình tiến hóa CSDL từ Version 1, Version 2 đến Version 3 để làm link quản lý dự án nộp form BTL.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Thiết kế 88 micro-tasks cụ thể, phân bổ khoa học, cân đối giữa 4 thành viên (Bùi Tuấn Anh: 27 task, Phạm Văn Hào: 22 task, Nguyễn Minh Khuê: 21 task, Nguyễn Thị Tuyết Mai: 18 task).
+    2. Xuất file `docs/ke-hoach-tien-do-WBS-chi-tiet.csv` (UTF-8-BOM) mở trực tiếp bằng Excel không lỗi font.
+    3. Biên soạn tài liệu 3 Sheets tại `docs/ke-hoach-tien-do-WBS-chi-tiet.md` và tạo Artifact hệ thống.
+    4. Hướng dẫn chi tiết cách Import vào Google Sheets và bật quyền chia sẻ công khai ("Bất kỳ ai có đường liên kết đều có thể xem") để lấy link nộp bài.
+    5. Kiểm tra biên dịch dự án: `dotnet build /t:Compile` đạt **0 Errors**.
+
+---
+
+- **Cập Nhật Bảng Phân Công Công Việc Chi Tiết Trong Báo Cáo LaTeX (Phiên 185)**:
+  - **Nhu cầu**: Người dùng cung cấp danh sách phân công nhiệm vụ chi tiết cho 4 thành viên (Tuấn Anh, Hào, Khuê, Mai) và yêu cầu cập nhật vào báo cáo.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Điền thông tin phân công cụ thể vào `tab:phan_cong_cong_viec` tại Trang 3 của `docs/latex/main.tex`.
+    2. Sử dụng định dạng `\textbullet` và `\newline` thay vì `itemize` hay `\\` để tránh lỗi ngắt hàng bảng trong LaTeX.
+    3. Căn chỉnh độ rộng 6 cột chuẩn xác: STT (0.8cm), Họ tên (2.6cm), Vai trò (2.0cm), Nhiệm vụ phân công (X - 6.3cm), Tiến độ (1.3cm), Đánh giá (1.7cm).
+    4. Biên dịch 2 lượt XeLaTeX đạt chuẩn 76 trang, 0 lỗi, 0 overfull.
+    5. Đóng gói lại file zip `docs/BaoCao_LaTeX_Overleaf.zip`.
 
 ---
 
