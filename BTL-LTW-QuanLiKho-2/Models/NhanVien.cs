@@ -15,6 +15,8 @@ public partial class NhanVien
 
     public string? DiaChi { get; set; }
 
+    public string? GhiChu { get; set; }
+
     public DateOnly? NgayVaoLam { get; set; }
 
     public string TrangThai { get; set; } = null!;

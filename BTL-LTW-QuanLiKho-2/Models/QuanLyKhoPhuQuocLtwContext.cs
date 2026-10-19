@@ -482,6 +482,7 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
 
             entity.Property(e => e.MaNv).HasColumnName("MaNV");
             entity.Property(e => e.DiaChi).HasMaxLength(255);
+            entity.Property(e => e.GhiChu).HasMaxLength(500);
             entity.Property(e => e.DienThoai)
                 .HasMaxLength(15)
                 .IsUnicode(false);

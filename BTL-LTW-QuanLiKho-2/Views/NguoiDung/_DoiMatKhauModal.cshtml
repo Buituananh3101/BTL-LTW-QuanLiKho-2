@@ -1,0 +1,64 @@
+<!-- ========================================================================
+     MODAL ĐẶT LẠI MẬT KHẨU NHANH CHO NGƯỜI DÙNG
+     ======================================================================== -->
+<div class="hh-ov" id="pwdModalOv">
+    <div class="hh-modal" role="dialog" aria-modal="true" aria-labelledby="pwdModalTitle" style="max-width: 440px;">
+        <!-- Header Modal -->
+        <div class="hh-m-head">
+            <h2 id="pwdModalTitle">
+                <i class="bi bi-key text-warning me-2"></i>
+                <span>Đặt lại mật khẩu</span>
+            </h2>
+            <button type="button" class="hh-x" data-close="pwdModalOv" aria-label="Đóng">
+                <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 6l12 12M18 6L6 18"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Body Modal -->
+        <div class="hh-m-body" style="padding: 20px 24px;">
+            <form id="pwdForm" onsubmit="return false;">
+                <input type="hidden" id="pwdMaTaiKhoan" value="0" />
+
+                <div class="alert alert-danger py-2 px-3 small d-none mb-3" id="pwdFormAlert"></div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-muted mb-1">Tài khoản</label>
+                    <div class="form-control form-control-sm bg-light fw-bold text-dark" id="pwdTenDangNhapText">
+                        --
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-dark mb-1" for="pwdMatKhauMoi">
+                        Mật khẩu mới <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group input-group-sm">
+                        <input type="password" id="pwdMatKhauMoi" class="form-control" placeholder="Tối thiểu 6 ký tự" />
+                        <button class="btn btn-outline-secondary" type="button" id="btnToggleNewPw" title="Hiện/ẩn mật khẩu">
+                            <i class="bi bi-eye" id="iconNewPw"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label small fw-semibold text-dark mb-1" for="pwdXacNhanMatKhau">
+                        Xác nhận mật khẩu mới <span class="text-danger">*</span>
+                    </label>
+                    <input type="password" id="pwdXacNhanMatKhau" class="form-control form-control-sm" placeholder="Nhập lại mật khẩu mới" />
+                </div>
+            </form>
+        </div>
+
+        <!-- Footer Modal -->
+        <div class="hh-m-foot d-flex justify-content-between align-items-center" style="padding: 12px 24px; border-top: 1px solid #e5e7eb; background: #f9fafb;">
+            <button type="button" class="btn btn-sm btn-outline-secondary px-3" data-close="pwdModalOv">
+                Bỏ qua
+            </button>
+            <button type="button" class="btn btn-sm btn-primary px-3 fw-semibold" id="btnSavePassword">
+                <i class="bi bi-check-lg me-1"></i>Lưu mật khẩu
+            </button>
+        </div>
+    </div>
+</div>
