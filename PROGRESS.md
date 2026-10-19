@@ -1,28 +1,164 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-19 – Loại Bỏ Hoàn Toàn Tham Chiếu KiotViet Trong Toàn Bộ Báo Cáo & Dự Án (Phiên 172)
+Cập nhật lần cuối: 2026-10-19 – Tạo Tài Liệu Giới Thiệu Dự Án & Hướng Dẫn Cài Đặt README.md (Phiên 183)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất việc loại bỏ 100% tất cả các câu từ, đoạn văn và tham chiếu nhắc tới KiotViet trong toàn bộ Báo cáo học thuật LaTeX và các tài liệu dự án:
-  + **Báo cáo học thuật LaTeX (`docs/latex/main.tex`)**:
-    - Xóa bỏ hoàn toàn tiểu mục `\subsection{Mô hình tham chiếu thực tế: Triết lý vận hành phần mềm quản trị KiotViet}` theo đúng yêu cầu người dùng.
-    - Chuyển đổi toàn bộ câu chữ nhắc tới KiotViet thành các thuật ngữ chuyên môn học thuật chuẩn mực ("hệ thống quản trị kho chuyên nghiệp thực tế", "chuẩn giao diện 2 cột trực quan", "bộ lọc đa tiêu chí", "hộp thoại xác nhận").
-    - Đổi tên các biến màu định nghĩa từ `kiotblue`, `kiotdark`, `kiotgreen` sang `appblue`, `appdark`, `appgreen`.
-    - Thay thế tài liệu tham khảo số 4 thành cẩm nang học thuật chính thống của Viện Nghiên cứu Quản lý Kinh tế Trung ương.
-    - Biên dịch XeLaTeX 2 lượt đạt kết quả hoàn hảo: 0 Errors, 0 tham chiếu undefined. Đã cập nhật gói nén `docs/BaoCao_LaTeX_Overleaf.zip`.
-  + **Toàn bộ Dự án & Mã nguồn**:
-    - Quét sạch và chuẩn hóa toàn bộ 12 file đặc tả chức năng trong `docs/specs/*.md`, `docs/quyet-dinh.md`, `AGENTS.md` và `.agent/rules/`.
-    - Dọn dẹp toàn bộ các dòng ghi chú (HTML/Razor comments, JS comments) trong `Views` và `wwwroot/js`.
-    - Chuẩn hóa tên các file Excel mẫu tải về trong 5 Controller (`Mau_Chuyen_Kho.xlsx`, `Mau_Nhap_Hang.xlsx`, `Mau_Tra_Hang_Nhap.xlsx`, `Mau_Xuat_Huy.xlsx`, `Mau_Nhap_Hang_Hoa.xlsx`), loại bỏ triệt để hậu tố thương hiệu.
-    - Dự án build thành công sạch sẽ với 0 errors (`dotnet build`).
+- Đã soạn thảo hoàn tất file [`README.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/README.md) chuẩn mực, chuyên nghiệp và đầy đủ cho toàn bộ dự án:
+  + Giới thiệu tổng quan hệ thống Quản lý kho hàng nội bộ đa chi nhánh KhoPro (Phú Quốc).
+  + Bảng tổng hợp công nghệ sử dụng: ASP.NET Core MVC (.NET 10), EF Core 10, SQL Server, Bootstrap 5, ClosedXML...
+  + Mô tả chi tiết 8 phân hệ cốt lõi: Hàng hóa, Nhập hàng, Chuyển kho, Trả hàng nhập, Xuất hủy, Kiểm kho & Cân bằng, Báo cáo & Thẻ kho, Quản trị & Nhật ký thao tác.
+  + Sơ đồ luồng vận hành luân chuyển hàng hóa đa chi nhánh bằng Mermaid diagram.
+  + Hướng dẫn cài đặt và thiết lập nhanh trên máy mới với 2 tùy chọn CSDL: Restore file backup `docs/QuanLyKhoPhuQuocLTW.bak` (5 giây) hoặc chạy script trọn gói `docs/QuanLyKhoPhuQuocLTW_FullScript.sql`.
+  + Danh sách tài khoản kiểm thử nghiệm thu (`quanly`, `thukho`, `banhang` / `123456`) kèm phạm vi phân quyền.
+  + Sơ đồ cây thư mục dự án và 5 quy ước kỹ thuật nổi bật (Tồn kho động qua View, Transaction toàn vẹn, Chứng từ bất biến, Khối Lego UI, Z-Index 6 tầng).
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm thử trực quan và rà soát các màn hình danh sách, form tạo mới chứng từ trên giao diện web.
-2. Chuẩn bị nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
+1. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
+2. Chuẩn bị slide thuyết trình hoặc báo cáo bảo vệ đồ án.
+
+---
+
+- **Tạo Tài Liệu Giới Thiệu Dự Án & Hướng Dẫn Cài Đặt README.md (Phiên 183)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "bạn có thể viết file readme hướng dẫn và giới thiệu nhanh về dự án giúp tôi ko".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Tạo file `README.md` tại thư mục gốc dự án theo phong cách GitHub Markdown chuẩn mực:
+       - Có đầy đủ huy hiệu (badges), mục lục điều hướng nhanh (Table of Contents), bảng biểu công nghệ rõ ràng.
+       - Trình bày sơ đồ luồng dữ liệu Mermaid luân chuyển hàng hóa giữa 3 kho (Kho trung tâm, Kho An Thới, Kho phụ kiện Tuna).
+       - Hướng dẫn cài đặt từng bước chi tiết (Quick Start Guide): Clone repo, 2 phương thức dựng CSDL (File `.bak` hoặc `.sql`), cấu hình connection string, chạy `dotnet run`.
+       - Bảng thông tin tài khoản demo phân quyền (`quanly`, `thukho`, `banhang`).
+       - Tổng kết kiến trúc kỹ thuật và cây thư mục dự án.
+    2. Kiểm tra biên dịch dự án: `dotnet build -t:Compile` đạt **0 Errors**.
+
+---
+
+- **Tinh Gọn Mục 3.2 Báo Cáo LaTeX: Gỡ Bỏ 3.2.4 & 3.2.5 (Phiên 182)**:
+  - **Nhu cầu**: Người dùng yêu cầu gỡ bỏ 2 phần: `3.2.4 Hệ sinh thái Khối Lego UI tái sử dụng` và `3.2.5 Giải pháp phân tầng Stacking Context giải quyết xung đột Dropdown và Modal`.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Xóa bỏ 2 tiểu mục tại cuối Mục 3.2 trong `docs/latex/main.tex`.
+    2. Biên dịch 2 lượt XeLaTeX để đồng bộ mục lục tự động và danh mục bảng biểu/hình ảnh.
+    3. Kiểm tra trực quan trang mục lục (Trang 6) và các trang chuyển tiếp 58, 59, 60: cấu trúc mạch lạc, hình chụp phân hệ 3.3 hiển thị đồng đều.
+    4. Cập nhật `docs/BaoCao_LaTeX_Overleaf.zip`.
+    5. Kiểm tra `dotnet build` đạt 0 lỗi.
+
+---
+
+- **Cập Nhật GVHD Thầy Lại Mạnh Dũng & Lớp N05 (Phiên 181)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "đổi tên giáo viên hướng dẫn thành Lại Mạnh Dũng, Lớp N05".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Cập nhật bảng thông tin trang bìa: `Giảng viên hướng dẫn: Lại Mạnh Dũng`, `Nhóm thực hiện: Nhóm 3 -- Lớp N05 -- K65`.
+    2. Cập nhật trang Lời nói đầu: Sửa lời cảm ơn thành "thầy Lại Mạnh Dũng" và dòng thông tin lớp `Nhóm 3 -- Lớp N05 -- K65`.
+    3. Biên dịch XeLaTeX và kết xuất ảnh kiểm tra trực quan các trang 1, 2, 3: hoàn hảo, sắc nét.
+    4. Cập nhật `docs/BaoCao_LaTeX_Overleaf.zip`. `dotnet build` đạt 0 lỗi.
+
+---
+
+- **Đổi Tên Đề Tài Thành "Xây Dựng Ứng Dụng Web Quản Lý Kho Hàng Nội Bộ Đa Chi Nhánh" (Phiên 180)**:
+  - **Nhu cầu**: Người dùng hỏi ý kiến: "tôi muốn đổi tên dự án thành Xây dựng ứng dụng Web quản lý kho hàng nội bộ đa chi nhánh có hợp lí ko" và ra lệnh: "đổi tên".
+  - **Lý do & Ý nghĩa học thuật**:
+    1. Chuyển từ "Website" sang "Ứng dụng Web" phản ánh đúng hàm lượng kỹ thuật và bản chất của hệ thống phần mềm quản trị nghiệp vụ phức tạp.
+    2. Thêm từ "nội bộ" giúp khoanh vùng phạm vi nghiệp vụ (WMS/ERP nội bộ doanh nghiệp), giải thích rõ ràng trước hội đồng tại sao không làm giỏ hàng bán lẻ công khai cho khách ngoài.
+    3. Giữ trọn vẹn điểm sáng cốt lõi "đa chi nhánh".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Cập nhật trang bìa, metadata, lời nói đầu, mục tiêu và kết luận trong `main.tex`.
+    2. Căn chỉnh tiêu đề trang bìa thành 2 dòng cân đối, không rớt chữ "Hàng" lẻ loi.
+    3. Tinh chỉnh tiêu đề Phụ lục B gọn gàng trong 1 dòng.
+    4. Cập nhật `AGENTS.md`, `docs/quyet-dinh.md`, đóng gói `docs/BaoCao_LaTeX_Overleaf.zip`.
+    5. Biên dịch XeLaTeX 0 lỗi, 0 Overfull. `dotnet build` đạt 0 lỗi.
+
+---
+
+- **Thiết Kế Sơ Đồ Mermaid Kiến Trúc Database View 2 Tầng (Hình 2.18) Thay Thế TikZ Cũ (Phiên 179)**:
+  - **Nhu cầu**: Người dùng yêu cầu vẽ lại sơ đồ Database View 2 tầng tại Mục 2.3.4 bằng Mermaid cho trực quan, đẹp mắt và đồng bộ đồ họa.
+  - **Bản chất**: Trước đó, sơ đồ được vẽ bằng khối lệnh `tikzpicture` thô sơ trong LaTeX với các hộp xám đơn điệu, không toát lên được vai trò kiến trúc của 2 tầng View và 6 luồng chứng từ gốc.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Soạn thảo mã nguồn Mermaid chuẩn tại `docs/latex/figures/fig_database_view_2_tang.mmd`.
+    2. Kết xuất ảnh PNG độ phân giải 2x bằng `npx @mermaid-js/mermaid-cli`.
+    3. Cập nhật `docs/latex/main.tex` tại Mục 2.3.4, thay thế khối TikZ cũ.
+    4. Biên dịch 2 lượt XeLaTeX thành công (76 trang, 0 Errors, danh mục hình vẽ Hình 2.18 cập nhật tự động).
+    5. Đóng gói cập nhật `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+  - **Nhu cầu**: Người dùng yêu cầu: "tôi muốn bạn trả lại hình 2.7 cũ".
+  - **Bản chất**: Trả lại sơ đồ hoạt động Nhập hàng nguyên bản dạng phân làn trách nhiệm 3 tầng dọc chuyên nghiệp (Thủ kho $\rightarrow$ Backend Service $\rightarrow$ CSDL) đã được thiết kế chuẩn từ trước.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Khôi phục `docs/latex/figures/fig_activity_nhaphang.png` và `docs/so-do-activity-nghiep-vu.md` từ bản gốc Git HEAD.
+    2. Cập nhật `docs/latex/main.tex`: thiết lập lại trang riêng cực đại cho Hình 2.7 (Trang 31) ngay sau trang thuyết minh công thức MAC (Trang 30).
+    3. Biên dịch XeLaTeX 76 trang, 0 Errors, đóng gói lại `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+
+- **Tối Ưu Bố Cục 2 Cột (Trái - Phải) Cho Biểu Đồ Hoạt Động Nhập Hàng Hình 2.7 (Phiên 177)**:
+  - **Nhu cầu**: Người dùng yêu cầu tối ưu lại Hình 2.7: "khối hình chữ nhật đầu tiền sửa sang trái, khối thứ 2 để sang phải để tối ưu hơn được ko".
+  - **Bản chất**: Trước đó, sơ đồ hoạt động xếp tầng theo chiều dọc khiến Khối 1 (Thủ kho) nằm ở trên và Khối 2 (Hệ thống) nằm ở dưới, tạo thành dải dọc quá dài và khiến trang in bị trống nhiều khoảng trắng.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Tái cấu trúc mã nguồn Mermaid sang dạng 2 khối ngang (`flowchart LR`) với các luồng rẽ nhánh Validation và phản hồi kết quả tuần hoàn.
+    2. Xuất ảnh độ nét cực cao qua `mermaid-cli` cục bộ (scale 3, 2352x930px).
+    3. Cân chỉnh trong `docs/latex/main.tex`: ghép Hình 2.7 vừa khít dưới phần thuyết minh Mục 2.2.1 trên cùng trang 30, loại bỏ lệnh ngắt trang gây lãng phí.
+    4. Biên dịch XeLaTeX thành công 75 trang, 0 Errors, đóng gói `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+
+- **Loại Bỏ Sơ Đồ TikZ RM Trùng Lặp Cũ Khỏi Báo Cáo LaTeX (Phiên 176)**:
+  - **Nhu cầu**: Người dùng phản hồi kèm ảnh chụp sơ đồ TikZ: "er, rm bên trên rồi. Hình này có ý nghĩa j".
+  - **Bản chất**: Đây là sơ đồ tóm tắt cũ vẽ tay bằng TikZ từ phiên sơ khởi của đồ án. Sau khi đã bổ sung 5 sơ đồ RM chi tiết bằng Mermaid/Crow's Foot ở Mục 2.3.2, hình vẽ này trở nên hoàn toàn thừa thãi, thiếu bảng trầm trọng và có lỗi đồ họa (mũi tên đè qua thân bảng).
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Gỡ bỏ triệt để tiểu mục `\subsubsection{Sơ đồ cấu trúc liên kết các bảng quan hệ cốt lõi (Sơ đồ RM tổng hợp)}` và khối `\begin{figure}[H] ... \begin{tikzpicture} ... \end{figure}`.
+    2. Cấu trúc Mục 2.3 trở nên liền mạch: từ Lược đồ Text $\rightarrow$ 5 Sơ đồ RM trực quan $\rightarrow$ Bảng ràng buộc FK $\rightarrow$ Chuẩn hóa 3NF/BCNF.
+    3. Biên dịch XeLaTeX 2 lượt đạt 76 trang, 0 Errors, mục lục và danh sách hình vẽ tự động đánh số lại chuẩn xác. Đóng gói `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+
+## Việc kế tiếp
+1. Kiểm tra toàn bộ Báo cáo từ Chương 1 đến Chương 5 trước khi in ấn/nộp bài.
+2. Chuẩn bị slide thuyết trình hoặc nghiệm thu đồ án Bài tập lớn Lập trình Web.
+
+---
+
+- **Khắc Phục Triệt Để Toàn Bộ Lỗi Tràn Lề Phải (Overfull \\hbox) Trên Toàn Bộ Báo Cáo LaTeX (Phiên 175)**:
+  - **Nhu cầu**: Người dùng gửi ảnh chụp trang Báo cáo (Mục 2.2.5 Quy trình Trả hàng nhập cho NCC) bị tràn lề phải nghiêm trọng: từ `ChiTietPhieuTraHangNhap` thò dài qua lề phải ~100pt và yêu cầu: "hiện tại trong dự án xảy ra lỗi tràn lề phải như này, tôi muốn bạn sửa lại toàn bộ".
+  - **Nguyên nhân**:
+    1. Các định danh PascalCase dài không chứa dấu cách hay dấu gạch ngang (`ChiTietPhieuTraHangNhap`, `ChiTietPhieuDieuChinh`, `ChiTietPhieuNhap`, `SoLuongTonHeThong`) không thể tự ngắt dòng trong font chữ La-tinh/Times của LaTeX.
+    2. Các tiêu đề `\chapter`, `\section` sử dụng kiểu `[hang]` cứng nhắc không cho phép ngắt dòng.
+    3. Bảng `tab:fk_constraints` và 5 bảng từ điển dữ liệu có tổng độ rộng cột cố định chiếm trọn chiều rộng trang in, khiến cột cuối hoặc ô chứa chữ dài không đủ chỗ hiển thị.
+    4. Ma trận phân quyền `tab:ma_tran_quyen` sử dụng các cột `c` cố định vượt quá `\textwidth` (17.7cm > 16.0cm).
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Thiết lập các thông số dung sai chống tràn toàn cục trong preamble (`\tolerance=2500`, `\emergencystretch=2.5em`, `\hfuzz=1pt`, `\hbadness=5000`, breakable `\_`).
+    2. Cập nhật `\titleformat` với `\raggedright` và kiểu `[block]`.
+    3. Thêm điểm ngắt từ mềm `\-` cho toàn bộ các định danh dài trong văn bản và bảng biểu.
+    4. Tái cấu trúc Bảng 2.7, Bảng 2.8 và 5 bảng Từ điển dữ liệu bằng `tabularx` với `tabcolsep` tối ưu.
+    5. Định dạng Phụ lục B với `\path`.
+    6. Kiểm tra log biên dịch XeLaTeX: **Overfull `\hbox` giảm từ > 40 trường hợp xuống chính xác 0 trường hợp**. File `main.pdf` 78 trang chuẩn mực, đóng gói `docs/BaoCao_LaTeX_Overleaf.zip`.
+    7. `dotnet build /t:Compile` đạt 0 lỗi.
+
+---
+
+- **Khắc Phục Triệt Để Lỗi Bảng 1.2 Tràn Lề Phải Trong Báo Cáo LaTeX (Phiên 174)**:
+  - **Nhu cầu**: Người dùng phản hồi kèm ảnh chụp trang tài liệu: "hiện tại bảng 1.2 này đang bị tràn phải, bạn hãy khắc phục".
+  - **Nguyên nhân**: Bảng 1.2 sử dụng `\begin{tabularx}{\textwidth}{|p{5.5cm}|c|c|c|}` nhưng không có cột `X` nào, khiến 3 cột `c` nở rộng theo độ dài tự nhiên của nội dung (vượt quá 19.5cm so với `\textwidth = 16.0cm`), làm bảng bị tràn 3.5cm qua lề phải.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Định nghĩa kiểu cột chuẩn `\newcolumntype{Z}{>{\centering\arraybackslash}X}` trong phần tiền sự (preamble) của `main.tex`.
+    2. Thiết lập `\setlength{\tabcolsep}{4.5pt}`, giãn dòng `\renewcommand{\arraystretch}{1.2}` và cấu trúc bảng `\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5.4cm}|Z|Z|Z|}`.
+    3. Tinh chỉnh từ ngữ ngắn gọn chuẩn nghiệp vụ (`Lập & Hoàn tất Phiếu...`) giúp 100% dòng ở cột 1 nằm gọn gàng trên 1 dòng duy nhất, không rớt chữ mồ côi.
+    4. Thêm ngắt dòng `\newline` cân đối ở các ô dài của cột vai trò ("Xem tất cả \newline chi nhánh", "Được lập \newline phiếu kiểm", "Chỉ xem \newline tồn hiện tại").
+    5. Kết xuất trang PDF và kiểm tra trực quan: Bảng nằm gọn gàng, hai lề trái/phải thẳng tắp với văn bản, cách mục 1.4 an toàn.
+    6. Biên dịch XeLaTeX 0 Errors, cập nhật `docs/BaoCao_LaTeX_Overleaf.zip`. `dotnet build` đạt 0 lỗi.
+
+---
+
+- **Chuẩn Hóa Mục 2.1 Use Case (UML) Bằng Mermaid & Khắc Phục Triệt Để Lỗi Bảng Tràn Đè Trang (Phiên 173)**:
+  - **Nhu cầu**: Người dùng yêu cầu chuẩn hóa Mục 2.1 Sử dụng biểu đồ Use Case Mermaid thay thế TikZ vector, và sửa lỗi nghiêm trọng: "bảng lỗi, bị tràn", "lỗi tràn đè sửa lỗi này" khiến các bảng đặc tả Use Case bị tràn qua lề đáy đè lên số trang và sinh trang trắng vô lý.
+  - **Nguyên nhân**: Cỡ chữ `\small` kết hợp giãn dòng `\arraystretch=1.25` và cột 1 hẹp khiến chiều cao các bảng vượt quá chiều cao trang in (`\textheight = 24.7cm`), buộc LaTeX phải đẩy bảng tràn qua lề trang hoặc đẩy sang trang sau tạo các trang trắng.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Chuyển đổi toàn bộ biểu đồ Use Case sang ảnh vẽ bằng Mermaid CLI chất lượng cao.
+    2. Chuẩn hóa Bảng 2.1 sang `tabularx` cột `Y`.
+    3. Định dạng lại Bảng 2.2 – 2.6 với `\footnotesize`, `\arraystretch=1.05`, `p{3.0cm}`, inline danh sách các bước dài.
+    4. Cô lập từng bảng bằng `\clearpage`, giúp bảng chiếm ~65-75% diện tích trang, cách số trang > 3.5cm an toàn tuyệt đối.
+    5. Kết xuất trang PDF sang ảnh PNG và kiểm tra trực quan từng trang 17–29: hoàn toàn sạch đẹp, không lỗi.
+    6. `dotnet build` đạt 0 lỗi, cập nhật `docs/BaoCao_LaTeX_Overleaf.zip`.
 
 ---
 
