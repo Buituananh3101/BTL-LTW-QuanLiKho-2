@@ -1,7 +1,7 @@
 # AGENTS.md – Quy chuẩn vận hành cho AI Assistant
 
 ## 1. Mô tả dự án & Công nghệ
-- **Dự án**: Website Quản lý kho hàng nhiều kho (Bài tập lớn Lập trình Web).
+- **Dự án**: Ứng dụng Web Quản lý kho hàng nội bộ đa chi nhánh (Bài tập lớn Lập trình Web).
 - **Giao diện & Nghiệp vụ**: Mô phỏng chuẩn thực tế hệ thống quản trị kho chuyên nghiệp (Hàng hóa, Kho, Mua hàng, Bán hàng, Báo cáo, Thiết lập).
 - **Nền tảng**: ASP.NET Core MVC trên .NET 10 (`net10.0`), Entity Framework Core 10.
 - **Cơ sở dữ liệu**: SQL Server (`QuanLyKhoPhuQuocLTW`), kết nối Windows Authentication / SQL Express.
