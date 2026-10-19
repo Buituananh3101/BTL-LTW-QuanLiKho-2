@@ -40,27 +40,36 @@
 \definecolor{appgray}{RGB}{80, 80, 80}
 \definecolor{tableheader}{gray}{0.90}
 
-% Định dạng tiêu đề chương mục chuẩn đồ án
-\titleformat{\chapter}[hang]
-  {\normalfont\LARGE\bfseries}{\chaptertitlename\ \thechapter:}{0.5em}{}
+% Định dạng tiêu đề chương mục chuẩn đồ án (cho phép ngắt dòng tránh tràn lề phải)
+\titleformat{\chapter}[block]
+  {\normalfont\LARGE\bfseries\raggedright}{\chaptertitlename\ \thechapter:\ }{0pt}{}
 \titlespacing*{\chapter}{0pt}{-10pt}{20pt}
 
 \titleformat{\section}
-  {\normalfont\Large\bfseries}{\thesection}{1em}{}
+  {\normalfont\Large\bfseries\raggedright}{\thesection}{1em}{}
 \titlespacing*{\section}{0pt}{15pt}{8pt}
 
 \titleformat{\subsection}
-  {\normalfont\large\bfseries}{\thesubsection}{1em}{}
+  {\normalfont\large\bfseries\raggedright}{\thesubsection}{1em}{}
 \titlespacing*{\subsection}{0pt}{12pt}{6pt}
 
 \titleformat{\subsubsection}
-  {\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{}
+  {\normalfont\normalsize\bfseries\raggedright}{\thesubsubsection}{1em}{}
 \titlespacing*{\subsubsection}{0pt}{8pt}{4pt}
 
 % Giãn dòng 1.3 và thụt đầu dòng 1cm
 \renewcommand{\baselinestretch}{1.3}
 \setlength{\parindent}{1cm}
 \setlength{\parskip}{4pt}
+
+% Cấu hình chống tràn lề phải (Overfull \hbox) toàn tài liệu
+\tolerance=2500
+\emergencystretch=2.5em
+\hfuzz=1pt
+\hbadness=5000
+
+% Cho phép ngắt dòng linh hoạt tại dấu gạch dưới trong mã code / tên bảng CSDL
+\renewcommand{\_}{\textunderscore\allowbreak}
 
 % Cấu hình hiển thị mã nguồn
 \lstdefinestyle{csharp}{
@@ -70,7 +79,7 @@
     commentstyle=\itshape\color{gray!70},
     stringstyle=\color{black},
     breaklines=true,
-    breakatwhitespace=true,
+    breakatwhitespace=false,
     tabsize=2,
     showstringspaces=false,
     numbers=left,
@@ -88,6 +97,7 @@
     \futurelet \reserved@a \@xhline
 }
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{Z}{>{\centering\arraybackslash}X}
 \makeatother
 
 % Căn lề chuẩn đồ án A4
@@ -101,7 +111,7 @@
     filecolor=black,      
     urlcolor=black,
     citecolor=black,
-    pdftitle={Bao Cao Bai Tap Lon - Website Quan Ly Kho Hang Da Chi Nhanh},
+    pdftitle={Bao Cao Bai Tap Lon - Ung Dung Web Quan Ly Kho Hang Noi Bo Da Chi Nhanh},
     pdfauthor={Nhom 3 - DH GTVT},
     bookmarksopen=true
 }
@@ -125,14 +135,14 @@
 
         {\Huge \textbf{BÀI TẬP LỚN}}\\[0.35cm]
         {\Large \textbf{Môn học : Lập trình Web}}\\[0.45cm]
-        {\LARGE \textbf{Đề tài : Xây Dựng Website Quản Lý Kho Hàng\\[0.35cm] Đa Chi Nhánh}}\\[0.6cm]
+        {\LARGE \textbf{Đề tài : Xây Dựng Ứng Dụng Web\\[0.35cm] Quản Lý Kho Hàng Nội Bộ Đa Chi Nhánh}}\\[0.6cm]
         
         % Thông tin sinh viên và giảng viên
         \renewcommand{\arraystretch}{1.25}
         \begin{tabular}{@{}ll@{}}
-            \textbf{Giảng viên hướng dẫn} & : Đào Thị Lệ Thủy \\[0.12cm]
+            \textbf{Giảng viên hướng dẫn} & : Lại Mạnh Dũng \\[0.12cm]
             \textbf{Khoa}                 & : Công nghệ thông tin \\[0.12cm]
-            \textbf{Nhóm thực hiện}       & : Nhóm 3 -- Lớp N04 -- K65 \\[0.12cm]
+            \textbf{Nhóm thực hiện}       & : Nhóm 3 -- Lớp N05 -- K65 \\[0.12cm]
             \textbf{Sinh viên thực hiện}  & : Bùi Tuấn Anh -- 241230653 (Trưởng nhóm)\\[0.12cm]
                                           & : Phạm Văn Hào -- 241224475 \\[0.12cm]
                                           & : Nguyễn Minh Khuê -- 231230815 \\[0.12cm]
@@ -159,16 +169,16 @@ Trong bối cảnh cuộc Cách mạng công nghiệp lần thứ tư và công 
 
 Trong thực tế, hoạt động quản trị kho đòi hỏi sự liên kết chặt chẽ giữa nhiều khâu nghiệp vụ khép kín: từ khâu tiếp nhận hàng từ nhà cung cấp, kiểm đếm nhập kho, lưu trữ, điều chuyển nội bộ giữa các kho, xuất hủy hàng hóa hư hỏng/hết hạn sử dụng, cho đến định kỳ kiểm kê và cân bằng sai lệch kho. Mỗi khâu đều phát sinh chứng từ kế toán và yêu cầu sự phối hợp nhịp nhàng giữa ba lớp nhân sự: Quản trị viên, Thủ kho và Nhân viên kho. Nếu các chứng từ và số lượng biến động không được quản lý tập trung và bọc trong các giao dịch an toàn (ACID Transaction), việc thất thoát và xác định trách nhiệm khi xảy ra chênh lệch sẽ trở nên vô cùng phức tạp.
 
-Xuất phát từ những vấn đề thực tiễn trên, nhóm sinh viên lựa chọn đề tài \textbf{``Xây Dựng Website Quản Lý Kho Hàng Đa Chi Nhánh''} làm nội dung nghiên cứu cho bài tập lớn học phần \textbf{Lập trình Web}. Đề tài tập trung nghiên cứu, phân tích nghiệp vụ thực tế và hiện thực hóa một hệ sinh thái quản lý kho chuyên nghiệp trên nền tảng công nghệ tiên tiến nhất \textbf{ASP.NET Core MVC (.NET 10)}, Entity Framework Core 10 và hệ quản trị cơ sở dữ liệu Microsoft SQL Server, chuẩn hóa theo trải nghiệm và quy trình vận hành ưu việt của các hệ thống quản trị kho hàng chuyên nghiệp thực tế.
+Xuất phát từ những vấn đề thực tiễn trên, nhóm sinh viên lựa chọn đề tài \textbf{``Xây Dựng Ứng Dụng Web Quản Lý Kho Hàng Nội Bộ Đa Chi Nhánh''} làm nội dung nghiên cứu cho bài tập lớn học phần \textbf{Lập trình Web}. Đề tài tập trung nghiên cứu, phân tích nghiệp vụ thực tế và hiện thực hóa một hệ sinh thái quản lý kho chuyên nghiệp trên nền tảng công nghệ tiên tiến nhất \textbf{ASP.NET Core MVC (.NET 10)}, Entity Framework Core 10 và hệ quản trị cơ sở dữ liệu Microsoft SQL Server, chuẩn hóa theo trải nghiệm và quy trình vận hành ưu việt của các hệ thống quản trị kho hàng chuyên nghiệp thực tế.
 
 Hệ thống được thiết kế phục vụ người dùng nội bộ, giải quyết triệt để bài toán đồng bộ tồn kho bằng giải thuật tính toán động qua Database View (\texttt{vw\_TonKhoHienTai}, \texttt{vw\_BienDongKho}), đóng gói hệ sinh thái giao diện khối Lego UI tái sử dụng và cung cấp các báo cáo phân tích chuyên sâu (Báo cáo Tồn kho đa chi nhánh dạng Pivot và Báo cáo Thẻ kho tịnh tiến lũy kế).
 
 Báo cáo trình bày đầy đủ quá trình từ khảo sát hiện trạng, phân tích yêu cầu nghiệp vụ, thiết kế biểu đồ Use Case, thiết kế cơ sở dữ liệu quan hệ ERD, sitemap, wireframe giao diện, chi tiết quá trình lập trình triển khai hệ thống, danh mục kiểm thử test cases thực tế và đánh giá kết quả đạt được. Thông qua đề tài, nhóm có cơ hội vận dụng sâu sắc kiến thức được học trong học phần Lập trình Web vào một bài toán thực tiễn có độ phức tạp cao, đồng thời rèn luyện kỹ năng làm việc nhóm và giải quyết sự cố kỹ thuật.
 
-Nhóm xin chân thành cảm ơn cô Đào Thị Lệ Thủy cùng các thầy cô trong Khoa Công nghệ Thông tin -- Trường Đại học Giao thông Vận tải đã tận tình giảng dạy, định hướng kiến trúc và góp ý quý báu trong suốt quá trình nhóm thực hiện đề tài. Do kiến thức và thời gian thực hiện còn hạn chế, báo cáo khó tránh khỏi những thiếu sót nhất định. Nhóm rất mong nhận được ý kiến đóng góp của quý thầy cô để hệ thống ngày càng hoàn thiện hơn.
+Nhóm xin chân thành cảm ơn thầy Lại Mạnh Dũng cùng các thầy cô trong Khoa Công nghệ Thông tin -- Trường Đại học Giao thông Vận tải đã tận tình giảng dạy, định hướng kiến trúc và góp ý quý báu trong suốt quá trình nhóm thực hiện đề tài. Do kiến thức và thời gian thực hiện còn hạn chế, báo cáo khó tránh khỏi những thiếu sót nhất định. Nhóm rất mong nhận được ý kiến đóng góp của quý thầy cô để hệ thống ngày càng hoàn thiện hơn.
 
 \begin{flushright}
-    \textit{Nhóm 3 -- Lớp N04 -- K65}\\
+    \textit{Nhóm 3 -- Lớp N05 -- K65}\\
     \textit{Khoa Công nghệ Thông tin -- Trường ĐH Giao thông Vận tải}
 \end{flushright}
 
@@ -291,7 +301,7 @@ Thực tế tại nhiều doanh nghiệp vừa và nhỏ cho thấy, công tác 
     \item \textbf{Thời gian kiểm kê kéo dài:} Mỗi đợt kiểm kê định kỳ thường đòi hỏi doanh nghiệp phải dừng hoạt động bán hàng trong nhiều ngày để đếm thủ công, sau đó đối chiếu phức tạp với sổ sách kế toán.
     \item \textbf{Chậm trễ trong báo cáo phân tích:} Việc tổng hợp số liệu tồn kho từ các chi nhánh đòi hỏi hàng giờ làm việc thủ công, không đáp ứng được yêu cầu ra quyết định nhanh của nhà quản trị.
 \end{itemize}
-Do đó, việc xây dựng một hệ thống website quản lý kho tập trung, hoạt động trên nền tảng đám mây, cho phép truy cập linh hoạt từ mọi thiết bị với độ bảo mật cao là yêu cầu cấp thiết.
+Do đó, việc xây dựng một ứng dụng web quản lý kho hàng nội bộ tập trung, hoạt động trên nền tảng đám mây, cho phép truy cập linh hoạt từ mọi thiết bị với độ bảo mật cao là yêu cầu cấp thiết.
 
 \section{Phân tích các nghiệp vụ kho cốt lõi}
 
@@ -382,8 +392,9 @@ REQ-F10 & Quản lý Hệ thống & Quản lý danh mục Chi nhánh kho, Phân 
 \begin{table}[H]
 \centering
 \small
-\renewcommand{\arraystretch}{1.3}
-\begin{tabularx}{\textwidth}{|p{5.5cm}|c|c|c|}
+\setlength{\tabcolsep}{4.5pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5.4cm}|Z|Z|Z|}
 \hline
 \rowcolor{tableheader}
 \textbf{Phân hệ / Chức năng} & \textbf{Quản trị viên (Admin)} & \textbf{Thủ kho} & \textbf{Nhân viên kho} \\
@@ -394,19 +405,19 @@ Quản lý Hàng hóa, Nhóm hàng & Toàn quyền & Xem \& Thêm mới & Chỉ 
 \hline
 Xem Giá vốn hàng hóa & Cho phép & Cho phép & \textbf{Bị ẩn giá vốn} \\
 \hline
-Lập \& Hoàn thành Phiếu Nhập hàng & Toàn quyền & Toàn quyền & Không có quyền \\
+Lập \& Hoàn tất Phiếu Nhập hàng & Toàn quyền & Toàn quyền & Không có quyền \\
 \hline
-Lập \& Hoàn thành Phiếu Trả hàng & Toàn quyền & Toàn quyền & Không có quyền \\
+Lập \& Hoàn tất Phiếu Trả hàng & Toàn quyền & Toàn quyền & Không có quyền \\
 \hline
-Lập \& Hoàn thành Phiếu Xuất hủy & Toàn quyền & Toàn quyền & Không có quyền \\
+Lập \& Hoàn tất Phiếu Xuất hủy & Toàn quyền & Toàn quyền & Không có quyền \\
 \hline
-Lập \& Hoàn thành Phiếu Chuyển kho & Toàn quyền & Toàn quyền & Không có quyền \\
+Lập \& Hoàn tất Phiếu Chuyển kho & Toàn quyền & Toàn quyền & Không có quyền \\
 \hline
-Lập Phiếu Kiểm kê thực tế & Toàn quyền & Toàn quyền & \textbf{Được lập phiếu kiểm} \\
+Lập Phiếu Kiểm kê thực tế & Toàn quyền & Toàn quyền & \textbf{Được lập} \newline \textbf{phiếu kiểm} \\
 \hline
 Duyệt Cân bằng kho (Khóa phiếu) & Toàn quyền & Toàn quyền & Không có quyền \\
 \hline
-Xem Báo cáo Tồn kho \& Thẻ kho & Xem tất cả chi nhánh & Kho phụ trách & Chỉ xem tồn hiện tại \\
+Xem Báo cáo Tồn kho \& Thẻ kho & Xem tất cả \newline chi nhánh & Kho phụ trách & Chỉ xem \newline tồn hiện tại \\
 \hline
 Quản lý Chi nhánh \& Người dùng & Toàn quyền & Không truy cập & Không truy cập \\
 \hline
@@ -886,47 +897,39 @@ Biểu đồ hoạt động (Activity Diagram) trong chuẩn UML 2.5 đóng vai 
 
 Dưới đây là 5 biểu đồ hoạt động chi tiết đại diện cho 5 quy trình nghiệp vụ cốt lõi của hệ thống:
 
+\clearpage
 \subsection{Quy trình Nhập hàng từ Nhà cung cấp và Cập nhật giá vốn}
 
-Quy trình nhập hàng từ Nhà cung cấp đảm nhận việc tiếp nhận hàng hóa vào từng chi nhánh kho, tăng số lượng tồn sổ sách và tính toán lại giá vốn bình quân gia quyền (Moving Average Cost -- MAC) của sản phẩm trên toàn hệ thống.
-
-Hình~\ref{fig:activity_nhaphang} mô tả chi tiết biểu đồ hoạt động của quy trình Nhập hàng:
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.88\textwidth,height=16cm,keepaspectratio]{figures/fig_activity_nhaphang.png}
-\caption{Biểu đồ hoạt động quy trình Nhập hàng từ Nhà cung cấp và Cập nhật giá vốn}
-\label{fig:activity_nhaphang}
-\end{figure}
+Quy trình nhập hàng từ Nhà cung cấp đảm nhận việc tiếp nhận hàng hóa vào từng chi nhánh kho, tăng số lượng tồn sổ sách và tính toán lại giá vốn bình quân gia quyền (Moving Average Cost -- MAC) của sản phẩm trên toàn hệ thống (chi tiết tại Hình~\ref{fig:activity_nhaphang}).
 
 \textbf{Thuyết minh các bước xử lý và cơ chế bảo toàn dữ liệu:}
 \begin{itemize}
     \item \textit{Thao tác người dùng}: Thủ kho mở form Tạo phiếu nhập, lựa chọn Nhà cung cấp và Chi nhánh kho đích. Sử dụng phím tắt F3 để tìm kiếm nhanh mặt hàng theo tên hoặc mã vạch, nhập số lượng thực nhập và đơn giá mua thực tế, sau đó nhấn nút 'Hoàn thành'.
     \item \textit{Kiểm tra hợp lệ}: Backend kiểm tra danh sách mặt hàng phải có ít nhất 1 dòng, số lượng và đơn giá phải $> 0$. Nếu dữ liệu không hợp lệ, hệ thống trả về thông báo lỗi chi tiết đến giao diện.
-    \item \textit{Giao dịch CSDL}: Khi dữ liệu hợp lệ, hệ thống mở một Database Transaction:
+    \item \textit{Giao dịch CSDL}: Khi dữ liệu hợp lệ, hệ thống mở Database Transaction thực hiện:
     \begin{enumerate}
         \item Tính toán lại giá vốn bình quân theo công thức:
         \[
         \text{Giá vốn mới} = \frac{(\text{Tồn hiện tại} \times \text{Giá vốn cũ}) + (\text{Số lượng nhập} \times \text{Đơn giá nhập})}{\text{Tồn hiện tại} + \text{Số lượng nhập}}
         \]
-        \item Lưu thông tin phiếu vào bảng Master \texttt{PhieuNhap} và các dòng chi tiết \texttt{ChiTietPhieuNhap} với trạng thái \texttt{DA\_XAC\_NHAN}.
-        \item Số lượng tồn kho tại chi nhánh lập tức được ghi nhận tăng thông qua View \texttt{vw\_TonKhoHienTai} và bảng biến động kho.
-        \item Tự động ghi nhận công nợ phải trả Nhà cung cấp và lưu vết kiểm toán vào \texttt{NhatKyThaoTac}.
+        \item Ghi nhận phiếu vào bảng Master \texttt{PhieuNhap} và bảng chi tiết \texttt{ChiTiet\-PhieuNhap} ở trạng thái \texttt{DA\_XAC\_NHAN}.
+        \item Cập nhật tăng tồn kho chi nhánh qua View \texttt{vw\_TonKhoHienTai} và biến động kho.
+        \item Ghi nhận công nợ đối tác và lưu vết kiểm toán vào \texttt{NhatKyThaoTac}.
     \end{enumerate}
 \end{itemize}
 
-\subsection{Quy trình Điều chuyển hàng hóa liên chi nhánh (2 Chặng)}
-
-Đặc thù chuỗi chi nhánh kho phân tán tại huyện đảo đòi hỏi quy trình điều chuyển hàng hóa phải được quản lý chặt chẽ theo mô hình 2 chặng: Xuất chuyển (Kho gửi) $\rightarrow$ Hàng đang đi đường $\rightarrow$ Nhận chuyển (Kho nhận) nhằm kiểm soát rủi ro thất thoát hoặc hao hụt trên đường vận chuyển.
-
-Hình~\ref{fig:activity_chuyenkho} mô tả chi tiết biểu đồ hoạt động của quy trình Điều chuyển kho:
-
+\clearpage
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.88\textwidth,height=16cm,keepaspectratio]{figures/fig_activity_chuyenkho.png}
-\caption{Biểu đồ hoạt động quy trình Điều chuyển kho liên chi nhánh 2 chặng}
-\label{fig:activity_chuyenkho}
+\includegraphics[width=0.98\textwidth,height=21.2cm,keepaspectratio]{figures/fig_activity_nhaphang.png}
+\caption{Biểu đồ hoạt động quy trình Nhập hàng từ Nhà cung cấp và Cập nhật giá vốn}
+\label{fig:activity_nhaphang}
 \end{figure}
+\clearpage
+
+\subsection{Quy trình Điều chuyển hàng hóa liên chi nhánh (2 Chặng)}
+
+Đặc thù chuỗi chi nhánh kho phân tán tại huyện đảo đòi hỏi quy trình điều chuyển hàng hóa phải được quản lý chặt chẽ theo mô hình 2 chặng: Xuất chuyển (Kho gửi) $\rightarrow$ Hàng đang đi đường $\rightarrow$ Nhận chuyển (Kho nhận) nhằm kiểm soát rủi ro thất thoát hoặc hao hụt trên đường vận chuyển (chi tiết tại Hình~\ref{fig:activity_chuyenkho}).
 
 \textbf{Thuyết minh các bước xử lý và cơ chế kiểm soát hàng đi đường:}
 \begin{itemize}
@@ -935,18 +938,18 @@ Hình~\ref{fig:activity_chuyenkho} mô tả chi tiết biểu đồ hoạt độ
     \item \textit{Giao dịch CSDL hoàn tất}: Hệ thống mở Transaction Chặng 2: cộng tồn kho chi nhánh nhận theo số lượng thực nhận, ghi nhận chênh lệch mất mát vào chi tiết phiếu chuyển để truy cứu trách nhiệm, cập nhật trạng thái phiếu thành \texttt{HOAN\_THANH} và đóng chứng từ.
 \end{itemize}
 
-\subsection{Quy trình Kiểm kê và Tự động Cân bằng kho}
-
-Kiểm kê định kỳ là nghiệp vụ xương sống của hệ thống nhằm phát hiện sai lệch giữa số lượng hàng đếm thực tế ngoài kho và số liệu tồn ghi nhận trên sổ sách phần mềm. Điểm nổi bật của hệ thống là khả năng tự động sinh chứng từ điều chỉnh và cân bằng tồn tức thời.
-
-Hình~\ref{fig:activity_kiemkho} mô tả chi tiết biểu đồ hoạt động của quy trình Kiểm kê và Cân bằng kho tự động:
-
+\clearpage
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.88\textwidth,height=16cm,keepaspectratio]{figures/fig_activity_kiemkho.png}
-\caption{Biểu đồ hoạt động quy trình Kiểm kê và Tự động Cân bằng kho}
-\label{fig:activity_kiemkho}
+\includegraphics[width=0.98\textwidth,height=21.2cm,keepaspectratio]{figures/fig_activity_chuyenkho.png}
+\caption{Biểu đồ hoạt động quy trình Điều chuyển kho liên chi nhánh 2 chặng}
+\label{fig:activity_chuyenkho}
 \end{figure}
+\clearpage
+
+\subsection{Quy trình Kiểm kê và Tự động Cân bằng kho}
+
+Kiểm kê định kỳ là nghiệp vụ xương sống của hệ thống nhằm phát hiện sai lệch giữa số lượng hàng đếm thực tế ngoài kho và số liệu tồn ghi nhận trên sổ sách phần mềm. Điểm nổi bật của hệ thống là khả năng tự động sinh chứng từ điều chỉnh và cân bằng tồn tức thời (chi tiết tại Hình~\ref{fig:activity_kiemkho}).
 
 \textbf{Thuyết minh các nhánh rẽ nghiệp vụ và tính bất biến của chứng từ:}
 \begin{itemize}
@@ -956,23 +959,23 @@ Hình~\ref{fig:activity_kiemkho} mô tả chi tiết biểu đồ hoạt động
     \item \textit{Nhánh 2 -- Cân bằng kho (\texttt{DA\_CAN\_BANG})}: Khi số liệu kiểm đếm đã được chốt, người dùng bấm 'Cân bằng kho'. Hệ thống bọc toàn bộ thao tác trong Database Transaction:
     \begin{enumerate}
         \item Tự động sinh một bản ghi \texttt{PhieuDieuChinh} liên kết với phiếu kiểm kê ở trạng thái \texttt{DA\_DUYET}.
-        \item Sinh các dòng chi tiết \texttt{ChiTietPhieuDieuChinh} đối với các mặt hàng có chênh lệch để cân bằng tồn sổ sách khớp chính xác 100\% với thực tế kiểm đếm.
-        \item Chuyển trạng thái phiếu kiểm thành \texttt{DA\_CAN\_BANG} và \textbf{khóa vĩnh viễn} (tuân thủ nghiêm ngặt Luật cốt lõi 6 trong AGENTS.md, cấm mọi thao tác sửa, xóa hoặc hủy phiếu đã cân bằng).
+        \item Sinh các dòng chi tiết \texttt{ChiTiet\-Phieu\-Dieu\-Chinh} đối với các mặt hàng có chênh lệch để cân bằng tồn sổ sách khớp chính xác 100\% với thực tế kiểm đếm.
+        \item Chuyển trạng thái phiếu kiểm thành \texttt{DA\_CAN\_BANG} và \textbf{khóa vĩnh viễn} (tuân thủ nghiêm ngặt Luật cốt lõi 6 trong AGENTS.md, cấm sửa, xóa hoặc hủy phiếu đã cân bằng).
     \end{enumerate}
 \end{itemize}
 
-\subsection{Quy trình Xuất hủy hàng hỏng và Hết hạn sử dụng}
-
-Trong quá trình bảo quản tại kho (đặc biệt đối với mặt hàng bình khí hóa lỏng, phụ kiện kim loại dễ bị rỉ sét do hơi muối biển, hoặc bếp gas vỡ kính), các sản phẩm hư hại không còn giá trị thương mại phải được xuất hủy khỏi kho để đảm bảo an toàn và tính chính xác của tài sản lưu kho.
-
-Hình~\ref{fig:activity_xuathuy} mô tả chi tiết biểu đồ hoạt động của quy trình Xuất hủy kho:
-
+\clearpage
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.88\textwidth,height=16cm,keepaspectratio]{figures/fig_activity_xuathuy.png}
-\caption{Biểu đồ hoạt động quy trình Xuất hủy hàng hỏng và Hết hạn sử dụng}
-\label{fig:activity_xuathuy}
+\includegraphics[width=0.98\textwidth,height=21.2cm,keepaspectratio]{figures/fig_activity_kiemkho.png}
+\caption{Biểu đồ hoạt động quy trình Kiểm kê và Tự động Cân bằng kho}
+\label{fig:activity_kiemkho}
 \end{figure}
+\clearpage
+
+\subsection{Quy trình Xuất hủy hàng hỏng và Hết hạn sử dụng}
+
+Trong quá trình bảo quản tại kho (đặc biệt đối với mặt hàng bình khí hóa lỏng, phụ kiện kim loại dễ bị rỉ sét do hơi muối biển, hoặc bếp gas vỡ kính), các sản phẩm hư hại không còn giá trị thương mại phải được xuất hủy khỏi kho để đảm bảo an toàn và tính chính xác của tài sản lưu kho (chi tiết tại Hình~\ref{fig:activity_xuathuy}).
 
 \textbf{Thuyết minh các bước xử lý và kiểm soát tài sản:}
 \begin{itemize}
@@ -981,25 +984,34 @@ Hình~\ref{fig:activity_xuathuy} mô tả chi tiết biểu đồ hoạt động
     \item \textit{Giao dịch CSDL}: Mở Database Transaction ghi nhận \texttt{PhieuXuat} và \texttt{ChiTietPhieuXuat} với trạng thái \texttt{DA\_XAC\_NHAN}. Giá trị xuất hủy được ghi nhận theo giá vốn sản phẩm, số lượng tồn kho giảm ngay lập tức thông qua View \texttt{vw\_TonKhoHienTai}, sinh dòng Thẻ kho xuất âm và ghi nhật ký kiểm toán.
 \end{itemize}
 
-\subsection{Quy trình Trả hàng nhập cho Nhà cung cấp}
-
-Khi hàng hóa nhập về không đạt chất lượng cam kết, bị lỗi từ phía nhà sản xuất hoặc thừa theo thỏa thuận hoàn trả, hệ thống cung cấp phân hệ Trả hàng nhập để xuất hoàn sản phẩm cho Nhà cung cấp và cân đối lại nghĩa vụ tài chính.
-
-Hình~\ref{fig:activity_trahang} mô tả chi tiết biểu đồ hoạt động của quy trình Trả hàng nhập:
-
+\clearpage
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.88\textwidth,height=16cm,keepaspectratio]{figures/fig_activity_trahang.png}
-\caption{Biểu đồ hoạt động quy trình Trả hàng nhập cho Nhà cung cấp}
-\label{fig:activity_trahang}
+\includegraphics[width=0.98\textwidth,height=21.2cm,keepaspectratio]{figures/fig_activity_xuathuy.png}
+\caption{Biểu đồ hoạt động quy trình Xuất hủy hàng hỏng và Hết hạn sử dụng}
+\label{fig:activity_xuathuy}
 \end{figure}
+\clearpage
+
+\subsection{Quy trình Trả hàng nhập cho Nhà cung cấp}
+
+Khi hàng hóa nhập về không đạt chất lượng cam kết, bị lỗi từ phía nhà sản xuất hoặc thừa theo thỏa thuận hoàn trả, hệ thống cung cấp phân hệ Trả hàng nhập để xuất hoàn sản phẩm cho Nhà cung cấp và cân đối lại nghĩa vụ tài chính (chi tiết tại Hình~\ref{fig:activity_trahang}).
 
 \textbf{Thuyết minh các bước xử lý và đối soát công nợ:}
 \begin{itemize}
     \item \textit{Khởi tạo phiếu trả}: Thủ kho có thể chọn trả hàng theo một Phiếu nhập gốc cụ thể hoặc chọn trực tiếp Nhà cung cấp đối tác. Chọn các mặt hàng cần hoàn trả và số lượng trả tương ứng.
     \item \textit{Kiểm tra tồn khả dụng}: Hệ thống kiểm tra số lượng hoàn trả phải $\le$ số lượng tồn thực tế đang có tại chi nhánh kho lập phiếu (tránh trường hợp hàng đã bán hoặc đã chuyển kho khác mà vẫn lập phiếu trả).
-    \item \textit{Xử lý tài chính \& Tồn kho}: Hệ thống mở Transaction: tạo \texttt{PhieuTraHangNhap} và \texttt{ChiTietPhieuTraHangNhap}, trừ số lượng tồn kho qua View \texttt{vw\_TonKhoHienTai}, sinh dòng biến động Thẻ kho loại \texttt{TRA\_HANG\_NHAP}. Đồng thời tự động cập nhật giảm trừ công nợ phải trả Nhà cung cấp (hoặc ghi nhận phiếu thu tiền mặt nếu Nhà cung cấp hoàn tiền ngay).
+    \item \textit{Xử lý tài chính \& Tồn kho}: Hệ thống mở Transaction ghi nhận chứng từ \texttt{PhieuTraHangNhap} và bảng chi tiết \texttt{ChiTiet\-Phieu\-Tra\-Hang\-Nhap}, giảm trừ tồn kho qua View \texttt{vw\_TonKhoHienTai}, sinh bản ghi Thẻ kho loại \texttt{TRA\_HANG\_NHAP}. Đồng thời tự động giảm công nợ phải trả Nhà cung cấp (hoặc tạo phiếu thu tiền mặt nếu đối tác hoàn tiền ngay).
 \end{itemize}
+
+\clearpage
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth,height=21.2cm,keepaspectratio]{figures/fig_activity_trahang.png}
+\caption{Biểu đồ hoạt động quy trình Trả hàng nhập cho Nhà cung cấp}
+\label{fig:activity_trahang}
+\end{figure}
+\clearpage
 
 \section{Thiết kế Cơ sở dữ liệu quan hệ (Database Design)}
 
@@ -1037,8 +1049,9 @@ Hình~\ref{fig:so_do_er} biểu diễn Sơ đồ ER của hệ thống với cá
 \subsubsection{Lược đồ quan hệ chuẩn (Relational Schema Notation)}
 Quy ước ký hiệu: Tên bảng ( \underline{Khóa chính PK}, Thuộc tính thường, \textit{Khóa ngoại FK*}, ... ) phân định theo 5 nhóm nghiệp vụ:
 
+\begin{sloppypar}
 \textbf{a) Nhóm 1: Quản trị hệ thống \& Phân quyền kho (RBAC)}
-\begin{enumerate}[label={\textbf{\arabic*./}}]
+\begin{enumerate}[leftmargin=*, label={\textbf{\arabic*./}}]
     \item \textbf{VaiTro} (\underline{MaVaiTro}, TenVaiTro, MoTa)
     \item \textbf{NhanVien} (\underline{MaNv}, HoTen, SoDienThoai, Email, DiaChi, TrangThaiLamViec, GhiChu, NgayTao)
     \item \textbf{TaiKhoan} (\underline{MaTaiKhoan}, TenDangNhap, MatKhauHash, \textit{MaVaiTro*}, \textit{MaNv*}, TrangThai, NgayTao, LanDangNhapCuoi)
@@ -1047,7 +1060,7 @@ Quy ước ký hiệu: Tên bảng ( \underline{Khóa chính PK}, Thuộc tính 
 \end{enumerate}
 
 \textbf{b) Nhóm 2: Danh mục hàng hóa, định mức \& kho hàng}
-\begin{enumerate}[resume, label={\textbf{\arabic*./}}]
+\begin{enumerate}[leftmargin=*, resume, label={\textbf{\arabic*./}}]
     \item \textbf{Kho} (\underline{MaKho}, TenKho, DiaChi, SoDienThoai, TrangThai, NgayTao)
     \item \textbf{DonViTinh} (\underline{MaDvt}, TenDvt)
     \item \textbf{NhomHang} (\underline{MaNhom}, TenNhom, MoTa)
@@ -1057,14 +1070,14 @@ Quy ước ký hiệu: Tên bảng ( \underline{Khóa chính PK}, Thuộc tính 
 \end{enumerate}
 
 \textbf{c) Nhóm 3: Đối tác \& Khách hàng}
-\begin{enumerate}[resume, label={\textbf{\arabic*./}}]
+\begin{enumerate}[leftmargin=*, resume, label={\textbf{\arabic*./}}]
     \item \textbf{NhomNhaCungCap} (\underline{MaNhomNcc}, TenNhomNcc, MoTa)
     \item \textbf{DonViCapHang} (\underline{MaNcc}, MaNccNoiBo, TenNcc, MaSoThue, SoDienThoai, Email, DiaChi, \textit{MaNhomNcc*}, NoCanTraHienTai, TongTienMua, TrangThai, DaDanhDau, NgayTao)
     \item \textbf{KhachHang} (\underline{MaKh}, MaKhNoiBo, TenKh, SoDienThoai, DiaChi, DiemTichLuy, TrangThai)
 \end{enumerate}
 
 \textbf{d) Nhóm 4: Giao dịch chứng từ nhập, xuất, chuyển, kiểm, trả hàng}
-\begin{enumerate}[resume, label={\textbf{\arabic*./}}]
+\begin{enumerate}[leftmargin=*, resume, label={\textbf{\arabic*./}}]
     \item \textbf{PhieuNhap} (\underline{MaPhieuNhap}, MaPhieu, \textit{MaKho*}, \textit{MaNcc*}, \textit{MaNvLap*}, \textit{MaNvXacNhan*}, NgayLap, NgayXacNhan, TongTien, TrangThai, GhiChu, DaDanhDau)
     \item \textbf{ChiTietPhieuNhap} (\underline{MaCtphieuNhap}, \textit{MaPhieuNhap*}, \textit{MaHang*}, SoLuong, DonGiaNhap, ThanhTien)
     \item \textbf{PhieuTraHangNhap} (\underline{MaPhieuTraHang}, MaPhieu, \textit{MaKho*}, \textit{MaNcc*}, \textit{MaNvLap*}, \textit{MaNvTra*}, NgayLap, NgayTra, TongTienHoanLai, TrangThai, GhiChu, DaDanhDau)
@@ -1080,11 +1093,12 @@ Quy ước ký hiệu: Tên bảng ( \underline{Khóa chính PK}, Thuộc tính 
 \end{enumerate}
 
 \textbf{e) Nhóm 5: Đơn bán lẻ \& Quản lý dòng tiền}
-\begin{enumerate}[resume, label={\textbf{\arabic*./}}]
+\begin{enumerate}[leftmargin=*, resume, label={\textbf{\arabic*./}}]
     \item \textbf{DonBan} (\underline{MaDonBan}, MaDonBanNoiBo, \textit{MaKh*}, \textit{MaKho*}, \textit{MaNvLap*}, NgayBan, TongTienHang, GiamGia, TongThanhToan, TrangThai, GhiChu)
     \item \textbf{ChiTietDonBan} (\underline{MaCtdonBan}, \textit{MaDonBan*}, \textit{MaHang*}, SoLuong, DonGiaApDung, ChietKhau)
     \item \textbf{KhoanThu} (\underline{MaKhoanThu}, \textit{MaDonBan*}, \textit{MaNvNop*}, SoTienThu, HinhThucThanhToan, NgayThu, GhiChu)
 \end{enumerate}
+\end{sloppypar}
 
 \subsubsection{Các sơ đồ cấu trúc quan hệ RM phân rã theo cụm nghiệp vụ}
 
@@ -1141,120 +1155,17 @@ Quy ước ký hiệu: Tên bảng ( \underline{Khóa chính PK}, Thuộc tính 
 \end{figure}
 \clearpage
 
-\subsubsection{Sơ đồ cấu trúc liên kết các bảng quan hệ cốt lõi (Sơ đồ RM tổng hợp)}
-Hình~\ref{fig:so_do_rm} thể hiện Sơ đồ quan hệ RM với các bảng vật lý cốt lõi, khóa chính (PK) được gạch chân và các mũi tên chỉ rõ ràng buộc khóa ngoại (Foreign Key) tham chiếu về khóa chính của bảng cha:
 
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[
-    table/.style={draw=black, line width=0.8pt, rounded corners=2pt, fill=gray!5, inner sep=4pt, align=left, font=\scriptsize},
-    pk/.style={font=\scriptsize\bfseries\underline},
-    fk/.style={font=\scriptsize\itshape},
-    ref/.style={->, thick, black}
-]
-    % Hàng 1: Danh mục nền tảng
-    \node[table] (dvt) at (0, 4) {
-        \textbf{DonViTinh}\\
-        \underline{MaDvt} (PK)\\
-        TenDvt
-    };
-
-    \node[table] (nhom) at (4, 4) {
-        \textbf{NhomHang}\\
-        \underline{MaNhom} (PK)\\
-        TenNhom
-    };
-
-    \node[table] (kho) at (9.5, 4) {
-        \textbf{Kho}\\
-        \underline{MaKho} (PK)\\
-        TenKho\\
-        DiaChi, TrangThai
-    };
-
-    % Hàng 2: Hàng hóa & Người dùng
-    \node[table] (hh) at (2, 1.2) {
-        \textbf{HangHoa}\\
-        \underline{MaHang} (PK)\\
-        MaHangNoiBo (UQ)\\
-        TenHang, MaVach\\
-        GiaVon, GiaBan\\
-        \textit{MaDvt} (FK), \textit{MaNhom} (FK)
-    };
-
-    \node[table] (ncc) at (-2.5, 1.2) {
-        \textbf{DonViCapHang}\\
-        \underline{MaNcc} (PK)\\
-        TenNcc, DienThoai
-    };
-
-    \node[table] (tk) at (9.5, 1.2) {
-        \textbf{TaiKhoan}\\
-        \underline{MaTaiKhoan} (PK)\\
-        TenDangNhap, HoTen\\
-        \textit{MaVaiTro} (FK)
-    };
-
-    % Hàng 3: Chứng từ Master
-    \node[table] (pn) at (-1.5, -2) {
-        \textbf{PhieuNhap}\\
-        \underline{MaPhieuNhap} (PK)\\
-        MaPhieu (UQ), NgayNhap\\
-        \textit{MaKho} (FK), \textit{MaNcc} (FK)\\
-        TongTien, TrangThai
-    };
-
-    \node[table] (pkk) at (6, -2) {
-        \textbf{PhieuKiemKe}\\
-        \underline{MaPhieuKiem} (PK)\\
-        MaPhieu (UQ), NgayKiemKe\\
-        \textit{MaKho} (FK), TrangThai
-    };
-
-    % Hàng 4: Chi tiết Detail
-    \node[table] (ctpn) at (-1.5, -4.8) {
-        \textbf{ChiTietPhieuNhap}\\
-        \underline{MaChiTiet} (PK)\\
-        \textit{MaPhieuNhap} (FK)\\
-        \textit{MaHang} (FK)\\
-        SoLuong, DonGia
-    };
-
-    \node[table] (ctkk) at (6, -4.8) {
-        \textbf{ChiTietPhieuKiemKe}\\
-        \underline{MaChiTiet} (PK)\\
-        \textit{MaPhieuKiem} (FK)\\
-        \textit{MaHang} (FK)\\
-        SoLuongThucTe, SoLuongTon
-    };
-
-    % Các đường liên kết FK -> PK
-    \draw[ref] (hh.north) -- ++(0, 0.5) -| (dvt.south);
-    \draw[ref] (hh.north) -- ++(0, 0.5) -| (nhom.south);
-
-    \draw[ref] (pn.north) -- ++(0, 0.5) -| (ncc.south);
-    \draw[ref] (pn.east) -- ++(1, 0) |- (kho.west);
-
-    \draw[ref] (pkk.north) -- (kho.south);
-
-    \draw[ref] (ctpn.north) -- (pn.south);
-    \draw[ref] (ctpn.east) -| (hh.south);
-
-    \draw[ref] (ctkk.north) -- (pkk.south);
-    \draw[ref] (ctkk.west) -| (hh.south);
-\end{tikzpicture}
-\caption{Sơ đồ cấu trúc liên kết các bảng quan hệ (Sơ đồ RM - Relational Model)}
-\label{fig:so_do_rm}
-\end{figure}
 
 \subsubsection{Bảng các ràng buộc toàn vẹn tham chiếu (Referential Integrity Constraints)}
 Các ràng buộc khóa ngoại (Foreign Key) đảm bảo tính toàn vẹn tham chiếu giữa các quan hệ theo công thức toán học: $\pi_{FK}(R) \subseteq \pi_{PK}(S)$. Bảng~\ref{tab:fk_constraints} thống kê các ràng buộc tham chiếu cốt lõi trong hệ thống:
 
 \begin{table}[H]
 \centering
-\footnotesize
-\renewcommand{\arraystretch}{1.05}
-\begin{tabularx}{\textwidth}{|p{3.5cm}|p{2.6cm}|p{2.0cm}|p{2.6cm}|p{2.0cm}|Y|}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}p{2.6cm}|>{\raggedright\arraybackslash}p{2.0cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{1.9cm}|>{\centering\arraybackslash}p{2.0cm}|}
 \hline
 \rowcolor{tableheader}
 \textbf{Tên ràng buộc} & \textbf{Bảng tham chiếu ($R$)} & \textbf{Khóa ngoại ($FK$)} & \textbf{Bảng cha ($S$)} & \textbf{Khóa chính ($PK$)} & \textbf{Hành vi xóa} \\
@@ -1271,29 +1182,29 @@ FK\_HangHoa\_DonViTinh & HangHoa & MaDvt & DonViTinh & MaDvt & NO ACTION \\
 \hline
 FK\_HangHoa\_NhomHang & HangHoa & MaNhom & NhomHang & MaNhom & NO ACTION \\
 \hline
-FK\_HinhAnh\_HangHoa & HinhAnhHangHoa & MaHang & HangHoa & MaHang & CASCADE \\
+FK\_HinhAnh\_HangHoa & HinhAnh\-HangHoa & MaHang & HangHoa & MaHang & CASCADE \\
 \hline
 FK\_NguongTon\_Kho & NguongTonKho & MaKho & Kho & MaKho & CASCADE \\
 \hline
 FK\_PhieuNhap\_Kho & PhieuNhap & MaKho & Kho & MaKho & NO ACTION \\
 \hline
-FK\_PhieuNhap\_NCC & PhieuNhap & MaNcc & DonViCapHang & MaNcc & NO ACTION \\
+FK\_PhieuNhap\_NCC & PhieuNhap & MaNcc & DonVi\-CapHang & MaNcc & NO ACTION \\
 \hline
-FK\_CTPN\_PhieuNhap & ChiTietPhieuNhap & MaPhieuNhap & PhieuNhap & MaPhieuNhap & CASCADE \\
+FK\_CTPN\_PhieuNhap & ChiTiet\-PhieuNhap & MaPhieuNhap & PhieuNhap & MaPhieuNhap & CASCADE \\
 \hline
-FK\_CTPN\_HangHoa & ChiTietPhieuNhap & MaHang & HangHoa & MaHang & NO ACTION \\
+FK\_CTPN\_HangHoa & ChiTiet\-PhieuNhap & MaHang & HangHoa & MaHang & NO ACTION \\
 \hline
-FK\_PhieuTra\_Kho & PhieuTraHangNhap & MaKho & Kho & MaKho & NO ACTION \\
+FK\_PhieuTra\_Kho & PhieuTra\-HangNhap & MaKho & Kho & MaKho & NO ACTION \\
 \hline
-FK\_CTPT\_PhieuTra & ChiTietPhieuTra & MaPhieuTra & PhieuTraHangNhap & MaPhieuTra & CASCADE \\
+FK\_CTPT\_PhieuTra & ChiTiet\-PhieuTra & MaPhieuTra & PhieuTra\-HangNhap & MaPhieuTra & CASCADE \\
 \hline
 FK\_ChuyenKho\_KhoNguon & PhieuChuyenKho & MaKhoNguon & Kho & MaKho & NO ACTION \\
 \hline
-FK\_CTPCK\_PhieuChuyen & ChiTietPhieuChuyen & MaPhieuChuyen & PhieuChuyenKho & MaPhieuChuyen & CASCADE \\
+FK\_CTPCK\_PhieuChuyen & ChiTiet\-Phieu\-Chuyen & MaPhieu\-Chuyen & PhieuChuyenKho & MaPhieu\-Chuyen & CASCADE \\
 \hline
 FK\_PhieuKiem\_Kho & PhieuKiemKe & MaKho & Kho & MaKho & NO ACTION \\
 \hline
-FK\_CTPKK\_PhieuKiem & ChiTietPhieuKiem & MaPhieuKiem & PhieuKiemKe & MaPhieuKiem & CASCADE \\
+FK\_CTPKK\_PhieuKiem & ChiTiet\-PhieuKiem & MaPhieuKiem & PhieuKiemKe & MaPhieuKiem & CASCADE \\
 \hline
 FK\_DieuChinh\_PhieuKiem & PhieuDieuChinh & MaPhieuKiem & PhieuKiemKe & MaPhieuKiem & NO ACTION \\
 \hline
@@ -1322,8 +1233,9 @@ Dưới đây là từ điển dữ liệu kỹ thuật của các thực thể 
 \begin{table}[H]
 \centering
 \small
+\setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\textwidth}{|p{2.8cm}|p{3.2cm}|c|c|Y|}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|c|c|Y|}
 \hline
 \rowcolor{tableheader}
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Khóa} & \textbf{Null} & \textbf{Mô tả / Ràng buộc} \\
@@ -1338,7 +1250,7 @@ MaVach & VARCHAR(50) & Index & Yes & Mã vạch barcode quét nhanh khi thao tá
 \hline
 GiaVon & DECIMAL(18,2) & & No & Giá vốn bình quân gia quyền tính tự động \\
 \hline
-GiaBanThamKhao & DECIMAL(18,2) & & No & Giá bán niêm yết tham khảo \\
+GiaBan\-ThamKhao & DECIMAL(18,2) & & No & Giá bán niêm yết tham khảo \\
 \hline
 ViTriKho & NVARCHAR(100) & & Yes & Vị trí lưu kho (Kệ / Dãy / Tầng) \\
 \hline
@@ -1360,8 +1272,9 @@ TrangThai & NVARCHAR(50) & & No & DANG\_KINH\_DOANH / NGUNG\_KD \\
 \begin{table}[H]
 \centering
 \small
+\setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\textwidth}{|p{2.8cm}|p{3.2cm}|c|c|Y|}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|c|c|Y|}
 \hline
 \rowcolor{tableheader}
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Khóa} & \textbf{Null} & \textbf{Mô tả / Ràng buộc} \\
@@ -1384,8 +1297,9 @@ TrangThai & NVARCHAR(50) & & No & HOAT\_DONG / NGUNG\_HOAT\_DONG \\
 \begin{table}[H]
 \centering
 \small
+\setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\textwidth}{|p{2.8cm}|p{3.2cm}|c|c|Y|}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|c|c|Y|}
 \hline
 \rowcolor{tableheader}
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Khóa} & \textbf{Null} & \textbf{Mô tả / Ràng buộc} \\
@@ -1416,13 +1330,14 @@ ThanhTien & DECIMAL(18,2) & & No & Cột trong ChiTiet: Thành tiền = SL $\tim
 \begin{table}[H]
 \centering
 \small
+\setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\textwidth}{|p{2.8cm}|p{3.2cm}|c|c|Y|}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|c|c|Y|}
 \hline
 \rowcolor{tableheader}
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Khóa} & \textbf{Null} & \textbf{Mô tả / Ràng buộc} \\
 \hline
-MaPhieuChuyen & INT IDENTITY(1,1) & PK & No & Khóa chính phiếu điều chuyển kho \\
+MaPhieu\-Chuyen & INT IDENTITY(1,1) & PK & No & Khóa chính phiếu điều chuyển kho \\
 \hline
 MaPhieu & NVARCHAR(50) & Unique & No & Mã hiển thị (VD: CK000001) \\
 \hline
@@ -1446,13 +1361,14 @@ DonGiaChuyen & DECIMAL(18,2) & & No & Cột trong ChiTiet: Giá vốn hàng chuy
 \begin{table}[H]
 \centering
 \small
+\setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\textwidth}{|p{2.8cm}|p{3.2cm}|c|c|Y|}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|c|c|Y|}
 \hline
 \rowcolor{tableheader}
 \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Khóa} & \textbf{Null} & \textbf{Mô tả / Ràng buộc} \\
 \hline
-MaPhieuKiemKe & INT IDENTITY(1,1) & PK & No & Khóa chính phiếu kiểm kê \\
+MaPhieu\-KiemKe & INT IDENTITY(1,1) & PK & No & Khóa chính phiếu kiểm kê \\
 \hline
 MaPhieu & NVARCHAR(50) & Unique & No & Mã chứng từ hiển thị (VD: PK000001) \\
 \hline
@@ -1464,9 +1380,9 @@ TrangThai & NVARCHAR(50) & & No & PHIEU\_TAM / DA\_CAN\_BANG / DA\_HUY \\
 \hline
 GhiChu & NVARCHAR(500) & & Yes & Ghi chú đợt kiểm kê thực tế \\
 \hline
-SoLuongTonHeThong & DECIMAL(18,2) & & No & Cột trong ChiTiet: Tồn sổ sách lúc kiểm \\
+SoLuong\-TonHeThong & DECIMAL(18,2) & & No & Cột trong ChiTiet: Tồn sổ sách lúc kiểm \\
 \hline
-SoLuongThucTe & DECIMAL(18,2) & & No & Cột trong ChiTiet: Số lượng thực đếm \\
+SoLuong\-ThucTe & DECIMAL(18,2) & & No & Cột trong ChiTiet: Số lượng thực đếm \\
 \hline
 DonGiaVon & DECIMAL(18,2) & & No & Cột trong ChiTiet: Giá vốn tính chênh lệch \\
 \hline
@@ -1480,31 +1396,8 @@ DonGiaVon & DECIMAL(18,2) & & No & Cột trong ChiTiet: Giá vốn tính chênh 
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[
-    node distance=1.1cm,
-    block/.style={rectangle, draw=black, line width=0.8pt, fill=gray!6, rounded corners=2pt, text width=6cm, align=center, inner sep=5pt, font=\footnotesize},
-    view/.style={rectangle, draw=black, line width=1pt, fill=blue!8, rounded corners=3pt, text width=7.2cm, align=center, inner sep=6pt, font=\small\bfseries},
-    arrow/.style={->, thick, black}
-]
-    \node[block] (s1) {1. Phiếu Nhập hàng (DA\_XAC\_NHAN): + SL Nhập};
-    \node[block, below=0.25cm of s1] (s2) {2. Phiếu Xuất hủy (DA\_XAC\_NHAN): - SL Xuất};
-    \node[block, below=0.25cm of s2] (s3) {3. Chuyển kho (DA\_XUAT / DA\_NHAN): - SL Kho Nguồn};
-    \node[block, below=0.25cm of s3] (s4) {4. Chuyển kho (DA\_NHAN): + SL Thực nhận Kho Đích};
-    \node[block, below=0.25cm of s4] (s5) {5. Cân bằng kiểm kê (DA\_DUYET): $\pm$ SL Điều chỉnh};
-    \node[block, below=0.25cm of s5] (s6) {6. Trả hàng nhập (DA\_TRA\_HANG): - SL Trả NCC};
-
-    \node[view, right=1.6cm of s3] (v1) {TẦNG 1: View vw\_BienDongKho\\(Hợp nhất 6 dòng chứng từ thời gian thực:\\NgayGiaoDich, MaKho, MaHang, SL\_Tang, SL\_Giam)};
-
-    \node[view, below=1.2cm of v1] (v2) {TẦNG 2: View vw\_TonKhoHienTai\\$\text{TonHienTai} = \sum \text{SL\_Tang} - \sum \text{SL\_Giam}$\\GROUP BY MaKho, MaHang};
-
-    \draw[arrow] (s1.east) -- (v1.west);
-    \draw[arrow] (s2.east) -- (v1.west);
-    \draw[arrow] (s3.east) -- (v1.west);
-    \draw[arrow] (s4.east) -- (v1.west);
-    \draw[arrow] (s5.east) -- (v1.west);
-    \draw[arrow] (s6.east) -- (v1.west);
-    \draw[arrow] (v1) -- node[right, font=\footnotesize]{GROUP BY (Kho, Hàng)} (v2);
-\end{tikzpicture}
+\includegraphics[width=\textwidth, keepaspectratio]{figures/fig_database_view_2_tang.png}
+\vspace{0.2cm}
 \caption{Kiến trúc Database View 2 tầng tính toán tồn kho động}
 \label{fig:view_2_tang}
 \end{figure}
@@ -1621,25 +1514,6 @@ catch (Exception)
 }
 \end{lstlisting}
 
-\subsection{Hệ sinh thái Khối Lego UI tái sử dụng}
-Nhóm đã chuẩn hóa giao diện thành các thành phần Lego UI độc lập:
-\begin{itemize}
-    \item \texttt{\_Pagination.cshtml}: Phân trang chuyên nghiệp với thông tin hiển thị ``Hiển thị 1--20 trên tổng số 150 mặt hàng''.
-    \item \texttt{\_DateFilter.cshtml}: Bộ lọc dải ngày thông minh (Hôm nay, Hôm qua, 7 ngày qua, Tháng này, Tùy chọn).
-    \item \texttt{Toast.js}: Hệ thống thông báo tự động góc phải màn hình (Xanh: Thành công, Đỏ: Lỗi, Vàng: Cảnh báo).
-    \item \texttt{Filter.initCombobox}: Thư viện tìm kiếm nhanh với phím F3 tự động kích hoạt ô nhập.
-\end{itemize}
-
-\subsection{Giải pháp phân tầng Stacking Context giải quyết xung đột Dropdown và Modal}
-Hệ thống thiết lập thang đo z-index 6 tầng chuẩn hóa:
-\begin{itemize}
-    \item \textbf{Tầng 1 (1--50):} Các thành phần bảng và nội dung trang.
-    \item \textbf{Tầng 2 (150--500):} Menu dropdown, ô gợi ý autocomplete và lịch dải ngày.
-    \item \textbf{Tầng 3 (1020):} Thanh Header menu cố định.
-    \item \textbf{Tầng 4 (1050--1065):} Cửa sổ Modal và Drawer trượt từ cạnh phải.
-    \item \textbf{Tầng 5 (1090):} Cửa sổ thông báo xác nhận (\texttt{ModalPrompt}).
-    \item \textbf{Tầng 6 (9999):} Thông báo nổi Toast.
-\end{itemize}
 
 \section{Mô tả kết quả đạt được qua các phân hệ}
 
@@ -1890,7 +1764,7 @@ Nhóm đã thực hiện tổng cộng 38 kịch bản kiểm thử chức năng
 \section{Kết quả đạt được}
 Sau quá trình nghiên cứu, phân tích nghiệp vụ và lập trình triển khai nghiêm túc qua 162 phiên làm việc liên tục, nhóm sinh viên đã hoàn thành xuất sắc toàn bộ các mục tiêu đặt ra cho bài tập lớn học phần Lập trình Web:
 \begin{enumerate}
-    \item \textbf{Về mặt sản phẩm:} Xây dựng thành công ứng dụng web Quản lý kho hàng đa chi nhánh hoàn chỉnh, đáp ứng chuẩn mực và tinh tế giao diện cũng như quy trình nghiệp vụ của các hệ thống quản trị kho hàng chuyên nghiệp thực tế.
+    \item \textbf{Về mặt sản phẩm:} Xây dựng thành công ứng dụng web Quản lý kho hàng nội bộ đa chi nhánh hoàn chỉnh, đáp ứng chuẩn mực và tinh tế giao diện cũng như quy trình nghiệp vụ của các hệ thống quản trị kho hàng chuyên nghiệp thực tế.
     \item \textbf{Về mặt kiến trúc CSDL:} Làm chủ hoàn toàn công nghệ ASP.NET Core MVC trên nền tảng mới nhất .NET 10, kết hợp Entity Framework Core 10. Giải quyết triệt để bài toán đồng bộ tồn kho bằng giải thuật tính toán động qua Database View (\texttt{vw\_TonKhoHienTai}, \texttt{vw\_BienDongKho}).
     \item \textbf{Về mặt giao diện \& Trải nghiệm (UI/UX):} Xây dựng thành công hệ sinh thái Khối Lego UI dùng chung (\texttt{\_Pagination}, \texttt{\_DateFilter}, \texttt{\_MultiSelectFilter}, \texttt{ToastNotification}, \texttt{ModalConfirm}, \texttt{ModalHelp}), giúp mã nguồn cực kỳ gọn gàng và mang lại trải nghiệm mượt mà với tương tác AJAX không tải lại trang.
     \item \textbf{Về mặt an toàn \& Toàn vẹn dữ liệu:} Đảm bảo an toàn tuyệt đối cho số liệu doanh nghiệp thông qua cơ chế phân quyền 3 lớp người dùng chặt chẽ, bảo vệ bằng giao dịch CSDL (Transaction) và khóa bất biến các chứng từ kiểm kê/điều chỉnh đã cân bằng.
@@ -1938,14 +1812,14 @@ Sau quá trình nghiên cứu, phân tích nghiệp vụ và lập trình triể
     \item \textbf{Bước 5:} Đăng nhập với tài khoản Quản lý mặc định: Tên đăng nhập \texttt{quanly}, Mật khẩu \texttt{123456}.
 \end{enumerate}
 
-\section*{Phụ lục B: Cấu trúc Thư mục Dự án và Ánh xạ Controller -- View}
-\begin{itemize}
-    \item \texttt{Controllers/AccountController.cs} $\rightarrow$ \texttt{Views/Account/Login.cshtml}: Quản lý phiên xác thực Cookie và chi nhánh.
-    \item \texttt{Controllers/HangHoaController.cs} $\rightarrow$ \texttt{Views/HangHoa/Index.cshtml}: Quản lý danh mục hàng hóa, nhóm hàng.
-    \item \texttt{Controllers/NhapHangController.cs} $\rightarrow$ \texttt{Views/NhapHang/Index.cshtml}: Phiếu nhập hàng nhà cung cấp.
-    \item \texttt{Controllers/ChuyenKhoController.cs} $\rightarrow$ \texttt{Views/ChuyenKho/Index.cshtml}: Phiếu chuyển kho liên chi nhánh.
-    \item \texttt{Controllers/PhieuKiemKeController.cs} $\rightarrow$ \texttt{Views/PhieuKiemKe/Index.cshtml}: Kiểm kê và cân bằng kho.
-    \item \texttt{Controllers/BaoCaoController.cs} $\rightarrow$ \texttt{Views/BaoCao/TonKho.cshtml}, \texttt{TheKho.cshtml}: Báo cáo Pivot và Thẻ kho.
+\section*{Phụ lục B: Cấu trúc Thư mục và Ánh xạ Controller -- View}
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Xác thực \& Phân quyền:} \path{Controllers/AccountController.cs} $\rightarrow$ \path{Views/Account/Login.cshtml} (Phiên làm việc Cookie, chi nhánh).
+    \item \textbf{Danh mục Hàng hóa:} \path{Controllers/HangHoaController.cs} $\rightarrow$ \path{Views/HangHoa/Index.cshtml} (Hàng hóa, nhóm hàng, đơn vị tính).
+    \item \textbf{Nhập hàng NCC:} \path{Controllers/NhapHangController.cs} $\rightarrow$ \path{Views/NhapHang/Index.cshtml} (Phiếu nhập hàng nhà cung cấp).
+    \item \textbf{Điều chuyển kho:} \path{Controllers/ChuyenKhoController.cs} $\rightarrow$ \path{Views/ChuyenKho/Index.cshtml} (Phiếu chuyển kho liên chi nhánh).
+    \item \textbf{Kiểm kê \& Cân bằng:} \path{Controllers/PhieuKiemKeController.cs} $\rightarrow$ \path{Views/PhieuKiemKe/Index.cshtml} (Kiểm kê, cân bằng kho).
+    \item \textbf{Báo cáo Kho:} \path{Controllers/BaoCaoController.cs} $\rightarrow$ \path{Views/BaoCao/TonKho.cshtml}, \path{TheKho.cshtml} (Tồn kho Pivot, Thẻ kho).
 \end{itemize}
 
 \end{document}
