@@ -1,0 +1,80 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.BaoCaoTonKhoIndexVM
+@using BTL_LTW_QuanLiKho_2.ViewModels.Common
+
+<!-- CỘT BÊN TRÁI: TIÊU ĐỀ "BÁO CÁO TỒN KHO" + CÁC BỘ LỌC LEGO ĐỒNG BỘ 100% HÀNG HÓA -->
+<aside class="kiot-sidebar-col" id="sidebarFilterCol">
+    <!-- Header cho sidebar khi mở ở chế độ mobile / zoom in -->
+    <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+        <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc tồn kho</div>
+        <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
+    </div>
+
+    <div class="kiot-sidebar-title d-none d-lg-flex">
+        Báo cáo tồn kho
+    </div>
+
+    <div class="kiot-filter-box">
+        <!-- 1. Chi nhánh kho (Lego Multi-Select Dropdown) -->
+        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("Kho", "kho", "Chi nhánh kho", "Tất cả chi nhánh", true, "dotKho") {
+            HeaderActionText = "Tất cả",
+            HeaderActionId = "btnToggleAllKho",
+            Items = Model.DanhSachKho.Select(k => new KiotMultiSelectItemVM(k.MaKho.ToString(), k.TenKho)).ToList()
+        }' />
+
+        <!-- 2. Nhóm hàng (Lego Multi-Select Dropdown giống Danh sách Hàng hóa) -->
+        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NhomHang", "nhom", "Nhóm hàng", "Chọn nhóm hàng", true, "dotNhomHang") {
+            Items = Model.DanhSachNhomHang.Select(g => new KiotMultiSelectItemVM(g.MaNhom.ToString(), g.TenNhom)).ToList()
+        }' />
+
+        <!-- 3. Tình trạng tồn (Lego Single-Select Dropdown giống Hàng hóa) -->
+        <div class="f-block position-relative">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <h6 class="mb-0">Tình trạng tồn <span class="filter-dot @(Model.Filter.TinhTrangTon != "ALL" ? "active" : "")" id="dotTinhTrangTon"></span></h6>
+            </div>
+            <div class="position-relative">
+                <div class="kiot-single-select-box" id="boxTinhTrangTon">
+                    <span id="textTinhTrangTon">
+                        @(Model.Filter.TinhTrangTon == "CON_TON" ? "Còn tồn (> 0)" :
+                          Model.Filter.TinhTrangTon == "HET_HANG" ? "Hết hàng (= 0)" :
+                          Model.Filter.TinhTrangTon == "TON_AM" ? "Tồn âm (< 0)" :
+                          Model.Filter.TinhTrangTon == "DUOI_DINH_MUC" ? "Dưới định mức tối thiểu" :
+                          Model.Filter.TinhTrangTon == "VUOT_DINH_MUC" ? "Vượt định mức tối đa" : "Tất cả")
+                    </span>
+                    <i class="bi bi-chevron-down kiot-select-chevron"></i>
+                </div>
+                <div class="kiot-ss-dropdown shadow" id="dropdownTinhTrangTon">
+                    <div class="kiot-ss-item @(Model.Filter.TinhTrangTon == "ALL" ? "selected" : "")" data-val="ALL">
+                        <span>Tất cả</span>
+                        <i class="bi bi-check2 check-icon"></i>
+                    </div>
+                    <div class="kiot-ss-item @(Model.Filter.TinhTrangTon == "CON_TON" ? "selected" : "")" data-val="CON_TON">
+                        <span>Còn tồn (> 0)</span>
+                        <i class="bi bi-check2 check-icon"></i>
+                    </div>
+                    <div class="kiot-ss-item @(Model.Filter.TinhTrangTon == "HET_HANG" ? "selected" : "")" data-val="HET_HANG">
+                        <span>Hết hàng (= 0)</span>
+                        <i class="bi bi-check2 check-icon"></i>
+                    </div>
+                    <div class="kiot-ss-item @(Model.Filter.TinhTrangTon == "TON_AM" ? "selected" : "")" data-val="TON_AM">
+                        <span class="text-danger fw-semibold">Tồn âm (< 0)</span>
+                        <i class="bi bi-check2 check-icon"></i>
+                    </div>
+                    <div class="kiot-ss-item @(Model.Filter.TinhTrangTon == "DUOI_DINH_MUC" ? "selected" : "")" data-val="DUOI_DINH_MUC">
+                        <span class="text-warning-emphasis fw-semibold">Dưới định mức tối thiểu</span>
+                        <i class="bi bi-check2 check-icon"></i>
+                    </div>
+                    <div class="kiot-ss-item @(Model.Filter.TinhTrangTon == "VUOT_DINH_MUC" ? "selected" : "")" data-val="VUOT_DINH_MUC">
+                        <span>Vượt định mức tối đa</span>
+                        <i class="bi bi-check2 check-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Hàng hóa (Lego Checkbox Status Filter chuẩn KiotViet) -->
+        <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Hàng hóa", "dotTrangThaiHang", new List<KiotStatusOptionVM> {
+            new("DANG_KINH_DOANH", "Đang kinh doanh", true),
+            new("NGUNG_KINH_DOANH", "Ngừng kinh doanh")
+        })' />
+    </div>
+</aside>

@@ -1,0 +1,23 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.QuanLyKho.KhoIndexVM
+@using BTL_LTW_QuanLiKho_2.ViewModels.Common
+
+<!-- CỘT BÊN TRÁI: TIÊU ĐỀ "KHO HÀNG" + BỘ LỌC LEGO CHUẨN KIOTVIET -->
+<aside class="kiot-sidebar-col" id="sidebarFilterCol">
+    <!-- Header cho sidebar khi mở ở chế độ mobile / zoom in -->
+    <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+        <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc kho hàng</div>
+        <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
+    </div>
+
+    <div class="kiot-sidebar-title d-none d-lg-flex">
+        Kho hàng
+    </div>
+
+    <div class="kiot-filter-box">
+        <!-- 1. Trạng thái chi nhánh kho -->
+        <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Trạng thái", "dotTrangThai", new List<KiotStatusOptionVM> {
+            new("HOAT_DONG", "Đang hoạt động", true),
+            new("NGUNG_HOAT_DONG", "Ngừng hoạt động")
+        })' />
+    </div>
+</aside>

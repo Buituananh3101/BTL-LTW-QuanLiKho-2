@@ -1,0 +1,166 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.TheKhoIndexVM
+@{
+    var viCulture = new System.Globalization.CultureInfo("vi-VN");
+}
+
+<div class="thekho-table-wrap mb-3">
+    <div class="kiot-table-scroll-body table-responsive">
+        <table class="thekho-table table table-hover align-middle mb-0" id="theKhoTable">
+            <thead>
+                <tr>
+                    <th style="width: 45px;" class="text-center">STT</th>
+                    <th style="width: 140px;">Thời gian</th>
+                    <th style="width: 130px;">Mã chứng từ</th>
+                    <th style="width: 125px;">Loại giao dịch</th>
+                    <th style="min-width: 200px;">Đối tác / Diễn giải</th>
+                    <th style="width: 120px;" class="text-end">Đơn giá / Giá vốn</th>
+                    <th style="width: 110px;" class="text-end">Số lượng nhập</th>
+                    <th style="width: 110px;" class="text-end">Số lượng xuất</th>
+                    <th style="width: 110px;" class="text-end">Tồn cuối</th>
+                    <th style="width: 180px;">Ghi chú</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.TongHop != null)
+                {
+                    <!-- 1. DÒNG ĐẶC BIỆT: TỒN ĐẦU KỲ -->
+                    <tr class="row-ton-dau">
+                        <td class="text-center text-muted">•</td>
+                        <td class="text-muted small">@Model.TongHop.TuNgay.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="text-muted small">-</td>
+                        <td>
+                            <span class="badge-tk badge-kiem-ke">Tồn đầu kỳ</span>
+                        </td>
+                        <td class="text-muted fw-semibold">Số dư tồn tính đến đầu kỳ</td>
+                        <td class="text-end text-muted">-</td>
+                        <td class="text-end text-muted">-</td>
+                        <td class="text-end text-muted">-</td>
+                        <td class="text-end fw-bold text-dark">
+                            @Model.TongHop.TonDauKy.ToString("#,##0.##", viCulture)
+                        </td>
+                        <td class="text-muted small">-</td>
+                    </tr>
+
+                    <!-- 2. CÁC DÒNG GIAO DỊCH BIẾN ĐỘNG TRONG KỲ -->
+                    @if (Model.DanhSachDong.Items.Any())
+                    {
+                        @foreach (var dong in Model.DanhSachDong.Items)
+                        {
+                            string badgeClass = dong.LoaiChungTu switch
+                            {
+                                "PHIEU_NHAP" => "badge-nhap",
+                                "XUAT_BAN" => "badge-xuat-ban",
+                                "XUAT_HUY" => "badge-xuat-huy",
+                                "CHUYEN_XUAT" => "badge-chuyen-xuat",
+                                "CHUYEN_NHAP" => "badge-chuyen-nhap",
+                                "KIEM_KE" => "badge-kiem-ke",
+                                "TRA_HANG_NHAP" => "badge-tra-hang",
+                                _ => "badge-kiem-ke"
+                            };
+
+                            <tr>
+                                <td class="text-center text-muted small">@dong.Stt</td>
+                                <td class="small text-muted">@dong.NgayGiaoDich.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(dong.UrlChiTiet))
+                                    {
+                                        <a href="@dong.UrlChiTiet" class="fw-semibold text-primary text-decoration-none" title="Xem chi tiết chứng từ">
+                                            @dong.MaChungTuHienThi
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="fw-semibold text-dark">@dong.MaChungTuHienThi</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge-tk @badgeClass">@dong.TenLoaiChungTu</span>
+                                </td>
+                                <td>
+                                    <span class="text-dark" title="@dong.DoiTac">@dong.DoiTac</span>
+                                </td>
+                                <td class="text-end text-muted">
+                                    @(dong.DonGia > 0 ? dong.DonGia.ToString("N0", viCulture) + " ₫" : "-")
+                                </td>
+                                <td class="text-end">
+                                    @if (dong.SoLuongTang > 0)
+                                    {
+                                        <span class="text-success fw-bold">+@dong.SoLuongTang.ToString("#,##0.##", viCulture)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    @if (dong.SoLuongGiam > 0)
+                                    {
+                                        <span class="text-danger fw-bold">-@dong.SoLuongGiam.ToString("#,##0.##", viCulture)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td class="text-end fw-bold text-dark">
+                                    @dong.TonLuyKe.ToString("#,##0.##", viCulture)
+                                </td>
+                                <td class="text-muted small text-truncate" style="max-width: 180px;" title="@dong.GhiChu">
+                                    @(dong.GhiChu ?? "-")
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center py-4 text-muted fst-italic">
+                                <i class="bi bi-inbox fs-4 d-block mb-1 text-secondary"></i>
+                                Không phát sinh giao dịch nào trong khoảng thời gian đã chọn
+                            </td>
+                        </tr>
+                    }
+
+                    <!-- 3. DÒNG ĐẶC BIỆT: TỒN CUỐI KỲ / TỔNG KẾT PHÁT SINH -->
+                    <tr class="row-ton-cuoi">
+                        <td class="text-center text-muted">•</td>
+                        <td class="small">@Model.TongHop.DenNgay.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>-</td>
+                        <td>
+                            <span class="badge-tk badge-nhap">Tồn cuối kỳ</span>
+                        </td>
+                        <td class="fw-bold">Tổng phát sinh & số dư cuối kỳ</td>
+                        <td class="text-end">-</td>
+                        <td class="text-end text-success fw-bold">
+                            +@Model.TongHop.TongNhapKy.ToString("#,##0.##", viCulture)
+                        </td>
+                        <td class="text-end text-danger fw-bold">
+                            -@Model.TongHop.TongXuatKy.ToString("#,##0.##", viCulture)
+                        </td>
+                        <td class="text-end fw-bold fs-6">
+                            @Model.TongHop.TonCuoiKy.ToString("#,##0.##", viCulture)
+                        </td>
+                        <td class="small">-</td>
+                    </tr>
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="10" class="text-center py-5 text-muted">
+                            <i class="bi bi-search fs-3 d-block mb-2 text-primary"></i>
+                            Vui lòng chọn một mặt hàng từ ô tìm kiếm bên trái để theo dõi Thẻ kho.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Phân trang AJAX Lego _Pagination -->
+    @if (Model.DanhSachDong.TotalPages > 1)
+    {
+        <div class="px-3 py-2 border-top bg-light">
+            <partial name="_Pagination" model="Model.DanhSachDong" />
+        </div>
+    }
+</div>

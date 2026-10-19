@@ -58,26 +58,26 @@
       </div>
     </li>
 
-    <li>
+    <li class="@(controller == "BaoCao" ? "active" : "")">
       <a href="#" onclick="return false;">Báo cáo</a>
       <div class="mega">
         <div class="mega-col">
           <div class="mega-title">Kho</div>
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Tồn kho theo kho</a>
+          <a asp-controller="BaoCao" asp-action="TonKho">Tồn kho theo kho</a>
           <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Nhập - Xuất - Tồn</a>
           <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Hàng dưới định mức</a>
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Thẻ kho</a>
+          <a asp-controller="BaoCao" asp-action="TheKho">Thẻ kho</a>
         </div>
       </div>
     </li>
 
-    <li class="@(controller == "NguoiDung" ? "active" : "")">
+    <li class="@(controller == "NguoiDung" || controller == "Kho" ? "active" : "")">
       <a href="#" onclick="return false;">Thiết lập</a>
       <div class="mega">
         <div class="mega-col">
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Kho</a>
           @if (User.IsInRole("Quản lý"))
           {
+            <a asp-controller="Kho" asp-action="Index">Kho</a>
             <a asp-controller="NguoiDung" asp-action="Index">Người dùng</a>
           }
           <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Nhật ký thao tác</a>

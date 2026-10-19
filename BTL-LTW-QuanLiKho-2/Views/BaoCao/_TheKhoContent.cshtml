@@ -1,0 +1,13 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.TheKhoIndexVM
+
+<!-- Khối thông tin hàng hóa & 4 Thẻ KPI Tổng hợp -->
+<div id="theKhoSummaryContainer">
+    <partial name="_TheKhoSummary" model="Model.TongHop" />
+</div>
+
+<!-- Bảng danh sách dòng biến động Thẻ kho -->
+<section id="content">
+    <div id="theKhoTableContainer">
+        <partial name="_TheKhoTable" model="Model" />
+    </div>
+</section>

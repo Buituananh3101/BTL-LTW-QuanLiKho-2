@@ -47,6 +47,7 @@ builder.Services.AddScoped<BTL_LTW_QuanLiKho_2.Services.ITonKhoService, BTL_LTW_
 builder.Services.AddScoped<BTL_LTW_QuanLiKho_2.Services.IBanHangService, BTL_LTW_QuanLiKho_2.Services.BanHangService>();
 builder.Services.AddScoped<BTL_LTW_QuanLiKho_2.Services.INhatKyThaoTacService, BTL_LTW_QuanLiKho_2.Services.NhatKyThaoTacService>();
 builder.Services.AddScoped<BTL_LTW_QuanLiKho_2.Services.IHangHoaExcelService, BTL_LTW_QuanLiKho_2.Services.HangHoaExcelService>();
+builder.Services.AddScoped<BTL_LTW_QuanLiKho_2.Services.ITheKhoService, BTL_LTW_QuanLiKho_2.Services.TheKhoService>();
 
 builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

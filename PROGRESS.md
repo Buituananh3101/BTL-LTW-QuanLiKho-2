@@ -1,18 +1,241 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-19 – Đưa Thông Báo Quyền Quản Lý Vào Mục Ghi Chú & Bỏ Banner Xanh (Phiên 150)
+Cập nhật lần cuối: 2026-10-19 – Chuẩn Hóa & Đồng Bộ Dropdown Kho Và Ô Tìm Mặt Hàng F3 Sidebar Thẻ Kho Dùng Khối Lego Đóng Gói (Phiên 159)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất loại bỏ hoàn toàn banner thông báo màu xanh biển (`#alertAdminAllKho`) trong phần phân quyền chi nhánh kho, đồng thời tự động đưa nội dung thông báo này vào mục Ghi chú (`#userGhiChu`) của tài khoản Quản lý.
+- Đã hoàn tất chuẩn hóa 100% giao diện Sidebar Báo cáo Thẻ kho (`_TheKhoFilterSidebar.cshtml`) theo các khối Lego đóng gói của hệ thống:
+  + Khối "Mặt hàng theo dõi": Chuyển sang `.f-block`, tích hợp input F3 gọn gàng, ô Autocomplete hàng hóa chuẩn Lego `KiotFilter.initProductSearch` (đầy đủ avatar chữ cái, tên hàng, mã, ĐVT, nhóm, tồn kho, giá), thẻ sản phẩm đang chọn `.tk-selected-card` thanh lịch có nút xóa `&times;` (`#btnRemoveSelectedProduct`) để đổi mặt hàng tức thì, và dòng hướng dẫn thân thiện khi chưa chọn hàng.
+  + Khối "Chi nhánh kho": Thay thế hoàn toàn thẻ `<select class="form-select">` HTML mặc định bằng Lego Single-Select Dropdown KiotViet (`.kiot-single-select-box`, `.kiot-ss-dropdown`, `.kiot-ss-item` có icon checkmark `bi-check2`), điều khiển bởi `KiotFilter.initSingleSelect`.
+  + API `BaoCaoController.SearchHangHoa`: Nâng cấp hỗ trợ cả tham số `q` & `term`, tự động tính tồn kho theo kho được chọn từ `vw_TonKhoHienTai`, trả về đầy đủ metadata cho Autocomplete Lego.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra nghiệm thu trên trình duyệt modal Thêm mới & Cập nhật người dùng với trường Ghi chú mới.
-2. Kiểm tra nghiệm thu phân quyền với 3 tài khoản hạt giống (`quanly`, `thukho`, `banhang` / mật khẩu `123456`).
-3. Kiểm tra trải nghiệm thực tế Import/Export file Excel trên trình duyệt (`/ChuyenKho/Create`, `/TraHangNhap/Create`, `/NhapHang/Create`).
+1. Kiểm tra trải nghiệm thực tế trên trình duyệt màn hình Báo cáo Thẻ kho (`/BaoCao/TheKho`):
+   - Thử nghiệm tìm kiếm hàng hóa F3, Up/Down/Enter chọn mặt hàng.
+   - Thử nghiệm đổi chi nhánh kho bằng Dropdown Lego Single-Select.
+   - Thử nghiệm nút bỏ chọn mặt hàng để tìm mặt hàng khác.
+2. Kiểm tra nghiệp vụ Thẻ kho khi xem từ Drawer chi tiết Danh sách Hàng hóa (`/HangHoa ➜ Tab Thẻ kho ➜ Xem thẻ kho chi tiết`).
+3. Kiểm tra tính năng Xuất file Excel Thẻ kho (`/BaoCao/ExportTheKho`) và In thẻ kho (`/BaoCao/TheKho`).
+
+---
+
+- **Chuẩn Hóa & Đồng Bộ Dropdown Kho Và Ô Tìm Mặt Hàng F3 Sidebar Thẻ Kho Dùng Khối Lego Đóng Gói (Phiên 159)**:
+  - **Nhu cầu**: Người dùng gửi ảnh chụp màn hình sidebar (`media_1792368150834_417f98c0.png`) và yêu cầu: "sửa lại phần dropdown và ô tìm mặt hàng đang theo dõi dựa trên các thành phần đã đóng gói để đồng bộ giao diện".
+  - **Nguyên nhân cốt lõi**:
+    + Ô chọn "Chi nhánh kho" đang dùng thẻ `<select class="form-select">` mặc định của HTML/Bootstrap với viền xanh thô lệch chuẩn KiotViet.
+    + Khối "Mặt hàng theo dõi" dùng thẻ `filter-group` và `.tk-product-picker-wrap` có viền xám bao quanh, chữ "Chưa chọn mặt hàng nào" chiếm diện tích, không đồng bộ với cấu trúc `.f-block` của sidebar KiotViet.
+    + API `SearchHangHoa` trước đó dùng tên tham số `term` thay vì `q` mà Lego `KiotFilter.initProductSearch` gửi lên, và chưa trả về tồn kho thực tế theo từng chi nhánh.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`Views/BaoCao/_TheKhoFilterSidebar.cshtml`**:
+       - Khối 1 (Mặt hàng theo dõi): Bọc trong `.f-block position-relative`, tiêu đề `<h6>` kèm chấm chỉ báo `filter-dot` (`#dotMatHang`) và badge F3; ô tìm kiếm F3 gọn gàng kèm icon kính lúp; thẻ sản phẩm đang chọn `.tk-selected-card` có nút xóa `#btnRemoveSelectedProduct`; gợi ý `#tkNoProductHint` tinh tế khi chưa chọn hàng.
+       - Khối 2 (Chi nhánh kho): Dựng chuẩn Lego Single-Select Dropdown `.kiot-single-select-box` (`#boxKho`, `#textKho`), `.kiot-ss-dropdown` (`#dropdownKho`, `.kiot-ss-item` kèm `check-icon` `bi-check2`), thẻ ẩn `#selectKhoLuuTru` và chấm chỉ báo `#dotKho`.
+    2. **`Controllers/BaoCaoController.cs`**:
+       - Nâng cấp `SearchHangHoa(string? q, string? term, int? warehouseId, int? whId, int limit = 15)`: Bắt cả `q` và `term`, hỗ trợ tính tồn kho theo kho đã chọn từ `VwTonKhoHienTais` (hoặc tổng tồn toàn hệ thống nếu chọn "Tất cả chi nhánh"), trả về `id`, `maHang`, `maHangNoiBo`, `tenHang`, `tenDvt`, `tenNhom`, `gia`, `tonKho`.
+    3. **`wwwroot/css/the-kho.css`**:
+       - Xóa bỏ class `.tk-product-picker-wrap` thô cũ.
+       - Cấu hình `.tk-autocomplete-dropdown`: Bỏ `min-width: 260px` làm tràn mép sidebar và đè lên nút toggle F4 `<`; cố định `width: 100% !important; max-width: 100% !important; box-sizing: border-box !important;` nằm trọn vẹn trong sidebar; giới hạn `max-height: 220px !important` gọn gàng không che khuất toàn bộ các bộ lọc bên dưới; bổ sung `padding: 3px 0 !important` chống đè mép ô tìm kiếm.
+       - Tinh chỉnh `.kk-autocomplete-item`: `font-size: 12px`, thumb `24px`, meta tồn và giá vừa vặn với chiều ngang sidebar.
+       - Styling `.tk-selected-card` nền xanh nhạt `#f0f7ff`, viền `#bfdbfe`, badge mã hàng `#0070f4`, nút xóa `.btn-remove-selected-product` có hiệu ứng hover đổi màu đỏ và phóng to.
+    4. **`wwwroot/js/the-kho-index.js`**:
+       - Khởi tạo Single-Select Chi nhánh kho bằng `KiotFilter.initSingleSelect('#boxKho', '#dropdownKho', callback)`, tự động cập nhật `#selectKhoLuuTru`, kích hoạt/tắt `#dotKho`, và nạp lại bảng Thẻ kho.
+       - Cập nhật hàm `applySelectedProduct` tự động đóng dropdown, xóa từ khóa input, hiển thị đầy đủ thông tin mặt hàng, gỡ bỏ `d-none` trên `#tkSelectedProductCard`, ẩn `#tkNoProductHint`, kích hoạt `#dotMatHang`.
+       - Đảm bảo dropdown luôn reset cuộn `scrollTop = 0` qua `MutationObserver` khi có danh sách mới, không bị lệch hoặc mất dòng đầu.
+       - Đóng dropdown tìm kiếm khi click ra ngoài hoặc nhấn phím `Escape`.
+       - Bắt sự kiện `#btnRemoveSelectedProduct` xóa sạch lựa chọn, ẩn card, hiện lại gợi ý, bỏ chấm `#dotMatHang`, focus lại ô F3 và nạp lại bảng hiển thị hướng dẫn chọn hàng.
+  - **Kiểm tra**:
+    - `node -c wwwroot/js/the-kho-index.js`: Cú pháp JavaScript hợp lệ 100%.
+    - `dotnet build -t:Compile`: Biên dịch hoàn tất với **0 Errors**.
+
+- **Đồng Bộ Toàn Diện Leftmenu Báo Cáo Tồn Kho Theo Khối Lego Đã Đóng Gói (Phiên 158)**:
+  - **Nhu cầu**: Người dùng gửi ảnh chụp màn hình sidebar (`media_1792368273326_83be8e70.png`) và yêu cầu: "sửa lại dropdown và checkbox ở leftmenu dựa theo các phần đã đóng gói để đồng bộ giao diẹn".
+  - **Nguyên nhân cốt lõi**:
+    + Ô chọn "Nhóm hàng" trước đó dùng thẻ `<select class="form-select">` mặc định của HTML/Bootstrap thô kệch, không có tìm kiếm con, không có chip tag pills như Danh sách Hàng hóa.
+    + Các mục "Tình trạng tồn" và "Hàng hóa" dùng các nút radio tròn đơn độc, không đồng bộ với khối Single-Select Dropdown `.kiot-single-select-box` (tiêu chí tồn của Hàng hóa) và khối Checkbox Filter `_KiotStatusFilter.cshtml` (trạng thái kinh doanh) đã đóng gói.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`Views/BaoCao/_TonKhoFilterSidebar.cshtml`**:
+       - Khối 1 (Chi nhánh kho): Tái sử dụng Lego `_KiotMultiSelectFilter.cshtml` kèm nút `btnToggleAllKho`.
+       - Khối 2 (Nhóm hàng): Tái sử dụng Lego `_KiotMultiSelectFilter.cshtml` (`#boxNhomHang`, `#dropdownNhomHang`), hỗ trợ tìm kiếm con tức thời và chip tag pills.
+       - Khối 3 (Tình trạng tồn): Dựng chuẩn Lego Single-Select Dropdown `.kiot-single-select-box`, `#boxTinhTrangTon`, `#dropdownTinhTrangTon` với 6 tiêu chí (Tất cả, Còn tồn >0, Hết hàng, Tồn âm, Dưới định mức, Vượt định mức) kèm icon checkmark `bi-check2`.
+       - Khối 4 (Hàng hóa): Tái sử dụng Lego Checkbox Filter `_KiotStatusFilter.cshtml` với 2 tùy chọn "Đang kinh doanh", "Ngừng kinh doanh".
+    2. **`ViewModels/BaoCao/BaoCaoTonKhoFilterParams.cs`**:
+       - Bổ sung `SelectedNhomIds` (`List<int>`) và `SelectedTrangThais` (`List<string>`).
+    3. **`Controllers/BaoCaoController.cs`**:
+       - Cập nhật logic lọc hỗ trợ cả mảng nhóm hàng `SelectedNhomIds` và mảng trạng thái `SelectedTrangThais`.
+    4. **`wwwroot/js/bao-cao-ton-kho.js`**:
+       - Hàm khởi tạo multi-select `setupMultiSelect` dùng chung cho cả Kho và Nhóm hàng.
+       - Hàm `setupSingleSelectTon` xử lý đóng mở mượt mà, lật hướng chống tràn và cập nhật text tiêu chí tồn.
+       - Bắt sự kiện checkbox `input[data-s]` cập nhật bảng AJAX và bật/tắt dot trạng thái.
+       - Bắt sự kiện click ra ngoài document đóng đồng thời tất cả dropdown.
+  - **Kiểm tra**:
+    - `node -c wwwroot/js/bao-cao-ton-kho.js`: Cú pháp JavaScript hợp lệ 100%.
+    - `dotnet build -t:Compile`: Biên dịch hoàn tất với **0 Errors**.
+
+---
+
+- **Đồng Bộ Hiển Thị & Click Sắp Xếp Trên Header Bảng Báo Cáo Tồn Kho Theo Chuẩn Danh Sách Hàng Hóa (Phiên 157)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "sửa lại phần click trên header, giống phần danh sách hàng hóa".
+  - **Nguyên nhân cốt lõi**:
+    + Header bảng Báo cáo tồn kho trước đó sử dụng cấu trúc tự do với icon mờ `bi-arrow-down-up opacity-25`, không có class `.th-content`, `.th-title-wrap`, `.sort-icon` và class `.num` cho các cột số, dẫn đến mũi tên không định vị chuẩn, hover không ăn theo bộ style `.sortable-th` trong `site.css` như Danh sách Hàng hóa.
+    + Logic JavaScript click sắp xếp chưa đồng bộ triệt để chu kỳ 3 trạng thái (Không sort ➜ Tăng dần ➜ Giảm dần ➜ Bỏ sort về mặc định) như `hang-hoa-index.js`.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`Views/BaoCao/_TonKhoTable.cshtml`**:
+       - Đồng bộ 100% cấu trúc thẻ `<th>` theo chuẩn Danh sách hàng hóa: `th.sortable-th`, `data-col`, class `.is-sorted`, `.sorted-asc`, `.sorted-desc`.
+       - Khối con chuẩn: `<div class="th-content"><span class="th-title-wrap"><span class="th-text">...</span><span class="sort-icon"><i class="bi bi-arrow-up/down"></i></span></span></div>`.
+       - Gắn class `.num` cho tất cả các cột số (Giá vốn, Giá trị tồn, các cột Tồn kho từng chi nhánh, Tổng tồn) để mũi tên được định vị tuyệt đối `right: 100%` mượt mà, căn lề phải thẳng hàng dữ liệu.
+       - Loại bỏ hoàn toàn các icon xám mờ rác `bi-arrow-down-up`.
+    2. **`wwwroot/js/bao-cao-ton-kho.js`**:
+       - Đọc `data-col` trên thẻ `<th>`.
+       - Chuẩn hóa chu kỳ sắp xếp 3 trạng thái: Click lần 1 (ASC) ➜ Click lần 2 (DESC) ➜ Click lần 3 (Bỏ sort `currentSortBy = ''; currentSortDir = '';`), tự động đưa về trang 1 và tải lại bảng AJAX.
+  - **Kiểm tra**:
+    - `node -c wwwroot/js/bao-cao-ton-kho.js`: Cú pháp JavaScript hợp lệ 100%.
+    - `dotnet build -t:Compile`: Biên dịch hoàn tất với **0 Errors**.
+
+---
+
+- **Sửa Lỗi Tương Tác Dropdown & Đóng Mở Chi Nhánh Kho Trên Sidebar Báo Cáo Tồn Kho (Phiên 156)**:
+  - **Nhu cầu**: Người dùng gửi ảnh chụp màn hình sidebar (`media_1792367981322_e05b0853.png`) và phản ánh: "leftmenu lỗi hiển thị, ko click tắt dropdown được".
+  - **Nguyên nhân cốt lõi**:
+    1. Trong `wwwroot/js/bao-cao-ton-kho.js`, sự kiện click ra ngoài document dùng sai class selector `$('.kiot-multiselect-dropdown')` thay vì class thực tế trong Lego template `_KiotMultiSelectFilter.cshtml` là `.kiot-ms-dropdown`, dẫn đến click ra ngoài document hoàn toàn không đóng được dropdown.
+    2. Đọc sai data attribute của các mục kho: dùng `data('id')` thay vì `data('val')` và `data('name')`, khiến từ điển `khoNames` bị rỗng và tag hiển thị fallback thành `Kho #1`, `Kho #2`, `+5` thay vì tên chi nhánh thật.
+    3. Dropdown bị mở đè lên các bộ lọc phía dưới do thiếu cơ chế lật hướng `drop-up` và đóng tự động khi click ra ngoài.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`wwwroot/js/bao-cao-ton-kho.js`**:
+       - Chuẩn hóa toàn bộ selector sang `.kiot-ms-dropdown` và `.kiot-multiselect-box`.
+       - Nạp chính xác `data-val` và `data-name` từ các item con vào `khoNames`.
+       - Tích hợp hàm Lego `window.KiotFilter.renderTagPills` (hoặc fallback `.kiot-pill-tag`) hiển thị chip tên kho có nút `&times;` xóa tag nhanh và pill `+N`.
+       - Xử lý click ra ngoài document `if (!$(e.target).closest('.kiot-multiselect-box, .kiot-ms-dropdown').length)` đóng ngay dropdown.
+       - Hỗ trợ phím `Escape` đóng tức thời cả Dropdown lẫn Drawer.
+       - Tích hợp nút Header Action `#btnToggleAllKho` cho phép "Chọn tất cả" / "Bỏ chọn" nhanh chóng.
+    2. **`Views/BaoCao/_TonKhoFilterSidebar.cshtml`**:
+       - Bổ sung `HeaderActionText = "Tất cả"` và `HeaderActionId = "btnToggleAllKho"` cho Lego `_KiotMultiSelectFilter`.
+       - Chuẩn hóa class wrapper `.f-block` đồng bộ với giao diện sidebar hệ thống.
+  - **Kiểm tra**:
+    - `node -c wwwroot/js/bao-cao-ton-kho.js`: Cú pháp JavaScript hợp lệ 100%.
+    - `dotnet build -t:Compile`: Biên dịch dự án hoàn tất với **0 Errors**.
+
+---
+
+- **Xây Dựng Hoàn Chỉnh Phân Hệ Báo Cáo Thẻ Kho Chuẩn KiotViet (Phiên 155)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "lên kê hoạch cho chức thẻ kho trong phần báo cáo" ➜ lần lượt phê duyệt và triển khai từ Giai đoạn 1 đến Giai đoạn 6.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Tài liệu Đặc tả**: Tạo đặc tả chức năng `docs/specs/the-kho.md` (7.638 bytes < 8.000 bytes, tuân thủ Luật 12 AGENTS.md).
+    2. **ViewModels (`ViewModels/BaoCao/`)**:
+       - `TheKhoFilterParams.cs`: Kế thừa `BaseFilterParams`, hỗ trợ `MaHang`, `MaKho`, `DateRange`, `TuNgay`, `DenNgay`, `LoaiChungTu`, `TuKhoa`.
+       - `TheKhoDongVM.cs`: Lưu chi tiết từng dòng biến động (Thời gian, Mã chứng từ linkable, Badge loại giao dịch, Đối tác, Đơn giá, Nhập, Xuất, Tồn lũy kế, Ghi chú).
+       - `TheKhoTongHopVM.cs`: Chứa thông tin hàng hóa, kho, dải ngày và các KPI tổng hợp (Tồn đầu kỳ, Tổng nhập, Tổng xuất, Tồn cuối kỳ, Tổng số giao dịch).
+       - `TheKhoIndexVM.cs`: ViewModel chính đóng gói dữ liệu màn hình Thẻ kho.
+    3. **Dịch vụ Nghiệp vụ (`Services/`)**:
+       - `ITheKhoService.cs` & `TheKhoService.cs`:
+         * Tính toán Tồn đầu kỳ từ `vw_BienDongKho` trước mốc `TuNgay`.
+         * Nạp các dòng giao dịch trong kỳ, bổ sung thông tin từ các bảng chứng từ (`PhieuNhap`, `PhieuXuat`, `PhieuChuyenKho`, `PhieuKiemKe`, `PhieuTraHangNhap`).
+         * Chạy thuật toán tính tồn lũy kế tịnh tiến từng dòng chính xác 100%.
+         * Xuất file Excel ClosedXML qua Lego `ExcelHelper.Export`.
+         * Cung cấp `LayLichSuTheKhoNhanhAsync` nạp 10 giao dịch gần nhất cho Drawer Hàng hóa.
+       - Đăng ký DI trong `Program.cs`.
+    4. **Controller (`BaoCaoController.cs`)**:
+       - Cung cấp các Action: `TheKho` (View chính), `FilterTheKho` (AJAX nạp đồng bộ `_TheKhoContent`), `ExportTheKho` (Excel), `GetTheKhoQuick` (JSON nạp Drawer), `SearchHangHoa` (Autocomplete F3).
+    5. **Views & CSS (`Views/BaoCao/`, `wwwroot/css/the-kho.css`)**:
+       - `Views/BaoCao/TheKho.cshtml`: Màn hình 2 cột chuẩn KiotViet kèm Toolbar (F3 search, Xuất file, In, Tải lại) và F4 thu gọn bộ lọc.
+       - `_TheKhoFilterSidebar.cshtml`: Khối chọn hàng F3, chọn kho, Lego `_KiotDateFilter` và `_KiotStatusFilter`.
+       - `_TheKhoSummary.cshtml`: Banner thông tin hàng hóa và 4 thẻ KPI tổng hợp.
+       - `_TheKhoTable.cshtml`: Bảng dòng biến động kèm dòng cố định Tồn đầu kỳ và Tồn cuối kỳ, phân trang `_Pagination`.
+       - `_TheKhoContent.cshtml`: Wrapper nạp đồng bộ Summary KPI và Bảng dòng qua 1 lượt AJAX.
+    6. **JavaScript (`wwwroot/js/the-kho-index.js`)**:
+       - Tích hợp Lego block `KiotFilter.initProductSearch` (F3 autocomplete chọn hàng).
+       - Tích hợp Lego block `KiotFilter.initDateFilter` và `KiotFilter.initSidebar`.
+       - Tự động tải lại bảng AJAX đồng bộ khi đổi bộ lọc hoặc click phân trang.
+    7. **Tích hợp Liên kết 2 chiều & Menu**:
+       - Kích hoạt menu `Báo cáo ➜ Kho ➜ Thẻ kho` trong `_MainMenu.cshtml` và `_Header.cshtml`.
+       - Thay thế mock data Tab 3 Thẻ kho trong `_HangHoaTable.cshtml` bằng dynamic container kèm link "Xem thẻ kho chi tiết".
+       - Cập nhật `hang-hoa-index.js` gọi AJAX nạp dữ liệu thật khi mở Tab Thẻ kho.
+  - **Kiểm tra**:
+    + `node -c`: Cú pháp JavaScript hợp lệ 100% trên cả `the-kho-index.js` và `hang-hoa-index.js`.
+    + `dotnet build -t:Compile`: Hoàn tất với **0 Errors**.
+
+---
+
+- **Xây Dựng Hoàn Chỉnh Phân Hệ Báo Cáo Tồn Kho Theo Kho Chuẩn Pivot KiotViet (Phiên 154)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "lên kê hoạch cho chức năng tồn kho theo khô trong phần báo cáo" ➜ xác nhận đồng ý hiển thị Giá vốn cho tất cả vai trò và chuẩn hóa dạng Pivot kho (dạng phổ biến nhất của KiotViet).
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Tài liệu Đặc tả & Quyết định**: Tạo đặc tả chức năng `docs/specs/bao-cao-ton-kho.md` (6.257 bytes < 8.000 bytes, tuân thủ Luật 12 AGENTS.md); cập nhật sổ quyết định `docs/quyet-dinh.md` (6.649 bytes < 8.000 bytes).
+    2. **ViewModels (`ViewModels/BaoCao/`)**:
+       - `BaoCaoTonKhoFilterParams.cs`: Kế thừa `BaseFilterParams`, hỗ trợ `SelectedKhoIds`, `MaNhom`, `TinhTrangTon` (`ALL`, `CON_TON`, `HET_HANG`, `TON_AM`, `DUOI_DINH_MUC`, `VUOT_DINH_MUC`), `TrangThaiHang`.
+       - `BaoCaoTonKhoItemVM.cs`: Lưu thông tin hàng hóa, `TonTheoKho` (Dictionary theo `MaKho`), `TongTon`, `GiaTriTon`, `CoDuoiDinhMuc`, `CoVuotDinhMuc`, `DinhMucTheoKho`.
+       - `BaoCaoTonKhoSummaryVM.cs`: 4 chỉ số KPI tổng hợp (`TongSoMatHang`, `TongSoLuongTon`, `TongGiaTriTon`, `SoMatHangCanLuuY`).
+       - `BaoCaoTonKhoIndexVM.cs`: Chứa dữ liệu phân trang, summary, danh sách kho được phép xem, nhóm hàng và bộ lọc.
+    3. **Controller (`Controllers/BaoCaoController.cs`)**:
+       - Kế thừa `BaseKhoController`, bảo vệ `[Authorize]`.
+       - `TonKho`: Action chính trả về view kèm dữ liệu phân trang và thống kê.
+       - `Filter`: AJAX partial view `_TonKhoTable.cshtml` kèm header `X-Summary-Json` cập nhật các thẻ KPI tức thời.
+       - `ExportExcel`: Xuất báo cáo đa chiều chuẩn ClosedXML (header xanh KiotViet, căn lề, format số lượng/tiền tệ, dòng tổng cộng với công thức SUM).
+       - `GetChiTietDinhMuc`: JSON trả về chi tiết tồn và định mức từng kho phục vụ Drawer.
+    4. **Views (`Views/BaoCao/`)**:
+       - `Views/BaoCao/TonKho.cshtml`: Layout KiotViet chuẩn với toolbar F3, nút Xuất Excel, nút In, 4 Thẻ Summary KPI, container bảng và Drawer.
+       - `Views/BaoCao/_TonKhoFilterSidebar.cshtml`: Tái sử dụng Lego `_KiotMultiSelectFilter`, combobox nhóm hàng, radio tình trạng tồn và trạng thái kinh doanh.
+       - `Views/BaoCao/_TonKhoTable.cshtml`: Bảng Pivot đa chiều sinh động các cột kho theo chi nhánh được chọn, bôi đỏ tồn âm, badge cảnh báo dưới định mức, phân trang `_Pagination`.
+       - `Views/BaoCao/_TonKhoDetailDrawer.cshtml`: Drawer trượt từ phải sang xem thẻ hàng hóa và phân bổ tồn chi tiết từng kho.
+    5. **JavaScript (`wwwroot/js/bao-cao-ton-kho.js`)**:
+       - Tích hợp `KiotFilter.initSidebar` (F4 thu gọn), hotkey F3 tìm kiếm debounce 350ms.
+       - Multi-select chi nhánh kho với tag pills, chọn tất cả/bỏ chọn, tìm kiếm kho nội bộ.
+       - Sắp xếp cột 3 trạng thái `sortable-th` (hỗ trợ sort theo cả các cột kho động `kho_{maKho}`).
+       - Cập nhật tự động 4 thẻ Summary KPI qua Response Header sau mỗi lần lọc AJAX.
+       - Drawer tương tác mượt mà, hỗ trợ đóng qua overlay, nút đóng và phím Escape.
+    6. **Kích hoạt Menu Topbar & Mobile Header**:
+       - `Views/Shared/_MainMenu.cshtml`: Kích hoạt menu `Báo cáo ➜ Kho ➜ Tồn kho theo kho` trỏ tới `/BaoCao/TonKho`.
+       - `Views/Shared/_Header.cshtml`: Kích hoạt mobile menu `Báo cáo tồn kho` trỏ tới `/BaoCao/TonKho`.
+  - **Kiểm tra**:
+    - `node -c wwwroot/js/bao-cao-ton-kho.js`: Cú pháp JavaScript hợp lệ 100%.
+    - `dotnet build -t:Compile`: Biên dịch dự án hoàn tất thành công với **0 Errors**.
+
+---
+
+- **Bỏ Hiển Thị Ghi Chú Dưới Tên Nhân Viên Trên Bảng Người Dùng (Phiên 153)**:
+  - **Nhu cầu**: Người dùng gửi ảnh chụp màn hình bảng Người dùng (`media_1792366959586_e46c41aa.png`) và yêu cầu: "bỏ phần hiển thị ghi chú dưới tên nhân viên di".
+  - **Nguyên nhân cốt lõi**:
+    + Trên bảng danh sách người dùng, dòng tài khoản Quản lý hiển thị dòng ghi chú dài bên dưới tên nhân viên làm chiều cao dòng bị dãn to hơn các dòng khác, gây mất cân đối giao diện.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`Views/NguoiDung/_NguoiDungTable.cshtml`**: Loại bỏ khối `<div class="text-muted small text-truncate">` hiển thị `u.GhiChu` dưới tên nhân viên. Cột Tên nhân viên chỉ hiển thị họ tên ngắn gọn, có tooltip `title="@u.HoTen"` và `text-truncate` bảo đảm chiều cao các dòng đồng đều nhau.
+    2. Ghi chú vẫn được bảo toàn nguyên vẹn trong CSDL và modal Thêm/Sửa người dùng.
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
+
+---
+
+- **Xây Dựng Hoàn Chỉnh Phân Hệ Quản Lý Chi Nhánh Kho & Thêm Mới Kho (Phiên 152)**:
+  - **Nhu cầu**: Người dùng hỏi: "trong dự án hiện tại muốn thêm kho thì hỗ trợ chưa" ➜ "lên kế hoạch cho thêm kho" ➜ "triển khai bước 1,2" ➜ "triển khai bước 3,4" ➜ "triển khai bước 5,6".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Bước 1 (ViewModels)**: Tạo `KhoFilterParams.cs`, `KhoListItemVM.cs`, `KhoIndexVM.cs`, `KhoFormVM.cs` trong `ViewModels/QuanLyKho/`.
+    2. **Bước 2 (Controller)**: `Controllers/KhoController.cs` kế thừa `BaseKhoController`, bảo vệ `[Authorize(Roles = "Quản lý")]`. Hỗ trợ các action: `Index`, `Filter` (AJAX table), `GetItem` (JSON cho modal edit), `Create` (Transaction EF: kiểm tra chống trùng tên, tạo kho, gán `TaiKhoanKho`, ghi log), `Edit` (Transaction đồng bộ phân quyền), `ToggleStatus` (Kích hoạt / Ngừng hoạt động, chặn khóa kho hoạt động duy nhất).
+    3. **Bước 3 (Views & AJAX Table)**: `Views/Kho/Index.cshtml`, `_KhoFilterSidebar.cshtml` (tái sử dụng `_KiotStatusFilter`), `_KhoTable.cshtml` (sắp xếp cột 3 trạng thái `sortable-th`, hiển thị badge kho đang làm việc, số nhân sự, số chứng từ, phân trang `_Pagination`).
+    4. **Bước 4 (Modal & JS AJAX)**: `Views/Kho/_KhoModal.cshtml` (Modal overlay KiotViet thêm/sửa kho, phân quyền nhân sự dạng lưới card, checkbox trạng thái hoạt động), `wwwroot/js/kho-index.js` (debounce F3, validation client-side, submit JSON, tích hợp `window.KiotConfirm.show(...)` khi đổi trạng thái kho, `KiotToast`).
+    5. **Bước 5 (Kích hoạt Menu)**: Cập nhật `_MainMenu.cshtml` và `_Header.cshtml` trỏ mục `Thiết lập ➜ Kho` đến `/Kho` cho vai trò Quản lý.
+    6. **Bước 6 (Tài liệu & Kiểm tra)**: Tạo đặc tả `docs/specs/quan-ly-kho.md` (7.630 bytes < 8.000 bytes, tuân thủ Luật 12), cập nhật `docs/quyet-dinh.md` (7.821 bytes < 8.000 bytes).
+  - **Kiểm tra**:
+    + `node -c wwwroot/js/kho-index.js`: Cú pháp JavaScript hợp lệ 100%.
+    + `dotnet build -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
+
+
+- **Khớp Chiều Ngang 100% Bảng Người Dùng & Bỏ Thanh Cuộn Ngang (Phiên 151)**:
+  - **Nhu cầu**: Người dùng gửi ảnh chụp màn hình bảng Quản lý người dùng (`media_1792366429229_3ee565b8.png`) và yêu cầu: "trong phần người dùng vì các cột là cố định lên bạn hãy sửa lại cho nó khớp chiểu ngang để ko còn thanh scroll ngang nữa".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `Views/NguoiDung/_NguoiDungTable.cshtml`, thẻ `table#userTable` đang đặt inline `min-width: 960px;` kết hợp với CSS chung `.tbl { min-width: 1100px; }`.
+    + Tổng bề rộng của 10 cột `<th>` trước đây cộng dồn lên đến 1.415px (45 + 140 + 180 + 120 + 180 + 150 + 220 + 140 + 130 + 110), vượt quá bề ngang hiển thị chuẩn trên màn hình máy tính khiến cột "Thao tác" bị tràn và xuất hiện thanh scroll ngang.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`wwwroot/css/site.css`**:
+       - Cấu hình chuyên biệt cho `#userTable`: `width: 100% !important; min-width: 0 !important; table-layout: fixed !important;`.
+       - Cấu hình `#userTableContainer .kiot-table-scroll-body { overflow-x: hidden !important; }`.
+       - Tinh chỉnh padding gọn gàng: `padding-left: 8px !important; padding-right: 8px !important;` (cột `#` và Thao tác: 2px).
+    2. **`Views/NguoiDung/_NguoiDungTable.cshtml`**:
+       - Bỏ hoàn toàn `min-width: 960px;`, đặt `table-layout: fixed !important; width: 100% !important;`.
+       - Tái phân bổ lại độ rộng cột cố định: `#` (40px), Tên đăng nhập (125px), Tên nhân viên (150px), Điện thoại (100px), Email (150px), Vai trò (125px), Đăng nhập cuối (125px), Trạng thái (115px), Thao tác (95px). Tổng 9 cột cố định = 925px.
+       - Cột "Kho làm việc": **không gán width cố định**, trở thành cột co giãn linh hoạt (flexible) tự động dãn chiếm toàn bộ không gian còn lại của 100% bảng.
+       - Bổ sung `text-truncate` và thuộc tính `title="..."` cho các ô dữ liệu (Tên đăng nhập, Tên nhân viên, Ghi chú, Điện thoại, Email, Đăng nhập cuối, Badge vai trò) để chống vỡ dòng hoặc đẩy tràn layout.
+    3. **Đồng bộ tài liệu**: Cập nhật `docs/specs/nguoi-dung.md` (7.798 bytes, tuân thủ Luật 12 < 8.000 ký tự).
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
 
 ---
 

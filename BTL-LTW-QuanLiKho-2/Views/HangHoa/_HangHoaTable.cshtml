@@ -370,7 +370,7 @@
                                     </div>
 
                                     <!-- ================= TAB 3: THẺ KHO ================= -->
-                                    <div class="tab-pane-content tab-thekho" style="display: none;">
+                                    <div class="tab-pane-content tab-thekho thekho-quick-box" data-ma-hang="@item.MaHang" data-loaded="false" style="display: none;">
                                         <div class="table-responsive mb-3 border rounded-2">
                                             <table class="thekho-table table table-sm mb-0">
                                                 <thead>
@@ -385,38 +385,23 @@
                                                         <th>Đối tác</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody>
+                                                <tbody class="thekho-quick-tbody">
                                                     <tr>
-                                                        <td><a href="javascript:void(0)" class="text-primary text-decoration-none fw-semibold">HD000046</a></td>
-                                                        <td class="text-muted small">@(item.NgayTao?.ToString("dd/MM/yyyy HH:mm") ?? DateTime.Now.ToString("dd/MM/yyyy HH:mm"))</td>
-                                                        <td>Bán hàng</td>
-                                                        <td class="text-end">@item.GiaBan.ToString("N0", viCulture)</td>
-                                                        <td class="text-end text-muted">@item.GiaVon.ToString("N0", viCulture)</td>
-                                                        <td class="text-end text-danger fw-semibold">-5</td>
-                                                        <td class="text-end fw-bold">@item.TonKho.ToString("N0", viCulture)</td>
-                                                        <td class="small">Tuấn - Hà Nội</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><a href="javascript:void(0)" class="text-primary text-decoration-none fw-semibold">PN000046</a></td>
-                                                        <td class="text-muted small">@(item.NgayTao?.AddMinutes(-30).ToString("dd/MM/yyyy HH:mm") ?? DateTime.Now.AddMinutes(-30).ToString("dd/MM/yyyy HH:mm"))</td>
-                                                        <td>Nhập hàng</td>
-                                                        <td class="text-end">@item.GiaVon.ToString("N0", viCulture)</td>
-                                                        <td class="text-end text-muted">@item.GiaVon.ToString("N0", viCulture)</td>
-                                                        <td class="text-end text-success fw-semibold">+@(item.TonKho + 5)</td>
-                                                        <td class="text-end fw-bold">@((item.TonKho + 5).ToString("N0", viCulture))</td>
-                                                        <td class="small">Công ty TNHH Citigo</td>
+                                                        <td colspan="8" class="text-center py-3 text-muted">
+                                                            <span class="spinner-border spinner-border-sm me-2"></span>Đang nạp dữ liệu thẻ kho...
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center pt-2 border-top product-detail-footer">
-                                            <div class="product-detail-footer-left">
-                                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                                    <i class="bi bi-file-earmark-arrow-up me-1"></i> Xuất file
-                                                </button>
+                                            <div class="product-detail-footer-left d-flex align-items-center gap-2">
+                                                <a href="@Url.Action("TheKho", "BaoCao", new { maHang = item.MaHang })" class="btn btn-outline-primary btn-sm" title="Mở trang Báo cáo Thẻ kho chi tiết">
+                                                    <i class="bi bi-box-arrow-up-right me-1"></i> Xem thẻ kho chi tiết
+                                                </a>
                                             </div>
-                                            <div class="text-muted small product-detail-footer-right">
-                                                1 - 2 trong 2 dòng
+                                            <div class="text-muted small product-detail-footer-right thekho-count-text">
+                                                Chờ nạp dữ liệu...
                                             </div>
                                         </div>
                                     </div>

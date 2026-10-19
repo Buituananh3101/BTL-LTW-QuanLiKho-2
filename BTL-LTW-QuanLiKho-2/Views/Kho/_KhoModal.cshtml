@@ -1,0 +1,166 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.QuanLyKho.KhoIndexVM
+
+<!-- ========================================================================
+     MODAL CHÍNH: TẠO & CẬP NHẬT CHI NHÁNH KHO CHUẨN KIOTVIET
+     Kế thừa 100% kiến trúc từ Form Thêm Hàng Hóa (_HangHoaModal.cshtml):
+     - Tabs Thông tin & Mô tả (.hh-tabs, .hh-tab, .hh-pane)
+     - Khối trường cơ bản Grid 2 cột (.hh-fields, .hh-f, .hh-span2)
+     - Khối gập mở Accordion (.hh-sec, .hh-sec-h, .hh-sec-b, .hh-chev)
+     - Soạn thảo mô tả giàu (.hh-rte-bar, .hh-rte)
+     - Chân modal Split Button (.hh-split, .hh-btn, .hh-chk)
+     ======================================================================== -->
+
+<!-- Sprite icon SVG dùng cho modal -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></symbol>
+</svg>
+
+<div class="hh-ov" id="khoModalOv">
+  <div class="hh-modal main" role="dialog" aria-modal="true" aria-labelledby="khoModalTitle" style="max-width: 860px;">
+    <!-- Header Modal có Tabs chuyển đổi chuẩn Hàng Hóa -->
+    <div class="hh-m-head">
+      <h2 id="khoModalTitle">Thêm mới chi nhánh kho</h2>
+      <button type="button" class="hh-x" data-close="khoModalOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+      <div class="hh-tabs">
+        <button type="button" class="hh-tab on" data-tab="info">Thông tin</button>
+        <button type="button" class="hh-tab" data-tab="desc">Mô tả</button>
+      </div>
+    </div>
+
+    <!-- Body Modal -->
+    <div class="hh-m-body" id="khoModalBody">
+      <form id="khoForm" onsubmit="return false;" autocomplete="off">
+        <input type="hidden" id="khoMaKho" value="0" />
+
+        <!-- Alert báo lỗi form -->
+        <div class="alert alert-danger py-2 px-3 small d-none mb-3" id="khoFormAlert"></div>
+
+        <!-- ==================== TAB 1: THÔNG TIN ==================== -->
+        <div class="hh-pane on" id="kho-pane-info">
+          <!-- KHỐI 1: CÁC TRƯỜNG THÔNG TIN CƠ BẢN (GRID 2 CỘT) -->
+          <div class="hh-fields" style="margin-bottom: 20px;">
+            <!-- Mã kho -->
+            <div class="hh-f" id="fldMaKho">
+              <label for="khoMaKhoDisplay">
+                <span>Mã kho</span>
+                <span class="badge bg-secondary-subtle text-secondary" id="badgeAutoCode" style="font-size: 10px;">Tự động</span>
+              </label>
+              <input type="text" id="khoMaKhoDisplay" placeholder="Mã tự động sinh (VD: KHO-04)" readonly style="background: var(--hh-bg, #f3f4f6); cursor: not-allowed;" />
+            </div>
+
+            <!-- Tên chi nhánh kho -->
+            <div class="hh-f" id="fldTenKho">
+              <label for="khoTenKho">
+                <span>Tên chi nhánh kho <span style="color:var(--hh-danger)">*</span></span>
+              </label>
+              <input type="text" id="khoTenKho" placeholder="Bắt buộc (VD: Kho trung tâm, Kho An Thới...)" autocomplete="off" />
+              <span class="hh-err" id="errTenKho">Vui lòng nhập tên chi nhánh kho (tối đa 100 ký tự).</span>
+            </div>
+
+            <!-- Địa chỉ kho (Chiếm trọn 2 cột) -->
+            <div class="hh-f hh-span2" id="fldDiaChi">
+              <label for="khoDiaChi">Địa chỉ kho</label>
+              <input type="text" id="khoDiaChi" placeholder="Số nhà, đường phố, phường/xã, thành phố / huyện..." autocomplete="off" />
+            </div>
+          </div>
+
+          <!-- KHỐI 2: ACCORDION PHÂN QUYỀN NHÂN SỰ PHỤ TRÁCH KHO -->
+          <section class="hh-sec open">
+            <div class="hh-sec-h">
+              <div>
+                <h3>Phân quyền nhân sự phụ trách kho</h3>
+                <p>Chỉ định các nhân viên có quyền truy cập, chuyển kho và kiểm kê tại chi nhánh này</p>
+              </div>
+              <svg class="hh-chev"><use href="#i-chev"/></svg>
+            </div>
+            <div class="hh-sec-b">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="small fw-semibold text-dark">
+                  Nhân sự được phân công: <span class="badge bg-primary-subtle text-primary border ms-1" id="selectedUserCount">0 nhân sự</span>
+                </span>
+                <div class="d-flex align-items-center gap-2">
+                  <button type="button" class="hh-link" id="btnSelectAllUsers" style="font-weight: 600;">Chọn tất cả</button>
+                  <span class="text-muted">|</span>
+                  <button type="button" class="hh-link text-muted" id="btnDeselectAllUsers">Bỏ chọn</button>
+                </div>
+              </div>
+
+              <!-- Lưới thẻ nhân sự trực quan chuẩn KiotViet -->
+              <div class="kho-user-card-grid" id="listUserCheckboxes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin-top: 6px;">
+                @foreach (var u in Model.DanhSachTaiKhoan)
+                {
+                  <div class="kho-user-card-item @(u.TenVaiTro == "Quản lý" ? "selected" : "")" data-id="@u.MaTaiKhoan" style="border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; background: #fff; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: flex-start; gap: 10px; user-select: none;">
+                    <input class="form-check-input kho-user-chk" type="checkbox" value="@u.MaTaiKhoan" id="chkUser_@u.MaTaiKhoan" @(u.TenVaiTro == "Quản lý" ? "checked disabled" : "") style="width: 17px; height: 17px; margin-top: 2px; cursor: pointer;" />
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-size: 13.5px; font-weight: 600; color: #1e293b; display: flex; justify-content: space-between; align-items: center;">
+                        <label for="chkUser_@u.MaTaiKhoan" style="cursor: pointer; margin: 0;" class="text-truncate" title="@u.HoTen">@u.HoTen</label>
+                        @if (u.TenVaiTro == "Quản lý")
+                        {
+                          <span class="badge bg-primary text-white" style="font-size: 10px;">Quản lý</span>
+                        }
+                        else if (u.TenVaiTro.Contains("kho", StringComparison.OrdinalIgnoreCase))
+                        {
+                          <span class="badge bg-warning text-dark" style="font-size: 10px;">@u.TenVaiTro</span>
+                        }
+                        else
+                        {
+                          <span class="badge bg-success text-white" style="font-size: 10px;">@u.TenVaiTro</span>
+                        }
+                      </div>
+                      <div style="font-size: 12px; color: #64748b; line-height: 1.35; margin-top: 2px;">
+                        <i class="bi bi-person me-1 text-muted"></i>@u.TenDangNhap
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- ==================== TAB 2: MÔ TẢ ==================== -->
+        <div class="hh-pane" id="kho-pane-desc">
+          <div class="hh-rte-bar">
+            <button type="button" data-cmd="bold" title="In đậm"><b>B</b></button>
+            <button type="button" data-cmd="italic" title="In nghiêng"><i>I</i></button>
+            <button type="button" data-cmd="underline" title="Gạch chân"><u>U</u></button>
+            <button type="button" data-cmd="insertUnorderedList" title="Danh sách dấu chấm">•</button>
+          </div>
+          <div class="hh-rte" id="khoMoTaRte" contenteditable="true" data-ph="Nhập mô tả chi tiết chi nhánh kho, đặc điểm hàng hóa chứa, hướng dẫn đường đi hoặc quy định giao nhận..."></div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Footer Modal chuẩn KiotViet Form Hàng Hóa -->
+    <div class="hh-m-foot">
+      <!-- Checkbox trạng thái kho bên trái chân modal -->
+      <label class="hh-chk" style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; font-size: 14px; font-weight: 500;">
+        <input type="checkbox" id="khoTrangThaiChk" checked style="width: 18px; height: 18px; accent-color: var(--hh-blue); cursor: pointer;" />
+        <span id="khoTrangThaiText">Đang hoạt động</span>
+      </label>
+
+      <span class="sp"></span>
+
+      <button type="button" class="hh-btn" data-close="khoModalOv">Bỏ qua</button>
+      
+      <!-- Split Button Lego KiotViet: Lưu & Thêm mới / Lưu & Sao chép -->
+      <div class="hh-split">
+        <button type="button" class="hh-btn" id="btnSaveKhoAndNew">Lưu &amp; Thêm mới</button>
+        <button type="button" class="hh-btn caret" id="btnKhoCaret" aria-label="Thêm tùy chọn">
+          <svg style="width:14px;height:14px;"><use href="#i-chev"/></svg>
+        </button>
+        <div class="hh-menu" id="khoSplitMenu">
+          <button type="button" id="btnSaveKhoCopy">Lưu &amp; Sao chép</button>
+        </div>
+      </div>
+
+      <button type="button" class="hh-btn primary" id="btnSaveKho">
+        <i class="bi bi-check-lg me-1"></i>Lưu chi nhánh kho
+      </button>
+    </div>
+  </div>
+</div>

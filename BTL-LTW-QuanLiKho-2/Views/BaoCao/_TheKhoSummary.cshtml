@@ -1,0 +1,87 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.TheKhoTongHopVM
+@{
+    var viCulture = new System.Globalization.CultureInfo("vi-VN");
+}
+
+@if (Model != null)
+{
+    <!-- BANNER THÔNG TIN HÀNG HÓA -->
+    <div class="thekho-product-banner">
+        <div class="info-main">
+            <div class="icon-box">
+                <i class="bi bi-box-seam"></i>
+            </div>
+            <div class="title-area">
+                <h2>@Model.TenHang</h2>
+                <div class="badge-list">
+                    <span class="meta-badge text-primary fw-bold">@Model.MaHangNoiBo</span>
+                    <span class="meta-badge">ĐVT: <strong>@Model.TenDvt</strong></span>
+                    @if (!string.IsNullOrEmpty(Model.TenNhomHang))
+                    {
+                        <span class="meta-badge">Nhóm: @Model.TenNhomHang</span>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.ViTri))
+                    {
+                        <span class="meta-badge">Vị trí: @Model.ViTri</span>
+                    }
+                    <span class="meta-badge text-muted">Giá vốn: @Model.GiaVon.ToString("N0", viCulture) ₫</span>
+                    <span class="meta-badge text-muted">Giá bán: @Model.GiaBan.ToString("N0", viCulture) ₫</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-end text-muted small d-none d-md-block">
+            <div><i class="bi bi-geo-alt me-1 text-primary"></i><strong>@Model.TenKho</strong></div>
+            <div class="mt-1" style="font-size: 11px;">
+                <i class="bi bi-calendar3 me-1"></i>@Model.TuNgay.ToString("dd/MM/yyyy") - @Model.DenNgay.ToString("dd/MM/yyyy")
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 THẺ CHỈ SỐ KPI TỔNG HỢP -->
+    <div class="thekho-kpi-grid">
+        <!-- 1. Tồn đầu kỳ -->
+        <div class="thekho-kpi-card ton-dau">
+            <div class="kpi-icon">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <div class="kpi-body">
+                <div class="kpi-val" id="kpiTonDauKy">@Model.TonDauKy.ToString("#,##0.##", viCulture)</div>
+                <div class="kpi-lbl">Tồn đầu kỳ</div>
+            </div>
+        </div>
+
+        <!-- 2. Tổng nhập trong kỳ -->
+        <div class="thekho-kpi-card nhap-ky">
+            <div class="kpi-icon">
+                <i class="bi bi-box-arrow-in-down"></i>
+            </div>
+            <div class="kpi-body">
+                <div class="kpi-val" id="kpiTongNhapKy">+@Model.TongNhapKy.ToString("#,##0.##", viCulture)</div>
+                <div class="kpi-lbl">Tổng nhập trong kỳ</div>
+            </div>
+        </div>
+
+        <!-- 3. Tổng xuất trong kỳ -->
+        <div class="thekho-kpi-card xuat-ky">
+            <div class="kpi-icon">
+                <i class="bi bi-box-arrow-up"></i>
+            </div>
+            <div class="kpi-body">
+                <div class="kpi-val" id="kpiTongXuatKy">-@Model.TongXuatKy.ToString("#,##0.##", viCulture)</div>
+                <div class="kpi-lbl">Tổng xuất trong kỳ</div>
+            </div>
+        </div>
+
+        <!-- 4. Tồn cuối kỳ -->
+        <div class="thekho-kpi-card ton-cuoi">
+            <div class="kpi-icon">
+                <i class="bi bi-archive-fill"></i>
+            </div>
+            <div class="kpi-body">
+                <div class="kpi-val" id="kpiTonCuoiKy">@Model.TonCuoiKy.ToString("#,##0.##", viCulture)</div>
+                <div class="kpi-lbl">Tồn cuối kỳ</div>
+            </div>
+        </div>
+    </div>
+}
