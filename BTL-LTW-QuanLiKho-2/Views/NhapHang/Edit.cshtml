@@ -1,0 +1,12 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.NhapHang.NhapHangFormVM
+@{
+    ViewData["Title"] = "Sửa phiếu nhập hàng " + Model.MaPhieuHienThi;
+}
+
+<partial name="_NhapHangForm" model="Model" />
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="~/js/components/f3-product-search.js" asp-append-version="true"></script>
+    <script src="~/js/nhap-hang-form.js" asp-append-version="true"></script>
+}

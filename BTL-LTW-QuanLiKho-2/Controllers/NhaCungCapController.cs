@@ -7,12 +7,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using BTL_LTW_QuanLiKho_2.Models;
 using BTL_LTW_QuanLiKho_2.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using BTL_LTW_QuanLiKho_2.ViewModels;
 using BTL_LTW_QuanLiKho_2.ViewModels.Common;
 using BTL_LTW_QuanLiKho_2.ViewModels.NhaCungCap;
 
 namespace BTL_LTW_QuanLiKho_2.Controllers;
 
+[Authorize]
 public class NhaCungCapController : BaseKhoController
 {
     private readonly ILogger<NhaCungCapController> _logger;
@@ -252,7 +254,20 @@ public class NhaCungCapController : BaseKhoController
             }
 
             await trans.CommitAsync();
-            return Json(new { success = true, id = ncc.MaDonViCapHang, message = $"Thêm nhà cung cấp \"{ncc.TenDonVi}\" thành công." });
+            return Json(new
+            {
+                success = true,
+                id = ncc.MaDonViCapHang,
+                supplier = new
+                {
+                    maDonViCapHang = ncc.MaDonViCapHang,
+                    maNcc = ncc.MaNcc,
+                    tenDonVi = ncc.TenDonVi,
+                    dienThoai = ncc.DienThoai ?? "",
+                    noCanTra = 0
+                },
+                message = $"Thêm nhà cung cấp \"{ncc.TenDonVi}\" thành công."
+            });
         }
         catch (Exception ex)
         {

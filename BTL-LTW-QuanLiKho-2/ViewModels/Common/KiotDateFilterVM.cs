@@ -18,4 +18,12 @@ public class KiotDateFilterVM
         Title = title;
         ShowFutureOptions = showFuture;
     }
+
+    public KiotDateFilterVM(string target, string title, bool showFuture, string defaultText)
+    {
+        Target = target;
+        Title = title;
+        ShowFutureOptions = showFuture;
+        DefaultText = string.Equals(defaultText, "thangnay", StringComparison.OrdinalIgnoreCase) ? "Tháng này" : defaultText;
+    }
 }

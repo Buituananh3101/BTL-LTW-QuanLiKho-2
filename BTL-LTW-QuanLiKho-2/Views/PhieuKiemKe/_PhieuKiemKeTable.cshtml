@@ -5,7 +5,7 @@
 }
 
 <div class="kiot-table-scroll-body">
-    <table class="tbl" id="stockTakeTable" style="min-width: 1450px;">
+    <table class="tbl" id="stockTakeTable" style="width: max-content; min-width: 760px;">
         <thead>
             <tr>
                 <th style="width: 36px;" class="text-center th-checkbox">
@@ -16,7 +16,7 @@
                         <i class="bi @(Model.DaDanhDauFilter ? "bi-star-fill" : "bi-star")"></i>
                     </span>
                 </th>
-                <th data-col="ma" style="width: 130px;" class="sortable-th @(Model.SortBy == "ma" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Mã kiểm kho">
+                <th data-col="ma" style="width: 130px; min-width: 130px;" class="sortable-th @(Model.SortBy == "ma" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Mã kiểm kho">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Mã kiểm kho</span>
@@ -25,7 +25,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="tg" style="width: 145px;" class="sortable-th @(Model.SortBy == "tg" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Thời gian">
+                <th data-col="tg" style="width: 145px; min-width: 145px;" class="sortable-th @(Model.SortBy == "tg" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Thời gian">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Thời gian</span>
@@ -34,7 +34,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="tt" style="width: 110px;" class="num r text-end sortable-th @(Model.SortBy == "tt" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tổng thực tế">
+                <th data-col="tt" style="width: 110px; min-width: 110px;" class="num r text-end sortable-th @(Model.SortBy == "tt" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tổng thực tế">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Tổng thực tế</span>
@@ -43,7 +43,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="cl" style="width: 120px;" class="num r text-end sortable-th @(Model.SortBy == "cl" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tổng chênh lệch">
+                <th data-col="cl" style="width: 120px; min-width: 120px;" class="num r text-end sortable-th @(Model.SortBy == "cl" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tổng chênh lệch">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Tổng chênh lệch</span>
@@ -52,7 +52,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="tang" style="width: 110px;" class="num r text-end sortable-th @(Model.SortBy == "tang" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo SL lệch tăng">
+                <th data-col="tang" style="width: 110px; min-width: 110px;" class="num r text-end sortable-th @(Model.SortBy == "tang" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo SL lệch tăng">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">SL lệch tăng</span>
@@ -61,7 +61,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="giam" style="width: 110px;" class="num r text-end sortable-th @(Model.SortBy == "giam" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo SL lệch giảm">
+                <th data-col="giam" style="width: 110px; min-width: 110px;" class="num r text-end sortable-th @(Model.SortBy == "giam" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo SL lệch giảm">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">SL lệch giảm</span>
@@ -70,7 +70,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="cb" style="width: 145px;" class="sortable-th @(Model.SortBy == "cb" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Ngày cân bằng">
+                <th data-col="cb" style="width: 145px; min-width: 145px;" class="sortable-th @(Model.SortBy == "cb" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Ngày cân bằng">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Ngày cân bằng</span>
@@ -79,7 +79,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="slt" style="width: 100px;" class="num r text-end sortable-th @(Model.SortBy == "slt" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo SL thực tế">
+                <th data-col="slt" style="width: 100px; min-width: 100px;" class="num r text-end sortable-th @(Model.SortBy == "slt" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo SL thực tế">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">SL thực tế</span>
@@ -88,7 +88,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="ghi" style="width: 180px;" class="sortable-th @(Model.SortBy == "ghi" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Ghi chú">
+                <th data-col="ghi" style="width: 180px; min-width: 180px;" class="sortable-th @(Model.SortBy == "ghi" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Ghi chú">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Ghi chú</span>
@@ -97,7 +97,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="st" style="width: 135px;" class="sortable-th @(Model.SortBy == "st" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Trạng thái">
+                <th data-col="st" style="width: 135px; min-width: 135px;" class="sortable-th @(Model.SortBy == "st" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Trạng thái">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Trạng thái</span>
@@ -106,7 +106,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="kho" style="width: 130px;" class="sortable-th @(Model.SortBy == "kho" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Kho">
+                <th data-col="kho" style="width: 130px; min-width: 130px;" class="sortable-th @(Model.SortBy == "kho" ? (Model.SortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Kho">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Kho</span>
@@ -134,9 +134,9 @@
             {
                 foreach (var item in Model.Items)
                 {
-                    <tr class="tbl-row" data-id="@item.MaPhieuKiemKe">
-                        <td class="w-chk text-center" onclick="event.stopPropagation();">
-                            <input class="form-check-input" type="checkbox" data-sel="@item.MaPhieuKiemKe">
+                    <tr class="product-row tbl-row" data-id="@item.MaPhieuKiemKe" title="Nhấn để xem chi tiết phiếu kiểm kho">
+                        <td class="w-chk text-center cell-checkbox" onclick="event.stopPropagation();">
+                            <input class="form-check-input row-select" type="checkbox" data-sel="@item.MaPhieuKiemKe" value="@item.MaPhieuKiemKe">
                         </td>
                         <td class="w-star text-center cell-star" style="cursor: pointer;" onclick="toggleFavoriteStockTake(event, @item.MaPhieuKiemKe, this)">
                             <span class="star-btn @(item.DaDanhDau ? "starred" : "")" data-id="@item.MaPhieuKiemKe" title="@(item.DaDanhDau ? "Bỏ đánh dấu sao" : "Đánh dấu sao")">
@@ -172,142 +172,146 @@
                     </tr>
 
                     <!-- Khối chi tiết bung ra (Inline Drawer / Accordion) -->
-                    <tr class="dtl" id="dtl-@item.MaPhieuKiemKe" style="display: none;">
-                        <td colspan="13" class="p-0 border-0">
-                                <div class="dp shadow-sm" data-d="@item.MaPhieuKiemKe">
-                                <div class="dp-tabs"><span class="dp-tab">Thông tin</span></div>
-                                <h2 class="d-flex align-items-center gap-2">
-                                    <span class="fw-bold" style="font-size: 18px; color: #1e293b;">@item.MaPhieuHienThi</span>
-                                    @if (item.TrangThai == "DA_DIEU_CHINH")
-                                    {
-                                        <span class="badge bg-success-subtle text-success border-0 px-2 py-1 rounded-pill" style="font-weight: 500; font-size: 12px;">Đã cân bằng kho</span>
-                                    }
-                                    else if (item.TrangThai == "HUY")
-                                    {
-                                        <span class="badge bg-secondary-subtle text-secondary border-0 px-2 py-1 rounded-pill" style="font-weight: 500; font-size: 12px;">Đã hủy</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-primary-subtle text-primary border-0 px-2 py-1 rounded-pill" style="font-weight: 500; font-size: 12px;">Phiếu tạm</span>
-                                    }
-                                </h2>
-                                <div class="meta text-muted small mt-2">
-                                    <span>Người tạo: <strong class="text-dark">@item.TenNguoiLap</strong></span>
-                                    <span>Ngày tạo: @item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm")</span>
-                                    <i class="br"></i>
-                                    @if (item.TrangThai == "DA_DIEU_CHINH")
-                                    {
-                                        <span>Người cân bằng: <strong class="text-dark">@item.TenNguoiLap</strong></span>
-                                        <span>Ngày cân bằng: @(item.NgayCanBang?.ToString("dd/MM/yyyy HH:mm"))</span>
-                                    }
-                                </div>
-
-                                <table class="dtl-tbl table table-sm table-bordered mt-3 mb-0" style="background: #fff;">
-                                    <thead style="background: #f8fafc;">
-                                        <tr>
-                                            <th style="width: 180px; font-weight: 600; font-size: 13px; color: #334155;">Mã hàng</th>
-                                            <th style="font-weight: 600; font-size: 13px; color: #334155;">Tên hàng</th>
-                                            <th class="r text-end" style="width: 120px; font-weight: 600; font-size: 13px; color: #334155;">Tồn kho</th>
-                                            <th class="r text-end" style="width: 120px; font-weight: 600; font-size: 13px; color: #334155;">Thực tế</th>
-                                            <th class="r text-end" style="width: 120px; font-weight: 600; font-size: 13px; color: #334155;">SL lệch</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr class="fin">
-                                            <td><input class="form-control form-control-sm dtl-search-code" placeholder="Tìm mã hàng" style="border-radius: 4px; border: 1px solid #d1d5db; height: 28px; font-size: 12.5px;"></td>
-                                            <td><input class="form-control form-control-sm dtl-search-name" placeholder="Tìm tên hàng" style="border-radius: 4px; border: 1px solid #d1d5db; height: 28px; font-size: 12.5px;"></td>
-                                            <td colspan="3" class="bg-transparent border-0"></td>
-                                        </tr>
-                                    </tbody>
-                                    <tbody class="dl">
-                                        @if (item.Lines.Any())
-                                        {
-                                            foreach (var l in item.Lines)
+                    <tr class="product-detail-row dtl" id="dtl-@item.MaPhieuKiemKe" style="display: none;">
+                        <td colspan="13" class="p-0">
+                            <div class="product-detail-panel-wrap" style="display: none;">
+                                <div class="product-detail-panel dp" data-d="@item.MaPhieuKiemKe">
+                                    <div class="dp-tabs"><button type="button" class="dp-tab active" data-tab="info">Thông tin</button></div>
+                                    <div class="kk-detail-fixed-wrap kiot-detail-fixed-wrap">
+                                        <h2 class="d-flex align-items-center gap-2">
+                                            <span class="fw-bold" style="font-size: 18px; color: #1e293b;">@item.MaPhieuHienThi</span>
+                                            @if (item.TrangThai == "DA_DIEU_CHINH")
                                             {
-                                                var diff = l.SlChenhLech;
-                                                <tr class="dtl-line-row" data-code="@l.MaHangNoiBo.ToLower()" data-name="@l.TenHang.ToLower()">
-                                                    <td><span class="text-break">@l.MaHangNoiBo</span></td>
-                                                    <td>@l.TenHang</td>
-                                                    <td class="r text-end">@l.SoLuongTheoSo.ToString("N0", viCulture)</td>
-                                                    <td class="r text-end">
-                                                        @if (l.SoLuongThucTe.HasValue)
-                                                        {
-                                                            @l.SoLuongThucTe.Value.ToString("N0", viCulture)
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="text-muted">Chưa kiểm</span>
-                                                        }
-                                                    </td>
-                                                    <td class="r text-end">
-                                                        @(diff.HasValue ? diff.Value.ToString("N0", viCulture) : "")
-                                                    </td>
-                                                </tr>
+                                                <span class="badge bg-success-subtle text-success border-0 px-2 py-1 rounded-pill" style="font-weight: 500; font-size: 12px;">Đã cân bằng kho</span>
                                             }
-                                        }
-                                        else
-                                        {
-                                            <tr><td colspan="5" class="text-muted text-center py-3">Không có hàng nào trong phiếu.</td></tr>
-                                        }
-                                    </tbody>
-                                </table>
+                                            else if (item.TrangThai == "HUY")
+                                            {
+                                                <span class="badge bg-secondary-subtle text-secondary border-0 px-2 py-1 rounded-pill" style="font-weight: 500; font-size: 12px;">Đã hủy</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-primary-subtle text-primary border-0 px-2 py-1 rounded-pill" style="font-weight: 500; font-size: 12px;">Phiếu tạm</span>
+                                            }
+                                        </h2>
+                                        <div class="meta text-muted small mt-2">
+                                            <span>Người tạo: <strong class="text-dark">@item.TenNguoiLap</strong></span>
+                                            <span>Ngày tạo: @item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm")</span>
+                                            <i class="br"></i>
+                                            @if (item.TrangThai == "DA_DIEU_CHINH")
+                                            {
+                                                <span>Người cân bằng: <strong class="text-dark">@item.TenNguoiLap</strong></span>
+                                                <span>Ngày cân bằng: @(item.NgayCanBang?.ToString("dd/MM/yyyy HH:mm"))</span>
+                                            }
+                                        </div>
 
-                                <!-- Khối Ghi chú + Tổng kết số liệu bên phải -->
-                                <div class="dp-bottom d-flex gap-4 align-items-start mt-3">
-                                    <div class="flex-grow-1" style="min-width: 250px;">
-                                        <textarea class="form-control dp-note" style="height: 105px; resize: none; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13.5px;" @(item.TrangThai == "HUY" ? "disabled" : "") placeholder="Ghi chú">@item.GhiChu</textarea>
-                                    </div>
-                                    <div class="sums" style="flex: 0 0 280px; width: 280px;">
-                                        <div class="d-flex justify-content-between py-1">
-                                            <span class="text-muted" style="font-size: 13.5px;">Số lượng thực tế</span>
-                                            <span class="text-dark" style="font-size: 13.5px;">@item.TongThucTe.ToString("N0", viCulture)</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between py-1">
-                                            <span class="text-muted" style="font-size: 13.5px;">Số lượng lệch tăng</span>
-                                            <span class="text-dark" style="font-size: 13.5px;">@(item.SlLechTang > 0 ? item.SlLechTang.ToString("N0", viCulture) : "0")</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between py-1">
-                                            <span class="text-muted" style="font-size: 13.5px;">Số lượng lệch giảm</span>
-                                            <span class="text-dark" style="font-size: 13.5px;">@(item.SlLechGiam > 0 ? "-" + item.SlLechGiam.ToString("N0", viCulture) : "0")</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between py-1">
-                                            <span class="text-muted" style="font-size: 13.5px;">Số lượng chênh lệch</span>
-                                            <span class="text-dark" style="font-size: 13.5px;">@item.TongChenhLech.ToString("N0", viCulture)</span>
-                                        </div>
-                                    </div>
-                                </div>
+                                        <table class="dtl-tbl table table-sm table-bordered mt-3 mb-0" style="background: #fff;">
+                                            <thead style="background: #f8fafc;">
+                                                <tr>
+                                                    <th style="width: 180px; font-weight: 600; font-size: 13px; color: #334155;">Mã hàng</th>
+                                                    <th style="font-weight: 600; font-size: 13px; color: #334155;">Tên hàng</th>
+                                                    <th class="r text-end" style="width: 120px; font-weight: 600; font-size: 13px; color: #334155;">Tồn kho</th>
+                                                    <th class="r text-end" style="width: 120px; font-weight: 600; font-size: 13px; color: #334155;">Thực tế</th>
+                                                    <th class="r text-end" style="width: 120px; font-weight: 600; font-size: 13px; color: #334155;">SL lệch</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="fin">
+                                                    <td><input class="form-control form-control-sm dtl-search-code" placeholder="Tìm mã hàng" style="border-radius: 4px; border: 1px solid #d1d5db; height: 28px; font-size: 12.5px;"></td>
+                                                    <td><input class="form-control form-control-sm dtl-search-name" placeholder="Tìm tên hàng" style="border-radius: 4px; border: 1px solid #d1d5db; height: 28px; font-size: 12.5px;"></td>
+                                                    <td colspan="3" class="bg-transparent border-0"></td>
+                                                </tr>
+                                            </tbody>
+                                            <tbody class="dl">
+                                                @if (item.Lines.Any())
+                                                {
+                                                    foreach (var l in item.Lines)
+                                                    {
+                                                        var diff = l.SlChenhLech;
+                                                        <tr class="dtl-line-row" data-code="@l.MaHangNoiBo.ToLower()" data-name="@l.TenHang.ToLower()">
+                                                            <td><span class="text-break">@l.MaHangNoiBo</span></td>
+                                                            <td>@l.TenHang</td>
+                                                            <td class="r text-end">@l.SoLuongTheoSo.ToString("N0", viCulture)</td>
+                                                            <td class="r text-end">
+                                                                @if (l.SoLuongThucTe.HasValue)
+                                                                {
+                                                                    @l.SoLuongThucTe.Value.ToString("N0", viCulture)
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="text-muted">Chưa kiểm</span>
+                                                                }
+                                                            </td>
+                                                            <td class="r text-end">
+                                                                @(diff.HasValue ? diff.Value.ToString("N0", viCulture) : "")
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr><td colspan="5" class="text-muted text-center py-3">Không có hàng nào trong phiếu.</td></tr>
+                                                }
+                                            </tbody>
+                                        </table>
 
-                                <!-- Hàng nút hành động -->
-                                <div class="dp-actions d-flex align-items-center gap-2 mt-3 pt-3 border-top">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary btn-cancel-doc" data-id="@item.MaPhieuKiemKe" data-code="@item.MaPhieuHienThi" data-status="@item.TrangThai">
-                                        <i class="bi bi-trash me-1"></i>Hủy
-                                    </button>
-                                    <a href="@Url.Action("Create", "PhieuKiemKe", new { copyId = item.MaPhieuKiemKe })" class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-copy me-1"></i>Sao chép
-                                    </a>
-                                    <a href="@Url.Action("Export", "PhieuKiemKe", new { type = "detail", id = item.MaPhieuKiemKe })" class="btn btn-sm btn-outline-secondary" target="_blank">
-                                        <i class="bi bi-box-arrow-up me-1"></i>Xuất file
-                                    </a>
-                                    <span class="ms-auto"></span>
-                                    @if (item.TrangThai != "HUY")
-                                    {
-                                        <button type="button" class="btn btn-sm btn-outline-secondary btn-save-note" data-id="@item.MaPhieuKiemKe">
-                                            <i class="bi bi-floppy me-1"></i>Lưu
-                                        </button>
-                                    }
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print();">
-                                        <i class="bi bi-printer me-1"></i>In
-                                    </button>
-                                    @if (item.TrangThai == "NHAP")
-                                    {
-                                        <a href="@Url.Action("Edit", "PhieuKiemKe", new { id = item.MaPhieuKiemKe })" class="btn btn-sm btn-primary">
-                                            <i class="bi bi-pencil-square me-1"></i>Mở phiếu
-                                        </a>
-                                    }
-                                </div>
+                                        <!-- Khối Ghi chú + Tổng kết số liệu bên phải -->
+                                        <div class="dp-bottom d-flex gap-4 align-items-start mt-3">
+                                            <div class="flex-grow-1" style="min-width: 250px;">
+                                                <textarea class="form-control dp-note" style="height: 105px; resize: none; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13.5px;" @(item.TrangThai == "HUY" ? "disabled" : "") placeholder="Ghi chú">@item.GhiChu</textarea>
+                                            </div>
+                                            <div class="sums" style="flex: 0 0 280px; width: 280px;">
+                                                <div class="d-flex justify-content-between py-1">
+                                                    <span class="text-muted" style="font-size: 13.5px;">Số lượng thực tế</span>
+                                                    <span class="text-dark" style="font-size: 13.5px;">@item.TongThucTe.ToString("N0", viCulture)</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between py-1">
+                                                    <span class="text-muted" style="font-size: 13.5px;">Số lượng lệch tăng</span>
+                                                    <span class="text-dark" style="font-size: 13.5px;">@(item.SlLechTang > 0 ? item.SlLechTang.ToString("N0", viCulture) : "0")</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between py-1">
+                                                    <span class="text-muted" style="font-size: 13.5px;">Số lượng lệch giảm</span>
+                                                    <span class="text-dark" style="font-size: 13.5px;">@(item.SlLechGiam > 0 ? "-" + item.SlLechGiam.ToString("N0", viCulture) : "0")</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between py-1">
+                                                    <span class="text-muted" style="font-size: 13.5px;">Số lượng chênh lệch</span>
+                                                    <span class="text-dark" style="font-size: 13.5px;">@item.TongChenhLech.ToString("N0", viCulture)</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Hàng nút hành động -->
+                                        <div class="dp-actions d-flex align-items-center gap-2 mt-3 pt-3 border-top">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary btn-cancel-doc" data-id="@item.MaPhieuKiemKe" data-code="@item.MaPhieuHienThi" data-status="@item.TrangThai">
+                                                <i class="bi bi-trash me-1"></i>Hủy
+                                            </button>
+                                            <a href="@Url.Action("Create", "PhieuKiemKe", new { copyId = item.MaPhieuKiemKe })" class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-copy me-1"></i>Sao chép
+                                            </a>
+                                            <a href="@Url.Action("Export", "PhieuKiemKe", new { type = "detail", id = item.MaPhieuKiemKe })" class="btn btn-sm btn-outline-secondary" target="_blank">
+                                                <i class="bi bi-box-arrow-up me-1"></i>Xuất file
+                                            </a>
+                                            <span class="ms-auto"></span>
+                                            @if (item.TrangThai != "HUY")
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-secondary btn-save-note" data-id="@item.MaPhieuKiemKe">
+                                                    <i class="bi bi-floppy me-1"></i>Lưu
+                                                </button>
+                                            }
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print();">
+                                                <i class="bi bi-printer me-1"></i>In
+                                            </button>
+                                            @if (item.TrangThai == "NHAP")
+                                            {
+                                                <a href="@Url.Action("Edit", "PhieuKiemKe", new { id = item.MaPhieuKiemKe })" class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-pencil-square me-1"></i>Mở phiếu
+                                                </a>
+                                            }
+                                        </div>
+                                    </div>
                             </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </td>
+                </tr>
                 }
             }
         </tbody>

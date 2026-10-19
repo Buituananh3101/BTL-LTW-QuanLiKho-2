@@ -49,6 +49,9 @@
     cursor: pointer;
     color: #64748b !important;
     font-weight: 500 !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
     border-bottom: 2px solid transparent !important;
     transition: all 0.2s ease;
     user-select: none;
@@ -216,5 +219,30 @@
 #nccEditGroupOv {
     z-index: 1065;
     align-items: center !important;
+}
+
+/* 8. Chuẩn hóa ô nhập liệu trong modal Nhà cung cấp (khắc phục triệt để lỗi ô Email type=email) */
+.hh-f input[type=email],
+.hh-f input[type=text],
+.hh-f input[type=tel] {
+    height: 38px;
+    border: 1px solid var(--hh-line, #d1d5db);
+    border-radius: 8px;
+    padding: 0 12px;
+    font-size: 14.5px;
+    font-family: inherit;
+    color: var(--hh-text, #111827);
+    background: #fff;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: 0.15s;
+}
+
+.hh-f input[type=email]:focus,
+.hh-f input[type=text]:focus,
+.hh-f input[type=tel]:focus {
+    border-color: var(--hh-blue, #0070f4);
+    box-shadow: 0 0 0 3px rgba(0, 112, 244, 0.14);
 }
 

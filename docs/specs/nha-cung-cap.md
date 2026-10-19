@@ -7,37 +7,19 @@
 ## 1. Kiến trúc File & CSDL
 
 ### 1.1. Bản đồ File liên quan (File Map)
-- **Controller**: `Controllers/NhaCungCapController.cs` (kế thừa `BaseKhoController`, phân quyền, lọc AJAX, CRUD, ToggleFavorite).
-- **ViewModels (`ViewModels/NhaCungCap/`)**:
-  - `NhaCungCapIndexVM.cs`: Trang Index & dữ liệu khởi tạo, có `DaDanhDauFilter`.
-  - `NhaCungCapFilterParams.cs`: Tiêu chí lọc (Q, NhomNcc, TongMua, ThoiGian, No, TrangThai, DaDanhDau).
-  - `NhaCungCapItemVM.cs`: Dòng hiển thị bảng (`MaDonViCapHang`, `MaNcc`, `TenDonVi`, `DaDanhDau`, `NoCanTraHienTai`...).
-  - `NhaCungCapFormVM.cs`: Dữ liệu tạo mới/sửa modal (13 trường dữ liệu + Accordions).
-  - `NhaCungCapDetailVM.cs`: Thông tin chi tiết nạp vào panel Master-Detail.
+- **Controller**: `Controllers/NhaCungCapController.cs` (CRUD, Filter AJAX, ToggleFavorite, ToggleStatus).
+- **ViewModels (`ViewModels/NhaCungCap/`)**: `NhaCungCapIndexVM`, `NhaCungCapFilterParams`, `NhaCungCapItemVM`, `NhaCungCapFormVM`, `NhaCungCapDetailVM`.
 - **Views (`Views/NhaCungCap/`)**:
-  - `Index.cshtml`: Topbar công cụ, sidebar 5 khối LEGO, bảng dữ liệu.
+  - `Index.cshtml`: Khung trang, topbar công cụ, bảng dữ liệu.
   - `_NhaCungCapFilterSidebar.cshtml`: 5 khối lọc KiotViet (Nhóm, Tổng mua, Thời gian, Nợ, Trạng thái).
-  - `_NhaCungCapTable.cshtml`: Bảng AJAX (`NhaCungCapIndexVM`), khớp chuẩn `HangHoa` (`product-row`, inline panel, cột sao, ẩn/hiện 12 cột).
-  - `_NhaCungCapModal.cshtml`: Modal tạo mới/sửa NCC (3 Accordion: Địa chỉ, Nhóm & Ghi chú, Thông tin hóa đơn).
-  - `_NhaCungCapDetail.cshtml`: Panel chi tiết (Tabs: Thông tin, Lịch sử nhập/trả hàng, Nợ cần trả).
-- **Styles & Scripts**:
-  - `wwwroot/js/nha-cung-cap-index.js`: AJAX lọc, phân trang, toggle sao, Master-Detail.
-  - `wwwroot/css/nha-cung-cap.css`: Form modal, accordion, detail panel.
-- **Menu điều hướng**: `_MainMenu.cshtml`, `_Header.cshtml`.
+  - `_NhaCungCapTable.cshtml`: Bảng AJAX (`product-row`, inline panel, cột sao, ẩn/hiện 12 cột).
+  - `_NhaCungCapModal.cshtml`: Modal tạo mới/sửa NCC (3 Accordion, sub-modals nhóm).
+  - `_NhaCungCapDetail.cshtml`: Panel chi tiết (Tabs: Thông tin, Lịch sử nhập/trả, Nợ cần trả).
+- **Styles & Scripts**: `wwwroot/js/nha-cung-cap-index.js`, `wwwroot/css/nha-cung-cap.css`.
 
 ### 1.2. Cơ sở dữ liệu (Tuân thủ 3 Nguyên tắc Vàng CSDL)
-- **Bảng `DonViCapHang`**:
-  - `MaDonViCapHang` INT IDENTITY PK.
-  - `TenDonVi` NVARCHAR(150) NOT NULL UNIQUE.
-  - `DienThoai` VARCHAR(15) NULL, `DiaChi` NVARCHAR(255) NULL.
-  - `TrangThai` VARCHAR(20) NOT NULL DEFAULT 'HOAT_DONG' (`HOAT_DONG` / `NGUNG_GIAO_DICH`, tuân thủ check constraint `CK_DonViCapHang_TrangThai`).
-  - `MaNcc` VARCHAR(30) NULL (tự sinh `NCC00001` nếu để trống).
-  - `Email` NVARCHAR(100) NULL, `KhuVuc` NVARCHAR(100) NULL, `PhuongXa` NVARCHAR(100) NULL.
-  - `MaNhomNcc` INT NULL (FK đến `NhomNhaCungCap`).
-  - `GhiChu` NVARCHAR(500) NULL, `TenCongTy` NVARCHAR(200) NULL, `MaSoThue` VARCHAR(30) NULL, `SoCccd` VARCHAR(30) NULL.
-  - `DaDanhDau` BIT NOT NULL DEFAULT 0 (Đánh dấu sao yêu thích).
-  - `NgayTao` DATETIME NOT NULL DEFAULT GETDATE(), `NguoiTao` NVARCHAR(100) NULL.
-- **Bảng `NhomNhaCungCap`**: `MaNhomNcc` INT IDENTITY PK, `TenNhom` NVARCHAR(150) UNIQUE, `GhiChu` NVARCHAR(255).
+- **Bảng `DonViCapHang`**: `MaDonViCapHang` PK, `TenDonVi` NOT NULL, `MaNcc`, `DienThoai`, `Email`, `DiaChi`, `KhuVuc`, `PhuongXa`, `MaNhomNcc` (FK), `GhiChu`, `TenCongTy`, `MaSoThue`, `SoCccd`, `TrangThai` (`HOAT_DONG` / `NGUNG_GIAO_DICH`), `DaDanhDau` BIT, `NgayTao`, `NguoiTao`.
+- **Bảng `NhomNhaCungCap`**: `MaNhomNcc` PK, `TenNhom` NVARCHAR(150), `GhiChu`.
 
 ---
 
@@ -59,18 +41,20 @@
 ---
 
 ## 3. Khối Lego Tái sử dụng (Tuân thủ Luật 10 & 03-giao-dien-layout.md)
-- [x] **Modal Xác nhận Ngừng hoạt động**: `#nccStatusConfirmOv` căn giữa, chuyển cảnh mượt mà, hỏi xác nhận trước khi đổi trạng thái.
-- [x] **Cột Sao Yêu Thích**: Cột sao cố định (`th-star`, `cell-star`), toggle sao âm thầm và lọc danh sách sao trên header.
-- [x] **Panel Chi tiết Cố định**: `.ncc-detail-fixed-wrap`, `.ncc-attr-grid`, `.ncc-attr-col` cố định 3 card 992px (320px/card), viền khép kín hình chữ nhật.
-- [x] **Hiển thị Cột (`#colMenu`)**: Bật/tắt 12 cột, chuẩn `#productTableContainer`, lưu `localStorage` (`kiot_ncc_columns_v2`).
+- [x] **Master-Detail Accordion & Tabs**: Lego `KiotFilter.initRowDetail` bung drawer êm ái, chuyển tab, tự đồng bộ `colspan` và `.last-visible-col`.
+- [x] **Thao tác Thực thể**: Lego `KiotFilter.initEntityActions` xử lý các nút Chỉnh sửa, Xóa, Ngừng hoạt động.
+- [x] **Hiển thị Cột (`#colMenu`)**: Lego `KiotFilter.initColumnToggle` lưu `kiot_ncc_columns_v2`.
+- [x] **Panel Chi tiết Cố định**: `.kiot-detail-fixed-wrap`, `.kiot-attr-grid`, `.kiot-attr-col` cố định 3 card 992px (320px/card), viền khép kín hình chữ nhật.
+- [x] **Cột Sao Yêu Thích**: Cột sao cố định, toggle sao âm thầm và lọc sao trên header.
+- [x] **Modal Xác nhận Ngừng hoạt động**: `#nccStatusConfirmOv` căn giữa, hỏi xác nhận trước khi đổi trạng thái.
 - [x] **Bộ lọc Thời gian**: `<partial name="_KiotDateFilter" ... />` kết hợp `KiotFilter.initDateFilter`.
 - [x] **Bộ lọc Nhóm NCC**: `<partial name="_KiotMultiSelectFilter" ... />` hỗ trợ sửa/xóa ✎ tại chỗ.
-- [x] **Bộ lọc Trạng thái**: `<partial name="_KiotStatusFilter" ... />` (Đang hoạt động / Ngừng hoạt động).
+- [x] **Bộ lọc Trạng thái**: `<partial name="_KiotStatusFilter" ... />` (Pills: Đang hoạt động / Ngừng hoạt động).
+- [x] **Bộ lọc Giá trị Từ - Tới**: `<partial name="_KiotValueFilter" ... />` (Tổng mua, Nợ hiện tại).
 - [x] **Phân trang AJAX**: `<partial name="_Pagination" model="Model.PagedData" />`.
-- [x] **Khối Accordion trong Form**: `.kiot-sec`, `.kiot-sec-h`, `.kiot-chev` cho 3 khối thông tin.
-- [x] **Modal con KiotPrompt & KiotConfirm**: Thêm nhanh nhóm, sửa nhóm, xác nhận xóa NCC.
-- [x] **Format tiền tệ**: class `.kiot-num` cho khoảng Tổng mua và Nợ hiện tại.
-- [x] **Thông báo Toast**: `window.KiotToast` dùng chung toàn hệ thống, dạng viên bo tròn tối màu, không viền kẻ dọc.
+- [x] **Khối Accordion Form**: `.kiot-sec`, `.kiot-sec-h`, `.kiot-chev` cho các khối thông tin.
+- [x] **Modal con KiotPrompt & KiotConfirm**: Thêm nhanh nhóm, sửa ✎ nhóm, xác nhận xóa.
+- [x] **Format tiền tệ & Toast**: Class `.kiot-num` và `window.KiotToast` toàn hệ thống.
 
 ---
 

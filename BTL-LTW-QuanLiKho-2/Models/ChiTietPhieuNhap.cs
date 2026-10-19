@@ -15,6 +15,10 @@ public partial class ChiTietPhieuNhap
 
     public decimal DonGiaNhap { get; set; }
 
+    public decimal GiamGia { get; set; } = 0;
+
+    public decimal ThanhTien { get; set; } = 0;
+
     public virtual HangHoa MaHangNavigation { get; set; } = null!;
 
     public virtual PhieuNhap MaPhieuNhapNavigation { get; set; } = null!;

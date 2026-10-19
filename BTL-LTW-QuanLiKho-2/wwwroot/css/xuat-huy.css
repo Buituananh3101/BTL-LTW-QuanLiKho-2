@@ -82,6 +82,13 @@
 }
 
 /* Panel bên phải - KiotViet Style */
+.form-wrap.panel-collapsed .panel-toggle,
+.panel-toggle.collapsed,
+.f-panel.collapsed ~ .panel-toggle {
+    right: 8px !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18) !important;
+}
+
 .xuat-huy-form-container .f-panel {
     background: #ffffff;
     border-left: 1px solid #e2e8f0;
@@ -120,3 +127,96 @@
         width: 100%;
     }
 }
+
+/* ==========================================================================
+   BẢNG DANH SÁCH XUẤT HỦY (CHUẨN KIOTVIET & NHÀ CUNG CẤP)
+   ========================================================================== */
+#xuatHuyTable {
+    width: max-content !important;
+    min-width: 760px !important;
+    table-layout: fixed !important;
+}
+
+/* Đóng khung hình chữ nhật liền mạch khi mở chi tiết dòng Xuất hủy */
+#xuatHuyTable tr.product-row.selected > td {
+    background-color: #ffffff !important;
+    border-top: 2px solid #0070f3 !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    border-right: none !important;
+}
+#xuatHuyTable tr.product-row.selected > td:first-child {
+    border-left: 3px solid #0070f3 !important;
+}
+#xuatHuyTable tr.product-row.selected > td.last-visible-col,
+#xuatHuyTable tr.product-row.selected > td:last-child {
+    border-right: 3px solid #0070f3 !important;
+}
+
+#xuatHuyTable tr.product-detail-row > td {
+    background-color: #ffffff !important;
+    padding: 0 !important;
+    border-top: none !important;
+    border-bottom: 2px solid #0070f3 !important;
+    border-left: 3px solid #0070f3 !important;
+    border-right: 3px solid #0070f3 !important;
+}
+
+.product-detail-panel.dp {
+    padding: 16px 20px;
+    background: #ffffff;
+}
+
+.product-detail-panel-wrap {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.dp-tabs {
+    display: flex;
+    gap: 24px;
+    border-bottom: 1px solid #e2e8f0;
+    margin: 0 -20px 14px;
+    padding: 0 20px;
+    position: static !important;
+    width: auto !important;
+}
+
+.dp-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 4px 8px;
+    margin-bottom: -1px;
+    color: #64748b;
+    font-weight: 500;
+    font-size: 13.5px;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    cursor: pointer;
+    outline: none !important;
+    transition: all 0.15s ease-in-out;
+}
+
+.dp-tab:hover {
+    color: #0070f3 !important;
+}
+
+.dp-tab.active {
+    color: #0070f3 !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid #0070f3 !important;
+}
+
+/* Khối thông tin chi tiết phiếu xuất hủy có độ rộng cố định 992px chuẩn KiotViet & Nhà cung cấp */
+.xh-detail-fixed-wrap {
+    width: 992px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 1040px) {
+    .xh-detail-fixed-wrap {
+        width: 100%;
+    }
+}
+

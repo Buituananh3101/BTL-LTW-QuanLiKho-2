@@ -489,8 +489,9 @@ public class XuatHuyController : BaseKhoController
                     return BadRequest(new { success = false, message = "Chỉ có thể chỉnh sửa phiếu tạm." });
                 }
 
+                DateTime ngayLap = req.NgayLap == default ? DateTime.Now : (req.NgayLap.Kind == DateTimeKind.Utc ? req.NgayLap.ToLocalTime() : req.NgayLap);
                 phieu.GhiChu = req.GhiChu?.Trim();
-                phieu.NgayLap = req.NgayLap;
+                phieu.NgayLap = ngayLap;
                 phieu.MaNvxacNhan = req.MaNvxacNhan ?? CurrentNhanVienId;
                 if (!string.IsNullOrWhiteSpace(maPhieu)) phieu.MaPhieu = maPhieu;
 
@@ -498,6 +499,7 @@ public class XuatHuyController : BaseKhoController
             }
             else
             {
+                DateTime ngayLap = req.NgayLap == default ? DateTime.Now : (req.NgayLap.Kind == DateTimeKind.Utc ? req.NgayLap.ToLocalTime() : req.NgayLap);
                 phieu = new PhieuXuat
                 {
                     LoaiPhieuXuat = "XUAT_HUY",
@@ -505,7 +507,7 @@ public class XuatHuyController : BaseKhoController
                     MaKho = req.MaKho > 0 ? req.MaKho : CurrentWarehouseId,
                     MaNvlap = CurrentNhanVienId,
                     MaNvxacNhan = req.MaNvxacNhan ?? CurrentNhanVienId,
-                    NgayLap = req.NgayLap,
+                    NgayLap = ngayLap,
                     GhiChu = req.GhiChu?.Trim(),
                     MaPhieu = maPhieu
                 };
@@ -589,8 +591,9 @@ public class XuatHuyController : BaseKhoController
                     return BadRequest(new { success = false, message = "Phiếu này đã hoàn thành hoặc đã bị hủy trước đó." });
                 }
 
+                DateTime ngayLap = req.NgayLap == default ? DateTime.Now : (req.NgayLap.Kind == DateTimeKind.Utc ? req.NgayLap.ToLocalTime() : req.NgayLap);
                 phieu.GhiChu = req.GhiChu?.Trim();
-                phieu.NgayLap = req.NgayLap;
+                phieu.NgayLap = ngayLap;
                 phieu.NgayXacNhan = DateTime.Now;
                 phieu.MaNvxacNhan = req.MaNvxacNhan ?? CurrentNhanVienId;
                 phieu.TrangThai = "DA_XAC_NHAN";
@@ -600,6 +603,7 @@ public class XuatHuyController : BaseKhoController
             }
             else
             {
+                DateTime ngayLap = req.NgayLap == default ? DateTime.Now : (req.NgayLap.Kind == DateTimeKind.Utc ? req.NgayLap.ToLocalTime() : req.NgayLap);
                 phieu = new PhieuXuat
                 {
                     LoaiPhieuXuat = "XUAT_HUY",
@@ -607,7 +611,7 @@ public class XuatHuyController : BaseKhoController
                     MaKho = req.MaKho > 0 ? req.MaKho : CurrentWarehouseId,
                     MaNvlap = CurrentNhanVienId,
                     MaNvxacNhan = req.MaNvxacNhan ?? CurrentNhanVienId,
-                    NgayLap = req.NgayLap,
+                    NgayLap = ngayLap,
                     NgayXacNhan = DateTime.Now,
                     GhiChu = req.GhiChu?.Trim(),
                     MaPhieu = maPhieu

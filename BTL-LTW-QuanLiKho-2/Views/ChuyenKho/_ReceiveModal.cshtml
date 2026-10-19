@@ -1,0 +1,168 @@
+<!-- Modal Nhận hàng & Quản lý Thất thoát chuyển kho -->
+<div class="modal fade" id="receiveModal" tabindex="-1" aria-labelledby="receiveModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow border-0" style="border-radius: 12px;">
+            <div class="modal-header border-bottom py-3 px-4">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="receiveModalLabel">
+                    <i class="bi bi-box-arrow-in-down text-success fs-5"></i>
+                    <span>Nhận hàng chuyển kho <span id="recvDocCode" class="text-primary"></span></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted small mb-3">
+                    Nhận hàng từ <b id="recvFromWarehouse" class="text-dark"></b>. Vui lòng kiểm đếm và nhập số lượng thực nhận cho từng mặt hàng (không được vượt quá số lượng chuyển).
+                </p>
+
+                <!-- Bảng kiểm đếm hàng nhận -->
+                <div class="table-responsive border rounded mb-3" style="max-height: 320px; overflow-y: auto;">
+                    <table class="table table-sm table-hover align-middle mb-0" id="recvTable" style="font-size: 13.5px;">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th style="width: 140px;">Mã hàng</th>
+                                <th>Tên hàng</th>
+                                <th class="text-end" style="width: 130px;">SL chuyển</th>
+                                <th class="text-end" style="width: 150px;">SL thực nhận</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recvTableBody">
+                            <!-- Render bằng JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Ô ghi chú nhận hàng (bắt buộc nếu nhận thiếu) -->
+                <div>
+                    <label class="form-label text-dark small fw-semibold mb-1" for="recvNoteInput">
+                        Ghi chú nhận hàng <span id="recvNoteRequired" class="text-danger" style="display: none;">*</span>
+                    </label>
+                    <textarea class="form-control" id="recvNoteInput" rows="2" placeholder="Ghi chú nhận hàng (bắt buộc nhập lý do nếu nhận thiếu)..." style="resize: none; font-size: 13.5px;"></textarea>
+                </div>
+
+                <!-- Thông báo lỗi nếu có -->
+                <div class="text-danger small mt-2" id="recvErrorMsg"></div>
+            </div>
+            <div class="modal-footer border-top py-2 px-4 bg-light d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary px-3" data-bs-dismiss="modal">Bỏ qua</button>
+                <button type="button" class="btn btn-sm btn-success px-4 fw-semibold d-inline-flex align-items-center gap-1" id="btnConfirmReceive">
+                    <i class="bi bi-check-lg"></i>
+                    <span>Nhận hàng</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Hàm mở Modal nhận hàng được gọi từ chuyen-kho-index.js
+    window.openReceiveModal = function (docId, docCode, fromName, lines, onDone) {
+        $('#recvDocCode').text(docCode);
+        $('#recvFromWarehouse').text(fromName);
+        $('#recvNoteInput').val('');
+        $('#recvErrorMsg').empty();
+        $('#recvNoteRequired').hide();
+
+        let tbody = '';
+        lines.forEach(function (l) {
+            tbody += `
+                <tr data-hang-id="${l.id}" data-code="${l.code}">
+                    <td class="fw-semibold">${l.code}</td>
+                    <td>${l.name}</td>
+                    <td class="text-end fw-bold text-dark">${l.qty.toLocaleString('vi-VN')}</td>
+                    <td class="text-end">
+                        <input type="text" class="form-control form-control-sm text-end recv-qty-input d-inline-block fw-semibold"
+                               style="max-width: 100px; height: 32px;"
+                               data-max="${l.qty}"
+                               value="${l.qty}"
+                               inputmode="numeric" />
+                    </td>
+                </tr>
+            `;
+        });
+
+        $('#recvTableBody').html(tbody);
+        const modalEl = document.getElementById('receiveModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+
+        // Kiểm tra nhận thiếu để hiển thị dấu * bắt buộc ghi chú
+        function checkShortage() {
+            let isShort = false;
+            $('#recvTableBody tr').each(function () {
+                const max = Number($(this).find('.recv-qty-input').data('max')) || 0;
+                const val = Number($(this).find('.recv-qty-input').val().replace(/\D/g, '')) || 0;
+                if (val < max) isShort = true;
+            });
+            $('#recvNoteRequired').toggle(isShort);
+        }
+
+        $('#recvTableBody').off('input').on('input', '.recv-qty-input', function () {
+            const raw = $(this).val().replace(/\D/g, '');
+            $(this).val(raw);
+            checkShortage();
+        });
+
+        $('#btnConfirmReceive').off('click').on('click', function () {
+            $('#recvErrorMsg').empty();
+            let badMax = false;
+            let shortage = false;
+            const recvLines = [];
+
+            $('#recvTableBody tr').each(function () {
+                const hangId = Number($(this).data('hang-id'));
+                const max = Number($(this).find('.recv-qty-input').data('max')) || 0;
+                const rawVal = $(this).find('.recv-qty-input').val();
+                const val = rawVal === '' ? 0 : Number(rawVal.replace(/\D/g, ''));
+
+                if (val > max) {
+                    badMax = true;
+                }
+                if (val < max) {
+                    shortage = true;
+                }
+
+                recvLines.push({
+                    MaHang: hangId,
+                    SoLuongNhan: val
+                });
+            });
+
+            if (badMax) {
+                $('#recvErrorMsg').text('Số lượng thực nhận không được vượt quá số lượng chuyển.');
+                return;
+            }
+
+            const note = $('#recvNoteInput').val().trim();
+            if (shortage && !note) {
+                $('#recvErrorMsg').text('Phát hiện nhận thiếu hàng. Vui lòng nhập lý do vào ô ghi chú.');
+                $('#recvNoteInput').focus();
+                return;
+            }
+
+            const $btn = $('#btnConfirmReceive');
+            $btn.prop('disabled', true);
+
+            $.ajax({
+                url: '/ChuyenKho/Receive',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    MaPhieuChuyen: docId,
+                    GhiChuNhan: note,
+                    Lines: recvLines
+                }),
+                success: function (res) {
+                    $btn.prop('disabled', false);
+                    modal.hide();
+                    if (window.KiotToast) KiotToast.success(res.message || 'Đã nhận hàng thành công.');
+                    if (typeof onDone === 'function') onDone();
+                },
+                error: function (xhr) {
+                    $btn.prop('disabled', false);
+                    const msg = xhr.responseJSON?.message || 'Đã xảy ra lỗi khi nhận hàng.';
+                    $('#recvErrorMsg').text(msg);
+                }
+            });
+        });
+    };
+</script>

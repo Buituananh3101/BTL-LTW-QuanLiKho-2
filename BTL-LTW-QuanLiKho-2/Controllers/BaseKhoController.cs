@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using BTL_LTW_QuanLiKho_2.Models;
 using BTL_LTW_QuanLiKho_2.Services;
@@ -8,6 +9,7 @@ namespace BTL_LTW_QuanLiKho_2.Controllers;
 /// Lớp Controller cơ sở dùng chung cho mọi Controller quản lý nghiệp vụ kho.
 /// Cung cấp sẵn các tiện ích truy xuất Kho làm việc, Tài khoản đăng nhập, Nhân viên và Phân quyền.
 /// </summary>
+[Authorize]
 public abstract class BaseKhoController : Controller
 {
     protected readonly QuanLyKhoPhuQuocLtwContext _context;

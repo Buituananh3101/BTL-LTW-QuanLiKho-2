@@ -453,7 +453,7 @@
     });
 
     /* ==========================================================================
-       5.1. TÙY CHỌN ẨN / HIỆN CỘT (COLUMN VISIBILITY) CHUẨN KIOTVIET
+       5.1. TÙY CHỌN ẨN / HIỆN CỘT (COLUMN VISIBILITY) QUA LEGO KIOTFILTER
        ========================================================================== */
     const STORAGE_COLS_KEY = 'kiot_ncc_columns_v2';
 
@@ -472,68 +472,21 @@
         ngaytao: 0
     };
 
-    function applyColumnVisibility() {
-        const $menu = $('#colMenu');
-        if (!$menu.length) return;
+    let nccColumnToggler = null;
 
-        let visibleCols = 2; // 1 cột checkbox + 1 cột sao luôn hiển thị
-        $menu.find('input[data-c]').each(function () {
-            const col = $(this).data('c');
-            const isChecked = $(this).is(':checked');
-            if (isChecked) visibleCols++;
-            $(`#supplierTable [data-col="${col}"]`).each(function () {
-                this.style.display = isChecked ? '' : 'none';
-            });
-        });
-
-        // 1. Cập nhật colspan chính xác theo số cột hiển thị để không sinh cột ma
-        $('#supplierTable tr.product-detail-row > td').attr('colspan', visibleCols);
-        $('#supplierTable tr.empty-row > td, #supplierTable tr:has(.empty) > td').attr('colspan', visibleCols);
-
-        // 2. Gắn class last-visible-col cho ô hiển thị cuối cùng của mỗi dòng để khép kín hình chữ nhật
-        $('#supplierTable .last-visible-col').removeClass('last-visible-col');
-        $('#supplierTable tr').each(function () {
-            $(this).children('th:visible, td:visible').last().addClass('last-visible-col');
+    function initColumnToggle() {
+        nccColumnToggler = KiotFilter.initColumnToggle({
+            menuSelector: '#colMenu',
+            tableSelector: '#supplierTable',
+            storageKey: STORAGE_COLS_KEY,
+            defaultCols: DEFAULT_NCC_COLS,
+            extraColsCount: 2 // 1 cột checkbox + 1 cột sao luôn hiển thị
         });
     }
 
-    function initColumnToggle() {
-        const $menu = $('#colMenu');
-        if (!$menu.length) return;
-
-        let savedCols = {};
-        try {
-            savedCols = JSON.parse(localStorage.getItem(STORAGE_COLS_KEY) || '{}');
-        } catch (_) {}
-
-        // Khôi phục trạng thái từ localStorage, fallback sang DEFAULT_NCC_COLS
-        $menu.find('input[data-c]').each(function () {
-            const col = $(this).data('c');
-            if (col) {
-                if (savedCols[col] !== undefined) {
-                    $(this).prop('checked', savedCols[col] === 1 || savedCols[col] === true);
-                } else if (DEFAULT_NCC_COLS[col] !== undefined) {
-                    $(this).prop('checked', DEFAULT_NCC_COLS[col] === 1);
-                }
-            }
-        });
-        applyColumnVisibility();
-
-        // Lắng nghe sự kiện click/change trên menu cột
-        $menu.on('change', 'input[data-c]', function () {
-            applyColumnVisibility();
-            saveColumnState();
-        });
-
-        function saveColumnState() {
-            const state = {};
-            $menu.find('input[data-c]').each(function () {
-                const col = $(this).data('c');
-                if (col) {
-                    state[col] = $(this).is(':checked') ? 1 : 0;
-                }
-            });
-            localStorage.setItem(STORAGE_COLS_KEY, JSON.stringify(state));
+    function applyColumnVisibility() {
+        if (nccColumnToggler && typeof nccColumnToggler.apply === 'function') {
+            nccColumnToggler.apply();
         }
     }
 
@@ -607,97 +560,62 @@
     });
 
     /* ==========================================================================
-       6. MASTER-DETAIL ACCORDION (BUNG DÒNG CHI TIẾT & 3 TABS KHỚP CHUẨN HÀNG HÓA)
+       6. MASTER-DETAIL ACCORDION & TABS (CHUẨN HÓA QUA LEGO KIOTFILTER.INITROWDETAIL)
        ========================================================================== */
-    function expandSupplierRow(id, toggle = true) {
-        const $row = $(`#supplierTable tr.product-row[data-id="${id}"]`);
-        const $detailRow = $(`#detail-${id}`);
-        if (!$row.length || !$detailRow.length) return;
+    let nccRowDetailHandler = null;
 
-        const $wrap = $detailRow.find('.product-detail-panel-wrap');
-        const isCurrentlyOpen = $detailRow.is(':visible');
-
-        // Đóng các dòng chi tiết khác đang mở (hiệu ứng slideUp khớp Hàng hóa)
-        $('#supplierTable .product-detail-row').not($detailRow).each(function () {
-            const $other = $(this);
-            $other.find('.product-detail-panel-wrap').slideUp(150, function () {
-                $other.hide();
-            });
-        });
-        $('#supplierTable .product-row').not($row).removeClass('selected');
-
-        if (isCurrentlyOpen) {
-            if (toggle) {
-                $wrap.slideUp(150, function () {
-                    $detailRow.hide();
-                });
-                $row.removeClass('selected');
+    function initRowDetail() {
+        nccRowDetailHandler = KiotFilter.initRowDetail({
+            tableSelector: '#supplierTable',
+            rowSelector: 'tr.product-row',
+            wrapSelector: '.product-detail-panel-wrap',
+            tabBtnSelector: '.product-detail-tab-btn',
+            tabPaneSelector: '.tab-pane-content',
+            onOpen: function (id) {
+                state.expandedId = id;
+            },
+            onClose: function () {
                 state.expandedId = null;
+            },
+            onTabChange: function (tabName, id, $targetPane, $panel) {
+                // Nạp AJAX nếu là tab history hoặc debt và chưa nạp dữ liệu
+                if ((tabName === 'history' || tabName === 'debt') && id) {
+                    const $dyn = $targetPane.find('.ncc-dyn-container[data-loaded="0"]');
+                    if ($dyn.length) {
+                        $.ajax({
+                            url: `/NhaCungCap/GetDetail?id=${id}`,
+                            type: 'GET',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            success: function (html) {
+                                const $res = $('<div>').html(html);
+                                const histHtml = $res.find('.ncc-tab-history').html();
+                                const debtHtml = $res.find('.ncc-tab-debt').html();
+
+                                if (histHtml) {
+                                    $panel.find('.tab-history').html(histHtml);
+                                }
+                                if (debtHtml) {
+                                    $panel.find('.tab-debt').html(debtHtml);
+                                }
+                            },
+                            error: function () {
+                                $targetPane.html('<div class="p-3 text-center text-danger small">Không thể nạp dữ liệu.</div>');
+                            }
+                        });
+                    }
+                }
             }
-        } else {
-            // Cập nhật colspan và class khép kín viền hình chữ nhật trước khi bung mở
-            const visibleCols = $('#supplierTable thead tr:first-child th:visible').length || 1;
-            $detailRow.find('> td').attr('colspan', visibleCols);
-
-            $row.children('td').removeClass('last-visible-col');
-            $row.children('td:visible').last().addClass('last-visible-col');
-
-            $row.addClass('selected');
-            $detailRow.show();
-            $wrap.hide().slideDown(150);
-            state.expandedId = id;
-        }
+        });
     }
 
-    // Click dòng bảng để mở chi tiết (trừ checkbox, sao, link, button)
-    $(document).on('click', '#supplierTable tr.product-row', function (e) {
-        if ($(e.target).closest('input, button, a, label, .cell-checkbox, .cell-star, .star-btn, .w-chk').length) return;
-        const id = $(this).data('id');
-        if (id) expandSupplierRow(id, true);
-    });
-
-    // Chuyển tabs trong Detail Panel (.product-detail-tab-btn khớp Hàng hóa)
-    $(document).on('click', '.product-detail-tab-btn', function (e) {
-        e.stopPropagation();
-        const tabName = $(this).data('tab');
-        const $panel = $(this).closest('.product-detail-panel');
-        const $detailRow = $(this).closest('.product-detail-row');
-        const id = $detailRow.attr('id') ? $detailRow.attr('id').replace('detail-', '') : '';
-
-        $panel.find('.product-detail-tab-btn').removeClass('active');
-        $(this).addClass('active');
-
-        $panel.find('.tab-pane-content').hide();
-        const $targetPane = $panel.find('.tab-' + tabName);
-        $targetPane.fadeIn(120);
-
-        // Nạp AJAX nếu là tab history hoặc debt và chưa nạp dữ liệu
-        if ((tabName === 'history' || tabName === 'debt') && id) {
-            const $dyn = $targetPane.find('.ncc-dyn-container[data-loaded="0"]');
-            if ($dyn.length) {
-                $.ajax({
-                    url: `/NhaCungCap/GetDetail?id=${id}`,
-                    type: 'GET',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                    success: function (html) {
-                        const $res = $('<div>').html(html);
-                        const histHtml = $res.find('.ncc-tab-history').html();
-                        const debtHtml = $res.find('.ncc-tab-debt').html();
-
-                        if (histHtml) {
-                            $panel.find('.tab-history').html(histHtml);
-                        }
-                        if (debtHtml) {
-                            $panel.find('.tab-debt').html(debtHtml);
-                        }
-                    },
-                    error: function () {
-                        $targetPane.html('<div class="p-3 text-center text-danger small">Không thể nạp dữ liệu.</div>');
-                    }
-                });
-            }
+    function expandSupplierRow(id, toggle = true) {
+        if (!nccRowDetailHandler) return;
+        if (toggle) {
+            nccRowDetailHandler.toggle(id);
+        } else {
+            nccRowDetailHandler.expand(id);
         }
-    });
+    }
 
     /* ==========================================================================
        7. MODAL THÊM MỚI / CHỈNH SỬA NHÀ CUNG CẤP CHUẨN KIOTVIET (THEO HÀNG HÓA)
@@ -1084,10 +1002,8 @@
         setTimeout(() => $('#nccTenDonVi').focus(), 40);
     });
 
-    // Mở modal chỉnh sửa từ nút trong detail panel
-    $(document).on('click', '.btn-edit-ncc', function (e) {
-        e.preventDefault();
-        const id = $(this).data('id');
+    // Mở modal chỉnh sửa nhà cung cấp
+    function openEditSupplierModal(id) {
         if (!id) return;
 
         resetNccForm();
@@ -1129,7 +1045,7 @@
                 if (window.KiotToast) window.KiotToast.error('Không thể lấy thông tin nhà cung cấp.');
             }
         });
-    });
+    }
 
     // Switch trạng thái trong modal edit
     $('#nccTrangThaiSwitch').on('change', function () {
@@ -1224,14 +1140,6 @@
         openDeleteSupplierModal(id, name);
     });
 
-    // Nút Xóa trong Panel chi tiết
-    $(document).on('click', '.btn-delete-ncc', function (e) {
-        e.preventDefault();
-        const id = $(this).data('id');
-        const name = $(this).data('name') || 'nhà cung cấp';
-        openDeleteSupplierModal(id, name);
-    });
-
     // Xác nhận xóa trong modal #nccDeleteOv
     $('#btnConfirmDeleteNcc').on('click', function () {
         const id = parseInt($('#delNccId').val()) || 0;
@@ -1311,24 +1219,24 @@
         showModal('nccStatusConfirmOv');
     }
 
-    $(document).on('click', '.btn-toggle-status-ncc', function (e) {
-        e.preventDefault();
-        const id = $(this).data('id');
-        const status = $(this).data('status') || ($(this).find('span').text().includes('Ngừng') ? 'HOAT_DONG' : 'NGUNG_GIAO_DICH');
-        let name = $(this).data('name');
-        if (!name) {
-            const $row = $(this).closest('tr.tbl-row');
-            if ($row.length) name = $row.find('td[data-col="ten"]').text().trim();
-            else {
-                const $detailRow = $(this).closest('tr.ncc-detail-tr');
-                if ($detailRow.length) {
-                    const rowId = $detailRow.attr('id')?.replace('nccDetailRow_', '');
-                    name = $(`tr.ncc-row[data-id="${rowId}"] td[data-col="ten"]`).text().trim();
-                }
+    // Khởi tạo các thao tác Thực thể qua LEGO KiotFilter.initEntityActions
+    function initEntityActions() {
+        KiotFilter.initEntityActions({
+            containerSelector: document,
+            editSelector: '.btn-edit-ncc',
+            deleteSelector: '.btn-delete-ncc',
+            statusSelector: '.btn-toggle-status-ncc',
+            onEdit: function (id) {
+                openEditSupplierModal(id);
+            },
+            onDelete: function (id, name) {
+                openDeleteSupplierModal(id, name);
+            },
+            onToggleStatus: function (id, name, status) {
+                openStatusConfirmModal(id, name, status);
             }
-        }
-        openStatusConfirmModal(id, name, status);
-    });
+        });
+    }
 
     $('#btnConfirmStatusNcc').on('click', function () {
         const id = parseInt($('#statusNccId').val()) || 0;
@@ -1441,6 +1349,8 @@
        ========================================================================== */
     initSidebarFilters();
     initColumnToggle();
+    initRowDetail();
+    initEntityActions();
     bindPaginationEvents();
 
 })(jQuery);

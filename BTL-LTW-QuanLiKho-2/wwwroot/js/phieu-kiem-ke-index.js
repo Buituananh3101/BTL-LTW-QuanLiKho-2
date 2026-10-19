@@ -150,6 +150,9 @@
             }
             applyColumnVisibility();
             bindTableEvents();
+            if (F.openId && kiemKhoRowDetail) {
+                kiemKhoRowDetail.expand(F.openId);
+            }
         })
         .catch(err => {
             if (wrap) wrap.style.opacity = '1';
@@ -158,12 +161,100 @@
         });
     }
 
+    let kiemKhoColumnToggler = null;
+
+    function initColumnToggle() {
+        kiemKhoColumnToggler = KiotFilter.initColumnToggle({
+            menuSelector: '#colMenu',
+            tableSelector: '#stockTakeTable',
+            storageKey: 'kiemkho_cols',
+            defaultCols: { ma: 1, tg: 1, tt: 1, cl: 1, tang: 1, giam: 1, cb: 1, slt: 1, ghi: 1, st: 1, kho: 1 },
+            extraColsCount: 2 // 1 chk + 1 star
+        });
+    }
+
     function applyColumnVisibility() {
-        for (const [col, show] of Object.entries(F.cols)) {
-            $$(`[data-col="${col}"]`).forEach(el => {
-                el.style.display = show ? '' : 'none';
-            });
+        if (kiemKhoColumnToggler && typeof kiemKhoColumnToggler.apply === 'function') {
+            kiemKhoColumnToggler.apply();
         }
+    }
+
+    let kiemKhoRowDetail = null;
+
+    function initRowDetail() {
+        kiemKhoRowDetail = KiotFilter.initRowDetail({
+            tableSelector: '#stockTakeTable',
+            rowSelector: 'tr.product-row, tr.tbl-row',
+            detailRowSelector: '#dtl-{id}',
+            wrapSelector: '.product-detail-panel-wrap, .kiot-detail-panel-wrap',
+            tabBtnSelector: '.dp-tab',
+            tabPaneSelector: '.dp-pane',
+            excludeClickSelector: 'input, button, a, label, .w-chk, .w-star, .cell-star, .star-btn, .cell-checkbox, .row-select',
+            onOpen: function (id) {
+                F.openId = id;
+            },
+            onClose: function () {
+                F.openId = null;
+            }
+        });
+    }
+
+    function handleCancelStockTake(id, btn) {
+        id = parseInt(id);
+        const code = btn.dataset.code || ('PKK' + id);
+        const status = btn.dataset.status || '';
+
+        if (status === 'DA_DIEU_CHINH') {
+            if (window.KiotConfirm) {
+                window.KiotConfirm.alert(`Phiếu kiểm <strong>${code}</strong> đã cân bằng kho, không được phép hủy theo quy định.`, 'Cảnh báo');
+            } else {
+                alert(`Phiếu kiểm ${code} đã cân bằng kho, không được phép hủy theo quy định.`);
+            }
+            return;
+        }
+        if (status === 'HUY') {
+            if (window.KiotConfirm) {
+                window.KiotConfirm.alert(`Phiếu kiểm <strong>${code}</strong> đã được hủy trước đó.`, 'Thông báo');
+            } else {
+                alert(`Phiếu kiểm ${code} đã được hủy trước đó.`);
+            }
+            return;
+        }
+
+        const doCancel = () => {
+            fetch(`${cancelUrl}/${id}`, { method: 'POST' })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    toast(res.message || 'Đã hủy phiếu kiểm thành công.');
+                    loadTable();
+                } else {
+                    toast(res.message || 'Không thể hủy phiếu.');
+                }
+            })
+            .catch(() => toast('Lỗi kết nối máy chủ.'));
+        };
+
+        if (window.KiotConfirm) {
+            window.KiotConfirm.show({
+                title: 'Hủy phiếu kiểm kho',
+                message: `Bạn có chắc chắn muốn hủy phiếu kiểm <strong style="color: #111827;">${code}</strong>? Thao tác này không thể hoàn tác.<br><span class="text-muted small">Phiếu tạm sau khi hủy sẽ không thể mở lại. Tồn kho không bị ảnh hưởng.</span>`,
+                confirmText: 'Đồng ý hủy',
+                onConfirm: doCancel
+            });
+        } else if (confirm(`Bạn có chắc chắn muốn hủy phiếu kiểm ${code}?\nPhiếu tạm sau khi hủy sẽ không thể mở lại. Tồn kho không bị ảnh hưởng.`)) {
+            doCancel();
+        }
+    }
+
+    function initEntityActions() {
+        KiotFilter.initEntityActions({
+            containerSelector: '#tableWrapper',
+            deleteSelector: '.btn-cancel-doc',
+            onDelete: function (id, name, btn) {
+                handleCancelStockTake(id, btn);
+            }
+        });
     }
 
     /* ===== SỰ KIỆN THANH CÔNG CỤ & SIDEBAR ===== */
@@ -264,9 +355,6 @@
             window.location.href = `${exportUrl}?${p.toString()}`;
             toast('Đang xuất file dữ liệu...');
         }
-
-        // Ẩn / hiện cột qua dropdown dùng KiotFilter.initColumnToggle
-        KiotFilter.initColumnToggle('#colMenu', '#stockTakeTable', 'kiemkho_cols');
 
         // Khởi tạo Bộ lọc Thời gian dùng KiotFilter.initDateFilter
         KiotFilter.initDateFilter('date', function (from, to, text, val) {
@@ -490,119 +578,44 @@
             };
         }
 
-        // Click dòng -> mở/đóng chi tiết dòng inline (trừ checkbox, star, input, button, a)
-        wrap.onclick = e => {
-            const row = e.target.closest('tr.tbl-row');
-            if (row && !e.target.closest('input') && !e.target.closest('button') && !e.target.closest('a') && !e.target.closest('.cell-star, .star-btn')) {
-                const id = row.dataset.id;
-                const dtl = $(`#dtl-${id}`, wrap);
-                if (dtl) {
-                    const isOpen = dtl.style.display !== 'none';
-                    $$('tr.dtl', wrap).forEach(d => d.style.display = 'none');
-                    $$('tr.tbl-row', wrap).forEach(r => r.classList.remove('open'));
-                    if (!isOpen) {
-                        dtl.style.display = '';
-                        row.classList.add('open');
-                        F.openId = id;
-                    } else {
-                        F.openId = null;
-                    }
-                }
-            }
-        };
-
         // Lọc trong bảng chi tiết dòng (mã hàng & tên hàng)
-        wrap.addEventListener('input', e => {
-            const inp = e.target;
-            if (inp.classList.contains('dtl-search-code') || inp.classList.contains('dtl-search-name')) {
-                const dp = inp.closest('.dp');
-                if (!dp) return;
-                const codeKw = ($('.dtl-search-code', dp)?.value || '').toLowerCase().trim();
-                const nameKw = ($('.dtl-search-name', dp)?.value || '').toLowerCase().trim();
-                $$('.dtl-line-row', dp).forEach(tr => {
-                    const c = tr.dataset.code || '';
-                    const n = tr.dataset.name || '';
-                    const match = (!codeKw || c.includes(codeKw)) && (!nameKw || n.includes(nameKw));
-                    tr.style.display = match ? '' : 'none';
-                });
-            }
+        $jq('#tableWrapper').off('input.dtlSearch', '.dtl-search-code, .dtl-search-name').on('input.dtlSearch', '.dtl-search-code, .dtl-search-name', function () {
+            const inp = this;
+            const dp = inp.closest('.dp');
+            if (!dp) return;
+            const codeKw = ($('.dtl-search-code', dp)?.value || '').toLowerCase().trim();
+            const nameKw = ($('.dtl-search-name', dp)?.value || '').toLowerCase().trim();
+            $$('.dtl-line-row', dp).forEach(tr => {
+                const c = tr.dataset.code || '';
+                const n = tr.dataset.name || '';
+                const match = (!codeKw || c.includes(codeKw)) && (!nameKw || n.includes(nameKw));
+                tr.style.display = match ? '' : 'none';
+            });
         });
 
         // Nút Lưu ghi chú trong chi tiết dòng
-        $$('.btn-save-note', wrap).forEach(btn => {
-            btn.onclick = () => {
-                const id = parseInt(btn.dataset.id);
-                const dp = btn.closest('.dp');
-                const note = $('.dp-note', dp)?.value || '';
+        $jq('#tableWrapper').off('click.saveNote', '.btn-save-note').on('click.saveNote', '.btn-save-note', function () {
+            const btn = this;
+            const id = parseInt(btn.dataset.id);
+            const dp = btn.closest('.dp');
+            const note = $('.dp-note', dp)?.value || '';
 
-                fetch(noteUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ maPhieuKiemKe: id, ghiChu: note })
-                })
-                .then(r => r.json())
-                .then(res => {
-                    if (res.success) {
-                        toast(res.message || 'Đã lưu ghi chú.');
-                        const noteCell = $(`tr.tbl-row[data-id="${id}"] [data-col="ghi"]`);
-                        if (noteCell) noteCell.textContent = note;
-                    } else {
-                        toast(res.message || 'Lỗi khi lưu ghi chú.');
-                    }
-                })
-                .catch(() => toast('Lỗi kết nối khi lưu ghi chú.'));
-            };
-        });
-
-        // Nút Hủy phiếu trong chi tiết dòng
-        $$('.btn-cancel-doc', wrap).forEach(btn => {
-            btn.onclick = () => {
-                const id = parseInt(btn.dataset.id);
-                const code = btn.dataset.code || ('PKK' + id);
-                const status = btn.dataset.status || '';
-
-                if (status === 'DA_DIEU_CHINH') {
-                    if (window.KiotConfirm) {
-                        window.KiotConfirm.alert(`Phiếu kiểm <strong>${code}</strong> đã cân bằng kho, không được phép hủy theo quy định.`, 'Cảnh báo');
-                    } else {
-                        alert(`Phiếu kiểm ${code} đã cân bằng kho, không được phép hủy theo quy định.`);
-                    }
-                    return;
+            fetch(noteUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ maPhieuKiemKe: id, ghiChu: note })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    toast(res.message || 'Đã lưu ghi chú.');
+                    const noteCell = $(`tr.tbl-row[data-id="${id}"] [data-col="ghi"]`);
+                    if (noteCell) noteCell.textContent = note;
+                } else {
+                    toast(res.message || 'Lỗi khi lưu ghi chú.');
                 }
-                if (status === 'HUY') {
-                    if (window.KiotConfirm) {
-                        window.KiotConfirm.alert(`Phiếu kiểm <strong>${code}</strong> đã được hủy trước đó.`, 'Thông báo');
-                    } else {
-                        alert(`Phiếu kiểm ${code} đã được hủy trước đó.`);
-                    }
-                    return;
-                }
-
-                const doCancel = () => {
-                    fetch(`${cancelUrl}/${id}`, { method: 'POST' })
-                    .then(r => r.json())
-                    .then(res => {
-                        if (res.success) {
-                            toast(res.message || 'Đã hủy phiếu kiểm thành công.');
-                            loadTable();
-                        } else {
-                            toast(res.message || 'Không thể hủy phiếu.');
-                        }
-                    })
-                    .catch(() => toast('Lỗi kết nối máy chủ.'));
-                };
-
-                if (window.KiotConfirm) {
-                    window.KiotConfirm.show({
-                        title: 'Hủy phiếu kiểm kho',
-                        message: `Bạn có chắc chắn muốn hủy phiếu kiểm <strong style="color: #111827;">${code}</strong>? Thao tác này không thể hoàn tác.<br><span class="text-muted small">Phiếu tạm sau khi hủy sẽ không thể mở lại. Tồn kho không bị ảnh hưởng.</span>`,
-                        confirmText: 'Đồng ý hủy',
-                        onConfirm: doCancel
-                    });
-                } else if (confirm(`Bạn có chắc chắn muốn hủy phiếu kiểm ${code}?\nPhiếu tạm sau khi hủy sẽ không thể mở lại. Tồn kho không bị ảnh hưởng.`)) {
-                    doCancel();
-                }
-            };
+            })
+            .catch(() => toast('Lỗi kết nối khi lưu ghi chú.'));
         });
     }
 
@@ -734,5 +747,8 @@
     // Khởi tạo ban đầu
     bindSidebarEvents();
     bindTableEvents();
+    initColumnToggle();
+    initRowDetail();
+    initEntityActions();
     paintFilters();
 })();

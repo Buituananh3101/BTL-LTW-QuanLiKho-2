@@ -1,21 +1,888 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-16 – Modal Xác Nhận Ngừng Hoạt Động Nhà Cung Cấp (Phiên 74)
+Cập nhật lần cuối: 2026-10-18 – Căn Phải Thời Gian & Cho Phép Nhập Tay / Tự Động Sinh Mã Chuyển Hàng Chuẩn Kiểm Kho (Phiên 119)
 
 ---
 
 ## Đang làm
-- Sẵn sàng tiếp tục các hạng mục nâng cấp giao diện hoặc xây dựng phân hệ kế tiếp theo yêu cầu người dùng.
+- Sẵn sàng kiểm thử trải nghiệm màn hình Lập/Sửa phiếu chuyển hàng (`/ChuyenKho/Create`, `/ChuyenKho/Edit`): ô Thời gian và Mã chuyển hàng căn lề phải sắc nét chuẩn Kiểm kho; ô Mã chuyển hàng cho phép nhập tay hoặc để trống tự động sinh mã `CKxxxxxx`, kiểm tra chống trùng mã thân thiện.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế modal thêm/sửa, bảng hiển thị và tùy chọn hiển thị cột nhà cung cấp cùng người dùng.
-2. Lập tài liệu đặc tả chi tiết `docs/specs/nhap-kho.md` theo chuẩn Hàng hóa & Nhà cung cấp.
-3. Xây dựng ViewModel cho Nhập kho (`NhapKhoIndexVM`, `NhapKhoFormVM`, `NhapKhoLineVM`...).
-4. Xây dựng `PhieuNhapController` và View giao diện (`Views/PhieuNhap/`) theo phong cách KiotViet.
+1. Kiểm tra trải nghiệm thực tế các luồng Chuyển kho, Xuất hủy, Nhập hàng.
+2. Xây dựng phân hệ Trả hàng nhập (Purchase Returns) theo yêu cầu.
 
 ---
+
+- **Căn Phải Thời Gian & Cho Phép Nhập Tay / Tự Động Sinh Mã Chuyển Hàng Chuẩn Kiểm Kho (Phiên 119)**:
+  - **Nhu cầu**: Người dùng phản ánh: "trong phần chuyển kho, phần thời gian và mã chuyển hàng để dịch sang phải. phần mã chuyển hàng sửa thành tự động và nhâp tay nếu ko nhập tay thì tự động giống kiểm kho".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `Views/ChuyenKho/_ChuyenKhoForm.cshtml`, ô `#fDate` có inline style `text-align: center;` thay vì căn lề phải (`text-align: right;`).
+    + Ô `#txtDocCode` sử dụng class `form-control form-control-sm text-center` và bị khóa cứng `disabled`, luôn bị điền sẵn mã sinh trước (`CK000003`) khi tạo mới, không cho phép người dùng tùy biến nhập mã tay hay hiển thị placeholder `"Mã phiếu tự động"` chuẩn Kiểm kho (`PhieuKiemKe`).
+    + Trong `wwwroot/js/chuyen-kho-form.js`, hàm `submitTransfer` hoàn toàn thiếu trường `MaPhieu` trong object `payload` gửi lên server.
+    + Trong `Controllers/ChuyenKhoController.cs`:
+      * Action `Create` tự gán trước `MaPhieu = await SinhMaPhieuTuDongAsync()` vào ViewModel làm mất placeholder.
+      * Action `Save` nếu phát hiện trùng mã nhập tay thì tự động ghi đè bằng `SinhMaPhieuTuDongAsync()` một cách âm thầm thay vì thông báo lỗi tiếng Việt thân thiện cho người dùng; đồng thời thiếu cập nhật mã khi sửa phiếu tạm (`!isNew`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`_ChuyenKhoForm.cshtml`**:
+      * Đổi `#fDate` sang `text-align: right;`, `color: #1e293b;`, `width: 190px;` đồng bộ mép phải với dropdown kho nhận và số liệu tổng kết.
+      * Đổi `#txtDocCode` từ `form-control` sang `class="inp"`, `placeholder="Mã phiếu tự động"`, bỏ `disabled` (chỉ disabled khi `Model.IsReadOnly`), căn phải `text-align: right;`, `text-transform: uppercase;`.
+    + **`ChuyenKhoViewModels.cs`**: Bổ sung `IsReadOnly => TrangThai != "NHAP";` và `MaPhieuHienThi` vào `ChuyenKhoFormVM`.
+    + **`ChuyenKhoController.cs`**:
+      * Trong `Create`: Đặt `MaPhieu = ""` để form hiển thị placeholder `"Mã phiếu tự động"`.
+      * Trong `Save`: Chuẩn hóa mã nhập tay (`Trim().ToUpper()`), kiểm tra trùng lặp trên bảng `PhieuChuyenKho` (loại trừ chính phiếu nếu đang sửa). Nếu trùng, trả về lỗi: `Mã chuyển hàng '{codeToSet}' đã tồn tại trong hệ thống. Vui lòng chọn mã khác.` Nếu để trống, tự động sinh mã `CK000001`... khi tạo mới hoặc giữ nguyên mã cũ khi sửa.
+    + **`chuyen-kho-form.js`**: Bổ sung `MaPhieu: ($('#txtDocCode').val() || '').trim().toUpperCase() || null` vào `payload` gửi đi; thêm event listener tự động viết hoa khi gõ vào `#txtDocCode`.
+    + **`chuyen-kho.css`**: Bổ sung selector `.f-panel .pr`, `.f-panel .pr .v` (`justify-content: flex-end; align-items: center;`) và `.f-panel .pr .inp` căn phải sắc nét, border/focus chuẩn KiotViet.
+    + **Kiểm tra**:
+      * `node -c chuyen-kho-form.js` đạt 0 lỗi cú pháp.
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+      * Cập nhật đặc tả `docs/specs/chuyen-kho.md` đạt 7.950 ký tự (< 8.000 ký tự theo Rule 12).
+
+
+- **Tối Ưu Đóng Mở Rightmenu (Panel Phải) Chuyển Hàng Mượt Chuẩn Kiểm Kho (Phiên 118)**:
+  - **Nhu cầu**: Người dùng phản ánh: "sửa lại phần đóng mở rightmenu trong chuyển hàng mượt như phần kiểm kho".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `chuyen-kho.css`, rule `.f-panel.collapsed` có các thuộc tính `max-width: 0 !important; opacity: 0 !important; pointer-events: none !important;`. Vì `max-width` không nằm trong danh sách transition và `opacity 0.2s` lệch pha với transition `0.25s cubic-bezier` của `width`, trình duyệt ngắt đột ngột chiều rộng ngay frame đầu tiên gây hiện tượng giật/nhảy hình.
+    + Thẻ con `.f-panel-inner` thiếu thiết lập chiều rộng cố định `width: 440px !important; min-width: 440px !important; flex-shrink: 0 !important;`, dẫn tới việc nội dung (chữ, nút, input) bị co rúm, gãy dòng trong quá trình panel co lại.
+    + Trong `Views/ChuyenKho/_ChuyenKhoForm.cshtml`, nút `#btnToggleRightPanel` đặt trước `<aside id="rightPanel">`, cản trở selector sibling `~`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`Views/ChuyenKho/_ChuyenKhoForm.cshtml`**: Di chuyển `#btnToggleRightPanel` đặt ngay sau `</aside>`, khớp chuẩn cấu trúc như Kiểm kho và Xuất hủy.
+    + **`wwwroot/css/chuyen-kho.css`**:
+      * Loại bỏ `opacity: 0 !important`, `max-width: 0 !important`, `pointer-events: none !important`.
+      * Bổ sung `.f-panel-inner` với `width: 440px !important; min-width: 440px !important; flex-shrink: 0 !important;` giúp bảo toàn layout tĩnh trong suốt quá trình panel trượt như cánh cửa trượt (curtain).
+      * Đồng bộ thời gian và đường cong gia tốc `0.25s cubic-bezier(0.25, 1, 0.35, 1)` cho cả `.f-panel` (thu hẹp width) và `.panel-toggle` (trượt right từ 425px về 8px).
+      * Bổ sung đầy đủ tổ hợp selector `.form-wrap.panel-collapsed .panel-toggle, .form-wrap.panel-collapsed #btnToggleRightPanel, #ckFormWrap.panel-collapsed #btnToggleRightPanel, .panel-toggle.collapsed, #btnToggleRightPanel.collapsed, .f-panel.collapsed ~ .panel-toggle, #rightPanel.collapsed ~ #btnToggleRightPanel { right: 8px !important; }`.
+    + **`wwwroot/js/chuyen-kho-form.js`**: Trong hàm `toggleRightPanel()`, gán tham số boolean xác định `$wrap.toggleClass('panel-collapsed', isCollapsed)` và `$btn.toggleClass('collapsed', isCollapsed)` đồng bộ tuyệt đối với `$panel.hasClass('collapsed')`.
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+    + `node -c chuyen-kho-form.js` hoàn thành với **0 Errors**.
+    + Đồng bộ tài liệu đặc tả `docs/specs/chuyen-kho.md` (7.967 ký tự < 8.000 ký tự theo Rule 12).
+
+- **Đồng Bộ Bộ Chọn Ngày Giờ Lập Phiếu Chuyển Hàng Chuẩn Kiểm Tồn (Phiên 117)**:
+  - **Nhu cầu**: Người dùng gửi ảnh `media_1792317438387_4e3a4eee.png` phản ánh: "sửa lại phần chọn thời gian này dựa trên phần chọn thời gian trong kiểm tồn".
+  - **Nguyên nhân**:
+    + Màn hình Lập/Sửa phiếu chuyển hàng (`/ChuyenKho/Create`, `/ChuyenKho/Edit`) đang dùng thẻ `<input type="datetime-local">` nguyên bản của trình duyệt. Popup lịch của trình duyệt thô cứng, hiển thị dạng cuộn giờ/phút AM-PM không đồng bộ với giao diện popup lịch KiotViet của hệ thống.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`_ChuyenKhoForm.cshtml`**: Thay thẻ `datetime-local` bằng cấu trúc chuẩn Kiểm tồn: ô input `.inp` hiển thị `dd/MM/yyyy HH:mm` kèm popup `.pop.dtpop.shadow-sm#dtPop` đặt trong container tương đối `.v.relw`.
+    + **`chuyen-kho-form.js`**:
+      * Triển khai toàn bộ logic chọn ngày giờ chuẩn Kiểm tồn & Nhập hàng: render lịch tháng `calHTML`, nút chuyển tháng `<` `>` (`.rp-nav`), lưới 7 ngày trong tuần `DOW`, đánh dấu ngày hôm nay (`.today`) và ngày đang chọn (`.sel`).
+      * Render cột danh sách 48 mốc thời gian cách nhau 30 phút (`.times button`), tự động cuộn đến giờ hiện tại.
+      * Tự động cập nhật `createdDate`, hiển thị ra ô input dạng `dd/MM/yyyy HH:mm`, gửi lên API dạng ISO chuẩn `formatLocalIso`.
+      * Tự động đóng popup khi click ra ngoài (`#dtPop`).
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+    + `node -c chuyen-kho-form.js` hoàn thành với **0 Errors**.
+    + Đồng bộ tài liệu đặc tả `docs/specs/chuyen-kho.md`.
+
+- **Sửa Lỗi Nút Đóng Mở Rightmenu (Panel Phải) Màn Hình Xuất Hủy (Phiên 116)**:
+  - **Nhu cầu**: Người dùng phản ánh: "nút đóng mở rightmenu phần xuất hủy lỗi" kèm ảnh chụp màn hình (`/XuatHuy/Create`). Khi thu gọn panel phải, nút tròn toggle `<` bị kẹt trôi lơ lửng ở vị trí `right: 425px` giữa màn hình thay vì bám sát vào mép phải.
+  - **Nguyên nhân cốt lõi**:
+    + Trong `xuat-huy-form.js`, hàm `togglePanel()` chỉ toggle class `collapsed` trên `#panel` và `#pTg`, nhưng thiếu việc toggle class `panel-collapsed` trên `#formWrap`.
+    + Trong `Views/XuatHuy/_XuatHuyForm.cshtml`, button `#pTg` được đặt trước `<aside id="panel">`, khiến selector CSS sibling combinator `.f-panel.collapsed ~ .panel-toggle` không bao giờ khớp.
+    + Trong `xuat-huy.css` và `kiem-kho.css`, thiếu selector trực tiếp `.panel-toggle.collapsed` với `right: 8px !important;`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Chuyển vị trí nút `#pTg` (`Views/XuatHuy/_XuatHuyForm.cshtml`)**: Đặt button `#pTg` ngay sau thẻ đóng `</aside>` để khớp tự nhiên selector CSS sibling `~`.
+    + **Bổ sung CSS định vị (`xuat-huy.css` & `kiem-kho.css`)**:
+      * Bổ sung `.form-wrap.panel-collapsed .panel-toggle, .panel-toggle.collapsed, .f-panel.collapsed ~ .panel-toggle { right: 8px !important; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18) !important; }`.
+    + **Nâng cấp JavaScript (`wwwroot/js/xuat-huy-form.js`)**:
+      * Trong `togglePanel()`, bổ sung `wrap?.classList.toggle('panel-collapsed', isCollapsed)`.
+      * Cập nhật tooltip `title` thành `Mở rộng thông tin (Phím tắt F4)` khi đóng và `Thu gọn thông tin (Phím tắt F4)` khi mở.
+      * Đổi icon chuẩn `bi-chevron-left` khi đóng và `bi-chevron-right` khi mở.
+    + **Kiểm tra**:
+      * `dotnet build /t:Compile` đạt **0 Errors**.
+      * `node -c xuat-huy-form.js` đạt **0 Errors**.
+      * Đồng bộ tài liệu đặc tả `docs/specs/xuat-huy.md` (7.472 ký tự < 8.000 ký tự theo Rule 12).
+
+
+- **Khắc Phục Lỗi Nút Đóng Mở Panel Phải (Right Menu) Trên Form Chuyển Hàng (Phiên 115)**:
+  - **Nhu cầu**: Người dùng phản ánh: "rightmenu đóng mở ko được" trên màn hình Lập/Sửa phiếu chuyển hàng (`/ChuyenKho/Create` và `/ChuyenKho/Edit/{id}`).
+  - **Nguyên nhân cốt lõi**:
+    + Trong `chuyen-kho-form.js`, sự kiện click `#btnToggleRightPanel` gán class sai: gọi `$panel.addClass('panel-collapsed')` thay vì `$panel.toggleClass('collapsed')`.
+    + Trong file CSS chuẩn `kiem-kho.css`, selector thu gọn panel là `.f-panel.collapsed` và selector dời nút toggle ra mép phải là `.form-wrap.panel-collapsed .panel-toggle`. Việc JS không gán class `panel-collapsed` cho `#ckFormWrap` và không gán `collapsed` cho `#rightPanel` khiến panel không bao giờ co lại về 0px và nút toggle bị kẹt tại `right: 425px`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`chuyen-kho.css`**: Định nghĩa tường minh các quy tắc đóng/mở `.f-panel.collapsed`, `#rightPanel.collapsed` co chiều rộng về `0 !important` có animation mượt mà `0.25s cubic-bezier(0.25, 1, 0.35, 1)`. Đồng thời định nghĩa nút `#btnToggleRightPanel` tự động trượt ra mép phải `right: 8px !important` khi panel thu gọn.
+    + **`chuyen-kho-form.js`**: Viết lại hàm `toggleRightPanel()` chuẩn chỉnh:
+      * Toggling đồng bộ class `collapsed` trên `#rightPanel` và `#btnToggleRightPanel`.
+      * Toggling class `panel-collapsed` trên `#ckFormWrap`.
+      * Cập nhật icon `bi-chevron-left` khi panel đóng và `bi-chevron-right` khi panel mở.
+      * Cập nhật tooltip `title` tương ứng và liên kết phím tắt toàn cục `F4`.
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile`: **0 Errors, 2 Warnings**.
+    + `node -c chuyen-kho-form.js`: **0 Errors**.
+    + Đồng bộ `docs/specs/chuyen-kho.md`.
+
+- **Sửa Lỗi Không Tìm Kiếm & Không Chọn Được Hàng Hóa Trên Form Chuyển Hàng (Phiên 114)**:
+  - **Nhu cầu**: Người dùng phản ánh: "vẫn lỗi tìm kiếm ko dược" trên form chuyển hàng (`/ChuyenKho/Create` và `/ChuyenKho/Edit/{id}`).
+  - **Nguyên nhân cốt lõi phát hiện**:
+    1. **Sai trạng thái trong truy vấn CSDL (`HangHoa`)**: Bảng `HangHoa` có ràng buộc kiểm tra `[CK_HangHoa_TrangThai]` chỉ nhận 2 giá trị `'DANG_BAN'` hoặc `'NGUNG_BAN'`. Trong Action `SearchProducts` của `ChuyenKhoController.cs`, code lọc `.Where(h => h.TrangThai == "HOAT_DONG")`, dẫn tới kết quả truy vấn SQL luôn trả về rỗng `[]` (0 hàng hóa).
+    2. **Thiếu CSS hiển thị dropdown Autocomplete**: Tệp `nhap-hang.css` định nghĩa `.nh-autocomplete-dropdown { display: none; }` nhưng thiếu quy tắc `.nh-autocomplete-dropdown.show { display: block !important; }`, khiến dropdown khi được thêm class `show` vẫn bị ẩn.
+    3. **Đồng bộ component F3 dùng chung**: `Create.cshtml` và `Edit.cshtml` chưa tích hợp tệp `f3-product-search.js` chuẩn KiotViet như bên Nhập hàng và Kiểm kho.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`ChuyenKhoController.cs`**:
+      * Đổi điều kiện truy vấn sang `.Where(h => h.TrangThai == "DANG_BAN")` và tìm kiếm trực tiếp `h.TenHang.Contains(q) || h.MaHangNoiBo.Contains(q)`.
+      * Bổ sung hỗ trợ cả 2 tham số `warehouseId` và `whId`.
+      * Trả về đầy đủ các trường dữ liệu (`maHang`, `maHangNoiBo`, `tenHang`, `tenDvt`, `tenNhom`, `gia`, `tonKho`, `id`, `code`, `name`, `unit`, `cost`, `stock`).
+    + **`Create.cshtml` & `Edit.cshtml`**: Nạp `f3-product-search.js` trước `chuyen-kho-form.js`.
+    + **`chuyen-kho-form.js`**:
+      * Tích hợp `initF3ProductSearch` chuẩn KiotViet (có phím tắt F3, debounce, điều hướng bàn phím mũi tên lên/xuống, Enter để chọn).
+      * Bổ sung cơ chế fallback nội bộ dùng `$drop.show()` và `$drop.hide()` đảm bảo luôn bật popup.
+      * Chuẩn hóa hàm `addProduct(item)` hỗ trợ mọi định dạng trường trả về từ API.
+    + **`chuyen-kho.css`**: Thêm quy tắc tường minh `.nh-autocomplete-dropdown.show { display: block !important; }`.
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile`: **0 Errors, 2 Warnings**.
+    + `node -c chuyen-kho-form.js`: **0 Errors**.
+    + Đồng bộ `docs/specs/chuyen-kho.md`.
+
+- **Sửa Lỗi Thanh Tìm Kiếm F3 & Nâng Cấp Dropdown Kho Nhận Chuẩn KiotViet (Phiên 113)**:
+  - **Nhu cầu**: Người dùng gửi ảnh `media_1792300655473_fa6347a9.png` phản ánh: "thanh tìm kiếm bị lỗi, dropdown kho nhận sửa giao diện".
+  - **Nguyên nhân**:
+    1. **Thanh tìm kiếm F3**: Thẻ `<input>` bị gán class Bootstrap `px-2` (`padding-left: 0.5rem !important`) và thẻ `<i>` bị gán `ms-2`, khiến icon kính lúp bị dời sang 18px trong khi chữ placeholder bắt đầu ở 8px, dẫn tới icon nằm đè lên chữ "Tìm".
+    2. **Dropdown Kho nhận**: Sử dụng thẻ `<select class="form-select">` nguyên bản của trình duyệt, hiển thị thô cứng, popup xanh không đồng bộ với thiết kế KiotViet.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`_ChuyenKhoForm.cshtml`**:
+      * Chuẩn hóa thanh tìm kiếm F3: bỏ `px-2 w-100 border-0` và `ms-2`, input có `padding: 0 16px 0 34px` và icon cố định ở `left: 10px`, căn chỉnh thẳng hàng hoàn hảo.
+      * Thay thế thẻ `<select>` bằng custom dropdown Bootstrap chuẩn KiotViet: nút bấm `.wh-custom-select-btn` nền trắng bo góc 6px, danh sách kho `.wh-custom-dropdown-menu` bo góc 8px đổ bóng `shadow-sm`, hiển thị icon tòa nhà `<i class="bi bi-buildings">` và checkmark `<i class="bi bi-check2">` cho kho đang chọn.
+    + **`chuyen-kho-form.js`**:
+      * Bổ sung sự kiện click `.wh-item-opt`: cập nhật giá trị hidden input `#fKhoNhan`, đổi tên hiển thị, chuyển dấu checkmark, xóa thông báo lỗi và viền đỏ nếu có.
+      * Tinh chỉnh `submitTransfer`: nếu chưa chọn kho nhận sẽ bôi đỏ viền nút dropdown `#btnSelectKhoNhan` và focus trực tiếp.
+    + **`chuyen-kho.css`**:
+      * Định kiểu hoàn chỉnh cho `.f-top .searchbox`, `.routebox`, `.wh-custom-select-btn`, `.wh-custom-dropdown-menu`.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 2 Warnings**.
+      * `node -c chuyen-kho-form.js` đạt **0 Errors**.
+      * Đồng bộ `docs/specs/chuyen-kho.md` (7.929 ký tự < 8.000 ký tự).
+
+- **Khắc Phục Triệt Để Hiện Tượng Rung Giật Khi Mở Chi Tiết Phiếu Kiểm Tồn (Phiên 112)**:
+  - **Nhu cầu**: Người dùng phản ánh: "trong phần kiểm tồn khi tôi mở phần chỉ tiết thì nó cứ giật giật, sửa lại cho ổn định".
+  - **Nguyên nhân cốt lõi phát hiện**:
+    1. **Xung đột mô hình đường viền bảng (Border Conflict)**: Trong `kiem-kho.css:393`, `table.tbl` bị gán `border-collapse: collapse;` (trong khi chuẩn toàn hệ thống là `separate`). Khi `slideDown` chạy, mỗi frame trình duyệt phải giải quyết xung đột viền 2px/3px và sticky header liên tục, làm các dòng trên dưới rung giật 2-3px.
+    2. **Xung đột hoạt ảnh đồng thời (Animation Clash)**: Trong `kiot-filter.js`, khi bấm dòng mới thì dòng cũ chạy `slideUp(150)` song song với dòng mới chạy `slideDown(150)`, hai dòng cùng co giãn chiều cao trong cùng `tbody` làm layout nhảy liên tục; ngoài ra thiếu `.stop(true, true)` khiến thao tác click nhanh bị dồn ứ hàng đợi animation.
+    3. **DOM Layout Thrashing**: Mỗi lần mở chi tiết, `kiot-filter.js` quét toàn bộ `find('tr')` bao gồm hàng trăm dòng sản phẩm trong bảng con `dtl-tbl` để xóa/gán class `.last-visible-col`, gây nghẽn main thread.
+    4. **Negative margin trên `.dp-tabs`**: `.dp-tabs` có `margin: 0 -20px 14px;` bên trong `.dp`, khi `.product-detail-panel-wrap` có `overflow: hidden;` lúc `slideDown`, trình duyệt tính toán lại subpixel tràn ngang gây giật lề.
+    5. **Thanh cuộn dọc xuất hiện đột ngột (Scrollbar Pop-in)**: Chi tiết cao ~500px khiến container bảng vượt quá chiều cao màn hình, thanh cuộn 17px nhảy vào làm co bảng đột ngột theo chiều ngang.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`kiem-kho.css`**: Đổi `table.tbl` và `#stockTakeTable` sang `border-collapse: separate !important; border-spacing: 0 !important;` chuẩn mực. Bỏ negative margin trên `.dp-tabs`. Thêm `scrollbar-gutter: stable;` cho `.kiot-table-scroll-body`.
+    + **`kiot-filter.js`**: Khi mở dòng mới, lập tức ẩn dòng cũ (`.stop(true, true).hide()`) không chạy đồng thời hai hiệu ứng slide. Thêm `.stop(true, true)` trên `$wrap`. Tối ưu gán `.last-visible-col` trực tiếp trên `$row.children('td:visible')`, loại bỏ hoàn toàn quét `find('tr')`. Chuẩn hóa selector click dòng bảng khi có nhiều class.
+    + **`site.css` & `chuyen-kho.css`**: Đồng bộ `scrollbar-gutter: stable;` và bỏ negative margin trên `.dp-tabs`.
+    + **`_PhieuKiemKeTable.cshtml` & `_ChuyenKhoTable.cshtml`**: Bỏ `shadow-sm` trên panel chi tiết tránh hiện tượng vẽ lại bóng (repaint artifact) trong bảng.
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile`: **0 Errors, 4 NuGet Warnings**.
+    + `node -c kiot-filter.js phieu-kiem-ke-index.js`: **0 Errors**.
+    + Đồng bộ `docs/specs/kiem-kho.md` (7.695 ký tự < 8.000 ký tự).
+
+- **Chuẩn Hóa Font & Màu Chữ Thường Cho Các Dòng Bảng Chuyển Hàng Giống Hàng Hóa (Phiên 111)**:
+  - **Nhu cầu**: Người dùng phản ánh qua ảnh chụp `media_1792299519860_cd6b7817.png` yêu cầu: "sửa font, màu các hàng hiển thị thành chữ thường giống danh sách hàng hóa hết".
+  - **Nguyên nhân**:
+    + Mã phiếu `maphieu` bị gán class `fw-semibold text-primary` làm chữ bị xanh và đậm.
+    + Cột `khonguon` và `khodich` bị bọc trong thẻ `<b class="text-primary">` khi trùng kho hiện tại, làm tên kho bị đậm và xanh.
+    + Cột `slchuyen`, `slnhan`, `giatri` bị gán các class in đậm `fw-semibold`, `fw-medium`, `text-danger fw-bold`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`_ChuyenKhoTable.cshtml`**:
+      * Đưa toàn bộ các ô dữ liệu trên từng dòng (`maphieu`, `khonguon`, `khodich`, `slchuyen`, `slnhan`, `giatri`) về chữ thường (regular font, color chuẩn `#1f2937`) giống hệt `_HangHoaTable.cshtml`.
+      * Gỡ bỏ hoàn toàn các class `fw-semibold`, `text-primary`, `fw-medium`, và thẻ `<b>`.
+    + **`chuyen-kho.css`**:
+      * Bổ sung luật CSS ép chuẩn `#transferTable tbody tr.product-row td` có `font-size: 13px !important; color: #1f2937 !important; font-weight: 400 !important;` đồng bộ tuyệt đối với Hàng hóa.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 2 Warnings**.
+
+- **Đồng Bộ Toàn Diện Chi Tiết Phiếu Chuyển Hàng Theo Chuẩn Kiểm Tồn (Phiên 110)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "sửa lại phần chi tiết trong phần chuyển hàng giống phần kiểm tồn, màu sắc chữ, font chữ, giao diện tương tác" kèm ảnh chụp màn hình drawer chuẩn của Kiểm tồn (`media_1792298582878_bd251676.png`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tái cấu trúc HTML Drawer trong `Views/ChuyenKho/_ChuyenKhoTable.cshtml`**:
+      * Thay thế cấu trúc grid 4 cột và thẻ card bằng khuôn mẫu Drawer Kiểm tồn (`PhieuKiemKe`).
+      * Header tab: `.dp-tabs` với nút `.dp-tab.active` gạch chân màu xanh thương hiệu (`#0a66e8`).
+      * Tiêu đề: `h2` với mã phiếu `18px` in đậm và badge trạng thái pill bo tròn mềm mại (`bg-success-subtle`, `bg-primary-subtle`, `bg-warning-subtle`, `bg-secondary-subtle`).
+      * Thông tin tóm tắt: `.meta.text-muted.small` thẳng hàng ngăn cách bằng đường kẻ đứng mảnh `1px solid #cfd5de` (Từ kho, Tới kho, Người tạo, Ngày tạo) và ngắt dòng `<i class="br"></i>` (Người chuyển, Ngày chuyển, Người nhận, Ngày nhận).
+      * Bảng hàng hóa chuyển: `.dtl-tbl.table.table-sm.table-bordered` với hàng tìm kiếm nhanh `tr.fin` (`.dtl-search-code`, `.dtl-search-name`).
+      * Cảnh báo: Alert nhận thiếu và alert hướng dẫn chọn kho đích hiển thị gọn gàng dưới bảng.
+      * Khối đáy: `.dp-bottom` gồm textarea `.dp-note` (min-width 250px, cao 105px, bo góc 6px) bên trái và danh sách số liệu `.sums` bên phải (không đóng khung thẻ hộp).
+      * Hàng nút hành động: `.dp-actions` phân cách gạch viền trên, nút phụ bên trái (Hủy/Hủy chuyển, Sao chép, Xuất file), `.ms-auto` đẩy nút chính sang phải (Lưu ghi chú, In, Mở phiếu, Chuyển hàng, Nhận hàng).
+    + **Đồng bộ CSS & JavaScript (`chuyen-kho.css`, `chuyen-kho-index.js`)**:
+      * Bổ sung đầy đủ hệ thống CSS class của Kiểm tồn (`.dp`, `.dp-tabs`, `.dp-tab`, `.meta`, `.dtl-tbl`, `.dp-bottom`, `.sums`, `.dp-actions`, `.kk-detail-fixed-wrap`) vào `chuyen-kho.css`.
+      * Tương thích hoàn toàn với các event handler: lọc tìm hàng nhanh theo mã/tên trong drawer, lưu ghi chú `.btn-save-note`, hủy phiếu `.btn-cancel-transfer`, mở modal nhận hàng `.btn-open-receive`.
+    + **Kiểm tra & Biên dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 NuGet Warnings**.
+      * `node -c chuyen-kho-index.js` đạt **0 Errors**.
+      * Đồng bộ `docs/specs/chuyen-kho.md` (7.620 ký tự < 8.000 ký tự).
+
+- **Chuẩn Hóa Toàn Bộ Giao Diện & Drawer Phiếu Chuyển Hàng Đồng Bộ Theo Chuẩn Hàng Hóa (Phiên 109)**:
+  - **Nhu cầu**: Người dùng phản ánh "trong phần chuyển hàng, giao diện nhìn loạn quá, sửa lại dựa trên danh sách hàng hóa cho đồng bộ và đẹp" kèm ảnh chụp chi tiết (`media_1792297543540_26f709bb.png`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bảng danh sách chính (`Views/ChuyenKho/_ChuyenKhoTable.cshtml`)**:
+      * Bổ sung dòng tổng hợp `tr.summary-row` ngay dưới `<thead>` tính tổng SL chuyển, tổng SL nhận, tổng Giá trị chuyển đồng bộ 100% với `_HangHoaTable.cshtml`.
+      * Tinh chỉnh độ rộng các cột dữ liệu cân đối, kết hợp `style="width: max-content; min-width: 760px;"` giúp bảng tự động co lại đẹp mắt khi người dùng ẩn bớt cột.
+    + **Tái cấu trúc toàn diện Drawer chi tiết theo chuẩn Hàng hóa (`HangHoa`)**:
+      * Thay thế thanh tab cũ bằng `.product-detail-tabs` và `.product-detail-tab-btn` chuẩn của hệ thống.
+      * Chuẩn hóa tiêu đề `h4.product-detail-title` và badge trạng thái KiotViet.
+      * Loại bỏ khối lộ trình route box 2 badge kẹp mũi tên và dòng meta text dạng gạch đứng `|`. Thay bằng lưới thuộc tính 4 cột `.row.g-3.mb-3.product-attr-grid` (`.attr-item`, `.attr-label`, `.attr-value`): Cột 1 (Từ kho/Tới kho), Cột 2 (Người tạo/Thời gian tạo), Cột 3 (Người chuyển/Thời gian chuyển), Cột 4 (Người nhận/Thời gian nhận).
+      * Bọc bảng danh sách sản phẩm chuyển trong thẻ `.border.rounded-2.overflow-hidden.bg-white` với header nền `#f8fafc`, hàng tìm kiếm nhanh `tr.fin` gọn gàng, định dạng số lượng và thành tiền canh phải sắc nét.
+      * Khối ghi chú và tóm tắt số liệu 2 cột cân xứng: bên trái là textarea có nhãn rõ ràng, bên phải là thẻ tổng hợp bo tròn `.p-3.rounded-2.border` trên nền `#f8fafc`.
+      * Đồng bộ hàng nút thao tác chuẩn Hàng hóa `.product-detail-footer` chia làm 2 cụm: `.product-detail-footer-left` (Xóa/Hủy, Sao chép, Xuất file) và `.product-detail-footer-right` (Lưu ghi chú, In, Mở phiếu/Chuyển hàng/Nhận hàng).
+    + **Dọn dẹp Stylesheet & JavaScript (`chuyen-kho.css`, `chuyen-kho-index.js`)**:
+      * Loại bỏ các class custom thừa (`.route`, `.routebox`, `.dp`, `.dp-tabs`, `.dp-bottom`, `.dp-actions`), tái sử dụng toàn bộ hệ thống CSS chuẩn của `site.css`.
+      * Cập nhật `tabBtnSelector: '.product-detail-tab-btn, .dp-tab'` trong JavaScript.
+    + **Kiểm tra & Biên dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 NuGet Warnings**.
+      * `node -c chuyen-kho-index.js` đạt **0 Errors**.
+      * Đồng bộ `docs/specs/chuyen-kho.md` (7.495 ký tự < 8.000 ký tự).
+
+- **Sửa Lỗi Không Thu Gọn Bảng Khi Còn Ít Cột Cho Nhập Hàng, Chuyển Kho, Xuất Hủy Theo Chuẩn Nhà Cung Cấp (Phiên 108)**:
+  - **Nhu cầu**: Người dùng phản ánh lỗi: "lỗi khi còn ít cột nhưng nó lại ko thu gọn lại" kèm ảnh chụp màn hình phân hệ Nhập hàng (`media_1792296391805_48d14108.png`) khi chỉ bật 4 cột (Mã nhập hàng, Thời gian, Nhà cung cấp, Trạng thái), bảng bị kéo giãn to đùng tràn toàn màn hình thay vì thu gọn lại vừa vặn như chuẩn Nhà cung cấp.
+  - **Nguyên nhân cốt lõi**:
+    + `#receiptTable` bị khóa cứng `min-width: 1750px !important; width: 100%;` trong cả inline style và CSS `nhap-hang.css`.
+    + `#transferTable` bị khóa cứng `min-width: 1450px !important; width: 100%;` trong `chuyen-kho.css` và inline `min-width: 1550px`.
+    + `#xuatHuyTable` bị gán `min-width: 1100px !important;`.
+    + Các thẻ `<th>` thiếu `min-width` cố định tương ứng độ rộng cột, hoặc ô chi tiết `tr.dtl > td` bị gắn `border-0`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Nhập hàng (`Views/NhapHang/_NhapHangTable.cshtml` & `wwwroot/css/nhap-hang.css`)**:
+      * Đưa `#receiptTable` về chuẩn Nhà cung cấp: `<table class="tbl" id="receiptTable" style="width: max-content; min-width: 760px;">` và CSS `width: max-content !important; min-width: 760px !important; table-layout: fixed !important;`.
+      * Bổ sung `min-width` cho tất cả 22 cột `<th>`.
+      * Gỡ bỏ `border-0` ở ô `td[colspan="22"]` dòng chi tiết `tr.dtl`.
+    + **Chuyển kho (`Views/ChuyenKho/_ChuyenKhoTable.cshtml` & `wwwroot/css/chuyen-kho.css`)**:
+      * Đưa `#transferTable` về chuẩn: `<table class="tbl" id="transferTable" style="width: max-content; min-width: 760px;">` và CSS `width: max-content !important; min-width: 760px !important; table-layout: fixed !important;`.
+      * Bổ sung `min-width` cho tất cả 13 cột `<th>`.
+    + **Xuất hủy (`Views/XuatHuy/_XuatHuyTable.cshtml` & `wwwroot/css/xuat-huy.css`)**:
+      * Đưa `#xuatHuyTable` về: `style="width: max-content; min-width: 760px;"` và CSS `min-width: 760px !important;`.
+      * Bổ sung `min-width` cho toàn bộ 11 cột `<th>`.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile --no-restore` đạt **0 Errors, 2 Warnings**.
+
+---
+
+- **Sửa Lỗi Hiển Thị Khi Ít Cột Bảng Phiếu Kiểm Kho Dựa Trên Chuẩn Nhà Cung Cấp (Phiên 107)**:
+  - **Nhu cầu**: Người dùng phản ánh lỗi trên màn hình Phiếu kiểm kho (`/PhieuKiemKe/Index`): khi ẩn bớt hầu hết các cột chỉ để lại 2 cột dữ liệu (Trạng thái, Kho), bảng bị co rút hẹp chỉ chiếm ~30% màn hình để lại khoảng trống trắng lớn bên phải; khi mở chi tiết dòng (Master-Detail), viền xanh `#0070f3` của dòng cha bị gập xuống ở cột Kho trong khi drawer chi tiết bung rộng 992px tạo thành bậc thang gãy khúc; yêu cầu sửa lại lỗi hiển thị khi ít cột dựa trên chuẩn hiển thị của phân hệ Nhà cung cấp (`NhaCungCap`).
+  - **Nguyên nhân cốt lõi**:
+    + Thẻ `<table id="stockTakeTable">` bị ép cứng inline `style="min-width: 1450px;"` và trong `kiem-kho.css` quy định `min-width: 1450px !important; width: 100%; table-layout: fixed;`.
+    + Toàn bộ 11 cột `<th>` đều có `width` cố định (`style="width: ...px;"`), khi chỉ còn 2 cột hiển thị (tổng ~337px), trình duyệt khóa cứng 4 ô ở 337px đầu tiên và để trống toàn bộ phần còn lại đến 1450px.
+    + Thẻ `td[colspan]` của dòng chi tiết `tr.dtl` bị gắn class `border-0` và chứa khối `.kk-detail-fixed-wrap` 992px ép drawer rộng 992px, trong khi ô `.last-visible-col` của dòng cha dừng ở 337px, làm viền phải của dòng cha và dòng con lệch nhau 655px.
+    + Trong `kiot-filter.js`, hàm `initRowDetail` khi mở dòng đã xóa sạch class `.last-visible-col` của toàn bảng kể cả `thead th`, khiến tiêu đề cột cuối cùng không được nhận diện.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Độ rộng Bảng & Khép kín Viền xanh (`Views/PhieuKiemKe/_PhieuKiemKeTable.cshtml` & `wwwroot/css/kiem-kho.css`)**:
+      * Đưa `#stockTakeTable` về chuẩn Nhà cung cấp (`#supplierTable`): `<table class="tbl" id="stockTakeTable" style="width: max-content; min-width: 760px;">` và CSS `width: max-content !important; min-width: 760px !important; table-layout: fixed !important;`.
+      * Bổ sung `min-width` đồng bộ cho toàn bộ 11 cột `<th>` tương ứng với `width`.
+      * Loại bỏ class `border-0` ở ô `td[colspan="13"]` của dòng `dtl`, khôi phục trọn vẹn viền xanh khép kín (viền trên 2px, 2 bên 3px, đáy 2px).
+      * Bổ sung quy tắc CSS cho cột hiển thị cuối cùng: `#stockTakeTable th.last-visible-col { width: auto !important; }` và `.tbl thead th.last-visible-col { width: auto !important; }` trong `site.css`. Khi ít cột, cột hiển thị cuối cùng tự động co giãn lấp đầy không gian bảng, đẩy viền phải của dòng cha thẳng hàng tuyệt đối 100% với viền phải của drawer 992px.
+    + **Tối ưu hóa Khối LEGO `KiotFilter.initRowDetail` (`wwwroot/js/kiot-filter.js`)**:
+      * Chuẩn hóa logic gán `.last-visible-col` khi mở dòng chi tiết: duyệt qua mọi dòng `tr` trong bảng (bao gồm cả `thead tr` và các dòng dữ liệu) để gán chính xác ô cuối cùng hiển thị, không xóa nhầm trên `thead`.
+    + **Đặc tả & Kiểm tra**:
+      * Đồng bộ tài liệu đặc tả `docs/specs/kiem-kho.md` (7.627 ký tự < 8.000 ký tự).
+      * `dotnet build -t:Compile` & `dotnet build` đạt **0 Errors, 4 Warnings**.
+      * `node -c` toàn bộ JavaScript đạt **0 Errors**.
+
+- **Chuẩn Hóa Hiển Thị Bảng Phiếu Chuyển Kho & Drawer Chi Tiết Dựa Trên Nhà Cung Cấp & Nhập Hàng (Phiên 106)**:
+  - **Nhu cầu**: Người dùng yêu cầu "sửa lại lỗi hiển thị phiếu chuyển kho dựa trên phiếu hiển thị nhà cung cấp" kèm ảnh chụp lỗi (bảng `#transferTable` bị co rút hẹp, khoảng trắng lớn bên phải, mất viền xanh chữ nhật, ẩn thiếu nhiều cột do lưu `localStorage` cũ, thiếu ô tìm kiếm nhanh hàng hóa trong drawer).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Khung bao bọc Flexbox (`Views/ChuyenKho/Index.cshtml`)**: Chuyển `class="kiot-table-wrapper"` từ `<section id="content">` vào `<div id="tableContainer">`, khôi phục thuộc tính flexbox kéo giãn bảng 100% không gian màn hình như `NhaCungCap` và `NhapHang`.
+    + **Bổ sung CSS Bảng & Viền xanh `#0070f3` (`wwwroot/css/chuyen-kho.css`)**:
+      * Bổ sung định kiểu cho `#transferTable, #transferTable.tbl`: `min-width: 1450px !important; width: 100%; table-layout: fixed !important; border-collapse: separate; border-spacing: 0;`.
+      * Tạo viền xanh chữ nhật liền mạch `#0070f3` bao quanh dòng cha và dòng chi tiết khi mở (viền trên 2px, viền 2 bên 3px kết hợp `.last-visible-col`, viền đáy 2px).
+      * Cố định độ rộng khung drawer `.ck-detail-fixed-wrap, .transfer-detail-fixed-wrap, .kiot-detail-fixed-wrap` ở `992px !important; max-width: 100%; box-sizing: border-box;` kèm responsive `@media (max-width: 1040px) { width: 100% !important; }`.
+    + **Hoàn thiện cấu trúc Drawer & Tìm kiếm nhanh hàng hóa (`Views/ChuyenKho/_ChuyenKhoTable.cshtml`)**:
+      * Loại bỏ `border-0` ở ô `td[colspan="13"]` của dòng `dtl` để không xung đột viền xanh.
+      * Tích hợp hàng tìm kiếm con `tr.fin` với `.dtl-search-code` (mã hàng) và `.dtl-search-name` (tên hàng) ngay trên danh sách mặt hàng chuyển.
+      * Cập nhật class khung chi tiết cố định thành `ck-detail-fixed-wrap kiot-detail-fixed-wrap`.
+    + **Tái cấu trúc JavaScript & Nâng cấp Khóa Storage (`wwwroot/js/chuyen-kho-index.js`)**:
+      * Nâng cấp `storageKey: 'kiot_chuyen_kho_cols_v2'` để tự động kích hoạt lại đầy đủ 11 cột hiển thị mặc định trên trình duyệt người dùng.
+      * Lưu trữ handler `transferRowDetailHandler = KiotFilter.initRowDetail(...)`, theo dõi `F.openId` và tự động re-expand dòng chi tiết sau mỗi lần nạp bảng bằng AJAX.
+      * Thêm trình lắng nghe `#selectAllRows` và `.row-select` đồng bộ chọn nhiều dòng.
+      * Thêm sự kiện tìm kiếm tức thì cho `.dtl-search-code, .dtl-search-name` tự động lọc dòng hàng hóa `tr.dtl-line-row` trong drawer.
+    + **Kiểm tra & Biên dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 NuGet Warnings**.
+      * `node -c BTL-LTW-QuanLiKho-2\wwwroot\js\chuyen-kho-index.js` đạt **0 Errors**.
+
+- **Bổ Sung Bật Tắt Cột & Sắp Xếp Click-To-Sort Header Bảng Chuyển Kho Giống Kiểm Kho (Phiên 105)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "thêm phần bật tắt ẩn hiện cột, ấn vào header cột sắp xếp giống phần kiểm kho".
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tùy chọn hiển thị cột (`#btnColsDropdown` + `#colMenu`)**:
+      * Bổ sung nút icon `bi-view-list` và menu dropdown chứa checkbox bật/tắt cho toàn bộ 11 cột dữ liệu vào toolbar của `Views/ChuyenKho/Index.cshtml`: Mã chuyển hàng, Thời gian, Từ kho, Tới kho, Ngày chuyển, Ngày nhận, SL chuyển, SL nhận, Giá trị chuyển, Ghi chú, Trạng thái.
+      * Tái sử dụng khối Lego chuẩn KiotViet `KiotFilter.initColumnToggle`: lưu cấu hình hiển thị vào `localStorage` (`storageKey: 'chuyenkho_cols'`), tự động đồng bộ ẩn/hiện các ô `[data-col]`, cập nhật `colspan` cho dòng rỗng và dòng chi tiết Drawer để không vỡ layout bảng.
+      * Tự động gọi `applyColumnVisibility()` khi khởi tạo và sau mỗi lần nạp bảng bằng AJAX trong `wwwroot/js/chuyen-kho-index.js`.
+    + **Sắp xếp 3 trạng thái khi nhấn vào header cột (Click-to-sort)**:
+      * Cập nhật toàn bộ 11 cột trong `Views/ChuyenKho/_ChuyenKhoTable.cshtml` thành `th.sortable-th` với icon mũi tên tăng/giảm (`bi-arrow-up`, `bi-arrow-down`) và các class căn lề chuẩn (`num r text-end`, `text-center`).
+      * Chu trình 3 trạng thái click-to-sort trong `wwwroot/js/chuyen-kho-index.js`: Tăng dần (`asc`) -> Giảm dần (`desc`) -> Bỏ sắp xếp (`null` / mặc định).
+      * Bổ sung các nhánh sắp xếp cho toàn bộ các cột còn lại trong `Controllers/ChuyenKhoController.cs`: `ngaychuyen` (`ThoiDiemXuat`), `ngaynhan` (`ThoiDiemNhan`), `slnhan` (`TongSoLuongNhan`), `ghi` (`GhiChu`), `st` (`TrangThai`).
+    + **Đặc tả & Kiểm tra**:
+      * Đồng bộ tài liệu đặc tả `docs/specs/chuyen-kho.md` (6.686 ký tự < 8.000 ký tự).
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c BTL-LTW-QuanLiKho-2\wwwroot\js\chuyen-kho-index.js` đạt **0 Errors**.
+
+- **Xây Dựng Hoàn Chỉnh Toàn Bộ Phân Hệ Chuyển Kho Chuẩn KiotViet & Prototype (Phiên 104)**:
+  - **Nhu cầu**: Người dùng cung cấp prototype `prototype-chuyenkho.html` và yêu cầu "triển khai toàn bộ" chức năng Chuyển kho (Stock Transfer).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Cơ sở dữ liệu & Entity Models (`migrations/sql/13_bo_sung_chuyen_kho.sql`)**:
+      * Bổ sung các cột mới vào `PhieuChuyenKho`: `MaPhieu` (`CK000001`), `DaDanhDau`, `GhiChuNhan`, `TongSoLuongChuyen`, `TongSoLuongNhan`, `TongGiaTriChuyen`.
+      * Bổ sung các cột mới vào `ChiTietPhieuChuyenKho`: `SoLuongNhan` (SL thực nhận), `DonGiaChuyen` (giá vốn), `ThanhTien`.
+      * Tạo Filtered Unique Index `UQ_PhieuChuyen_MaPhieu` chống trùng lặp mã phiếu.
+      * Nâng cấp View `vw_BienDongKho` nhánh `CHUYEN_NHAP` cộng tồn kho nhận theo `ISNULL(ct.SoLuongNhan, ct.SoLuong)` để xử lý chính xác nhận thiếu / thất thoát.
+      * Đồng bộ `Models/PhieuChuyenKho.cs`, `Models/ChiTietPhieuChuyenKho.cs`, `Models/QuanLyKhoPhuQuocLtwContext.cs`, `Services/MaChungTuHelper.cs`.
+    + **ViewModels & Controller Backend (`ChuyenKhoViewModels.cs`, `ChuyenKhoController.cs`)**:
+      * Kế thừa `BaseKhoController`, tích hợp `ITonKhoService` và `INhatKyThaoTacService`.
+      * Bọc các thao tác chứng từ và nhận hàng trong `BeginTransactionAsync`.
+      * Kiểm tra chặn xuất âm kho nguồn qua `_tonKhoService.KiemTraXuatKhoAsync(...)` khi chuyển sang trạng thái `DA_XUAT`.
+      * Cung cấp đầy đủ các Action: `Index`, `Filter` (AJAX partial), `ToggleFavorite` (silent toggle), `GetNextCode` (tự sinh mã `CKxxxxxx`), `Create`, `Edit`, `Save` (Lưu tạm `NHAP` / Chuyển hàng `DA_XUAT`), `Receive` (Nhận hàng kiểm soát thất thoát), `Cancel` (Hủy phiếu tạm hoặc hủy chuyển hoàn tồn), `SaveNote`, `SearchProducts` (F3 autocomplete), `Export` (Excel ClosedXML).
+    + **Giao Diện Razor Views & Frontend Scripts**:
+      * **Màn hình 1 Danh sách (`Views/ChuyenKho/Index.cshtml`, `_ChuyenKhoFilterSidebar.cshtml`, `_ChuyenKhoTable.cshtml`)**:
+        - Bộ lọc sidebar: Hướng chuyển 3 trạng thái (`all`, `out`, `in`), trạng thái (Phiếu tạm, Đang chuyển, Đã nhận, Đã hủy), thời gian (`_KiotDateFilter`).
+        - Bảng dữ liệu Master-Detail viền xanh chữ nhật `#0070f3` (`KiotFilter.initRowDetail`), inline drawer cố định 992px (`.ck-detail-fixed-wrap`), khối lộ trình chuyển `[Kho A] -> [Kho B]`, meta người lập/chuyển/nhận, cảnh báo nhận thiếu, thanh nút ngữ cảnh theo kho và trạng thái, phân trang AJAX.
+      * **Màn hình 2 Form Lập/Sửa (`Views/ChuyenKho/Create.cshtml`, `Edit.cshtml`, `_ChuyenKhoForm.cshtml`)**:
+        - Form 2 cột: Bảng hàng hóa tìm kiếm F3 autocomplete, cảnh báo vượt tồn màu đỏ tức thì (`hint-over`), panel phải lộ trình kho, nút F4 thu gọn, nút F9 Lưu tạm, F10 Chuyển hàng.
+      * **Modal Nhận hàng (`Views/ChuyenKho/_ReceiveModal.cshtml`)**:
+        - Bảng kiểm đếm số lượng thực nhận, chặn `SL nhận > SL chuyển`, bắt buộc nhập ghi chú lý do thất thoát nếu nhận thiếu.
+      * **Styles & Scripts**: `wwwroot/css/chuyen-kho.css`, `wwwroot/js/chuyen-kho-index.js`, `wwwroot/js/chuyen-kho-form.js`.
+      * **Menu hệ thống**: Kích hoạt liên kết `Chuyển kho` trong `Views/Shared/_MainMenu.cshtml`.
+    + **Đặc tả & Kiểm tra**:
+      * Đã tạo tài liệu đặc tả `docs/specs/chuyen-kho.md` (6.384 ký tự < 8.000 ký tự).
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c` toàn bộ JavaScript đạt **0 Errors**.
+
+- **Sửa Lỗi Biên Dịch CS1729 Cho Constructor KiotDateFilterVM (Phiên 103)**:
+  - **Nhu cầu**: Người dùng tải ảnh chụp lỗi Visual Studio: `CS1729 'KiotDateFilterVM' does not contain a constructor that takes 4 arguments` tại `Views/ChuyenKho/_ChuyenKhoFilterSidebar.cshtml` dòng 56.
+  - **Nguyên nhân**:
+    + Trong `_ChuyenKhoFilterSidebar.cshtml` gọi: `<partial name="_KiotDateFilter" model='new KiotDateFilterVM("date", "Thời gian", false, "thangnay")' />` (4 tham số).
+    + Tuy nhiên `ViewModels/Common/KiotDateFilterVM.cs` trước đó chỉ có 2 overload constructor (0 tham số và tối đa 3 tham số), thiếu overload nhận 4 tham số có `defaultText`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bổ sung constructor 4 tham số trong `ViewModels/Common/KiotDateFilterVM.cs`**:
+      * `public KiotDateFilterVM(string target, string title, bool showFuture, string defaultText)` gán `DefaultText = defaultText`.
+      * Tự động chuẩn hóa nếu truyền mã `"thangnay"` thành chuỗi tiếng Việt `"Tháng này"`.
+    + **Đồng bộ view (`Views/ChuyenKho/_ChuyenKhoFilterSidebar.cshtml`)**:
+      * Đổi tham số `"thangnay"` thành `"Tháng này"` chuẩn xác.
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings** (sạch lỗi biên dịch).
+
+---
+
+- **Đồng Bộ Ô Người Tạo / Xuất Hủy Chuẩn KiotViet (Phiên 102)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm ảnh chụp: "trong phần xuất hủy, nút dropdown chọn người đang lỗi, sửa lại cho đồng bộ".
+  - **Nguyên nhân**:
+    + Trên `Views/XuatHuy/_XuatHuyForm.cshtml`, dòng đầu panel dùng thẻ `<select id="fNhanVien">` native HTML với inline style `max-width: 135px; height: 32px`, bị lệch dòng và vỡ giao diện so với ô thời gian bên cạnh.
+    + Thẻ `<option selected="@(boolean)">` trong Razor bị lỗi render `selected="False"` dẫn đến trình duyệt chọn sai nhân viên (`Trần Thị Kho` thay vì tài khoản đăng nhập `Nguyễn Minh Quân`).
+    + Trong khi đó, cả 2 khuôn mẫu chuẩn **Kiểm kho** (`_PhieuKiemKeForm.cshtml`) và **Nhập hàng** (`_NhapHangForm.cshtml`) đều hiển thị người tạo dạng text gắn liền với tài khoản đăng nhập (quy chuẩn bảo mật audit trail của KiotViet).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Đồng bộ View (`Views/XuatHuy/_XuatHuyForm.cshtml`)**:
+      * Loại bỏ thẻ `<select>` native lỗi thời, chuyển sang hiển thị tên tài khoản đăng nhập kèm icon: `<i class="bi bi-person text-secondary me-1"></i>@(string.IsNullOrEmpty(Model.TenNguoiXacNhan) ? (string.IsNullOrEmpty(Model.TenNguoiLap) ? "admin" : Model.TenNguoiLap) : Model.TenNguoiXacNhan)`. Đồng bộ 100% từng pixel với Kiểm kho và Nhập hàng.
+      * Thêm `<input type="hidden" id="fNhanVien" value="@(Model.MaNvxacNhan ?? Model.MaNvlap)" />` để JavaScript `xuat-huy-form.js` (`maNvxacNhan: parseInt($('#fNhanVien').value)`) vẫn hoạt động trơn tru.
+    + **Đồng Bộ Đặc Tả (`docs/specs/xuat-huy.md`)**:
+      * Cập nhật mô tả hiển thị người tạo/xuất hủy trong mục Panel F4 (7.361 ký tự < 8.000 ký tự).
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c wwwroot/js/xuat-huy-form.js` đạt **0 Errors**.
+
+---
+
+- **Đồng Bộ Bộ Chọn Thời Gian Popup Cho Phân Hệ Xuất Hủy (Phiên 101)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "tiếp tục sửa cho phần xuất hủy".
+  - **Khảo sát hiện trạng**:
+    + Ô `#fDate` và popup `#dtPop` đã có sẵn trong `Views/XuatHuy/_XuatHuyForm.cshtml`.
+    + Trong `wwwroot/js/xuat-huy-form.js`, sự kiện click chọn giờ trước đó bị gán `dtPop.classList.remove('show')` làm popup bị tắt ngay khi chọn giờ, đồng thời dùng `scrollIntoView` gây rung giật màn hình.
+    + Thiếu sự kiện `focus`, thiếu chống double-fire `Date.now() - lastFocusTime < 300`, thiếu sự kiện `change` khi người dùng tự gõ tay, và thiếu phím tắt `Escape` đóng popup.
+    + Trong `Controllers/XuatHuyController.cs` (hàm `SaveDraft` và `Complete`), `req.NgayLap` chưa được chuẩn hóa chuyển đổi `DateTimeKind.Utc` sang `ToLocalTime()`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Nâng cấp Script (`wwwroot/js/xuat-huy-form.js`)**:
+      * Đổi định vị khung giờ trong `paintDt()` sang `timesEl.scrollTop` chuẩn xác, không gây rung giật cuộn cửa sổ.
+      * Tích hợp `focus`, chống double-fire, và hỗ trợ sự kiện `change` parse chuỗi ngày giờ gõ tay `dd/MM/yyyy HH:mm`.
+      * **Giữ popup luôn mở khi click chọn ngày hoặc chọn giờ**, người dùng có thể thoải mái chọn lại ngày/giờ nhiều lần liên tiếp.
+      * **Chỉ đóng popup khi click ra ngoài** (`document.addEventListener('click')`) hoặc khi bấm phím `Escape`.
+    + **Xử lý Backend (`Controllers/XuatHuyController.cs`)**:
+      * Chuẩn hóa `ngayLap = req.NgayLap.Kind == DateTimeKind.Utc ? req.NgayLap.ToLocalTime() : req.NgayLap` trong cả `SaveDraft` và `Complete`.
+    + **Đồng Bộ Đặc Tả (`docs/specs/xuat-huy.md`)**:
+      * Cập nhật mô tả popup ngày giờ trong mục Panel F4 (7.214 ký tự < 8.000 ký tự).
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c wwwroot/js/xuat-huy-form.js` đạt **0 Errors**.
+
+---
+
+- **Tích Hợp Bộ Chọn Thời Gian Lập Phiếu Nhập Hàng Chuẩn KiotViet / Kiểm Kho (Phiên 100)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm ảnh chụp: "phần nút thời gian này trong phần nhập hàng khi ấn vào ko hiện lên phần chọn thời gian".
+  - **Nguyên nhân**:
+    + Ô thời gian `#fDate` trong `Views/NhapHang/_NhapHangForm.cshtml` đang có thuộc tính `readonly` và `cursor: default`.
+    + Thiếu container popup `<div class="pop dtpop shadow-sm" id="dtPop"></div>`.
+    + Trong `wwwroot/js/nhap-hang-form.js` chưa có logic lắng nghe sự kiện, hàm render lịch tháng và danh sách khung giờ 30 phút (`paintDt`, `calHTML`), và chưa gửi `NgayLap` trong payload `submitDoc`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Nâng cấp View (`Views/NhapHang/_NhapHangForm.cshtml`)**:
+      * Bỏ thuộc tính `readonly`, đổi style thành `cursor: pointer;`, thêm `title="Nhấp để chọn ngày giờ nhập hàng"` và `autocomplete="off"`.
+      * Thêm `<div class="pop dtpop shadow-sm" id="dtPop"></div>` bên trong thẻ cha `.v.relw`.
+    + **Nâng cấp JS (`wwwroot/js/nhap-hang-form.js` & `wwwroot/js/phieu-kiem-ke-form.js`)**:
+      * Khởi tạo `createdDate` từ giá trị hiển thị ban đầu của `#fDate`.
+      * Xây dựng hàm `calHTML(y, m, sel)` và `paintDt()` render lịch tháng chuẩn tiếng Việt (Thứ 2 đến CN) kèm danh sách 48 khung giờ 30 phút.
+      * Tự động căn giữa khung giờ đang chọn bằng `timesEl.scrollTop` chuẩn xác mà không gây rung lắc/giật cuộn trang web.
+      * Gắn sự kiện `focus`, `click` (chống double-fire), `change` (parse người dùng gõ tay), chuyển tháng trước/sau `[data-dn]`, chọn ngày `button.d`, chọn giờ `[data-tm]`.
+      * **Giữ popup luôn mở khi click chọn ngày hoặc chọn giờ** (bỏ lệnh tự tắt `removeClass('show')`), giúp người dùng thoải mái thay đổi ngày/giờ liên tiếp.
+      * **Popup chỉ đóng lại khi người dùng click ra ngoài** (`$(document).on('click')`) hoặc khi bấm phím `Escape`. Bổ sung `e.stopPropagation()` trên `#fDate` và `#dtPop` để ngăn sự kiện nổi bọt lên `document` khi vẽ lại DOM ngày/giờ (nguyên nhân khiến popup bị đóng nhầm trước đó). Đồng bộ hoàn toàn cả 2 phân hệ Nhập hàng và Kiểm kho.
+      * Truyền `NgayLap: formatLocalIso(createdDate)` vào payload khi người dùng bấm Lưu tạm (F9) hoặc Hoàn thành (F10).
+    + **Xử lý Backend (`Controllers/NhapHangController.cs`)**:
+      * Chuẩn hóa gán `phieu.NgayLap` với kiểm tra múi giờ (`DateTimeKind.Utc ? ToLocalTime() : req.NgayLap.Value`), đảm bảo lưu đúng ngày giờ theo giờ Việt Nam.
+    + **Đồng Bộ Đặc Tả (`docs/specs/nhap-hang.md`)**:
+      * Cập nhật mô tả chi tiết bộ chọn thời gian datetime picker `.dtpop` (7.977 ký tự < 8.000 ký tự).
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c wwwroot/js/nhap-hang-form.js` & `phieu-kiem-ke-form.js` đạt **0 Errors**.
+
+
+
+- **Loại Bỏ Tính Năng Tự Động Cuộn Kéo Màn Hình Khi Mở Khối Chi Tiết (Phiên 99)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "bỏ phần tự động cuộn kéo phần chi tiết ra chính giữa màn hình đi".
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tắt `autoCenter` Trong `KiotFilter.initRowDetail` (`wwwroot/js/kiot-filter.js`)**:
+      * Đưa giá trị mặc định của `autoCenter` về `false`.
+      * Khi người dùng click mở dòng dữ liệu, khối chi tiết mở trượt nhẹ nhàng tại chỗ (`slideDown(150)`), tuyệt đối không tự động dịch chuyển thanh cuộn dọc (`scrollTop`) hay thanh cuộn ngang (`scrollLeft`).
+    + **Đồng Bộ Phân Hệ Nhập Hàng (`wwwroot/js/nhap-hang-index.js`)**:
+      * Loại bỏ hoàn toàn cấu hình và code can thiệp cuộn tự động. Giữ nguyên vị trí quan sát của người dùng.
+    + **Đồng Bộ Đặc Tả (`docs/specs/nhap-hang.md`)**:
+      * Cập nhật mô tả hành vi mở dòng tại chỗ, không dịch chuyển màn hình (7.816 ký tự < 8.000 ký tự).
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c kiot-filter.js` & `nhap-hang-index.js` đạt **0 Errors**.
+
+
+- **Tự Động Cuộn Kéo Khối Chi Tiết Ra Chính Giữa Màn Hình Khi Mở Dòng Bảng Nhập Hàng (Phiên 98)**:
+  - **Nhu cầu**: Người dùng phản ánh: "khi ấn vào hàng để hiển thị phần chỉ tiết thì ko tự động kéo phần chi tiết ra giữa màn hình".
+  - **Nguyên nhân cốt lõi**:
+    + Trước đây hàm cuộn chỉ kích hoạt khi đáy khối chi tiết vượt ra ngoài màn hình (`detailBottom > containerTop + containerHeight`), bỏ qua tất cả các dòng ở nửa trên bảng.
+    + Khi kích hoạt, hàm chỉ cuộn mép trên của dòng lên sát mép trên viewport (`- 10px`), không căn giữa màn hình.
+    + Nếu người dùng trước đó đã cuộn ngang để xem các cột thông tin bên phải, khối chi tiết 992px ở bên trái bị khuất một phần do không được tự động kéo về vị trí nhìn thấy.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Nâng Cấp Khối Lego `KiotFilter.initRowDetail` (`wwwroot/js/kiot-filter.js`)**:
+      * Bổ sung tính năng `autoCenter: true` mặc định cho khối Lego quản lý Master-Detail.
+      * Tích hợp hàm `scrollToCenter($row, $detailRow)`:
+        - Tính toán chính xác tọa độ đỉnh và chiều cao tổng thể của cả khối (`$row + $detailRow`).
+        - Căn giữa dọc: Nếu khối nằm gọn trong khung nhìn container, tự động cuộn sao cho khoảng cách lề trên và lề dưới bằng nhau (`targetScrollTop = blockTop - (containerHeight - blockHeight) / 2`). Nếu khối dài hơn màn hình, định vị dòng sát đỉnh kèm đệm 12px để người dùng xem từ trên xuống.
+        - Căn giữa ngang: Nếu container đang bị cuộn ngang sang phải, tự động kéo `scrollLeft` về 0 để toàn bộ bảng chi tiết 992px hiển thị trọn vẹn ở giữa vùng nhìn.
+        - Hiệu ứng cuộn êm ái qua `$scrollContainer.stop(true).animate(..., 250)`.
+    + **Đồng Bộ Phân Hệ Nhập Hàng (`wwwroot/js/nhap-hang-index.js`)**:
+      * Kích hoạt `autoCenter: true` thông qua cấu hình `KiotFilter.initRowDetail`, loại bỏ code cuộn thủ công rời rạc.
+    + **Đồng Bộ Đặc Tả (`docs/specs/nhap-hang.md`)**:
+      * Cập nhật mô tả trải nghiệm tự động kéo khối chi tiết ra chính giữa màn hình (7.840 ký tự < 8.000 ký tự).
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c kiot-filter.js` & `nhap-hang-index.js` đạt **0 Errors**.
+
+
+- **Tách Nút Nhập File & Xuất File Riêng Biệt Trong Danh Sách Hàng Hóa (Phiên 97)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "trong phần danh sách hàng hóa, tách nút nhập và xuất ra thành 1 nút nhập 1 nút xuất".
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tách Cụm Nút Trong `Views/HangHoa/_HangHoaExcelActions.cshtml`**: Thay thế dropdown gộp "Xuất / Nhập file" thành 2 nút bấm riêng biệt chuẩn KiotViet:
+      * **Nút Nhập file (`#btnOpenImportModal`)**: Icon `bi-box-arrow-in-down text-primary`, bấm 1 click mở ngay modal nhập hàng `#hhImportModalOv`.
+      * **Nút Xuất file (`#btnOpenExportModal`)**: Icon `bi-box-arrow-up text-success`, bấm 1 click mở ngay modal xuất file `#hhExportModalOv` chọn phạm vi và cột cần xuất.
+    + **Bổ Sung Tải File Mẫu Trong Modal Nhập Hàng (`Views/HangHoa/_HangHoaImportModal.cshtml`)**: Bổ sung liên kết tải file mẫu `.xlsx` ngay trên tiêu đề khung kéo thả và ở góc trái footer modal.
+    + **Tối Ưu Responsive (`Views/HangHoa/Index.cshtml`)**: Cả 2 nút sử dụng class `.btn.btn-tool` với `<span class="d-none d-sm-inline">`, hiển thị icon nhỏ gọn trên mobile và hiển thị nhãn đầy đủ trên tablet/desktop.
+    + **Kiểm Tra & Đồng Bộ**:
+      * `dotnet build /t:Compile` đạt **0 Errors**.
+      * Đồng bộ đặc tả `docs/specs/danh-sach-hang-hoa.md`.
+
+- **Nâng Cấp Sắp Xếp Cột Bảng Nhập Hàng Sang Chuẩn 3 Trạng Thái (Tăng -> Giảm -> Bình Thường) (Phiên 96)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "khi ấn vào headtable thì mới có 2 lần ấn tăng giảm. sửa lại thành 3 lần ấn tăng giảm bình thường".
+  - **Nguyên nhân cốt lõi**:
+    + Trước đây trong `nhap-hang-index.js`, sự kiện click `.sortable-th` chỉ chuyển đổi qua lại giữa 2 trạng thái (`asc` <-> `desc`), không thể hủy sắp xếp để trở về trạng thái sắp xếp mặc định của hệ thống.
+    + `SortBy` và `SortDir` trong `NhapHangFilterVM` có giá trị mặc định cứng là `"tg"` và `"desc"`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Chuẩn Hóa JS 3 Trạng Thái (`wwwroot/js/nhap-hang-index.js`)**:
+      * Chu trình 3 lần click: Lần 1: Tăng dần (`asc` - mũi tên lên), Lần 2: Giảm dần (`desc` - mũi tên xuống), Lần 3: Bình thường (`''` - không icon, quay về sắp xếp mặc định theo ngày tạo giảm dần).
+      * Bắt sự kiện trực tiếp `#receiptTable thead th.sortable-th` đồng bộ 100% với `HangHoa`, `NhaCungCap`, `PhieuKiemKe`.
+    + **Đồng Bộ ViewModel & Controller (`NhapHangViewModels.cs`, `NhapHangController.cs`)**:
+      * Đưa `SortBy` và `SortDir` trong `NhapHangFilterVM` về kiểu nullable (`string?`) với giá trị mặc định `null` (Bình thường trên lượt nạp đầu tiên).
+      * `NhapHangIndexVM.SortBy` và `SortDir` làm sạch chuỗi rỗng về `null`.
+      * Bổ sung trường hợp sắp xếp cho `tongsl` (Tổng số lượng) và `slmathang` (Số lượng mặt hàng) trong switch expression của `BuildIndexViewModel`.
+    + **Đồng Bộ Đặc Tả (`docs/specs/nhap-hang.md`)**:
+      * Cập nhật quy tắc sắp xếp 3 trạng thái, độ dài file 7.749 ký tự (< 8.000 ký tự).
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors, 4 Warnings**.
+      * `node -c nhap-hang-index.js` đạt **0 Errors**.
+
+
+- **Chuẩn Hóa Giao Diện Ô Chọn Nhà Cung Cấp Chuẩn KiotViet Trong Phiên Nhập Hàng (Phiên 95)**:
+  - **Nhu cầu**: Người dùng phản ánh lỗi giao diện ô Nhà cung cấp trên panel bên phải màn hình Lập/Sửa phiếu nhập hàng (`/NhapHang/Create`, `/NhapHang/Edit`). Placeholder "Tìm nhà cung cấp..." bị đẩy sát về bên phải, thụt sâu tạo khoảng trắng vô nghĩa, nút `+` bị lệch và khi chọn NCC bị dính `text-align: right`.
+  - **Nguyên nhân cốt lõi**:
+    + Thẻ `<input id="supplierSearchInput">` được gán class `.inp` bên trong `.pr`. Do thừa kế quy tắc `.pr .inp { text-align: right; max-width: 200px; }` của `kiem-kho.css`, nội dung và placeholder bị căn lề phải thô kệch.
+    + Khung chứa sử dụng `.input-group` nhưng không dùng `.form-control`, gây xung đột viền và bo góc giữa input và nút `+`.
+    + Dropdown `#supplierDropdown` bị gán `right: 40px` cứng trong CSS khiến danh sách gợi ý bị khuyết góc phải.
+    + Thiếu nút xóa chọn nhanh (✕) và thiếu điều hướng phím mũi tên / Enter.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tái Cấu Trúc HTML Razor (`Views/NhapHang/_NhapHangForm.cshtml`)**:
+      * Đưa ô chọn NCC về cấu trúc khối chuẩn `.nh-supplier-wrap` chứa `.nh-supplier-box` và `.btn-add-ncc`.
+      * Bổ sung icon tìm kiếm kính lúp `.nh-supplier-icon` bên trái input.
+      * Thêm nút xóa chọn nhanh `.nh-supplier-clear-btn` (`#btnClearSupplier`) hiển thị khi đã chọn hoặc đang gõ NCC.
+      * Căn chỉnh chiều cao `34px` đồng bộ tuyệt đối với các ô `fDate`, `txtDocCode`, `txtInvoiceNo`.
+    + **Chuẩn Hóa CSS (`wwwroot/css/nhap-hang.css`)**:
+      * Định nghĩa `.nh-supplier-input` với `text-align: left !important;`, `width: 100% !important;`, `height: 34px !important;` và `padding: 0 26px 0 28px !important;`.
+      * Định nghĩa nút xóa `✕` dạng tròn bo viền, hover đỏ nhạt `#fee2e2`.
+      * Nâng cấp nút `+` vuông vắn `34px x 34px`, hover xanh KiotViet `#0070f4`.
+      * Mở rộng `#supplierDropdown` với `right: 0; min-width: 280px; text-align: left !important;`, shadow nổi bật.
+    + **Nâng Cấp JavaScript Quản Lý NCC (`wwwroot/js/nhap-hang-form.js`)**:
+      * Bổ sung hàm quản lý tập trung `selectSupplier(id, name)`: Gán giá trị, tự động ẩn/hiện nút `✕`, đóng dropdown và reset trạng thái.
+      * Bổ sung điều hướng bàn phím `ArrowDown`, `ArrowUp`, `Enter`, `Escape` cho danh sách NCC, tự động cuộn dòng chọn (`scrollIntoView`).
+      * Hỗ trợ nút `+ Thêm mới nhà cung cấp` ngay trong dropdown khi không tìm thấy kết quả.
+      * Đồng bộ gọi `selectSupplier` sau khi tạo mới NCC qua modal.
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build /t:Compile` đạt **0 Errors**.
+      * `node -c nhap-hang-form.js` đạt **0 Errors**.
+      * Đồng bộ tài liệu đặc tả `docs/specs/nhap-hang.md` (7.477 ký tự < 8.000 ký tự theo Rule 12).
+
+
+- **Sửa Lỗi Khóa Cuộn và Tràn Màn Hình Khi Mở Drawer Chi Tiết Bảng Nhập Hàng (Phiên 94)**:
+  - **Nhu cầu**: Người dùng phản ánh lỗi "hiện tại ko cuộn được lên" kèm ảnh chụp màn hình khi mở dòng chi tiết phiếu nhập (PN000007). Khung chi tiết bị tràn ra ngoài đáy màn hình, thanh cuộn không xuất hiện và người dùng không thể cuộn lên hoặc xuống.
+  - **Nguyên nhân cốt lõi**:
+    + Trên `Views/NhapHang/Index.cshtml`, thẻ chứa bảng `#tableContainer` chưa được bọc trong `<section id="content">` và thiếu class `.kiot-table-wrapper`.
+    + Do thiếu container flex với `min-height: 0` và chiều cao cố định, `.kiot-table-scroll-body` không bị giới hạn chiều cao mà phình to theo toàn bộ bảng + dòng chi tiết.
+    + Vì `.app-main-body` có `overflow: hidden`, phần dưới của dòng chi tiết và phân trang bị che khuất ngoài đáy màn hình, đồng thời thanh cuộn không kích hoạt khiến trang bị kẹt cứng không thể cuộn.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bổ Sung Khung Bọc Chuẩn KiotViet (`Views/NhapHang/Index.cshtml`)**:
+      * Bọc `#tableContainer` trong `<section id="content">` và gán class `kiot-table-wrapper` đồng bộ 100% với `HangHoa`, `NhaCungCap`, `PhieuKiemKe`.
+    + **Định Nghĩa Chiều Cao Flex & Cuộn Độc Lập (`nhap-hang.css`)**:
+      * Bổ sung styling tường minh cho `#content` (`flex: 1; min-height: 0; background: #fff; border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden;`).
+      * Định nghĩa `#tableContainer, .kiot-table-wrapper` với `flex: 1 1 auto; min-height: 0; height: 100%; display: flex; flex-direction: column; overflow: hidden; width: 100%;`.
+      * Ép `.kiot-table-scroll-body` có `overflow-y: auto !important; overflow-x: auto !important; flex: 1 1 auto; min-height: 0;`.
+      * Cấu hình `#receiptTable` với `min-width: 1750px !important; table-layout: fixed; border-collapse: separate;`.
+    + **Tự Động Cuộn Mượt Đến Dòng Chi Tiết (`wwwroot/js/nhap-hang-index.js`)**:
+      * Bổ sung cơ chế auto-scroll trong callback `onOpen`: Khi mở dòng sát đáy viewport, bảng tự động cuộn lên một khoảng thích hợp để người dùng nhìn thấy trọn vẹn cả tiêu đề, bảng con và các nút thao tác mà không cần kéo chuột thủ công.
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors**.
+      * `node -c nhap-hang-index.js` đạt **0 Errors**.
+      * Cập nhật `docs/specs/nhap-hang.md` đạt 7.462 ký tự (< 8.000 ký tự theo Rule 12).
+
+  - **Nhu cầu**: Người dùng yêu cầu "sửa lại giao diện phiếu nhập hàng giống giao diện phần phiếu kiểm tồn. xem kĩ lại và sửa giúp tôi".
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tái Cấu Trúc Form Nhập Hàng (`Views/NhapHang/_NhapHangForm.cshtml`) Đồng Bộ `_PhieuKiemKeForm.cshtml`**:
+      * Sử dụng cấu trúc `.kk-container`, `.form-wrap`, `.f-main`, `.f-panel`, `.f-panel-inner` và hệ thống CSS chuẩn từ `kiem-kho.css`.
+      * Thanh công cụ `f-top`: Nút quay lại `.back`, tiêu đề 20px bold, ô tìm kiếm F3 (`.searchbox.focus-w.relw`), toolbar `.tools.relw` với nút import Excel (`#btnImportExcel`), nút ẩn/hiện cột (`#tEye` kèm popup `.colmenu`), nút lưu ý nghiệp vụ (`#tNote` kèm popup `.pop.notes`).
+      * Bảng hàng hóa `.tbl` trong `.grid-card`: Cột Xóa `.w-del` đặt ở cột 1, STT `.w-stt` ở cột 2, Mã hàng `.w-code`, Tên hàng `.w-name` kèm thông tin tồn kho, ĐVT `.w-dvt`, các input nhập liệu dùng class chuẩn `.qty` (`.line-qty`, `.line-price`, `.line-discount`), thành tiền bold nổi bật.
+      * Trạng thái rỗng: Hiển thị khối empty state chuẩn Kiểm kho (`#emptyLineBox` với icon `bi-file-earmark-spreadsheet`, tải file mẫu, chọn file dữ liệu, phím tắt F3).
+      * Nút tròn F4 thu gọn/mở rộng panel `.panel-toggle` căn giữa vách ngăn cột, trượt mượt mà sang mép phải khi thu gọn.
+      * Panel bên phải `.f-panel`: Các dòng thuộc tính `.pr` (`display: flex; justify-content: space-between;`), input autocomplete NCC có nút `+` mở modal đầy đủ `_NhaCungCapModal`, mã phiếu nhập, số HĐ, kho, trạng thái badge, tổng tiền, giảm giá, cần trả NCC bold to nổi bật, ô ghi chú.
+      * Widget "Nhập gần đây" (`.recent`): Tự động ghi lại lịch sử thao tác thêm/sửa hàng hóa trong phiên.
+      * 2 Nút thao tác đáy lớn 56px chuẩn Kiểm kho: `.save` ("Lưu tạm (F9)" - Xanh dương) và `.done` ("Hoàn thành (F10)" - Xanh lá).
+    + **Đồng Bộ Bảng Danh Sách & Badge (`Views/NhapHang/_NhapHangTable.cshtml`, `NhapHangViewModels.cs`)**:
+      * Loại bỏ `summary-row` để danh sách bắt đầu ngay dưới header, mã phiếu hiển thị dạng text thường không bị đổi màu link.
+      * Đưa `BadgeClass` về chuẩn Bootstrap subtle: `bg-success-subtle text-success border border-success-subtle` cho Đã nhập hàng, `bg-primary-subtle text-primary border border-primary-subtle` cho Phiếu tạm, `bg-secondary-subtle text-secondary border border-secondary-subtle` cho Đã hủy.
+    + **Nâng Cấp JavaScript Form (`wwwroot/js/nhap-hang-form.js`)**:
+      * Cập nhật `addProductLine` sinh template HTML chuẩn `.qty`, `.del`, `.w-del`, `.w-stt`, `.w-code`.
+      * Thêm cơ chế chuyển đổi tự động giữa bảng lưới và khối empty state (`checkEmptyState()`).
+      * Tích hợp nhật ký thao tác `recentActions` tự động render danh sách vào widget "Nhập gần đây".
+      * Tích hợp popup `#tEye` ẩn hiện cột linh hoạt (ĐVT, Tồn kho, Giảm giá) và popup `#tNote` hiển thị lưu ý.
+      * Hỗ trợ tải file mẫu Excel (`#btnDownloadTemplate`) và nạp file Excel nhanh (`#btnPickExcel`).
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build -t:Compile` đạt **0 Errors**.
+      * `node -c nhap-hang-form.js` và `nhap-hang-index.js` đạt **0 Errors**.
+      * Cập nhật đặc tả `docs/specs/nhap-hang.md` đạt 7.157 ký tự (< 8.000 ký tự theo Rule 12).
+
+  - **Nhu cầu**: Người dùng yêu cầu "sửa lại giao diện phần nhập hàng giống phần nhập kho" theo khuôn mẫu chuẩn của màn hình Phiếu kiểm kho (`/PhieuKiemKe`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Đồng Bộ Thứ Tự Bộ Lọc Sidebar (`Views/NhapHang/_NhapHangFilterSidebar.cshtml`)**:
+      * Đưa khối "Thời gian" lên vị trí số 1 mặc định "Toàn thời gian" (`ALL`), kế tiếp là "Trạng thái" (mặc định chọn sẵn "Phiếu tạm" và "Đã nhập hàng"), "Người tạo", "Người nhập", "Nhà cung cấp".
+      * Tắt chấm cam `#dotDate` và `#dotSt` ở trạng thái mặc định, chỉ kích hoạt khi người dùng tùy chỉnh bộ lọc.
+    + **Thanh Công Cụ Topbar (`Views/NhapHang/Index.cshtml`)**:
+      * Nhúng `~/css/kiem-kho.css` trước `~/css/nhap-hang.css`.
+      * Bổ sung nút Trợ giúp `#btnHelp` sau nút tải lại bảng khớp với Kiểm kho.
+    + **Bảng Dữ Liệu & Viền Chữ Nhật (#0070f3) Liên Kết (`_NhapHangTable.cshtml`, `nhap-hang.css`)**:
+      * Đặt `min-width: 1750px` cho `#receiptTable`, loại bỏ gò bó `width: max-content`, tích hợp class `tbl`.
+      * Khung viền xanh chữ nhật `#0070f3` (2px trên/dưới, 3px hai bên) liên kết liền mạch dòng cha `tr.tbl-row.open` và dòng con `tr.dtl > td`.
+      * Dòng tổng hợp `tr.summary-row` có nền xám nhẹ `#f8fafc` và viền đáy `#e2e8f0` phân định rõ ràng.
+      * Trạng thái rỗng hiển thị thông báo thân thiện kèm nút xóa nhanh bộ lọc `#resetF`.
+    + **Khung Chi Tiết Bung Ra (Inline Drawer) Chuẩn 100% Kiểm Kho**:
+      * Thanh tab `Thông tin` có gạch chân xanh chuẩn `.dp-tabs` và `.dp-tab.active`.
+      * Tiêu đề `<h2>` hiển thị mã phiếu kèm badge pill bo góc tròn.
+      * Dòng `.meta` phân cách bằng đường kẻ dọc `|` (`border-right`) chuẩn Kiểm kho.
+      * Bảng phụ `.dtl-tbl` chứa hàng lọc nhanh `.fin` cho mã hàng và tên hàng (`dtl-search-code`, `dtl-search-name`).
+      * Khối `.dp-bottom` chia 2 cột: bên trái textarea `.dp-note` ghi chú, bên phải tóm tắt số liệu `.sums`.
+      * Hàng nút hành động `.dp-actions` đồng bộ: `[Hủy]`, `[Sao chép]`, `[Xuất file]`, `ms-auto`, `[Lưu]`, `[In]`, `[Mở phiếu]`/`[Xem chi tiết]`.
+    + **Backend & Controller (`NhapHangViewModels.cs`, `NhapHangController.cs`)**:
+      * `NhapHangFilterVM`: Đổi mặc định `DateFilterType` thành `"ALL"` và `Statuses` thành `["NHAP", "DA_XAC_NHAN"]`.
+      * `SaveNote`: Hỗ trợ lưu ghi chú qua cả query param `id` lẫn JSON body `maPhieuNhap`.
+    + **Điều Khiển Frontend (`nhap-hang-index.js`)**:
+      * Cập nhật `F.preset = 'ALL'`, `F.statuses = ['NHAP', 'DA_XAC_NHAN']`.
+      * Cập nhật `initRowDetail` sử dụng `detailRowSelector: '#dtl-{id}'`, `tabBtnSelector: '.dp-tab'`.
+      * Cập nhật `.btn-save-note` gửi `maPhieuNhap` và hiển thị toast thông báo.
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build BTL-LTW-QuanLiKho-2.slnx`: Đạt **0 Errors**.
+      * `node -c nhap-hang-index.js`: Đạt **0 Errors**.
+      * Đồng bộ `docs/specs/nhap-hang.md` (7.851 ký tự < 8.000 ký tự theo Rule 12).
+  - **Nhu cầu**: Người dùng phản ánh lỗi hiển thị dropdown gợi ý kết quả khi gõ tìm kiếm trên thanh tìm kiếm hàng hóa F3 màn hình Lập/Sửa Phiếu nhập hàng (`/NhapHang/Create`, `/NhapHang/Edit`). Các trường Tên, Mã, ĐVT, Tồn kho và Giá bị vỡ hàng, thụt lùi ziczac dạng bậc thang, thiếu thumbnail và chưa hỗ trợ phím mũi tên.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tái Cấu Trúc CSS Dropdown & Item Gợi Ý (`nhap-hang.css`, `site.css`)**:
+      * Mở rộng `.nh-search-wrap` (`flex: 0 1 580px; max-width: 650px; min-width: 340px;`) và `.nh-autocomplete-dropdown` (`min-width: 540px; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15)`).
+      * Bổ sung trọn vẹn bộ styling cho `.kk-autocomplete-item`: Căn chỉnh `display: flex; justify-content: space-between; align-items: center; gap: 12px;` trên 1 hàng ngang duy nhất.
+      * Thêm `.kk-item-thumb` dạng badge vuông bo góc 6px với chữ cái đầu viết hoa trên nền xanh `#e0f2fe` chuẩn Kiểm kho thay vì icon thô.
+      * Căn lề rõ ràng: Khối bên trái `.kk-item-main` chứa Tên hàng đậm và Mã hàng/ĐVT nhỏ gọn; Khối bên phải `.kk-item-meta` căn phải hiển thị Tồn kho (số xanh đậm) và Giá nhập.
+      * Thêm hiệu ứng hover và `.active` nền xanh nhạt `#eff6ff` kèm đường kẻ mờ `#f1f5f9` phân cách giữa các dòng.
+    + **Nâng Cấp Component JS Dùng Chung (`wwwroot/js/components/f3-product-search.js`)**:
+      * Bổ sung tính năng điều hướng bàn phím toàn diện: `ArrowDown` và `ArrowUp` di chuyển chọn dòng, tự động cuộn dropdown theo dòng đang chọn (`scrollIntoView`), `Enter` chọn nhanh hàng hóa vào bảng, `Escape` đóng dropdown.
+      * Thêm xử lý `mouseenter` đồng bộ vị trí con trỏ chuột với `activeIndex`.
+      * Tự động chọn dòng đầu tiên (`activeIndex = 0`) khi có kết quả để quét mã vạch hoặc bấm Enter thêm ngay lập tức.
+      * Bổ sung hàm lọc an toàn `escapeHtml` ngăn chặn lỗi chuỗi hoặc tấn công XSS.
+    + **Chuẩn Hóa View Razor (`Views/NhapHang/_NhapHangForm.cshtml`)**:
+      * Đổi placeholder thành `Tìm hàng hóa theo mã hoặc tên (F3)` đồng bộ 100% với Kiểm kho và chuẩn KiotViet.
+    + **Kiểm Tra & Biên Dịch**:
+      * `node -c f3-product-search.js` đạt **0 Errors**.
+      * `dotnet build /t:Compile` đạt **0 Errors**.
+      * Đồng bộ tài liệu đặc tả `docs/specs/nhap-hang.md` (7.938 ký tự < 8.000 ký tự theo Rule 12).
+
+
+- **Chuẩn Hóa Hiển Thị Bảng Phiếu Nhập & Drawer Chi Tiết Dựa Trên Nhà Cung Cấp (Phiên 90)**:
+  - **Nhu cầu**: Tiếp tục sửa phần hiển thị bảng danh sách phiếu nhập hàng và dòng mở rộng chi tiết (inline drawer) trên `/NhapHang/Index` dựa trên chuẩn hiển thị của phân hệ Nhà cung cấp (`NhaCungCap`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Chuẩn Hóa Giao Diện Bảng Razor View (`Views/NhapHang/_NhapHangTable.cshtml`)**:
+      * Bổ sung chỉ báo sắp xếp sort-icon (`bi-arrow-up/down`) cho các cột còn thiếu (`tongsl`, `slmathang`).
+      * Chuẩn hóa class dòng dữ liệu `.product-row.tbl-row` và dòng chi tiết `.product-detail-row.dtl` khớp 100% selector của LEGO `KiotFilter.initRowDetail`.
+      * Tích hợp hàng tìm kiếm con `tr.fin` với `.dtl-search-code` (mã hàng) và `.dtl-search-name` (tên hàng) ngay trên bảng mặt hàng của dòng chi tiết.
+      * Thêm thông tin `Tiền đã trả NCC` vào cột tổng hợp và khối tóm tắt đáy.
+    + **Cố Định Độ Rộng Khung Chi Tiết 992px (`nhap-hang.css`, `site.css`)**:
+      * Đưa `.receipt-detail-fixed-wrap` và `.nh-detail-fixed-wrap` về chuẩn kích thước `992px !important; max-width: 100%; box-sizing: border-box;`, đồng bộ cùng `.ncc-detail-fixed-wrap`, `.kk-detail-fixed-wrap`, `.xh-detail-fixed-wrap`.
+      * Bổ sung responsive media query `@media (max-width: 1040px) { width: 100% !important; }`.
+      * Bảo đảm viền xanh chữ nhật `#0070f3` khép kín 4 cạnh hoàn hảo (trên/dưới 2px, 2 bên 3px) phối hợp với `.last-visible-col`.
+    + **Tái Cấu Trúc JavaScript Bằng Khối LEGO (`wwwroot/js/nhap-hang-index.js`)**:
+      * Tích hợp `KiotFilter.initRowDetail`: Tự động tính toán `colspan` theo số cột thực tế hiển thị (loại bỏ hoàn toàn cột ma), gán `.last-visible-col` khép kín viền xanh, đóng/mở 150ms mượt mà và tự khôi phục dòng mở sau khi tải lại AJAX.
+      * Xây dựng trình lắng nghe tìm kiếm trực tiếp trong chi tiết (`.dtl-search-code`, `.dtl-search-name`) tự động lọc các dòng `tr.dtl-line-row` ngay tức thì.
+      * Tích hợp modal xác nhận hủy phiếu an toàn bằng `window.KiotConfirm.show(...)` chuẩn KiotViet thay vì `confirm()` mặc định của trình duyệt.
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build /t:Compile` đạt **0 Errors**.
+      * `node -c` toàn bộ JavaScript đạt **0 Errors**.
+      * Đồng bộ tài liệu đặc tả `docs/specs/nhap-hang.md` (7.915 ký tự < 8.000 ký tự theo Rule 12).
+
+- **Tối Ưu Bỏ Ô Lọc Số Hóa Đơn Trực Tiếp Trên Leftmenu Nhập Hàng (Phiên 89)**:
+  - **Nhu cầu**: Người dùng yêu cầu loại bỏ ô nhập lọc "Số hóa đơn" trên thanh Leftmenu/Sidebar của danh sách Nhập hàng (`/NhapHang`), giữ giao diện gọn gàng, đồng bộ với các màn hình khác.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Loại bỏ khỏi Razor View (`Views/NhapHang/_NhapHangFilterSidebar.cshtml`)**: Xóa khối input `Số hóa đơn` (`#invoiceNumberFilter`) và chấm cam `#dotShd`. Giữ lại cấu trúc các khối lọc chuẩn: Trạng thái, Thời gian, Người tạo, Người nhập, Nhà cung cấp.
+    + **Đồng bộ JavaScript (`wwwroot/js/nhap-hang-index.js`)**: Loại bỏ `soHoaDon` khỏi đối tượng bộ lọc `F`, bỏ chấm cam `#dotShd` khỏi hàm `paintFilters()`, bỏ input event listener `#invoiceNumberFilter` và xóa reset `soHoaDon` trong `resetAllFilters()`.
+    + **Tính năng tìm kiếm**: Số hóa đơn vẫn được hỗ trợ tìm kiếm trực tiếp và kết hợp thông minh qua thanh tìm kiếm chính F3 (`#keywordSearch`).
+    + **Kiểm tra & Biên dịch**: `dotnet build /t:Compile` đạt **0 Errors**, `node -c nhap-hang-index.js` đạt **0 Errors**.
+
+- **Đồng Bộ Form Nhập Nhà Cung Cấp Đầy Đủ Chuẩn KiotViet Vào Phân Hệ Nhập Hàng (Phiên 88)**:
+  - **Nhu cầu**: Người dùng yêu cầu thay thế modal tạo nhanh nhà cung cấp 4 trường rút gọn trước đó bằng toàn bộ form nhập nhà cung cấp đầy đủ chuẩn KiotViet của phân hệ Nhà cung cấp (`_NhaCungCapModal`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tái Sử Dụng Modal Gốc Nhà Cung Cấp (`Views/NhaCungCap/_NhaCungCapModal.cshtml`)**:
+      * Chuyển đổi `@model dynamic` cho phép nhận linh hoạt cả `NhaCungCapIndexVM` và `NhapHangFormVM`.
+      * Tự động trích xuất danh sách nhóm `NhomNccList` phục vụ combobox nhóm NCC và tạo nhóm con nhanh (`#nccPromptOv`).
+    + **Cung Cấp Dữ Liệu Nhóm (`ViewModels/NhapHang/NhapHangViewModels.cs`, `Controllers/NhapHangController.cs`)**:
+      * Bổ sung `List<NhomNhaCungCap> NhomNccList` vào `NhapHangFormVM`.
+      * Cập nhật `PopulateFormSelectLists` trong `NhapHangController.cs` tự động nạp danh sách `NhomNhaCungCaps` từ CSDL.
+    + **Nhúng Giao Diện & Stylesheet (`Views/NhapHang/_NhapHangForm.cshtml`)**:
+      * Nạp `~/css/hang-hoa-form.css` và `~/css/nha-cung-cap.css`.
+      * Nhúng `<partial name="~/Views/NhaCungCap/_NhaCungCapModal.cshtml" model="Model" />` thay thế hoàn toàn `#quickSupplierModal` cũ.
+    + **Đồng Bộ API Phía Backend (`Controllers/NhaCungCapController.cs`)**:
+      * Cập nhật action `Create([FromBody] NhaCungCapFormVM form)` trả về cả `id` và đối tượng `supplier` (`maDonViCapHang`, `tenDonVi`, `maNcc`, `dienThoai`, `noCanTra`) đảm bảo tương thích ngược 100%.
+    + **Điều Khiển Frontend Đầy Đủ (`wwwroot/js/nhap-hang-form.js`)**:
+      * Kích hoạt mở modal `#nccModalOv` khi click nút `+` (`#btnOpenAddSupplier`).
+      * Tích hợp đầy đủ custom combobox `nccGroupCombobox` (gõ tìm nhóm, click chọn, bút chì ✎ sửa/xóa nhóm, tạo nhanh nhóm `#btnNewNhomNcc`).
+      * Hỗ trợ accordion sections (Địa chỉ chi tiết, Khu vực, Phường/Xã; Nhóm NCC, Ghi chú; Tên công ty xuất HĐ, MST, CCCD).
+      * Xử lý 2 chế độ "Lưu" và "Lưu & Thêm mới", tự động chọn ngay nhà cung cấp mới vào ô input nhà cung cấp của phiếu nhập.
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build /t:Compile` đạt **0 Errors**.
+      * `node -c` toàn bộ JavaScript đạt **0 Errors**.
+      * Đồng bộ tài liệu đặc tả `docs/specs/nhap-hang.md` (7.793 ký tự < 8.000 ký tự theo Rule 12).
+
+- **Khắc Phục Toàn Diện Lỗi Leftmenu/Sidebar Phân Hệ Nhập Hàng (Phiên 87)**:
+  - **Nhu cầu**: Người dùng phản ánh trên màn hình danh sách Nhập hàng (`/NhapHang`), phần cột lọc bên trái (Leftmenu/Sidebar) bị lỗi, không thao tác mở/chọn được.
+  - **Nguyên nhân cốt lõi**:
+    + Trong `wwwroot/js/nhap-hang-index.js`, toàn bộ 3 hộp Multi-select (`#boxNguoiTao`, `#boxNguoiNhap`, `#boxNhaCungCap`) thiếu các hàm lắng nghe sự kiện click mở/đóng dropdown, không có hàm chọn item, không xử lý tìm kiếm nội bộ và không gọi `KiotFilter.renderTagPills` để hiển thị các tag đã chọn.
+    + Thiếu lệnh khởi tạo bộ lọc thời gian `KiotFilter.initDateFilter('date', ...)` khiến các popup chọn nhanh (Hôm nay, Hôm qua, Tuần này, Tháng này...) và lịch 2 tháng không mở được hoặc không lọc được.
+    + Nút F4 và `#btnToggleSidebar` trước đó toggle class `.collapsed` trực tiếp lên `#sidebarFilterCol` thay vì toggle `.sidebar-collapsed` lên `#kiotContainer`, khiến giao diện không co giãn đúng theo chuẩn CSS KiotViet.
+    + Các chấm cam báo hiệu trạng thái lọc (`#dotDate`, `#dotSt`, `#dotUser`, `#dotShd`, `#dotConfirmer`, `#dotNcc`) bị tê liệt do thiếu hàm đồng bộ `paintFilters()`.
+    + Backend `NhapHangFilterVM` và `NhapHangController.cs` chưa hỗ trợ lọc nhiều ID (`NccIds`, `CreatorIds`, `ConfirmerIds`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bổ Sung DTO & Query Đa Giá Trị (`ViewModels/NhapHang/NhapHangViewModels.cs`, `Controllers/NhapHangController.cs`)**:
+      * Bổ sung `List<int> NccIds`, `List<int> CreatorIds`, `List<int> ConfirmerIds` vào `NhapHangFilterVM`.
+      * Cập nhật `BuildIndexViewModel` trong `NhapHangController.cs` hỗ trợ lọc đồng thời cả danh sách ID và ID đơn lẻ tương thích ngược 100%.
+    + **Đồng Bộ Razor View (`Views/NhapHang/_NhapHangFilterSidebar.cshtml`)**:
+      * Cấu hình `DefaultText = "Tháng này"` cho `_KiotDateFilter`.
+      * Kiểm tra chọn sẵn cho cả `CreatorIds`, `ConfirmerIds`, `NccIds`.
+    + **Tái Thiết Toàn Diện `wwwroot/js/nhap-hang-index.js` Theo Chuẩn Lego KiotViet**:
+      * Đưa vào đối tượng trạng thái lọc tập trung `F`.
+      * Triển khai hàm `setupMultiSelectDropdown` và `renderMultiSelect` cho cả 3 dropdown: Người tạo, Người nhập, Nhà cung cấp (hỗ trợ click box mở dropdown, click chọn checkbox, click nút xóa tag `×`, tìm kiếm nội bộ lọc danh sách mượt mà).
+      * Khởi tạo `KiotFilter.initDateFilter('date', ...)` xử lý đầy đủ chế độ chọn nhanh preset và lịch kép tùy chỉnh.
+      * Khởi tạo `KiotFilter.initSidebar(...)` quản lý thu gọn/mở rộng sidebar (F4) và mobile drawer trơn tru.
+      * Cài đặt `paintFilters()` tự động bật/tắt toàn bộ 6 chấm cam chỉ thị và đồng bộ trạng thái giao diện.
+      * Thêm debounce 350ms cho ô Số hóa đơn (`#invoiceNumberFilter`) và Từ khóa F3 (`#keywordSearch`).
+      * Xử lý đóng dropdown/popup khi click ra ngoài, cuộn sidebar hoặc bấm Escape.
+    + **Kiểm Tra & Biên Dịch**:
+      * `dotnet build /t:Compile` đạt **0 Error(s)**.
+      * `node -c nhap-hang-index.js` đạt **0 Error(s)**.
+
+- **Khắc Phục Lỗi Chìm Tràn Màn Hình Form Lập/Sửa Phiếu Nhập Hàng (Phiên 86)**:
+  - **Nhu cầu**: Người dùng phản ánh trên màn hình lập/sửa phiếu Nhập hàng (`/NhapHang/Create`), hàng tổng kết bên trái ("Tổng mặt hàng", "Tổng số lượng") và thanh nút hành động bên phải ("Lưu tạm (F9)", "Hoàn thành (F10)") bị chìm tụt xuống dưới đáy màn hình, bị cắt lẹm không nhìn thấy trọn vẹn.
+  - **Nguyên nhân cốt lõi**:
+    + Trong `site.css`, container chính `.app-main-body` có `height: calc(100vh - 86px); overflow: hidden;`.
+    + Trong `nhap-hang.css`, `.nh-container` lại được gán `min-height: calc(100vh - 56px);` (lớn hơn 30px so với `.app-main-body`), đồng thời thiếu `height: 100%`, `min-height: 0` và `overflow: hidden`.
+    + `.nh-panel` có `overflow-y: auto` trực tiếp trên toàn bộ panel khiến thanh nút `.nh-panel-actions` bị đẩy xuống cuối nội dung form dài và chìm dưới đáy viewport thay vì ghim cố định.
+    + `.nh-main` có `overflow-y: auto` và bảng lưới thiếu scrollbar nội bộ khiến cả khối trang bị dãn dài.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Chuẩn Hóa Bố Cục Viewport (`wwwroot/css/nhap-hang.css`)**:
+      * Thiết lập `.nh-container`: `height: 100%; min-height: 0; overflow: hidden;`.
+      * Thiết lập `.nh-form-wrap`: `height: 100%; min-height: 0; overflow: hidden; position: relative;`.
+      * Thiết lập `.nh-main`: `height: 100%; min-height: 0; overflow: hidden;` kết hợp `.nh-topbar` có `flex-shrink: 0;`.
+      * Thiết lập `.nh-grid-card`: `flex: 1; min-height: 0; overflow: hidden;`, bọc `.table-responsive` có `flex: 1; min-height: 0; overflow: auto;` và `position: sticky; top: 0;` cho header bảng.
+      * Ghim đáy thanh tóm tắt số liệu: `.nh-items-footer { flex-shrink: 0; }` luôn hiển thị 100% rõ ràng ở đáy card hàng hóa.
+      * Ghim đáy thanh nút thao tác: `.nh-panel { height: 100%; min-height: 0; overflow: hidden; position: relative; }`, tách riêng `.nh-panel-body` có `flex: 1; min-height: 0; overflow-y: auto;` và `.nh-panel-actions { flex-shrink: 0; }` luôn ghim cố định đáy, 100% không bao giờ bị chìm/tràn.
+      * Tinh chỉnh gọn gàng các ô nhập: textarea 2 dòng (`rows="2"`, `height: 56px`), gap 10px, scrollbar 6px mượt mà.
+    + **Kiểm Tra & Đồng Bộ Tài Liệu**:
+      * `dotnet build /t:Compile` đạt **0 Errors**.
+      * `node -c` toàn bộ JavaScript đạt **0 Errors**.
+      * Đồng bộ tài liệu đặc tả `docs/specs/nhap-hang.md` (7.742 ký tự, bảo đảm < 8.000 ký tự theo Rule 12).
+
+- **Khắc Phục Lỗi Ràng Buộc UNIQUE MaDonBan Cho Phân Hệ Xuất Hủy (Phiên 85)**:
+  - **Nhu cầu**: Khi nhấn "Hoàn thành (F10)" lập phiếu Xuất hủy, hệ thống báo lỗi `DbUpdateException: Cannot insert duplicate key in object 'dbo.PhieuXuat'. The duplicate key value is (<NULL>)`.
+  - **Nguyên nhân**: Ràng buộc `UNIQUE` chuẩn của SQL Server trên `PhieuXuat(MaDonBan)` và `ChiTietPhieuXuat(MaCTDonBan)` chỉ cho phép duy nhất một giá trị `NULL`. Các phiếu xuất hủy (`XUAT_HUY`) không thuộc đơn bán hàng (`MaDonBan = NULL` và `MaCTDonBan = NULL`) nên khi tạo từ phiếu thứ 2 trở đi sẽ bị chặn vi phạm ràng buộc.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tạo Script Di Chuyển CSDL (`migrations/sql/12_fix_unique_madonban_phieuxuat.sql`)**: Chuyển đổi ràng buộc `UNIQUE` cũ trên `PhieuXuat(MaDonBan)` và `ChiTietPhieuXuat(MaCTDonBan)` thành Filtered Unique Index: `CREATE UNIQUE NONCLUSTERED INDEX ... WHERE [Column] IS NOT NULL`. Đảm bảo tuân thủ 3 nguyên tắc vàng CSDL trong `AGENTS.md`.
+    + **Thực thi trên CSDL**: Đã áp dụng thành công trên CSDL SQL Server `QuanLyKhoPhuQuocLTW`.
+    + **Đồng bộ DbContext (`Models/QuanLyKhoPhuQuocLtwContext.cs`)**: Cập nhật mapping `entity.HasIndex(...).IsUnique().HasFilter("([Column] IS NOT NULL)")` cho cả `ChiTietPhieuXuat` và `PhieuXuat`.
+    + **Kiểm tra & Biên dịch**:
+      * `dotnet build /t:Compile` đạt **0 Errors**.
+      * Đồng bộ tài liệu đặc tả `docs/specs/xuat-huy.md`.
+
+- **Chuẩn Hóa Nút Tròn Thu Gọn/Mở Rộng Panel Phải Cho Nhập Hàng Chuẩn Kiểm Kho (Phiên 84)**:
+  - **Nhu cầu**: Người dùng phản ánh nút thu gọn/mở rộng panel phải trên màn hình lập/sửa phiếu Nhập hàng đang là hình bán nguyệt xám dài dính lệch mép, yêu cầu sửa lại nút thành nút tròn floating nổi bật, căn giữa vách ngăn cột dựa trên chuẩn của phân hệ Kiểm kho (`PhieuKiemKe`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Chuẩn Hóa Giao Diện Razor View (`Views/NhapHang/_NhapHangForm.cshtml`)**: Bổ sung class `.panel-toggle` và chuẩn hóa thuộc tính `title="Thu gọn thông tin (Phím tắt F4)"`.
+    + **Chuẩn Hóa Định Kiểu CSS (`wwwroot/css/nhap-hang.css`)**:
+      * Thay thế hoàn toàn kiểu dáng bán nguyệt cũ bằng nút tròn nổi bật chuẩn Kiểm kho: `width: 30px; height: 30px; border-radius: 50%; border: 1px solid #0070f4; background: #fff; color: #0070f4;`.
+      * Tọa độ căn chính giữa vách ngăn: `right: 345px;` (với panel rộng 360px: `360px - 15px`).
+      * Hiệu ứng đổ bóng chuẩn KiotViet: `box-shadow: 0 2px 8px rgba(10, 102, 232, 0.2);`, hover đổi nền xanh nhẹ `#eff6ff` và scale 1.1x.
+      * Khi đóng panel: Tự động trượt sang sát mép phải `right: 8px;`, đổi icon sang `bi-chevron-left`.
+    + **Đồng Bộ JavaScript (`wwwroot/js/nhap-hang-form.js`)**: Cập nhật click handler toggle cả 2 class `.panel-closed` và `.panel-collapsed`, cập nhật dynamic tooltip `title` phù hợp trạng thái mở/đóng.
+    + **Kiểm Tra & Đồng Bộ Tài Liệu**:
+      * `dotnet build /t:Compile` đạt **0 Errors**.
+      * `node -c` JavaScript đạt **0 Errors**.
+      * Đồng bộ đặc tả `docs/specs/nhap-hang.md` (7.891 ký tự, đảm bảo < 8.000 ký tự theo Rule 12).
+
+- **Cố Định Độ Rộng Khung Chi Tiết Kiểm Kho Chuẩn KiotViet & Nhà Cung Cấp (Phiên 83)**:
+  - **Nhu cầu**: Người dùng yêu cầu áp dụng giải pháp cố định độ rộng tương tự Nhà cung cấp và Xuất hủy cho phân hệ Kiểm kho (`PhieuKiemKe`), tránh việc bảng hàng hóa kiểm kho, ghi chú và các nút thao tác bị kéo dãn theo bề ngang bảng 13 cột.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bổ Sung Khung Cố Định Vào Razor View (`Views/PhieuKiemKe/_PhieuKiemKeTable.cshtml`)**: Bọc toàn bộ nội dung chi tiết (tiêu đề, meta, bảng `dtl-tbl`, khối `dp-bottom` ghi chú & tổng kết, thanh nút `dp-actions`) bên dưới tab bar vào `<div class="kk-detail-fixed-wrap kiot-detail-fixed-wrap">`.
+    + **Chuẩn Hóa CSS Cố Định (`wwwroot/css/kiem-kho.css`, `wwwroot/css/site.css`)**:
+      * Khai báo `.kk-detail-fixed-wrap { width: 992px; max-width: 100%; box-sizing: border-box; }` đồng bộ với `.ncc-detail-fixed-wrap` và `.xh-detail-fixed-wrap`.
+      * Bổ sung responsive media query `@media (max-width: 1040px) { width: 100%; }` đảm bảo hiển thị hoàn hảo trên màn hình hẹp/thu phóng.
+      * Giữ nguyên viền xanh chữ nhật `#0070f3` khép kín 100% bề ngang dòng bảng, trong khi toàn bộ nội dung và nút bấm bên trong được căn chỉnh gọn gàng, ngay ngắn trong phạm vi 992px.
+    + **Kiểm Tra & Đồng Bộ Tài Liệu**:
+      * `dotnet build /t:Compile` đạt **0 Errors**.
+      * `node -c` toàn bộ JavaScript đạt **0 Errors**.
+      * Đồng bộ đặc tả `docs/specs/kiem-kho.md` (7.549 ký tự, đảm bảo < 8.000 ký tự theo Rule 12).
+
+- **Xây Dựng Hoàn Chỉnh Mô-đun Nhập Hàng Chuẩn KiotViet (Phiên 82)**:
+  - **Nhu cầu**: Người dùng yêu cầu triển khai toàn diện chức năng Nhập hàng (Goods Receipt / Purchase Order) dựa trên trọn vẹn 100% các khối Lego đã đóng gói (Bộ lọc thời gian `_KiotDateFilter`, trạng thái `_KiotStatusFilter`, multi-select `_KiotMultiSelectFilter`, tìm kiếm hàng hóa F3 `f3-product-search.js`, thanh phân trang `_Pagination`, toggle sao không thông báo, viền xanh chữ nhật khép kín).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Cơ sở dữ liệu & Entity Models**:
+      * Thực thi Migration `migrations/sql/12_bo_sung_maphieu_dadanhdau_phieunhap.sql` bổ sung các cột `MaPhieu`, `DaDanhDau`, `SoHoaDon`, `GiamGia`, `TongTien`, `CanTraNcc`, `MaDatHangNhap` vào `PhieuNhap` và `GiamGia`, `ThanhTien` vào `ChiTietPhieuNhap`.
+      * Tạo Filtered Unique Index `UQ_PhieuNhap_MaPhieu` đảm bảo mã phiếu không trùng lặp.
+      * Đồng bộ `Models/PhieuNhap.cs`, `Models/ChiTietPhieuNhap.cs`, `Models/QuanLyKhoPhuQuocLtwContext.cs`.
+    + **ViewModels Đầy Đủ**:
+      * Xây dựng `ViewModels/NhapHang/NhapHangViewModels.cs` với `NhapHangListItemVM`, `NhapHangLineVM`, `NhapHangFilterVM`, `NhapHangIndexVM`, `NhapHangFormVM`, `SaveNhapHangRequest`, `SaveNoteRequest`, `QuickSupplierVM`.
+    + **Controller Nghiệp Vụ (`Controllers/NhapHangController.cs`)**:
+      * Kế thừa `BaseKhoController`, tích hợp `INhatKyThaoTacService` ghi log bảo mật.
+      * Cung cấp đầy đủ các Action: `Index`, `Filter` (AJAX partial), `ToggleFavorite` (silent toggle), `GetNextCode` (tự sinh mã `PN000001`), `Create`, `Edit`, `Details`, `Save` (POST JSON bọc trong `BeginTransactionAsync`), `Cancel` (kiểm tra an toàn tồn kho trước khi hủy phiếu hoàn thành), `SaveNote`, `SearchProducts` (F3 autocomplete), `SearchSuppliers`, `QuickCreateSupplier` và `Export` (Excel bằng ClosedXML).
+    + **Giao Diện Chuẩn KiotViet & Bảng Dựa Trên Nhà Cung Cấp**:
+      * Màn hình 1 Danh sách (`Views/NhapHang/Index.cshtml`, `_NhapHangFilterSidebar.cshtml`, `_NhapHangTable.cshtml`): 
+        - Cấu trúc bảng dựa trên bảng Nhà cung cấp (`width: max-content`, min-width 900px, không ép tràn ngang).
+        - Dropdown tùy chọn hiển thị cột 2 cột gồm đầy đủ 20 cột chuẩn KiotViet: Mã nhập hàng, Mã trả hàng nhập, Thời gian, Thời gian tạo, Ngày cập nhật, Mã NCC, Nhà cung cấp, Chi nhánh, Người nhập, Người tạo, Tổng SL, SL mặt hàng, Tổng tiền hàng, Giảm giá, Cần trả NCC, CK thanh toán, Tiền đã trả NCC, Ghi chú, Trạng thái, Số hóa đơn đầu vào.
+        - Dòng tổng hợp `summary-row` tính tổng các cột số liệu cuộn tự nhiên.
+        - Drawer xem chi tiết inline dạng accordion viền chữ nhật `#0070f3` khép kín liền mạch.
+      * Màn hình 2 Form 2 cột (`Views/NhapHang/Create.cshtml`, `Edit.cshtml`, `Details.cshtml`, `_NhapHangForm.cshtml`): Bên trái là bảng hàng nhập tích hợp F3 autocomplete và nhập Excel; bên phải là panel thông tin chứng từ thu gọn F4, tạo nhanh NCC bằng modal con.
+    + **Styles & Scripts**:
+      * `wwwroot/css/nhap-hang.css`: Định dạng chuẩn KiotViet, layout 2 cột, viền xanh chữ nhật không lem, badge trạng thái.
+      * `wwwroot/js/nhap-hang-index.js`: Tích hợp `KiotFilter.initColumnToggle` với 20 cột, lưu `localStorage`, lọc AJAX, sắp xếp cột, đổi sao silent không hiện toast, phân trang, hủy phiếu.
+      * `wwwroot/js/nhap-hang-form.js`: Tính toán tự động, F3/F4/F9/F10, đọc Excel bằng SheetJS, lưu tạm và hoàn thành.
+    + **Điều Hướng Hệ Thống**: Kết nối liên kết "Nhập hàng" trong `_Header.cshtml` và `_MainMenu.cshtml` về `/NhapHang/Index`.
+    + **Kiểm Tra & Biên Dịch**: `dotnet build --no-restore -t:CoreCompile` đạt **0 Errors**, `node -c` toàn bộ JavaScript đạt **0 Errors**.
+
+- **Cố Định Độ Rộng Khung Chi Tiết Xuất Hủy Chuẩn Nhà Cung Cấp (Phiên 81)**:
+  - **Nhu cầu**: Người dùng phản ánh khi mở dòng chi tiết phiếu xuất hủy, các thành phần (bảng sản phẩm hủy, ô tìm kiếm inline, ghi chú, tổng kết và các nút hành động) bị kéo dãn toàn bộ bề ngang theo bảng dữ liệu rộng nhiều cột, yêu cầu cố định độ rộng tương tự như phần Nhà cung cấp.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bổ Sung Khung Cố Định Vào Razor View (`Views/XuatHuy/_XuatHuyTable.cshtml`)**: Bọc toàn bộ nội dung chi tiết (tiêu đề, meta, bảng `dtl-tbl`, khối `dp-bottom` ghi chú & tổng kết, thanh nút `dp-actions`) bên dưới tab bar vào `<div class="xh-detail-fixed-wrap kiot-detail-fixed-wrap">`.
+    + **Chuẩn Hóa CSS Cố Định (`wwwroot/css/xuat-huy.css`)**:
+      * Khai báo `.xh-detail-fixed-wrap { width: 992px; max-width: 100%; box-sizing: border-box; }` đồng bộ với chuẩn `.ncc-detail-fixed-wrap` và `.kiot-detail-fixed-wrap`.
+      * Bổ sung responsive media query `@media (max-width: 1040px) { width: 100%; }` đảm bảo hiển thị hoàn hảo trên màn hình hẹp/thu phóng.
+      * Giữ nguyên viền xanh `#0070f3` khép kín 100% bề ngang dòng bảng, trong khi toàn bộ nội dung và nút bấm bên trong được căn chỉnh gọn gàng, ngay ngắn trong phạm vi 992px.
+    + **Kiểm Tra & Đồng Bộ Tài Liệu**:
+      * `dotnet build /t:Compile` đạt **0 Errors**.
+      * Đồng bộ đặc tả `docs/specs/xuat-huy.md` (6.885 ký tự, đảm bảo < 8.000 ký tự theo Rule 12).
+
+- **Khắc Phục Lỗi Giật Lắc Của Tab Thông Tin Khi Đóng Mở Dòng Chi Tiết (Phiên 80)**:
+  - **Nhu cầu**: Người dùng phản ánh tab "Thông tin" trong dòng chi tiết phiếu kiểm kho bị giật lắc qua lại ngang khi click mở/đóng chi tiết dòng.
+  - **Nguyên nhân cốt lõi**:
+    1. Tranh chấp CSS `position: sticky; left: 0; width: max-content;` trên `.dp-tabs` kết hợp với `margin: 0 -20px` khiến tab bị tính lại tọa độ liên tục khi kích thước khung thay đổi.
+    2. `.dp` có `padding` và `position: sticky` nhưng lại bị gán làm wrapper trượt trực tiếp bởi jQuery `slideDown/slideUp`, dẫn đến việc `overflow: hidden` tạm thời của jQuery làm mất/chuyển đổi context dính (sticky context) mỗi frame hoạt họa, gây giật nảy 20px.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tách Khung Bọc Animation Độc Lập (`_PhieuKiemKeTable.cshtml`)**: Tách biệt `<div class="product-detail-panel-wrap">` (chuyên dùng cho slideDown/slideUp không có padding/sticky) bọc bên ngoài `<div class="product-detail-panel dp">` (chứa nội dung tĩnh và padding).
+    + **Chuẩn Hóa CSS Cố Định Tab Bar (`site.css`, `kiem-kho.css`, `xuat-huy.css`)**:
+      * Loại bỏ `position: sticky; left: 0; width: max-content;` khỏi `.kiot-detail-tabs`, `.product-detail-tabs`, `.ncc-detail-tabs` và `.dp-tabs`.
+      * Thiết lập `.dp-tabs` ở `position: static !important; width: auto !important;` với `border-bottom` trải đều tự nhiên.
+      * Loại bỏ `position: sticky; left: 0;` và `max-width: min(1200px, calc(100vw - 320px))` khỏi `.dp`, giúp layout co giãn ổn định tuyệt đối.
+    + **Cập Nhật Selector Script (`phieu-kiem-ke-index.js`)**: Điều chỉnh `wrapSelector: '.product-detail-panel-wrap, .kiot-detail-panel-wrap'` để jQuery chỉ tác động lên wrapper trượt.
+    + **Kiểm tra biên dịch & cú pháp**: `dotnet build` đạt 0 Errors, `node -c` toàn bộ JavaScript đạt 0 Errors.
+
+- **Đóng Gói Nút Nhập / Xuất File Excel Danh Sách Hàng Hóa Chuẩn KiotViet (Phiên 79)**:
+  - **Nhu cầu**: Đóng gói các nút Import file và Xuất file riêng lẻ trên thanh toolbar danh sách hàng hóa thành một khối dropdown duy nhất chuẩn KiotViet gọn gàng và tái sử dụng.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tạo Partial View Dùng Chung (`_HangHoaExcelActions.cshtml`)**: Tạo `Views/HangHoa/_HangHoaExcelActions.cshtml` đóng gói dropdown thao tác file Excel chuẩn KiotViet (`.btn.btn-tool.dropdown-toggle`), gồm 3 tùy chọn:
+      * 📤 **Xuất file (Export)**: Mở modal `#hhExportModalOv` chọn cột và phạm vi xuất dữ liệu.
+      * 📥 **Nhập file (Import)**: Mở modal `#hhImportModalOv` kéo thả file Excel cập nhật hàng hóa.
+      * 📑 **Tải file mẫu nhập hàng (.xlsx)**: Liên kết trực tiếp tải mẫu chuẩn `DownloadTemplate`.
+    + **Tối Ưu Responsive & Tinh Gọn Toolbar (`Views/HangHoa/Index.cshtml`)**:
+      * Loại bỏ 25 dòng code HTML phân mảnh giữa desktop (2 nút riêng) và mobile (1 dropdown).
+      * Thay thế bằng 1 dòng `<partial name="_HangHoaExcelActions" />`, tự động co giãn hiển thị icon hoặc text linh hoạt trên mọi kích thước màn hình.
+    + **Kiểm tra biên dịch**: `dotnet build /t:Compile` đạt 0 Errors.
+    + **Đồng bộ đặc tả**: Cập nhật File Map trong `docs/specs/danh-sach-hang-hoa.md`.
+
+- **Sửa Lỗi Hiển Thị Ô Email Trong Modal Nhà Cung Cấp (Phiên 78)**:
+  - **Nhu cầu**: Sửa lỗi ô Email trong modal "Thêm mới nhà cung cấp" bị vuông góc sắc nhọn, chiều cao và đường viền lệch lạc so với các ô nhập liệu khác (Tên nhà cung cấp, Mã NCC, Điện thoại).
+  - **Nguyên nhân**: Trong `hang-hoa-form.css`, bộ chọn định kiểu `.hh-f input[type=text], .hh-f input[type=number]` chỉ áp dụng cho text và number, thiếu `input[type=email]`. Khiến ô input Email rơi về kiểu dáng mặc định của trình duyệt (border vuông 90 độ, không có `border-radius: 8px;`, thiếu `height: 38px;`, `padding: 0 12px;` và hiệu ứng focus).
+  - **Giải pháp & Kết quả thực hiện**:
+    + Trong `wwwroot/css/hang-hoa-form.css`: Bổ sung `input[type=email]`, `input[type=tel]`, `input[type=password]`, `input[type=search]`, `input[type=url]`, `input[type=date]` vào bộ chọn dùng chung `.hh-f`.
+    + Trong `wwwroot/css/nha-cung-cap.css`: Bổ sung khối quy tắc chuyên biệt đảm bảo toàn bộ input trong modal (đặc biệt là `.hh-f input[type=email]`) luôn đạt chuẩn kích thước `height: 38px`, bo tròn góc `border-radius: 8px;`, `padding: 0 12px;`, `font-size: 14.5px;` và viền sáng xanh khi focus.
+    + Kiểm tra biên dịch `dotnet build` đạt 0 Errors.
+
+- **Áp Dụng Chuẩn Hiển Thị Nhà Cung Cấp Cho Phân Hệ Xuất Hủy (Phiên 77)**:
+  - **Nhu cầu**: Người dùng yêu cầu đồng bộ cấu trúc hiển thị, tùy chọn ẩn/hiện cột và hiệu ứng mở dòng chi tiết của phân hệ Nhà cung cấp sang phân hệ Xuất hủy (`XuatHuy`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Đồng Bộ Giao Diện & Cấu Trúc Bảng (`Views/XuatHuy/_XuatHuyTable.cshtml`)**:
+      * Bổ sung dòng tổng hợp `summary-row` cuộn tự nhiên cùng nội dung bảng, tính tổng giá trị hủy (`TongGiaTriHuy.Sum()`).
+      * Chuẩn hóa bộ chọn dòng: Đổi id checkbox chọn tất cả thành `#selectAllRows`, gắn class `.row-select` cho từng dòng.
+      * Chuẩn hóa class hàng: `tr.product-row.tbl-row` cho dòng dữ liệu và `tr.product-detail-row.dtl` cho dòng chi tiết.
+      * Bọc toàn bộ panel chi tiết trong `.product-detail-panel-wrap` để hỗ trợ hiệu ứng trượt mượt mà.
+    + **Đồng Bộ Phong Cách & Viền Hộp Khép Kín (`wwwroot/css/xuat-huy.css`)**:
+      * Cố định độ rộng bảng `#xuatHuyTable` với `width: max-content !important; min-width: 1100px !important; table-layout: fixed !important;`.
+      * Thiết lập viền chữ nhật xanh `#0070f3` khép kín 4 cạnh hoàn hảo (trên/dưới 2px, 2 bên 3px) phối hợp cùng class `.last-visible-col`.
+    + **Tái Cấu Trúc Script Tương Tác (`wwwroot/js/xuat-huy-index.js`)**:
+      * Tích hợp khối LEGO `KiotFilter.initColumnToggle`: Tùy biến `extraColsCount: 2` (checkbox + sao) và 9 cột dữ liệu, tự động tính toán `colspan` và gán `.last-visible-col`.
+      * Tích hợp khối LEGO `KiotFilter.initRowDetail`: Thay thế mã thủ công bằng bộ quản lý Master-Detail chuẩn, trượt mở/đóng 150ms, tự động đóng dòng khác và tự động khôi phục dòng đang mở sau khi tải lại bảng qua AJAX.
+      * Gắn sự kiện chọn tất cả dòng checkbox `#selectAllRows` và đồng bộ trạng thái khi chọn từng dòng lẻ.
+    + **Kiểm Tra & Đồng Bộ Tài Liệu**:
+      * `dotnet build` đạt **0 Errors**.
+      * `node -c` toàn bộ JavaScript đạt **0 Errors**.
+      * Đồng bộ đặc tả `docs/specs/xuat-huy.md` (< 8.000 ký tự theo Rule 12).
+
+- **Áp Dụng Các Khối Lego (RowDetail, EntityActions, ColumnToggle) Cho Phân Hệ Kiểm Kho (Phiên 76)**:
+  - **Nhu cầu**: Người dùng yêu cầu áp dụng các khối Lego vừa đóng gói (`KiotFilter.initRowDetail`, `KiotFilter.initEntityActions`, và `KiotFilter.initColumnToggle` nâng cấp) vào phân hệ Kiểm kho (`PhieuKiemKe`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Tái Cấu Trúc Script Kiểm Kho (`wwwroot/js/phieu-kiem-ke-index.js`)**:
+      * Tích hợp `KiotFilter.initColumnToggle`: Tùy biến `extraColsCount: 2` (cột checkbox + cột sao) và 11 cột dữ liệu, tự động tính toán `colspan` và gán `.last-visible-col` để khép kín hình chữ nhật viền xanh.
+      * Tích hợp `KiotFilter.initRowDetail`: Thay thế hoàn toàn mã thủ công `wrap.onclick`. Điều khiển đóng/mở accordion chi tiết dòng (`tr.dtl`) với slideDown/slideUp mượt mà, tự động đóng dòng khác và tự động khôi phục dòng mở sau khi tải lại bảng qua AJAX (`F.openId`).
+      * Tích hợp `KiotFilter.initEntityActions`: Thay thế vòng lặp gán sự kiện thủ công cho nút Hủy (`.btn-cancel-doc`), ủy quyền sự kiện trên `#tableWrapper`, tích hợp hộp thoại xác nhận hủy phiếu tạm chuẩn KiotConfirm/KiotPrompt và chặn hủy phiếu đã cân bằng.
+      * Tinh gọn `bindTableEvents()`: Chuyển các sự kiện tìm kiếm trong bảng chi tiết (`.dtl-search-*`) và lưu ghi chú (`.btn-save-note`) sang ủy quyền sự kiện qua jQuery `.off().on()`, triệt tiêu nguy cơ rò rỉ bộ nhớ hoặc gắn trùng lặp sự kiện khi tải lại bảng.
+    + **Đồng Bộ Giao Diện & CSS (`wwwroot/css/kiem-kho.css`, `_PhieuKiemKeTable.cshtml`)**:
+      * Bổ sung `.kiot-detail-panel-wrap` vào container `.dp` và chuyển `.dp-tab` sang button ngữ nghĩa.
+      * Viền chữ nhật xanh `#0070f3` khép kín 4 cạnh hoàn hảo (trên/dưới 2px, 2 bên 3px) phối hợp cùng `.last-visible-col`.
+    + **Kiểm Tra & Đồng Bộ Tài Liệu**:
+      * `dotnet build` đạt **0 Errors**.
+      * `node -c` toàn bộ JavaScript đạt **0 Errors**.
+      * Đồng bộ đặc tả `docs/specs/kiem-kho.md` (7.406 ký tự, bảo đảm < 8.000 ký tự theo Rule 12).
+
+- **Đóng gói Khối Master-Detail Accordion, Thao tác Thực thể & Tùy chọn Cột Bảng (Phiên 75)**:
+  - **Nhu cầu**: Người dùng yêu cầu đóng gói logic hiển thị trong bảng Nhà cung cấp (click mở dòng chi tiết inline, các tab Thông tin / Lịch sử / Nợ, các nút thao tác Sửa / Xóa / Đổi trạng thái, tùy chọn ẩn/hiện cột) thành các khối Lego dùng chung toàn hệ thống để có thể áp dụng cho các phân hệ khác (Khách hàng, Hàng hóa, Nhân viên...) chỉ với 1-2 dòng cấu hình.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Thư viện JavaScript Dùng chung (`kiot-filter.js`)**:
+      * Đóng gói `KiotFilter.initRowDetail(options)`: Điều khiển click dòng dữ liệu (`rowSelector`) bung mở dòng chi tiết inline (`.product-detail-panel-wrap`) với hiệu ứng slideDown/slideUp mượt mà 150ms; tự động đóng các dòng khác đang mở; tự động đồng bộ `colspan` bằng đúng số cột hiển thị thực tế; tự động gán class `.last-visible-col` cho ô hiển thị cuối cùng để khép kín hình chữ nhật viền xanh; lắng nghe click chuyển tab trong panel chi tiết (`tabBtnSelector`) với hiệu ứng fadeIn 120ms và hỗ trợ callback lazy loading `onTabChange(tabName, id, $pane, $panel)`.
+      * Đóng gói `KiotFilter.initEntityActions(options)`: Bắt sự kiện click các nút thao tác thực thể tiêu chuẩn (`.btn-edit-*`, `.btn-delete-*`, `.btn-toggle-status-*`, `.btn-copy-*`) với callback tương ứng `onEdit(id)`, `onDelete(id, name)`, `onToggleStatus(id, name, status)`, `onCopy(id)`.
+      * Nâng cấp `KiotFilter.initColumnToggle(options)`: Hỗ trợ linh hoạt cả truyền danh sách tham số hoặc object options; tự động khôi phục từ `localStorage` với fallback `defaultCols`; tự động tính `colspan` chính xác và gán `.last-visible-col` cho các dòng để viền bảng không bao giờ bị hở hay lệch.
+    + **Giao diện & CSS Dùng chung (`site.css`)**:
+      * Chuẩn hóa bộ class Lego: `tr.kiot-row.selected > td`, `tr.kiot-detail-row > td`, `.kiot-detail-panel-wrap`, `.kiot-detail-panel`, `.kiot-detail-tabs`, `.kiot-detail-tab-btn`, `.kiot-detail-tab-content`, `.kiot-detail-fixed-wrap` (cố định 992px), `.kiot-attr-grid` (gap 16px), `.kiot-attr-col` (cố định 320px/card), `.kiot-detail-footer`.
+      * Bảo đảm tương thích ngược 100% với các class hiện hữu (`.product-detail-*`, `.ncc-detail-*`).
+    + **Tái cấu trúc Tích hợp Màn hình Nhà Cung Cấp (`nha-cung-cap-index.js`)**:
+      * Thay thế toàn bộ mã lặp lại bằng các lời gọi hàm Lego: `initColumnToggle()` gọi `KiotFilter.initColumnToggle`, `initRowDetail()` gọi `KiotFilter.initRowDetail`, `initEntityActions()` gọi `KiotFilter.initEntityActions`.
+    + **Kiểm tra biên dịch & Cú pháp**:
+      * `dotnet build` đạt **0 Errors**.
+      * `node -c` toàn bộ các tệp JavaScript đạt **0 Errors**.
+      * Đồng bộ tài liệu luật `.agent/rules/03-giao-dien-layout.md` (6.353 ký tự), `docs/quyet-dinh.md` (7.039 ký tự), `docs/specs/nha-cung-cap.md` (6.756 ký tự).
 
 - **Modal Xác Nhận Ngừng Hoạt Động / Kích Hoạt Lại Nhà Cung Cấp (Phiên 74)**:
   - **Nhu cầu**: Khi nhấn nút "Ngừng hoạt động" hoặc "Kích hoạt lại" trên thanh thao tác của nhà cung cấp, hệ thống phải mở hộp thoại (modal) hỏi xác nhận trước khi thực hiện thay vì chuyển trạng thái ngay lập tức.
@@ -811,6 +1678,21 @@ Cập nhật lần cuối: 2026-10-16 – Modal Xác Nhận Ngừng Hoạt Độ
 ---
 
 ## Nhật ký phiên
+- **2026-10-18 (Phiên 107 - Sáng)**:
+  - Sửa lỗi hiển thị khi ít cột bảng Phiếu kiểm kho dựa trên chuẩn Nhà cung cấp:
+    - Đưa bảng `#stockTakeTable` về cấu hình `width: max-content; min-width: 760px; table-layout: fixed !important;` đồng bộ với `#supplierTable`.
+    - Bổ sung `min-width` đồng bộ cho toàn bộ 11 cột `<th>`, gỡ bỏ `border-0` ở ô `td[colspan]` của dòng chi tiết `tr.dtl`.
+    - Bổ sung quy tắc co giãn `th.last-visible-col { width: auto !important; }` giúp cột hiển thị cuối cùng lấp đầy bảng khi ít cột, triệt tiêu gãy khúc viền xanh `#0070f3`.
+    - Tối ưu `KiotFilter.initRowDetail` bảo toàn class `.last-visible-col` cho mọi dòng trong bảng bao gồm `thead tr`.
+- **2026-10-17 (Phiên 79 - Trưa)**:
+  - Đóng gói nút Nhập/Xuất file Excel trong Danh sách hàng hóa:
+    - Tạo partial view `Views/HangHoa/_HangHoaExcelActions.cshtml` gom các thao tác file (Xuất file, Nhập file, Tải file mẫu) vào 1 nút dropdown KiotViet duy nhất.
+    - Tinh gọn `Views/HangHoa/Index.cshtml`, loại bỏ 25 dòng mã phân mảnh giữa desktop và mobile, chuyển sang gọi 1 dòng partial lego.
+    - Cập nhật File Map trong đặc tả `docs/specs/danh-sach-hang-hoa.md`.
+- **2026-10-17 (Phiên 78 - Trưa)**:
+  - Sửa lỗi ô Email trong modal Thêm mới nhà cung cấp:
+    - Bổ sung selector `input[type=email]` (và các loại input liên quan) vào `.hh-f` trong `hang-hoa-form.css`.
+    - Bổ sung khối quy tắc chuyên biệt trong `nha-cung-cap.css` đảm bảo ô Email luôn có chiều cao 38px, bo tròn góc `border-radius: 8px;`, `padding: 0 12px;`, không còn bị lỗi viền vuông sắc nhọn.
 - **2026-10-16 (Phiên 72 - Tối)**:
   - Thống nhất giao diện thông báo toàn hệ thống & Bỏ kẻ dọc xanh bên trái:
     - Loại bỏ triệt để `border-left` trên `.kiot-toast` trong `site.css`, giải quyết triệt để lỗi kẻ dọc xanh/đỏ/vàng bị nhô ra ngoài góc bo tròn.

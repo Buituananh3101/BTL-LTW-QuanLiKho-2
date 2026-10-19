@@ -1,0 +1,108 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.ChuyenKho.ChuyenKhoIndexVM
+@{
+    ViewData["Title"] = "Chuyển kho";
+}
+
+<link href="~/css/kiem-kho.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/nhap-hang.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/chuyen-kho.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="kiot-container position-relative" id="kiotContainer"
+     data-filter-url="@Url.Action("Filter", "ChuyenKho")"
+     data-toggle-star-url="@Url.Action("ToggleFavorite", "ChuyenKho")"
+     data-cancel-url="@Url.Action("Cancel", "ChuyenKho")"
+     data-save-note-url="@Url.Action("SaveNote", "ChuyenKho")"
+     data-export-url="@Url.Action("Export", "ChuyenKho")"
+     data-receive-url="@Url.Action("Receive", "ChuyenKho")"
+     data-is-starred="@(Model.Filter.DaDanhDau ? "true" : "false")"
+     data-sort-by="@(Model.Filter.SortBy ?? "")"
+     data-sort-dir="@(Model.Filter.SortDir ?? "")"
+     data-current-wh="@Model.CurrentKhoId">
+
+    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + BỘ LỌC KIOTVIET (PARTIAL VIEW) -->
+    <partial name="_ChuyenKhoFilterSidebar" model="Model" />
+
+    <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
+    <div class="kiot-sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Nút tròn thu gọn / mở rộng ở ranh giới giữa sidebar và bảng (Phím tắt F4) -->
+    <button type="button" class="kiot-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
+        <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
+    </button>
+
+    <!-- 2. CỘT BÊN PHẢI: THANH TÌM KIẾM + TOOLBAR + BẢNG PHIẾU CHUYỂN KHO -->
+    <main class="kiot-main-col">
+        <!-- Toolbar trên cùng -->
+        <div class="kiot-toolbar-row">
+            <!-- Tiêu đề + Nút phễu bộ lọc trên mobile -->
+            <div class="kiot-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
+                <span class="kiot-mobile-title fw-bold fs-6 text-dark">Chuyển hàng</span>
+                <button type="button" class="btn btn-sm btn-outline-primary kiot-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+
+            <!-- Ô tìm kiếm theo mã phiếu chuyển (F3) -->
+            <div class="kiot-search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã phiếu chuyển, tên hàng (F3)" value="@Model.Filter.Q" autocomplete="off" />
+            </div>
+
+            <!-- Nhóm nút hành động KiotViet -->
+            <div class="kiot-actions-group">
+                <!-- Nút + Chuyển hàng -->
+                <a href="@Url.Action("Create", "ChuyenKho")" class="btn btn-primary d-inline-flex align-items-center" id="btnNew" title="Lập phiếu chuyển hàng mới" style="background-color: #0070f4; border-color: #0070f4;">
+                    <i class="bi bi-plus-lg me-1"></i><span>Chuyển hàng</span>
+                </a>
+
+                <!-- Nút Xuất file Excel -->
+                <button type="button" class="btn btn-tool" id="btnExpList" title="Xuất danh sách ra file Excel">
+                    <i class="bi bi-box-arrow-up me-1"></i><span>Xuất file</span>
+                </button>
+
+                <!-- Dropdown Tùy chọn hiển thị cột -->
+                <div class="dropdown">
+                    <button class="btn btn-tool" type="button" id="btnColsDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Tùy chọn hiển thị cột">
+                        <i class="bi bi-view-list"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end shadow p-3" id="colMenu" style="min-width: 210px;">
+                        <h6 class="dropdown-header px-0 pt-0 text-dark fw-bold">Hiển thị cột</h6>
+                        <div class="d-flex flex-column gap-2 small">
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="maphieu" checked> Mã chuyển hàng</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ngaylap" checked> Thời gian</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="khonguon" checked> Từ kho</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="khodich" checked> Tới kho</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ngaychuyen" checked> Ngày chuyển</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ngaynhan" checked> Ngày nhận</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="slchuyen" checked> SL chuyển</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="slnhan" checked> SL nhận</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="giatri" checked> Giá trị chuyển</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ghi" checked> Ghi chú</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="st" checked> Trạng thái</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút Trợ giúp -->
+                <button type="button" class="btn btn-tool btn-icon" id="btnHelp" title="Trợ giúp chuyển hàng">
+                    <i class="bi bi-question-circle"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Khung chứa bảng dữ liệu Master-Detail -->
+        <section id="content">
+            <div id="tableContainer" class="kiot-table-wrapper">
+                <partial name="_ChuyenKhoTable" model="Model" />
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Modal Nhận hàng popup -->
+<partial name="_ReceiveModal" />
+
+@section Scripts {
+    <script src="~/js/kiot-filter.js" asp-append-version="true"></script>
+    <script src="~/js/chuyen-kho-index.js" asp-append-version="true"></script>
+}

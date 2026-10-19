@@ -264,6 +264,10 @@
             // Áp dụng lại hiển thị cột & gắn lại sự kiện
             applyColVisibility();
             bindTableEvents();
+
+            if (F.openId) {
+                expandXuatHuyRow(F.openId, false);
+            }
         } catch (err) {
             console.error('Lỗi khi tải bảng xuất hủy:', err);
             if (window.KiotToast) KiotToast.error('Không thể tải dữ liệu bảng.');
@@ -272,57 +276,72 @@
         }
     }
 
-    /* ===== QUẢN LÝ ẨN / HIỆN CỘT BẢNG ===== */
+    /* ===== QUẢN LÝ ẨN / HIỆN CỘT BẢNG (COLUMN VISIBILITY) QUA LEGO KIOTFILTER ===== */
+    const STORAGE_COLS_KEY = 'kiot_xuathuy_cols_v2';
+    const DEFAULT_XH_COLS = {
+        ma: 1,
+        gt: 1,
+        tg: 1,
+        tgt: 0,
+        kho: 1,
+        nxh: 0,
+        nt: 0,
+        ghi: 1,
+        st: 1
+    };
+    let xhColumnToggler = null;
+
     function initColumnToggle() {
-        const menu = $('#colMenu');
-        if (!menu) return;
-        const storageKey = 'xuathuy_cols';
-        let savedCols = {};
-        try {
-            savedCols = JSON.parse(localStorage.getItem(storageKey) || '{}');
-        } catch (_) { }
-
-        // Khôi phục trạng thái từ localStorage
-        $$('input[data-c]', menu).forEach(chk => {
-            const col = chk.dataset.c;
-            if (col && savedCols[col] !== undefined) {
-                chk.checked = savedCols[col] === 1;
-            }
-        });
-        applyColVisibility();
-
-        menu.addEventListener('change', e => {
-            const chk = e.target.closest('input[data-c]');
-            if (!chk) return;
-            applyColVisibility();
-            saveColState();
-        });
-
-        function saveColState() {
-            const state = {};
-            $$('input[data-c]', menu).forEach(chk => {
-                const col = chk.dataset.c;
-                if (col) state[col] = chk.checked ? 1 : 0;
+        if (typeof KiotFilter !== 'undefined' && typeof KiotFilter.initColumnToggle === 'function') {
+            xhColumnToggler = KiotFilter.initColumnToggle({
+                menuSelector: '#colMenu',
+                tableSelector: '#xuatHuyTable',
+                storageKey: STORAGE_COLS_KEY,
+                defaultCols: DEFAULT_XH_COLS,
+                extraColsCount: 2 // 1 cột checkbox + 1 cột sao luôn hiển thị
             });
-            localStorage.setItem(storageKey, JSON.stringify(state));
         }
     }
 
     function applyColVisibility() {
-        const menu = $('#colMenu');
-        const wrap = $('#tableWrapper');
-        if (!menu || !wrap) return;
-
-        $$('input[data-c]', menu).forEach(chk => {
-            const col = chk.dataset.c;
-            const isChecked = chk.checked;
-            $$(`[data-col="${col}"]`, wrap).forEach(el => {
-                el.style.display = isChecked ? '' : 'none';
-            });
-        });
+        if (xhColumnToggler && typeof xhColumnToggler.apply === 'function') {
+            xhColumnToggler.apply();
+        }
     }
 
-    /* ===== SỰ KIỆN TRÊN BẢNG (EXPAND ROW, INNER SEARCH, ACTIONS) ===== */
+    /* ===== MASTER-DETAIL ACCORDION CHUẨN KIOTFILTER (THEO NHÀ CUNG CẤP) ===== */
+    let xhRowDetailHandler = null;
+
+    function initRowDetail() {
+        if (typeof KiotFilter !== 'undefined' && typeof KiotFilter.initRowDetail === 'function') {
+            xhRowDetailHandler = KiotFilter.initRowDetail({
+                tableSelector: '#xuatHuyTable',
+                rowSelector: 'tr.product-row',
+                detailRowSelector: '#detail-{id}',
+                wrapSelector: '.product-detail-panel-wrap',
+                excludeClickSelector: 'input, button, a, label, .cell-checkbox, .cell-star, .star-btn, .w-chk, .w-star',
+                slideDuration: 150,
+                fadeDuration: 120,
+                onOpen: function (id) {
+                    F.openId = id;
+                },
+                onClose: function () {
+                    F.openId = null;
+                }
+            });
+        }
+    }
+
+    function expandXuatHuyRow(id, toggle = true) {
+        if (!xhRowDetailHandler) return;
+        if (toggle) {
+            xhRowDetailHandler.toggle(id);
+        } else {
+            xhRowDetailHandler.expand(id);
+        }
+    }
+
+    /* ===== SỰ KIỆN TRÊN BẢNG (CHECKBOX, INNER SEARCH, ACTIONS) ===== */
     function bindTableEvents() {
         const wrap = $('#tableWrapper');
         if (!wrap) return;
@@ -332,33 +351,19 @@
         if (resetLink) resetLink.onclick = resetAllFilters;
 
         // Chọn tất cả dòng
-        const chkAll = $('#chkAll', wrap);
+        const chkAll = $('#selectAllRows', wrap);
         if (chkAll) {
             chkAll.onchange = e => {
-                $$('input[data-sel]', wrap).forEach(c => c.checked = e.target.checked);
+                $$('#xuatHuyTable .row-select', wrap).forEach(c => c.checked = e.target.checked);
             };
         }
-
-        // Click dòng -> mở/đóng chi tiết dòng inline (trừ checkbox, star, input, button, a)
-        wrap.onclick = e => {
-            const row = e.target.closest('tr.tbl-row');
-            if (row && !e.target.closest('input') && !e.target.closest('button') && !e.target.closest('a') && !e.target.closest('.cell-star, .star-btn')) {
-                const id = row.dataset.id;
-                const dtl = $(`#dtl-${id}`, wrap);
-                if (dtl) {
-                    const isOpen = dtl.style.display !== 'none';
-                    $$('tr.dtl', wrap).forEach(d => d.style.display = 'none');
-                    $$('tr.tbl-row', wrap).forEach(r => r.classList.remove('open'));
-                    if (!isOpen) {
-                        dtl.style.display = '';
-                        row.classList.add('open');
-                        F.openId = id;
-                    } else {
-                        F.openId = null;
-                    }
-                }
-            }
-        };
+        wrap.querySelectorAll('#xuatHuyTable .row-select').forEach(chk => {
+            chk.onchange = () => {
+                const all = wrap.querySelectorAll('#xuatHuyTable .row-select');
+                const checked = wrap.querySelectorAll('#xuatHuyTable .row-select:checked');
+                if (chkAll) chkAll.checked = all.length > 0 && all.length === checked.length;
+            };
+        });
 
         // Lọc trong bảng chi tiết dòng (mã hàng & tên hàng)
         wrap.oninput = e => {
@@ -424,14 +429,6 @@
                 }
             };
         });
-
-        // Mở lại dòng nếu có F.openId
-        if (F.openId) {
-            const dtl = $(`#dtl-${F.openId}`, wrap);
-            const row = $(`tr.tbl-row[data-id="${F.openId}"]`, wrap);
-            if (dtl) dtl.style.display = '';
-            if (row) row.classList.add('open');
-        }
     }
 
     /* ===== ĐÁNH DẤU SAO FAVORITE ===== */
@@ -696,6 +693,9 @@
 
         // 6. LEGO: Tùy chọn hiển thị cột
         initColumnToggle();
+
+        // 6.1. LEGO: Master-Detail row accordion chuẩn Nhà cung cấp
+        initRowDetail();
 
         // 7. Gắn sự kiện bảng ban đầu
         bindTableEvents();

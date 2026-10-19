@@ -60,32 +60,8 @@
                     </ul>
                 </div>
 
-                <!-- Nút Import & Xuất file cho Desktop -->
-                <button type="button" class="btn btn-tool d-none d-md-inline-flex" id="btnOpenImportModal" onclick="window.openImportModal();">
-                    <i class="bi bi-box-arrow-in-down me-1"></i>Import file
-                </button>
-                <button type="button" class="btn btn-tool d-none d-md-inline-flex" id="btnOpenExportModal" onclick="window.openExportModal();">
-                    <i class="bi bi-box-arrow-up me-1"></i>Xuất file
-                </button>
-
-                <!-- Dropdown gom Import/Xuất trên Mobile/Zoom in -->
-                <div class="dropdown d-inline-block d-md-none">
-                    <button class="btn btn-tool" type="button" id="btnDropdownExcelMobile" data-bs-toggle="dropdown" aria-expanded="false" title="Nhập / Xuất Excel">
-                        <i class="bi bi-table"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="btnDropdownExcelMobile">
-                        <li>
-                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="window.openImportModal();">
-                                <i class="bi bi-box-arrow-in-down me-2 text-primary"></i>Import file
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="window.openExportModal();">
-                                <i class="bi bi-box-arrow-up me-2 text-success"></i>Xuất file
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <!-- Cụm nút Nhập file & Xuất file Excel chuẩn KiotViet -->
+                <partial name="_HangHoaExcelActions" />
 
                 <!-- Nút Ẩn/Hiện cột KiotViet (Thay thế nút reload) -->
                 <div class="dropdown d-inline-block position-relative" id="dropdownColConfigWrap">

@@ -1,0 +1,11 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.ChuyenKho.ChuyenKhoFormVM
+@{
+    ViewData["Title"] = Model.IsEdit ? "Sửa phiếu chuyển hàng" : "Chuyển hàng";
+}
+
+<partial name="_ChuyenKhoForm" model="Model" />
+
+@section Scripts {
+    <script src="~/js/components/f3-product-search.js" asp-append-version="true"></script>
+    <script src="~/js/chuyen-kho-form.js" asp-append-version="true"></script>
+}

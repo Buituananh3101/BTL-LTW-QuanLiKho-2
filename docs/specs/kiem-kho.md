@@ -49,14 +49,15 @@
   - Click lần 2: Giảm dần (DESC, hiện icon `bi-arrow-down`).
   - Click lần 3: Bỏ sắp xếp (về mặc định theo thời gian chốt mới nhất).
   - Áp dụng trên 11 cột (`ma`, `tg`, `tt`, `cl`, `tang`, `giam`, `cb`, `slt`, `ghi`, `st`, `kho`), hỗ trợ căn lề số học `.num` và đồng bộ qua AJAX/Export.
-- **Bung mở chi tiết (`tr.dtl`)**:
-  - Click dòng bung mở accordion 5 cột (Mã, Tên, Tồn, Thực tế, Lệch), textarea ghi chú, tổng kết số lượng.
-  - Nút thao tác: Hủy (chỉ phiếu tạm), Sao chép, Xuất file (`type=detail&id=...`), Mở phiếu, Lưu ghi chú, In.
+- **Bung mở chi tiết (`tr.dtl`) & Hiển thị ổn định không rung giật (Chuẩn Nhà cung cấp)**:
+  - Bảng `#stockTakeTable` cấu hình `width: max-content; min-width: 760px; border-collapse: separate !important; border-spacing: 0 !important;` đồng bộ Nhà cung cấp (`#supplierTable`), không ép tràn cố định 1450px.
+  - Tối ưu Drawer ổn định tuyệt đối: loại bỏ xung đột hoạt ảnh đồng thời khi đóng mở nhiều dòng, dùng `.stop(true, true)` chống hàng đợi click dồn dập, gán `.last-visible-col` trực tiếp không gây DOM layout thrashing, loại bỏ negative margin trên `.dp-tabs`, tích hợp `scrollbar-gutter: stable` ngăn co giật ngang khi thanh cuộn xuất hiện.
+  - Tái sử dụng khối Lego `KiotFilter.initEntityActions`: Nút Hủy (`.btn-cancel-doc`) qua modal xác nhận (chỉ hủy phiếu tạm). Các nút Sao chép, Xuất file, Mở phiếu, Lưu ghi chú, In.
 - **Xuất file Excel chuẩn KiotViet (`.xlsx`)**:
-  - Hỗ trợ 2 chế độ:
-    + **Xuất danh sách phiếu kiểm** (`type = "list"`): Xuất danh sách phiếu theo bộ lọc với 13 cột chuẩn mực (STT, Mã kiểm kho, Thời gian kiểm, Kho kiểm, Người tạo, Tổng thực tế, Tổng chênh lệch, SL lệch tăng, SL lệch giảm, Tổng giá trị lệch, Ngày cân bằng, Trạng thái, Ghi chú).
-    + **Xuất chi tiết từng dòng hàng** (`type = "detail"`): Xuất chi tiết toàn bộ các dòng hàng hóa kiểm kê của các phiếu lọc được với 16 cột chi tiết. Hỗ trợ xuất riêng 1 phiếu từ nút "Xuất file" trên từng dòng bảng.
-  - Sử dụng thư viện `ClosedXML` xuất file `.xlsx` chuẩn (MIME `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`), áp dụng định dạng Header KiotViet `#0066cc`, viền ô, căn lề và định dạng số `#,#00` / ngày giờ, tự động điều chỉnh độ rộng cột. Loại bỏ dứt điểm lỗi gom toàn bộ dữ liệu vào 1 cột/1 dòng khi mở CSV trên Windows tiếng Việt.
+  - Hỗ trợ 2 chế độ qua `ClosedXML`:
+    + **Xuất danh sách phiếu** (`type = "list"`): Xuất danh sách 13 cột theo bộ lọc hiện tại.
+    + **Xuất chi tiết dòng hàng** (`type = "detail"`): Xuất 16 cột chi tiết dòng hàng kiểm kê (hỗ trợ xuất riêng 1 phiếu từ nút dòng).
+  - Định dạng header xanh KiotViet `#0066cc`, viền ô, căn lề số/ngày và auto-fit độ rộng cột chuẩn mực.
 - **Phân trang**: Tái sử dụng `_Pagination.cshtml` dùng chung qua AJAX.
 
 ### 2.2. Màn hình Lập / Sửa phiếu (`Create` / `Edit`)
