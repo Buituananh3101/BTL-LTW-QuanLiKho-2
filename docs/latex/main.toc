@@ -34,23 +34,22 @@
 \contentsline {subsubsection}{Phân hệ 5: Báo cáo \& Thống kê Tồn kho}{22}{subsubsection*.15}%
 \contentsline {subsection}{\numberline {2.1.4}Đặc tả chi tiết các kịch bản Use Case cốt lõi (Use Case Specifications)}{23}{subsection.2.1.4}%
 \contentsline {section}{\numberline {2.2}Thiết kế luồng xử lý nghiệp vụ (Activity Diagrams)}{29}{section.2.2}%
-\contentsline {subsection}{\numberline {2.2.1}Quy trình Nhập hàng từ Nhà cung cấp và Cập nhật giá vốn}{29}{subsection.2.2.1}%
-\contentsline {subsection}{\numberline {2.2.2}Quy trình Điều chuyển hàng hóa liên chi nhánh (2 Chặng)}{31}{subsection.2.2.2}%
-\contentsline {subsection}{\numberline {2.2.3}Quy trình Kiểm kê và Tự động Cân bằng kho}{33}{subsection.2.2.3}%
-\contentsline {subsection}{\numberline {2.2.4}Quy trình Xuất hủy hàng hỏng và Hết hạn sử dụng}{34}{subsection.2.2.4}%
-\contentsline {subsection}{\numberline {2.2.5}Quy trình Trả hàng nhập cho Nhà cung cấp}{36}{subsection.2.2.5}%
-\contentsline {section}{\numberline {2.3}Thiết kế Cơ sở dữ liệu quan hệ (Database Design)}{37}{section.2.3}%
-\contentsline {subsection}{\numberline {2.3.1}Mô hình thực thể -- liên kết (Sơ đồ ER - Entity-Relationship Diagram)}{37}{subsection.2.3.1}%
-\contentsline {subsection}{\numberline {2.3.2}Mô hình dữ liệu quan hệ (Sơ đồ RM - Relational Model)}{40}{subsection.2.3.2}%
-\contentsline {subsubsection}{Lược đồ quan hệ chuẩn (Relational Schema Notation)}{40}{subsubsection*.28}%
-\contentsline {subsubsection}{Các sơ đồ cấu trúc quan hệ RM phân rã theo cụm nghiệp vụ}{42}{subsubsection*.29}%
-\contentsline {subsubsection}{Sơ đồ cấu trúc liên kết các bảng quan hệ cốt lõi (Sơ đồ RM tổng hợp)}{48}{subsubsection*.35}%
-\contentsline {subsubsection}{Bảng các ràng buộc toàn vẹn tham chiếu (Referential Integrity Constraints)}{48}{subsubsection*.37}%
-\contentsline {subsubsection}{Đánh giá chuẩn hóa cơ sở dữ liệu (3NF / BCNF)}{49}{subsubsection*.39}%
-\contentsline {subsection}{\numberline {2.3.3}Từ điển dữ liệu chi tiết các bảng chính}{50}{subsection.2.3.3}%
-\contentsline {subsection}{\numberline {2.3.4}Giải thuật Database View 2 tầng tính toán tồn kho động}{53}{subsection.2.3.4}%
-\contentsline {section}{\numberline {2.4}Thiết kế Kiến trúc phần mềm và Giao diện người dùng}{54}{section.2.4}%
-\contentsline {subsection}{\numberline {2.4.1}Mô hình kiến trúc MVC phân tầng trên ASP.NET Core}{54}{subsection.2.4.1}%
+\contentsline {subsection}{\numberline {2.2.1}Quy trình Nhập hàng từ Nhà cung cấp và Cập nhật giá vốn}{30}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Quy trình Điều chuyển hàng hóa liên chi nhánh (2 Chặng)}{32}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Quy trình Kiểm kê và Tự động Cân bằng kho}{34}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.4}Quy trình Xuất hủy hàng hỏng và Hết hạn sử dụng}{36}{subsection.2.2.4}%
+\contentsline {subsection}{\numberline {2.2.5}Quy trình Trả hàng nhập cho Nhà cung cấp}{38}{subsection.2.2.5}%
+\contentsline {section}{\numberline {2.3}Thiết kế Cơ sở dữ liệu quan hệ (Database Design)}{40}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Mô hình thực thể -- liên kết (Sơ đồ ER - Entity-Relationship Diagram)}{40}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Mô hình dữ liệu quan hệ (Sơ đồ RM - Relational Model)}{42}{subsection.2.3.2}%
+\contentsline {subsubsection}{Lược đồ quan hệ chuẩn (Relational Schema Notation)}{42}{subsubsection*.28}%
+\contentsline {subsubsection}{Các sơ đồ cấu trúc quan hệ RM phân rã theo cụm nghiệp vụ}{44}{subsubsection*.29}%
+\contentsline {subsubsection}{Bảng các ràng buộc toàn vẹn tham chiếu (Referential Integrity Constraints)}{50}{subsubsection*.35}%
+\contentsline {subsubsection}{Đánh giá chuẩn hóa cơ sở dữ liệu (3NF / BCNF)}{50}{subsubsection*.37}%
+\contentsline {subsection}{\numberline {2.3.3}Từ điển dữ liệu chi tiết các bảng chính}{51}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.4}Giải thuật Database View 2 tầng tính toán tồn kho động}{54}{subsection.2.3.4}%
+\contentsline {section}{\numberline {2.4}Thiết kế Kiến trúc phần mềm và Giao diện người dùng}{55}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}Mô hình kiến trúc MVC phân tầng trên ASP.NET Core}{55}{subsection.2.4.1}%
 \contentsline {subsection}{\numberline {2.4.2}Sơ đồ cấu trúc điều hướng trang (Sitemap)}{55}{subsection.2.4.2}%
 \contentsline {subsection}{\numberline {2.4.3}Thiết kế khung giao diện Wireframe hệ thống}{55}{subsection.2.4.3}%
 \contentsline {chapter}{\numberline {3}HIỆN THỰC HÓA VÀ LẬP TRÌNH HỆ THỐNG}{56}{chapter.3}%
@@ -59,10 +58,8 @@
 \contentsline {subsection}{\numberline {3.2.1}Cơ chế Xác thực và Phân quyền theo Chi nhánh qua Cookie Authentication}{56}{subsection.3.2.1}%
 \contentsline {subsection}{\numberline {3.2.2}Cơ chế Controller cơ sở (BaseKhoController)}{57}{subsection.3.2.2}%
 \contentsline {subsection}{\numberline {3.2.3}Cơ chế giao dịch an toàn (ACID Transaction) trong lưu trữ Master-Detail}{57}{subsection.3.2.3}%
-\contentsline {subsection}{\numberline {3.2.4}Hệ sinh thái Khối Lego UI tái sử dụng}{58}{subsection.3.2.4}%
-\contentsline {subsection}{\numberline {3.2.5}Giải pháp phân tầng Stacking Context giải quyết xung đột Dropdown và Modal}{58}{subsection.3.2.5}%
-\contentsline {section}{\numberline {3.3}Mô tả kết quả đạt được qua các phân hệ}{59}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}Phân hệ Xác thực, Đăng nhập và Lựa chọn Chi nhánh làm việc}{59}{subsection.3.3.1}%
+\contentsline {section}{\numberline {3.3}Mô tả kết quả đạt được qua các phân hệ}{58}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Phân hệ Xác thực, Đăng nhập và Lựa chọn Chi nhánh làm việc}{58}{subsection.3.3.1}%
 \contentsline {subsection}{\numberline {3.3.2}Phân hệ Quản lý Danh mục Hàng hóa \& Cảnh báo định mức}{59}{subsection.3.3.2}%
 \contentsline {subsection}{\numberline {3.3.3}Phân hệ Quản lý Giao dịch Nhập hàng từ Nhà cung cấp}{60}{subsection.3.3.3}%
 \contentsline {subsection}{\numberline {3.3.4}Phân hệ Quản lý Trả hàng nhập Nhà cung cấp}{61}{subsection.3.3.4}%
@@ -79,4 +76,4 @@
 \contentsline {section}{\numberline {5.1}Kết quả đạt được}{72}{section.5.1}%
 \contentsline {section}{\numberline {5.2}Bài học rút ra}{72}{section.5.2}%
 \contentsline {section}{\numberline {5.3}Đề xuất phương hướng phát triển}{73}{section.5.3}%
-\contentsline {chapter}{Tài liệu tham khảo và Phụ lục}{74}{chapter*.60}%
+\contentsline {chapter}{Tài liệu tham khảo và Phụ lục}{74}{chapter*.58}%
