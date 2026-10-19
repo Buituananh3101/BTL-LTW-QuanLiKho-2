@@ -1,24 +1,89 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-19 – Chuẩn Hóa & Đồng Bộ Dropdown Kho Và Ô Tìm Mặt Hàng F3 Sidebar Thẻ Kho Dùng Khối Lego Đóng Gói (Phiên 159)
+Cập nhật lần cuối: 2026-10-19 – Khắc Phục Lỗi Stacking Context Giam Cầm Modal & Chuẩn Hóa Hệ Thống Z-Index Toàn Website (Phiên 161)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất chuẩn hóa 100% giao diện Sidebar Báo cáo Thẻ kho (`_TheKhoFilterSidebar.cshtml`) theo các khối Lego đóng gói của hệ thống:
-  + Khối "Mặt hàng theo dõi": Chuyển sang `.f-block`, tích hợp input F3 gọn gàng, ô Autocomplete hàng hóa chuẩn Lego `KiotFilter.initProductSearch` (đầy đủ avatar chữ cái, tên hàng, mã, ĐVT, nhóm, tồn kho, giá), thẻ sản phẩm đang chọn `.tk-selected-card` thanh lịch có nút xóa `&times;` (`#btnRemoveSelectedProduct`) để đổi mặt hàng tức thì, và dòng hướng dẫn thân thiện khi chưa chọn hàng.
-  + Khối "Chi nhánh kho": Thay thế hoàn toàn thẻ `<select class="form-select">` HTML mặc định bằng Lego Single-Select Dropdown KiotViet (`.kiot-single-select-box`, `.kiot-ss-dropdown`, `.kiot-ss-item` có icon checkmark `bi-check2`), điều khiển bởi `KiotFilter.initSingleSelect`.
-  + API `BaoCaoController.SearchHangHoa`: Nâng cấp hỗ trợ cả tham số `q` & `term`, tự động tính tồn kho theo kho được chọn từ `vw_TonKhoHienTai`, trả về đầy đủ metadata cho Autocomplete Lego.
+- Đã hoàn tất sửa triệt để lỗi Header/Navigation đè lên Modal & chuẩn hóa hệ thống z-index toàn diện:
+  + Gỡ bỏ `z-index: 1` trên `.app-main-body` trong `site.css`, giải phóng stacking context để các Modal, Backdrop và Drawer (`_NguoiDungModal`, `_KhoModal`, `_HangHoaModal`, `_DoiMatKhauModal`, `_NhaCungCapModal`,...) hiển thị trọn vẹn 100% trên đỉnh màn hình, che mờ header chuẩn KiotViet.
+  + Chuẩn hóa phân tầng Z-Index 6 lớp toàn hệ thống: Layer 1 (Nội dung 1-50) < Layer 2 (Dropdowns, Autocompletes 150-500) < Layer 3 (Header & Mega Menu 1020) < Layer 4 (Modals, Overlays 1050-1065) < Layer 5 (Prompts 1090-1095) < Layer 6 (Toasts 9999).
+  + Điều chỉnh toàn bộ in-page dropdowns (`.tk-autocomplete-dropdown`, `.nh-autocomplete-dropdown`, `.kiot-ms-dropdown`, `.kiot-ss-dropdown`, `.kiot-combobox-dropdown`, `.kiot-attr-menu`, `.dtpop`,...) về mức an toàn 150–500 để không bao giờ đè lên Mega Menu.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế trên trình duyệt màn hình Báo cáo Thẻ kho (`/BaoCao/TheKho`):
-   - Thử nghiệm tìm kiếm hàng hóa F3, Up/Down/Enter chọn mặt hàng.
-   - Thử nghiệm đổi chi nhánh kho bằng Dropdown Lego Single-Select.
-   - Thử nghiệm nút bỏ chọn mặt hàng để tìm mặt hàng khác.
-2. Kiểm tra nghiệp vụ Thẻ kho khi xem từ Drawer chi tiết Danh sách Hàng hóa (`/HangHoa ➜ Tab Thẻ kho ➜ Xem thẻ kho chi tiết`).
+1. Kiểm tra trải nghiệm thực tế khi mở Modal "Thêm mới người dùng" (`/NguoiDung`) và Modal "Thêm chi nhánh kho" (`/Kho`) – đảm bảo tiêu đề và nút đóng `✕` hiển thị rõ ràng trên header.
+2. Kiểm tra thao tác hover Mega Menu trên navbar khi các ô tìm kiếm hoặc dropdown bộ lọc đang hiển thị – đảm bảo Mega Menu luôn nổi phía trên.
 3. Kiểm tra tính năng Xuất file Excel Thẻ kho (`/BaoCao/ExportTheKho`) và In thẻ kho (`/BaoCao/TheKho`).
+
+---
+
+- **Khắc Phục Lỗi Stacking Context Giam Cầm Modal & Chuẩn Hóa Hệ Thống Z-Index Đa Tầng (Phiên 161)**:
+  - **Nhu cầu**: Người dùng gửi ảnh chụp màn hình modal Người dùng (`media_1792370777374_e5ae41c0.png`) với phản hồi: "bạn sửa thì phải chỉnh lại các thành phần còn lại bị ảnh hưởng".
+  - **Nguyên nhân cốt lõi**:
+    + Trước đó, để ngăn ô tìm kiếm F3 ở sidebar Thẻ kho đè lên Mega Menu, thuộc tính `z-index: 1;` đã được thêm vào container `.app-main-body`.
+    + Do `.app-main-body` có `position: relative; z-index: 1;`, CSS đã tạo ra một Stacking Context cục bộ độc lập. Mọi Modal, Drawer và Backdrop (`.hh-ov`, `#userModalOv`,...) được render bên trong `@RenderBody()` bị giam cầm ở tầng ưu tiên 1 và không thể nổi lên trên `.app-header-fixed` (vốn có `z-index: 1020`).
+    + Kết quả: Thanh menu chính (màu xanh 42px) và topbar (44px) đè hoàn toàn lên phần đầu của Modal, che khuất tiêu đề "Thêm mới người dùng" và nút đóng `✕`.
+    + Đồng thời, nhiều dropdown in-page rải rác (`.tk-autocomplete-dropdown`, `.nh-autocomplete-dropdown`, `.kiot-ss-dropdown`, `.kiot-ms-dropdown`,...) bị gán giá trị z-index ngẫu nhiên quá cao (`1050`, `1060`, `1065`), gây xung đột với Header (`1020`).
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`wwwroot/css/site.css`**:
+       - Gỡ bỏ hoàn toàn `z-index: 1;` khỏi `.app-main-body`. `.app-main-body` trở về `z-index: auto` mặc định, không tạo stacking context giam giữ các phần tử con có `position: fixed`.
+       - Chuẩn hóa các dropdown nội trang về mức an toàn `z-index: 150` (thấp hơn Header 1020):
+         * `.product-img-popover`: `1060` ➜ `150`.
+         * `.quick-date-popup` & `.dual-calendar-popup`: `1060` ➜ `500`.
+         * `.kiot-ms-dropdown` & `.kiot-ss-dropdown`: `1050` ➜ `150`.
+         * `.kiot-attr-menu`: `1065 !important` ➜ `150 !important`.
+         * `.kiot-combobox-dropdown`: `1060` ➜ `150`.
+         * `.nh-autocomplete-dropdown, .kiot-autocomplete-dropdown`: `1050` ➜ `150`.
+         * `.kiot-suggest-dropdown`: `1040` ➜ `150`.
+         * `.dtpop`: `1050` ➜ `500`.
+    2. **Đồng bộ toàn bộ các file CSS chức năng**:
+       - `wwwroot/css/the-kho.css`: `.tk-autocomplete-dropdown` hạ từ `1060 !important` xuống `150 !important`.
+       - `wwwroot/css/chuyen-kho.css`: `.nh-autocomplete-dropdown` hạ từ `1050` xuống `150`.
+       - `wwwroot/css/nhap-hang.css`: `.nh-autocomplete-dropdown` và `.nh-supplier-dropdown` hạ từ `1050` xuống `150`.
+       - `wwwroot/css/tra-hang-nhap.css`: `.nh-autocomplete-dropdown`, `.payer-custom-dropdown-menu`, `.wh-custom-dropdown-menu` hạ từ `1050` xuống `150`; `.dtpop` hạ từ `1060` xuống `500`.
+       - `wwwroot/css/kiem-kho.css`: `.pop.notes` hạ từ `1060` xuống `500`.
+    3. **Kiến trúc Z-Index chuẩn 6 tầng vững chắc**:
+       - *Tầng 1 (1–50)*: Bảng dữ liệu, thẻ card, sidebar, input.
+       - *Tầng 2 (150–500)*: Dropdown chọn, autocomplete gợi ý, lịch ngày, popover.
+       - *Tầng 3 (1020)*: Global Header `.app-header-fixed` & Mega Menu `.mega` (luôn đè lên Tầng 1 & 2).
+       - *Tầng 4 (1050–1065)*: Modals `.hh-ov`, Drawer chi tiết, Backdrop che mờ (luôn đè lên Header Tầng 3).
+       - *Tầng 5 (1090–1095)*: Confirmation Modal `KiotPrompt` (nổi trên Modal Tầng 4).
+       - *Tầng 6 (9999)*: Toast Thông báo `KiotToast` (nổi cao nhất toàn màn hình).
+    4. **Đồng bộ tài liệu**: Ghi nhận quyết định vào `docs/quyet-dinh.md`.
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
+
+---
+
+- **Chuẩn Hóa & Làm Đẹp Cột Loại Giao Dịch Tab Thẻ Kho Chuẩn Phong Cách KiotViet (Phiên 160)**:
+  - **Nhu cầu**: Người dùng gửi ảnh chụp màn hình tab Thẻ kho (`media_1792369840373_a42b0452.png`) và yêu cầu: "cái phần thẻ kho cột loại giao dịch hiện tại đang hiển thị rất xấu, sửa lại để dễ nhìn và đồng bộ".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `TheKhoService.cs`, API nạp nhanh `LayLichSuTheKhoNhanhAsync` gán badgeClass là các class Bootstrap solid cứng (`bg-danger text-white`, `bg-primary text-white`) không có bo góc, không có padding thích hợp và màu sắc chói gắt.
+    + File `the-kho.css` chỉ được nạp tại trang `/BaoCao/TheKho` mà không có trong `_Layout.cshtml` hay `site.css`, khiến thẻ `<span class="badge-tk">` tại tab Thẻ kho trong Drawer Hàng hóa bị mất hoàn toàn định dạng CSS.
+    + Tiêu đề `<thead>` bảng thẻ kho trong `_HangHoaTable.cshtml` đặt sai tên cột (`Giá vốn` và `Số lượng`), dẫn đến số lượng nhập (+50) bị lệch sang nằm dưới cột "Giá vốn", còn số lượng xuất (-1) nằm dưới cột "Số lượng".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`wwwroot/css/site.css` & `wwwroot/css/the-kho.css`**:
+       - Thêm và đồng bộ định dạng `.badge-tk` dùng chung toàn hệ thống: `font-size: 11.5px; font-weight: 500; padding: 3px 8px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;`.
+       - Định nghĩa bảng màu pastel tinh tế, đồng bộ chuẩn KiotViet:
+         * `badge-nhap`: Nền `#ecfdf5`, chữ `#15803d`, viền `#bbf7d0`.
+         * `badge-xuat-ban`: Nền `#eff6ff`, chữ `#1d4ed8`, viền `#bfdbfe`.
+         * `badge-xuat-huy`: Nền `#fef2f2`, chữ `#b91c1c`, viền `#fecaca`.
+         * `badge-chuyen-xuat`: Nền `#fffbeb`, chữ `#b45309`, viền `#fde68a`.
+         * `badge-chuyen-nhap`: Nền `#f0fdfa`, chữ `#0f766e`, viền `#99f6e4`.
+         * `badge-kiem-ke`: Nền `#f8fafc`, chữ `#475569`, viền `#e2e8f0`.
+         * `badge-tra-hang`: Nền `#fdf2f8`, chữ `#9d174d`, viền `#fbcfe8`.
+    2. **`Services/TheKhoService.cs`**:
+       - Cập nhật phương thức `BoSungThongTinChungTuAsync`: Đổi toàn bộ `dong.BadgeClass` thành các class chuẩn `badge-nhap`, `badge-xuat-huy`, `badge-xuat-ban`, `badge-chuyen-xuat`, `badge-chuyen-nhap`, `badge-kiem-ke`, `badge-tra-hang`.
+    3. **`wwwroot/js/hang-hoa-index.js`**:
+       - Bổ sung hàm chuẩn hóa `badgeClass` theo mã `loaiChungTu` trước khi render HTML dòng bảng để đảm bảo luôn hiển thị badge mềm mại dù backend trả về định dạng nào.
+    4. **`Views/HangHoa/_HangHoaTable.cshtml`**:
+       - Cập nhật tiêu đề bảng thead Thẻ kho thành `SL Nhập` và `SL Xuất` (thay vì `Giá vốn` và `Số lượng`) để khớp 100% với dữ liệu render.
+    5. **Đồng bộ tài liệu**: Cập nhật `docs/specs/the-kho.md` (7.780 bytes < 8.000 ký tự).
+  - **Kiểm tra**:
+    + `node -c wwwroot/js/hang-hoa-index.js`: Cú pháp JavaScript hợp lệ 100%.
+    + `dotnet build -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
 
 ---
 
@@ -45,6 +110,10 @@ Cập nhật lần cuối: 2026-10-19 – Chuẩn Hóa & Đồng Bộ Dropdown K
        - Đảm bảo dropdown luôn reset cuộn `scrollTop = 0` qua `MutationObserver` khi có danh sách mới, không bị lệch hoặc mất dòng đầu.
        - Đóng dropdown tìm kiếm khi click ra ngoài hoặc nhấn phím `Escape`.
        - Bắt sự kiện `#btnRemoveSelectedProduct` xóa sạch lựa chọn, ẩn card, hiện lại gợi ý, bỏ chấm `#dotMatHang`, focus lại ô F3 và nạp lại bảng hiển thị hướng dẫn chọn hàng.
+    5. **Sửa lỗi ô tìm kiếm F3 đè lên Mega Menu (_MainMenu.cshtml)**:
+       - Gỡ bỏ style="z-index: 1055;" trên wrapper ô tìm kiếm _TheKhoFilterSidebar.cshtml.
+       - Thiết lập .app-main-body { z-index: 1; } trong site.css tạo stacking context riêng cho vùng nội dung, không đè lên header.
+       - Thêm .mega { z-index: 1000; } trong site.css đảm bảo Mega Menu luôn nổi phía trên.
   - **Kiểm tra**:
     - `node -c wwwroot/js/the-kho-index.js`: Cú pháp JavaScript hợp lệ 100%.
     - `dotnet build -t:Compile`: Biên dịch hoàn tất với **0 Errors**.

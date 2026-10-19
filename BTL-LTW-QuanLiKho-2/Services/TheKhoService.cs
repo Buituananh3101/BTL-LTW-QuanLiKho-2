@@ -378,7 +378,7 @@ public class TheKhoService : ITheKhoService
             if (item.LoaiChungTu == "PHIEU_NHAP")
             {
                 dong.TenLoaiChungTu = "Nhập hàng";
-                dong.BadgeClass = "bg-primary text-white";
+                dong.BadgeClass = "badge-nhap";
                 if (pnDict.TryGetValue(item.MaChungTu, out var pn))
                 {
                     dong.MaChungTuHienThi = pn.MaHienThi;
@@ -391,7 +391,7 @@ public class TheKhoService : ITheKhoService
             else if (item.LoaiChungTu == "XUAT_HUY")
             {
                 dong.TenLoaiChungTu = "Xuất hủy";
-                dong.BadgeClass = "bg-danger text-white";
+                dong.BadgeClass = "badge-xuat-huy";
                 if (pxDict.TryGetValue(item.MaChungTu, out var px))
                 {
                     dong.MaChungTuHienThi = px.MaHienThi;
@@ -404,7 +404,7 @@ public class TheKhoService : ITheKhoService
             else if (item.LoaiChungTu == "XUAT_BAN")
             {
                 dong.TenLoaiChungTu = "Bán hàng";
-                dong.BadgeClass = "bg-info text-dark";
+                dong.BadgeClass = "badge-xuat-ban";
                 if (pxDict.TryGetValue(item.MaChungTu, out var px))
                 {
                     dong.MaChungTuHienThi = px.MaHienThi;
@@ -417,7 +417,7 @@ public class TheKhoService : ITheKhoService
             else if (item.LoaiChungTu == "CHUYEN_XUAT")
             {
                 dong.TenLoaiChungTu = "Chuyển đi";
-                dong.BadgeClass = "bg-warning text-dark";
+                dong.BadgeClass = "badge-chuyen-xuat";
                 if (ckDict.TryGetValue(item.MaChungTu, out var ck))
                 {
                     dong.MaChungTuHienThi = ck.MaHienThi;
@@ -430,7 +430,7 @@ public class TheKhoService : ITheKhoService
             else if (item.LoaiChungTu == "CHUYEN_NHAP")
             {
                 dong.TenLoaiChungTu = "Chuyển đến";
-                dong.BadgeClass = "bg-success text-white";
+                dong.BadgeClass = "badge-chuyen-nhap";
                 if (ckDict.TryGetValue(item.MaChungTu, out var ck))
                 {
                     dong.MaChungTuHienThi = ck.MaHienThi;
@@ -443,7 +443,7 @@ public class TheKhoService : ITheKhoService
             else if (item.LoaiChungTu == "KIEM_KE")
             {
                 dong.TenLoaiChungTu = "Kiểm kê";
-                dong.BadgeClass = "bg-secondary text-white";
+                dong.BadgeClass = "badge-kiem-ke";
                 if (kkDict.TryGetValue(item.MaChungTu, out var kk))
                 {
                     dong.MaChungTuHienThi = kk.MaHienThi;
@@ -456,7 +456,7 @@ public class TheKhoService : ITheKhoService
             else if (item.LoaiChungTu == "TRA_HANG_NHAP")
             {
                 dong.TenLoaiChungTu = "Trả hàng nhập";
-                dong.BadgeClass = "bg-dark text-white";
+                dong.BadgeClass = "badge-tra-hang";
                 if (thnDict.TryGetValue(item.MaChungTu, out var thn))
                 {
                     dong.MaChungTuHienThi = thn.MaHienThi;
@@ -469,6 +469,7 @@ public class TheKhoService : ITheKhoService
             else
             {
                 dong.TenLoaiChungTu = item.LoaiChungTu;
+                dong.BadgeClass = "badge-kiem-ke";
                 dong.MaChungTuHienThi = $"#{item.MaChungTu}";
                 dong.DoiTac = "Khác";
             }

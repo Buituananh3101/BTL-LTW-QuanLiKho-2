@@ -18,7 +18,7 @@
     max-height: 220px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    z-index: 1060 !important;
+    z-index: 150 !important;
     padding: 3px 0 !important;
     display: none;
     box-sizing: border-box !important;
@@ -324,18 +324,23 @@
 
 /* Badges phân loại giao dịch */
 .badge-tk {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1.25;
+    padding: 3px 8px;
     border-radius: 4px;
-    display: inline-block;
     white-space: nowrap;
+    letter-spacing: 0.01em;
+    box-sizing: border-box;
 }
 
-.badge-nhap { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-.badge-xuat-ban { background: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
-.badge-xuat-huy { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-.badge-chuyen-xuat { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-.badge-chuyen-nhap { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-.badge-kiem-ke { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
-.badge-tra-hang { background: #fdf2f8; color: #9d174d; border: 1px solid #fbcfe8; }
+.badge-nhap { background: #ecfdf5 !important; color: #15803d !important; border: 1px solid #bbf7d0 !important; }
+.badge-xuat-ban { background: #eff6ff !important; color: #1d4ed8 !important; border: 1px solid #bfdbfe !important; }
+.badge-xuat-huy { background: #fef2f2 !important; color: #b91c1c !important; border: 1px solid #fecaca !important; }
+.badge-chuyen-xuat { background: #fffbeb !important; color: #b45309 !important; border: 1px solid #fde68a !important; }
+.badge-chuyen-nhap { background: #f0fdfa !important; color: #0f766e !important; border: 1px solid #99f6e4 !important; }
+.badge-kiem-ke { background: #f8fafc !important; color: #475569 !important; border: 1px solid #e2e8f0 !important; }
+.badge-tra-hang { background: #fdf2f8 !important; color: #9d174d !important; border: 1px solid #fbcfe8 !important; }

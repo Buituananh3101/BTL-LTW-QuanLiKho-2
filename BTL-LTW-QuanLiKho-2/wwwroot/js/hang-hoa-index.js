@@ -757,10 +757,26 @@ $(document).ready(function () {
                         const ton = `<span class="fw-bold">${d.tonLuyKe.toLocaleString('vi-VN')}</span>`;
                         const giaStr = d.donGia > 0 ? d.donGia.toLocaleString('vi-VN') + ' ₫' : '-';
 
+                        // Chuẩn hóa badge class loại giao dịch đồng bộ KiotViet
+                        const badgeClass = (d.badgeClass && d.badgeClass.startsWith('badge-'))
+                            ? d.badgeClass
+                            : (function (loai) {
+                                switch (loai) {
+                                    case 'PHIEU_NHAP': return 'badge-nhap';
+                                    case 'XUAT_BAN': return 'badge-xuat-ban';
+                                    case 'XUAT_HUY': return 'badge-xuat-huy';
+                                    case 'CHUYEN_XUAT': return 'badge-chuyen-xuat';
+                                    case 'CHUYEN_NHAP': return 'badge-chuyen-nhap';
+                                    case 'KIEM_KE': return 'badge-kiem-ke';
+                                    case 'TRA_HANG_NHAP': return 'badge-tra-hang';
+                                    default: return 'badge-kiem-ke';
+                                }
+                            })(d.loaiChungTu);
+
                         html += `<tr>
                             <td>${codeHtml}</td>
                             <td class="text-muted small">${timeStr}</td>
-                            <td><span class="badge-tk ${d.badgeClass || 'badge-kiem-ke'}">${escapeHtml(d.tenLoaiChungTu)}</span></td>
+                            <td><span class="badge-tk ${badgeClass}">${escapeHtml(d.tenLoaiChungTu)}</span></td>
                             <td class="text-end text-muted">${giaStr}</td>
                             <td class="text-end">${tang}</td>
                             <td class="text-end">${giam}</td>

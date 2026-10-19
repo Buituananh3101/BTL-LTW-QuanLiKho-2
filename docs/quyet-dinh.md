@@ -40,5 +40,6 @@
 - **2026-10-19 (Phiên 149)** – Phân hệ Quản lý Chi nhánh Kho (`/Kho`) – CRUD chi nhánh kho qua `KhoController`; đồng bộ phân quyền nhân sự `TaiKhoanKho`; bảo vệ kho hoạt động duy nhất; kích hoạt menu `Thiết lập ➜ Kho`.
 - **2026-10-19 (Phiên 151)** – Báo cáo Tồn kho theo kho (`/BaoCao/TonKho`) dạng Pivot Kho KiotViet – Tính toán động từ `vw_TonKhoHienTai`; bảng Pivot sinh động cột theo kho; 4 thẻ Summary KPI; drawer chi tiết định mức; xuất Excel ClosedXML; lọc AJAX multi-select kho, nhóm hàng, tình trạng tồn.
 - **2026-10-19 (Phiên 155)** – Báo cáo Thẻ kho (`/BaoCao/TheKho`) chuẩn KiotViet – Tính toán động Tồn đầu kỳ, Tồn lũy kế và Tồn cuối kỳ từ `vw_BienDongKho`; 4 thẻ KPI Summary; tích hợp Autocomplete F3 chọn hàng, Lego `_KiotDateFilter`, `_KiotStatusFilter`, xuất Excel ClosedXML; nạp động Tab Thẻ kho trong Drawer Hàng hóa.
+- **2026-10-19 (Phiên 161)** – Chuẩn hóa Hệ thống Z-Index Đa Tầng Toàn Hệ Thống – Loại bỏ `z-index: 1` trên `.app-main-body` tránh tạo stacking context giam cầm modal/overlay; chuẩn hóa dropdowns/autocompletes/popovers trong trang ở Layer 2 (150–500), Header/Mega Menu ở Layer 3 (1020), Modals/Drawers ở Layer 4 (1050–1065), Confirmation Prompts ở Layer 5 (1090–1095) và Toasts ở Layer 6 (9999).
 
 

@@ -219,6 +219,7 @@ body {
   padding: 6px 0;
   min-width: 220px;
   border: 1px solid #e5e7eb;
+  z-index: 1000;
 }
 .mainnav > ul > li:hover .mega {
   display: flex;
@@ -737,7 +738,7 @@ body {
   position: absolute;
   top: -45px;
   left: 36px;
-  z-index: 1060;
+  z-index: 150;
   background: #fff;
   border-radius: 10px;
   padding: 8px;
@@ -1100,7 +1101,7 @@ body {
 /* Quick Date Picker popup (3 columns like Screenshot 3) */
 .quick-date-popup {
   position: fixed;
-  z-index: 1060;
+  z-index: 500;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.18);
@@ -1165,7 +1166,7 @@ body {
 /* Dual Calendar popup (Screenshot 2) */
 .dual-calendar-popup {
   position: fixed;
-  z-index: 1060;
+  z-index: 500;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 12px 35px rgba(0,0,0,0.2);
@@ -1244,7 +1245,7 @@ body {
   top: 100%;
   left: 0;
   right: 0;
-  z-index: 1040;
+  z-index: 150;
   background: #fff;
   border-radius: 6px;
   border: 1px solid var(--border);
@@ -1687,6 +1688,63 @@ tr.product-detail-row > td {
   border-bottom: 2px solid #e2e8f0;
 }
 
+/* Badges phân loại giao dịch Thẻ kho chuẩn KiotViet */
+.badge-tk {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.25;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  box-sizing: border-box;
+}
+
+.badge-tk.badge-nhap {
+  background-color: #ecfdf5 !important;
+  color: #15803d !important;
+  border: 1px solid #bbf7d0 !important;
+}
+
+.badge-tk.badge-xuat-ban {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border: 1px solid #bfdbfe !important;
+}
+
+.badge-tk.badge-xuat-huy {
+  background-color: #fef2f2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fecaca !important;
+}
+
+.badge-tk.badge-chuyen-xuat {
+  background-color: #fffbeb !important;
+  color: #b45309 !important;
+  border: 1px solid #fde68a !important;
+}
+
+.badge-tk.badge-chuyen-nhap {
+  background-color: #f0fdfa !important;
+  color: #0f766e !important;
+  border: 1px solid #99f6e4 !important;
+}
+
+.badge-tk.badge-kiem-ke {
+  background-color: #f8fafc !important;
+  color: #475569 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.badge-tk.badge-tra-hang {
+  background-color: #fdf2f8 !important;
+  color: #9d174d !important;
+  border: 1px solid #fbcfe8 !important;
+}
+
 /* Multi-select filter box (KiotViet style) */
 .kiot-multiselect-box {
   border: 1px solid var(--border);
@@ -1783,7 +1841,7 @@ tr.product-detail-row > td {
   border: 1px solid #d1d5db;
   border-radius: 8px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-  z-index: 1050;
+  z-index: 150;
   display: none;
   max-height: 250px;
   overflow-y: auto;
@@ -1918,7 +1976,7 @@ tr.product-detail-row > td {
   border: 1px solid #d1d5db;
   border-radius: 8px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-  z-index: 1050;
+  z-index: 150;
   display: none;
   max-height: 250px;
   overflow-y: auto;
@@ -2176,7 +2234,7 @@ tr.product-detail-row > td {
   border-radius: 6px !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
   padding: 4px 0 !important;
-  z-index: 1065 !important;
+  z-index: 150 !important;
   min-width: 220px !important;
 }
 
@@ -2527,7 +2585,7 @@ tr.product-detail-row > td {
   border: 1px solid #d1d5db;
   border-radius: 6px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-  z-index: 1060;
+  z-index: 150;
   display: none;
   max-height: 220px;
   overflow-y: auto;
@@ -2772,7 +2830,7 @@ tr.product-detail-row > td {
   border-radius: 8px;
   max-height: 380px;
   overflow-y: auto;
-  z-index: 1050;
+  z-index: 150;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   display: none;
 }
@@ -2878,7 +2936,7 @@ tr.product-detail-row > td {
   border-radius: 8px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   padding: 12px;
-  z-index: 1050;
+  z-index: 500;
   width: 320px;
   flex-direction: row;
   gap: 12px;

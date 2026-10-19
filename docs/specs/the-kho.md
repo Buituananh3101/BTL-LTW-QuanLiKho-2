@@ -82,6 +82,7 @@ Số liệu Thẻ kho được truy vấn từ View CSDL **`vw_BienDongKho`** (h
 ### 4.2. Tích hợp liên kết hai chiều với Danh sách Hàng hóa
 - Khi mở Drawer chi tiết hàng hóa tại `/HangHoa` và bấm vào Tab **"Thẻ kho"**:
   - Tự động gọi API `/BaoCao/GetTheKhoQuick?maHang={id}&soLuong=10` nạp 10 giao dịch gần nhất kèm tồn lũy kế chính xác.
+  - Hiển thị badge loại giao dịch pastel chuẩn KiotViet (`.badge-tk`), phân tách rõ ràng cột SL Nhập (+) và SL Xuất (-).
   - Cung cấp nút **"Xem thẻ kho chi tiết ➜"** mở trực tiếp trang `/BaoCao/TheKho?maHang={id}`.
 
 ---
