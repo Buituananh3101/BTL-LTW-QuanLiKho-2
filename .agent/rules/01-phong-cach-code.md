@@ -142,6 +142,6 @@ Toàn bộ Action AJAX trả về dữ liệu JSON phải tuân thủ khuôn m�
 ## 5. Dịch vụ & Helper dùng chung (Shared Domain Services)
 
 - **`BaseKhoController`**: Lớp Controller cơ sở quản lý kho, cung cấp `CurrentWarehouseId`, `CurrentUserId`, `CurrentNhanVienId`, `CurrentUserRole`, `IsQuanLy`.
-- **`MaChungTuHelper`** (`Services/MaChungTuHelper.cs`): Format chuẩn mã KiotViet (`FormatMaKiemKe`, `FormatMaNhapKho`, `FormatMaXuatKho`, `FormatMaHang`...).
+- **`MaChungTuHelper`** (`Services/MaChungTuHelper.cs`): Format chuẩn mã chứng từ hệ thống (`FormatMaKiemKe`, `FormatMaNhapKho`, `FormatMaXuatKho`, `FormatMaHang`...).
 - **`INhatKyThaoTacService`** (`Services/INhatKyThaoTacService.cs`): Tự động ghi nhật ký kiểm toán thao tác hệ thống không làm chặn transaction chính.
-- **`f3-product-search.js`** (`wwwroot/js/components/f3-product-search.js`): Component Autocomplete tìm kiếm hàng hóa chuẩn KiotViet phím F3 dùng chung cho Nhập, Xuất, Kiểm kho.
+- **`f3-product-search.js`** (`wwwroot/js/components/f3-product-search.js`): Component Autocomplete tìm kiếm hàng hóa chuẩn phím F3 dùng chung cho Nhập, Xuất, Kiểm kho.

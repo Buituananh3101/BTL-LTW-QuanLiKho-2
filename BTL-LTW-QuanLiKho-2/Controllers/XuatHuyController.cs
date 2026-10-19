@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BTL_LTW_QuanLiKho_2.Models;
@@ -783,7 +783,7 @@ public class XuatHuyController : BaseKhoController
 
         using var ms = new MemoryStream();
         workbook.SaveAs(ms);
-        return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_Xuat_Huy_KiotViet.xlsx");
+        return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_Xuat_Huy.xlsx");
     }
 
     // POST: XuatHuy/ImportExcel

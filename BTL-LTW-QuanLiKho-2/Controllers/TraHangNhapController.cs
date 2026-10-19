@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -613,7 +613,7 @@ public class TraHangNhapController : BaseKhoController
 
         using var ms = new MemoryStream();
         workbook.SaveAs(ms);
-        return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_Tra_Hang_Nhap_KiotViet.xlsx");
+        return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_Tra_Hang_Nhap.xlsx");
     }
 
     // 13.1. Nhập danh sách hàng từ file Excel phía Server (ClosedXML)

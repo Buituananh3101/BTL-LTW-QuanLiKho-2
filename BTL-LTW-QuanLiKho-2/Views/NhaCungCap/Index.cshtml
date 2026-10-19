@@ -1,4 +1,4 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.NhaCungCap.NhaCungCapIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.NhaCungCap.NhaCungCapIndexVM
 @{
     ViewData["Title"] = "Nhà cung cấp";
 }
@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="~/css/nha-cung-cap.css" asp-append-version="true" />
 
 <div class="kiot-container position-relative" id="kiotContainer" data-sort-by="@Model.SortBy" data-sort-dir="@Model.SortDir">
-    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + 5 KHỐI BỘ LỌC KIOTVIET -->
+    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + 5 KHỐI BỘ LỌC chuyên nghiệp -->
     <partial name="_NhaCungCapFilterSidebar" model="Model" />
 
     <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->

@@ -1,4 +1,4 @@
-# Đặc tả Chức năng: Báo cáo Tồn kho theo kho (Pivot Kho)
+﻿# Đặc tả Chức năng: Báo cáo Tồn kho theo kho (Pivot Kho)
 
 > **Mã chức năng**: `BaoCao_TonKho`  
 > **Đường dẫn**: `/BaoCao/TonKho`  
@@ -9,12 +9,12 @@
 
 ## 1. Mục tiêu & Phạm vi nghiệp vụ
 
-- **Mục tiêu**: Cung cấp bức tranh toàn diện và tức thời về lượng tồn kho, giá trị hàng hóa lưu kho theo từng chi nhánh kho và toàn hệ thống dưới dạng bảng **Pivot kho** đa chiều chuẩn KiotViet.
+- **Mục tiêu**: Cung cấp bức tranh toàn diện và tức thời về lượng tồn kho, giá trị hàng hóa lưu kho theo từng chi nhánh kho và toàn hệ thống dưới dạng bảng **Pivot kho** đa chiều chuẩn chuyên nghiệp.
 - **Tính năng chính**:
   1. Thống kê KPI tổng quan: Tổng SKU mặt hàng, Tổng số lượng tồn, Tổng giá trị tồn (Giá vốn * Tồn), Số mặt hàng cần lưu ý (Dưới định mức / Hết hàng).
   2. Bảng Pivot kho: Cột cố định thông tin hàng hóa & tài chính (Mã, Tên, ĐVT, Nhóm, Giá vốn, Giá trị tồn), các cột phân bổ số lượng tồn theo từng Chi nhánh kho, và cột Tổng tồn toàn hệ thống.
   3. Lọc đa chiều: Theo chi nhánh kho (Multi-select), Nhóm hàng (Tree Combobox), Tình trạng tồn (Tất cả, Còn tồn >0, Hết hàng =0, Tồn âm <0, Dưới định mức tối thiểu, Vượt định mức tối đa), Trạng thái hàng hóa (Đang KD / Ngừng KD), Từ khóa tìm kiếm F3.
-  4. Xuất file Excel chuẩn KiotViet: Xuất báo cáo đa cột kèm format số lượng, tiền tệ và dòng tổng cộng qua Lego `ExcelHelper`.
+  4. Xuất file Excel chuẩn chuyên nghiệp: Xuất báo cáo đa cột kèm format số lượng, tiền tệ và dòng tổng cộng qua Lego `ExcelHelper`.
   5. Chi tiết mặt hàng (Drawer): Xem ngưỡng tồn tối thiểu/tối đa từng kho, vị trí kệ và phân bổ chi tiết.
 
 ---
@@ -57,10 +57,10 @@
 
 ---
 
-## 4. Luồng màn hình & Giao diện (Pivot KiotViet)
+## 4. Luồng màn hình & Giao diện (Pivot đa chiều)
 
 1. **Bố cục chính (`Views/BaoCao/TonKho.cshtml`)**:
-   - Cột trái: Sidebar bộ lọc KiotViet (`_TonKhoFilterSidebar.cshtml`), nút gập mở F4.
+   - Cột trái: Sidebar bộ lọc hệ thống (`_TonKhoFilterSidebar.cshtml`), nút gập mở F4.
    - Cột phải: Topbar tìm kiếm F3 + 4 Thẻ Summary KPI + Bảng Pivot kho + Phân trang AJAX.
 2. **Bảng Pivot AJAX (`_TonKhoTable.cshtml`)**:
    - Thead: Cố định thông tin mặt hàng, sinh động các cột `<th>` theo danh sách kho đang chọn lọc, cột cuối là `Tổng tồn`.

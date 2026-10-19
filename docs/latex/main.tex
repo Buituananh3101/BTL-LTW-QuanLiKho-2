@@ -34,10 +34,10 @@
 \usepackage{rotating}
 
 % Định nghĩa màu sắc in ấn học thuật (100% Black)
-\definecolor{kiotblue}{RGB}{0, 0, 0}
-\definecolor{kiotdark}{RGB}{0, 0, 0}
-\definecolor{kiotgreen}{RGB}{0, 0, 0}
-\definecolor{kiotgray}{RGB}{80, 80, 80}
+\definecolor{appblue}{RGB}{0, 0, 0}
+\definecolor{appdark}{RGB}{0, 0, 0}
+\definecolor{appgreen}{RGB}{0, 0, 0}
+\definecolor{appgray}{RGB}{80, 80, 80}
 \definecolor{tableheader}{gray}{0.90}
 
 % Định dạng tiêu đề chương mục chuẩn đồ án
@@ -159,7 +159,7 @@ Trong bối cảnh cuộc Cách mạng công nghiệp lần thứ tư và công 
 
 Trong thực tế, hoạt động quản trị kho đòi hỏi sự liên kết chặt chẽ giữa nhiều khâu nghiệp vụ khép kín: từ khâu tiếp nhận hàng từ nhà cung cấp, kiểm đếm nhập kho, lưu trữ, điều chuyển nội bộ giữa các kho, xuất hủy hàng hóa hư hỏng/hết hạn sử dụng, cho đến định kỳ kiểm kê và cân bằng sai lệch kho. Mỗi khâu đều phát sinh chứng từ kế toán và yêu cầu sự phối hợp nhịp nhàng giữa ba lớp nhân sự: Quản trị viên, Thủ kho và Nhân viên kho. Nếu các chứng từ và số lượng biến động không được quản lý tập trung và bọc trong các giao dịch an toàn (ACID Transaction), việc thất thoát và xác định trách nhiệm khi xảy ra chênh lệch sẽ trở nên vô cùng phức tạp.
 
-Xuất phát từ những vấn đề thực tiễn trên, nhóm sinh viên lựa chọn đề tài \textbf{``Xây Dựng Website Quản Lý Kho Hàng Đa Chi Nhánh''} làm nội dung nghiên cứu cho bài tập lớn học phần \textbf{Lập trình Web}. Đề tài tập trung nghiên cứu, phân tích nghiệp vụ thực tế và hiện thực hóa một hệ sinh thái quản lý kho chuyên nghiệp trên nền tảng công nghệ tiên tiến nhất \textbf{ASP.NET Core MVC (.NET 10)}, Entity Framework Core 10 và hệ quản trị cơ sở dữ liệu Microsoft SQL Server, mô phỏng chuẩn mực theo trải nghiệm và quy trình vận hành ưu việt của phần mềm KiotViet.
+Xuất phát từ những vấn đề thực tiễn trên, nhóm sinh viên lựa chọn đề tài \textbf{``Xây Dựng Website Quản Lý Kho Hàng Đa Chi Nhánh''} làm nội dung nghiên cứu cho bài tập lớn học phần \textbf{Lập trình Web}. Đề tài tập trung nghiên cứu, phân tích nghiệp vụ thực tế và hiện thực hóa một hệ sinh thái quản lý kho chuyên nghiệp trên nền tảng công nghệ tiên tiến nhất \textbf{ASP.NET Core MVC (.NET 10)}, Entity Framework Core 10 và hệ quản trị cơ sở dữ liệu Microsoft SQL Server, chuẩn hóa theo trải nghiệm và quy trình vận hành ưu việt của các hệ thống quản trị kho hàng chuyên nghiệp thực tế.
 
 Hệ thống được thiết kế phục vụ người dùng nội bộ, giải quyết triệt để bài toán đồng bộ tồn kho bằng giải thuật tính toán động qua Database View (\texttt{vw\_TonKhoHienTai}, \texttt{vw\_BienDongKho}), đóng gói hệ sinh thái giao diện khối Lego UI tái sử dụng và cung cấp các báo cáo phân tích chuyên sâu (Báo cáo Tồn kho đa chi nhánh dạng Pivot và Báo cáo Thẻ kho tịnh tiến lũy kế).
 
@@ -292,14 +292,6 @@ Thực tế tại nhiều doanh nghiệp vừa và nhỏ cho thấy, công tác 
     \item \textbf{Chậm trễ trong báo cáo phân tích:} Việc tổng hợp số liệu tồn kho từ các chi nhánh đòi hỏi hàng giờ làm việc thủ công, không đáp ứng được yêu cầu ra quyết định nhanh của nhà quản trị.
 \end{itemize}
 Do đó, việc xây dựng một hệ thống website quản lý kho tập trung, hoạt động trên nền tảng đám mây, cho phép truy cập linh hoạt từ mọi thiết bị với độ bảo mật cao là yêu cầu cấp thiết.
-
-\subsection{Mô hình tham chiếu thực tế: Triết lý vận hành phần mềm quản trị KiotViet}
-Để đảm bảo sản phẩm phần mềm mang tính ứng dụng cao và phù hợp với thói quen của người dùng Việt Nam, nhóm nghiên cứu đã lựa chọn phần mềm **KiotViet** làm mô hình tham chiếu thực tế. KiotViet hiện là giải pháp quản lý bán hàng và kho phổ biến nhất tại thị trường Việt Nam với các ưu điểm vượt trội:
-\begin{itemize}
-    \item \textbf{Bố cục 2 cột trực quan:} Cột trái dành riêng cho các bộ lọc thông minh (Lọc theo dải ngày, trạng thái, nhóm hàng, chi nhánh), cột phải là vùng làm việc hiển thị danh sách chứng từ và thanh công cụ tác vụ.
-    \item \textbf{Hỗ trợ thao tác phím tắt tối đa:} Tích hợp các phím tắt nhanh (F1 để tra cứu hướng dẫn, F3 để tìm kiếm hàng hóa, F4 để thu gọn thanh lọc, Esc để đóng cửa sổ bật lên) giúp nhân viên kho xử lý nhanh chóng mà không cần lạm dụng chuột.
-    \item \textbf{Nguyên tắc bất biến của chứng từ:} Khi một giao dịch kho đã hoàn tất và sinh phiếu kế toán, hệ thống khóa vĩnh viễn quyền chỉnh sửa nhằm đảm bảo tính toàn vẹn và minh bạch của dữ liệu kiểm toán.
-\end{itemize}
 
 \section{Phân tích các nghiệp vụ kho cốt lõi}
 
@@ -642,11 +634,13 @@ Hình~\ref{fig:uc_phanhe5} thể hiện các công cụ phân tích số liệu 
 % ==========================================
 % UC-01: ĐĂNG NHẬP VÀ CHỌN KHO
 % ==========================================
+\clearpage
+
 \begin{table}[H]
 \centering
-\small
-\renewcommand{\arraystretch}{1.25}
-\begin{tabularx}{\textwidth}{|p{3.2cm}|Y|}
+\footnotesize
+\renewcommand{\arraystretch}{1.08}
+\begin{tabularx}{\textwidth}{|p{3.0cm}|Y|}
 \hline
 \rowcolor{tableheader}
 \multicolumn{2}{|c|}{\textbf{Đặc tả Use Case UC-01: Đăng nhập và Lựa chọn Chi nhánh Kho làm việc}} \\
@@ -663,7 +657,7 @@ Hình~\ref{fig:uc_phanhe5} thể hiện các công cụ phân tích số liệu 
 \hline
 \textbf{Thao tác của Tác nhân} & \textbf{Phản hồi của Hệ thống} \\
 \hline
-1. Người dùng truy cập đường dẫn \texttt{/Account/Login}. & 2. Hiển thị form đăng nhập chuẩn KiotViet gồm Tên đăng nhập và Mật khẩu. \\
+1. Người dùng truy cập đường dẫn \texttt{/Account/Login}. & 2. Hiển thị form đăng nhập gồm Tên đăng nhập và Mật khẩu. \\
 3. Nhập tên đăng nhập, mật khẩu và bấm 'Đăng nhập'. & 4. Kiểm tra tài khoản, xác thực băm mật khẩu SHA-256 kèm muối an toàn. \\
 & 5. Truy vấn bảng \texttt{TaiKhoanKho} để lấy danh sách các chi nhánh kho được phép truy cập. \\
 6. (Nếu có $>1$ kho): Người dùng chọn chi nhánh kho muốn làm việc trên modal. & 7. Tạo Claims danh tính (\texttt{UserId}, \texttt{Role}, \texttt{MaKho}, \texttt{TenKho}), mã hóa Cookie Authentication và chuyển hướng vào trang Tổng quan hệ thống. \\
@@ -689,11 +683,13 @@ Hình~\ref{fig:uc_phanhe5} thể hiện các công cụ phân tích số liệu 
 % ==========================================
 % UC-02: NHẬP HÀNG TỪ NCC
 % ==========================================
+\clearpage
+
 \begin{table}[H]
 \centering
-\small
-\renewcommand{\arraystretch}{1.25}
-\begin{tabularx}{\textwidth}{|p{3.2cm}|Y|}
+\footnotesize
+\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\textwidth}{|p{3.0cm}|Y|}
 \hline
 \rowcolor{tableheader}
 \multicolumn{2}{|c|}{\textbf{Đặc tả Use Case UC-02: Lập Phiếu Nhập hàng từ Nhà cung cấp}} \\
@@ -723,7 +719,7 @@ Hình~\ref{fig:uc_phanhe5} thể hiện các công cụ phân tích số liệu 
 9a. \textit{Dữ liệu không hợp lệ}: Nếu danh sách hàng rỗng hoặc số lượng $\le 0$, hệ thống hiển thị cảnh báo đỏ và ngăn chặn lưu phiếu.
 } \\
 \hline
-\textbf{Quy tắc nghiệp vụ} & - BR-03: Công thức Giá vốn bình quân: $\text{GiaVonMoi} = \frac{(\text{TonCu} \times \text{GiaVonCu}) + (\text{SlNhap} \times \text{GiaNhap})}{\text{TonCu} + \text{SlNhap}}$.\newline
+\textbf{Quy tắc nghiệp vụ} & - BR-03: Công thức Giá vốn bình quân: $\text{GiaVonMoi} = [(\text{TonCu} \times \text{GiaVonCu}) + (\text{SlNhap} \times \text{GiaNhap})] / (\text{TonCu} + \text{SlNhap})$.\newline
 - BR-04: Phiếu nhập ở trạng thái \texttt{DA\_NHAP} tuyệt đối không được phép chỉnh sửa hoặc xóa bỏ. \\
 \hline
 \textbf{Hậu điều kiện} & Số lượng tồn kho tăng tương ứng; thẻ kho ghi nhận dòng nhập; công nợ nhà cung cấp được ghi nhận. \\
@@ -736,11 +732,13 @@ Hình~\ref{fig:uc_phanhe5} thể hiện các công cụ phân tích số liệu 
 % ==========================================
 % UC-03: ĐIỀU CHUYỂN KHO LIÊN CHI NHÁNH
 % ==========================================
+\clearpage
+
 \begin{table}[H]
 \centering
-\small
-\renewcommand{\arraystretch}{1.25}
-\begin{tabularx}{\textwidth}{|p{3.2cm}|Y|}
+\footnotesize
+\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\textwidth}{|p{3.0cm}|Y|}
 \hline
 \rowcolor{tableheader}
 \multicolumn{2}{|c|}{\textbf{Đặc tả Use Case UC-03: Điều chuyển Kho Nội bộ Liên Chi nhánh}} \\
@@ -782,11 +780,13 @@ Hình~\ref{fig:uc_phanhe5} thể hiện các công cụ phân tích số liệu 
 % ==========================================
 % UC-04: KIỂM KÊ VÀ CÂN BẰNG KHO
 % ==========================================
+\clearpage
+
 \begin{table}[H]
 \centering
-\small
-\renewcommand{\arraystretch}{1.25}
-\begin{tabularx}{\textwidth}{|p{3.2cm}|Y|}
+\footnotesize
+\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\textwidth}{|p{3.0cm}|Y|}
 \hline
 \rowcolor{tableheader}
 \multicolumn{2}{|c|}{\textbf{Đặc tả Use Case UC-04: Kiểm kê và Cân bằng Kho Tự động qua Transaction}} \\
@@ -805,13 +805,8 @@ Hình~\ref{fig:uc_phanhe5} thể hiện các công cụ phân tích số liệu 
 \hline
 1. Vào menu 'Kiểm kho' $\rightarrow$ bấm '+ Tạo phiếu kiểm'. & 2. Khởi tạo phiếu kiểm mới, tự động nạp toàn bộ danh sách mặt hàng kèm Tồn sổ sách hiện hành lấy trực tiếp từ View \texttt{vw\_TonKhoHienTai}. \\
 3. Tiến hành kiểm đếm thực tế ngoài hiện trường và nhập số lượng đếm được vào cột 'Thực tế'. & 4. Hệ thống tính toán tức thời: $\text{Lech} = \text{ThucTe} - \text{SoSach}$, tự động phân loại Thừa / Thiếu và tính Giá trị lệch theo giá vốn. \\
-5. Kiểm tra lại toàn bộ danh sách chênh lệch và bấm nút 'Cân bằng kho'. & 6. Hiển thị hộp thoại xác nhận \texttt{KiotPrompt} với cảnh báo: "Hệ thống sẽ cập nhật tồn sổ sách khớp thực tế và khóa phiếu kiểm vĩnh viễn". \\
-7. Bấm 'Đồng ý cân bằng'. & 8. Mở Transaction CSDL:\newline
-$\bullet$ Tự động sinh 01 \texttt{PhieuDieuChinh} ở trạng thái \texttt{DA\_DUYET} chứa các dòng sai lệch.\newline
-$\bullet$ Ghi nhận biến động tồn kho (tăng/giảm) đưa tồn sổ sách khớp 100\% với thực tế.\newline
-$\bullet$ Ghi các dòng Thẻ kho loại \texttt{KIEM\_KE}.\newline
-$\bullet$ Chuyển trạng thái phiếu kiểm thành \texttt{DA\_CAN\_BANG} và khóa vĩnh viễn không cho sửa/xóa.\newline
-Commit Transaction và hiển thị thông báo thành công. \\
+5. Kiểm tra lại toàn bộ danh sách chênh lệch và bấm nút 'Cân bằng kho'. & 6. Hiển thị hộp thoại xác nhận với cảnh báo: "Hệ thống sẽ cập nhật tồn sổ sách khớp thực tế và khóa phiếu kiểm vĩnh viễn". \\
+7. Bấm 'Đồng ý cân bằng'. & 8. Mở Transaction CSDL: (1) Tự động sinh 01 \texttt{PhieuDieuChinh} ở trạng thái \texttt{DA\_DUYET} chứa các dòng sai lệch; (2) Ghi nhận biến động tồn kho (tăng/giảm) đưa tồn sổ sách khớp 100\% với thực tế; (3) Ghi các dòng Thẻ kho loại \texttt{KIEM\_KE}; (4) Chuyển trạng thái phiếu kiểm thành \texttt{DA\_CAN\_BANG} và khóa vĩnh viễn không cho sửa/xóa. Commit Transaction và thông báo thành công. \\
 \hline
 \multicolumn{2}{|l|}{\textbf{Luồng sự kiện phụ \& Ngoại lệ (Alternative Flows):}} \\
 \hline
@@ -833,11 +828,13 @@ Commit Transaction và hiển thị thông báo thành công. \\
 % ==========================================
 % UC-05: TRA CỨU THẺ KHO
 % ==========================================
+\clearpage
+
 \begin{table}[H]
 \centering
-\small
-\renewcommand{\arraystretch}{1.25}
-\begin{tabularx}{\textwidth}{|p{3.2cm}|Y|}
+\footnotesize
+\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\textwidth}{|p{3.0cm}|Y|}
 \hline
 \rowcolor{tableheader}
 \multicolumn{2}{|c|}{\textbf{Đặc tả Use Case UC-05: Tra cứu Thẻ kho và Phân tích Biến động Lũy kế}} \\
@@ -854,13 +851,9 @@ Commit Transaction và hiển thị thông báo thành công. \\
 \hline
 \textbf{Thao tác của Tác nhân} & \textbf{Phản hồi của Hệ thống} \\
 \hline
-1. Vào menu 'Báo cáo' $\rightarrow$ chọn 'Thẻ kho' (hoặc mở Tab Thẻ kho từ Drawer chi tiết Hàng hóa). & 2. Hiển thị màn hình Thẻ kho chuẩn KiotViet với thanh tìm kiếm F3, bộ lọc dải ngày và bộ lọc chi nhánh kho. \\
+1. Vào menu 'Báo cáo' $\rightarrow$ chọn 'Thẻ kho' (hoặc mở Tab Thẻ kho từ Drawer chi tiết Hàng hóa). & 2. Hiển thị màn hình Thẻ kho chuyên nghiệp với thanh tìm kiếm F3, bộ lọc dải ngày và bộ lọc chi nhánh kho. \\
 3. Gõ tên hoặc mã mặt hàng tại ô tìm kiếm F3. & 4. Dropdown hiển thị gợi ý thông minh trong $\le 100$ms kèm ảnh thumbnail, giá bán và tồn hiện tại. \\
-5. Chọn mặt hàng và chọn khoảng thời gian (Từ ngày -- Đến ngày). & 6. Thực thi truy vấn:\newline
-$\bullet$ Tính Tồn đầu kỳ: Tổng nhập trừ Tổng xuất từ đầu lịch sử đến trước mốc 'Từ ngày'.\newline
-$\bullet$ Nạp danh sách giao dịch trong kỳ sắp xếp theo thời gian tăng dần.\newline
-$\bullet$ Chạy thuật toán lũy kế: $\text{TonLuyKe}_i = \text{TonLuyKe}_{i-1} + \text{Nhap}_i - \text{Xuat}_i$.\newline
-$\bullet$ Hiển thị Summary KPI (Tồn đầu, Tổng nhập, Tổng xuất, Tồn cuối) và bảng chi tiết có phân loại badge màu sắc chuẩn KiotViet. \\
+5. Chọn mặt hàng và chọn khoảng thời gian (Từ ngày -- Đến ngày). & 6. Thực thi truy vấn: (1) Tính Tồn đầu kỳ: Tổng nhập trừ Tổng xuất từ đầu lịch sử đến trước mốc 'Từ ngày'; (2) Nạp danh sách giao dịch trong kỳ sắp xếp theo thời gian tăng dần; (3) Thuật toán lũy kế: $\text{TonLuyKe}_i = \text{TonLuyKe}_{i-1} + \text{Nhap}_i - \text{Xuat}_i$; (4) Hiển thị Summary KPI (Tồn đầu, Tổng nhập, Tổng xuất, Tồn cuối) và bảng chi tiết có phân loại badge màu sắc trực quan, khoa học. \\
 7. (Tùy chọn): Bấm 'Xuất Excel'. & 8. Sử dụng thư viện ClosedXML kết xuất file Excel định dạng chuẩn bảng biểu kế toán tải về máy khách. \\
 \hline
 \multicolumn{2}{|l|}{\textbf{Luồng rẽ nhánh \& Ngoại lệ (Alternative Flows):}} \\
@@ -880,39 +873,133 @@ $\bullet$ Hiển thị Summary KPI (Tồn đầu, Tổng nhập, Tổng xuất, 
 \label{tab:uc_spec_thekho}
 \end{table}
 
+\clearpage
+
 \section{Thiết kế luồng xử lý nghiệp vụ (Activity Diagrams)}
 
-Hình~\ref{fig:activity_kiemkho} thể hiện biểu đồ hoạt động của quy trình Kiểm kho và Cân bằng kho tự động:
+Biểu đồ hoạt động (Activity Diagram) trong chuẩn UML 2.5 đóng vai trò quan trọng trong việc mô hình hóa trực quan các quy trình nghiệp vụ, luồng điều khiển và sự luân chuyển thông tin giữa các thành phần kiến trúc. Trong hệ thống Quản lý kho hàng đa chi nhánh, các luồng nghiệp vụ được thiết kế theo mô hình phân làn trách nhiệm (\textit{Swimlanes}) gồm 3 tầng tương tác rõ rệt:
+\begin{enumerate}
+    \item \textbf{Tầng Giao diện người dùng (Client UI / Actor):} Thao tác của Thủ kho hoặc Nhân viên kho thông qua giao diện Web (tìm kiếm phím tắt F3, nhập liệu, kích hoạt lệnh xác nhận hoặc lưu tạm).
+    \item \textbf{Tầng Xử lý ứng dụng (Web App / Backend Service Logic):} Tiếp nhận yêu cầu, kiểm tra tính hợp lệ của dữ liệu (Validation), thực hiện các thuật toán nghiệp vụ đặc thù (tính giá vốn bình quân gia quyền MAC, xác định mức độ chênh lệch kiểm kê thừa/thiếu, kiểm tra hạn mức tồn khả dụng).
+    \item \textbf{Tầng Dữ liệu và Giao dịch (Database Engine / Transaction):} Khởi tạo giao dịch phân tán (\texttt{BeginTransactionAsync}), cập nhật đồng bộ các bảng Master-Detail, biến động số liệu tồn kho sổ sách thông qua View \texttt{vw\_TonKhoHienTai}, ghi nhận nhật ký thao tác (\texttt{NhatKyThaoTac}) và thực hiện Commit hoặc Rollback an toàn.
+\end{enumerate}
+
+Dưới đây là 5 biểu đồ hoạt động chi tiết đại diện cho 5 quy trình nghiệp vụ cốt lõi của hệ thống:
+
+\subsection{Quy trình Nhập hàng từ Nhà cung cấp và Cập nhật giá vốn}
+
+Quy trình nhập hàng từ Nhà cung cấp đảm nhận việc tiếp nhận hàng hóa vào từng chi nhánh kho, tăng số lượng tồn sổ sách và tính toán lại giá vốn bình quân gia quyền (Moving Average Cost -- MAC) của sản phẩm trên toàn hệ thống.
+
+Hình~\ref{fig:activity_nhaphang} mô tả chi tiết biểu đồ hoạt động của quy trình Nhập hàng:
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[
-    node distance=1.2cm,
-    startstop/.style={circle, draw=black, fill=black, inner sep=4pt},
-    process/.style={rectangle, draw=black, line width=0.8pt, fill=gray!5, rounded corners=3pt, text width=5cm, align=center, inner sep=6pt, font=\small},
-    decision/.style={diamond, draw=black, line width=0.8pt, fill=white, aspect=2, inner sep=3pt, font=\small, text width=2.8cm, align=center},
-    arrow/.style={->, thick, black}
-]
-    \node[startstop] (start) {};
-    \node[process, below=0.8cm of start] (p1) {Mở form tạo phiếu kiểm kê\\(Tự động load tồn sổ sách từ View)};
-    \node[process, below=0.8cm of p1] (p2) {Nhập số lượng đếm thực tế\\(Hệ thống tính chênh lệch)};
-    \node[decision, below=0.8cm of p2] (d1) {Người dùng chọn?};
-    \node[process, right=1.5cm of d1] (p_draft) {Lưu tạm phiếu\\Trạng thái: PHIEU\_TAM\\(Không đổi tồn kho)};
-    \node[process, below=1cm of d1] (p_trans) {Bọc Transaction CSDL:\\1. Sinh Phiếu điều chỉnh DA\_DUYET\\2. Tồn kho tự động cân bằng\\3. Khóa phiếu kiểm vĩnh viễn};
-    \node[circle, draw=black, line width=1.5pt, inner sep=4pt, below=0.8cm of p_trans] (end) {};
-    \fill[black] (end) circle (2.5pt);
+\includegraphics[width=0.88\textwidth,height=16cm,keepaspectratio]{figures/fig_activity_nhaphang.png}
+\caption{Biểu đồ hoạt động quy trình Nhập hàng từ Nhà cung cấp và Cập nhật giá vốn}
+\label{fig:activity_nhaphang}
+\end{figure}
 
-    \draw[arrow] (start) -- (p1);
-    \draw[arrow] (p1) -- (p2);
-    \draw[arrow] (p2) -- (d1);
-    \draw[arrow] (d1) -- node[above]{\scriptsize Lưu tạm} (p_draft);
-    \draw[arrow] (d1) -- node[right]{\scriptsize Cân bằng kho} (p_trans);
-    \draw[arrow] (p_trans) -- (end);
-    \draw[arrow] (p_draft) |- (end);
-\end{tikzpicture}
-\caption{Biểu đồ hoạt động quy trình Kiểm kê và Cân bằng kho tự động}
+\textbf{Thuyết minh các bước xử lý và cơ chế bảo toàn dữ liệu:}
+\begin{itemize}
+    \item \textit{Thao tác người dùng}: Thủ kho mở form Tạo phiếu nhập, lựa chọn Nhà cung cấp và Chi nhánh kho đích. Sử dụng phím tắt F3 để tìm kiếm nhanh mặt hàng theo tên hoặc mã vạch, nhập số lượng thực nhập và đơn giá mua thực tế, sau đó nhấn nút 'Hoàn thành'.
+    \item \textit{Kiểm tra hợp lệ}: Backend kiểm tra danh sách mặt hàng phải có ít nhất 1 dòng, số lượng và đơn giá phải $> 0$. Nếu dữ liệu không hợp lệ, hệ thống trả về thông báo lỗi chi tiết đến giao diện.
+    \item \textit{Giao dịch CSDL}: Khi dữ liệu hợp lệ, hệ thống mở một Database Transaction:
+    \begin{enumerate}
+        \item Tính toán lại giá vốn bình quân theo công thức:
+        \[
+        \text{Giá vốn mới} = \frac{(\text{Tồn hiện tại} \times \text{Giá vốn cũ}) + (\text{Số lượng nhập} \times \text{Đơn giá nhập})}{\text{Tồn hiện tại} + \text{Số lượng nhập}}
+        \]
+        \item Lưu thông tin phiếu vào bảng Master \texttt{PhieuNhap} và các dòng chi tiết \texttt{ChiTietPhieuNhap} với trạng thái \texttt{DA\_XAC\_NHAN}.
+        \item Số lượng tồn kho tại chi nhánh lập tức được ghi nhận tăng thông qua View \texttt{vw\_TonKhoHienTai} và bảng biến động kho.
+        \item Tự động ghi nhận công nợ phải trả Nhà cung cấp và lưu vết kiểm toán vào \texttt{NhatKyThaoTac}.
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Quy trình Điều chuyển hàng hóa liên chi nhánh (2 Chặng)}
+
+Đặc thù chuỗi chi nhánh kho phân tán tại huyện đảo đòi hỏi quy trình điều chuyển hàng hóa phải được quản lý chặt chẽ theo mô hình 2 chặng: Xuất chuyển (Kho gửi) $\rightarrow$ Hàng đang đi đường $\rightarrow$ Nhận chuyển (Kho nhận) nhằm kiểm soát rủi ro thất thoát hoặc hao hụt trên đường vận chuyển.
+
+Hình~\ref{fig:activity_chuyenkho} mô tả chi tiết biểu đồ hoạt động của quy trình Điều chuyển kho:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth,height=16cm,keepaspectratio]{figures/fig_activity_chuyenkho.png}
+\caption{Biểu đồ hoạt động quy trình Điều chuyển kho liên chi nhánh 2 chặng}
+\label{fig:activity_chuyenkho}
+\end{figure}
+
+\textbf{Thuyết minh các bước xử lý và cơ chế kiểm soát hàng đi đường:}
+\begin{itemize}
+    \item \textit{Chặng 1 (Xuất chuyển tại Kho gửi)}: Thủ kho chi nhánh xuất lập phiếu chuyển, chọn kho nhận và danh sách mặt hàng cần điều chuyển. Hệ thống kiểm tra số lượng chuyển phải $\le$ số lượng tồn kho khả dụng tại kho nguồn. Nếu thỏa mãn, Transaction Chặng 1 lưu phiếu ở trạng thái \texttt{DANG\_CHUYEN}, trừ tồn kho gửi và ghi nhận hàng vào trạng thái đang luân chuyển.
+    \item \textit{Chặng 2 (Nhận chuyển tại Kho đích)}: Khi hàng đến nơi, thủ kho chi nhánh nhận tiến hành kiểm đếm số lượng thực tế. Nếu có thất thoát hoặc hư hỏng trong quá trình di chuyển (ví dụ: bốc dỡ qua phà biển), thủ kho ghi nhận số lượng thực nhận và lý do hao hụt.
+    \item \textit{Giao dịch CSDL hoàn tất}: Hệ thống mở Transaction Chặng 2: cộng tồn kho chi nhánh nhận theo số lượng thực nhận, ghi nhận chênh lệch mất mát vào chi tiết phiếu chuyển để truy cứu trách nhiệm, cập nhật trạng thái phiếu thành \texttt{HOAN\_THANH} và đóng chứng từ.
+\end{itemize}
+
+\subsection{Quy trình Kiểm kê và Tự động Cân bằng kho}
+
+Kiểm kê định kỳ là nghiệp vụ xương sống của hệ thống nhằm phát hiện sai lệch giữa số lượng hàng đếm thực tế ngoài kho và số liệu tồn ghi nhận trên sổ sách phần mềm. Điểm nổi bật của hệ thống là khả năng tự động sinh chứng từ điều chỉnh và cân bằng tồn tức thời.
+
+Hình~\ref{fig:activity_kiemkho} mô tả chi tiết biểu đồ hoạt động của quy trình Kiểm kê và Cân bằng kho tự động:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth,height=16cm,keepaspectratio]{figures/fig_activity_kiemkho.png}
+\caption{Biểu đồ hoạt động quy trình Kiểm kê và Tự động Cân bằng kho}
 \label{fig:activity_kiemkho}
 \end{figure}
+
+\textbf{Thuyết minh các nhánh rẽ nghiệp vụ và tính bất biến của chứng từ:}
+\begin{itemize}
+    \item \textit{Tải số liệu sổ sách thời gian thực}: Khi khởi tạo phiếu kiểm kê, hệ thống tự động truy vấn View \texttt{vw\_TonKhoHienTai} để lấy số tồn sổ sách tại thời điểm hiện tại của toàn bộ mặt hàng thuộc chi nhánh kiểm kê.
+    \item \textit{Kiểm đếm và tính chênh lệch}: Nhân viên kho nhập số lượng đếm thực tế. Hệ thống tự động tính độ lệch ($\Delta = \text{Tồn thực tế} - \text{Tồn sổ sách}$) cùng giá trị chênh lệch (Thừa hoặc Thiếu) dựa trên đơn giá vốn hiện hành.
+    \item \textit{Nhánh 1 -- Lưu tạm (\texttt{PHIEU\_TAM})}: Trường hợp đợt kiểm kê diễn ra trong nhiều ngày hoặc chưa hoàn tất đếm, người dùng bấm 'Lưu tạm'. Phiếu kiểm được lưu ở trạng thái tạm thời, không làm biến động tồn kho và cho phép thủ kho tiếp tục chỉnh sửa số liệu.
+    \item \textit{Nhánh 2 -- Cân bằng kho (\texttt{DA\_CAN\_BANG})}: Khi số liệu kiểm đếm đã được chốt, người dùng bấm 'Cân bằng kho'. Hệ thống bọc toàn bộ thao tác trong Database Transaction:
+    \begin{enumerate}
+        \item Tự động sinh một bản ghi \texttt{PhieuDieuChinh} liên kết với phiếu kiểm kê ở trạng thái \texttt{DA\_DUYET}.
+        \item Sinh các dòng chi tiết \texttt{ChiTietPhieuDieuChinh} đối với các mặt hàng có chênh lệch để cân bằng tồn sổ sách khớp chính xác 100\% với thực tế kiểm đếm.
+        \item Chuyển trạng thái phiếu kiểm thành \texttt{DA\_CAN\_BANG} và \textbf{khóa vĩnh viễn} (tuân thủ nghiêm ngặt Luật cốt lõi 6 trong AGENTS.md, cấm mọi thao tác sửa, xóa hoặc hủy phiếu đã cân bằng).
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Quy trình Xuất hủy hàng hỏng và Hết hạn sử dụng}
+
+Trong quá trình bảo quản tại kho (đặc biệt đối với mặt hàng bình khí hóa lỏng, phụ kiện kim loại dễ bị rỉ sét do hơi muối biển, hoặc bếp gas vỡ kính), các sản phẩm hư hại không còn giá trị thương mại phải được xuất hủy khỏi kho để đảm bảo an toàn và tính chính xác của tài sản lưu kho.
+
+Hình~\ref{fig:activity_xuathuy} mô tả chi tiết biểu đồ hoạt động của quy trình Xuất hủy kho:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth,height=16cm,keepaspectratio]{figures/fig_activity_xuathuy.png}
+\caption{Biểu đồ hoạt động quy trình Xuất hủy hàng hỏng và Hết hạn sử dụng}
+\label{fig:activity_xuathuy}
+\end{figure}
+
+\textbf{Thuyết minh các bước xử lý và kiểm soát tài sản:}
+\begin{itemize}
+    \item \textit{Lập phiếu xuất hủy}: Thủ kho chọn chi nhánh kho và loại xuất là \texttt{XUAT\_HUY}. Sử dụng ô tìm kiếm F3 để thêm các mặt hàng bị hư hại, nhập số lượng xuất hủy và bắt buộc điền lý do chi tiết (ngấm nước bão, va đập móp méo, rỉ sét chân đế).
+    \item \textit{Kiểm tra tồn khả dụng}: Hệ thống kiểm tra số lượng đề xuất hủy không được vượt quá số tồn khả dụng hiện hành trong kho.
+    \item \textit{Giao dịch CSDL}: Mở Database Transaction ghi nhận \texttt{PhieuXuat} và \texttt{ChiTietPhieuXuat} với trạng thái \texttt{DA\_XAC\_NHAN}. Giá trị xuất hủy được ghi nhận theo giá vốn sản phẩm, số lượng tồn kho giảm ngay lập tức thông qua View \texttt{vw\_TonKhoHienTai}, sinh dòng Thẻ kho xuất âm và ghi nhật ký kiểm toán.
+\end{itemize}
+
+\subsection{Quy trình Trả hàng nhập cho Nhà cung cấp}
+
+Khi hàng hóa nhập về không đạt chất lượng cam kết, bị lỗi từ phía nhà sản xuất hoặc thừa theo thỏa thuận hoàn trả, hệ thống cung cấp phân hệ Trả hàng nhập để xuất hoàn sản phẩm cho Nhà cung cấp và cân đối lại nghĩa vụ tài chính.
+
+Hình~\ref{fig:activity_trahang} mô tả chi tiết biểu đồ hoạt động của quy trình Trả hàng nhập:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth,height=16cm,keepaspectratio]{figures/fig_activity_trahang.png}
+\caption{Biểu đồ hoạt động quy trình Trả hàng nhập cho Nhà cung cấp}
+\label{fig:activity_trahang}
+\end{figure}
+
+\textbf{Thuyết minh các bước xử lý và đối soát công nợ:}
+\begin{itemize}
+    \item \textit{Khởi tạo phiếu trả}: Thủ kho có thể chọn trả hàng theo một Phiếu nhập gốc cụ thể hoặc chọn trực tiếp Nhà cung cấp đối tác. Chọn các mặt hàng cần hoàn trả và số lượng trả tương ứng.
+    \item \textit{Kiểm tra tồn khả dụng}: Hệ thống kiểm tra số lượng hoàn trả phải $\le$ số lượng tồn thực tế đang có tại chi nhánh kho lập phiếu (tránh trường hợp hàng đã bán hoặc đã chuyển kho khác mà vẫn lập phiếu trả).
+    \item \textit{Xử lý tài chính \& Tồn kho}: Hệ thống mở Transaction: tạo \texttt{PhieuTraHangNhap} và \texttt{ChiTietPhieuTraHangNhap}, trừ số lượng tồn kho qua View \texttt{vw\_TonKhoHienTai}, sinh dòng biến động Thẻ kho loại \texttt{TRA\_HANG\_NHAP}. Đồng thời tự động cập nhật giảm trừ công nợ phải trả Nhà cung cấp (hoặc ghi nhận phiếu thu tiền mặt nếu Nhà cung cấp hoàn tiền ngay).
+\end{itemize}
 
 \section{Thiết kế Cơ sở dữ liệu quan hệ (Database Design)}
 
@@ -937,7 +1024,7 @@ Hình~\ref{fig:so_do_er} biểu diễn Sơ đồ ER của hệ thống với cá
 \clearpage
 \begin{figure}[p]
 \centering
-\includegraphics[angle=90, width=0.95\textwidth, height=18.5cm, keepaspectratio]{figures/fig_er_tong_quan.png}
+\includegraphics[angle=90, width=0.98\textwidth, height=23.4cm, keepaspectratio]{figures/fig_er_tong_quan.png}
 \vspace{0.2cm}
 \caption{Mô hình thực thể -- liên kết tổng quát (Sơ đồ ER - Entity-Relationship Diagram)}
 \label{fig:so_do_er}
@@ -1447,11 +1534,11 @@ Hệ thống được tổ chức theo mô hình kiến trúc MVC 3 tầng phân
 Luồng điều hướng người dùng được thiết kế khoa học:
 Đăng nhập $\rightarrow$ Chọn chi nhánh kho $\rightarrow$ Dashboard tổng quan $\rightarrow$ Phân hệ Hàng hóa $\rightarrow$ Phân hệ Giao dịch (Nhập/Trả/Xuất/Chuyển/Kiểm) $\rightarrow$ Phân hệ Báo cáo (Tồn kho Pivot/Thẻ kho) $\rightarrow$ Thiết lập hệ thống (Kho/Người dùng).
 
-\subsection{Thiết kế khung giao diện Wireframe chuẩn KiotViet}
-Giao diện ứng dụng tuân thủ chuẩn mực giao diện 2 cột KiotViet:
+\subsection{Thiết kế khung giao diện Wireframe hệ thống}
+Giao diện ứng dụng tuân thủ chuẩn mực thiết kế 2 cột trực quan:
 \begin{itemize}
-    \item \textbf{Thanh điều hướng cố định (Top Navbar):} Cao 42px, nền xanh KiotViet, chứa Logo, Menu điều hướng đa cấp, Dropdown chọn nhanh chi nhánh kho làm việc hiện hành và Thông tin tài khoản đăng nhập.
-    \item \textbf{Sidebar Bộ lọc (Cột trái):} Chiều rộng 260px, gồm ô tìm kiếm nhanh F3, bộ lọc dải ngày \texttt{\_KiotDateFilter}, bộ lọc đa chọn kho \texttt{\_KiotMultiSelectFilter}, cây danh mục nhóm hàng và nút F4 thu gọn để mở rộng tối đa không gian làm việc.
+    \item \textbf{Thanh điều hướng cố định (Top Navbar):} Cao 42px, nền màu chủ đạo, chứa Logo, Menu điều hướng đa cấp, Dropdown chọn nhanh chi nhánh kho làm việc hiện hành và Thông tin tài khoản đăng nhập.
+    \item \textbf{Sidebar Bộ lọc (Cột trái):} Chiều rộng 260px, gồm ô tìm kiếm nhanh F3, bộ lọc dải ngày \texttt{\_DateFilter}, bộ lọc đa chọn kho \texttt{\_MultiSelectFilter}, cây danh mục nhóm hàng và nút F4 thu gọn để mở rộng tối đa không gian làm việc.
     \item \textbf{Vùng làm việc chính (Cột phải):} Thanh công cụ chứa các nút tác vụ (+ Thêm mới, Xuất Excel, F1 Trợ giúp) và bảng dữ liệu hiển thị dạng bảng có hỗ trợ cuộn ngang và phân trang AJAX \texttt{\_Pagination}.
 \end{itemize}
 
@@ -1537,10 +1624,10 @@ catch (Exception)
 \subsection{Hệ sinh thái Khối Lego UI tái sử dụng}
 Nhóm đã chuẩn hóa giao diện thành các thành phần Lego UI độc lập:
 \begin{itemize}
-    \item \texttt{\_Pagination.cshtml}: Phân trang chuẩn KiotViet với thông tin hiển thị ``Hiển thị 1--20 trên tổng số 150 mặt hàng''.
-    \item \texttt{\_KiotDateFilter.cshtml}: Bộ lọc dải ngày thông minh (Hôm nay, Hôm qua, 7 ngày qua, Tháng này, Tùy chọn).
-    \item \texttt{KiotToast.js}: Hệ thống thông báo tự động góc phải màn hình (Xanh: Thành công, Đỏ: Lỗi, Vàng: Cảnh báo).
-    \item \texttt{KiotFilter.initCombobox}: Thư viện tìm kiếm nhanh với phím F3 tự động kích hoạt ô nhập.
+    \item \texttt{\_Pagination.cshtml}: Phân trang chuyên nghiệp với thông tin hiển thị ``Hiển thị 1--20 trên tổng số 150 mặt hàng''.
+    \item \texttt{\_DateFilter.cshtml}: Bộ lọc dải ngày thông minh (Hôm nay, Hôm qua, 7 ngày qua, Tháng này, Tùy chọn).
+    \item \texttt{Toast.js}: Hệ thống thông báo tự động góc phải màn hình (Xanh: Thành công, Đỏ: Lỗi, Vàng: Cảnh báo).
+    \item \texttt{Filter.initCombobox}: Thư viện tìm kiếm nhanh với phím F3 tự động kích hoạt ô nhập.
 \end{itemize}
 
 \subsection{Giải pháp phân tầng Stacking Context giải quyết xung đột Dropdown và Modal}
@@ -1550,7 +1637,7 @@ Hệ thống thiết lập thang đo z-index 6 tầng chuẩn hóa:
     \item \textbf{Tầng 2 (150--500):} Menu dropdown, ô gợi ý autocomplete và lịch dải ngày.
     \item \textbf{Tầng 3 (1020):} Thanh Header menu cố định.
     \item \textbf{Tầng 4 (1050--1065):} Cửa sổ Modal và Drawer trượt từ cạnh phải.
-    \item \textbf{Tầng 5 (1090):} Cửa sổ thông báo xác nhận (\texttt{KiotPrompt}).
+    \item \textbf{Tầng 5 (1090):} Cửa sổ thông báo xác nhận (\texttt{ModalPrompt}).
     \item \textbf{Tầng 6 (9999):} Thông báo nổi Toast.
 \end{itemize}
 
@@ -1569,12 +1656,12 @@ Màn hình Đăng nhập được thiết kế tinh giản, hỗ trợ người 
 \end{figure}
 
 \subsection{Phân hệ Quản lý Danh mục Hàng hóa \& Cảnh báo định mức}
-Giao diện quản lý hàng hóa tuân thủ bố cục 2 cột chuẩn KiotViet: Sidebar bên trái chứa ô tìm kiếm nhanh F3 và cây nhóm hàng; vùng làm việc hiển thị danh sách 34 mặt hàng mẫu phong phú (Bình gas, Bếp gas, Phụ kiện, Khí công nghiệp) kèm cảnh báo tồn tối thiểu/tối đa (Hình~\ref{fig:res_hanghoa}).
+Giao diện quản lý hàng hóa tuân thủ bố cục 2 cột chuyên nghiệp: Sidebar bên trái chứa ô tìm kiếm nhanh F3 và cây nhóm hàng; vùng làm việc hiển thị danh sách 34 mặt hàng mẫu phong phú (Bình gas, Bếp gas, Phụ kiện, Khí công nghiệp) kèm cảnh báo tồn tối thiểu/tối đa (Hình~\ref{fig:res_hanghoa}).
 
 \begin{figure}[H]
 \centering
 \fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_2_hanghoa.png}}
-\caption{Phân hệ Quản lý Danh mục Hàng hóa và Bộ lọc thông minh chuẩn KiotViet}
+\caption{Phân hệ Quản lý Danh mục Hàng hóa và Bộ lọc thông minh}
 \label{fig:res_hanghoa}
 \end{figure}
 
@@ -1754,7 +1841,7 @@ Công tác kiểm thử đóng vai trò quyết định nhằm đảm bảo tín
 \hline
 \textbf{Kết quả đánh giá} & \textbf{[ĐÃ SỬA -- PASS]} \\
 \hline
-\textbf{Đề xuất \& Xử lý} & Phân tích: \texttt{.app-main-body} có \texttt{position: relative; z-index: 1;} tạo Stacking Context cục bộ giam giữ Modal. Khắc phục: Gỡ bỏ z-index khỏi main-body, chuẩn hóa dropdown về z-index 150, thiết lập kiến trúc z-index 6 tầng chuẩn KiotViet. \\
+\textbf{Đề xuất \& Xử lý} & Phân tích: \texttt{.app-main-body} có \texttt{position: relative; z-index: 1;} tạo Stacking Context cục bộ giam giữ Modal. Khắc phục: Gỡ bỏ z-index khỏi main-body, chuẩn hóa dropdown về z-index 150, thiết lập kiến trúc z-index 6 tầng chuẩn hóa. \\
 \hline
 \end{tabularx}
 \caption{Kịch bản kiểm thử TC-04: Khắc phục lỗi Stacking Context Modal}
@@ -1803,9 +1890,9 @@ Nhóm đã thực hiện tổng cộng 38 kịch bản kiểm thử chức năng
 \section{Kết quả đạt được}
 Sau quá trình nghiên cứu, phân tích nghiệp vụ và lập trình triển khai nghiêm túc qua 162 phiên làm việc liên tục, nhóm sinh viên đã hoàn thành xuất sắc toàn bộ các mục tiêu đặt ra cho bài tập lớn học phần Lập trình Web:
 \begin{enumerate}
-    \item \textbf{Về mặt sản phẩm:} Xây dựng thành công ứng dụng web Quản lý kho hàng đa chi nhánh hoàn chỉnh, mô phỏng chân thực và tinh tế giao diện cũng như quy trình nghiệp vụ của phần mềm thực tế KiotViet.
+    \item \textbf{Về mặt sản phẩm:} Xây dựng thành công ứng dụng web Quản lý kho hàng đa chi nhánh hoàn chỉnh, đáp ứng chuẩn mực và tinh tế giao diện cũng như quy trình nghiệp vụ của các hệ thống quản trị kho hàng chuyên nghiệp thực tế.
     \item \textbf{Về mặt kiến trúc CSDL:} Làm chủ hoàn toàn công nghệ ASP.NET Core MVC trên nền tảng mới nhất .NET 10, kết hợp Entity Framework Core 10. Giải quyết triệt để bài toán đồng bộ tồn kho bằng giải thuật tính toán động qua Database View (\texttt{vw\_TonKhoHienTai}, \texttt{vw\_BienDongKho}).
-    \item \textbf{Về mặt giao diện \& Trải nghiệm (UI/UX):} Xây dựng thành công hệ sinh thái Khối Lego UI dùng chung (\texttt{\_Pagination}, \texttt{\_KiotDateFilter}, \texttt{\_KiotMultiSelectFilter}, \texttt{KiotToast}, \texttt{KiotConfirm}, \texttt{KiotHelp}), giúp mã nguồn cực kỳ gọn gàng và mang lại trải nghiệm mượt mà với tương tác AJAX không tải lại trang.
+    \item \textbf{Về mặt giao diện \& Trải nghiệm (UI/UX):} Xây dựng thành công hệ sinh thái Khối Lego UI dùng chung (\texttt{\_Pagination}, \texttt{\_DateFilter}, \texttt{\_MultiSelectFilter}, \texttt{ToastNotification}, \texttt{ModalConfirm}, \texttt{ModalHelp}), giúp mã nguồn cực kỳ gọn gàng và mang lại trải nghiệm mượt mà với tương tác AJAX không tải lại trang.
     \item \textbf{Về mặt an toàn \& Toàn vẹn dữ liệu:} Đảm bảo an toàn tuyệt đối cho số liệu doanh nghiệp thông qua cơ chế phân quyền 3 lớp người dùng chặt chẽ, bảo vệ bằng giao dịch CSDL (Transaction) và khóa bất biến các chứng từ kiểm kê/điều chỉnh đã cân bằng.
 \end{enumerate}
 
@@ -1837,7 +1924,7 @@ Sau quá trình nghiên cứu, phân tích nghiệp vụ và lập trình triể
     \item Microsoft Learn (2025). \textit{ASP.NET Core MVC Documentation \& Best Practices}. Truy cập tại: \url{https://learn.microsoft.com/aspnet/core/mvc}
     \item Microsoft Learn (2025). \textit{Entity Framework Core 10 Overview and Database First Approaches}. Truy cập tại: \url{https://learn.microsoft.com/ef/core}
     \item Khoa Công nghệ Thông tin -- Trường ĐH Giao thông Vận tải (2024). \textit{Giáo trình Lập trình Web và Ứng dụng}. NXB Giao thông Vận tải.
-    \item KiotViet Academy (2024). \textit{Cẩm nang hướng dẫn vận hành Quản lý Kho hàng và Kiểm kê thực tế}. Công ty Cổ phần Phần mềm Citigo.
+    \item Viện Nghiên cứu Quản lý Kinh tế Trung ương (2023). \textit{Cẩm nang Hướng dẫn Vận hành Quản lý Kho hàng và Kiểm soát Tồn kho Doanh nghiệp}. NXB Thống kê.
     \item ClosedXML Documentation (2025). \textit{Easy OpenXML Spreadsheet Generation in .NET}. GitHub: \url{https://github.com/ClosedXML/ClosedXML}
     \item Bootstrap Team (2024). \textit{Bootstrap 5.3 Framework Documentation}. Truy cập tại: \url{https://getbootstrap.com}
 \end{enumerate}

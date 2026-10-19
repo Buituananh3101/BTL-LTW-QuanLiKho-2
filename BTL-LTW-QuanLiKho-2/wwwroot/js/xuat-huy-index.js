@@ -1,4 +1,4 @@
-/**
+﻿/**
  * xuat-huy-index.js - Quản lý tương tác màn hình danh sách xuất hủy
  * Tái sử dụng trọn vẹn khối Lego KiotFilter & KiotConfirm
  */
@@ -18,7 +18,7 @@
     let isStarredFilterActive = app.dataset.isStarred === 'true';
     let currentWhId = parseInt(app.dataset.warehouseId) || 0;
 
-    // Trạng thái bộ lọc (Mặc định Tháng này theo chuẩn Screenshot 1 KiotViet)
+    // Trạng thái bộ lọc (Mặc định Tháng này theo chuẩn Screenshot 1 chuyên nghiệp)
     const F = {
         q: '',
         mode: 'preset',

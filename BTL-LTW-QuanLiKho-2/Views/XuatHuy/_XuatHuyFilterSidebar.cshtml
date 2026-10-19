@@ -1,7 +1,7 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.XuatHuyIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.XuatHuyIndexVM
 @using BTL_LTW_QuanLiKho_2.ViewModels.Common
 
-<!-- CỘT BÊN TRÁI: TIÊU ĐỀ "XUẤT HỦY" + CÁC KHỐI BỘ LỌC KIOTVIET CHUẨN LEGO -->
+<!-- CỘT BÊN TRÁI: TIÊU ĐỀ "XUẤT HỦY" + CÁC KHỐI BỘ LỌC chuyên nghiệp CHUẨN LEGO -->
 <aside class="kiot-sidebar-col" id="sidebarFilterCol">
     <!-- Header cho sidebar khi mở ở chế độ mobile/zoom in -->
     <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
@@ -22,7 +22,7 @@
             new("HUY", "Đã hủy", Model.Filter.Statuses.Contains("HUY"))
         })' />
 
-        <!-- 2. Thời gian (Mặc định Tháng này theo chuẩn Screenshot KiotViet) -->
+        <!-- 2. Thời gian (Mặc định Tháng này theo chuẩn Screenshot chuyên nghiệp) -->
         <partial name="_KiotDateFilter" model='new KiotDateFilterVM("date", "Thời gian", false)' />
 
         <!-- 3. Người tạo -->

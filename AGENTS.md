@@ -2,7 +2,7 @@
 
 ## 1. Mô tả dự án & Công nghệ
 - **Dự án**: Website Quản lý kho hàng nhiều kho (Bài tập lớn Lập trình Web).
-- **Giao diện & Nghiệp vụ**: Mô phỏng chuẩn thực tế KiotViet (Hàng hóa, Kho, Mua hàng, Bán hàng, Báo cáo, Thiết lập).
+- **Giao diện & Nghiệp vụ**: Mô phỏng chuẩn thực tế hệ thống quản trị kho chuyên nghiệp (Hàng hóa, Kho, Mua hàng, Bán hàng, Báo cáo, Thiết lập).
 - **Nền tảng**: ASP.NET Core MVC trên .NET 10 (`net10.0`), Entity Framework Core 10.
 - **Cơ sở dữ liệu**: SQL Server (`QuanLyKhoPhuQuocLTW`), kết nối Windows Authentication / SQL Express.
 - **Quy ước code**: Model, DbContext, Controller, View, Bảng CSDL và Cột đều dùng **TIẾNG VIỆT KHÔNG DẤU** (`HangHoa`, `Kho`, `PhieuKiemKe`, `ChiTietPhieuNhap`...).
@@ -51,7 +51,7 @@
 |---|---|---|
 | [`.agent/rules/01-phong-cach-code.md`](./.agent/rules/01-phong-cach-code.md) | Quy ước đặt tên, cấu trúc Controller/View/ViewModel | Khi tạo hoặc sửa Controller, View, ViewModel |
 | [`.agent/rules/02-nghiep-vu-kho.md`](./.agent/rules/02-nghiep-vu-kho.md) | Nghiệp vụ tồn kho, trạng thái chứng từ, View tồn kho | Khi code nhập, xuất, chuyển, kiểm kho |
-| [`.agent/rules/03-giao-dien-layout.md`](./.agent/rules/03-giao-dien-layout.md) | Chuẩn giao diện KiotViet, Layout, Header, Menu, Modal | Khi dựng giao diện màn hình mới hoặc sửa topbar |
+| [`.agent/rules/03-giao-dien-layout.md`](./.agent/rules/03-giao-dien-layout.md) | Chuẩn giao diện chuyên nghiệp, Layout, Header, Menu, Modal | Khi dựng giao diện màn hình mới hoặc sửa topbar |
 | [`.agent/rules/04-xac-thuc-phan-quyen.md`](./.agent/rules/04-xac-thuc-phan-quyen.md) | Phân quyền vai trò, quản lý Kho qua Claim/Cookie | Khi làm tính năng đăng nhập, chọn kho, bảo mật |
 | [`.agent/rules/05-co-so-du-lieu.md`](./.agent/rules/05-co-so-du-lieu.md) | Database First, DbContext, 3 Nguyên tắc vàng CSDL | Khi cần thêm bảng, thêm cột, cấu hình Entity |
 | [`docs/specs/danh-sach-hang-hoa.md`](./docs/specs/danh-sach-hang-hoa.md) | Đặc tả Quản lý Hàng hóa (Khuôn mẫu cho Danh mục CRUD) | Khuôn mẫu làm các danh mục Kho, NCC, Khách hàng |

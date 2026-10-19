@@ -1,5 +1,5 @@
-/**
- * hang-hoa-index.js – Quản lý tương tác trang Danh sách hàng hóa KiotViet
+﻿/**
+ * hang-hoa-index.js – Quản lý tương tác trang Danh sách hàng hóa chuyên nghiệp
  * Bao gồm: Sidebar Drawer, Dual Calendar, Multi-select Tags, Sắp xếp cột 3 trạng thái, AJAX Paging, Star.
  */
 
@@ -18,7 +18,7 @@ $(document).ready(function () {
     const groupModalEl = document.getElementById('quickGroupModal');
     const groupModal = groupModalEl ? new bootstrap.Modal(groupModalEl) : null;
 
-    // Cấu hình ẩn / hiện cột mặc định khớp KiotViet (13 cột dữ liệu + 2 cột cố định: checkbox, star)
+    // Cấu hình ẩn / hiện cột mặc định khớp chuyên nghiệp (13 cột dữ liệu + 2 cột cố định: checkbox, star)
     const DEFAULT_PRODUCT_COLS = {
         img: 1,
         mahang: 1,
@@ -757,7 +757,7 @@ $(document).ready(function () {
                         const ton = `<span class="fw-bold">${d.tonLuyKe.toLocaleString('vi-VN')}</span>`;
                         const giaStr = d.donGia > 0 ? d.donGia.toLocaleString('vi-VN') + ' ₫' : '-';
 
-                        // Chuẩn hóa badge class loại giao dịch đồng bộ KiotViet
+                        // Chuẩn hóa badge class loại giao dịch đồng bộ chuyên nghiệp
                         const badgeClass = (d.badgeClass && d.badgeClass.startsWith('badge-'))
                             ? d.badgeClass
                             : (function (loai) {

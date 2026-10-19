@@ -1,5 +1,5 @@
-/**
- * kiot-filter.js – Bộ thư viện JavaScript giao diện chuẩn KiotViet dùng chung
+﻿/**
+ * kiot-filter.js – Bộ thư viện JavaScript giao diện chuẩn chuyên nghiệp dùng chung
  * Phục vụ các màn hình Danh mục & Chứng từ: Hàng hóa, Kiểm kho, Nhập kho, Khách hàng, NCC...
  */
 
@@ -514,7 +514,7 @@ window.KiotFilter = (function ($) {
         });
     }
 
-    // 9. Quản lý Ẩn / Hiện Cột bảng dữ liệu (Column Visibility) Chuẩn KiotViet
+    // 9. Quản lý Ẩn / Hiện Cột bảng dữ liệu (Column Visibility) chuẩn chuyên nghiệp
     function initColumnToggle(menuSelectorOrOptions, tableSelector, storageKey) {
         let opt = {};
         if (typeof menuSelectorOrOptions === 'object') {
@@ -736,7 +736,7 @@ window.KiotFilter = (function ($) {
         box.html(html);
     }
 
-    // 15. KiotCombobox – Dropdown vừa gõ vừa chọn kèm icon Bút chì ✎ sửa/xóa trực tiếp (Chuẩn KiotViet)
+    // 15. KiotCombobox – Dropdown vừa gõ vừa chọn kèm icon Bút chì ✎ sửa/xóa trực tiếp (chuẩn chuyên nghiệp)
     function initCombobox(options) {
         const opt = $.extend({
             wrapSelector: '',        // Container .kiot-combobox-wrap hoặc selector
@@ -902,7 +902,7 @@ window.KiotFilter = (function ($) {
         };
     }
 
-    // 16. Khởi tạo bộ lọc Khoảng giá trị (Từ - Tới) chuẩn KiotViet (.fromto / _KiotValueFilter)
+    // 16. Khởi tạo bộ lọc Khoảng giá trị (Từ - Tới) chuẩn chuyên nghiệp (.fromto / _KiotValueFilter)
     function initValueFilter(id, onChangeCallback) {
         const fromInput = $(`#filter${id}Tu`);
         const toInput = $(`#filter${id}Den`);
@@ -929,7 +929,7 @@ window.KiotFilter = (function ($) {
         fromInput.add(toInput).on('input', updateHandler);
     }
 
-    // 17. Khởi tạo bộ lọc Trạng thái dạng Pills chuẩn KiotViet (.pills / .pill / _KiotStatusFilter)
+    // 17. Khởi tạo bộ lọc Trạng thái dạng Pills chuẩn chuyên nghiệp (.pills / .pill / _KiotStatusFilter)
     function initStatusFilter(containerSelector, onSelectCallback) {
         const container = $(containerSelector);
         if (!container.length) return;
@@ -946,7 +946,7 @@ window.KiotFilter = (function ($) {
         });
     }
 
-    // 18. Quản lý Master-Detail Accordion & Tabs trong Bảng (Chuẩn KiotViet)
+    // 18. Quản lý Master-Detail Accordion & Tabs trong Bảng (chuẩn chuyên nghiệp)
     function initRowDetail(options) {
         const opt = $.extend({
             tableSelector: '',                                  // Selector bảng hoặc container (e.g. '#supplierTable')
@@ -1125,7 +1125,7 @@ window.KiotFilter = (function ($) {
         };
     }
 
-    // 19. Quản lý các nút Thao tác Thực thể (Edit, Delete, Toggle Status, Copy) Chuẩn KiotViet
+    // 19. Quản lý các nút Thao tác Thực thể (Edit, Delete, Toggle Status, Copy) chuẩn chuyên nghiệp
     function initEntityActions(options) {
         const opt = $.extend({
             containerSelector: document,
@@ -1209,7 +1209,7 @@ window.KiotFilter = (function ($) {
         }
     }
 
-    // 20. Khởi tạo Bộ Chọn Ngày Giờ Lập Phiếu (DateTimePicker 24h) Chuẩn KiotViet
+    // 20. Khởi tạo Bộ Chọn Ngày Giờ Lập Phiếu (DateTimePicker 24h) chuẩn chuyên nghiệp
     function initDateTimePicker(options) {
         const opt = $.extend({
             inputSelector: '#fDate',
@@ -1416,7 +1416,7 @@ window.KiotFilter = (function ($) {
         };
     }
 
-    // 21. Khởi tạo Tìm kiếm Hàng hóa Autocomplete F3 Chuẩn KiotViet
+    // 21. Khởi tạo Tìm kiếm Hàng hóa Autocomplete F3 chuẩn chuyên nghiệp
     function initProductSearch(options) {
         const opt = $.extend({
             inputSelector: '#productSearchInput',
@@ -1633,7 +1633,7 @@ window.KiotFilter = (function ($) {
         };
     }
 
-    // 22. Quản lý Lưới Dòng Hàng Hóa Chứng Từ (Document Grid) Chuẩn KiotViet
+    // 22. Quản lý Lưới Dòng Hàng Hóa Chứng Từ (Document Grid) chuẩn chuyên nghiệp
     function initDocGrid(options) {
         const opt = $.extend({
             tableBodySelector: '#itemsTableBody',
@@ -2084,7 +2084,7 @@ window.KiotFilter = (function ($) {
         };
     }
 
-    // 22. KiotListPage – Bộ máy điều khiển trang danh sách chuẩn KiotViet (Boilerplate Engine)
+    // 22. KiotListPage – Bộ máy điều khiển trang danh sách chuẩn chuyên nghiệp (Boilerplate Engine)
     function createListPage(options) {
         const opt = $.extend({
             containerSelector: '#kiotContainer',

@@ -1,17 +1,22 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-19 – Chuẩn Hóa Bố Cục & Tiêu Đề Tiểu Mục Sơ Đồ RM Trong Báo Cáo LaTeX (Phiên 169)
+Cập nhật lần cuối: 2026-10-19 – Loại Bỏ Hoàn Toàn Tham Chiếu KiotViet Trong Toàn Bộ Báo Cáo & Dự Án (Phiên 172)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất chuẩn hóa toàn bộ bố cục, vị trí và font chữ của các tiêu đề sơ đồ RM trong Báo cáo LaTeX (`docs/latex/main.tex`):
-  + **Khắc phục triệt để hiện tượng lơ lửng & font to bất thường**:
-    - Chuyển toàn bộ các dòng tiêu đề cụm `a) Cụm 1...` đến `e) Cụm 5...` ra ngoài môi trường `figure`, đặt tại dòng đầu tiên ngay sau lệnh `\clearpage` của mỗi trang.
-    - Căn lề trái chuẩn xác (`\noindent\textbf{...}`), cỡ chữ Times New Roman 12pt đậm (`\normalsize`) hoàn toàn đồng nhất với format chung của toàn bộ đề mục trong báo cáo.
-    - Chuyển môi trường hình sang `\begin{figure}[H]` với `height=17.5cm, keepaspectratio`, đảm bảo tiêu đề mục nằm trên cùng mép trang, hình ảnh xoay ngang căn giữa và caption nằm dưới chân trên đúng 1 trang A4 duy nhất, không có khoảng trắng lơ lửng.
-  + **Làm sạch Sơ đồ ER tổng quan (Hình 2.8)**: Loại bỏ dòng tiêu đề thủ công thừa phía trên hình, chỉ giữ lại Caption chuẩn LaTeX ở dưới chân hình.
-  + **Biên dịch & Đóng gói**: XeLaTeX biên dịch thành công 68 trang hoàn chỉnh, 0 Errors, 0 cảnh báo tham chiếu. Cập nhật gói nén `docs/BaoCao_LaTeX_Overleaf.zip`.
+- Đã hoàn tất việc loại bỏ 100% tất cả các câu từ, đoạn văn và tham chiếu nhắc tới KiotViet trong toàn bộ Báo cáo học thuật LaTeX và các tài liệu dự án:
+  + **Báo cáo học thuật LaTeX (`docs/latex/main.tex`)**:
+    - Xóa bỏ hoàn toàn tiểu mục `\subsection{Mô hình tham chiếu thực tế: Triết lý vận hành phần mềm quản trị KiotViet}` theo đúng yêu cầu người dùng.
+    - Chuyển đổi toàn bộ câu chữ nhắc tới KiotViet thành các thuật ngữ chuyên môn học thuật chuẩn mực ("hệ thống quản trị kho chuyên nghiệp thực tế", "chuẩn giao diện 2 cột trực quan", "bộ lọc đa tiêu chí", "hộp thoại xác nhận").
+    - Đổi tên các biến màu định nghĩa từ `kiotblue`, `kiotdark`, `kiotgreen` sang `appblue`, `appdark`, `appgreen`.
+    - Thay thế tài liệu tham khảo số 4 thành cẩm nang học thuật chính thống của Viện Nghiên cứu Quản lý Kinh tế Trung ương.
+    - Biên dịch XeLaTeX 2 lượt đạt kết quả hoàn hảo: 0 Errors, 0 tham chiếu undefined. Đã cập nhật gói nén `docs/BaoCao_LaTeX_Overleaf.zip`.
+  + **Toàn bộ Dự án & Mã nguồn**:
+    - Quét sạch và chuẩn hóa toàn bộ 12 file đặc tả chức năng trong `docs/specs/*.md`, `docs/quyet-dinh.md`, `AGENTS.md` và `.agent/rules/`.
+    - Dọn dẹp toàn bộ các dòng ghi chú (HTML/Razor comments, JS comments) trong `Views` và `wwwroot/js`.
+    - Chuẩn hóa tên các file Excel mẫu tải về trong 5 Controller (`Mau_Chuyen_Kho.xlsx`, `Mau_Nhap_Hang.xlsx`, `Mau_Tra_Hang_Nhap.xlsx`, `Mau_Xuat_Huy.xlsx`, `Mau_Nhap_Hang_Hoa.xlsx`), loại bỏ triệt để hậu tố thương hiệu.
+    - Dự án build thành công sạch sẽ với 0 errors (`dotnet build`).
 
 ---
 
@@ -20,6 +25,52 @@ Cập nhật lần cuối: 2026-10-19 – Chuẩn Hóa Bố Cục & Tiêu Đề 
 2. Chuẩn bị nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
 
 ---
+
+- **Loại Bỏ Hoàn Toàn Tham Chiếu KiotViet Trong Toàn Bộ Báo Cáo & Dự Án (Phiên 172)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "trong báo cáo và dự án của tôi, bạn hãy bỏ tất cả những câu, đoạn nhắc tới kiotviet. Ví dụ Mô hình tham chiếu thực tế: Triết lý vận hành phần mềm quản trị KiotViet bỏ hết mấy cái này đi, không nhắc tới nó nữa".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Báo cáo LaTeX (`docs/latex/main.tex`)**:
+       - Xóa bỏ hoàn toàn tiểu mục "Mô hình tham chiếu thực tế: Triết lý vận hành phần mềm quản trị KiotViet".
+       - Chuẩn hóa lại toàn bộ 22 vị trí trong file `.tex`: Lời mở đầu, Use case, Wireframe, Lego UI, Phân hệ Hàng hóa, Stacking context, Kết luận và Danh mục tài liệu tham khảo.
+       - Biên dịch XeLaTeX thành công, `main.pdf` không còn bất kỳ ký tự nào nhắc tới KiotViet.
+    2. **Tài liệu đặc tả & Quy chuẩn**:
+       - Cập nhật đồng bộ `AGENTS.md`, `.agent/rules/01-phong-cach-code.md`, `.agent/rules/03-giao-dien-layout.md`, `docs/quyet-dinh.md` và toàn bộ 12 file trong `docs/specs/*.md`.
+    3. **Controllers & Giao diện**:
+       - Sửa tên các file mẫu tải về: `Mau_Chuyen_Kho.xlsx`, `Mau_Nhap_Hang.xlsx`, `Mau_Tra_Hang_Nhap.xlsx`, `Mau_Xuat_Huy.xlsx`, `Mau_Nhap_Hang_Hoa.xlsx`.
+       - Dọn dẹp toàn bộ comment trong Views và JS.
+       - `dotnet build` đạt 0 lỗi. Cập nhật `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+
+- **Tối Ưu Hóa Kích Thước Tối Đa Cho Sơ Đồ ER Tổng Quan Trong Báo Cáo LaTeX (Phiên 171)**:
+  - **Nhu cầu**: Người dùng gửi ảnh trang chứa Sơ đồ ER tổng quan và yêu cầu: "riêng hình này bạn hãy cố gắng căn to nhất có thể nhưng ko được tràn đè".
+  - **Nguyên nhân**: Bản cũ bị giới hạn cứng `height=18.5cm` (do trước đó còn dòng tiêu đề thừa phía trên), khiến hình sau khi xoay 90 độ bị co lại chỉ rộng 8.8cm và cao 18.5cm, để lại nhiều khoảng trống trắng xung quanh.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Thiết lập `height=23.4cm` và `\vspace{0.2cm}` trong môi trường `figure[p]`.
+    2. Chiều dài sơ đồ mở rộng tối đa lên 23.4cm, bề ngang mở rộng lên ~11.2cm (tăng hơn 60% diện tích).
+    3. Căn giữa trang cân đối, giữ nguyên tỷ lệ khung hình (`keepaspectratio`), caption ở dưới cách số trang hơn 1.2cm an toàn tuyệt đối.
+    4. Biên dịch XeLaTeX 0 Errors ra file `main.pdf` 76 trang. Đóng gói `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+
+- **Thiết Kế Lại Toàn Diện Mục 2.2 Biểu Đồ Hoạt Động (Activity Diagrams) Bằng Mermaid (Phiên 170)**:
+
+- **Thiết Kế Lại Toàn Diện Mục 2.2 Biểu Đồ Hoạt Động (Activity Diagrams) Bằng Mermaid (Phiên 170)**:
+  - **Nhu cầu**: Người dùng yêu cầu: (1) "tôi muốn làm lại phần 2.2 Thiết kế luồng xử lý nghiệp vụ (Activity Diagrams) cho chuẩn và cụ thể. Bạn hãy lên kế hoạch"; (2) "tôi muốn dùng mermaid"; (3) "triển khai".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Tài liệu nguồn `docs/so-do-activity-nghiep-vu.md`**:
+       - Xây dựng 5 biểu đồ hoạt động Mermaid phân làn trách nhiệm 3 tầng (Client UI $\leftrightarrow$ Web App Backend $\leftrightarrow$ Database & Transaction) bao phủ toàn bộ các chu trình lưu chuyển kho hàng cốt lõi.
+    2. **Kết xuất ảnh tự động qua Kroki.io**:
+       - Kết xuất 5 ảnh PNG độ nét cao (2K resolution, sắc nét từng chi tiết): `fig_activity_nhaphang.png`, `fig_activity_chuyenkho.png`, `fig_activity_kiemkho.png`, `fig_activity_xuathuy.png`, `fig_activity_trahang.png`.
+    3. **Tái cấu trúc & Nâng cấp toàn diện Mục 2.2 trong `docs/latex/main.tex`**:
+       - *2.2.1: Quy trình Nhập hàng từ NCC & Cập nhật giá vốn*: Công thức MAC, bọc Transaction lưu Master-Detail, ghi nhận công nợ NCC.
+       - *2.2.2: Quy trình Điều chuyển kho 2 chặng*: Xuất chuyển trừ kho nguồn $\rightarrow$ hàng đi đường $\rightarrow$ nhận chuyển tại kho đích, đối soát hao hụt thất thoát trên biển.
+       - *2.2.3: Quy trình Kiểm kê & Tự động Cân bằng kho*: Lấy tồn sổ sách thời gian thực từ View, tính chênh lệch thừa/thiếu, nhánh Lưu tạm vs Cân bằng kho sinh `PhieuDieuChinh` và khóa vĩnh viễn (Luật 6 AGENTS.md).
+       - *2.2.4: Quy trình Xuất hủy hàng hỏng*: Kiểm tra tồn khả dụng, ghi nhận lý do rỉ sét/vỡ hỏng, trừ tồn kho ngay lập tức.
+       - *2.2.5: Quy trình Trả hàng nhập cho NCC*: Kiểm tra tồn khả dụng, giảm trừ công nợ phải trả NCC hoặc hoàn tiền.
+    4. **Biên dịch & Đóng gói**:
+       - Biên dịch XeLaTeX 3 lượt hoàn tất: `main.pdf` 78 trang, 0 Errors, 0 tham chiếu undefined.
+       - Cập nhật gói nén `docs/BaoCao_LaTeX_Overleaf.zip` (13.2 MB).
 
 - **Chuẩn Hóa Bố Cục & Tiêu Đề Tiểu Mục Sơ Đồ RM Trong Báo Cáo LaTeX (Phiên 169)**:
   - **Nhu cầu**: Người dùng phản hồi kèm ảnh chụp trang 27: "hiện tại ảnh oke rồi nhưng các phần như a) Sơ đồ RM Cụm 1: Quản trị Hệ thống, Nhân sự & Phân quyền kho (RBAC) tôi thấy đang lơ lửng, font size to hơn bình thường ko tuân theo format chung".

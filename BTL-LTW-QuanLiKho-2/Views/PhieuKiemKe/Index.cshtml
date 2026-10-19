@@ -1,4 +1,4 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.PhieuKiemKeIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.PhieuKiemKeIndexVM
 @{
     ViewData["Title"] = "Phiếu kiểm kho";
 }
@@ -17,7 +17,7 @@
      data-sort-by="@Model.SortBy"
      data-sort-dir="@Model.SortDir">
 
-    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + BỘ LỌC KIOTVIET (PARTIAL VIEW) -->
+    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + BỘ LỌC chuyên nghiệp (PARTIAL VIEW) -->
     <partial name="_PhieuKiemKeFilterSidebar" model="Model" />
 
     <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
@@ -46,7 +46,7 @@
                 <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã phiếu kiểm (F3)" value="@Model.Filter.Q" autocomplete="off" />
             </div>
 
-            <!-- Nhóm nút hành động KiotViet -->
+            <!-- Nhóm nút hành động chuyên nghiệp -->
             <div class="kiot-actions-group">
                 <!-- Nút + Kiểm kho -->
                 <a href="@Url.Action("Create", "PhieuKiemKe")" class="btn btn-primary d-inline-flex align-items-center" id="btnNew" title="Lập phiếu kiểm kho mới">

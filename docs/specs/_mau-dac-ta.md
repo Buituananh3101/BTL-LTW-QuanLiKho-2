@@ -1,4 +1,4 @@
-# Mẫu Đặc tả Chức năng mới: [Tên chức năng]
+﻿# Mẫu Đặc tả Chức năng mới: [Tên chức năng]
 
 > **Ghi chú**: Sử dụng mẫu này khi bắt đầu thiết kế bất kỳ chức năng chứng từ hoặc danh mục mới nào trong hệ thống. Điền đầy đủ thông tin trước khi bắt tay vào viết code.
 
@@ -28,7 +28,7 @@
 
 ---
 
-## 3. Luồng màn hình & Giao diện (KiotViet style)
+## 3. Luồng màn hình & Giao diện (Chuẩn giao diện hệ thống)
 1. **Màn hình Danh sách (`Index`)**:
    - Bộ lọc sidebar trái: Ngày tạo, Trạng thái, Kho làm việc, Người tạo.
    - Bảng danh sách: Phân trang AJAX qua partial view `_[TenChucNang]Table.cshtml`.

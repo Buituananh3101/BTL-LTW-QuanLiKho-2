@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -1187,7 +1187,7 @@ public class HangHoaController : BaseKhoController
     public IActionResult DownloadTemplate()
     {
         var bytes = _excelService.GenerateTemplate();
-        return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_Nhap_Hang_Hoa_KiotViet.xlsx");
+        return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_Nhap_Hang_Hoa.xlsx");
     }
 
     /// <summary>

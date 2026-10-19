@@ -1,4 +1,4 @@
-# Đặc tả Chức năng: Chuyển kho (KiotViet Stock Transfer)
+﻿# Đặc tả Chức năng: Chuyển kho (Quản lý Chuyển kho)
 
 > **Mô tả**: Quản lý luồng chuyển hàng hóa giữa các kho nội bộ (Kho gửi -> Kho nhận), kiểm soát tồn kho theo thời gian thực, xử lý nhận hàng từng phần và thất thoát trên đường chuyển.
 
@@ -59,7 +59,7 @@
   - Trạng thái (Checkbox Lego: Phiếu tạm, Đang chuyển, Đã nhận, Đã hủy).
   - Thời gian (`_KiotDateFilter` + `KiotFilter.initDateFilter`).
 - **Topbar**: Tiêu đề "Chuyển hàng", ô tìm kiếm mã phiếu F3, nút "+ Chuyển hàng", "Xuất file", nút tùy chọn hiển thị cột (`#btnColsDropdown` + `#colMenu`).
-- **Bảng dữ liệu Master-Detail chuẩn Kiểm tồn & KiotViet (`PhieuKiemKe`)**:
+- **Bảng dữ liệu Master-Detail chuẩn Kiểm tồn & hệ thống (`PhieuKiemKe`)**:
   - Dòng cha + Dòng chi tiết viền chữ nhật `#0070f3` (`KiotFilter.initRowDetail`).
   - Dòng tổng hợp `tr.summary-row` ngay dưới thead hiển thị tổng SL chuyển, tổng SL nhận, tổng Giá trị chuyển.
   - Drawer chi tiết chuẩn Kiểm tồn (`PhieuKiemKe`):
@@ -72,8 +72,8 @@
   - Phân trang AJAX (`_Pagination.cshtml`).
 
 ### 4.2. Màn hình 2: Lập/Sửa phiếu (`/ChuyenKho/Create`, `/ChuyenKho/Edit/{id}`)
-- Layout 2 cột chuẩn KiotViet:
-  - Cột trái: Nút quay lại, ô tìm hàng F3 autocomplete, nút nhập Excel (`#btnImportExcel`), empty state "Thêm sản phẩm từ file excel" với nút "Chọn file dữ liệu" (`#btnPickExcel`) & link tải file mẫu (`Mau_Chuyen_Kho_KiotViet.xlsx`, `DownloadTemplate`), import server-side ClosedXML qua API `ChuyenKho/ImportExcel`, bảng lưới hàng hóa có cảnh báo vượt tồn.
+- Layout 2 cột chuẩn chuyên nghiệp:
+  - Cột trái: Nút quay lại, ô tìm hàng F3 autocomplete, nút nhập Excel (`#btnImportExcel`), empty state "Thêm sản phẩm từ file excel" với nút "Chọn file dữ liệu" (`#btnPickExcel`) & link tải file mẫu (`Mau_Chuyen_Kho.xlsx`, `DownloadTemplate`), import server-side ClosedXML qua API `ChuyenKho/ImportExcel`, bảng lưới hàng hóa có cảnh báo vượt tồn.
   - Cột phải: Box lộ trình `routebox` (Kho gửi -> Kho nhận), dropdown kho nhận `.wh-custom-select-btn`, thời gian `.dtpop` & mã chuyển hàng `.inp` căn phải đồng bộ Kiểm kho (nhập tay hoặc để trống tự sinh `CK000001`...), tổng SL, tổng giá trị, ghi chú.
   - Thu gọn/mở rộng panel phải mượt mà 0.25s chuẩn Kiểm kho (F4, `.f-panel-inner` 440px cố định chống giật méo nội dung, nút trượt đồng bộ mép).
   - Nút cố định đáy: "Lưu tạm" (`NHAP`) và "Chuyển hàng" (`DA_XUAT`).

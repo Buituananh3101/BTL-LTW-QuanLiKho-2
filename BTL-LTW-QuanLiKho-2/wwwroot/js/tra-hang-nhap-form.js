@@ -1,6 +1,6 @@
-/**
+﻿/**
  * tra-hang-nhap-form.js
- * Quản lý màn hình Lập / Sửa / Xem Phiếu Trả Hàng Nhập (Chuẩn KiotViet & Prototype)
+ * Quản lý màn hình Lập / Sửa / Xem Phiếu Trả Hàng Nhập (chuẩn chuyên nghiệp & Prototype)
  * Autocomplete F3, Kiểm tra vượt tồn, Phím tắt F3/F4/F8/F9/F10, Panel trượt mượt
  */
 
@@ -71,7 +71,7 @@ $(function () {
         if ($fDateIso.length) $fDateIso.val(dtPicker.getISO() || formatLocalIso(createdDate));
     }
 
-    /* ===== 2.1. CHỌN NGƯỜI TRẢ TỪ DROPDOWN TÙY CHỈNH (ĐỒNG BỘ CHUYỂN KHO & KIOTVIET) ===== */
+    /* ===== 2.1. CHỌN NGƯỜI TRẢ TỪ DROPDOWN TÙY CHỈNH (ĐỒNG BỘ CHUYỂN KHO & chuyên nghiệp) ===== */
     $(document).on('click', '.payer-item-opt', function (e) {
         e.preventDefault();
         const id = $(this).data('id');

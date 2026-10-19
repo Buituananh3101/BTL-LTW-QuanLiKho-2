@@ -1,6 +1,6 @@
-/**
+﻿/**
  * bao-cao-ton-kho.js - Quản lý tương tác Báo cáo Tồn kho theo kho (Pivot Kho)
- * Chuẩn hóa 100% theo khuôn mẫu KiotViet LEGO (đồng bộ với Danh sách Hàng hóa)
+ * Chuẩn hóa 100% theo khuôn mẫu chuyên nghiệp LEGO (đồng bộ với Danh sách Hàng hóa)
  */
 (function ($) {
     'use strict';
@@ -30,7 +30,7 @@
     const khoNames = {};
     const nhomNames = {};
 
-    // 2. Khởi tạo Sidebar KiotViet F4 & Hotkeys
+    // 2. Khởi tạo Sidebar chuyên nghiệp F4 & Hotkeys
     if (window.KiotFilter && typeof KiotFilter.initSidebar === 'function') {
         KiotFilter.initSidebar({
             storageKey: 'kiot_sidebar_baocao_tonkho'
@@ -131,7 +131,7 @@
         }, 350);
     });
 
-    // 5. Khởi tạo Multi-Select Dropdown dùng chung (Chuẩn Lego KiotViet)
+    // 5. Khởi tạo Multi-Select Dropdown dùng chung (Chuẩn Lego hệ thống)
     function setupMultiSelect(boxId, dropdownId, dotId, selectedArray, namesMap, placeholder, onRenderComplete) {
         const $box = $(boxId);
         const $dropdown = $(dropdownId);

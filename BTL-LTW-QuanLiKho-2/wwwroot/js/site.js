@@ -1,4 +1,4 @@
-/**
+﻿/**
  * site.js – Thư viện tiện ích JavaScript dùng chung toàn hệ thống KhoPro
  */
 
@@ -285,7 +285,7 @@ window.KiotPrompt = (function () {
 })();
 
 // ========================================================================
-// 6. KiotConfirm – Modal xác nhận xóa / thông báo dùng chung (Chuẩn KiotViet, CENTER)
+// 6. KiotConfirm – Modal xác nhận xóa / thông báo dùng chung (chuẩn chuyên nghiệp, CENTER)
 // ========================================================================
 window.KiotConfirm = (function () {
     'use strict';
@@ -393,7 +393,7 @@ window.KiotConfirm = (function () {
 })();
 
 // ========================================================================
-// 7. KiotHelp – Hộp thoại Hướng dẫn sử dụng toàn hệ thống (Chuẩn KiotViet)
+// 7. KiotHelp – Hộp thoại Hướng dẫn sử dụng toàn hệ thống (chuẩn chuyên nghiệp)
 // ========================================================================
 window.KiotHelp = (function () {
     'use strict';

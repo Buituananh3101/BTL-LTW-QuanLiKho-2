@@ -1,6 +1,6 @@
-/**
+﻿/**
  * tra-hang-nhap-index.js
- * Quản lý danh sách Phiếu Trả Hàng Nhập (Chuẩn KiotViet & Prototype)
+ * Quản lý danh sách Phiếu Trả Hàng Nhập (chuẩn chuyên nghiệp & Prototype)
  * Tái sử dụng đồng bộ 100% khối LEGO KiotFilter & KiotToast
  */
 
@@ -510,7 +510,7 @@ $(function () {
         fetchTable();
     });
 
-    /* ===== 6. MỞ / ĐÓNG CHI TIẾT DÒNG INLINE (ACCORDION DRAWER CHUYỂN ĐỘNG MƯỢT NHƯ NHÀ CUNG CẤP & KIOTVIET) ===== */
+    /* ===== 6. MỞ / ĐÓNG CHI TIẾT DÒNG INLINE (ACCORDION DRAWER CHUYỂN ĐỘNG MƯỢT NHƯ NHÀ CUNG CẤP & chuyên nghiệp) ===== */
     let returnRowDetailHandler = null;
 
     function initRowDetail() {

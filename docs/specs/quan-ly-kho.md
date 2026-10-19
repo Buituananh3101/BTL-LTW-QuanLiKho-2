@@ -1,4 +1,4 @@
-# Đặc tả Chức năng: Quản lý Chi nhánh Kho
+﻿# Đặc tả Chức năng: Quản lý Chi nhánh Kho
 
 > **Mô-đun**: Thiết lập hệ thống ➜ Quản lý Kho  
 > **Tài liệu tham chiếu**: [`.agent/rules/02-nghiep-vu-kho.md`](../../.agent/rules/02-nghiep-vu-kho.md) | [`.agent/rules/04-xac-thuc-phan-quyen.md`](../../.agent/rules/04-xac-thuc-phan-quyen.md) | [`AGENTS.md`](../../AGENTS.md)
@@ -7,7 +7,7 @@
 
 ## 1. Mục tiêu & Phạm vi nghiệp vụ
 
-- **Mục tiêu**: Cung cấp giao diện chuẩn KiotViet giúp Quản lý quản lý danh mục chi nhánh kho, thêm mới kho, chỉnh sửa thông tin, phân công nhân sự và kích hoạt/ngừng hoạt động kho.
+- **Mục tiêu**: Cung cấp giao diện chuẩn chuyên nghiệp giúp Quản lý quản lý danh mục chi nhánh kho, thêm mới kho, chỉnh sửa thông tin, phân công nhân sự và kích hoạt/ngừng hoạt động kho.
 - **Phạm vi truy cập**: URL `/Kho`. Chỉ vai trò **Quản lý** (`[Authorize(Roles = "Quản lý")]`) được truy cập. Các vai trò khác bị chặn (403 ➜ `/Account/AccessDenied`).
 - **Hành động nghiệp vụ**:
   - Xem danh sách kho kèm tìm kiếm theo từ khóa (Mã, Tên, Địa chỉ, Ghi chú), lọc Trạng thái (Đang hoạt động / Ngừng hoạt động).
@@ -34,7 +34,7 @@
 
 ---
 
-## 3. Luồng màn hình & Giao diện (KiotViet style)
+## 3. Luồng màn hình & Giao diện (Chuẩn giao diện hệ thống)
 
 ### 3.1. Màn hình Danh sách (`Index.cshtml`)
 - **Topbar**: Nút tìm kiếm F3, nút `+ Kho` (`#btnOpenCreateKhoModal`), nút F4 gập mở sidebar, nút làm mới `#btnReloadTable`.
@@ -45,7 +45,7 @@
   - Phân trang AJAX: Tái sử dụng Lego `_Pagination.cshtml`.
 
 ### 3.2. Modal Thêm/Sửa Chi nhánh Kho (`_KhoModal.cshtml`)
-- Giao diện Modal Overlay KiotViet (`.hh-ov`, `.hh-modal.main` max-width 860px) kế thừa chuẩn Form Tạo hàng hóa (`_HangHoaModal.cshtml`).
+- Giao diện Modal Overlay hệ thống (`.hh-ov`, `.hh-modal.main` max-width 860px) kế thừa chuẩn Form Tạo hàng hóa (`_HangHoaModal.cshtml`).
 - **Header (`.hh-m-head`)**: Tiêu đề modal, nút đóng `X` (`.hh-x`), cụm Tabs chuyển đổi `.hh-tabs` ("Thông tin" & "Mô tả").
 - **Body (`.hh-m-body`)**:
   - **Tab 1: Thông tin (`#kho-pane-info`)**:

@@ -1,4 +1,4 @@
-@using BTL_LTW_QuanLiKho_2.Models
+﻿@using BTL_LTW_QuanLiKho_2.Models
 @using BTL_LTW_QuanLiKho_2.ViewModels.NhaCungCap
 @using BTL_LTW_QuanLiKho_2.ViewModels.NhapHang
 @model dynamic
@@ -19,8 +19,8 @@
 }
 
 <!-- ========================================================================
-     MODAL CHÍNH: TẠO & CẬP NHẬT NHÀ CUNG CẤP CHUẨN KIOTVIET (THEO HÀNG HÓA)
-     Cấu trúc KiotViet Modal, Custom Combobox tìm kiếm + sửa ✎, Accordion Sections
+     MODAL CHÍNH: TẠO & CẬP NHẬT NHÀ CUNG CẤP chuẩn chuyên nghiệp (THEO HÀNG HÓA)
+     Cấu trúc chuyên nghiệp Modal, Custom Combobox tìm kiếm + sửa ✎, Accordion Sections
      ======================================================================== -->
 
 <!-- Sprite icon SVG dùng cho modal -->
@@ -114,7 +114,7 @@
                   <span>Nhóm nhà cung cấp</span>
                   <button type="button" class="hh-link" id="btnNewNhomNcc" data-new="nhom">+ Tạo mới</button>
                 </label>
-                <!-- Custom Combobox KiotViet có ô tìm kiếm và bút chì ✎ sửa/xóa -->
+                <!-- Custom Combobox chuyên nghiệp có ô tìm kiếm và bút chì ✎ sửa/xóa -->
                 <div class="hh-cs-wrap" id="wrapMaNhomNcc" data-select-id="#nccMaNhomNcc">
                   <div class="hh-cs-box" id="boxMaNhomNcc">
                     <input type="text" class="hh-cs-input" id="inputMaNhomNcc" placeholder="Chọn nhóm nhà cung cấp" readonly autocomplete="off" />
@@ -206,7 +206,7 @@
 </div>
 
 <!-- ========================================================================
-     MODAL CON 1: TẠO NHANH NHÓM NHÀ CUNG CẤP (CHUẨN KIOTVIET)
+     MODAL CON 1: TẠO NHANH NHÓM NHÀ CUNG CẤP (chuẩn chuyên nghiệp)
      ======================================================================== -->
 <div class="hh-ov" id="nccPromptOv">
   <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="nccPromptTitle" style="max-width: 440px;">
@@ -232,7 +232,7 @@
 </div>
 
 <!-- ========================================================================
-     MODAL CON 2: SỬA / XÓA NHÓM NHÀ CUNG CẤP (CHUẨN KIOTVIET)
+     MODAL CON 2: SỬA / XÓA NHÓM NHÀ CUNG CẤP (chuẩn chuyên nghiệp)
      ======================================================================== -->
 <div class="hh-ov" id="nccEditGroupOv">
   <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="nccEditGroupTitle" style="max-width: 480px;">

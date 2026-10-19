@@ -1,6 +1,6 @@
-# Đặc tả Chức năng: Báo cáo Thẻ kho (Stock Card Report)
+﻿# Đặc tả Chức năng: Báo cáo Thẻ kho (Stock Card Report)
 
-> **Mục tiêu**: Cung cấp cho Thủ kho và Quản lý báo cáo theo dõi chi tiết lịch sử xuất - nhập - tồn của từng mặt hàng tại một chi nhánh kho hoặc toàn hệ thống theo trình tự thời gian chuẩn KiotViet. Tái sử dụng 100% các khối LEGO: `KiotFilter`, `ExcelHelper`, `_KiotDateFilter`, `_KiotStatusFilter`, `_Pagination`.
+> **Mục tiêu**: Cung cấp cho Thủ kho và Quản lý báo cáo theo dõi chi tiết lịch sử xuất - nhập - tồn của từng mặt hàng tại một chi nhánh kho hoặc toàn hệ thống theo trình tự thời gian chuẩn chuyên nghiệp. Tái sử dụng 100% các khối LEGO: `KiotFilter`, `ExcelHelper`, `_KiotDateFilter`, `_KiotStatusFilter`, `_Pagination`.
 
 ---
 
@@ -46,12 +46,12 @@ Số liệu Thẻ kho được truy vấn từ View CSDL **`vw_BienDongKho`** (h
 | `Services/ITheKhoService.cs` | Interface dịch vụ nghiệp vụ Thẻ kho |
 | `Services/TheKhoService.cs` | Tính toán Tồn đầu, Tồn lũy kế, nạp chi tiết đối tác, xuất Excel ClosedXML |
 | `Controllers/BaoCaoController.cs` | Kế thừa `BaseKhoController`, cung cấp action `TheKho`, `FilterTheKho`, `ExportTheKho`, `GetTheKhoQuick`, `SearchHangHoa` |
-| `Views/BaoCao/TheKho.cshtml` | View chính 2 cột KiotViet, Toolbar, Container AJAX đồng bộ |
+| `Views/BaoCao/TheKho.cshtml` | View chính 2 cột hệ thống, Toolbar, Container AJAX đồng bộ |
 | `Views/BaoCao/_TheKhoFilterSidebar.cshtml` | Sidebar Lego: Autocomplete F3 chọn hàng, Dropdown kho, `_KiotDateFilter`, `_KiotStatusFilter` |
 | `Views/BaoCao/_TheKhoSummary.cshtml` | Banner chi tiết hàng hóa và 4 thẻ KPI Thẻ kho |
 | `Views/BaoCao/_TheKhoTable.cshtml` | Bảng dòng biến động kèm dòng Tồn đầu kỳ, Tồn cuối kỳ, `_Pagination` |
 | `Views/BaoCao/_TheKhoContent.cshtml` | Wrapper nạp đồng bộ KPI Summary và Bảng dữ liệu qua 1 request AJAX |
-| `wwwroot/css/the-kho.css` | CSS styling chuẩn KiotViet cho Autocomplete, Banner, KPI Cards, Bảng Thẻ kho, Badges |
+| `wwwroot/css/the-kho.css` | CSS styling chuẩn chuyên nghiệp cho Autocomplete, Banner, KPI Cards, Bảng Thẻ kho, Badges |
 | `wwwroot/js/the-kho-index.js` | Tương tác Autocomplete F3, Lego Date Filter, AJAX pagination, Export Excel, Print |
 | `Views/Shared/_MainMenu.cshtml` | Kích hoạt liên kết `Báo cáo ➜ Kho ➜ Thẻ kho` |
 | `Views/Shared/_Header.cshtml` | Kích hoạt menu mobile `Báo cáo Thẻ kho` |
@@ -60,7 +60,7 @@ Số liệu Thẻ kho được truy vấn từ View CSDL **`vw_BienDongKho`** (h
 
 ---
 
-## 4. Luồng Màn hình & Tương tác (UI/UX KiotViet)
+## 4. Luồng Màn hình & Tương tác (Chuẩn giao diện UI/UX)
 
 ### 4.1. Màn hình Báo cáo Thẻ kho (`/BaoCao/TheKho`)
 1. **Sidebar bộ lọc bên trái**:
@@ -82,7 +82,7 @@ Số liệu Thẻ kho được truy vấn từ View CSDL **`vw_BienDongKho`** (h
 ### 4.2. Tích hợp liên kết hai chiều với Danh sách Hàng hóa
 - Khi mở Drawer chi tiết hàng hóa tại `/HangHoa` và bấm vào Tab **"Thẻ kho"**:
   - Tự động gọi API `/BaoCao/GetTheKhoQuick?maHang={id}&soLuong=10` nạp 10 giao dịch gần nhất kèm tồn lũy kế chính xác.
-  - Hiển thị badge loại giao dịch pastel chuẩn KiotViet (`.badge-tk`), phân tách rõ ràng cột SL Nhập (+) và SL Xuất (-).
+  - Hiển thị badge loại giao dịch pastel chuẩn chuyên nghiệp (`.badge-tk`), phân tách rõ ràng cột SL Nhập (+) và SL Xuất (-).
   - Cung cấp nút **"Xem thẻ kho chi tiết ➜"** mở trực tiếp trang `/BaoCao/TheKho?maHang={id}`.
 
 ---
