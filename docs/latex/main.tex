@@ -715,8 +715,125 @@ Hình~\ref{fig:so_do_er} biểu diễn Sơ đồ ER của hệ thống với cá
     \draw[link] (tk) -- (phancong) node[midway, right] {\scriptsize N};
     \draw[link] (phancong) -- (kho) node[midway, right] {\scriptsize M};
 \end{tikzpicture}
-\caption{Mô hình thực thể -- liên kết (Sơ đồ ER - Entity-Relationship Diagram)}
+\caption{Mô hình thực thể -- liên kết tổng quát (Sơ đồ ER - Entity-Relationship Diagram)}
 \label{fig:so_do_er}
+\end{figure}
+
+\subsubsection{Các sơ đồ ER phân rã theo cụm nghiệp vụ trọng tâm}
+
+Để làm rõ cấu trúc liên kết chi tiết với các thuộc tính cụ thể mà không làm rối sơ đồ tổng thể, hệ thống được phân rã thành các phân hệ ER chi tiết:
+
+\textbf{a) Sơ đồ ER Cụm Quản trị Hệ thống, Nhân sự \& Phân quyền kho (RBAC):}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    entity/.style={rectangle, draw=black, line width=0.8pt, fill=gray!8, inner sep=4pt, font=\scriptsize\bfseries, align=center},
+    rel/.style={diamond, draw=black, line width=0.7pt, fill=white, aspect=1.8, inner sep=2pt, font=\tiny, align=center},
+    link/.style={draw=black, thick},
+    node distance=1.2cm and 1.8cm
+]
+    \node[entity] (vt) {VAI\_TRO\\ \tiny(MaVaiTro, TenVaiTro)};
+    \node[entity, right=2.2cm of vt] (tk) {TAI\_KHOAN\\ \tiny(MaTaiKhoan, TenDangNhap,\\ \tiny MatKhauHash, TrangThai)};
+    \node[entity, right=2.2cm of tk] (nv) {NHAN\_VIEN\\ \tiny(MaNv, HoTen, SĐT,\\ \tiny Email, TrangThai)};
+    
+    \node[entity, below=1.8cm of tk] (tkk) {TAI\_KHOAN\_KHO\\ \tiny(MaTaiKhoan, MaKho)};
+    \node[entity, below=1.5cm of tkk] (kho) {KHO\\ \tiny(MaKho, TenKho, DiaChi)};
+    \node[entity, below=1.8cm of nv] (nk) {NHAT\_KY\_THAO\_TAC\\ \tiny(MaNhatKy, HanhDong,\\ \tiny BangTacDong, ThoiDiem)};
+
+    \node[rel] (r_vt) at ($(vt)!0.5!(tk)$) {Có vai trò};
+    \node[rel] (r_nv) at ($(tk)!0.5!(nv)$) {Sở hữu};
+    \node[rel] (r_tkk) at ($(tk)!0.5!(tkk)$) {Phân quyền};
+    \node[rel] (r_kho) at ($(tkk)!0.5!(kho)$) {Truy cập};
+    \node[rel] (r_nk) at ($(tk)!0.5!(nk)$) {Ghi vết};
+
+    \draw[link] (vt) -- (r_vt) node[midway, above]{\tiny 1};
+    \draw[link] (r_vt) -- (tk) node[midway, above]{\tiny N};
+    \draw[link] (nv) -- (r_nv) node[midway, above]{\tiny 1};
+    \draw[link] (r_nv) -- (tk) node[midway, above]{\tiny 1};
+    \draw[link] (tk) -- (r_tkk) node[midway, right]{\tiny 1};
+    \draw[link] (r_tkk) -- (tkk) node[midway, right]{\tiny N};
+    \draw[link] (tkk) -- (r_kho) node[midway, right]{\tiny N};
+    \draw[link] (r_kho) -- (kho) node[midway, right]{\tiny 1};
+    \draw[link] (tk) |- (r_nk);
+    \draw[link] (r_nk) -- (nk) node[midway, above]{\tiny N};
+\end{tikzpicture}
+\caption{Sơ đồ ER Cụm Quản trị Hệ thống \& Phân quyền kho (RBAC)}
+\label{fig:er_rbac}
+\end{figure}
+
+\textbf{b) Sơ đồ ER Cụm Chuỗi cung ứng (Nhập hàng \& Trả hàng NCC):}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    entity/.style={rectangle, draw=black, line width=0.8pt, fill=gray!8, inner sep=4pt, font=\scriptsize\bfseries, align=center},
+    rel/.style={diamond, draw=black, line width=0.7pt, fill=white, aspect=1.8, inner sep=2pt, font=\tiny, align=center},
+    link/.style={draw=black, thick},
+    node distance=1.2cm and 1.8cm
+]
+    \node[entity] (ncc) {DON\_VI\_CAP\_HANG\\ \tiny(MaNcc, TenNcc, MST,\\ \tiny SĐT, NoCanTra)};
+    
+    \node[entity, above right=1cm and 2cm of ncc] (pn) {PHIEU\_NHAP\\ \tiny(MaPhieuNhap, MaPhieu,\\ \tiny NgayLap, TongTien, TrangThai)};
+    \node[entity, below right=1cm and 2cm of ncc] (pt) {PHIEU\_TRA\_HANG\\ \tiny(MaPhieuTraHang, MaPhieu,\\ \tiny NgayTra, TongTienHoan, TrangThai)};
+
+    \node[entity, right=2.2cm of pn] (ctpn) {CHI\_TIET\_PHIEU\_NHAP\\ \tiny(MaCtphieuNhap, SoLuong,\\ \tiny DonGiaNhap, ThanhTien)};
+    \node[entity, right=2.2cm of pt] (ctpt) {CHI\_TIET\_TRA\_HANG\\ \tiny(MaCtphieuTra, SoLuong,\\ \tiny DonGiaTra, LyDoTra)};
+
+    \node[entity] (hh) at ($(ctpn)!0.5!(ctpt) + (2.5, 0)$) {HANG\_HOA\\ \tiny(MaHang, MaHangNoiBo,\\ \tiny TenHang, GiaVon, GiaBan)};
+
+    \node[rel] (r_pn) at ($(ncc)!0.5!(pn)$) {Cung cấp};
+    \node[rel] (r_pt) at ($(ncc)!0.5!(pt)$) {Nhận trả};
+    \node[rel] (r_ctpn) at ($(pn)!0.5!(ctpn)$) {Gồm};
+    \node[rel] (r_ctpt) at ($(pt)!0.5!(ctpt)$) {Gồm};
+    \node[rel] (r_hhpn) at ($(ctpn)!0.5!(hh)$) {Thuộc};
+    \node[rel] (r_hhpt) at ($(ctpt)!0.5!(hh)$) {Thuộc};
+
+    \draw[link] (ncc) |- (r_pn); \draw[link] (r_pn) -- (pn) node[midway, above]{\tiny N};
+    \draw[link] (ncc) |- (r_pt); \draw[link] (r_pt) -- (pt) node[midway, below]{\tiny N};
+    \draw[link] (pn) -- (r_ctpn); \draw[link] (r_ctpn) -- (ctpn) node[midway, above]{\tiny N};
+    \draw[link] (pt) -- (r_ctpt); \draw[link] (r_ctpt) -- (ctpt) node[midway, below]{\tiny N};
+    \draw[link] (ctpn) -- (r_hhpn); \draw[link] (r_hhpn) -- (hh) node[midway, above]{\tiny 1};
+    \draw[link] (ctpt) -- (r_hhpt); \draw[link] (r_hhpt) -- (hh) node[midway, below]{\tiny 1};
+\end{tikzpicture}
+\caption{Sơ đồ ER Cụm Chuỗi cung ứng Nhập kho \& Xuất trả nhà cung cấp}
+\label{fig:er_supply_chain}
+\end{figure}
+
+\textbf{c) Sơ đồ ER Cụm Điều chuyển kho \& Kiểm kê - Cân bằng kho:}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    entity/.style={rectangle, draw=black, line width=0.8pt, fill=gray!8, inner sep=4pt, font=\scriptsize\bfseries, align=center},
+    rel/.style={diamond, draw=black, line width=0.7pt, fill=white, aspect=1.8, inner sep=2pt, font=\tiny, align=center},
+    link/.style={draw=black, thick},
+    node distance=1.2cm and 1.8cm
+]
+    \node[entity] (kho) {KHO\\ \tiny(MaKho, TenKho)};
+    
+    \node[entity, above right=1cm and 2cm of kho] (pck) {PHIEU\_CHUYEN\_KHO\\ \tiny(MaPhieuChuyen, MaPhieu,\\ \tiny KhoNguon, KhoDich, TrangThai)};
+    \node[entity, below right=1cm and 2cm of kho] (pkk) {PHIEU\_KIEM\_KE\\ \tiny(MaPhieuKiemKe, MaPhieu,\\ \tiny NgayKiemKe, TrangThai)};
+
+    \node[entity, right=2.2cm of pck] (ctck) {CHI\_TIET\_CHUYEN\\ \tiny(MaCtphieuChuyen,\\ \tiny SoLuong, SoLuongNhan)};
+    \node[entity, right=2.2cm of pkk] (ctkk) {CHI\_TIET\_KIEM\_KE\\ \tiny(MaCtkiemKe, TonSoSach,\\ \tiny ThucTe, DonGiaVon)};
+
+    \node[entity, below=1.2cm of pkk] (pdc) {PHIEU\_DIEU\_CHINH\\ \tiny(MaPhieuDieuChinh,\\ \tiny NgayDuyet, TrangThai)};
+
+    \node[rel] (r_ck) at ($(kho)!0.5!(pck)$) {Xuất/Nhập};
+    \node[rel] (r_kk) at ($(kho)!0.5!(pkk)$) {Kiểm tại};
+    \node[rel] (r_ctck) at ($(pck)!0.5!(ctck)$) {Gồm};
+    \node[rel] (r_ctkk) at ($(pkk)!0.5!(ctkk)$) {Gồm};
+    \node[rel] (r_dc) at ($(pkk)!0.5!(pdc)$) {Sinh ra};
+
+    \draw[link] (kho) |- (r_ck); \draw[link] (r_ck) -- (pck) node[midway, above]{\tiny N};
+    \draw[link] (kho) |- (r_kk); \draw[link] (r_kk) -- (pkk) node[midway, below]{\tiny N};
+    \draw[link] (pck) -- (r_ctck); \draw[link] (r_ctck) -- (ctck) node[midway, above]{\tiny N};
+    \draw[link] (pkk) -- (r_ctkk); \draw[link] (r_ctkk) -- (ctkk) node[midway, below]{\tiny N};
+    \draw[link] (pkk) -- (r_dc); \draw[link] (r_dc) -- (pdc) node[midway, right]{\tiny 1};
+\end{tikzpicture}
+\caption{Sơ đồ ER Cụm Điều chuyển kho \& Kiểm kê cân bằng tồn kho}
+\label{fig:er_transfer_audit}
 \end{figure}
 
 \subsection{Mô hình dữ liệu quan hệ (Sơ đồ RM - Relational Model)}
@@ -879,6 +996,96 @@ Hình~\ref{fig:so_do_rm} thể hiện Sơ đồ quan hệ RM với các bảng v
 \caption{Sơ đồ cấu trúc liên kết các bảng quan hệ (Sơ đồ RM - Relational Model)}
 \label{fig:so_do_rm}
 \end{figure}
+
+\subsubsection{Bảng các ràng buộc toàn vẹn tham chiếu (Referential Integrity Constraints)}
+Các ràng buộc khóa ngoại (Foreign Key) đảm bảo tính toàn vẹn tham chiếu giữa các quan hệ theo công thức toán học: $\pi_{FK}(R) \subseteq \pi_{PK}(S)$. Bảng~\ref{tab:fk_constraints} thống kê các ràng buộc tham chiếu cốt lõi trong hệ thống:
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{|p{3.8cm}|p{2.8cm}|p{2.2cm}|p{2.8cm}|p{2.2cm}|Y|}
+\hline
+\rowcolor{tableheader}
+\textbf{Tên ràng buộc} & \textbf{Bảng tham chiếu ($R$)} & \textbf{Khóa ngoại ($FK$)} & \textbf{Bảng cha ($S$)} & \textbf{Khóa chính ($PK$)} & \textbf{Hành vi xóa} \\
+\hline
+FK\_TaiKhoan\_VaiTro & TaiKhoan & MaVaiTro & VaiTro & MaVaiTro & NO ACTION \\
+\hline
+FK\_TaiKhoan\_NhanVien & TaiKhoan & MaNv & NhanVien & MaNv & SET NULL \\
+\hline
+FK\_TaiKhoanKho\_TaiKhoan & TaiKhoanKho & MaTaiKhoan & TaiKhoan & MaTaiKhoan & CASCADE \\
+\hline
+FK\_TaiKhoanKho\_Kho & TaiKhoanKho & MaKho & Kho & MaKho & CASCADE \\
+\hline
+FK\_HangHoa\_DonViTinh & HangHoa & MaDvt & DonViTinh & MaDvt & NO ACTION \\
+\hline
+FK\_HangHoa\_NhomHang & HangHoa & MaNhom & NhomHang & MaNhom & NO ACTION \\
+\hline
+FK\_HinhAnh\_HangHoa & HinhAnhHangHoa & MaHang & HangHoa & MaHang & CASCADE \\
+\hline
+FK\_NguongTon\_HangHoa & NguongTonKho & MaHang & HangHoa & MaHang & CASCADE \\
+\hline
+FK\_NguongTon\_Kho & NguongTonKho & MaKho & Kho & MaKho & CASCADE \\
+\hline
+FK\_PhieuNhap\_Kho & PhieuNhap & MaKho & Kho & MaKho & NO ACTION \\
+\hline
+FK\_PhieuNhap\_NCC & PhieuNhap & MaNcc & DonViCapHang & MaNcc & NO ACTION \\
+\hline
+FK\_CTPN\_PhieuNhap & ChiTietPhieuNhap & MaPhieuNhap & PhieuNhap & MaPhieuNhap & CASCADE \\
+\hline
+FK\_CTPN\_HangHoa & ChiTietPhieuNhap & MaHang & HangHoa & MaHang & NO ACTION \\
+\hline
+FK\_PhieuTra\_Kho & PhieuTraHangNhap & MaKho & Kho & MaKho & NO ACTION \\
+\hline
+FK\_PhieuTra\_NCC & PhieuTraHangNhap & MaNcc & DonViCapHang & MaNcc & NO ACTION \\
+\hline
+FK\_CTPT\_PhieuTra & ChiTietPhieuTra & MaPhieuTra & PhieuTraHangNhap & MaPhieuTra & CASCADE \\
+\hline
+FK\_CTPT\_HangHoa & ChiTietPhieuTra & MaHang & HangHoa & MaHang & NO ACTION \\
+\hline
+FK\_PhieuXuat\_Kho & PhieuXuat & MaKho & Kho & MaKho & NO ACTION \\
+\hline
+FK\_CTPX\_PhieuXuat & ChiTietPhieuXuat & MaPhieuXuat & PhieuXuat & MaPhieuXuat & CASCADE \\
+\hline
+FK\_CTPX\_HangHoa & ChiTietPhieuXuat & MaHang & HangHoa & MaHang & NO ACTION \\
+\hline
+FK\_ChuyenKho\_KhoNguon & PhieuChuyenKho & MaKhoNguon & Kho & MaKho & NO ACTION \\
+\hline
+FK\_ChuyenKho\_KhoDich & PhieuChuyenKho & MaKhoDich & Kho & MaKho & NO ACTION \\
+\hline
+FK\_CTPCK\_PhieuChuyen & ChiTietPhieuChuyen & MaPhieuChuyen & PhieuChuyenKho & MaPhieuChuyen & CASCADE \\
+\hline
+FK\_CTPCK\_HangHoa & ChiTietPhieuChuyen & MaHang & HangHoa & MaHang & NO ACTION \\
+\hline
+FK\_PhieuKiem\_Kho & PhieuKiemKe & MaKho & Kho & MaKho & NO ACTION \\
+\hline
+FK\_CTPKK\_PhieuKiem & ChiTietPhieuKiem & MaPhieuKiem & PhieuKiemKe & MaPhieuKiem & CASCADE \\
+\hline
+FK\_CTPKK\_HangHoa & ChiTietPhieuKiem & MaHang & HangHoa & MaHang & NO ACTION \\
+\hline
+FK\_DieuChinh\_PhieuKiem & PhieuDieuChinh & MaPhieuKiem & PhieuKiemKe & MaPhieuKiem & NO ACTION \\
+\hline
+FK\_CTPDC\_DieuChinh & ChiTietDieuChinh & MaPhieuDieuChinh & PhieuDieuChinh & MaPhieuDieuChinh & CASCADE \\
+\hline
+FK\_DonBan\_KhachHang & DonBan & MaKh & KhachHang & MaKh & NO ACTION \\
+\hline
+FK\_CTDB\_DonBan & ChiTietDonBan & MaDonBan & DonBan & MaDonBan & CASCADE \\
+\hline
+FK\_KhoanThu\_DonBan & KhoanThu & MaDonBan & DonBan & MaDonBan & CASCADE \\
+\hline
+\end{tabularx}
+\caption{Bảng các ràng buộc toàn vẹn tham chiếu trọng tâm trong cơ sở dữ liệu}
+\label{tab:fk_constraints}
+\end{table}
+
+\subsubsection{Đánh giá chuẩn hóa cơ sở dữ liệu (3NF / BCNF)}
+Cơ sở dữ liệu \texttt{QuanLyKhoPhuQuocLTW} được thiết kế tuân thủ nghiêm ngặt lý thuyết chuẩn hóa quan hệ nhằm triệt tiêu dư thừa dữ liệu và chống dị thường (Anomalies):
+\begin{enumerate}
+    \item \textbf{Dạng chuẩn 1 (1NF):} Toàn bộ các thuộc tính trong các quan hệ đều là thuộc tính nguyên tố (Atomic values), không chứa tập giá trị lặp. Các thuộc tính đa trị (như danh sách ảnh sản phẩm) được tách ra quan hệ riêng \texttt{HinhAnhHangHoa}; định mức tồn kho phân tán theo chi nhánh được tách thành \texttt{NguongTonKho}.
+    \item \textbf{Dạng chuẩn 2 (2NF):} Đạt 1NF và mọi thuộc tính không khóa đều phụ thuộc hàm đầy đủ vào khóa chính. Đối với bảng có khóa chính hỗn hợp như \texttt{TaiKhoan\_Kho(MaTaiKhoan, MaKho)}, thuộc tính \texttt{NgayPhanQuyen} phụ thuộc hàm vào toàn bộ cặp khóa chính, không phụ thuộc vào một phần khóa.
+    \item \textbf{Dạng chuẩn 3 (3NF) \& BCNF:} Đạt 2NF và không tồn tại bất kỳ phụ thuộc hàm bắc cầu nào giữa các thuộc tính không khóa ($X \rightarrow Y \rightarrow Z$). Ví dụ: Thông tin nhân viên không lưu trong bảng \texttt{TaiKhoan} mà được tách riêng thành bảng \texttt{NhanVien}; thông tin nhà cung cấp không lưu dư thừa trong \texttt{PhieuNhap} mà tham chiếu khóa ngoại tới \texttt{DonViCapHang}.
+    \item \textbf{Phi vật lý hóa số lượng tồn kho (Dynamic Inventory Engine):} Điểm đặc sắc nhất trong thiết kế là việc \textbf{loại bỏ hoàn toàn thuộc tính tồn kho tĩnh} trên bảng vật lý \texttt{HangHoa}. Toàn bộ số lượng tồn kho được tính toán động theo thời gian thực qua Database View \texttt{vw\_TonKhoHienTai}, ngăn chặn triệt để tình trạng bất đồng bộ dữ liệu (Race Condition) và tranh chấp khóa khi nhiều người dùng thao tác đồng thời.
+\end{enumerate}
 
 \subsection{Từ điển dữ liệu chi tiết các bảng chính}
 
@@ -1212,67 +1419,51 @@ Dưới đây là mô tả kết quả đạt được và vị trí đính kèm
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}
-    \node[draw=black, line width=1pt, rounded corners=3pt, inner sep=18pt, fill=gray!5, text width=0.88\textwidth, align=center] {
-        \textbf{\large [Hình 3.1: Màn hình Đăng nhập \& Chọn kho làm việc]}\\
-        \vspace{2mm}
-        \small\color{kiotgray}\textit{Dán ảnh chụp giao diện Đăng nhập kèm danh sách chọn chi nhánh kho tại đây}
-    };
-\end{tikzpicture}
-\caption{Màn hình Đăng nhập \& Lựa chọn chi nhánh kho làm việc}
+\fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_1_login.png}}
+\caption{Màn hình Đăng nhập hệ thống và Lựa chọn chi nhánh kho làm việc}
 \label{fig:res_login}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}
-    \node[draw=black, line width=1pt, rounded corners=3pt, inner sep=18pt, fill=gray!5, text width=0.88\textwidth, align=center] {
-        \textbf{\large [Hình 3.2: Danh mục Hàng hóa \& Drawer tra cứu Thẻ kho nhanh]}\\
-        \vspace{2mm}
-        \small\color{kiotgray}\textit{Dán ảnh chụp danh sách hàng hóa và Drawer thẻ kho bên phải tại đây}
-    };
-\end{tikzpicture}
-\caption{Phân hệ Quản lý Hàng hóa \& Drawer tra cứu Thẻ kho nhanh}
+\fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_2_hanghoa.png}}
+\caption{Phân hệ Quản lý Danh mục Hàng hóa và Bộ lọc thông minh chuẩn KiotViet}
 \label{fig:res_hanghoa}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}
-    \node[draw=black, line width=1pt, rounded corners=3pt, inner sep=18pt, fill=gray!5, text width=0.88\textwidth, align=center] {
-        \textbf{\large [Hình 3.3: Phân hệ Kiểm kho \& Cân bằng kho tự động]}\\
-        \vspace{2mm}
-        \small\color{kiotgray}\textit{Dán ảnh chụp màn hình kiểm đếm thực tế vs sổ sách và nút Cân bằng kho tại đây}
-    };
-\end{tikzpicture}
-\caption{Phân hệ Kiểm kho \& Cân bằng kho tự động}
+\fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_3_kiemkho.png}}
+\caption{Phân hệ Kiểm kho \& Đối chiếu tồn sổ sách với số lượng đếm thực tế}
 \label{fig:res_kiemkho}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}
-    \node[draw=black, line width=1pt, rounded corners=3pt, inner sep=18pt, fill=gray!5, text width=0.88\textwidth, align=center] {
-        \textbf{\large [Hình 3.4: Báo cáo Tồn kho theo kho dạng Pivot đa chi nhánh]}\\
-        \vspace{2mm}
-        \small\color{kiotgray}\textit{Dán ảnh chụp bảng Pivot các kho, 4 thẻ KPI summary và nút Xuất Excel tại đây}
-    };
-\end{tikzpicture}
-\caption{Báo cáo Tồn kho theo kho dạng Pivot đa chi nhánh}
+\fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_4_bcton.png}}
+\caption{Báo cáo Tồn kho theo kho dạng Pivot đa chi nhánh và 4 thẻ KPI tổng hợp}
 \label{fig:res_bcton}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}
-    \node[draw=black, line width=1pt, rounded corners=3pt, inner sep=18pt, fill=gray!5, text width=0.88\textwidth, align=center] {
-        \textbf{\large [Hình 3.5: Báo cáo Thẻ kho chi tiết biến động lũy kế]}\\
-        \vspace{2mm}
-        \small\color{kiotgray}\textit{Dán ảnh chụp thẻ kho từng mặt hàng với dòng Tồn đầu kỳ, Nhập/Xuất/Chuyển và Tồn cuối kỳ tại đây}
-    };
-\end{tikzpicture}
-\caption{Báo cáo Thẻ kho chi tiết biến động lũy kế từng mặt hàng}
+\fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_5_thekho.png}}
+\caption{Báo cáo Thẻ kho chi tiết biến động xuất nhập tồn lũy kế từng mặt hàng}
 \label{fig:res_thekho}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_6_nhaphang.png}}
+\caption{Phân hệ Quản lý Giao dịch Nhập hàng từ Nhà cung cấp}
+\label{fig:res_nhaphang}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_7_chuyenkho.png}}
+\caption{Phân hệ Quản lý Điều chuyển hàng hóa nội bộ liên chi nhánh}
+\label{fig:res_chuyenkho}
 \end{figure}
 
 \cleardoublepage

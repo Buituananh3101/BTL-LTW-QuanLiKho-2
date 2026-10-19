@@ -57,68 +57,91 @@
 \newlabel{fig:activity_kiemkho}{{2.2}{20}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Biểu đồ hoạt động quy trình Kiểm kê và Cân bằng kho tự động}{figure.caption.9}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {2.3}Thiết kế Cơ sở dữ liệu quan hệ (Database Design)}{20}{section.2.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3.1}Mô hình thực thể -- liên kết (Sơ đồ ER - Entity-Relationship Diagram)}{20}{subsection.2.3.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Mô hình thực thể -- liên kết (Sơ đồ ER - Entity-Relationship Diagram)}}{21}{figure.caption.10}\protected@file@percent }
-\newlabel{fig:so_do_er}{{2.3}{21}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Mô hình thực thể -- liên kết (Sơ đồ ER - Entity-Relationship Diagram)}{figure.caption.10}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.2}Mô hình dữ liệu quan hệ (Sơ đồ RM - Relational Model)}{21}{subsection.2.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{Lược đồ quan hệ chuẩn (Relational Schema Notation)}{22}{subsubsection*.11}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{Sơ đồ cấu trúc liên kết các bảng quan hệ (Sơ đồ RM vật lý)}{23}{subsubsection*.12}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ cấu trúc liên kết các bảng quan hệ (Sơ đồ RM - Relational Model)}}{23}{figure.caption.13}\protected@file@percent }
-\newlabel{fig:so_do_rm}{{2.4}{23}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Sơ đồ cấu trúc liên kết các bảng quan hệ (Sơ đồ RM - Relational Model)}{figure.caption.13}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.3}Từ điển dữ liệu chi tiết các bảng chính}{24}{subsection.2.3.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng HangHoa (Hàng hóa)}}{24}{table.caption.14}\protected@file@percent }
-\newlabel{tab:dict_hanghoa}{{2.4}{24}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Từ điển dữ liệu bảng HangHoa (Hàng hóa)}{table.caption.14}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuKiemKe \& ChiTietPhieuKiemKe}}{24}{table.caption.15}\protected@file@percent }
-\newlabel{tab:dict_kiemkho}{{2.5}{24}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Từ điển dữ liệu bảng PhieuKiemKe \& ChiTietPhieuKiemKe}{table.caption.15}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.4}Giải thuật Database View tính toán tồn kho tức thời}{25}{subsection.2.3.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2.4}Thiết kế Kiến trúc phần mềm và Giao diện người dùng}{25}{section.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.1}Mô hình kiến trúc MVC phân tầng trên ASP.NET Core}{25}{subsection.2.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.2}Sơ đồ cấu trúc điều hướng trang (Sitemap)}{25}{subsection.2.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.3}Thiết kế khung giao diện Wireframe chuẩn KiotViet}{25}{subsection.2.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{\numberline {3}HIỆN THỰC HÓA VÀ LẬP TRÌNH HỆ THỐNG}{27}{chapter.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Mô hình thực thể -- liên kết tổng quát (Sơ đồ ER - Entity-Relationship Diagram)}}{21}{figure.caption.10}\protected@file@percent }
+\newlabel{fig:so_do_er}{{2.3}{21}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Mô hình thực thể -- liên kết tổng quát (Sơ đồ ER - Entity-Relationship Diagram)}{figure.caption.10}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Các sơ đồ ER phân rã theo cụm nghiệp vụ trọng tâm}{21}{subsubsection*.11}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ ER Cụm Quản trị Hệ thống \& Phân quyền kho (RBAC)}}{22}{figure.caption.12}\protected@file@percent }
+\newlabel{fig:er_rbac}{{2.4}{22}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Sơ đồ ER Cụm Quản trị Hệ thống \& Phân quyền kho (RBAC)}{figure.caption.12}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ ER Cụm Chuỗi cung ứng Nhập kho \& Xuất trả nhà cung cấp}}{22}{figure.caption.13}\protected@file@percent }
+\newlabel{fig:er_supply_chain}{{2.5}{22}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Sơ đồ ER Cụm Chuỗi cung ứng Nhập kho \& Xuất trả nhà cung cấp}{figure.caption.13}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ ER Cụm Điều chuyển kho \& Kiểm kê cân bằng tồn kho}}{23}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:er_transfer_audit}{{2.6}{23}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Sơ đồ ER Cụm Điều chuyển kho \& Kiểm kê cân bằng tồn kho}{figure.caption.14}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.2}Mô hình dữ liệu quan hệ (Sơ đồ RM - Relational Model)}{23}{subsection.2.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Lược đồ quan hệ chuẩn (Relational Schema Notation)}{23}{subsubsection*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Sơ đồ cấu trúc liên kết các bảng quan hệ (Sơ đồ RM vật lý)}{25}{subsubsection*.16}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ cấu trúc liên kết các bảng quan hệ (Sơ đồ RM - Relational Model)}}{26}{figure.caption.17}\protected@file@percent }
+\newlabel{fig:so_do_rm}{{2.7}{26}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Sơ đồ cấu trúc liên kết các bảng quan hệ (Sơ đồ RM - Relational Model)}{figure.caption.17}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Bảng các ràng buộc toàn vẹn tham chiếu (Referential Integrity Constraints)}{26}{subsubsection*.18}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng các ràng buộc toàn vẹn tham chiếu trọng tâm trong cơ sở dữ liệu}}{27}{table.caption.19}\protected@file@percent }
+\newlabel{tab:fk_constraints}{{2.4}{27}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Bảng các ràng buộc toàn vẹn tham chiếu trọng tâm trong cơ sở dữ liệu}{table.caption.19}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Đánh giá chuẩn hóa cơ sở dữ liệu (3NF / BCNF)}{28}{subsubsection*.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.3}Từ điển dữ liệu chi tiết các bảng chính}{28}{subsection.2.3.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng HangHoa (Hàng hóa)}}{29}{table.caption.21}\protected@file@percent }
+\newlabel{tab:dict_hanghoa}{{2.5}{29}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Từ điển dữ liệu bảng HangHoa (Hàng hóa)}{table.caption.21}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng Kho (Chi nhánh kho vật lý)}}{29}{table.caption.22}\protected@file@percent }
+\newlabel{tab:dict_kho}{{2.6}{29}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Từ điển dữ liệu bảng Kho (Chi nhánh kho vật lý)}{table.caption.22}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuNhap \& ChiTietPhieuNhap}}{30}{table.caption.23}\protected@file@percent }
+\newlabel{tab:dict_nhaphang}{{2.7}{30}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Từ điển dữ liệu bảng PhieuNhap \& ChiTietPhieuNhap}{table.caption.23}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuChuyenKho \& ChiTietPhieuChuyenKho}}{30}{table.caption.24}\protected@file@percent }
+\newlabel{tab:dict_chuyenkho}{{2.8}{30}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Từ điển dữ liệu bảng PhieuChuyenKho \& ChiTietPhieuChuyenKho}{table.caption.24}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuKiemKe \& ChiTietPhieuKiemKe}}{31}{table.caption.25}\protected@file@percent }
+\newlabel{tab:dict_kiemkho}{{2.9}{31}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Từ điển dữ liệu bảng PhieuKiemKe \& ChiTietPhieuKiemKe}{table.caption.25}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.4}Giải thuật Database View 2 tầng tính toán tồn kho động}{31}{subsection.2.3.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kiến trúc Database View 2 tầng tính toán tồn kho động}}{32}{figure.caption.26}\protected@file@percent }
+\newlabel{fig:view_2_tang}{{2.8}{32}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Kiến trúc Database View 2 tầng tính toán tồn kho động}{figure.caption.26}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.4}Thiết kế Kiến trúc phần mềm và Giao diện người dùng}{32}{section.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.1}Mô hình kiến trúc MVC phân tầng trên ASP.NET Core}{32}{subsection.2.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.2}Sơ đồ cấu trúc điều hướng trang (Sitemap)}{33}{subsection.2.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.3}Thiết kế khung giao diện Wireframe chuẩn KiotViet}{33}{subsection.2.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {3}HIỆN THỰC HÓA VÀ LẬP TRÌNH HỆ THỐNG}{34}{chapter.3}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {3.1}Môi trường công nghệ và công cụ phát triển}{27}{section.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3.2}Xây dựng các cơ chế kiến trúc nền tảng (Core Framework)}{27}{section.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.1}Cơ chế Xác thực và Phân quyền theo Chi nhánh qua Cookie Authentication}{27}{subsection.3.2.1}\protected@file@percent }
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.1}{\ignorespaces Thiết lập Claims danh tính và Chi nhánh làm việc trong AccountController}}{27}{lstlisting.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Cơ chế Controller cơ sở (BaseKhoController)}{28}{subsection.3.2.2}\protected@file@percent }
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.2}{\ignorespaces Cơ chế quản lý ngữ cảnh chi nhánh kho trong BaseKhoController}}{28}{lstlisting.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.3}Cơ chế giao dịch an toàn (ACID Transaction) trong lưu trữ Master-Detail}{28}{subsection.3.2.3}\protected@file@percent }
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.3}{\ignorespaces Bọc giao dịch ACID khi hoàn thành chứng từ kho}}{28}{lstlisting.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.4}Hệ sinh thái Khối Lego UI tái sử dụng}{29}{subsection.3.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.5}Giải pháp phân tầng Stacking Context giải quyết xung đột Dropdown và Modal}{29}{subsection.3.2.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3.3}Mô tả kết quả đạt được qua các phân hệ}{30}{section.3.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Màn hình Đăng nhập \& Lựa chọn chi nhánh kho làm việc}}{30}{figure.caption.16}\protected@file@percent }
-\newlabel{fig:res_login}{{3.1}{30}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Màn hình Đăng nhập \& Lựa chọn chi nhánh kho làm việc}{figure.caption.16}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Quản lý Hàng hóa \& Drawer tra cứu Thẻ kho nhanh}}{30}{figure.caption.17}\protected@file@percent }
-\newlabel{fig:res_hanghoa}{{3.2}{30}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Phân hệ Quản lý Hàng hóa \& Drawer tra cứu Thẻ kho nhanh}{figure.caption.17}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Kiểm kho \& Cân bằng kho tự động}}{30}{figure.caption.18}\protected@file@percent }
-\newlabel{fig:res_kiemkho}{{3.3}{30}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Phân hệ Kiểm kho \& Cân bằng kho tự động}{figure.caption.18}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Báo cáo Tồn kho theo kho dạng Pivot đa chi nhánh}}{30}{figure.caption.19}\protected@file@percent }
-\newlabel{fig:res_bcton}{{3.4}{30}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Báo cáo Tồn kho theo kho dạng Pivot đa chi nhánh}{figure.caption.19}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Báo cáo Thẻ kho chi tiết biến động lũy kế từng mặt hàng}}{31}{figure.caption.20}\protected@file@percent }
-\newlabel{fig:res_thekho}{{3.5}{31}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Báo cáo Thẻ kho chi tiết biến động lũy kế từng mặt hàng}{figure.caption.20}{}}
-\@writefile{toc}{\contentsline {chapter}{\numberline {4}KIỂM THỬ HỆ THỐNG VÀ ĐÁNH GIÁ CHẤT LƯỢNG}{32}{chapter.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.1}Môi trường công nghệ và công cụ phát triển}{34}{section.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.2}Xây dựng các cơ chế kiến trúc nền tảng (Core Framework)}{34}{section.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.1}Cơ chế Xác thực và Phân quyền theo Chi nhánh qua Cookie Authentication}{34}{subsection.3.2.1}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.1}{\ignorespaces Thiết lập Claims danh tính và Chi nhánh làm việc trong AccountController}}{34}{lstlisting.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Cơ chế Controller cơ sở (BaseKhoController)}{35}{subsection.3.2.2}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.2}{\ignorespaces Cơ chế quản lý ngữ cảnh chi nhánh kho trong BaseKhoController}}{35}{lstlisting.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.3}Cơ chế giao dịch an toàn (ACID Transaction) trong lưu trữ Master-Detail}{35}{subsection.3.2.3}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.3}{\ignorespaces Bọc giao dịch ACID khi hoàn thành chứng từ kho}}{35}{lstlisting.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.4}Hệ sinh thái Khối Lego UI tái sử dụng}{36}{subsection.3.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.5}Giải pháp phân tầng Stacking Context giải quyết xung đột Dropdown và Modal}{36}{subsection.3.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}Mô tả kết quả đạt được qua các phân hệ}{37}{section.3.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Màn hình Đăng nhập hệ thống và Lựa chọn chi nhánh kho làm việc}}{37}{figure.caption.27}\protected@file@percent }
+\newlabel{fig:res_login}{{3.1}{37}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Màn hình Đăng nhập hệ thống và Lựa chọn chi nhánh kho làm việc}{figure.caption.27}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Quản lý Danh mục Hàng hóa và Bộ lọc thông minh chuẩn KiotViet}}{38}{figure.caption.28}\protected@file@percent }
+\newlabel{fig:res_hanghoa}{{3.2}{38}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Phân hệ Quản lý Danh mục Hàng hóa và Bộ lọc thông minh chuẩn KiotViet}{figure.caption.28}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Kiểm kho \& Đối chiếu tồn sổ sách với số lượng đếm thực tế}}{38}{figure.caption.29}\protected@file@percent }
+\newlabel{fig:res_kiemkho}{{3.3}{38}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Phân hệ Kiểm kho \& Đối chiếu tồn sổ sách với số lượng đếm thực tế}{figure.caption.29}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Báo cáo Tồn kho theo kho dạng Pivot đa chi nhánh và 4 thẻ KPI tổng hợp}}{39}{figure.caption.30}\protected@file@percent }
+\newlabel{fig:res_bcton}{{3.4}{39}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Báo cáo Tồn kho theo kho dạng Pivot đa chi nhánh và 4 thẻ KPI tổng hợp}{figure.caption.30}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Báo cáo Thẻ kho chi tiết biến động xuất nhập tồn lũy kế từng mặt hàng}}{39}{figure.caption.31}\protected@file@percent }
+\newlabel{fig:res_thekho}{{3.5}{39}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Báo cáo Thẻ kho chi tiết biến động xuất nhập tồn lũy kế từng mặt hàng}{figure.caption.31}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Quản lý Giao dịch Nhập hàng từ Nhà cung cấp}}{40}{figure.caption.32}\protected@file@percent }
+\newlabel{fig:res_nhaphang}{{3.6}{40}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Phân hệ Quản lý Giao dịch Nhập hàng từ Nhà cung cấp}{figure.caption.32}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Quản lý Điều chuyển hàng hóa nội bộ liên chi nhánh}}{40}{figure.caption.33}\protected@file@percent }
+\newlabel{fig:res_chuyenkho}{{3.7}{40}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Phân hệ Quản lý Điều chuyển hàng hóa nội bộ liên chi nhánh}{figure.caption.33}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {4}KIỂM THỬ HỆ THỐNG VÀ ĐÁNH GIÁ CHẤT LƯỢNG}{41}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {4.1}Kế hoạch và phương pháp kiểm thử}{32}{section.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4.2}Danh mục kịch bản kiểm thử chi tiết (Test Cases)}{32}{section.4.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-01: Tính tồn tức thời sau Nhập hàng}}{32}{table.caption.21}\protected@file@percent }
-\newlabel{tab:tc1}{{4.1}{32}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Kịch bản kiểm thử TC-01: Tính tồn tức thời sau Nhập hàng}{table.caption.21}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-02: Điều chuyển hàng hóa nội bộ}}{33}{table.caption.22}\protected@file@percent }
-\newlabel{tab:tc2}{{4.2}{33}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Kịch bản kiểm thử TC-02: Điều chuyển hàng hóa nội bộ}{table.caption.22}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-03: Cân bằng kiểm kê và Khóa chứng từ}}{33}{table.caption.23}\protected@file@percent }
-\newlabel{tab:tc3}{{4.3}{33}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Kịch bản kiểm thử TC-03: Cân bằng kiểm kê và Khóa chứng từ}{table.caption.23}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-04: Khắc phục lỗi Stacking Context Modal}}{34}{table.caption.24}\protected@file@percent }
-\newlabel{tab:tc4}{{4.4}{34}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Kịch bản kiểm thử TC-04: Khắc phục lỗi Stacking Context Modal}{table.caption.24}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-05: Sửa lỗi Token AntiForgery trên AJAX JSON}}{34}{table.caption.25}\protected@file@percent }
-\newlabel{tab:tc5}{{4.5}{34}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Kịch bản kiểm thử TC-05: Sửa lỗi Token AntiForgery trên AJAX JSON}{table.caption.25}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.3}Báo cáo kết quả kiểm thử và quá trình khắc phục lỗi}{34}{section.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{\numberline {5}KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}{36}{chapter.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.1}Kế hoạch và phương pháp kiểm thử}{41}{section.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.2}Danh mục kịch bản kiểm thử chi tiết (Test Cases)}{41}{section.4.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-01: Tính tồn tức thời sau Nhập hàng}}{41}{table.caption.34}\protected@file@percent }
+\newlabel{tab:tc1}{{4.1}{41}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Kịch bản kiểm thử TC-01: Tính tồn tức thời sau Nhập hàng}{table.caption.34}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-02: Điều chuyển hàng hóa nội bộ}}{42}{table.caption.35}\protected@file@percent }
+\newlabel{tab:tc2}{{4.2}{42}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Kịch bản kiểm thử TC-02: Điều chuyển hàng hóa nội bộ}{table.caption.35}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-03: Cân bằng kiểm kê và Khóa chứng từ}}{42}{table.caption.36}\protected@file@percent }
+\newlabel{tab:tc3}{{4.3}{42}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Kịch bản kiểm thử TC-03: Cân bằng kiểm kê và Khóa chứng từ}{table.caption.36}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-04: Khắc phục lỗi Stacking Context Modal}}{43}{table.caption.37}\protected@file@percent }
+\newlabel{tab:tc4}{{4.4}{43}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Kịch bản kiểm thử TC-04: Khắc phục lỗi Stacking Context Modal}{table.caption.37}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-05: Sửa lỗi Token AntiForgery trên AJAX JSON}}{43}{table.caption.38}\protected@file@percent }
+\newlabel{tab:tc5}{{4.5}{43}{\texorpdfstring {\xpg@aux {\xpg@current@opts }{\languagename }}{}\ignorespaces Kịch bản kiểm thử TC-05: Sửa lỗi Token AntiForgery trên AJAX JSON}{table.caption.38}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.3}Báo cáo kết quả kiểm thử và quá trình khắc phục lỗi}{43}{section.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {5}KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}{45}{chapter.5}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {5.1}Kết quả đạt được}{36}{section.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5.2}Bài học rút ra}{36}{section.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5.3}Đề xuất phương hướng phát triển}{37}{section.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{Tài liệu tham khảo và Phụ lục}{38}{chapter*.26}\protected@file@percent }
-\gdef \@abspage@last{40}
+\@writefile{toc}{\contentsline {section}{\numberline {5.1}Kết quả đạt được}{45}{section.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5.2}Bài học rút ra}{45}{section.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5.3}Đề xuất phương hướng phát triển}{46}{section.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{Tài liệu tham khảo và Phụ lục}{47}{chapter*.39}\protected@file@percent }
+\gdef \@abspage@last{49}
