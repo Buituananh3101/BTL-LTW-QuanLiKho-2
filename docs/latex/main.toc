@@ -30,33 +30,33 @@
 \contentsline {section}{\numberline {2.2}Thiết kế luồng xử lý nghiệp vụ (Activity Diagrams)}{19}{section.2.2}%
 \contentsline {section}{\numberline {2.3}Thiết kế Cơ sở dữ liệu quan hệ (Database Design)}{20}{section.2.3}%
 \contentsline {subsection}{\numberline {2.3.1}Mô hình thực thể -- liên kết (Sơ đồ ER - Entity-Relationship Diagram)}{20}{subsection.2.3.1}%
-\contentsline {subsubsection}{Các sơ đồ ER phân rã theo cụm nghiệp vụ trọng tâm}{21}{subsubsection*.11}%
-\contentsline {subsection}{\numberline {2.3.2}Mô hình dữ liệu quan hệ (Sơ đồ RM - Relational Model)}{23}{subsection.2.3.2}%
-\contentsline {subsubsection}{Lược đồ quan hệ chuẩn (Relational Schema Notation)}{23}{subsubsection*.15}%
-\contentsline {subsubsection}{Sơ đồ cấu trúc liên kết các bảng quan hệ (Sơ đồ RM vật lý)}{25}{subsubsection*.16}%
-\contentsline {subsubsection}{Bảng các ràng buộc toàn vẹn tham chiếu (Referential Integrity Constraints)}{26}{subsubsection*.18}%
-\contentsline {subsubsection}{Đánh giá chuẩn hóa cơ sở dữ liệu (3NF / BCNF)}{28}{subsubsection*.20}%
-\contentsline {subsection}{\numberline {2.3.3}Từ điển dữ liệu chi tiết các bảng chính}{28}{subsection.2.3.3}%
-\contentsline {subsection}{\numberline {2.3.4}Giải thuật Database View 2 tầng tính toán tồn kho động}{31}{subsection.2.3.4}%
-\contentsline {section}{\numberline {2.4}Thiết kế Kiến trúc phần mềm và Giao diện người dùng}{32}{section.2.4}%
-\contentsline {subsection}{\numberline {2.4.1}Mô hình kiến trúc MVC phân tầng trên ASP.NET Core}{32}{subsection.2.4.1}%
-\contentsline {subsection}{\numberline {2.4.2}Sơ đồ cấu trúc điều hướng trang (Sitemap)}{33}{subsection.2.4.2}%
-\contentsline {subsection}{\numberline {2.4.3}Thiết kế khung giao diện Wireframe chuẩn KiotViet}{33}{subsection.2.4.3}%
-\contentsline {chapter}{\numberline {3}HIỆN THỰC HÓA VÀ LẬP TRÌNH HỆ THỐNG}{34}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Môi trường công nghệ và công cụ phát triển}{34}{section.3.1}%
-\contentsline {section}{\numberline {3.2}Xây dựng các cơ chế kiến trúc nền tảng (Core Framework)}{34}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}Cơ chế Xác thực và Phân quyền theo Chi nhánh qua Cookie Authentication}{34}{subsection.3.2.1}%
-\contentsline {subsection}{\numberline {3.2.2}Cơ chế Controller cơ sở (BaseKhoController)}{35}{subsection.3.2.2}%
-\contentsline {subsection}{\numberline {3.2.3}Cơ chế giao dịch an toàn (ACID Transaction) trong lưu trữ Master-Detail}{35}{subsection.3.2.3}%
-\contentsline {subsection}{\numberline {3.2.4}Hệ sinh thái Khối Lego UI tái sử dụng}{36}{subsection.3.2.4}%
-\contentsline {subsection}{\numberline {3.2.5}Giải pháp phân tầng Stacking Context giải quyết xung đột Dropdown và Modal}{36}{subsection.3.2.5}%
-\contentsline {section}{\numberline {3.3}Mô tả kết quả đạt được qua các phân hệ}{37}{section.3.3}%
-\contentsline {chapter}{\numberline {4}KIỂM THỬ HỆ THỐNG VÀ ĐÁNH GIÁ CHẤT LƯỢNG}{41}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Kế hoạch và phương pháp kiểm thử}{41}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Danh mục kịch bản kiểm thử chi tiết (Test Cases)}{41}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Báo cáo kết quả kiểm thử và quá trình khắc phục lỗi}{43}{section.4.3}%
-\contentsline {chapter}{\numberline {5}KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}{45}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Kết quả đạt được}{45}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Bài học rút ra}{45}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Đề xuất phương hướng phát triển}{46}{section.5.3}%
-\contentsline {chapter}{Tài liệu tham khảo và Phụ lục}{47}{chapter*.39}%
+\contentsline {subsubsection}{Các sơ đồ ER phân rã chi tiết theo cụm nghiệp vụ}{21}{subsubsection*.11}%
+\contentsline {subsection}{\numberline {2.3.2}Mô hình dữ liệu quan hệ (Sơ đồ RM - Relational Model)}{27}{subsection.2.3.2}%
+\contentsline {subsubsection}{Lược đồ quan hệ chuẩn (Relational Schema Notation)}{27}{subsubsection*.17}%
+\contentsline {subsubsection}{Sơ đồ cấu trúc liên kết các bảng quan hệ (Sơ đồ RM vật lý)}{29}{subsubsection*.18}%
+\contentsline {subsubsection}{Bảng các ràng buộc toàn vẹn tham chiếu (Referential Integrity Constraints)}{29}{subsubsection*.20}%
+\contentsline {subsubsection}{Đánh giá chuẩn hóa cơ sở dữ liệu (3NF / BCNF)}{30}{subsubsection*.22}%
+\contentsline {subsection}{\numberline {2.3.3}Từ điển dữ liệu chi tiết các bảng chính}{31}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.4}Giải thuật Database View 2 tầng tính toán tồn kho động}{34}{subsection.2.3.4}%
+\contentsline {section}{\numberline {2.4}Thiết kế Kiến trúc phần mềm và Giao diện người dùng}{35}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}Mô hình kiến trúc MVC phân tầng trên ASP.NET Core}{35}{subsection.2.4.1}%
+\contentsline {subsection}{\numberline {2.4.2}Sơ đồ cấu trúc điều hướng trang (Sitemap)}{36}{subsection.2.4.2}%
+\contentsline {subsection}{\numberline {2.4.3}Thiết kế khung giao diện Wireframe chuẩn KiotViet}{36}{subsection.2.4.3}%
+\contentsline {chapter}{\numberline {3}HIỆN THỰC HÓA VÀ LẬP TRÌNH HỆ THỐNG}{37}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Môi trường công nghệ và công cụ phát triển}{37}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Xây dựng các cơ chế kiến trúc nền tảng (Core Framework)}{37}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Cơ chế Xác thực và Phân quyền theo Chi nhánh qua Cookie Authentication}{37}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Cơ chế Controller cơ sở (BaseKhoController)}{38}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Cơ chế giao dịch an toàn (ACID Transaction) trong lưu trữ Master-Detail}{38}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.4}Hệ sinh thái Khối Lego UI tái sử dụng}{39}{subsection.3.2.4}%
+\contentsline {subsection}{\numberline {3.2.5}Giải pháp phân tầng Stacking Context giải quyết xung đột Dropdown và Modal}{39}{subsection.3.2.5}%
+\contentsline {section}{\numberline {3.3}Mô tả kết quả đạt được qua các phân hệ}{40}{section.3.3}%
+\contentsline {chapter}{\numberline {4}KIỂM THỬ HỆ THỐNG VÀ ĐÁNH GIÁ CHẤT LƯỢNG}{44}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Kế hoạch và phương pháp kiểm thử}{44}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Danh mục kịch bản kiểm thử chi tiết (Test Cases)}{44}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Báo cáo kết quả kiểm thử và quá trình khắc phục lỗi}{46}{section.4.3}%
+\contentsline {chapter}{\numberline {5}KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}{48}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Kết quả đạt được}{48}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Bài học rút ra}{48}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Đề xuất phương hướng phát triển}{49}{section.5.3}%
+\contentsline {chapter}{Tài liệu tham khảo và Phụ lục}{50}{chapter*.41}%

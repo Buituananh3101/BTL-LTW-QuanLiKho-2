@@ -1,21 +1,68 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-19 – Gỡ Bỏ Phần Chọn Nhanh Đăng Nhập Tài Khoản Mẫu (Phiên 163)
+Cập nhật lần cuối: 2026-10-19 – Hoàn Thiện Mô Hình ER/RM CSDL & Chuẩn Hóa Báo Cáo LaTeX Trong VS Code (Phiên 165)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất loại bỏ phần chọn nhanh đăng nhập tài khoản mẫu thử nghiệm (`.demo-hint`) tại màn hình Đăng nhập (`/Account/Login`):
-  + Xóa khối gợi ý tài khoản mẫu và các nút chọn nhanh `quanly`, `thukho`, `banhang` trong `Views/Account/Login.cshtml`.
-  + Gỡ bỏ hàm trợ giúp `window.quickFill` trong `wwwroot/js/dang-nhap.js`.
-  + Dọn sạch các CSS rules liên quan (`.demo-hint`, `.demo-tags`, `.demo-tag`) trong `wwwroot/css/dang-nhap.css`.
-  + Giao diện form đăng nhập gọn gàng, chuẩn xác thực tế cho người dùng tự nhập tài khoản.
+- Đã hoàn tất đặc tả kiến trúc Cơ sở dữ liệu và tích hợp đồ họa Sơ đồ ER / RM vào báo cáo LaTeX `docs/latex/main.tex`:
+  + Tài liệu hóa toàn diện 29 bảng vật lý và 2 Views logic trong `docs/so-do-er-va-rm-csdl.md` (chuẩn ER Mermaid + mô hình quan hệ RM toán học + 53 ràng buộc toàn vẹn tham chiếu).
+  + Tạo từ điển CSDL cô đọng `docs/specs/tu-dien-co-so-du-lieu.md` tuân thủ Luật 12 AGENTS.md ($\le 8.000$ ký tự).
+  + Kết xuất và chuẩn hóa 6 sơ đồ đồ họa Mermaid chất lượng cao dạng ngang (`direction LR`), loại bỏ hoàn toàn hiện tượng sơ đồ dọc quá khổ làm tràn trang.
+  + Chuẩn hóa bố cục LaTeX: đóng gói tiêu đề bên trong môi trường `figure`, khống chế kích thước `height=12.5cm - 13.5cm, keepaspectratio` và chèn `\clearpage` đảm bảo tiêu đề, hình ảnh và caption luôn nằm trọn vẹn trong CÙNG 1 TRANG, xóa bỏ triệt để tình trạng tiêu đề mồ côi và trang trắng.
+  + Biên dịch XeLaTeX trực tiếp trong VS Code đạt kết quả hoàn hảo (0 Errors). Cập nhật gói nén `docs/BaoCao_LaTeX_Overleaf.zip`.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế đăng nhập tại `/Account/Login`.
-2. Tiếp tục hoàn thiện các chức năng nâng cao theo yêu cầu người dùng.
+1. Kiểm thử trực quan các màn hình danh sách và bộ lọc trên giao diện người dùng KiotViet (Hàng hóa, Nhập hàng, Trả hàng nhập, Xuất hủy, Chuyển kho, Kiểm kho, Báo cáo tồn kho, Thẻ kho).
+2. Chuẩn bị nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
+
+---
+
+- **Hoàn Thiện Mô Hình ER/RM CSDL & Chuẩn Hóa Báo Cáo LaTeX Trong VS Code (Phiên 165)**:
+  - **Nhu cầu**: Người dùng yêu cầu: (1) Lên kế hoạch và làm rõ toàn bộ kiến trúc CSDL của dự án với Sơ đồ ER và Lược đồ RM; (2) Gắn sơ đồ vào báo cáo học thuật LaTeX trong VS Code; (3) Giữ đồ họa trực quan Mermaid giống hệt file `.md`; (4) Sửa lỗi sơ đồ bị tràn ra ngoài, kích thước quá to, và lỗi "tên sơ đồ nằm ở trang trước bị trắng trơn còn sơ đồ bị đẩy sang trang tiếp theo".
+  - **Nguyên nhân cốt lõi**:
+    1. Tiêu đề sơ đồ nằm ở ngoài môi trường `\begin{figure}[H]`, khi hình ảnh quá cao không vừa phần còn lại của trang, LaTeX tự động đẩy `figure` sang trang tiếp theo, để lại tiêu đề cô đơn trên trang trắng.
+    2. Sơ đồ ban đầu có tỉ lệ dọc hẹp (width/height chỉ 0.31 - 0.49), khi phóng theo `width=0.95\textwidth` làm chiều cao bị đội lên tới 30-48cm, tràn qua chân trang A4.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Thiết kế sơ đồ ER & RM chuẩn học thuật**:
+       - Xây dựng sơ đồ ER tổng quan và 5 sơ đồ ER phân rã chi tiết theo từng cụm nghiệp vụ (RBAC, Hàng hóa, Chuỗi cung ứng, Chuyển kho/Kiểm kê, Bán hàng) cùng lược đồ quan hệ RM toán học và bảng 53 ràng buộc khóa ngoại.
+       - Viết file `docs/so-do-er-va-rm-csdl.md` và `docs/specs/tu-dien-co-so-du-lieu.md`.
+    2. **Đồ họa trực quan Mermaid & Tối ưu bố cục ngang**:
+       - Kết xuất 6 ảnh PNG độ nét cao từ Mermaid CLI (`fig_er_tong_quan.png`, `fig_er_rbac.png`, `fig_er_hanghoa.png`, `fig_er_supply_chain.png`, `fig_er_transfer_audit.png`, `fig_er_sales.png`).
+       - Dùng `direction LR` để sơ đồ dàn ngang (tỉ lệ w/h 1.34 - 1.71), khớp hoàn hảo với tỉ lệ trang A4 tiêu chuẩn.
+    3. **Sửa bố cục LaTeX chống tràn & chống mồ côi tiêu đề**:
+       - Đóng gói tiêu đề `{\bfseries\large ...}` trực tiếp vào BÊN TRONG môi trường `figure` để đảm bảo tiêu đề và hình ảnh là một khối nguyên tử (atomic block).
+       - Đặt giới hạn cả chiều rộng và chiều cao: `width=0.90-0.95\textwidth, height=12.5-13.5cm, keepaspectratio`.
+       - Thêm `\clearpage` trước mỗi cụm để mỗi sơ đồ đứng riêng rẽ, ngay ngắn trên 1 trang (các trang từ 21 đến 26).
+       - Khắc phục thẻ `\begin{table}[H]` mở thừa ở dòng 877.
+    4. **Kiểm tra & Biên dịch**:
+       - Biên dịch XeLaTeX trực tiếp trong môi trường nội bộ VS Code: `main.pdf` 52 trang ra lò chuẩn xác, 0 Errors, 0 cảnh báo tham chiếu.
+       - Cập nhật gói nén `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+  - **Nhu cầu**: Người dùng yêu cầu: "hiện tại dự án đã gần đạt, tôi muốn bạn tạo thêm dữ liệu để test đầy đủ các chức năng".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Thiết kế & Thực thi script migration `migrations/sql/15_du_lieu_mau_toan_dien.sql`**:
+       - Bổ sung 5 nhóm nhà cung cấp mới và 6 nhà cung cấp KiotViet chuẩn chỉ thông tin (Mã số thuế, email, khu vực, người tạo).
+       - Bổ sung 8 khách hàng thực tế tại Phú Quốc thuộc cả 2 nhóm `CUA_HANG` và `LE`.
+       - Bổ sung 15 mặt hàng phong phú chất lượng cao thuộc đầy đủ các nhóm hàng (Bình gas, Phụ kiện gas, Thiết bị an toàn, Khí công nghiệp, Than/Cồn, Xe đẩy).
+       - Khởi tạo ngưỡng tồn an toàn `NguongTonKho` cho toàn bộ các mặt hàng mới trên cả 3 kho.
+       - Cấp tồn dồi dào qua phiếu nhập `THONG_THUONG` cho Kho trung tâm, Kho An Thới và Kho phụ kiện Tuna.
+       - Tạo 6 chứng từ Chuyển kho mô phỏng đầy đủ luồng thực tế (bao gồm chuyển có mất mát/thất thoát trên phà biển, chuyển đang đi đường, chuyển nháp, chuyển hủy).
+       - Tạo 4 phiếu Trả hàng nhập đầy đủ các trạng thái và các nhà cung cấp khác nhau.
+       - Tạo 4 phiếu Xuất hủy (`XUAT_HUY`) phản ánh các nguyên nhân hao hụt thực tế (rỉ sét chân đế, ngấm nước mưa bão, bể kính bếp...).
+       - Tạo 2 đơn bán hàng `DonBan` và phiếu xuất bán `XUAT_BAN` tương ứng cho Resort Vinpearl và Đại lý Cửa Cạn.
+       - Tạo 2 phiếu Kiểm kho `PhieuKiemKe` (1 phiếu đã duyệt cân bằng qua `PhieuDieuChinh` và 1 phiếu bản nháp đang kiểm kê).
+       - Bổ sung lịch sử hoạt động vào bảng `NhatKyThaoTac`.
+    2. **Kiểm tra & Xác thực**:
+       - Nạp dữ liệu qua `sqlcmd` với cờ UTF-8 `-f 65001`, toàn bộ 11/11 phần thực thi hoàn tất với 0 lỗi.
+       - View tồn kho `vw_TonKhoHienTai` phản ánh chính xác số liệu:
+         * Kho trung tâm: 29 mặt hàng, 2,102 đơn vị tồn, tổng trị giá ~2.42 tỷ VNĐ.
+         * Kho An Thới: 11 mặt hàng, 491 đơn vị tồn, tổng trị giá ~165.5 triệu VNĐ.
+         * Kho phụ kiện Tuna: 8 mặt hàng, 460 đơn vị tồn, tổng trị giá ~159.2 triệu VNĐ.
+       - `dotnet build -t:Compile`: Biên dịch dự án thành công với **0 Errors**.
 
 ---
 

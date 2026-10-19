@@ -113,30 +113,29 @@
 \begin{titlepage}
     \begin{center}
         {\Large \textbf{TRƯỜNG ĐẠI HỌC GIAO THÔNG VẬN TẢI}}\\[0.2cm]
-        {\Large \textbf{KHOA CÔNG NGHỆ THÔNG TIN}}\\[0.8cm]
+        {\Large \textbf{KHOA CÔNG NGHỆ THÔNG TIN}}\\[0.5cm]
         
         % Logo Trường ĐH Giao thông Vận tải
         \IfFileExists{GTVT1.jpg}{%
-            \includegraphics[width=4.8cm]{GTVT1.jpg}\\[0.5cm]
+            \includegraphics[width=4.2cm]{GTVT1.jpg}\\[0.4cm]
         }{%
-            \includegraphics[width=4.8cm]{logo_gtvt.jpg}\\[0.5cm]
+            \includegraphics[width=4.2cm]{logo_gtvt.jpg}\\[0.4cm]
         }
 
-        {\Huge \textbf{BÀI TẬP LỚN}}\\[0.4cm]
-        {\Large \textbf{Môn học : Lập trình Web}}\\[0.5cm]
-        {\LARGE \textbf{Đề tài : Xây Dựng Website Quản Lý Kho Hàng\\ Đa Chi Nhánh}}\\[0.8cm]
+        {\Huge \textbf{BÀI TẬP LỚN}}\\[0.35cm]
+        {\Large \textbf{Môn học : Lập trình Web}}\\[0.45cm]
+        {\LARGE \textbf{Đề tài : Xây Dựng Website Quản Lý Kho Hàng\\[0.35cm] Đa Chi Nhánh}}\\[0.6cm]
         
         % Thông tin sinh viên và giảng viên
-        \vspace{0.4cm}
-        \renewcommand{\arraystretch}{1.35}
+        \renewcommand{\arraystretch}{1.25}
         \begin{tabular}{@{}ll@{}}
-            \textbf{Giảng viên hướng dẫn} & : Đào Thị Lệ Thủy \\[0.15cm]
-            \textbf{Khoa}                 & : Công nghệ thông tin \\[0.15cm]
-            \textbf{Nhóm thực hiện}       & : Nhóm 3 -- Lớp N04 -- K65 \\[0.15cm]
-            \textbf{Sinh viên thực hiện}  & : Bùi Tuấn Anh -- 241230653 (Trưởng nhóm)\\[0.15cm]
-                                          & : Phạm Văn Hào -- 241224475 \\[0.15cm]
-                                          & : Nguyễn Minh Khuê -- 231230815 \\[0.15cm]
-                                          & : Nguyễn Thị Tuyết Mai -- 241230783 \\[0.15cm]
+            \textbf{Giảng viên hướng dẫn} & : Đào Thị Lệ Thủy \\[0.12cm]
+            \textbf{Khoa}                 & : Công nghệ thông tin \\[0.12cm]
+            \textbf{Nhóm thực hiện}       & : Nhóm 3 -- Lớp N04 -- K65 \\[0.12cm]
+            \textbf{Sinh viên thực hiện}  & : Bùi Tuấn Anh -- 241230653 (Trưởng nhóm)\\[0.12cm]
+                                          & : Phạm Văn Hào -- 241224475 \\[0.12cm]
+                                          & : Nguyễn Minh Khuê -- 231230815 \\[0.12cm]
+                                          & : Nguyễn Thị Tuyết Mai -- 241230783 \\[0.12cm]
         \end{tabular}
         
         \vfill
@@ -651,190 +650,65 @@ Hình~\ref{fig:so_do_er} biểu diễn Sơ đồ ER của hệ thống với cá
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[
-    entity/.style={rectangle, draw=black, line width=1pt, fill=gray!8, inner sep=5pt, font=\small\bfseries, align=center},
-    rel/.style={diamond, draw=black, line width=0.8pt, fill=white, aspect=1.8, inner sep=2pt, font=\scriptsize, align=center},
-    link/.style={draw=black, thick},
-    node distance=1.3cm and 2cm
-]
-    % Central: HANG_HOA & KHO
-    \node[entity] (hh) {HANG\_HOA};
-    \node[entity, right=4.2cm of hh] (kho) {KHO};
-    \node[rel] (luutru) at ($(hh)!0.5!(kho)$) {Lưu trữ};
-
-    % Phía trên HANG_HOA
-    \node[entity, above left=1.8cm and 0.2cm of hh] (nhom) {NHOM\_HANG};
-    \node[rel] (thuoc) at ($(hh)!0.5!(nhom)$) {Thuộc};
-
-    \node[entity, above right=1.8cm and 0.2cm of hh] (dvt) {DON\_VI\_TINH};
-    \node[rel] (co_dvt) at ($(hh)!0.5!(dvt)$) {Có ĐVT};
-
-    % Phía dưới HANG_HOA & KHO: PHIEU_NHAP
-    \node[entity, below=2.6cm of hh] (pn) {PHIEU\_NHAP};
-    \node[rel] (ct_nhap) at ($(hh)!0.5!(pn)$) {Chi tiết\\nhập};
-
-    \node[entity, left=2.2cm of pn] (ncc) {NHA\_CUNG\_CAP};
-    \node[rel] (cungcap) at ($(ncc)!0.5!(pn)$) {Cung cấp};
-
-    \node[rel] (nhap_kho) at ($(pn)!0.5!(kho)$) {Nhập tại};
-
-    % PHIEU_KIEM_KE
-    \node[entity, below=2.6cm of kho] (pkk) {PHIEU\_KIEM\_KE};
-    \node[rel] (kiem_kho) at ($(kho)!0.5!(pkk)$) {Kiểm tại};
-    \node[rel] (ct_kiem) at ($(hh)!0.5!(pkk)$) {Chi tiết\\kiểm};
-
-    % TAI_KHOAN phía trên KHO
-    \node[entity, above=2.2cm of kho] (tk) {TAI\_KHOAN};
-    \node[rel] (phancong) at ($(tk)!0.5!(kho)$) {Phụ trách};
-
-    % Lines with cardinalities
-    \draw[link] (hh) -- (luutru) node[midway, above] {\scriptsize N};
-    \draw[link] (luutru) -- (kho) node[midway, above] {\scriptsize M};
-
-    \draw[link] (hh) -- (thuoc) node[midway, left] {\scriptsize N};
-    \draw[link] (thuoc) -- (nhom) node[midway, left] {\scriptsize 1};
-
-    \draw[link] (hh) -- (co_dvt) node[midway, right] {\scriptsize N};
-    \draw[link] (co_dvt) -- (dvt) node[midway, right] {\scriptsize 1};
-
-    \draw[link] (ncc) -- (cungcap) node[midway, above] {\scriptsize 1};
-    \draw[link] (cungcap) -- (pn) node[midway, above] {\scriptsize N};
-
-    \draw[link] (pn) -- (ct_nhap) node[midway, left] {\scriptsize 1};
-    \draw[link] (ct_nhap) -- (hh) node[midway, left] {\scriptsize N};
-
-    \draw[link] (pn) -- (nhap_kho) node[midway, above] {\scriptsize N};
-    \draw[link] (nhap_kho) -- (kho) node[midway, above] {\scriptsize 1};
-
-    \draw[link] (pkk) -- (kiem_kho) node[midway, right] {\scriptsize N};
-    \draw[link] (kiem_kho) -- (kho) node[midway, right] {\scriptsize 1};
-
-    \draw[link] (pkk) -- (ct_kiem) node[midway, below] {\scriptsize 1};
-    \draw[link] (ct_kiem) -- (hh) node[midway, below] {\scriptsize N};
-
-    \draw[link] (tk) -- (phancong) node[midway, right] {\scriptsize N};
-    \draw[link] (phancong) -- (kho) node[midway, right] {\scriptsize M};
-\end{tikzpicture}
+\includegraphics[width=0.98\textwidth, height=11.5cm, keepaspectratio]{figures/fig_er_tong_quan.png}
 \caption{Mô hình thực thể -- liên kết tổng quát (Sơ đồ ER - Entity-Relationship Diagram)}
 \label{fig:so_do_er}
 \end{figure}
 
-\subsubsection{Các sơ đồ ER phân rã theo cụm nghiệp vụ trọng tâm}
+\subsubsection{Các sơ đồ ER phân rã chi tiết theo cụm nghiệp vụ}
 
-Để làm rõ cấu trúc liên kết chi tiết với các thuộc tính cụ thể mà không làm rối sơ đồ tổng thể, hệ thống được phân rã thành các phân hệ ER chi tiết:
+Để thể hiện trực quan đầy đủ cấu trúc thuộc tính, kiểu dữ liệu, các ràng buộc khóa (PK, FK, UK) và bản số tham gia (Crow's Foot Notation) chính xác như trong tài liệu đặc tả, hệ thống được phân rã thành 5 sơ đồ cụm nghiệp vụ:
 
-\textbf{a) Sơ đồ ER Cụm Quản trị Hệ thống, Nhân sự \& Phân quyền kho (RBAC):}
-
+\clearpage
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[
-    entity/.style={rectangle, draw=black, line width=0.8pt, fill=gray!8, inner sep=4pt, font=\scriptsize\bfseries, align=center},
-    rel/.style={diamond, draw=black, line width=0.7pt, fill=white, aspect=1.8, inner sep=2pt, font=\tiny, align=center},
-    link/.style={draw=black, thick},
-    node distance=1.2cm and 1.8cm
-]
-    \node[entity] (vt) {VAI\_TRO\\ \tiny(MaVaiTro, TenVaiTro)};
-    \node[entity, right=2.2cm of vt] (tk) {TAI\_KHOAN\\ \tiny(MaTaiKhoan, TenDangNhap,\\ \tiny MatKhauHash, TrangThai)};
-    \node[entity, right=2.2cm of tk] (nv) {NHAN\_VIEN\\ \tiny(MaNv, HoTen, SĐT,\\ \tiny Email, TrangThai)};
-    
-    \node[entity, below=1.8cm of tk] (tkk) {TAI\_KHOAN\_KHO\\ \tiny(MaTaiKhoan, MaKho)};
-    \node[entity, below=1.5cm of tkk] (kho) {KHO\\ \tiny(MaKho, TenKho, DiaChi)};
-    \node[entity, below=1.8cm of nv] (nk) {NHAT\_KY\_THAO\_TAC\\ \tiny(MaNhatKy, HanhDong,\\ \tiny BangTacDong, ThoiDiem)};
-
-    \node[rel] (r_vt) at ($(vt)!0.5!(tk)$) {Có vai trò};
-    \node[rel] (r_nv) at ($(tk)!0.5!(nv)$) {Sở hữu};
-    \node[rel] (r_tkk) at ($(tk)!0.5!(tkk)$) {Phân quyền};
-    \node[rel] (r_kho) at ($(tkk)!0.5!(kho)$) {Truy cập};
-    \node[rel] (r_nk) at ($(tk)!0.5!(nk)$) {Ghi vết};
-
-    \draw[link] (vt) -- (r_vt) node[midway, above]{\tiny 1};
-    \draw[link] (r_vt) -- (tk) node[midway, above]{\tiny N};
-    \draw[link] (nv) -- (r_nv) node[midway, above]{\tiny 1};
-    \draw[link] (r_nv) -- (tk) node[midway, above]{\tiny 1};
-    \draw[link] (tk) -- (r_tkk) node[midway, right]{\tiny 1};
-    \draw[link] (r_tkk) -- (tkk) node[midway, right]{\tiny N};
-    \draw[link] (tkk) -- (r_kho) node[midway, right]{\tiny N};
-    \draw[link] (r_kho) -- (kho) node[midway, right]{\tiny 1};
-    \draw[link] (tk) |- (r_nk);
-    \draw[link] (r_nk) -- (nk) node[midway, above]{\tiny N};
-\end{tikzpicture}
-\caption{Sơ đồ ER Cụm Quản trị Hệ thống \& Phân quyền kho (RBAC)}
+{\bfseries\large a) Cụm 1: Quản trị Hệ thống, Nhân sự \& Phân quyền kho (RBAC)}\par\vspace{0.3cm}
+\includegraphics[width=0.92\textwidth, height=13cm, keepaspectratio]{figures/fig_er_rbac.png}
+\vspace{0.2cm}
+\caption{Sơ đồ ER Cụm Quản trị Hệ thống, Nhân sự \& Phân quyền kho (RBAC)}
 \label{fig:er_rbac}
 \end{figure}
 
-\textbf{b) Sơ đồ ER Cụm Chuỗi cung ứng (Nhập hàng \& Trả hàng NCC):}
-
+\clearpage
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[
-    entity/.style={rectangle, draw=black, line width=0.8pt, fill=gray!8, inner sep=4pt, font=\scriptsize\bfseries, align=center},
-    rel/.style={diamond, draw=black, line width=0.7pt, fill=white, aspect=1.8, inner sep=2pt, font=\tiny, align=center},
-    link/.style={draw=black, thick},
-    node distance=1.2cm and 1.8cm
-]
-    \node[entity] (ncc) {DON\_VI\_CAP\_HANG\\ \tiny(MaNcc, TenNcc, MST,\\ \tiny SĐT, NoCanTra)};
-    
-    \node[entity, above right=1cm and 2cm of ncc] (pn) {PHIEU\_NHAP\\ \tiny(MaPhieuNhap, MaPhieu,\\ \tiny NgayLap, TongTien, TrangThai)};
-    \node[entity, below right=1cm and 2cm of ncc] (pt) {PHIEU\_TRA\_HANG\\ \tiny(MaPhieuTraHang, MaPhieu,\\ \tiny NgayTra, TongTienHoan, TrangThai)};
+{\bfseries\large b) Cụm 2: Danh mục Hàng hóa, Định mức tồn \& Đơn vị tính}\par\vspace{0.3cm}
+\includegraphics[width=0.92\textwidth, height=13cm, keepaspectratio]{figures/fig_er_hanghoa.png}
+\vspace{0.2cm}
+\caption{Sơ đồ ER Cụm Danh mục Hàng hóa, Định mức tồn \& Đơn vị tính}
+\label{fig:er_hanghoa}
+\end{figure}
 
-    \node[entity, right=2.2cm of pn] (ctpn) {CHI\_TIET\_PHIEU\_NHAP\\ \tiny(MaCtphieuNhap, SoLuong,\\ \tiny DonGiaNhap, ThanhTien)};
-    \node[entity, right=2.2cm of pt] (ctpt) {CHI\_TIET\_TRA\_HANG\\ \tiny(MaCtphieuTra, SoLuong,\\ \tiny DonGiaTra, LyDoTra)};
-
-    \node[entity] (hh) at ($(ctpn)!0.5!(ctpt) + (2.5, 0)$) {HANG\_HOA\\ \tiny(MaHang, MaHangNoiBo,\\ \tiny TenHang, GiaVon, GiaBan)};
-
-    \node[rel] (r_pn) at ($(ncc)!0.5!(pn)$) {Cung cấp};
-    \node[rel] (r_pt) at ($(ncc)!0.5!(pt)$) {Nhận trả};
-    \node[rel] (r_ctpn) at ($(pn)!0.5!(ctpn)$) {Gồm};
-    \node[rel] (r_ctpt) at ($(pt)!0.5!(ctpt)$) {Gồm};
-    \node[rel] (r_hhpn) at ($(ctpn)!0.5!(hh)$) {Thuộc};
-    \node[rel] (r_hhpt) at ($(ctpt)!0.5!(hh)$) {Thuộc};
-
-    \draw[link] (ncc) |- (r_pn); \draw[link] (r_pn) -- (pn) node[midway, above]{\tiny N};
-    \draw[link] (ncc) |- (r_pt); \draw[link] (r_pt) -- (pt) node[midway, below]{\tiny N};
-    \draw[link] (pn) -- (r_ctpn); \draw[link] (r_ctpn) -- (ctpn) node[midway, above]{\tiny N};
-    \draw[link] (pt) -- (r_ctpt); \draw[link] (r_ctpt) -- (ctpt) node[midway, below]{\tiny N};
-    \draw[link] (ctpn) -- (r_hhpn); \draw[link] (r_hhpn) -- (hh) node[midway, above]{\tiny 1};
-    \draw[link] (ctpt) -- (r_hhpt); \draw[link] (r_hhpt) -- (hh) node[midway, below]{\tiny 1};
-\end{tikzpicture}
+\clearpage
+\begin{figure}[H]
+\centering
+{\bfseries\large c) Cụm 3: Chuỗi cung ứng (Nhập hàng \& Trả hàng Nhà cung cấp)}\par\vspace{0.3cm}
+\includegraphics[width=0.95\textwidth, height=13cm, keepaspectratio]{figures/fig_er_supply_chain.png}
+\vspace{0.2cm}
 \caption{Sơ đồ ER Cụm Chuỗi cung ứng Nhập kho \& Xuất trả nhà cung cấp}
 \label{fig:er_supply_chain}
 \end{figure}
 
-\textbf{c) Sơ đồ ER Cụm Điều chuyển kho \& Kiểm kê - Cân bằng kho:}
-
+\clearpage
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[
-    entity/.style={rectangle, draw=black, line width=0.8pt, fill=gray!8, inner sep=4pt, font=\scriptsize\bfseries, align=center},
-    rel/.style={diamond, draw=black, line width=0.7pt, fill=white, aspect=1.8, inner sep=2pt, font=\tiny, align=center},
-    link/.style={draw=black, thick},
-    node distance=1.2cm and 1.8cm
-]
-    \node[entity] (kho) {KHO\\ \tiny(MaKho, TenKho)};
-    
-    \node[entity, above right=1cm and 2cm of kho] (pck) {PHIEU\_CHUYEN\_KHO\\ \tiny(MaPhieuChuyen, MaPhieu,\\ \tiny KhoNguon, KhoDich, TrangThai)};
-    \node[entity, below right=1cm and 2cm of kho] (pkk) {PHIEU\_KIEM\_KE\\ \tiny(MaPhieuKiemKe, MaPhieu,\\ \tiny NgayKiemKe, TrangThai)};
-
-    \node[entity, right=2.2cm of pck] (ctck) {CHI\_TIET\_CHUYEN\\ \tiny(MaCtphieuChuyen,\\ \tiny SoLuong, SoLuongNhan)};
-    \node[entity, right=2.2cm of pkk] (ctkk) {CHI\_TIET\_KIEM\_KE\\ \tiny(MaCtkiemKe, TonSoSach,\\ \tiny ThucTe, DonGiaVon)};
-
-    \node[entity, below=1.2cm of pkk] (pdc) {PHIEU\_DIEU\_CHINH\\ \tiny(MaPhieuDieuChinh,\\ \tiny NgayDuyet, TrangThai)};
-
-    \node[rel] (r_ck) at ($(kho)!0.5!(pck)$) {Xuất/Nhập};
-    \node[rel] (r_kk) at ($(kho)!0.5!(pkk)$) {Kiểm tại};
-    \node[rel] (r_ctck) at ($(pck)!0.5!(ctck)$) {Gồm};
-    \node[rel] (r_ctkk) at ($(pkk)!0.5!(ctkk)$) {Gồm};
-    \node[rel] (r_dc) at ($(pkk)!0.5!(pdc)$) {Sinh ra};
-
-    \draw[link] (kho) |- (r_ck); \draw[link] (r_ck) -- (pck) node[midway, above]{\tiny N};
-    \draw[link] (kho) |- (r_kk); \draw[link] (r_kk) -- (pkk) node[midway, below]{\tiny N};
-    \draw[link] (pck) -- (r_ctck); \draw[link] (r_ctck) -- (ctck) node[midway, above]{\tiny N};
-    \draw[link] (pkk) -- (r_ctkk); \draw[link] (r_ctkk) -- (ctkk) node[midway, below]{\tiny N};
-    \draw[link] (pkk) -- (r_dc); \draw[link] (r_dc) -- (pdc) node[midway, right]{\tiny 1};
-\end{tikzpicture}
-\caption{Sơ đồ ER Cụm Điều chuyển kho \& Kiểm kê cân bằng tồn kho}
+{\bfseries\large d) Cụm 4: Luân chuyển nội bộ, Xuất hủy \& Kiểm kê - Cân bằng kho}\par\vspace{0.3cm}
+\includegraphics[width=0.90\textwidth, height=13.5cm, keepaspectratio]{figures/fig_er_transfer_audit.png}
+\vspace{0.2cm}
+\caption{Sơ đồ ER Cụm Điều chuyển kho, Xuất hủy \& Kiểm kê cân bằng kho}
 \label{fig:er_transfer_audit}
 \end{figure}
+
+\clearpage
+\begin{figure}[H]
+\centering
+{\bfseries\large e) Cụm 5: Bán hàng \& Quản lý dòng tiền (Khách hàng \& Khoản thu)}\par\vspace{0.3cm}
+\includegraphics[width=0.92\textwidth, height=12.5cm, keepaspectratio]{figures/fig_er_sales.png}
+\vspace{0.2cm}
+\caption{Sơ đồ ER Cụm Đơn bán hàng \& Quản lý khoản thu}
+\label{fig:er_sales}
+\end{figure}
+\clearpage
 
 \subsection{Mô hình dữ liệu quan hệ (Sơ đồ RM - Relational Model)}
 Áp dụng các quy tắc chuyển đổi từ mô hình ER sang mô hình quan hệ (Mapping ER to Relational Model), hệ thống chuẩn hóa cơ sở dữ liệu đạt chuẩn dạng chuẩn 3 (3NF) nhằm loại bỏ dư thừa dữ liệu và ngăn ngừa dị thường thao tác.
@@ -1002,9 +876,9 @@ Các ràng buộc khóa ngoại (Foreign Key) đảm bảo tính toàn vẹn tha
 
 \begin{table}[H]
 \centering
-\small
-\renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\textwidth}{|p{3.8cm}|p{2.8cm}|p{2.2cm}|p{2.8cm}|p{2.2cm}|Y|}
+\footnotesize
+\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|p{2.6cm}|p{2.0cm}|p{2.6cm}|p{2.0cm}|Y|}
 \hline
 \rowcolor{tableheader}
 \textbf{Tên ràng buộc} & \textbf{Bảng tham chiếu ($R$)} & \textbf{Khóa ngoại ($FK$)} & \textbf{Bảng cha ($S$)} & \textbf{Khóa chính ($PK$)} & \textbf{Hành vi xóa} \\
@@ -1023,8 +897,6 @@ FK\_HangHoa\_NhomHang & HangHoa & MaNhom & NhomHang & MaNhom & NO ACTION \\
 \hline
 FK\_HinhAnh\_HangHoa & HinhAnhHangHoa & MaHang & HangHoa & MaHang & CASCADE \\
 \hline
-FK\_NguongTon\_HangHoa & NguongTonKho & MaHang & HangHoa & MaHang & CASCADE \\
-\hline
 FK\_NguongTon\_Kho & NguongTonKho & MaKho & Kho & MaKho & CASCADE \\
 \hline
 FK\_PhieuNhap\_Kho & PhieuNhap & MaKho & Kho & MaKho & NO ACTION \\
@@ -1037,41 +909,21 @@ FK\_CTPN\_HangHoa & ChiTietPhieuNhap & MaHang & HangHoa & MaHang & NO ACTION \\
 \hline
 FK\_PhieuTra\_Kho & PhieuTraHangNhap & MaKho & Kho & MaKho & NO ACTION \\
 \hline
-FK\_PhieuTra\_NCC & PhieuTraHangNhap & MaNcc & DonViCapHang & MaNcc & NO ACTION \\
-\hline
 FK\_CTPT\_PhieuTra & ChiTietPhieuTra & MaPhieuTra & PhieuTraHangNhap & MaPhieuTra & CASCADE \\
-\hline
-FK\_CTPT\_HangHoa & ChiTietPhieuTra & MaHang & HangHoa & MaHang & NO ACTION \\
-\hline
-FK\_PhieuXuat\_Kho & PhieuXuat & MaKho & Kho & MaKho & NO ACTION \\
-\hline
-FK\_CTPX\_PhieuXuat & ChiTietPhieuXuat & MaPhieuXuat & PhieuXuat & MaPhieuXuat & CASCADE \\
-\hline
-FK\_CTPX\_HangHoa & ChiTietPhieuXuat & MaHang & HangHoa & MaHang & NO ACTION \\
 \hline
 FK\_ChuyenKho\_KhoNguon & PhieuChuyenKho & MaKhoNguon & Kho & MaKho & NO ACTION \\
 \hline
-FK\_ChuyenKho\_KhoDich & PhieuChuyenKho & MaKhoDich & Kho & MaKho & NO ACTION \\
-\hline
 FK\_CTPCK\_PhieuChuyen & ChiTietPhieuChuyen & MaPhieuChuyen & PhieuChuyenKho & MaPhieuChuyen & CASCADE \\
-\hline
-FK\_CTPCK\_HangHoa & ChiTietPhieuChuyen & MaHang & HangHoa & MaHang & NO ACTION \\
 \hline
 FK\_PhieuKiem\_Kho & PhieuKiemKe & MaKho & Kho & MaKho & NO ACTION \\
 \hline
 FK\_CTPKK\_PhieuKiem & ChiTietPhieuKiem & MaPhieuKiem & PhieuKiemKe & MaPhieuKiem & CASCADE \\
 \hline
-FK\_CTPKK\_HangHoa & ChiTietPhieuKiem & MaHang & HangHoa & MaHang & NO ACTION \\
-\hline
 FK\_DieuChinh\_PhieuKiem & PhieuDieuChinh & MaPhieuKiem & PhieuKiemKe & MaPhieuKiem & NO ACTION \\
-\hline
-FK\_CTPDC\_DieuChinh & ChiTietDieuChinh & MaPhieuDieuChinh & PhieuDieuChinh & MaPhieuDieuChinh & CASCADE \\
 \hline
 FK\_DonBan\_KhachHang & DonBan & MaKh & KhachHang & MaKh & NO ACTION \\
 \hline
 FK\_CTDB\_DonBan & ChiTietDonBan & MaDonBan & DonBan & MaDonBan & CASCADE \\
-\hline
-FK\_KhoanThu\_DonBan & KhoanThu & MaDonBan & DonBan & MaDonBan & CASCADE \\
 \hline
 \end{tabularx}
 \caption{Bảng các ràng buộc toàn vẹn tham chiếu trọng tâm trong cơ sở dữ liệu}

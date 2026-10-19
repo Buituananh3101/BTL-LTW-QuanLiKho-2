@@ -5,17 +5,17 @@
 \contentsline {table}{\numberline {2.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả Use Case UC-01: Lập và Cân bằng Phiếu Kiểm kho}}{17}{table.caption.6}%
 \contentsline {table}{\numberline {2.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả Use Case UC-02: Điều chuyển kho nội bộ liên chi nhánh}}{18}{table.caption.7}%
 \contentsline {table}{\numberline {2.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả Use Case UC-03: Nhập hàng từ Nhà cung cấp}}{19}{table.caption.8}%
-\contentsline {table}{\numberline {2.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng các ràng buộc toàn vẹn tham chiếu trọng tâm trong cơ sở dữ liệu}}{27}{table.caption.19}%
-\contentsline {table}{\numberline {2.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng HangHoa (Hàng hóa)}}{29}{table.caption.21}%
-\contentsline {table}{\numberline {2.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng Kho (Chi nhánh kho vật lý)}}{29}{table.caption.22}%
-\contentsline {table}{\numberline {2.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuNhap \& ChiTietPhieuNhap}}{30}{table.caption.23}%
-\contentsline {table}{\numberline {2.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuChuyenKho \& ChiTietPhieuChuyenKho}}{30}{table.caption.24}%
-\contentsline {table}{\numberline {2.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuKiemKe \& ChiTietPhieuKiemKe}}{31}{table.caption.25}%
+\contentsline {table}{\numberline {2.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng các ràng buộc toàn vẹn tham chiếu trọng tâm trong cơ sở dữ liệu}}{30}{table.caption.21}%
+\contentsline {table}{\numberline {2.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng HangHoa (Hàng hóa)}}{32}{table.caption.23}%
+\contentsline {table}{\numberline {2.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng Kho (Chi nhánh kho vật lý)}}{32}{table.caption.24}%
+\contentsline {table}{\numberline {2.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuNhap \& ChiTietPhieuNhap}}{33}{table.caption.25}%
+\contentsline {table}{\numberline {2.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuChuyenKho \& ChiTietPhieuChuyenKho}}{33}{table.caption.26}%
+\contentsline {table}{\numberline {2.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuKiemKe \& ChiTietPhieuKiemKe}}{34}{table.caption.27}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-01: Tính tồn tức thời sau Nhập hàng}}{41}{table.caption.34}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-02: Điều chuyển hàng hóa nội bộ}}{42}{table.caption.35}%
-\contentsline {table}{\numberline {4.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-03: Cân bằng kiểm kê và Khóa chứng từ}}{42}{table.caption.36}%
-\contentsline {table}{\numberline {4.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-04: Khắc phục lỗi Stacking Context Modal}}{43}{table.caption.37}%
-\contentsline {table}{\numberline {4.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-05: Sửa lỗi Token AntiForgery trên AJAX JSON}}{43}{table.caption.38}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-01: Tính tồn tức thời sau Nhập hàng}}{44}{table.caption.36}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-02: Điều chuyển hàng hóa nội bộ}}{45}{table.caption.37}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-03: Cân bằng kiểm kê và Khóa chứng từ}}{45}{table.caption.38}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-04: Khắc phục lỗi Stacking Context Modal}}{46}{table.caption.39}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-05: Sửa lỗi Token AntiForgery trên AJAX JSON}}{46}{table.caption.40}%
 \addvspace {10\p@ }
