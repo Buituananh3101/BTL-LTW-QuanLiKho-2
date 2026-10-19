@@ -1,18 +1,13 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-19 – Tạo Tài Liệu Giới Thiệu Dự Án & Hướng Dẫn Cài Đặt README.md (Phiên 183)
+Cập nhật lần cuối: 2026-10-19 – Chuẩn Hóa README.md: Bỏ Nhắc Phú Quốc & Thống Nhất Tên Hệ Thống (Phiên 184)
 
 ---
 
 ## Đang làm
-- Đã soạn thảo hoàn tất file [`README.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/README.md) chuẩn mực, chuyên nghiệp và đầy đủ cho toàn bộ dự án:
-  + Giới thiệu tổng quan hệ thống Quản lý kho hàng nội bộ đa chi nhánh KhoPro (Phú Quốc).
-  + Bảng tổng hợp công nghệ sử dụng: ASP.NET Core MVC (.NET 10), EF Core 10, SQL Server, Bootstrap 5, ClosedXML...
-  + Mô tả chi tiết 8 phân hệ cốt lõi: Hàng hóa, Nhập hàng, Chuyển kho, Trả hàng nhập, Xuất hủy, Kiểm kho & Cân bằng, Báo cáo & Thẻ kho, Quản trị & Nhật ký thao tác.
-  + Sơ đồ luồng vận hành luân chuyển hàng hóa đa chi nhánh bằng Mermaid diagram.
-  + Hướng dẫn cài đặt và thiết lập nhanh trên máy mới với 2 tùy chọn CSDL: Restore file backup `docs/QuanLyKhoPhuQuocLTW.bak` (5 giây) hoặc chạy script trọn gói `docs/QuanLyKhoPhuQuocLTW_FullScript.sql`.
-  + Danh sách tài khoản kiểm thử nghiệm thu (`quanly`, `thukho`, `banhang` / `123456`) kèm phạm vi phân quyền.
-  + Sơ đồ cây thư mục dự án và 5 quy ước kỹ thuật nổi bật (Tồn kho động qua View, Transaction toàn vẹn, Chứng từ bất biến, Khối Lego UI, Z-Index 6 tầng).
+- Hệ thống đã chuẩn hóa toàn bộ tài liệu hướng dẫn [`README.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/README.md) theo tên gọi chuẩn: **"KhoPro – Hệ Thống Quản Lý Kho Hàng Nội Bộ Đa Chi Nhánh"**.
+- Đã gỡ bỏ toàn bộ các tham chiếu địa danh cụ thể (Phú Quốc, đảo, phà biển, phường xã địa phương) trong phần mô tả, luồng nghiệp vụ và sơ đồ Mermaid.
+- Giữ nguyên các hướng dẫn kỹ thuật thiết lập CSDL, chạy ứng dụng và tài khoản kiểm thử demo.
 
 ---
 
@@ -21,6 +16,18 @@ Cập nhật lần cuối: 2026-10-19 – Tạo Tài Liệu Giới Thiệu Dự 
 2. Chuẩn bị slide thuyết trình hoặc báo cáo bảo vệ đồ án.
 
 ---
+
+- **Chuẩn Hóa README.md: Bỏ Nhắc Phú Quốc & Thống Nhất Tên Hệ Thống (Phiên 184)**:
+  - **Nhu cầu**: Người dùng yêu cầu viết lại file README, loại bỏ hoàn toàn các nhắc đến Phú Quốc, thống nhất tên gọi đề tài là "Hệ Thống Quản Lý Kho Hàng Nội Bộ Đa Chi Nhánh".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Chuẩn hóa tiêu đề và trích dẫn đầu trang trong `README.md` thành: `KhoPro – Hệ Thống Quản Lý Kho Hàng Nội Bộ Đa Chi Nhánh`.
+    2. Rà soát và thay thế toàn bộ các từ ngữ mang tính địa phương / đảo Phú Quốc:
+       - Thay thế mô tả chuỗi biệt lập tại Phú Quốc bằng chuỗi cung ứng và phân phối hàng hóa đa chi nhánh.
+       - Chuẩn hóa vai trò 3 chi nhánh kho (Kho trung tâm điều phối, Kho An Thới phân phối bán lẻ, Kho phụ kiện lưu trữ vật tư & thiết bị).
+       - Loại bỏ "rò rỉ van trên phà biển", "kiểm đếm cập cảng", "đang trung chuyển qua phà" thành "vận chuyển liên chi nhánh", "đang trung chuyển liên kho".
+       - Cập nhật dòng kết cuối trang: `*Dự án Bài tập lớn Lập trình Web – KhoPro: Hệ Thống Quản Lý Kho Hàng Nội Bộ Đa Chi Nhánh.*`
+    3. Kiểm tra bằng `Select-String`: 0 kết quả nhắc đến Phú Quốc trong phần nội dung văn bản.
+
 
 - **Tạo Tài Liệu Giới Thiệu Dự Án & Hướng Dẫn Cài Đặt README.md (Phiên 183)**:
   - **Nhu cầu**: Người dùng yêu cầu: "bạn có thể viết file readme hướng dẫn và giới thiệu nhanh về dự án giúp tôi ko".

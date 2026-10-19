@@ -1,6 +1,6 @@
 # 📦 KhoPro – Hệ Thống Quản Lý Kho Hàng Nội Bộ Đa Chi Nhánh
 
-> **Bài tập lớn môn Lập trình Web** – Xây dựng hệ thống quản trị kho hàng nội bộ chuyên nghiệp mô phỏng quy chuẩn thực tế (tương tự KiotViet/Sapo) cho chuỗi phân phối thiết bị gas, khí công nghiệp và phụ kiện tại Phú Quốc.
+> **Bài tập lớn môn Lập trình Web** – Xây dựng hệ thống quản trị kho hàng nội bộ chuyên nghiệp, chuẩn hóa theo mô hình thực tế cho chuỗi cung ứng và phân phối hàng hóa đa chi nhánh.
 
 ---
 
@@ -18,12 +18,12 @@
 
 ## 📖 Giới thiệu tổng quan
 
-**KhoPro** là ứng dụng Web quản lý kho hàng nội bộ đa chi nhánh, giải quyết bài toán luân chuyển hàng hóa, theo dõi tồn kho theo thời gian thực và kiểm soát hao hụt thất thoát giữa các kho biệt lập trên đảo Phú Quốc:
-- **Kho trung tâm** (Phường Dương Đông): Tổng kho tiếp nhận hàng hoá từ đất liền.
-- **Kho An Thới** (Phường An Thới): Chi nhánh kho phía Nam đảo phục vụ bán lẻ và tàu bè.
-- **Kho phụ kiện Tuna** (Xã Dương Tơ): Kho chuyên trách vật tư cơ khí, đồng hồ áp suất và thiết bị an toàn.
+**KhoPro** là hệ thống Web quản lý kho hàng nội bộ đa chi nhánh, giải quyết bài toán luân chuyển hàng hóa, theo dõi tồn kho theo thời gian thực và kiểm soát hao hụt thất thoát giữa các chi nhánh kho trong toàn hệ thống:
+- **Kho trung tâm**: Tổng kho điều phối và tiếp nhận hàng hóa tập trung.
+- **Kho An Thới**: Chi nhánh kho phân phối và bán lẻ.
+- **Kho phụ kiện Tuna**: Kho chuyên trách vật tư cơ khí, đồng hồ áp suất và thiết bị an toàn.
 
-Hệ thống được thiết kế theo trải nghiệm giao diện **KiotViet UI**, tối ưu thao tác bàn phím (F1, F3, Esc), lọc dữ liệu không tải lại trang qua AJAX, phân trang động, và hỗ trợ trích xuất Excel/CSV chuyên nghiệp.
+Hệ thống được thiết kế theo trải nghiệm giao diện quản trị chuyên nghiệp, trực quan, tối ưu thao tác bàn phím (F1, F3, Esc), lọc dữ liệu không tải lại trang qua AJAX, phân trang động, và hỗ trợ trích xuất Excel/CSV tiện lợi.
 
 ---
 
@@ -35,7 +35,7 @@ Hệ thống được thiết kế theo trải nghiệm giao diện **KiotViet U
 | **Truy cập dữ liệu** | **Entity Framework Core 10** | Mô hình **Database-First**, tối ưu truy vấn AsNoTracking, Transactions |
 | **Cơ sở dữ liệu** | **Microsoft SQL Server** | Indexed Views (`vw_TonKhoHienTai`, `vw_BienDongKho`), Filtered Indexes, Check Constraints |
 | **Xác thực & Phân quyền** | **Cookie Authentication** | Claims-based Authorization: Phân quyền theo vai trò & Kho công tác |
-| **Giao diện người dùng** | **HTML5, CSS3, Bootstrap 5, JS ES6** | Hệ thống Lego UI chuẩn KiotViet: Dropdown, DatePicker, Toast, Prompt, Modal đa tầng |
+| **Giao diện người dùng** | **HTML5, CSS3, Bootstrap 5, JS ES6** | Hệ thống Lego UI module hóa: Dropdown, DatePicker, Toast, Prompt, Modal đa tầng |
 | **Biểu tượng (Icons)** | **Bootstrap Icons** | Icon trực quan, đồng bộ toàn hệ thống |
 | **Xử lý Excel** | **ClosedXML** | Xuất/nhập file Excel `.xlsx` chuyên nghiệp theo chuẩn định dạng tiền tệ và ngày tháng VN |
 
@@ -60,8 +60,8 @@ Hệ thống được thiết kế theo trải nghiệm giao diện **KiotViet U
 - Điều chuyển hàng hóa 2 chiều linh hoạt giữa 3 chi nhánh kho.
 - Quy trình chuẩn 2 bước an toàn:
   1. **Kho xuất**: Lập phiếu và xác nhận xuất hàng (`DA_XUAT`) ➜ Trừ tồn kho nguồn ngay lập tức.
-  2. **Kho nhận**: Kiểm đếm hàng cập cảng và xác nhận nhận (`DA_NHAN`) ➜ Cộng tồn kho đích.
-- **Xử lý thất thoát trên đường vận chuyển**: Cho phép số lượng nhận nhỏ hơn số lượng xuất (ví dụ rò rỉ van trên phà biển), ghi chú lý do thất thoát và lưu vết kiểm định.
+  2. **Kho nhận**: Kiểm đếm hàng thực tế và xác nhận nhận (`DA_NHAN`) ➜ Cộng tồn kho đích.
+- **Xử lý thất thoát trên đường vận chuyển**: Cho phép số lượng nhận nhỏ hơn số lượng xuất (ví dụ va chạm, hao hụt trong quá trình vận chuyển liên chi nhánh), ghi chú lý do thất thoát và lưu vết kiểm định.
 
 ### 4. Trả hàng nhập (`/TraHangNhap`)
 - Trả lại hàng cận date, vỏ bình hư hỏng hoặc phụ kiện trầy xước cho Nhà cung cấp.
@@ -83,9 +83,9 @@ Hệ thống được thiết kế theo trải nghiệm giao diện **KiotViet U
 
 ### 8. Quản trị & Nhật ký (`/NguoiDung`, `/NhaCungCap`, `/Kho`)
 - Quản lý người dùng, phân quyền vai trò (`Quản lý`, `Thủ kho`, `Bán hàng`) và gán kho làm việc.
-- Quản lý nhóm nhà cung cấp và thông tin đối tác KiotViet.
+- Quản lý nhóm nhà cung cấp và thông tin đối tác cung ứng.
 - **Nhật ký thao tác hệ thống (`NhatKyThaoTac`)**: Ghi nhận toàn bộ thao tác thêm, sửa, duyệt, hủy chứng từ phục vụ hậu kiểm.
-- **Hệ thống trợ giúp KiotHelp (F1)**: Modal hướng dẫn quy trình và phím tắt chuyên biệt cho từng màn hình.
+- **Hệ thống trợ giúp trực quan (F1)**: Modal hướng dẫn quy trình và phím tắt chuyên biệt cho từng màn hình.
 
 ---
 
@@ -93,22 +93,22 @@ Hệ thống được thiết kế theo trải nghiệm giao diện **KiotViet U
 
 ```mermaid
 flowchart TD
-    NCC["Nhà cung cấp"] -->|1. Nhập hàng| Kho1["Kho trung tâm (Kho 1)"]
+    NCC["Nhà cung cấp"] -->|"1. Nhập hàng"| Kho1["Kho trung tâm"]
     
-    subgraph "Luân chuyển nội bộ"
-        Kho1 -->|2. Xuất chuyển (DA_XUAT)| Trans["Đang trung chuyển qua phà"]
-        Trans -->|3. Nhận hàng (DA_NHAN)| Kho2["Kho An Thới (Kho 2)"]
-        Trans -->|3. Nhận hàng (DA_NHAN)| Kho3["Kho phụ kiện Tuna (Kho 3)"]
+    subgraph Sub1 ["Luân chuyển nội bộ"]
+        Kho1 -->|"2. Xuất chuyển - DA_XUAT"| Trans["Đang trung chuyển liên kho"]
+        Trans -->|"3. Nhận hàng - DA_NHAN"| Kho2["Kho An Thới"]
+        Trans -->|"3. Nhận hàng - DA_NHAN"| Kho3["Kho phụ kiện Tuna"]
     end
     
-    Kho1 -->|4. Trả hàng lỗi| NCC
-    Kho2 -->|5. Xuất hủy hàng hư hỏng| Disposal["Hủy bỏ / Thanh lý"]
+    Kho1 -->|"4. Trả hàng lỗi"| NCC
+    Kho2 -->|"5. Xuất hủy hàng hỏng"| Disposal["Hủy bỏ / Thanh lý"]
     
-    subgraph "Kiểm soát kho"
+    subgraph Sub2 ["Kiểm soát kho"]
         Count["Kiểm kê định kỳ"] --> Diff{"Có chênh lệch?"}
-        Diff -->|Có| Adj["Phiếu điều chỉnh cân bằng"]
-        Diff -->|Khớp 100%| Done["Chốt kiểm kê"]
-        Adj -->|Cập nhật sổ sách| Stock["vw_TonKhoHienTai"]
+        Diff -->|"Có"| Adj["Phiếu điều chỉnh cân bằng"]
+        Diff -->|"Khớp số lượng"| Done["Chốt kiểm kê"]
+        Adj -->|"Cập nhật sổ sách"| Stock["vw_TonKhoHienTai"]
     end
     
     Kho1 -.-> Stock
@@ -218,7 +218,7 @@ BTL-LTW-QuanLiKho-2/
 │   │   ├── XuatHuy/               # Danh sách & Form xuất hủy hàng hỏng
 │   │   ├── PhieuKiemKe/           # Kiểm kê kho & cân bằng chênh lệch
 │   │   └── BaoCao/                # Báo cáo tồn kho & Thẻ kho
-│   ├── wwwroot/                   # Tài nguyên tĩnh (CSS KiotViet, JS Lego, Icons, Ảnh)
+│   ├── wwwroot/                   # Tài nguyên tĩnh (CSS hệ thống, JS Lego, Icons, Ảnh)
 │   ├── appsettings.json           # Cấu hình ConnectionString và ứng dụng
 │   └── Program.cs                 # Cấu hình DI, Middleware, Authentication
 ├── docs/                          # Tài liệu đặc tả, quyết định kỹ thuật & CSDL
@@ -239,13 +239,13 @@ BTL-LTW-QuanLiKho-2/
 2. **Tính toàn vẹn dữ liệu qua Transaction**: Mọi thao tác lưu chứng từ kèm chi tiết, chuyển kho 2 bước, cân bằng kho đều được bọc trong `BeginTransactionAsync()`.
 3. **Nguyên tắc bất biến của chứng từ**: Chứng từ đã hoàn thành (`DA_XAC_NHAN`, `DA_NHAN`, `DA_DIEU_CHINH`) bị khóa tuyệt đối, không cho phép sửa/xóa nhằm đảm bảo tính minh bạch kế toán kho.
 4. **Hệ thống Lego UI tái sử dụng**:
-   - Bộ lọc ngày nhanh `_KiotDateFilter` (Hôm nay, Hôm qua, Tuần này, Tháng này, Tùy chỉnh).
+   - Bộ lọc thời gian nhanh `_KiotDateFilter` (Hôm nay, Hôm qua, Tuần này, Tháng này, Tùy chỉnh).
    - Combobox tìm kiếm và thêm nhanh đối tác `KiotFilter.initCombobox`.
-   - Phân trang chuẩn KiotViet `_Pagination` hỗ trợ AJAX.
-   - Hộp thoại xác nhận thay thế native alert `KiotPrompt`.
+   - Phân trang phân đoạn `_Pagination` hỗ trợ nạp dữ liệu động qua AJAX.
+   - Hộp thoại xác nhận tương tác thay thế native alert `KiotPrompt`.
    - Thông báo Toast góc màn hình `KiotToast`.
 5. **Kiến trúc Z-Index 6 tầng**: Ngăn chặn triệt để tình trạng dropdown in-page đè lên Header hoặc Modal bị giam cầm trong Stacking Context cục bộ.
 
 ---
 
-*Dự án Bài tập lớn Lập trình Web – KhoPro Quản lý kho hàng nội bộ đa chi nhánh Phú Quốc.*
+*Dự án Bài tập lớn Lập trình Web – KhoPro: Hệ Thống Quản Lý Kho Hàng Nội Bộ Đa Chi Nhánh.*
