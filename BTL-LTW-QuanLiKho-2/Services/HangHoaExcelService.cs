@@ -133,131 +133,33 @@ public class HangHoaExcelService : IHangHoaExcelService
     /// </summary>
     public byte[] ExportExcel(List<HangHoaItemVM> items, List<string>? selectedColumns)
     {
-        var allColumnDefs = new List<(string Key, string Title)>
+        var allColMap = new Dictionary<string, ExcelExportColumn<HangHoaItemVM>>(StringComparer.OrdinalIgnoreCase)
         {
-            ("LoaiHang", "Loại hàng"),
-            ("NhomHang", "Nhóm hàng"),
-            ("MaHang", "Mã hàng"),
-            ("TenHang", "Tên hàng"),
-            ("GiaBan", "Giá bán"),
-            ("GiaVon", "Giá vốn"),
-            ("TonKho", "Tồn kho"),
-            ("TonNhoNhat", "Tồn nhỏ nhất"),
-            ("TonLonNhat", "Tồn lớn nhất"),
-            ("Dvt", "Đơn vị tính"),
-            ("ThuocTinh", "Thuộc tính"),
-            ("TrongLuong", "Trọng lượng"),
-            ("DonViTrongLuong", "Đơn vị trọng lượng"),
-            ("ViTri", "Vị trí"),
-            ("MoTa", "Mô tả"),
-            ("TrangThai", "Trạng thái")
+            ["LoaiHang"] = new("Loại hàng", x => "Hàng hóa"),
+            ["NhomHang"] = new("Nhóm hàng", x => x.TenNhom),
+            ["MaHang"] = new("Mã hàng", x => x.MaHangNoiBo, alignment: XLAlignmentHorizontalValues.Center),
+            ["TenHang"] = new("Tên hàng", x => x.TenHang),
+            ["GiaBan"] = new("Giá bán", x => x.GiaBan, ExcelColumnType.Currency),
+            ["GiaVon"] = new("Giá vốn", x => x.GiaVon, ExcelColumnType.Currency),
+            ["TonKho"] = new("Tồn kho", x => x.TonKho, ExcelColumnType.Number),
+            ["TonNhoNhat"] = new("Tồn nhỏ nhất", x => x.TonToiThieu ?? 0, ExcelColumnType.Number),
+            ["TonLonNhat"] = new("Tồn lớn nhất", x => x.TonCaoNhat ?? 0, ExcelColumnType.Number),
+            ["Dvt"] = new("Đơn vị tính", x => x.TenDvt, alignment: XLAlignmentHorizontalValues.Center),
+            ["ThuocTinh"] = new("Thuộc tính", x => x.ThuocTinhs != null && x.ThuocTinhs.Any() ? string.Join(",", x.ThuocTinhs.Select(a => $"{a.Ten}:{a.GiaTri}")) : ""),
+            ["TrongLuong"] = new("Trọng lượng", x => x.TrongLuong ?? 0, ExcelColumnType.Number),
+            ["DonViTrongLuong"] = new("Đơn vị trọng lượng", x => x.DonViTrongLuong ?? "g", alignment: XLAlignmentHorizontalValues.Center),
+            ["ViTri"] = new("Vị trí", x => x.ViTri ?? ""),
+            ["MoTa"] = new("Mô tả", x => x.MoTa ?? x.QuyCach ?? ""),
+            ["TrangThai"] = new("Trạng thái", x => x.TrangThai == "NGUNG_BAN" ? "Ngừng bán" : "Đang kinh doanh", alignment: XLAlignmentHorizontalValues.Center)
         };
 
         var selectedCols = (selectedColumns != null && selectedColumns.Count > 0)
-            ? allColumnDefs.Where(c => selectedColumns.Contains(c.Key, StringComparer.OrdinalIgnoreCase)).ToList()
-            : allColumnDefs;
+            ? selectedColumns.Where(allColMap.ContainsKey).Select(k => allColMap[k]).ToList()
+            : allColMap.Values.ToList();
 
-        if (!selectedCols.Any()) selectedCols = allColumnDefs;
+        if (!selectedCols.Any()) selectedCols = allColMap.Values.ToList();
 
-        using var workbook = new XLWorkbook();
-        var ws = workbook.Worksheets.Add("DanhSachHangHoa");
-
-        // Header
-        for (int colIdx = 0; colIdx < selectedCols.Count; colIdx++)
-        {
-            ws.Cell(1, colIdx + 1).Value = selectedCols[colIdx].Title;
-        }
-        ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, selectedCols.Count));
-        ws.Row(1).Height = 28;
-
-        // Data rows
-        int rowIdx = 2;
-        foreach (var item in items)
-        {
-            for (int colIdx = 0; colIdx < selectedCols.Count; colIdx++)
-            {
-                var key = selectedCols[colIdx].Key;
-                var cell = ws.Cell(rowIdx, colIdx + 1);
-
-                switch (key)
-                {
-                    case "LoaiHang":
-                        cell.Value = "Hàng hóa";
-                        break;
-                    case "NhomHang":
-                        cell.Value = item.TenNhom;
-                        break;
-                    case "MaHang":
-                        cell.Value = item.MaHangNoiBo;
-                        break;
-                    case "TenHang":
-                        cell.Value = item.TenHang;
-                        break;
-                    case "GiaBan":
-                        cell.Value = item.GiaBan;
-                        cell.Style.NumberFormat.Format = "#,##0";
-                        break;
-                    case "GiaVon":
-                        cell.Value = item.GiaVon;
-                        cell.Style.NumberFormat.Format = "#,##0";
-                        break;
-                    case "TonKho":
-                        cell.Value = item.TonKho;
-                        cell.Style.NumberFormat.Format = "#,##0";
-                        break;
-                    case "TonNhoNhat":
-                        cell.Value = item.TonToiThieu ?? 0;
-                        cell.Style.NumberFormat.Format = "#,##0";
-                        break;
-                    case "TonLonNhat":
-                        cell.Value = item.TonCaoNhat ?? 0;
-                        cell.Style.NumberFormat.Format = "#,##0";
-                        break;
-                    case "Dvt":
-                        cell.Value = item.TenDvt;
-                        break;
-                    case "ThuocTinh":
-                        if (item.ThuocTinhs != null && item.ThuocTinhs.Any())
-                        {
-                            cell.Value = string.Join(",", item.ThuocTinhs.Select(a => $"{a.Ten}:{a.GiaTri}"));
-                        }
-                        else
-                        {
-                            cell.Value = "";
-                        }
-                        break;
-                    case "TrongLuong":
-                        cell.Value = item.TrongLuong ?? 0;
-                        cell.Style.NumberFormat.Format = "#,##0";
-                        break;
-                    case "DonViTrongLuong":
-                        cell.Value = item.DonViTrongLuong ?? "g";
-                        break;
-                    case "ViTri":
-                        cell.Value = item.ViTri ?? "";
-                        break;
-                    case "MoTa":
-                        cell.Value = item.MoTa ?? item.QuyCach ?? "";
-                        break;
-                    case "TrangThai":
-                        cell.Value = item.TrangThai == "NGUNG_BAN" ? "Ngừng bán" : "Đang kinh doanh";
-                        break;
-                }
-            }
-            ws.Row(rowIdx).Height = 22;
-            rowIdx++;
-        }
-
-        if (rowIdx > 2)
-        {
-            ExcelHelper.ApplyTableBorders(ws.Range(2, 1, rowIdx - 1, selectedCols.Count));
-        }
-
-        ws.Columns().AdjustToContents();
-
-        using var ms = new MemoryStream();
-        workbook.SaveAs(ms);
-        return ms.ToArray();
+        return ExcelHelper.ExportToExcel("DanhSachHangHoa", selectedCols, items);
     }
 
     /// <summary>

@@ -53,50 +53,6 @@
     const fcost = l => Number(l.cost) || 0;
     const fdiff = l => l.act == null ? null : (Number(l.act) - fsys(l));
 
-    /* ===== CHỌN NGÀY GIỜ LẬP PHIẾU ===== */
-    const DOW = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-    const DT = { y: FM.created.getFullYear(), m: FM.created.getMonth() };
-
-    function calHTML(y, m, sel) {
-        const first = new Date(y, m, 1), pad = (first.getDay() + 6) % 7, days = new Date(y, m + 1, 0).getDate(), today = sod(new Date()).getTime();
-        let h = `<div class="cal"><div class="cal-g">` + DOW.map(x => `<span class="dow">${x}</span>`).join('');
-        for (let i = 0; i < pad; i++) h += '<span></span>';
-        for (let d = 1; d <= days; d++) {
-            const t = new Date(y, m, d).getTime();
-            let c = 'd';
-            if (t === today) c += ' today';
-            if (t === sel) c += ' sel';
-            h += `<button type="button" class="${c}" data-t="${t}">${d}</button>`;
-        }
-        return h + '</div></div>';
-    }
-
-    function paintDt() {
-        const pop = $('#dtPop');
-        if (!pop) return;
-        const sel = sod(FM.created).getTime(), times = [];
-        for (let h = 0; h < 24; h++) {
-            for (const m of [0, 30]) times.push(`${p2(h)}:${p2(m)}`);
-        }
-        const cur = dTime(FM.created);
-        pop.innerHTML = `
-            <div style="flex:1">
-                <div class="dtnav">
-                    <button type="button" class="rp-nav" data-dn="-1"><i class="bi bi-chevron-left"></i></button>
-                    <span>Tháng ${DT.m + 1}/${DT.y}</span>
-                    <button type="button" class="rp-nav" data-dn="1"><i class="bi bi-chevron-right"></i></button>
-                </div>
-                ${calHTML(DT.y, DT.m, sel)}
-            </div>
-            <div class="times">
-                ${times.map(t => `<button type="button" data-tm="${t}" class="${t === cur ? 'cur' : ''}">${t}</button>`).join('')}
-            </div>`;
-        const timesEl = $('.times', pop);
-        const curEl = $('.times .cur', pop);
-        if (timesEl && curEl) {
-            timesEl.scrollTop = curEl.offsetTop - (timesEl.clientHeight / 2) + (curEl.clientHeight / 2);
-        }
-    }
 
     /* ===== TÍNH TOÁN & VẼ GIAO DIỆN ===== */
     function counts() {
@@ -276,46 +232,6 @@
         refreshAll();
     }
 
-    /* ===== AUTOCOMPLETE TÌM KIẾM HÀNG HÓA (F3) ===== */
-    let sgList = [], sgIdx = 0, searchTimer = null;
-    function paintSuggest() {
-        const box = $('#suggest');
-        if (!box) return;
-        if (!sgList.length) {
-            box.classList.remove('show');
-            return;
-        }
-        box.innerHTML = sgList.map((p, i) => `
-            <div class="sg ${i === sgIdx ? 'act' : ''}" data-i="${i}">
-                <div class="th">${(p.tenHang.trim()[0] || 'H').toUpperCase()}</div>
-                <div class="nm">
-                    <b>${p.tenHang}</b>
-                    <small>${p.maHangNoiBo}</small>
-                </div>
-                <div class="nums">
-                    Giá: <b>${fmt(p.gia)}</b><br>
-                    Tồn: <b>${fmt(p.tonKho)}</b>
-                </div>
-            </div>`).join('');
-        box.dataset.owner = '#fSearch';
-        box.classList.add('show');
-    }
-
-    function queryProducts(kw) {
-        if (!kw.trim()) {
-            sgList = [];
-            paintSuggest();
-            return;
-        }
-        fetch(`${searchUrl}?q=${encodeURIComponent(kw.trim())}&warehouseId=${FM.warehouseId}`)
-            .then(r => r.json())
-            .then(data => {
-                sgList = data || [];
-                sgIdx = 0;
-                paintSuggest();
-            })
-            .catch(() => { sgList = []; paintSuggest(); });
-    }
 
     /* ===== POPUP ĐIỀU HƯỚNG & CÔNG CỤ ===== */
     document.addEventListener('mousedown', e => {
@@ -337,48 +253,17 @@
 
     /* ===== XỬ LÝ SỰ KIỆN FORM ===== */
     function bindFormEvents() {
-        const S = $('#fSearch');
-        if (S) {
-            S.addEventListener('input', () => {
-                clearTimeout(searchTimer);
-                searchTimer = setTimeout(() => queryProducts(S.value), 250);
-            });
-            S.addEventListener('keydown', e => {
-                if (e.key === 'ArrowDown' && sgList.length) {
-                    e.preventDefault();
-                    sgIdx = (sgIdx + 1) % sgList.length;
-                    paintSuggest();
-                } else if (e.key === 'ArrowUp' && sgList.length) {
-                    e.preventDefault();
-                    sgIdx = (sgIdx - 1 + sgList.length) % sgList.length;
-                    paintSuggest();
-                } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const p = sgList[sgIdx];
-                    if (p) {
-                        addProduct(p);
-                        S.value = '';
-                        sgList = [];
-                        paintSuggest();
-                    }
-                } else if (e.key === 'Escape') {
-                    sgList = [];
-                    paintSuggest();
+        // Tìm kiếm hàng hóa Autocomplete F3 dùng Lego KiotFilter.initProductSearch
+        if (!isReadOnly && window.KiotFilter && typeof KiotFilter.initProductSearch === 'function') {
+            KiotFilter.initProductSearch({
+                inputSelector: '#fSearch',
+                dropdownSelector: '#suggest',
+                apiUrl: searchUrl,
+                getWarehouseId: () => FM.warehouseId,
+                onSelect: function (product) {
+                    addProduct(product);
                 }
             });
-
-            $('#suggest').addEventListener('mousedown', e => {
-                const s = e.target.closest('.sg');
-                if (!s) return;
-                e.preventDefault();
-                addProduct(sgList[parseInt(s.dataset.i)]);
-                S.value = '';
-                sgList = [];
-                paintSuggest();
-                S.focus();
-            });
-
-            S.focus();
         }
 
         function togglePanel() {
@@ -502,77 +387,20 @@
         // Thu gọn / mở rộng panel phải
         $('#pTg')?.addEventListener('click', togglePanel);
 
-        // Chọn ngày giờ kiểm kho
-        const dI = $('#fDate');
-        const dtPop = $('#dtPop');
-        if (dI && dtPop && !isReadOnly) {
-            let lastFocusTime = 0;
-
-            const openDatePicker = () => {
-                DT.y = FM.created.getFullYear();
-                DT.m = FM.created.getMonth();
-                paintDt();
-                $$('.pop.show').forEach(p => {
-                    if (p !== dtPop) p.classList.remove('show');
-                });
-                dtPop.dataset.owner = '#fDate';
-                dtPop.classList.add('show');
-            };
-
-            dI.addEventListener('focus', () => {
-                lastFocusTime = Date.now();
-                openDatePicker();
-            });
-
-            dI.addEventListener('click', () => {
-                // Chống hiện tượng double-fire giữa focus và click khi click chuột lần đầu
-                if (Date.now() - lastFocusTime < 300) {
-                    return;
-                }
-                // Nếu đã mở từ trước và click lại vào ô input: toggle đóng/mở
-                if (dtPop.classList.contains('show')) {
-                    dtPop.classList.remove('show');
-                } else {
-                    openDatePicker();
-                }
-            });
-            dI.addEventListener('change', () => {
-                const m = dI.value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
-                if (m) {
-                    const d = new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5]);
-                    if (!isNaN(d)) {
-                        FM.created = d;
-                        FM.dirty = true;
-                    }
-                }
-                dI.value = dFull(FM.created);
-            });
-            dtPop.addEventListener('click', e => {
-                const n = e.target.closest('[data-dn]');
-                const d = e.target.closest('button.d');
-                const t = e.target.closest('[data-tm]');
-                if (n) {
-                    const x = new Date(DT.y, DT.m + parseInt(n.dataset.dn), 1);
-                    DT.y = x.getFullYear();
-                    DT.m = x.getMonth();
-                    paintDt();
-                }
-                if (d) {
-                    const x = new Date(parseInt(d.dataset.t));
-                    FM.created = new Date(x.getFullYear(), x.getMonth(), x.getDate(), FM.created.getHours(), FM.created.getMinutes());
+        // Chọn ngày giờ kiểm kho dùng Lego KiotFilter.initDateTimePicker
+        if (window.KiotFilter && typeof KiotFilter.initDateTimePicker === 'function') {
+            KiotFilter.initDateTimePicker({
+                inputSelector: '#fDate',
+                popupSelector: '#dtPop',
+                initialDate: FM.created,
+                isReadOnly: isReadOnly,
+                onChange: function (d) {
+                    FM.created = d;
                     FM.dirty = true;
-                    dI.value = dFull(FM.created);
-                    paintDt();
-                }
-                if (t) {
-                    const [h, m] = t.dataset.tm.split(':');
-                    FM.created = new Date(FM.created.getFullYear(), FM.created.getMonth(), FM.created.getDate(), parseInt(h), parseInt(m));
-                    FM.dirty = true;
-                    dI.value = dFull(FM.created);
-                    paintDt();
                 }
             });
         }
+
 
         // 4 Tabs click
         $('#tabs')?.addEventListener('click', e => {

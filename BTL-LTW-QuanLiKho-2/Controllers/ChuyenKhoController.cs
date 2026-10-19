@@ -13,6 +13,7 @@ using BTL_LTW_QuanLiKho_2.Services;
 using BTL_LTW_QuanLiKho_2.ViewModels;
 using BTL_LTW_QuanLiKho_2.ViewModels.Common;
 using BTL_LTW_QuanLiKho_2.ViewModels.ChuyenKho;
+using BTL_LTW_QuanLiKho_2.Helpers;
 using ClosedXML.Excel;
 
 namespace BTL_LTW_QuanLiKho_2.Controllers;
@@ -598,51 +599,22 @@ public class ChuyenKhoController : BaseKhoController
         filter.PageSize = 10000;
         var model = await BuildIndexViewModelAsync(filter);
 
-        using var workbook = new XLWorkbook();
-        var ws = workbook.Worksheets.Add("ChuyenHang");
+        var bytes = ExcelHelper.Export("ChuyenHang", model.PagedData.Items, col => col
+            .AddCenter("Mã chuyển hàng", x => x.MaPhieuHienThi)
+            .AddDateTime("Thời gian tạo", x => x.NgayLap)
+            .AddText("Kho gửi", x => x.TenKhoNguon)
+            .AddText("Kho nhận", x => x.TenKhoDich)
+            .AddCenter("Thời điểm xuất", x => x.ThoiDiemXuat?.ToString("dd/MM/yyyy HH:mm") ?? "")
+            .AddCenter("Thời điểm nhận", x => x.ThoiDiemNhan?.ToString("dd/MM/yyyy HH:mm") ?? "")
+            .AddNumber("Tổng SL chuyển", x => x.TongSoLuongChuyen)
+            .AddNumber("Tổng SL nhận", x => x.TrangThai == "DA_NHAN" ? x.TongSoLuongNhan : 0)
+            .AddCurrency("Tổng giá trị chuyển", x => x.TongGiaTriChuyen)
+            .AddText("Người tạo", x => x.TenNguoiLap)
+            .AddCenter("Trạng thái", x => x.TenTrangThai)
+            .AddText("Ghi chú", x => x.GhiChu ?? "")
+        );
 
-        // Tiêu đề cột
-        ws.Cell(1, 1).Value = "Mã chuyển hàng";
-        ws.Cell(1, 2).Value = "Thời gian tạo";
-        ws.Cell(1, 3).Value = "Kho gửi";
-        ws.Cell(1, 4).Value = "Kho nhận";
-        ws.Cell(1, 5).Value = "Thời điểm xuất";
-        ws.Cell(1, 6).Value = "Thời điểm nhận";
-        ws.Cell(1, 7).Value = "Tổng SL chuyển";
-        ws.Cell(1, 8).Value = "Tổng SL nhận";
-        ws.Cell(1, 9).Value = "Tổng giá trị chuyển";
-        ws.Cell(1, 10).Value = "Người tạo";
-        ws.Cell(1, 11).Value = "Trạng thái";
-        ws.Cell(1, 12).Value = "Ghi chú";
-
-        ws.Range(1, 1, 1, 12).Style.Font.Bold = true;
-        ws.Range(1, 1, 1, 12).Style.Fill.BackgroundColor = XLColor.FromHtml("#E9F1FD");
-
-        int row = 2;
-        foreach (var item in model.PagedData.Items)
-        {
-            ws.Cell(row, 1).Value = item.MaPhieuHienThi;
-            ws.Cell(row, 2).Value = item.NgayLap.ToString("dd/MM/yyyy HH:mm");
-            ws.Cell(row, 3).Value = item.TenKhoNguon;
-            ws.Cell(row, 4).Value = item.TenKhoDich;
-            ws.Cell(row, 5).Value = item.ThoiDiemXuat?.ToString("dd/MM/yyyy HH:mm") ?? "";
-            ws.Cell(row, 6).Value = item.ThoiDiemNhan?.ToString("dd/MM/yyyy HH:mm") ?? "";
-            ws.Cell(row, 7).Value = item.TongSoLuongChuyen;
-            ws.Cell(row, 8).Value = item.TrangThai == "DA_NHAN" ? item.TongSoLuongNhan : 0;
-            ws.Cell(row, 9).Value = item.TongGiaTriChuyen;
-            ws.Cell(row, 10).Value = item.TenNguoiLap;
-            ws.Cell(row, 11).Value = item.TenTrangThai;
-            ws.Cell(row, 12).Value = item.GhiChu ?? "";
-            row++;
-        }
-
-        ws.Columns().AdjustToContents();
-
-        using var stream = new MemoryStream();
-        workbook.SaveAs(stream);
-        var content = stream.ToArray();
-
-        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachChuyenHang_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+        return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachChuyenHang_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
     }
 
     #region Private Helpers

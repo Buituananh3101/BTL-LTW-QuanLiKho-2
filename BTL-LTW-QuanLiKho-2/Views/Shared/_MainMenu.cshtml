@@ -20,13 +20,12 @@
           <div class="mega-title">Kho hàng</div>
           <a asp-controller="PhieuKiemKe" asp-action="Index">Kiểm kho</a>
           <a asp-controller="ChuyenKho" asp-action="Index">Chuyển kho</a>
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Xuất dùng nội bộ</a>
           <a asp-controller="XuatHuy" asp-action="Index">Xuất hủy</a>
         </div>
       </div>
     </li>
 
-    <li class="@(controller == "NhaCungCap" ? "active" : "")">
+    <li class="@(controller == "NhaCungCap" || controller == "NhapHang" || controller == "TraHangNhap" ? "active" : "")">
       <a href="#" onclick="return false;">Mua hàng</a>
       <div class="mega">
         <div class="mega-col">
@@ -36,7 +35,7 @@
         <div class="mega-col">
           <div class="mega-title">Mua hàng</div>
           <a asp-controller="NhapHang" asp-action="Index">Nhập hàng</a>
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Trả hàng nhập</a>
+          <a asp-controller="TraHangNhap" asp-action="Index">Trả hàng nhập</a>
         </div>
       </div>
     </li>

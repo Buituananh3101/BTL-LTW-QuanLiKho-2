@@ -458,6 +458,35 @@ body {
   border-spacing: 0;
   table-layout: fixed;
 }
+/* Bảng Hàng hóa giữ độ rộng cột cố định chuẩn KiotViet & Kiểm kho, không co rút khi thêm cột */
+#productTable {
+  width: max-content !important;
+  min-width: 760px !important;
+  table-layout: fixed !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+#productTable tr.product-row.selected > td {
+  background-color: #ffffff !important;
+  border-top: 2px solid #0070f3 !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  border-right: none !important;
+}
+#productTable tr.product-row.selected > td:first-child {
+  border-left: 3px solid #0070f3 !important;
+}
+#productTable tr.product-row.selected > td.last-visible-col,
+#productTable tr.product-row.selected > td:last-child {
+  border-right: 3px solid #0070f3 !important;
+}
+#productTable tr.product-detail-row > td {
+  background-color: #ffffff !important;
+  padding: 0 !important;
+  border-top: none !important;
+  border-bottom: 2px solid #0070f3 !important;
+  border-left: 3px solid #0070f3 !important;
+  border-right: 3px solid #0070f3 !important;
+}
 .tbl thead th {
   position: sticky;
   top: 0;
@@ -2702,6 +2731,28 @@ tr.product-detail-row > td {
 }
 
 /* ===== COMPONENT LEGO: F3 PRODUCT SEARCH AUTOCOMPLETE ===== */
+.nh-autocomplete-dropdown,
+.kiot-autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 520px;
+  width: 100%;
+  max-width: 680px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  max-height: 380px;
+  overflow-y: auto;
+  z-index: 1050;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  display: none;
+}
+.nh-autocomplete-dropdown.show,
+.kiot-autocomplete-dropdown.show {
+  display: block !important;
+}
+
 .kk-autocomplete-item {
   display: flex !important;
   align-items: center !important;
@@ -2786,6 +2837,104 @@ tr.product-detail-row > td {
   color: #1e293b;
   font-weight: 600;
 }
+
+/* 7. DateTimePicker Popup Chuẩn KiotViet (.dtpop) dùng chung cho các Form Chứng từ */
+.relw { position: relative; }
+.dtpop {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  z-index: 1050;
+  width: 320px;
+  flex-direction: row;
+  gap: 12px;
+  box-sizing: border-box;
+}
+.dtpop.show { display: flex !important; }
+.dtpop .times {
+  width: 90px;
+  height: 230px;
+  overflow-y: auto;
+  border-left: 1px solid #e5e7eb;
+  padding-left: 8px;
+  box-sizing: border-box;
+}
+.dtpop .times button {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: none;
+  padding: 6px 4px;
+  font-size: 13px;
+  border-radius: 4px;
+  text-align: center;
+  cursor: pointer;
+  color: #374151;
+  transition: all 0.12s ease;
+}
+.dtpop .times button:hover { background: #eef4ff; color: #0070f3; }
+.dtpop .times button.cur { background: #0070f3; color: #ffffff; font-weight: 600; }
+.dtpop .dtnav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #1f2937;
+}
+.dtpop .rp-nav {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  cursor: pointer;
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: #4b5563;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+}
+.dtpop .rp-nav:hover { background: #f3f6fb; color: #0070f3; border-color: #0070f3; }
+.dtpop .cal {
+  width: 200px;
+}
+.dtpop .cal-g {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+}
+.dtpop .cal-g .dow {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 4px 0;
+}
+.dtpop .cal-g button.d {
+  aspect-ratio: 1;
+  border: 0;
+  background: none;
+  border-radius: 4px;
+  font-size: 12.5px;
+  cursor: pointer;
+  color: #1f2937;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+}
+.dtpop .cal-g button.d:hover { background: #eef4ff; color: #0070f3; }
+.dtpop .cal-g button.d.today { font-weight: 700; color: #0070f3; }
+.dtpop .cal-g button.d.sel { background: #0070f3 !important; color: #ffffff !important; font-weight: 600; }
+
 
 
 

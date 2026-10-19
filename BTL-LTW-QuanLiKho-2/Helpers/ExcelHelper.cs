@@ -167,4 +167,238 @@ public static class ExcelHelper
         range.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
         range.Style.Border.OutsideBorderColor = XLColor.FromHtml("#cbd5e1");
     }
+
+    /// <summary>
+    /// Xuất danh sách dữ liệu ra mảng byte file Excel chuẩn KiotViet với ClosedXML.
+    /// Tự động áp dụng Header xanh KiotViet, kẻ viền bảng, căn lề, format số/ngày và tự động co giãn độ rộng cột.
+    /// </summary>
+    public static byte[] ExportToExcel<T>(
+        string sheetName,
+        IEnumerable<ExcelExportColumn<T>> columns,
+        IEnumerable<T> data)
+    {
+        var colList = columns.ToList();
+        using var workbook = new XLWorkbook();
+        var ws = workbook.Worksheets.Add(sheetName);
+
+        // 1. Tiêu đề cột
+        for (int i = 0; i < colList.Count; i++)
+        {
+            ws.Cell(1, i + 1).Value = colList[i].Header;
+        }
+        ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, colList.Count));
+        ws.Row(1).Height = 28;
+
+        // 2. Dữ liệu các dòng
+        int rowIdx = 2;
+        foreach (var item in data)
+        {
+            for (int c = 0; c < colList.Count; c++)
+            {
+                var col = colList[c];
+                var cell = ws.Cell(rowIdx, c + 1);
+                var raw = col.Selector(item);
+
+                if (raw == null)
+                {
+                    cell.Value = string.Empty;
+                }
+                else
+                {
+                    switch (col.Type)
+                    {
+                        case ExcelColumnType.Currency:
+                        case ExcelColumnType.Number:
+                        case ExcelColumnType.Decimal:
+                        case ExcelColumnType.Integer:
+                            if (raw is decimal mVal)
+                            {
+                                cell.Value = mVal;
+                            }
+                            else if (raw is double dVal)
+                            {
+                                cell.Value = dVal;
+                            }
+                            else if (raw is int iVal)
+                            {
+                                cell.Value = iVal;
+                            }
+                            else if (raw is long lVal)
+                            {
+                                cell.Value = lVal;
+                            }
+                            else if (decimal.TryParse(raw.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var parsed))
+                            {
+                                cell.Value = parsed;
+                            }
+                            else
+                            {
+                                cell.Value = raw.ToString();
+                            }
+
+                            if (!string.IsNullOrEmpty(col.NumberFormat))
+                            {
+                                cell.Style.NumberFormat.Format = col.NumberFormat;
+                            }
+                            else if (col.Type == ExcelColumnType.Currency || col.Type == ExcelColumnType.Integer)
+                            {
+                                cell.Style.NumberFormat.Format = "#,##0";
+                            }
+                            else
+                            {
+                                cell.Style.NumberFormat.Format = "#,##0.##";
+                            }
+                            break;
+
+                        case ExcelColumnType.DateTime:
+                            if (raw is DateTime dtVal)
+                            {
+                                cell.Value = dtVal.ToString(col.NumberFormat ?? "dd/MM/yyyy HH:mm");
+                            }
+                            else
+                            {
+                                cell.Value = raw.ToString();
+                            }
+                            break;
+
+                        case ExcelColumnType.Date:
+                            if (raw is DateTime dtDate)
+                            {
+                                cell.Value = dtDate.ToString(col.NumberFormat ?? "dd/MM/yyyy");
+                            }
+                            else
+                            {
+                                cell.Value = raw.ToString();
+                            }
+                            break;
+
+                        default: // Text
+                            cell.Value = raw.ToString();
+                            break;
+                    }
+                }
+
+                // Căn lề
+                if (col.Alignment.HasValue)
+                {
+                    cell.Style.Alignment.Horizontal = col.Alignment.Value;
+                }
+                else if (col.Type == ExcelColumnType.DateTime || col.Type == ExcelColumnType.Date)
+                {
+                    cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                }
+            }
+            rowIdx++;
+        }
+
+        // 3. Viền bảng
+        if (rowIdx > 2)
+        {
+            ApplyTableBorders(ws.Range(1, 1, rowIdx - 1, colList.Count));
+        }
+
+        // 4. Căn chỉnh độ rộng cột
+        for (int c = 0; c < colList.Count; c++)
+        {
+            if (colList[c].Width is double widthVal)
+            {
+                ws.Column(c + 1).Width = widthVal;
+            }
+        }
+        ws.Columns().AdjustToContents();
+
+        using var ms = new MemoryStream();
+        workbook.SaveAs(ms);
+        return ms.ToArray();
+    }
+
+    /// <summary>
+    /// Xuất danh sách dữ liệu ra file Excel theo cú pháp Fluent Builder ngắn gọn.
+    /// </summary>
+    public static byte[] Export<T>(string sheetName, IEnumerable<T> data, Action<ExcelExportBuilder<T>> configure)
+    {
+        var builder = new ExcelExportBuilder<T>();
+        configure(builder);
+        return builder.Build(sheetName, data);
+    }
+}
+
+/// <summary>
+/// Kiểu dữ liệu cột xuất Excel
+/// </summary>
+public enum ExcelColumnType
+{
+    Text,
+    Number,
+    Decimal,
+    Currency,
+    Integer,
+    DateTime,
+    Date
+}
+
+/// <summary>
+/// Định nghĩa một cột xuất Excel ClosedXML
+/// </summary>
+public class ExcelExportColumn<T>
+{
+    public string Header { get; set; } = string.Empty;
+    public Func<T, object?> Selector { get; set; } = null!;
+    public ExcelColumnType Type { get; set; } = ExcelColumnType.Text;
+    public string? NumberFormat { get; set; }
+    public XLAlignmentHorizontalValues? Alignment { get; set; }
+    public double? Width { get; set; }
+
+    public ExcelExportColumn() { }
+
+    public ExcelExportColumn(
+        string header,
+        Func<T, object?> selector,
+        ExcelColumnType type = ExcelColumnType.Text,
+        string? numberFormat = null,
+        XLAlignmentHorizontalValues? alignment = null,
+        double? width = null)
+    {
+        Header = header;
+        Selector = selector;
+        Type = type;
+        NumberFormat = numberFormat;
+        Alignment = alignment;
+        Width = width;
+    }
+}
+
+/// <summary>
+/// Fluent Builder tạo cấu hình các cột xuất Excel
+/// </summary>
+public class ExcelExportBuilder<T>
+{
+    private readonly List<ExcelExportColumn<T>> _columns = new();
+
+    public ExcelExportBuilder<T> Add(string header, Func<T, object?> selector, ExcelColumnType type = ExcelColumnType.Text, string? format = null, XLAlignmentHorizontalValues? align = null, double? width = null)
+    {
+        _columns.Add(new ExcelExportColumn<T>(header, selector, type, format, align, width));
+        return this;
+    }
+
+    public ExcelExportBuilder<T> AddText(string header, Func<T, object?> selector, XLAlignmentHorizontalValues? align = null)
+        => Add(header, selector, ExcelColumnType.Text, null, align);
+
+    public ExcelExportBuilder<T> AddCenter(string header, Func<T, object?> selector)
+        => Add(header, selector, ExcelColumnType.Text, null, XLAlignmentHorizontalValues.Center);
+
+    public ExcelExportBuilder<T> AddNumber(string header, Func<T, object?> selector, string format = "#,##0.##")
+        => Add(header, selector, ExcelColumnType.Number, format);
+
+    public ExcelExportBuilder<T> AddCurrency(string header, Func<T, object?> selector, string format = "#,##0")
+        => Add(header, selector, ExcelColumnType.Currency, format);
+
+    public ExcelExportBuilder<T> AddDateTime(string header, Func<T, object?> selector, string format = "dd/MM/yyyy HH:mm")
+        => Add(header, selector, ExcelColumnType.DateTime, format, XLAlignmentHorizontalValues.Center);
+
+    public ExcelExportBuilder<T> AddDate(string header, Func<T, object?> selector, string format = "dd/MM/yyyy")
+        => Add(header, selector, ExcelColumnType.Date, format, XLAlignmentHorizontalValues.Center);
+
+    public byte[] Build(string sheetName, IEnumerable<T> data)
+        => ExcelHelper.ExportToExcel(sheetName, _columns, data);
 }

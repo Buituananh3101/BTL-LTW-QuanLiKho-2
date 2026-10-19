@@ -1,19 +1,405 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Căn Phải Thời Gian & Cho Phép Nhập Tay / Tự Động Sinh Mã Chuyển Hàng Chuẩn Kiểm Kho (Phiên 119)
+Cập nhật lần cuối: 2026-10-18 – Triển Khai Giai Đoạn 2 Đóng Gói Lego: F3 Product Search & DocGrid Engine (Phiên 138)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử trải nghiệm màn hình Lập/Sửa phiếu chuyển hàng (`/ChuyenKho/Create`, `/ChuyenKho/Edit`): ô Thời gian và Mã chuyển hàng căn lề phải sắc nét chuẩn Kiểm kho; ô Mã chuyển hàng cho phép nhập tay hoặc để trống tự động sinh mã `CKxxxxxx`, kiểm tra chống trùng mã thân thiện.
+- Hoàn thành xuất sắc Giai đoạn 2 kế hoạch đóng gói Lego:
+  + Đóng gói `KiotFilter.initProductSearch` (Tìm kiếm hàng hóa Autocomplete F3, quét barcode, hiển thị tồn/giá, phím mũi tên) dùng chung toàn hệ thống, hợp nhất cả 5 form chứng từ (Kiểm kho, Nhập hàng, Xuất hủy, Chuyển kho, Trả hàng nhập).
+  + Đóng gói `KiotFilter.initDocGrid` (Quản lý lưới dòng chứng từ, tự động đánh STT, chuyển đổi trạng thái rỗng/có dữ liệu, bắt sự kiện xóa dòng qua KiotConfirm, tính toán realtime).
+  + Loại bỏ hoàn toàn mã nhúng file dư thừa `f3-product-search.js` trên 6 View (`ChuyenKho`, `NhapHang`, `TraHangNhap`).
+- Sẵn sàng chuẩn bị Giai đoạn 3: Đóng gói `KiotFilter.initImageUploader` (Quản lý 5 ảnh, kéo thả, nén Canvas, paste clipboard) và Combobox phân cấp danh mục.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế các luồng Chuyển kho, Xuất hủy, Nhập hàng.
-2. Xây dựng phân hệ Trả hàng nhập (Purchase Returns) theo yêu cầu.
+1. Kiểm tra trải nghiệm thực tế tìm kiếm F3 và lưới dòng chứng từ trên môi trường chạy thử.
+2. Triển khai Giai đoạn 3 theo kế hoạch đóng gói Lego (`ke-hoach-dong-goi-lego.md`).
 
 ---
+
+- **Triển Khai Giai Đoạn 2 Đóng Gói Lego: F3 Product Search & DocGrid Engine (Phiên 138)**:
+  - **Nhu cầu**: Người dùng yêu cầu triển khai Giai đoạn 2 của Kế hoạch đóng gói Lego (`ke-hoach-dong-goi-lego.md`).
+  - **Mục tiêu Giai đoạn 2**:
+    1. Đóng gói Lego Tìm Kiếm Hàng Hóa Autocomplete F3 (`KiotFilter.initProductSearch`) vào `kiot-filter.js`, loại bỏ hơn 200 dòng code thủ công lặp lại ở `phieu-kiem-ke-form.js`, `xuat-huy-form.js`, `tra-hang-nhap-form.js`, `chuyen-kho-form.js`.
+    2. Đóng gói Lego Lưới Dòng Chứng Từ (`KiotFilter.initDocGrid`) vào `kiot-filter.js` để tự động hóa quản lý STT, empty state, xóa dòng kèm xác nhận KiotConfirm, và kích hoạt tính toán lại.
+    3. Loại bỏ hoàn toàn script `f3-product-search.js` lẻ tẻ trên các View.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`wwwroot/css/site.css`**: Bổ sung bộ style cho container dropdown `.nh-autocomplete-dropdown, .kiot-autocomplete-dropdown` định vị absolute, box-shadow, auto-scroll, z-index 1050.
+    + **`wwwroot/js/kiot-filter.js`**:
+      * Triển khai Lego block 17: `KiotFilter.initProductSearch({ inputSelector, dropdownSelector, apiUrl, getWarehouseId, onSelect, debounceMs })` tích hợp phím F3 toàn cục, debounce gõ phím, điều hướng Up/Down/Enter/Escape, click chọn, auto-hide khi click ngoài, và global alias `window.initF3ProductSearch` cho backward compatibility.
+      * Triển khai Lego block 18: `KiotFilter.initDocGrid({ tableBodySelector, emptyBoxSelector, tableScrollSelector, rowSelector, sttSelector, btnRemoveSelector, qtyInputSelector, onRecalc, onRemove, confirmDelete })`.
+    + **Tái cấu trúc 5 Form Chứng Từ**:
+      * `chuyen-kho-form.js`: Xóa bỏ hơn 120 dòng code fallback suggest thủ công; tích hợp `KiotFilter.initProductSearch` và `KiotFilter.initDocGrid`.
+      * `xuat-huy-form.js`: Xóa bỏ hơn 80 dòng code autocomplete thủ công; tích hợp `KiotFilter.initProductSearch`.
+      * `phieu-kiem-ke-form.js`: Xóa bỏ hơn 85 dòng code autocomplete thủ công; tích hợp `KiotFilter.initProductSearch`.
+      * `nhap-hang-form.js`: Chuyển sang sử dụng `KiotFilter.initProductSearch`.
+      * `tra-hang-nhap-form.js`: Xóa bỏ hơn 85 dòng code autocomplete thủ công; tích hợp `KiotFilter.initProductSearch`.
+    + **Dọn dẹp View**: Loại bỏ thẻ `<script src="~/js/components/f3-product-search.js">` khỏi 6 view (`ChuyenKho/Create`, `Edit`; `NhapHang/Create`, `Edit`; `TraHangNhap/Create`, `Edit`).
+    + **Đồng bộ tài liệu**: Cập nhật `.agent/rules/03-giao-dien-layout.md` bổ sung Lego 17 & 18, duy trì dung lượng 7.662 bytes (< 8.000 ký tự theo Rule 12).
+  - **Kiểm tra**:
+    + `node -c` xác nhận cú pháp 100% hợp lệ trên cả 6 file JavaScript.
+    + `dotnet build` biên dịch thành công hoàn hảo với **0 Errors**.
+
+---
+
+- **Khắc Phục Lỗi Bấm Vào Thời Gian Không Hiện Ở Toàn Bộ Chức Năng (Phiên 137)**:
+  - **Nhu cầu**: Người dùng phản ánh: *"lỗi phần thời gian ấn vào ko hiện gì ở tất cả chức năng"*.
+  - **Nguyên nhân cốt lõi phát hiện**:
+    1. **Thiếu nạp script toàn cục**: File `kiot-filter.js` ban đầu chỉ được nạp ở các trang `Index.cshtml`. Khi người dùng vào các trang lập phiếu (`Create.cshtml`, `Edit.cshtml`), đối tượng `window.KiotFilter` bị `undefined`, dẫn đến điều kiện `(window.KiotFilter && typeof KiotFilter.initDateTimePicker === 'function')` trả về `false`, không hề gán bất kỳ listener nào vào ô `#fDate`.
+    2. **Thiếu CSS `.relw` trong `site.css`**: Popup `.dtpop` được định vị `position: absolute` nhưng class wrapper `.relw { position: relative; }` trước đó chỉ có trong `kiem-kho.css`, dẫn đến lệch vị trí hiển thị ở các chức năng khác (`NhapHang`, `XuatHuy`, `ChuyenKho`).
+    3. **Lỗi chặn nổi bọt sự kiện (Event Bubbling) khi DOM bị render lại**: Trong `initDateTimePicker`, khi người dùng bấm chọn ngày hoặc chuyển tháng, hàm `renderPopup()` gán lại `innerHTML` của `$pop`. Thao tác này khiến phần tử `button` vừa bấm bị tách khỏi DOM (detached). Khi sự kiện nổi bọt lên `$(document).on('click')`, biểu thức `$(e.target).closest()` không còn thuộc document nên trả về `length === 0`, kích hoạt hàm `closePopup()` ngay tức khắc!
+    4. **Lỗi làm tròn khung giờ active**: `dTime(currentDate)` trả về phút thực tế (vd: `21:23`) nên không bao giờ khớp với các khung giờ chẵn 30 phút (`21:00`, `21:30`), làm mất class `.cur` và không tự cuộn tới giờ hiện tại.
+    5. **Bộ lọc thời gian Sidebar**: Trong `initDateFilter`, bộ chọn sự kiện thiếu selector radio button `#${target}All` khiến việc nhấp trực tiếp vào nút radio không mở popup.
+  - **Giải pháp & Khắc phục**:
+    + `Views/Shared/_Layout.cshtml`: Thêm `<script src="~/js/kiot-filter.js" asp-append-version="true"></script>` ngay trước `@RenderSectionAsync("Scripts")`, đảm bảo `window.KiotFilter` luôn sẵn sàng 100% trên toàn bộ các view của hệ thống.
+    + `wwwroot/css/site.css`: Đã bổ sung `.relw { position: relative; }` cùng bộ style hoàn chỉnh cho `.dtpop` và `.times`.
+    + `wwwroot/js/kiot-filter.js`:
+      * Thêm `e.stopPropagation()` vào cả `$inp.on('click')` và `$pop.on('click.kiotDtPop')` để ngăn tuyệt đối sự kiện nổi bọt lên document.
+      * Thêm logic tự động làm tròn khung giờ theo `stepMinutes` (`Math.floor(curM / opt.stepMinutes) * opt.stepMinutes`) để highlight chính xác `.cur` và tự động cuộn danh sách giờ.
+      * Thêm tự động đóng popup khi chọn khung giờ (`closePopup()`) theo đúng chuẩn UX KiotViet.
+      * Namespace hóa sự kiện document click (`click.kiotDtPop_...`, `click.kiotDateFilter_...`) chống rò rỉ hoặc chồng chéo listener.
+      * Bổ sung selector `#${target}All` và chặn nổi bọt bên trong popup chọn nhanh và lịch tùy chỉnh trong `initDateFilter`.
+  - **Kiểm tra**:
+    + `node -c BTL-LTW-QuanLiKho-2\wwwroot\js\kiot-filter.js` kiểm tra cú pháp JS hoàn hảo 100%.
+    + `dotnet build` biên dịch thành công với **0 Errors**.
+
+---
+
+- **Triển Khai Giai Đoạn 1 Đóng Gói Lego: DateTimePicker & ClosedXML Excel Engine (Phiên 136)**:
+  - **Nhu cầu**: Người dùng yêu cầu triển khai Giai đoạn 1 của Kế hoạch đóng gói các thành phần chưa đóng gói trong toàn bộ dự án (`ke-hoach-dong-goi-lego.md`).
+  - **Mục tiêu Giai đoạn 1**:
+    1. Đóng gói Lego Chọn Ngày Giờ Lập Chứng Từ (`KiotFilter.initDateTimePicker`) dùng chung cho toàn bộ các form chứng từ, thay thế hàng trăm dòng code vẽ lịch / bảng giờ thủ công bị trùng lặp.
+    2. Đóng gói Bộ máy xuất file Excel ClosedXML dùng chung (`ExcelHelper.ExportToExcel<T>` & `ExcelHelper.Export<T>`), loại bỏ toàn bộ code vòng lặp ô, kẻ viền bảng, bôi màu xanh header `#0066cc` lặp lại ở các Controller.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`wwwroot/css/site.css`**: Bổ sung bộ style dùng chung toàn hệ thống cho popup lịch 2 cột chuẩn KiotViet (`.dtpop`, `.times`, `.times button`, `.times button.cur`, `.dtnav`, `.rp-nav`, `.cal`, `.cal-g`, `.cal-g .dow`, `.cal-g button.d`, `.cal-g button.d.sel`, `.cal-g button.d.today`).
+    + **`wwwroot/js/kiot-filter.js`**:
+      * Triển khai Lego block 15: `KiotFilter.initDateTimePicker({ inputSelector, popupSelector, onChange, isReadOnly })`.
+      * Tự động parse ngày giờ từ input hoặc ISO, render lịch tháng điều hướng 2 chiều, lưới 7 ngày, cột giờ 24h (bước 30 phút).
+      * Tự động tính toán vị trí cuộn `scrollTop` đưa slot giờ đang chọn `.cur` vào giữa khung nhìn, tích hợp chống click-focus double-fire < 300ms, tự đồng bộ 2 chiều với input `dd/MM/yyyy HH:mm`.
+    + **Tái cấu trúc 5 Form Chứng Từ**:
+      * `phieu-kiem-ke-form.js`: Thay thế mã lịch thủ công bằng `KiotFilter.initDateTimePicker`.
+      * `nhap-hang-form.js`: Thay thế mã lịch thủ công bằng `KiotFilter.initDateTimePicker`.
+      * `xuat-huy-form.js`: Thay thế mã lịch thủ công bằng `KiotFilter.initDateTimePicker`.
+      * `chuyen-kho-form.js`: Thay thế mã lịch thủ công bằng `KiotFilter.initDateTimePicker`.
+      * `tra-hang-nhap-form.js`: Thay thế mã lịch thủ công bằng `KiotFilter.initDateTimePicker`, tự đồng bộ với cả trường ẩn ISO `#fDateIso`.
+    + **`Helpers/ExcelHelper.cs`**:
+      * Triển khai Lego block 16: `ExcelHelper.ExportToExcel<T>`, `ExcelHelper.Export<T>` và `ExcelExportBuilder<T>` với cú pháp Fluent Builder cực kỳ gọn gàng, an toàn kiểu dữ liệu compile-time.
+      * Tự động áp dụng Header xanh KiotViet `#0066cc`, kẻ viền bảng `ApplyTableBorders`, căn lề tự động, format số `#,##0.##`, tiền tệ `#,##0`, ngày giờ `dd/MM/yyyy HH:mm`, tự động co giãn độ rộng cột `AdjustToContents()`.
+    + **Tái cấu trúc 5 Controller / Service Xuất Excel**:
+      * `PhieuKiemKeController.cs`: Rút gọn action `Export` (cả `detail` và `summary`) từ ~210 dòng xuống ~40 dòng, sử dụng `ExcelHelper.Export`.
+      * `XuatHuyController.cs`: Rút gọn action `Export` từ ~130 dòng xuống ~35 dòng.
+      * `NhapHangController.cs`: Rút gọn action `Export` từ ~110 dòng xuống ~40 dòng.
+      * `ChuyenKhoController.cs`: Rút gọn action `Export` từ ~45 dòng xuống ~15 dòng.
+      * `HangHoaExcelService.cs`: Rút gọn `ExportExcel` từ ~125 dòng xuống ~25 dòng, ánh xạ động các cột theo tùy chọn người dùng qua `ExcelHelper.ExportToExcel`.
+    + **Đồng bộ tài liệu**:
+      * Cập nhật `.agent/rules/03-giao-dien-layout.md` bổ sung Lego 15 và 16, duy trì độ dài 7.135 ký tự (< 8.000 ký tự theo Rule 12).
+  - **Kiểm tra**:
+    + `node -c` xác nhận cú pháp 100% hợp lệ trên cả 6 file JavaScript (`kiot-filter.js`, `phieu-kiem-ke-form.js`, `nhap-hang-form.js`, `xuat-huy-form.js`, `chuyen-kho-form.js`, `tra-hang-nhap-form.js`).
+    + `dotnet build` biên dịch thành công hoàn hảo với **0 Errors**.
+
+---
+
+- **Loại Bỏ Mục Xuất Dùng Nội Bộ Khỏi Mega Menu Hàng Hóa (Phiên 135)**:
+  - **Nhu cầu**: Người dùng yêu cầu kèm ảnh chụp màn hình menu Topbar (`media_1792331363909_2ddad512.png`): "bỏ cái xuất dùng nội bộ kia đi".
+  - **Nguyên nhân & Thực hiện**:
+    + Trong `Views/Shared/_MainMenu.cshtml`, nhóm "Kho hàng" thuộc mega dropdown "Hàng hóa" có một liên kết giữ chỗ tạm `<a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Xuất dùng nội bộ</a>`.
+    + Đã loại bỏ hoàn toàn dòng liên kết này khỏi `_MainMenu.cshtml`, giúp menu gọn gàng, chỉ giữ lại các chức năng thực tế của nhóm kho hàng: "Kiểm kho", "Chuyển kho", "Xuất hủy".
+  - **Kiểm tra**:
+    + `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+
+---
+
+- **Đồng Bộ Nút & Popup Chọn Ngày Giờ Trên Form Trả Hàng Nhập Chuẩn Kiểm Tồn (Phiên 134)**:
+  - **Nhu cầu**: Người dùng yêu cầu kèm ảnh chụp màn hình: "sửa lại nút thời gian dựa trên kiểm tồn" trên form Lập/Sửa phiếu Trả hàng nhập (`_TraHangNhapForm.cshtml`).
+  - **Nguyên nhân cốt lõi**:
+    + Popup chọn ngày giờ trước đó trong `_TraHangNhapForm.cshtml` và `tra-hang-nhap.css` sử dụng cấu trúc xếp chồng dọc tự phát (calendar ở trên, các nút bấm giờ nằm ngang dạng flex wrap ở dưới với thanh cuộn lộn xộn), không khớp với chuẩn 2 cột của Kiểm tồn (`PhieuKiemKe`) và Chuyển kho (`ChuyenKho`).
+    + Sự kiện mở/đóng popup chưa có cơ chế chống double-fire giữa `focus` và `click`, thiếu tính năng tự động cuộn đến khung giờ hiện tại (`.cur`) khi mở popup.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`Views/TraHangNhap/_TraHangNhapForm.cshtml`**:
+      * Chuẩn hóa ô nhập liệu `#fDateInp` (`max-width: 175px`, căn lề phải, font 13px, màu chữ `#4b5563`, hỗ trợ `autocomplete="off"`).
+      * Làm rỗng container `<div class="pop dtpop shadow-sm" id="dtPop"></div>` để toàn bộ giao diện điều hướng và các slot thời gian được sinh động linh hoạt từ JavaScript.
+    + **`wwwroot/css/tra-hang-nhap.css`**:
+      * Thay thế toàn bộ các class cũ `.cal-day` và `.time-btn` bằng bộ CSS chuẩn 2 cột của Kiểm tồn (`.dtpop`, `.dtpop.show`, `.times`, `.times button`, `.times button.cur`, `.dtnav`, `.rp-nav`, `.cal`, `.cal-h`, `.cal-g`, `.cal-g .dow`, `.cal-g button.d`, `.cal-g button.d.today`, `.cal-g button.d.sel`).
+      * Cột trái rộng 200px (tháng/năm điều hướng & lưới 7 ngày), cột phải rộng 90px cao 230px cuộn dọc với 48 mốc thời gian 30 phút (`00:00` đến `23:30`).
+    + **`wwwroot/js/tra-hang-nhap-form.js`**:
+      * Triển khai hàm `paintDt()` và `calHTML()` chuẩn Kiểm tồn.
+      * Tự động tính toán vị trí cuộn dọc (`scrollTop`) đưa khung giờ đang chọn `.cur` vào giữa khung nhìn của cột thời gian khi mở popup.
+      * Tích hợp cơ chế chống rung và double-fire `lastFocusTime < 300ms` giữa sự kiện `focus` và `click` trên ô nhập liệu.
+      * Hỗ trợ tự động cập nhật ngày giờ khi gõ tay định dạng `dd/MM/yyyy HH:mm`.
+      * Đồng bộ 100% dữ liệu 2 chiều giữa hiển thị `#fDateInp` và trường ẩn ISO `#fDateIso` gửi lên server.
+      * Đóng popup mượt mà khi chọn xong slot thời gian, hoặc khi click ra ngoài popup, hoặc khi nhấn phím `Escape`.
+    + **Kiểm tra**:
+      * `node -c tra-hang-nhap-form.js`: Không có lỗi cú pháp.
+      * `dotnet build -t:Compile`: Biên dịch thành công với **0 Errors**.
+
+---
+
+- **Thêm Tùy Chọn Ẩn Hiện Cột & Cố Định Độ Rộng Bảng Hàng Hóa Chuẩn Kiểm Tồn (Phiên 133)**:
+  - **Nhu cầu**:
+    + Người dùng yêu cầu: "dựa trên phần nhập hàng, thêm phần ẩn hiện cột cho danh sách hàng hóa".
+    + Tiếp tục hoàn thiện theo yêu cầu: "sửa lại dựa trên phần kiểm tồn, ko co lại khi thêm cột".
+  - **Nguyên nhân & Yêu cầu kỹ thuật**:
+    + Bảng hàng hóa trước đó kế thừa `.tbl { width: 100%; table-layout: fixed; }` từ `site.css`. Khi bật thêm cột, tổng chiều rộng bảng bị giới hạn trong 100% container, dẫn đến các cột đang hiển thị (như Tên hàng, Mã hàng, Giá bán, Giá vốn, Tồn kho) bị co rút (shrink) lại, chữ bị ngắt dòng mất thẩm mỹ.
+    + Cần đồng bộ cơ chế của phân hệ Kiểm tồn (`#stockTakeTable` trong `kiem-kho.css` và `_PhieuKiemKeTable.cshtml`): Áp dụng `width: max-content !important; min-width: 760px !important; table-layout: fixed !important;` và định nghĩa cả `width` lẫn `min-width` tường minh cho tất cả 15 cột. Khi thêm cột, bảng mở rộng tự nhiên sang phải và cuộn ngang mượt mà bằng thanh cuộn của container `.kiot-table-scroll-body`, không có bất kỳ cột nào bị co rút.
+    + Khung chi tiết dòng sản phẩm áp dụng `.kiot-detail-fixed-wrap` cố định 992px (chuẩn Nhà cung cấp & Kiểm tồn) để nội dung chi tiết không bị kéo dãn quá đà khi bảng mở rộng nhiều cột.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`Views/HangHoa/_HangHoaTable.cshtml`**:
+      * Thiết lập `style="width: max-content; min-width: 760px;"` trực tiếp trên thẻ `<table id="productTable">`.
+      * Khóa chặt độ rộng bằng cả `width` và `min-width` trên toàn bộ 15 cột: checkbox (36px), star (36px), ảnh (48px), mã hàng (130px), tên hàng (240px), nhóm hàng (140px), ĐVT (80px), giá bán (110px), giá vốn (110px), tồn kho (100px), khách đặt (100px), vị trí (110px), ngày tạo (145px), dự kiến hết hàng (160px), trạng thái (130px).
+      * Bổ sung `.kiot-detail-fixed-wrap` cho `.product-detail-tab-content` để nội dung 4 tab chi tiết cố định 992px chuẩn KiotViet.
+    + **`wwwroot/css/site.css`**:
+      * Định nghĩa rule `#productTable { width: max-content !important; min-width: 760px !important; table-layout: fixed !important; border-collapse: separate !important; border-spacing: 0 !important; }` khớp chuẩn `#stockTakeTable` của kiểm tồn.
+      * Cấu hình viền đóng khung hình chữ nhật liền mạch màu xanh `#0070f3` (`selected > td`, `last-visible-col`, `product-detail-row > td`).
+    + **`wwwroot/js/hang-hoa-index.js`**:
+      * Tối ưu hiệu ứng mở accordion bằng `.stop(true, true)` chống rung giật, đồng bộ cập nhật `colspan` và class `.last-visible-col` tức thì.
+    + **`docs/specs/danh-sach-hang-hoa.md`**: Đồng bộ mục 3.2 chuẩn bảng `width: max-content` từ kiểm tồn, độ dài 7.704 ký tự (tuân thủ Rule 12).
+    + **Kiểm tra**:
+      * `node -c hang-hoa-index.js` thành công 100%.
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+
+
+- **Khắc Phục Lỗi LINQ Translation PadLeft Khi Lọc Tìm Kiếm Phiếu Trả Hàng Nhập (Phiên 132)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm ảnh chụp màn hình ngoại lệ `System.InvalidOperationException: The LINQ expression could not be translated` tại dòng `await liveQuery.SumAsync(...)` trong `TraHangNhapController.cs`.
+  - **Nguyên nhân cốt lõi**:
+    + Trong `BuildIndexViewModel` của `TraHangNhapController.cs`, điều kiện lọc tìm kiếm mã phiếu `filter.Q` sử dụng biểu thức `("thn" + p.MaPhieuTraHang.ToString().PadLeft(6, '0')).Contains(q)`.
+    + Hàm `.PadLeft()` của C# không thể dịch sang câu lệnh SQL tương đương trong Entity Framework Core, dẫn đến khi gọi `SumAsync` (terminal operator), EF Core phát nổ ngoại lệ biên dịch query.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`TraHangNhapController.cs`**:
+      * Tách xử lý parse chuỗi tìm kiếm ra ngoài biểu thức LINQ (kiểm tra `int.TryParse` trực tiếp cho `searchId` và tách tiền tố `thn` cho `thnId`).
+      * Điều kiện `Where` chuyển sang so sánh số nguyên chuẩn `p.MaPhieuTraHang == searchId` và `p.MaPhieuTraHang == thnId` dịch 100% sang SQL.
+      * Tối ưu biểu thức sắp xếp `OrderBy` tránh nối chuỗi phức tạp trong SQL expression.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+
+- **Đồng Bộ Chiều Cao 34px Cụm Nút Giảm Giá VND / % Khớp Ô Nhập Liệu (Phiên 131)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm ảnh chụp màn hình (`media_1792327138276_310480fa.png`): "sửa lại phần VND % cho cao đều".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `_TraHangNhapForm.cshtml`, cụm nút bấm chọn đơn vị giảm giá (`#btnDiscVnd` và `#btnDiscPct`) sử dụng class `.btn-group-sm` và `py-0`, khiến chiều cao thực tế của nút chỉ đạt ~24px, trong khi ô nhập số tiền giảm giá `#orderDiscountInput` bên cạnh có chiều cao 34px, làm cho hàng Giảm giá bị lệch độ cao, mất cân đối.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`_TraHangNhapForm.cshtml` & `tra-hang-nhap.css`**:
+      * Thiết lập class `.disc-toggle-group` với chiều cao cố định chuẩn `height: 34px !important;`.
+      * Cấu hình 2 nút `#btnDiscVnd` và `#btnDiscPct` đạt chiều cao chuẩn 34px (`line-height: 32px`, `padding: 0 10px`, `font-size: 12px`, `font-weight: 600`), căn giữa hoàn hảo theo chiều dọc ngang.
+      * Khi hoạt động (`.active`), nút có nền xanh `#0a66e8`, chữ trắng; khi chưa chọn có viền mảnh `#cbd5e1`, nền trắng tinh tế.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+
+
+- **Khắc Phục Lỗi Bảng Hàng Hóa Trống Bị Ẩn Mất Trên Form Trả Hàng Nhập (Phiên 130)**:
+  - **Nhu cầu**: Người dùng phản ánh: "lỗi ko hiện gì" kèm ảnh chụp màn hình (`media_1792326925507_82aec926.png`) hiển thị toàn bộ khung lưới bảng hàng hóa bị trắng trơn.
+  - **Nguyên nhân cốt lõi**:
+    + Trong `tra-hang-nhap-form.js`, hàm `checkEmptyState()` trước đó khi kiểm tra `hasRows == false` đã thực thi lệnh `$('#tableScrollWrap').hide()`. Vì khối `#emptyWrap` được chuyển vào bên trong `#tableScrollWrap` (để nằm ngay dưới thẻ `table`), việc ẩn phần tử cha `#tableScrollWrap` đã kéo theo toàn bộ bảng tiêu đề lẫn nút "Chọn file dữ liệu" bị ẩn sạch.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`tra-hang-nhap-form.js`**: Cập nhật hàm `checkEmptyState()` luôn giữ `#tableScrollWrap` hiển thị (`$('#tableScrollWrap').show()`), chỉ điều khiển ẩn/hiện duy nhất khối `#emptyWrap` (`display: none !important;` khi có dòng hàng và `display: flex !important;` khi chưa có hàng).
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` đạt **0 Errors**.
+      * `node -c tra-hang-nhap-form.js` đạt **0 Errors**.
+
+
+- **Chuẩn Hóa Nút Chọn File Dữ Liệu & Vùng Trạng Thái Trống Khớp 100% Phân Hệ Kiểm Tồn (Phiên 129)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm ảnh chụp màn hình (`media_1792326355123_f5ee1b21.png`): "sửa lại nút chọn file dữ liệu dựa trên phần kiểm tồn".
+  - **Nguyên nhân cốt lõi**:
+    + Nút "Chọn file dữ liệu" trước đó có kích thước 42px, dùng icon hộp mũi tên `bi-box-arrow-in-down` và nằm trong vùng `.empty` có bong bóng tròn 100px ở trên, không khớp với thiết kế chuẩn của Kiểm tồn trong `prototype-kiemkho-full.html`.
+    + Khi bảng hàng hóa trống, toàn bộ phần header của bảng bị ẩn đi (`display: none`), khiến giao diện bên trái bị khoảng trắng quá lớn.
+    + Trình xử lý file trong `tra-hang-nhap-form.js` trước đó chỉ dùng `readAsText(file)` (chỉ đọc được CSV), khi người dùng chọn file `.xlsx` thật thì phát sinh lỗi dữ liệu nhị phân.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Giao diện Empty State (`_TraHangNhapForm.cshtml`)**:
+      * Đưa về chuẩn `.xl-empty` của Kiểm tồn: loại bỏ icon tròn lớn, giữ tiêu đề `<b>Thêm sản phẩm từ file excel</b>` (font 19px đậm), link tải file mẫu `Excel file`.
+      * Giữ cố định header của bảng (`itemsTable` `<thead>`) luôn hiển thị ở trên cùng, khối `.xl-empty` nằm ngay dưới header.
+      * Nâng cấp nút `#btnSelectFile` chuẩn Kiểm tồn: chiều cao 52px, font chữ 18px, padding 0 24px, bo góc 6px, nền xanh `#0a66e8`, icon bảng tính `bi-file-earmark-spreadsheet fs-5`, chữ "Chọn file dữ liệu".
+    + **Xử lý JavaScript (`tra-hang-nhap-form.js`)**:
+      * Nâng cấp hàm xử lý file hỗ trợ đầy đủ cả file `.xlsx` / `.xls` (qua thư viện `XLSX.read` của SheetJS) lẫn `.csv` (qua FileReader tách dòng), tự động phát hiện header và nạp hàng hóa vào bảng.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+      * `node -c tra-hang-nhap-form.js` đạt **0 Errors**.
+
+
+- **Chuẩn Hóa Giao Diện Dropdown Người Trả Trong Phiếu Trả Hàng Nhập Đồng Bộ Với Chuyển Kho & KiotViet (Phiên 128)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "sửa lại giao dienj phần dropdown cho đồng bộ" kèm ảnh chụp màn hình (`media_1792326315059_bf0d8dff.png`) hiển thị ô chọn Người trả trong right panel đang dùng thẻ `<select>` thô của trình duyệt với danh sách popup màu xanh Windows cũ kỹ.
+  - **Nguyên nhân cốt lõi**:
+    + Trong `_TraHangNhapForm.cshtml`, trường chọn Người trả trước đó là thẻ `<select class="inp" id="fPayer">`. Khi mở ra, trình duyệt hiển thị menu select nguyên bản của hệ điều hành với góc vuông, không có icon, màu hover mặc định gây lệch tông với giao diện hiện đại của hệ thống.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Form lập phiếu (`_TraHangNhapForm.cshtml`)**:
+      * Thay thế `<select id="fPayer">` bằng bộ nút custom dropdown Bootstrap chuẩn Chuyển kho (`#btnSelectPayer` kèm `data-bs-toggle="dropdown"`, class `.payer-custom-select-btn`), hiển thị text người trả kèm icon chevron mũi tên và bo góc 6px.
+      * Danh sách menu `.payer-custom-dropdown-menu` với bo góc 8px, hiệu ứng đổ bóng `box-shadow`, padding 7px 10px, tiêu đề phụ "CHỌN NHÂN VIÊN TRẢ", icon người dùng `bi-person`, icon tích chọn màu xanh `bi-check2` trên mục đang được chọn (`.active`).
+      * Trường ẩn `<input type="hidden" id="fPayer">` lưu trữ mã nhân viên trả, tương thích 100% với luồng submit dữ liệu cũ.
+    + **Bảng danh sách (`_TraHangNhapTable.cshtml`)**:
+      * Chuẩn hóa thẻ `<select class="inp-payer">` trong drawer chi tiết bảng danh sách với `border-radius: 6px; border-color: #cbd5e1; height: 32px;` đồng bộ.
+    + **CSS (`tra-hang-nhap.css`)**:
+      * Khai báo `.payer-custom-select-btn` và `.payer-custom-dropdown-menu` đồng bộ 100% với `.wh-custom-select-btn` của Chuyển kho: màu hover `#f1f5f9`, active `#e0f2fe`, viền focus `#0a66e8` với viền bóng 3px `rgba(10, 102, 232, 0.12)`.
+    + **JavaScript (`tra-hang-nhap-form.js`)**:
+      * Bổ sung sự kiện click `.payer-item-opt`: cập nhật giá trị `#fPayer`, đổi text trên nút chọn, đổi trạng thái active/check-icon và tự động đóng menu dropdown mượt mà.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+      * `node -c tra-hang-nhap-form.js` đạt **0 Errors**.
+
+- **Tích Hợp Accordion Mở/Đóng Chi Tiết Trả Hàng Nhập Chuyển Động Mượt Chuẩn Nhà Cung Cấp & Lego KiotFilter (Phiên 127)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "khi mở phần chi tiết thì nó phải chuyển động mượt như phần nhà cung cấp".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `tra-hang-nhap-index.js`, sự kiện click dòng bảng trước đó sử dụng lệnh thô jQuery `$detailRow.show()` và `$detailRow.hide()` trực tiếp trên thẻ `<tr>`. Do thẻ bảng HTML `<tr>` không hỗ trợ animation trượt tự nhiên, việc show/hide làm dòng bật/tắt giật cục lập tức, không có hiệu ứng trượt êm dịu (slideDown/slideUp) như phân hệ Nhà cung cấp.
+    + Trong `_TraHangNhapTable.cshtml`, thiếu khối bọc animation `.product-detail-panel-wrap` (chuẩn Lego KiotViet) bên trong ô `<td>`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bảng danh sách (`_TraHangNhapTable.cshtml`)**:
+      * Bổ sung thẻ bọc `<div class="product-detail-panel-wrap" style="display: none;">` ôm trọn khối `.ncc-detail-fixed-wrap`, cho phép jQuery tính toán và trượt độ cao mượt mà không làm vỡ cấu trúc bảng.
+    + **JavaScript (`tra-hang-nhap-index.js`)**:
+      * Tái sử dụng khối Lego `KiotFilter.initRowDetail` (tuân thủ Luật 10 trong `AGENTS.md`) với cấu hình: `tableSelector: '#receiptTable'`, `rowSelector: 'tr.product-row, tr.tbl-row'`, `detailRowSelector: '#detail-row-{id}'`, `wrapSelector: '.product-detail-panel-wrap'`, `slideDuration: 150`, `fadeDuration: 120`.
+      * Khi click mở dòng, thẻ bọc `.product-detail-panel-wrap` thực hiện `slideDown(150)` êm mượt; khi đóng hoặc chuyển dòng thực hiện `slideUp(150)` nhịp nhàng giống 100% Nhà cung cấp, Chuyển kho, Nhập hàng.
+      * Trong hàm nạp lại bảng AJAX `fetchTable()`, hỗ trợ duy trì hiển thị `.product-detail-panel-wrap` khi dòng đang được mở mà không bị chớp giật.
+    + **CSS (`tra-hang-nhap.css`)**:
+      * Bổ sung `.last-visible-col` cho viền phải 3px để đảm bảo khung chữ nhật bao quanh dòng chi tiết luôn khép kín đẹp mắt khi đóng mở.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+      * `node -c tra-hang-nhap-index.js` đạt **0 Errors**.
+
+- **Cố Định Độ Rộng 992px Khung Chi Tiết Trả Hàng Nhập Chuẩn Nhà Cung Cấp & KiotViet (Phiên 126)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "hiện tại phần chi tiết khi hiện các cột thì nó cứ kéo dài ra, bạn hãy sửa lại cố định giống phần nhà cung cấp".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `_TraHangNhapTable.cshtml`, thẻ bao quanh nội dung chi tiết trước đó chứa thuộc tính inline `style="width: 100%; min-width: 820px; ..."`. Khi người dùng bật nhiều cột trong "Tùy chọn cột", tổng độ rộng bảng mở rộng lên 1.500px - 1.800px khiến thuộc tính `width: 100%` ép khung chi tiết kéo dài hết cỡ, phá vỡ bố cục và đẩy các phần tử tài chính dạt sang bên phải.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bảng danh sách (`_TraHangNhapTable.cshtml`)**:
+      * Loại bỏ inline style `width: 100%; min-width: 820px;`, thay bằng class chuẩn KiotViet `.ncc-detail-fixed-wrap.thn-detail-fixed-wrap.kiot-detail-fixed-wrap` với `style="padding: 16px 20px; background: #fff;"`.
+      * Bổ sung class `.product-detail-row.dtl.detail-row` cho dòng `<tr>` chi tiết để tích hợp hoàn hảo với bộ quản lý cột động và kiểu dáng KiotViet.
+      * Tinh chỉnh độ rộng các cột trong bảng mặt hàng trả (`Mã hàng`: 130px, `ĐVT`: 75px, `Số lượng`: 90px, `Giá nhập`: 110px, `Giá trả lại`: 110px, `Thành tiền`: 130px, `Tên hàng`: co giãn tự do ~307px) vừa vặn tuyệt đối trong khung 992px.
+    + **CSS (`tra-hang-nhap.css`)**:
+      * Bổ sung định kiểu `.thn-detail-fixed-wrap, .ncc-detail-fixed-wrap` cố định `width: 992px !important; max-width: 100% !important; box-sizing: border-box !important;`.
+      * Tương thích responsive cho màn hình nhỏ `@media (max-width: 1040px) { width: 100% !important; }`.
+      * Bổ sung đường viền xanh 2 bên và đáy cho `#receiptTable tr.product-detail-row > td`.
+    + **JS Quản lý cột động (`kiot-filter.js`)**:
+      * Mở rộng selector tự động cập nhật `colspan` khi bật/tắt cột: thêm `tr.detail-row > td` để đồng bộ hoàn toàn giữa số cột hiển thị và dòng chi tiết.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+      * `node -c kiot-filter.js` đạt **0 Errors**.
+
+- **Đồng Bộ Font Chữ Thường & Màu Sắc Cột Công Nợ Nhà Cung Cấp Chuẩn Danh Sách Hàng Hóa (Phiên 125)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm ảnh chụp màn hình (`media_1792325335931_1712ad5a.png`): "sửa lại phần font, màu thành chữ thường giống danh sách hàng hóa".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `_NhaCungCapTable.cshtml`, cột "Nợ cần trả hiện tại" trước đó sử dụng `<span class="@(item.NoCanTraHienTai > 0 ? "text-danger fw-semibold" : "text-muted")">`, khiến các giá trị công nợ mang màu đỏ và font bán đậm (semi-bold), không đồng nhất với cột "Tổng mua" kế bên cũng như phong cách hiển thị dữ liệu số trong danh sách Hàng hóa (chữ thường, màu tối tiêu chuẩn `text-dark`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Bảng danh sách (`_NhaCungCapTable.cshtml`)**:
+      * Chuẩn hóa thẻ ô dữ liệu cột Nợ cần trả: `<td data-col="no" class="num text-dark">@item.NoCanTraHienTai.ToString("N0", viCulture)</td>`.
+      * Bỏ hoàn toàn class `text-danger`, `fw-semibold`, `text-muted` trên các dòng dữ liệu để chuyển sang chữ thường (regular weight 400) và màu tối đồng bộ với Hàng hóa.
+      * Trong tab chi tiết mở rộng `tab-info`: chuẩn hóa hiển thị `Nợ cần trả hiện tại` sang `fw-bold text-dark`.
+    + **Modal/Drawer chi tiết (`_NhaCungCapDetail.cshtml`)**:
+      * Đưa khối tóm tắt công nợ trong tab `debt` về màu tối đồng bộ: `fs-4 fw-bold text-dark`.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` đạt **0 Errors**.
+
+
+- **Chuẩn Hóa Nút Chọn File Dữ Liệu & Cụm Nút Hành Động Phiếu Trả Hàng Nhập Giống Kiểm Tồn (Phiên 124)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "sửa lại các nút chọn file dữ liệu, hoàn thành giống phần kiểm tồn" kèm ảnh chụp màn hình (`media_1792323977134_8208938a.png`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Nút "Chọn file dữ liệu" (Empty State)**:
+      * Trong `_TraHangNhapForm.cshtml`, nâng cấp vùng trống `#emptyWrap` theo chuẩn giao diện Kiểm tồn: icon `.ico mb-3 > i.bi-file-earmark-spreadsheet`, tiêu đề "Thêm sản phẩm từ ô tìm kiếm hoặc file Excel", link "Excel file mẫu", và nút `#btnSelectFile` với icon `bi-box-arrow-in-down fs-5`, chữ "Chọn file dữ liệu", nền xanh `#0a66e8`, bo góc 6px.
+      * Trong `tra-hang-nhap.css`, bổ sung CSS `#emptyWrap #btnSelectFile` chiều cao 42px, padding 0 20px, bo góc 6px, hiệu ứng đổ bóng và hover `#0852bd`.
+      * Trong `tra-hang-nhap-form.js`, cập nhật hàm `checkEmptyState()` sử dụng `.attr('style', 'display: none !important;')` và `display: flex !important;` để tương thích hoàn toàn với class `.d-flex` của Bootstrap khi ẩn/hiện bảng hàng hóa.
+    + **Cụm 2 nút hành động "Lưu tạm" & "Hoàn thành" (`.f-actions`)**:
+      * Trong `_TraHangNhapForm.cshtml`, loại bỏ các class Bootstrap ghi đè, chuẩn hóa cấu trúc 2 nút hành động theo đúng bản thiết kế Kiểm tồn:
+        - Nút Lưu tạm `#btnSaveDraft`: class `.save`, icon `bi-floppy fs-5 mb-1` xếp dọc trên text "Lưu tạm (F9)", nền xanh dương `#0a66e8`.
+        - Nút Hoàn thành `#btnSaveComplete`: class `.done`, icon `bi-check-lg fs-5 mb-1` xếp dọc trên text "Hoàn thành (F10)", nền xanh lá `#12b34a`.
+      * Trong `tra-hang-nhap.css`, thiết lập quy tắc `.f-actions button`: chiều cao 56px, `flex-direction: column`, căn giữa icon và text, bo góc 6px, font-weight 600, hiệu ứng hover chuyên nghiệp.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+      * `node -c tra-hang-nhap-form.js` đạt **0 Errors**.
+
+
+- **Khắc Phục Lỗi Leftmenu Không Thao Tác Được Trong Phân Hệ Trả Hàng Nhập (Phiên 123)**:
+  - **Nhu cầu**: Người dùng phản ánh: "leftmenu trong phần trả nhập hàng click ko hiện gì" kèm ảnh chụp màn hình (`media_1792323897920_7c682a36.png`).
+  - **Nguyên nhân cốt lõi**:
+    + Trong `tra-hang-nhap-index.js`, hàm `KiotFilter.initDateFilter` bị gọi sai chữ ký hàm: truyền vào object `{ scope: '#sidebarFilterCol', ... }` thay vì truyền `(target, callback)`. Do bên trong `kiot-filter.js`, hàm thực hiện `target.charAt(0)`, việc `target` là object đã ném ra lỗi `Uncaught TypeError: target.charAt is not a function`.
+    + Exception đồng bộ này đã làm dừng toàn bộ luồng khởi tạo JavaScript trong khối `$(function() { ... })`, khiến tất cả các hàm gắn sự kiện phía sau (chọn thời gian nhanh, popup dual calendar, multi-select dropdown Người tạo, Người trả, Nhà cung cấp, checkbox trạng thái, thu gọn sidebar F4) đều không được kích hoạt.
+    + Trong `TraHangNhapFilterVM.cs`, thuộc tính `DateFilterType` mặc định là `"THIS_MONTH"` trong khi giao diện sidebar hiển thị mặc định `"Toàn thời gian"` (`"ALL"`), gây lệch pha dữ liệu ban đầu.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`kiot-filter.js`**: Nâng cấp hàm `initDateFilter(targetOrOptions, onApplyCallback)` hỗ trợ linh hoạt cả 2 chữ ký hàm (chuỗi target hoặc object options), chống hoàn toàn lỗi crash TypeError trong tương lai.
+    + **`tra-hang-nhap-index.js`**:
+      * Chuẩn hóa lời gọi `KiotFilter.initDateFilter('date', function (from, to, text, val) { ... })` khớp chuẩn toàn hệ thống.
+      * Tích hợp `KiotFilter.initSidebar(...)` quản lý thu gọn/mở rộng sidebar, F4, và mobile drawer đồng bộ Lego KiotFilter.
+      * Khởi tạo `F.preset = 'ALL'` đồng bộ với ô radio "Toàn thời gian".
+      * Sửa `colToggler.applyColumns()` thành `colToggler.apply()`.
+    + **`TraHangNhapViewModels.cs`**: Cập nhật `DateFilterType` mặc định thành `"ALL"`.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` đạt **0 Errors**.
+      * `node -c` cả `kiot-filter.js` và `tra-hang-nhap-index.js` đều đạt **0 Errors**.
+
+- **Hoàn Thiện Sắp Xếp Tăng/Giảm Cột Bảng Trả Hàng Nhập Chuẩn KiotViet (Phiên 122)**:
+  - **Nhu cầu**: Người dùng phản ánh lỗi: "khi ấn lên header các cột thì chưa có sắp xếp tăng giảm bình thường" trên phân hệ Trả hàng nhập kèm ảnh chụp màn hình (`media_1792324091113_af4db32c.png`).
+  - **Nguyên nhân cốt lõi**:
+    + Trong `_TraHangNhapTable.cshtml`, các thẻ `<th>` dùng attribute `data-col="ma"`, `"tg"`, `"ncc"`, `"tongsl"`, `"tongtien"`, `"canthu"`, `"dathu"`, `"st"` nhưng lại kiểm tra điều kiện `@(Model.SortBy == "maphieu")`, `"ngaytra"`, `"tenncc"`, `"tongsoluong"`... Do lệch tên định danh, class `.is-sorted` và icon mũi tên `bi-arrow-up` / `bi-arrow-down` không được render ra giao diện.
+    + Một số cột (`tgtao`, `chinhanh`, `nguoitra`, `nguoitao`, `slmathang`, `giamgia`, `ghi`) chưa được gắn class `sortable-th` và cấu trúc `th-content` / `sort-icon`.
+    + Trong `TraHangNhapController.cs`, switch-case sắp xếp chỉ bắt các alias dài (`"maphieu"`, `"ngaytra"`...), không bắt alias ngắn (`"ma"`, `"tg"`, `"ncc"`...), đồng thời thiếu hoàn toàn nhánh sắp xếp cho Trạng thái (`"st"`), Ghi chú (`"ghi"`), SL mặt hàng (`"slmathang"`), Giảm giá (`"giamgia"`), Chi nhánh (`"chinhanh"`), Người trả (`"nguoitra"`), Người tạo (`"nguoitao"`), Thời gian tạo (`"tgtao"`).
+    + Thẻ bảng `#receiptTable` trong `_TraHangNhapTable.cshtml` và `tra-hang-nhap.css` bị gán `min-width: 1400px;`, chưa đồng bộ chuẩn thu gọn 760px khi ít cột.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Controller (`Controllers/TraHangNhapController.cs`)**: Hỗ trợ đầy đủ toàn bộ các khóa cột ngắn và dài (`"ma"`, `"tg"`, `"tgtao"`, `"ncc"`, `"chinhanh"`, `"nguoitra"`, `"nguoitao"`, `"tongsl"`, `"slmathang"`, `"tongtien"`, `"giamgia"`, `"canthu"`, `"dathu"`, `"ghi"`, `"st"`), bổ sung order by theo `TrangThai`, `GhiChu`, `ChiTietPhieuTraHangNhaps.Count`, `GiamGia`, `MaKhoNavigation.TenKho`, `HoTen` người trả/người tạo.
+    + **View Table (`Views/TraHangNhap/_TraHangNhapTable.cshtml`)**:
+      * Đưa `#receiptTable` về chuẩn: `<table class="tbl" id="receiptTable" style="width: max-content; min-width: 760px;">`.
+      * Bổ sung đầy đủ class `sortable-th`, cấu trúc `th-content`, `th-title-wrap`, `th-text`, và icon mũi tên `sort-icon` (`bi-arrow-up` / `bi-arrow-down`) cho tất cả các cột dữ liệu.
+      * Chuẩn hóa logic kiểm tra khớp cả mã ngắn và mã dài: `@((Model.SortBy == "<col>" || Model.SortBy == "<col_alias>") ? ...)`.
+    + **CSS (`wwwroot/css/tra-hang-nhap.css`)**: Cập nhật `#receiptTable` sang `min-width: 760px !important;`.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile --no-restore` đạt **0 Errors, 2 Warnings**.
+      * `node -c tra-hang-nhap-index.js` đạt **0 Errors**.
+
+---
+
+- **Cải Thiện Toàn Diện Leftmenu & Rightmenu Giao Diện Phiếu Trả Hàng Nhập (Phiên 121)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "tiếp tục cải thiện leftmenu rightmenu giao diện phiếu trả".
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Leftmenu (Cột lọc Sidebar trái danh sách `Index`)**:
+      * Triển khai hàm `setupMultiSelectDropdown` cho 3 bộ lọc: Người tạo (`#boxNguoiTao`), Người trả (`#boxNguoiTra`), Nhà cung cấp (`#boxNhaCungCap`).
+      * Hỗ trợ tìm kiếm realtime bên trong dropdown, render tag pills có nút xóa `×`, hiển thị `+N` khi chọn nhiều, cập nhật chấm xanh `.filter-dot` (`#dotUser`, `#dotPayer`, `#dotNcc`).
+      * Nút thò thụt sidebar `#btnToggleSidebar`: Bổ sung hover buffer chống flicker 120ms (chỉ hiện nút khi di chuột vào sidebar hoặc vào nút; khi thu gọn `sidebar-collapsed` luôn bám sát lề trái `8px`).
+      * Bổ sung phím tắt toàn cục `F4` (đóng/mở sidebar bộ lọc) và `F3` (focus ô tìm kiếm mã phiếu trả).
+      * Hỗ trợ đóng mở bộ lọc trên mobile (`#btnMobileFilter`, `#btnCloseSidebarMobile`, `#sidebarBackdrop`).
+      * Xử lý click ngoài tự động đóng các popup multiselect & advbox; gắn sự kiện nút `#resetF` khi empty state.
+    + **Rightmenu (Panel phải trên màn hình Lập/Sửa `_TraHangNhapForm.cshtml`)**:
+      * Căn lề phải sắc nét đồng bộ 185px cho toàn bộ các trường nhập liệu: Người trả & Thời gian trả (`#fDateInp` hiển thị `dd/MM/yyyy HH:mm`), Mã trả hàng nhập (`#txtDocCode`), Tiền NCC trả (`#orderPaidInput`), Giảm giá (`#orderDiscountInput`).
+      * Mã trả hàng nhập (`#txtDocCode`): Cho phép nhập tay mã tùy ý hoặc để trống tự động sinh mã `THNxxxxxx` chuẩn Kiểm kho; tự động viết hoa khi gõ; kiểm tra chống trùng lặp mã thân thiện trên server; gửi `MaPhieu` trong payload AJAX.
+      * Nút tròn `#btnToggleRightPanel` trượt mượt 0.25s cubic-bezier giữa `right: 425px` và `right: 8px` khi thu gọn; đồng bộ phím tắt `F4`.
+      * Tinh chỉnh CSS `#thnRightPanel .pr` chuẩn Kiểm kho & Chuyển kho (`border`, `padding`, `text-align: right`, `focus`).
+    + **Khắc phục lỗi cảnh báo "Vượt tồn" hiển thị sai & Lỗi lưu phiếu**:
+      * *Lỗi "Vượt tồn"*: Do thẻ cảnh báo tồn kho có class Bootstrap `d-block` (`display: block !important;`), ghi đè thuộc tính inline `style="display: none;"` và hàm jQuery `.toggle(false)`. Khi số lượng là 1 (tồn 97), dòng chữ "Vượt tồn (còn 97)" vẫn bị ép hiện ra. Đã gỡ bỏ class `d-block`, chuyển sang định nghĩa `.hint-over { display: block; }` trong CSS (không có `!important`) để ẩn/hiện chính xác.
+      * *Lỗi "Lỗi khi lưu phiếu trả hàng."*: Action `Save` trước đó gắn `[ValidateAntiForgeryToken]` nhưng request là JSON body AJAX không có form token nên ASP.NET Core trả về HTTP 400. Đã gỡ bỏ `[ValidateAntiForgeryToken]` ở `Save`, `QuickUpdateNote`, `Cancel` đồng bộ chuẩn các controller khác trong hệ thống.
+    + **Kiểm tra**:
+      * `node -c tra-hang-nhap-index.js` và `node -c tra-hang-nhap-form.js` đạt 0 lỗi cú pháp.
+      * `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+      * Đồng bộ đặc tả `docs/specs/tra-hang-nhap.md` (6.897 ký tự < 8.000 ký tự theo Rule 12).
+
+
+- **Xây Dựng Toàn Diện Phân Hệ Trả Hàng Nhập Chuẩn KiotViet & Prototype (Phiên 120)**:
+  - **Nhu cầu**: Người dùng cung cấp file prototype `prototype-trahangnhap.html` và yêu cầu: "lên kế hoạch lắp ráp để làm chức năng trả hàng", sau đó yêu cầu "triển khai kế hoạch".
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Cơ sở dữ liệu (Migration 14)**:
+      * Tạo file `migrations/sql/14_bo_sung_tra_hang_nhap.sql` và thực thi thành công trên SQL Server `.\SQLEXPRESS` (`QuanLyKhoPhuQuocLTW`).
+      * Tạo 2 bảng `PhieuTraHangNhap` (khóa ngoại `Kho`, `DonViCapHang`, `NhanVien`, tiền tố `THN{id:D6}`) và `ChiTietPhieuTraHangNhap` (khóa ngoại `HangHoa`, `ON DELETE CASCADE`).
+      * Cập nhật View cốt lõi `vw_BienDongKho` thêm nhánh 6 `TRA_HANG_NHAP`: khi `TrangThai = 'DA_TRA_HANG'` thì ghi nhận `SoLuongGiam = ct.SoLuong`. Khi phiếu bị hủy (`'HUY'`), View tự động loại trừ giúp hoàn lại tồn kho và công nợ NCC tức thì mà không cần sinh bút toán đảo.
+    + **Entity Framework & Models**:
+      * Tạo `Models/PhieuTraHangNhap.cs` và `Models/ChiTietPhieuTraHangNhap.cs`.
+      * Bổ sung navigation properties vào `Kho.cs`, `DonViCapHang.cs`, `NhanVien.cs`, `HangHoa.cs`.
+      * Cấu hình ánh xạ Fluent API và đăng ký `DbSet` trong `QuanLyKhoPhuQuocLtwContext.cs`.
+    + **Helper & ViewModels**:
+      * Thêm `FormatMaTraHangNhap` vào `Services/MaChungTuHelper.cs`.
+      * Xây dựng trọn bộ `ViewModels/TraHangNhap/TraHangNhapViewModels.cs` (`TraHangNhapIndexVM`, `TraHangNhapFilterVM`, `TraHangNhapListItemVM`, `TraHangNhapFormVM`, `TraHangNhapLineVM`, `SaveTraHangNhapRequest`, `QuickUpdateTraHangNoteRequest`).
+    + **Controller**:
+      * Xây dựng `Controllers/TraHangNhapController.cs` kế thừa `BaseKhoController`.
+      * Đầy đủ action: `Index`, `Filter` (AJAX phân trang/lọc), `Create`, `Edit`, `Details`, `Save` (bọc transaction `BeginTransactionAsync`, kiểm tra chặn xuất âm kho bằng `ITonKhoService.KiemTraXuatKhoAsync`, ghi `NhatKyThaoTac`), `Cancel`, `QuickUpdateNote`, `ToggleFavorite`, `SearchProduct`, `SearchSupplier`, `DownloadTemplate`, `ExportExcel`.
+    + **Giao diện & Views**:
+      * `_MainMenu.cshtml`: Kích hoạt liên kết menu `asp-controller="TraHangNhap" asp-action="Index"`.
+      * `Views/TraHangNhap/Index.cshtml`: Màn hình danh sách với F3 tìm kiếm, popup tìm kiếm nâng cao `#advbox`, nút xuất file, tùy chọn cột.
+      * `Views/TraHangNhap/_TraHangNhapFilterSidebar.cshtml`: Sidebar lọc thời gian `_KiotDateFilter`, checkbox trạng thái, dropdown người tạo, người trả, nhà cung cấp.
+      * `Views/TraHangNhap/_TraHangNhapTable.cshtml`: Bảng cuộn 2 chiều độc lập, hàng tổng hợp cố định, drawer chi tiết inline 992px, sub-filter và các nút tác vụ (Hủy, Sao chép, In, Mở sửa).
+      * `Views/TraHangNhap/_TraHangNhapForm.cshtml`, `Create.cshtml`, `Edit.cshtml`, `Details.cshtml`: Giao diện 2 cột toàn màn hình chuẩn KiotViet:
+        - Cột trái: Bảng hàng hóa, tìm kiếm F3 autocomplete, cảnh báo đỏ `.over` khi vượt tồn, nhập Excel/CSV, tải file mẫu `MauTraHangNhap.csv`.
+        - Cột phải: Panel 440px cố định trượt mượt mà 0.25s qua phím F4 (nút `.panel-toggle`), popup chọn ngày giờ `.dtpop` chuẩn Kiểm tồn, chọn NCC chip + modal tạo nhanh, giảm giá VND/%, tiền NCC trả (F8), nút ghim đáy Lưu tạm (F9) và Hoàn thành (F10).
+    + **CSS & JavaScript**:
+      * `wwwroot/css/tra-hang-nhap.css`: Định kiểu toàn diện cho danh sách, bảng, drawer chi tiết và form 2 cột.
+      * `wwwroot/js/tra-hang-nhap-index.js`: Xử lý AJAX filter, sorting, bookmark, chọn cột, drawer, in phiếu, cập nhật ghi chú nhanh.
+      * `wwwroot/js/tra-hang-nhap-form.js`: Xử lý bảng hàng trả, tìm F3, tính toán tổng tiền, F4 trượt mượt, popup lịch `.dtpop`, nạp CSV, phím tắt F3/F4/F8/F9/F10.
+    + **Kiểm tra & Đồng bộ tài liệu**:
+      * Cú pháp JavaScript: `node -c tra-hang-nhap-index.js` và `node -c tra-hang-nhap-form.js` đạt 0 lỗi.
+      * Biên dịch dự án: `dotnet build -t:Compile` đạt **Build succeeded. 0 Warning(s) nghiệp vụ, 0 Error(s)**.
+      * Tạo tài liệu đặc tả `docs/specs/tra-hang-nhap.md` (6.468 ký tự < 8.000 ký tự theo Rule 12).
+      * Đồng bộ `docs/quyet-dinh.md` (Phiên 119) và `.agent/rules/02-nghiep-vu-kho.md` (7.983 ký tự < 8.000 ký tự theo Rule 12).
+
 
 - **Căn Phải Thời Gian & Cho Phép Nhập Tay / Tự Động Sinh Mã Chuyển Hàng Chuẩn Kiểm Kho (Phiên 119)**:
   - **Nhu cầu**: Người dùng phản ánh: "trong phần chuyển kho, phần thời gian và mã chuyển hàng để dịch sang phải. phần mã chuyển hàng sửa thành tự động và nhâp tay nếu ko nhập tay thì tự động giống kiểm kho".

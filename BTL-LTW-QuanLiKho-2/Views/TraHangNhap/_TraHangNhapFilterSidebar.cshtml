@@ -1,0 +1,43 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.TraHangNhap.TraHangNhapIndexVM
+@using BTL_LTW_QuanLiKho_2.ViewModels.Common
+
+<!-- CỘT BÊN TRÁI: TIÊU ĐỀ "TRẢ HÀNG NHẬP" + CÁC KHỐI BỘ LỌC KIOTVIET (MODULAR LEGO) -->
+<aside class="kiot-sidebar-col" id="sidebarFilterCol">
+    <!-- Header cho sidebar khi mở ở mobile/zoom -->
+    <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+        <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc trả hàng nhập</div>
+        <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
+    </div>
+
+    <!-- Tiêu đề sidebar Desktop -->
+    <div class="kiot-sidebar-title d-none d-lg-flex">
+        Trả hàng nhập
+    </div>
+
+    <div class="kiot-filter-box" id="side">
+        <!-- 1. Thời gian -->
+        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("date", "Thời gian", false)' />
+
+        <!-- 2. Trạng thái chứng từ -->
+        <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Trạng thái", "dotSt", new() {
+            new("NHAP", "Phiếu tạm", Model.Filter.Statuses.Contains("NHAP")),
+            new("DA_TRA_HANG", "Đã trả hàng", Model.Filter.Statuses.Contains("DA_TRA_HANG")),
+            new("HUY", "Đã hủy", Model.Filter.Statuses.Contains("HUY"))
+        })' />
+
+        <!-- 3. Người tạo -->
+        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NguoiTao", "nguoitao", "Người tạo", "Chọn người tạo", true, "dotUser") {
+            Items = Model.NhanViens.Select(nv => new KiotMultiSelectItemVM(nv.Value, nv.Text, (Model.Filter.CreatorIds != null && Model.Filter.CreatorIds.Contains(int.TryParse(nv.Value, out var cid) ? cid : -1)) || Model.Filter.CreatorId?.ToString() == nv.Value)).ToList()
+        }' />
+
+        <!-- 4. Người trả -->
+        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NguoiTra", "nguoitra", "Người trả", "Chọn người trả", true, "dotPayer") {
+            Items = Model.NhanViens.Select(nv => new KiotMultiSelectItemVM(nv.Value, nv.Text, (Model.Filter.PayerIds != null && Model.Filter.PayerIds.Contains(int.TryParse(nv.Value, out var pid) ? pid : -1)) || Model.Filter.PayerId?.ToString() == nv.Value)).ToList()
+        }' />
+
+        <!-- 5. Nhà cung cấp -->
+        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NhaCungCap", "ncc", "Nhà cung cấp", "Chọn nhà cung cấp", true, "dotNcc") {
+            Items = Model.NhaCungCaps.Select(ncc => new KiotMultiSelectItemVM(ncc.Value, ncc.Text, (Model.Filter.NccIds != null && Model.Filter.NccIds.Contains(int.TryParse(ncc.Value, out var nid) ? nid : -1)) || Model.Filter.NccId?.ToString() == ncc.Value)).ToList()
+        }' />
+    </div>
+</aside>

@@ -892,25 +892,10 @@ public class XuatHuyController : BaseKhoController
 
         bool isDetail = string.Equals(type, "detail", StringComparison.OrdinalIgnoreCase);
 
-        using var workbook = new XLWorkbook();
+        // Mặc định xuất file Excel (.xlsx) chuẩn KiotViet bằng ClosedXML qua Lego ExcelHelper
         if (isDetail)
         {
-            var ws = workbook.Worksheets.Add("ChiTietXuatHuy");
-            var headers = new[]
-            {
-                "STT", "Mã xuất hủy", "Thời gian", "Chi nhánh", "Người tạo", "Người xuất hủy",
-                "Trạng thái", "Mã hàng", "Tên hàng", "ĐVT", "Số lượng hủy", "Đơn giá (Giá vốn)",
-                "Thành tiền (Giá trị hủy)", "Ghi chú"
-            };
-
-            for (int i = 0; i < headers.Length; i++)
-            {
-                ws.Cell(1, i + 1).Value = headers[i];
-            }
-            ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
-            ws.Row(1).Height = 28;
-
-            int rowIdx = 2;
+            var detailRows = new List<(int Stt, XuatHuyListItemVM Item, XuatHuyLineVM? Line)>();
             int stt = 1;
             foreach (var item in model.Items)
             {
@@ -918,112 +903,51 @@ public class XuatHuyController : BaseKhoController
                 {
                     foreach (var line in item.Lines)
                     {
-                        ws.Cell(rowIdx, 1).Value = stt++;
-                        ws.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                        ws.Cell(rowIdx, 2).Value = item.MaPhieuHienThi;
-                        ws.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                        ws.Cell(rowIdx, 3).Value = item.NgayLap.ToString("dd/MM/yyyy HH:mm");
-                        ws.Cell(rowIdx, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                        ws.Cell(rowIdx, 4).Value = item.TenKho;
-                        ws.Cell(rowIdx, 5).Value = item.TenNguoiLap;
-                        ws.Cell(rowIdx, 6).Value = item.TenNguoiXacNhan ?? "";
-                        ws.Cell(rowIdx, 7).Value = item.TenTrangThai;
-                        ws.Cell(rowIdx, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                        ws.Cell(rowIdx, 8).Value = line.MaHangNoiBo;
-                        ws.Cell(rowIdx, 9).Value = line.TenHang;
-                        ws.Cell(rowIdx, 10).Value = line.TenDvt;
-                        ws.Cell(rowIdx, 11).Value = line.SoLuongXuat;
-                        ws.Cell(rowIdx, 11).Style.NumberFormat.Format = "#,##0.##";
-                        ws.Cell(rowIdx, 12).Value = line.DonGiaXuat;
-                        ws.Cell(rowIdx, 12).Style.NumberFormat.Format = "#,##0";
-                        ws.Cell(rowIdx, 13).Value = line.ThanhTien;
-                        ws.Cell(rowIdx, 13).Style.NumberFormat.Format = "#,##0";
-                        ws.Cell(rowIdx, 14).Value = item.GhiChu ?? "";
-                        rowIdx++;
+                        detailRows.Add((stt++, item, line));
                     }
                 }
                 else
                 {
-                    ws.Cell(rowIdx, 1).Value = stt++;
-                    ws.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                    ws.Cell(rowIdx, 2).Value = item.MaPhieuHienThi;
-                    ws.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                    ws.Cell(rowIdx, 3).Value = item.NgayLap.ToString("dd/MM/yyyy HH:mm");
-                    ws.Cell(rowIdx, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                    ws.Cell(rowIdx, 4).Value = item.TenKho;
-                    ws.Cell(rowIdx, 5).Value = item.TenNguoiLap;
-                    ws.Cell(rowIdx, 6).Value = item.TenNguoiXacNhan ?? "";
-                    ws.Cell(rowIdx, 7).Value = item.TenTrangThai;
-                    ws.Cell(rowIdx, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                    ws.Cell(rowIdx, 8).Value = "";
-                    ws.Cell(rowIdx, 9).Value = "(Phiếu chưa có danh sách hàng)";
-                    ws.Cell(rowIdx, 10).Value = "";
-                    ws.Cell(rowIdx, 11).Value = 0;
-                    ws.Cell(rowIdx, 12).Value = 0;
-                    ws.Cell(rowIdx, 13).Value = 0;
-                    ws.Cell(rowIdx, 14).Value = item.GhiChu ?? "";
-                    rowIdx++;
+                    detailRows.Add((stt++, item, null));
                 }
             }
 
-            if (rowIdx > 2)
-            {
-                ExcelHelper.ApplyTableBorders(ws.Range(1, 1, rowIdx - 1, headers.Length));
-            }
-            ws.Columns().AdjustToContents();
+            var bytes = ExcelHelper.Export("ChiTietXuatHuy", detailRows, col => col
+                .AddCenter("STT", x => x.Stt)
+                .AddCenter("Mã xuất hủy", x => x.Item.MaPhieuHienThi)
+                .AddDateTime("Thời gian", x => x.Item.NgayLap)
+                .AddText("Chi nhánh", x => x.Item.TenKho)
+                .AddText("Người tạo", x => x.Item.TenNguoiLap)
+                .AddText("Người xuất hủy", x => x.Item.TenNguoiXacNhan ?? "")
+                .AddCenter("Trạng thái", x => x.Item.TenTrangThai)
+                .AddCenter("Mã hàng", x => x.Line?.MaHangNoiBo ?? "")
+                .AddText("Tên hàng", x => x.Line?.TenHang ?? "(Phiếu chưa có danh sách hàng)")
+                .AddCenter("ĐVT", x => x.Line?.TenDvt ?? "")
+                .AddNumber("Số lượng hủy", x => x.Line?.SoLuongXuat ?? 0)
+                .AddCurrency("Đơn giá (Giá vốn)", x => x.Line?.DonGiaXuat ?? 0)
+                .AddCurrency("Thành tiền (Giá trị hủy)", x => x.Line?.ThanhTien ?? 0)
+                .AddText("Ghi chú", x => x.Item.GhiChu ?? "")
+            );
 
-            using var ms = new MemoryStream();
-            workbook.SaveAs(ms);
-            return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"ChiTietXuatHuy_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"ChiTietXuatHuy_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
         else
         {
-            var ws = workbook.Worksheets.Add("DanhSachXuatHuy");
-            var headers = new[]
-            {
-                "STT", "Mã xuất hủy", "Thời gian", "Chi nhánh", "Người tạo", "Người xuất hủy",
-                "Tổng số lượng", "Tổng giá trị hủy", "Trạng thái", "Ghi chú"
-            };
+            var summaryRows = model.Items.Select((item, idx) => (Stt: idx + 1, Item: item));
+            var bytes = ExcelHelper.Export("DanhSachXuatHuy", summaryRows, col => col
+                .AddCenter("STT", x => x.Stt)
+                .AddCenter("Mã xuất hủy", x => x.Item.MaPhieuHienThi)
+                .AddDateTime("Thời gian", x => x.Item.NgayLap)
+                .AddText("Chi nhánh", x => x.Item.TenKho)
+                .AddText("Người tạo", x => x.Item.TenNguoiLap)
+                .AddText("Người xuất hủy", x => x.Item.TenNguoiXacNhan ?? "")
+                .AddNumber("Tổng số lượng", x => x.Item.TongSoLuong)
+                .AddCurrency("Tổng giá trị hủy", x => x.Item.TongGiaTriHuy)
+                .AddCenter("Trạng thái", x => x.Item.TenTrangThai)
+                .AddText("Ghi chú", x => x.Item.GhiChu ?? "")
+            );
 
-            for (int i = 0; i < headers.Length; i++)
-            {
-                ws.Cell(1, i + 1).Value = headers[i];
-            }
-            ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
-            ws.Row(1).Height = 28;
-
-            int rowIdx = 2;
-            int stt = 1;
-            foreach (var item in model.Items)
-            {
-                ws.Cell(rowIdx, 1).Value = stt++;
-                ws.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                ws.Cell(rowIdx, 2).Value = item.MaPhieuHienThi;
-                ws.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                ws.Cell(rowIdx, 3).Value = item.NgayLap.ToString("dd/MM/yyyy HH:mm");
-                ws.Cell(rowIdx, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                ws.Cell(rowIdx, 4).Value = item.TenKho;
-                ws.Cell(rowIdx, 5).Value = item.TenNguoiLap;
-                ws.Cell(rowIdx, 6).Value = item.TenNguoiXacNhan ?? "";
-                ws.Cell(rowIdx, 7).Value = item.TongSoLuong;
-                ws.Cell(rowIdx, 7).Style.NumberFormat.Format = "#,##0.##";
-                ws.Cell(rowIdx, 8).Value = item.TongGiaTriHuy;
-                ws.Cell(rowIdx, 8).Style.NumberFormat.Format = "#,##0";
-                ws.Cell(rowIdx, 9).Value = item.TenTrangThai;
-                ws.Cell(rowIdx, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                ws.Cell(rowIdx, 10).Value = item.GhiChu ?? "";
-                rowIdx++;
-            }
-
-            if (rowIdx > 2)
-            {
-                ExcelHelper.ApplyTableBorders(ws.Range(1, 1, rowIdx - 1, headers.Length));
-            }
-            ws.Columns().AdjustToContents();
-
-            using var ms = new MemoryStream();
-            workbook.SaveAs(ms);
-            return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachXuatHuy_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachXuatHuy_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
     }
 }

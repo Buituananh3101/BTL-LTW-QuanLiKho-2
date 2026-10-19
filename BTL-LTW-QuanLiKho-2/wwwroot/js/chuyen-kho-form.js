@@ -21,157 +21,56 @@
         return (Number(n) || 0).toLocaleString('vi-VN');
     }
 
-    // ===== CHỌN NGÀY GIỜ LẬP PHIẾU CHUẨN KIỂM TỒN =====
-    const $fDate = $('#fDate');
-    const $dtPop = $('#dtPop');
-    let createdDate = new Date();
-    if ($fDate.length && $fDate.val()) {
-        const parts = $fDate.val().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
-        if (parts) {
-            const parsed = new Date(+parts[3], +parts[2] - 1, +parts[1], +parts[4], +parts[5]);
-            if (!isNaN(parsed.getTime())) {
-                createdDate = parsed;
-            }
-        }
-    }
-
-    const DOW = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-    const DT = { y: createdDate.getFullYear(), m: createdDate.getMonth() };
-
-    function p2(n) { return String(n).padStart(2, '0'); }
-    function sod(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
-    function dFull(d) {
-        return `${p2(d.getDate())}/${p2(d.getMonth() + 1)}/${d.getFullYear()} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
-    }
-    function dTime(d) {
-        return `${p2(d.getHours())}:${p2(d.getMinutes())}`;
-    }
+    // ===== CHỌN NGÀY GIỜ LẬP PHIẾU (LEGO KIOTDATETIMEPICKER) =====
     function formatLocalIso(d) {
         if (!d || isNaN(d.getTime())) return null;
+        const p2 = n => String(n).padStart(2, '0');
         return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}T${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`;
     }
 
-    function calHTML(y, m, sel) {
-        const first = new Date(y, m, 1), pad = (first.getDay() + 6) % 7, days = new Date(y, m + 1, 0).getDate(), today = sod(new Date()).getTime();
-        let h = '<div class="cal"><div class="cal-g">' + DOW.map(x => `<span class="dow">${x}</span>`).join('');
-        for (let i = 0; i < pad; i++) h += '<span></span>';
-        for (let d = 1; d <= days; d++) {
-            const t = new Date(y, m, d).getTime();
-            let c = 'd';
-            if (t === today) c += ' today';
-            if (t === sel) c += ' sel';
-            h += `<button type="button" class="${c}" data-t="${t}">${d}</button>`;
-        }
-        return h + '</div></div>';
-    }
-
-    function paintDt() {
-        if (!$dtPop.length) return;
-        const sel = sod(createdDate).getTime(), times = [];
-        for (let h = 0; h < 24; h++) {
-            for (const m of [0, 30]) times.push(`${p2(h)}:${p2(m)}`);
-        }
-        const cur = dTime(createdDate);
-        $dtPop.html(`
-            <div style="flex:1">
-                <div class="dtnav">
-                    <button type="button" class="rp-nav" data-dn="-1"><i class="bi bi-chevron-left"></i></button>
-                    <span>Tháng ${DT.m + 1}/${DT.y}</span>
-                    <button type="button" class="rp-nav" data-dn="1"><i class="bi bi-chevron-right"></i></button>
-                </div>
-                ${calHTML(DT.y, DT.m, sel)}
-            </div>
-            <div class="times">
-                ${times.map(t => `<button type="button" data-tm="${t}" class="${t === cur ? 'cur' : ''}">${t}</button>`).join('')}
-            </div>
-        `);
-        const $times = $dtPop.find('.times');
-        const $cur = $times.find('.cur');
-        if ($times.length && $cur.length) {
-            $times[0].scrollTop = $cur[0].offsetTop - ($times[0].clientHeight / 2) + ($cur[0].clientHeight / 2);
-        }
-    }
-
-    if ($fDate.length && $dtPop.length) {
-        let lastFocusTime = 0;
-
-        const openDatePicker = () => {
-            DT.y = createdDate.getFullYear();
-            DT.m = createdDate.getMonth();
-            paintDt();
-            $('.pop.show').not($dtPop).removeClass('show');
-            $dtPop.addClass('show');
-        };
-
-        $fDate.on('focus', function () {
-            lastFocusTime = Date.now();
-            openDatePicker();
-        });
-
-        $fDate.on('click', function (e) {
-            e.stopPropagation();
-            if (Date.now() - lastFocusTime < 300) {
-                return;
+    let createdDate = new Date();
+    const dtPicker = (window.KiotFilter && typeof KiotFilter.initDateTimePicker === 'function')
+        ? KiotFilter.initDateTimePicker({
+            inputSelector: '#fDate',
+            popupSelector: '#dtPop',
+            onChange: function (d) {
+                createdDate = d;
             }
-            if ($dtPop.hasClass('show')) {
-                $dtPop.removeClass('show');
-            } else {
-                openDatePicker();
-            }
-        });
+        })
+        : null;
+    if (dtPicker) createdDate = dtPicker.getDate();
 
-        $fDate.on('change', function () {
-            const m = $(this).val().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
-            if (m) {
-                const d = new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5]);
-                if (!isNaN(d.getTime())) {
-                    createdDate = d;
-                }
+    // ===== QUẢN LÝ LƯỚI DÒNG HÀNG HÓA (LEGO KIOTDOCGRID) =====
+    const docGrid = (window.KiotFilter && typeof KiotFilter.initDocGrid === 'function')
+        ? KiotFilter.initDocGrid({
+            tableBodySelector: '#itemsTableBody',
+            emptyBoxSelector: '#emptyLineBox',
+            tableScrollSelector: '#tableScrollWrap',
+            rowSelector: 'tr.item-line-row',
+            sttSelector: '.row-stt',
+            btnRemoveSelector: '.btn-remove-line',
+            qtyInputSelector: '.line-qty',
+            onRecalc: function () {
+                recalcTotals();
             }
-            $(this).val(dFull(createdDate));
-        });
+        })
+        : null;
 
-        $dtPop.on('click', function (e) {
-            e.stopPropagation();
-            const $n = $(e.target).closest('[data-dn]');
-            const $d = $(e.target).closest('button.d');
-            const $t = $(e.target).closest('[data-tm]');
-
-            if ($n.length) {
-                const step = parseInt($n.data('dn'), 10);
-                const x = new Date(DT.y, DT.m + step, 1);
-                DT.y = x.getFullYear();
-                DT.m = x.getMonth();
-                paintDt();
-            }
-            if ($d.length) {
-                const t = parseInt($d.data('t'), 10);
-                const x = new Date(t);
-                createdDate = new Date(x.getFullYear(), x.getMonth(), x.getDate(), createdDate.getHours(), createdDate.getMinutes());
-                $fDate.val(dFull(createdDate));
-                paintDt();
-            }
-            if ($t.length) {
-                const parts = $t.data('tm').split(':');
-                createdDate = new Date(createdDate.getFullYear(), createdDate.getMonth(), createdDate.getDate(), parseInt(parts[0], 10), parseInt(parts[1], 10));
-                $fDate.val(dFull(createdDate));
-                paintDt();
-            }
-        });
-    }
-
-    // Cập nhật trạng thái hiển thị bảng / rỗng
     function checkEmptyState() {
-        const count = $('#itemsTableBody tr.item-line-row').length;
-        if (count === 0) {
-            $('#tableScrollWrap').hide();
-            $('#emptyLineBox').show();
+        if (docGrid) {
+            docGrid.checkEmpty();
         } else {
-            $('#emptyLineBox').hide();
-            $('#tableScrollWrap').show();
+            const count = $('#itemsTableBody tr.item-line-row').length;
+            if (count === 0) {
+                $('#tableScrollWrap').hide();
+                $('#emptyLineBox').show();
+            } else {
+                $('#emptyLineBox').hide();
+                $('#tableScrollWrap').show();
+            }
+            reindexRows();
+            recalcTotals();
         }
-        reindexRows();
-        recalcTotals();
     }
 
     // Đánh lại số thứ tự dòng
@@ -254,122 +153,17 @@
         checkEmptyState();
     }
 
-    // 1. Tìm kiếm Autocomplete hàng hóa (F3)
-    if (typeof initF3ProductSearch === 'function') {
-        initF3ProductSearch({
+    // 1. Tìm kiếm Autocomplete hàng hóa (F3) dùng Lego KiotFilter.initProductSearch
+    if (window.KiotFilter && typeof KiotFilter.initProductSearch === 'function') {
+        KiotFilter.initProductSearch({
             inputSelector: '#productSearchInput',
             dropdownSelector: '#autocompleteDropdown',
             apiUrl: urls.searchProducts,
             getWarehouseId: function () {
-                return currentWhId || Number($app.data('warehouse-id')) || 0;
+                return $('#fKhoXuat').val() || currentWhId || 1;
             },
             onSelect: function (product) {
                 addProduct(product);
-            }
-        });
-    } else {
-        let suggestList = [];
-        let activeSuggestIdx = 0;
-
-        function renderSuggestDropdown() {
-            const $drop = $('#autocompleteDropdown');
-            if (!suggestList.length) {
-                $drop.html('<div class="p-3 text-center text-muted small">Không tìm thấy hàng hóa phù hợp</div>').show().addClass('show');
-                return;
-            }
-
-            let html = '';
-            suggestList.forEach((p, idx) => {
-                const isAct = idx === activeSuggestIdx ? 'active' : '';
-                const name = p.name || p.tenHang || '';
-                const code = p.code || p.maHangNoiBo || '';
-                const unit = p.unit || p.tenDvt || '';
-                const cost = Number(p.cost !== undefined ? p.cost : (p.gia !== undefined ? p.gia : p.giaVon)) || 0;
-                const stock = Number(p.stock !== undefined ? p.stock : p.tonKho) || 0;
-                const firstLetter = (name || 'H').trim()[0].toUpperCase();
-
-                html += `
-                    <div class="kk-autocomplete-item ${isAct}" data-idx="${idx}">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="kk-item-thumb bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; border-radius: 6px;">
-                                ${firstLetter}
-                            </div>
-                            <div>
-                                <div class="fw-semibold text-dark text-truncate" style="max-width: 280px;">${name}</div>
-                                <div class="text-muted small">${code} ${unit ? '(' + unit + ')' : ''}</div>
-                            </div>
-                        </div>
-                        <div class="text-end ms-auto">
-                            <div class="text-primary fw-bold small">Tồn gửi: ${fmt(stock)}</div>
-                            <div class="text-muted small">Giá vốn: ${fmt(cost)}</div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            $drop.html(html).show().addClass('show');
-        }
-
-        let searchTimer = null;
-        $('#productSearchInput').on('input', function () {
-            clearTimeout(searchTimer);
-            const query = $(this).val().trim();
-            if (!query) {
-                suggestList = [];
-                $('#autocompleteDropdown').hide().removeClass('show').empty();
-                return;
-            }
-
-            searchTimer = setTimeout(function () {
-                $.get(urls.searchProducts, { q: query, whId: currentWhId }, function (data) {
-                    suggestList = data || [];
-                    activeSuggestIdx = 0;
-                    renderSuggestDropdown();
-                });
-            }, 200);
-        });
-
-        $('#productSearchInput').on('keydown', function (e) {
-            if (e.key === 'ArrowDown' && suggestList.length) {
-                e.preventDefault();
-                activeSuggestIdx = (activeSuggestIdx + 1) % suggestList.length;
-                renderSuggestDropdown();
-            } else if (e.key === 'ArrowUp' && suggestList.length) {
-                e.preventDefault();
-                activeSuggestIdx = (activeSuggestIdx - 1 + suggestList.length) % suggestList.length;
-                renderSuggestDropdown();
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                if (suggestList.length && suggestList[activeSuggestIdx]) {
-                    const item = suggestList[activeSuggestIdx];
-                    suggestList = [];
-                    $('#autocompleteDropdown').hide().removeClass('show').empty();
-                    addProduct(item);
-                    $(this).val('').focus();
-                }
-            } else if (e.key === 'Escape') {
-                suggestList = [];
-                $('#autocompleteDropdown').hide().removeClass('show').empty();
-            }
-        });
-
-        $(document).on('mousedown click', '.kk-autocomplete-item', function (e) {
-            e.preventDefault();
-            const idx = $(this).data('idx') !== undefined ? $(this).data('idx') : $(this).data('index');
-            if (suggestList && suggestList[idx]) {
-                const item = suggestList[idx];
-                suggestList = [];
-                $('#autocompleteDropdown').hide().removeClass('show').empty();
-                addProduct(item);
-                $('#productSearchInput').val('').focus();
-            }
-        });
-
-        // Đóng dropdown khi click ra ngoài
-        $(document).on('click', function (e) {
-            if (!$(e.target).closest('.nh-search-wrap').length) {
-                suggestList = [];
-                $('#autocompleteDropdown').hide().removeClass('show').empty();
             }
         });
     }

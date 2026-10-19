@@ -1041,26 +1041,10 @@ public class PhieuKiemKeController : BaseKhoController
             }
         }
 
-        // Mặc định xuất file Excel (.xlsx) chuẩn KiotViet bằng ClosedXML
-        using var workbook = new XLWorkbook();
+        // Mặc định xuất file Excel (.xlsx) chuẩn KiotViet bằng ClosedXML qua Lego ExcelHelper
         if (isDetail)
         {
-            var ws = workbook.Worksheets.Add("ChiTietKiemKho");
-            var headers = new[]
-            {
-                "STT", "Mã kiểm kho", "Thời gian kiểm", "Kho kiểm", "Người tạo", "Trạng thái",
-                "Mã hàng", "Tên hàng", "ĐVT", "Tồn kho", "Thực tế", "SL lệch",
-                "Đơn giá", "Giá trị lệch", "Ngày cân bằng", "Ghi chú"
-            };
-
-            for (int i = 0; i < headers.Length; i++)
-            {
-                ws.Cell(1, i + 1).Value = headers[i];
-            }
-            ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
-            ws.Row(1).Height = 28;
-
-            int rowIdx = 2;
+            var detailRows = new List<(int Stt, PhieuKiemKeListItemVM Item, PhieuKiemKeLineVM? Line)>();
             int stt = 1;
             foreach (var item in model.Items)
             {
@@ -1068,186 +1052,56 @@ public class PhieuKiemKeController : BaseKhoController
                 {
                     foreach (var line in item.Lines)
                     {
-                        ws.Cell(rowIdx, 1).Value = stt++;
-                        ws.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                        ws.Cell(rowIdx, 2).Value = item.MaPhieuHienThi;
-                        ws.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                        ws.Cell(rowIdx, 3).Value = item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm");
-                        ws.Cell(rowIdx, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                        ws.Cell(rowIdx, 4).Value = item.TenKho;
-                        ws.Cell(rowIdx, 5).Value = item.TenNguoiLap;
-
-                        ws.Cell(rowIdx, 6).Value = item.TenTrangThai;
-                        ws.Cell(rowIdx, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                        ws.Cell(rowIdx, 7).Value = line.MaHangNoiBo;
-                        ws.Cell(rowIdx, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                        ws.Cell(rowIdx, 8).Value = line.TenHang;
-
-                        ws.Cell(rowIdx, 9).Value = line.TenDvt;
-                        ws.Cell(rowIdx, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                        ws.Cell(rowIdx, 10).Value = line.SoLuongTheoSo;
-                        ws.Cell(rowIdx, 10).Style.NumberFormat.Format = "#,##0.##";
-
-                        if (line.SoLuongThucTe.HasValue)
-                        {
-                            ws.Cell(rowIdx, 11).Value = line.SoLuongThucTe.Value;
-                            ws.Cell(rowIdx, 11).Style.NumberFormat.Format = "#,##0.##";
-                        }
-                        else
-                        {
-                            ws.Cell(rowIdx, 11).Value = "";
-                        }
-
-                        if (line.SlChenhLech.HasValue)
-                        {
-                            ws.Cell(rowIdx, 12).Value = line.SlChenhLech.Value;
-                            ws.Cell(rowIdx, 12).Style.NumberFormat.Format = "#,##0.##";
-                        }
-                        else
-                        {
-                            ws.Cell(rowIdx, 12).Value = "";
-                        }
-
-                        ws.Cell(rowIdx, 13).Value = line.DonGia;
-                        ws.Cell(rowIdx, 13).Style.NumberFormat.Format = "#,##0";
-
-                        if (line.GiaTriLech.HasValue)
-                        {
-                            ws.Cell(rowIdx, 14).Value = line.GiaTriLech.Value;
-                            ws.Cell(rowIdx, 14).Style.NumberFormat.Format = "#,##0";
-                        }
-                        else
-                        {
-                            ws.Cell(rowIdx, 14).Value = "";
-                        }
-
-                        ws.Cell(rowIdx, 15).Value = item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "";
-                        ws.Cell(rowIdx, 15).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                        ws.Cell(rowIdx, 16).Value = item.GhiChu ?? "";
-
-                        rowIdx++;
+                        detailRows.Add((stt++, item, line));
                     }
                 }
                 else
                 {
-                    ws.Cell(rowIdx, 1).Value = stt++;
-                    ws.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                    ws.Cell(rowIdx, 2).Value = item.MaPhieuHienThi;
-                    ws.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                    ws.Cell(rowIdx, 3).Value = item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm");
-                    ws.Cell(rowIdx, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                    ws.Cell(rowIdx, 4).Value = item.TenKho;
-                    ws.Cell(rowIdx, 5).Value = item.TenNguoiLap;
-
-                    ws.Cell(rowIdx, 6).Value = item.TenTrangThai;
-                    ws.Cell(rowIdx, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                    ws.Cell(rowIdx, 7).Value = "";
-                    ws.Cell(rowIdx, 8).Value = "(Phiếu chưa có danh sách hàng)";
-                    ws.Cell(rowIdx, 9).Value = "";
-                    ws.Cell(rowIdx, 10).Value = 0;
-                    ws.Cell(rowIdx, 11).Value = "";
-                    ws.Cell(rowIdx, 12).Value = "";
-                    ws.Cell(rowIdx, 13).Value = 0;
-                    ws.Cell(rowIdx, 14).Value = "";
-
-                    ws.Cell(rowIdx, 15).Value = item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "";
-                    ws.Cell(rowIdx, 15).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                    ws.Cell(rowIdx, 16).Value = item.GhiChu ?? "";
-
-                    rowIdx++;
+                    detailRows.Add((stt++, item, null));
                 }
             }
 
-            if (rowIdx > 2)
-            {
-                ExcelHelper.ApplyTableBorders(ws.Range(1, 1, rowIdx - 1, headers.Length));
-            }
-            ws.Columns().AdjustToContents();
+            var bytes = ExcelHelper.Export("ChiTietKiemKho", detailRows, col => col
+                .AddCenter("STT", x => x.Stt)
+                .AddCenter("Mã kiểm kho", x => x.Item.MaPhieuHienThi)
+                .AddDateTime("Thời gian kiểm", x => x.Item.ThoiDiemChot)
+                .AddText("Kho kiểm", x => x.Item.TenKho)
+                .AddText("Người tạo", x => x.Item.TenNguoiLap)
+                .AddCenter("Trạng thái", x => x.Item.TenTrangThai)
+                .AddCenter("Mã hàng", x => x.Line?.MaHangNoiBo ?? "")
+                .AddText("Tên hàng", x => x.Line?.TenHang ?? "(Phiếu chưa có danh sách hàng)")
+                .AddCenter("ĐVT", x => x.Line?.TenDvt ?? "")
+                .AddNumber("Tồn kho", x => x.Line?.SoLuongTheoSo ?? 0)
+                .AddNumber("Thực tế", x => x.Line?.SoLuongThucTe)
+                .AddNumber("SL lệch", x => x.Line?.SlChenhLech)
+                .AddCurrency("Đơn giá", x => x.Line?.DonGia ?? 0)
+                .AddCurrency("Giá trị lệch", x => x.Line?.GiaTriLech)
+                .AddCenter("Ngày cân bằng", x => x.Item.NgayCanBang.HasValue ? x.Item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "")
+                .AddText("Ghi chú", x => x.Item.GhiChu ?? "")
+            );
 
-            using var ms = new MemoryStream();
-            workbook.SaveAs(ms);
-            return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"ChiTietKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"ChiTietKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
         else
         {
-            var ws = workbook.Worksheets.Add("DanhSachPhieuKiem");
-            var headers = new[]
-            {
-                "STT", "Mã kiểm kho", "Thời gian kiểm", "Kho kiểm", "Người tạo",
-                "Tổng thực tế", "Tổng chênh lệch", "SL lệch tăng", "SL lệch giảm",
-                "Tổng giá trị lệch", "Ngày cân bằng", "Trạng thái", "Ghi chú"
-            };
+            var summaryRows = model.Items.Select((item, idx) => (Stt: idx + 1, Item: item));
+            var bytes = ExcelHelper.Export("DanhSachPhieuKiem", summaryRows, col => col
+                .AddCenter("STT", x => x.Stt)
+                .AddCenter("Mã kiểm kho", x => x.Item.MaPhieuHienThi)
+                .AddDateTime("Thời gian kiểm", x => x.Item.ThoiDiemChot)
+                .AddText("Kho kiểm", x => x.Item.TenKho)
+                .AddText("Người tạo", x => x.Item.TenNguoiLap)
+                .AddNumber("Tổng thực tế", x => x.Item.TongThucTe)
+                .AddNumber("Tổng chênh lệch", x => x.Item.TongChenhLech)
+                .AddNumber("SL lệch tăng", x => x.Item.SlLechTang)
+                .AddNumber("SL lệch giảm", x => x.Item.SlLechGiam)
+                .AddCurrency("Tổng giá trị lệch", x => x.Item.TongGiaTriLech)
+                .AddCenter("Ngày cân bằng", x => x.Item.NgayCanBang.HasValue ? x.Item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "")
+                .AddCenter("Trạng thái", x => x.Item.TenTrangThai)
+                .AddText("Ghi chú", x => x.Item.GhiChu ?? "")
+            );
 
-            for (int i = 0; i < headers.Length; i++)
-            {
-                ws.Cell(1, i + 1).Value = headers[i];
-            }
-            ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
-            ws.Row(1).Height = 28;
-
-            int rowIdx = 2;
-            int stt = 1;
-            foreach (var item in model.Items)
-            {
-                ws.Cell(rowIdx, 1).Value = stt++;
-                ws.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                ws.Cell(rowIdx, 2).Value = item.MaPhieuHienThi;
-                ws.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                ws.Cell(rowIdx, 3).Value = item.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm");
-                ws.Cell(rowIdx, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                ws.Cell(rowIdx, 4).Value = item.TenKho;
-                ws.Cell(rowIdx, 5).Value = item.TenNguoiLap;
-
-                ws.Cell(rowIdx, 6).Value = item.TongThucTe;
-                ws.Cell(rowIdx, 6).Style.NumberFormat.Format = "#,##0.##";
-
-                ws.Cell(rowIdx, 7).Value = item.TongChenhLech;
-                ws.Cell(rowIdx, 7).Style.NumberFormat.Format = "#,##0.##";
-
-                ws.Cell(rowIdx, 8).Value = item.SlLechTang;
-                ws.Cell(rowIdx, 8).Style.NumberFormat.Format = "#,##0.##";
-
-                ws.Cell(rowIdx, 9).Value = item.SlLechGiam;
-                ws.Cell(rowIdx, 9).Style.NumberFormat.Format = "#,##0.##";
-
-                ws.Cell(rowIdx, 10).Value = item.TongGiaTriLech;
-                ws.Cell(rowIdx, 10).Style.NumberFormat.Format = "#,##0";
-
-                ws.Cell(rowIdx, 11).Value = item.NgayCanBang.HasValue ? item.NgayCanBang.Value.ToString("dd/MM/yyyy HH:mm") : "";
-                ws.Cell(rowIdx, 11).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                ws.Cell(rowIdx, 12).Value = item.TenTrangThai;
-                ws.Cell(rowIdx, 12).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                ws.Cell(rowIdx, 13).Value = item.GhiChu ?? "";
-
-                rowIdx++;
-            }
-
-            if (rowIdx > 2)
-            {
-                ExcelHelper.ApplyTableBorders(ws.Range(1, 1, rowIdx - 1, headers.Length));
-            }
-            ws.Columns().AdjustToContents();
-
-            using var ms = new MemoryStream();
-            workbook.SaveAs(ms);
-            return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachKiemKho_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
     }
 

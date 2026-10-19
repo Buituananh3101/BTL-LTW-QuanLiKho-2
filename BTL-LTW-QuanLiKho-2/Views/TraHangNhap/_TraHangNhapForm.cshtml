@@ -1,0 +1,365 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.TraHangNhap.TraHangNhapFormVM
+@using System.Globalization
+@{
+    var viCulture = CultureInfo.GetCultureInfo("vi-VN");
+}
+
+<link href="~/css/kiem-kho.css" rel="stylesheet" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/hang-hoa-form.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/nha-cung-cap.css" asp-append-version="true" />
+<link href="~/css/nhap-hang.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/tra-hang-nhap.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="kk-container" id="thnFormApp"
+     data-search-products-url="@Url.Action("SearchProduct", "TraHangNhap")"
+     data-search-suppliers-url="@Url.Action("SearchSupplier", "TraHangNhap")"
+     data-save-url="@Url.Action("Save", "TraHangNhap")"
+     data-index-url="@Url.Action("Index", "TraHangNhap")"
+     data-template-url="@Url.Action("DownloadTemplate", "TraHangNhap")"
+     data-warehouse-id="@Model.MaKho"
+     data-id="@Model.MaPhieuTraHang"
+     data-is-readonly="@(Model.IsReadOnly ? "true" : "false")">
+
+    <div class="form-wrap" id="thnFormWrap">
+        <!-- VÙNG CHÍNH BÊN TRÁI (Bảng hàng trả & Công cụ) -->
+        <div class="f-main">
+            <div class="f-top">
+                <a href="@Url.Action("Index", "TraHangNhap")" class="back" id="fBack" title="Quay lại danh sách" aria-label="Quay lại">
+                    <i class="bi bi-arrow-left fs-5"></i>
+                </a>
+                <h1 class="page-title" style="font-size: 20px; font-weight: 700; margin: 0; color: #1f2937;">
+                    @(Model.IsReadOnly ? "Chi tiết phiếu trả hàng nhập" : (Model.MaPhieuTraHang > 0 ? "Sửa phiếu trả hàng nhập" : "Trả hàng nhập"))
+                </h1>
+
+                @if (!Model.IsReadOnly)
+                {
+                    <div class="searchbox focus-w relw">
+                        <i class="bi bi-search search-icon"></i>
+                        <input id="productSearchInput" placeholder="Tìm hàng hóa theo mã hoặc tên (F3)" autocomplete="off">
+                        <div class="nh-autocomplete-dropdown shadow-sm" id="autocompleteDropdown"></div>
+                    </div>
+                }
+
+                <div class="tools relw">
+                    @if (!Model.IsReadOnly)
+                    {
+                        <button type="button" class="btn btn-tool" id="btnImportExcel" title="Nhập danh sách hàng từ file Excel/CSV">
+                            <i class="bi bi-box-arrow-in-down"></i>
+                        </button>
+                        <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" style="display: none;" />
+                    }
+                    <button type="button" class="btn btn-tool" id="tEye" title="Ẩn/hiện cột">
+                        <i class="bi bi-view-list"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" id="tNote" title="Lưu ý khi trả hàng">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+
+                    <div class="pop colmenu shadow-sm" id="fCols">
+                        <label><input type="checkbox" data-fc="dvt" checked> ĐVT</label>
+                        <label><input type="checkbox" data-fc="giavon" checked> Giá nhập</label>
+                        <label><input type="checkbox" data-fc="tonkho" checked> Tồn kho</label>
+                    </div>
+
+                    <div class="pop notes shadow-sm" id="notes">
+                        <b><i class="bi bi-info-circle text-primary me-1"></i>Lưu ý khi trả hàng nhập</b>
+                        <ul>
+                            <li>Phiếu tạm <b>không</b> trừ tồn kho và chưa thay đổi công nợ NCC.</li>
+                            <li>Khi <b>Hoàn thành</b>, tồn kho sẽ giảm ngay và công nợ NCC được bù trừ.</li>
+                            <li>Hệ thống <b>chặn tồn âm</b>: không thể trả vượt quá số lượng tồn kho hiện tại.</li>
+                            <li>Nếu không chọn NCC, bắt buộc NCC phải thanh toán đủ số tiền.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khối bảng lưới hàng hóa trả -->
+            <div class="grid-card shadow-sm" id="gridCard">
+                <div id="tableScrollWrap" style="flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column;">
+                    <table class="tbl" id="itemsTable">
+                        <thead>
+                            <tr>
+                                @if (!Model.IsReadOnly)
+                                {
+                                    <th class="w-del text-center" style="width: 38px;"></th>
+                                }
+                                <th class="w-stt text-center" style="width: 46px;">STT</th>
+                                <th class="w-code" style="width: 125px;">Mã hàng</th>
+                                <th class="w-name" style="width: 280px;">Tên hàng</th>
+                                <th class="w-dvt text-center col-dvt" style="width: 70px;">ĐVT</th>
+                                <th class="text-end" style="width: 120px;">Số lượng</th>
+                                <th class="text-end col-giavon" style="width: 125px;">Giá nhập</th>
+                                <th class="text-end" style="width: 130px;">Giá trả lại</th>
+                                <th class="text-end" style="width: 140px;">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsTableBody">
+                            @if (Model.Lines != null && Model.Lines.Any())
+                            {
+                                int stt = 1;
+                                foreach (var line in Model.Lines)
+                                {
+                                    bool isOver = line.SoLuong > line.TonKho;
+                                    <tr class="line-item-row" data-id="@line.MaHang" data-code="@line.MaHangNoiBo" data-name="@line.TenHang" data-unit="@line.TenDvt" data-cost="@line.GiaVon" data-stock="@line.TonKho">
+                                        @if (!Model.IsReadOnly)
+                                        {
+                                            <td class="w-del text-center">
+                                                <button type="button" class="del btn-line-del" title="Xóa dòng này">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        }
+                                        <td class="w-stt text-center line-stt">@(stt++)</td>
+                                        <td class="w-code">
+                                            <span class="code-text" title="@line.MaHangNoiBo">@line.MaHangNoiBo</span>
+                                        </td>
+                                        <td class="w-name">
+                                            <span class="name-text fw-semibold text-dark">@line.TenHang</span>
+                                            <div class="text-muted small col-tonkho">Tồn kho: <strong class="text-primary line-stock-text">@line.TonKho.ToString("N0", viCulture)</strong></div>
+                                        </td>
+                                        <td class="w-dvt text-center text-muted col-dvt">@(string.IsNullOrEmpty(line.TenDvt) ? "---" : line.TenDvt)</td>
+                                        <td class="text-end">
+                                            @if (!Model.IsReadOnly)
+                                            {
+                                                <input type="text" class="inp text-end line-qty @(isOver ? "over" : "")" value="@line.SoLuong.ToString("N0", viCulture)" inputmode="numeric" style="width: 90px; height: 32px;" />
+                                                <span class="hint-over text-danger small" style="@(isOver ? "" : "display:none;")">Vượt tồn (còn @line.TonKho.ToString("N0", viCulture))</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="fw-semibold">@line.SoLuong.ToString("N0", viCulture)</span>
+                                            }
+                                        </td>
+                                        <td class="text-end text-muted col-giavon">
+                                            <span>@line.GiaVon.ToString("N0", viCulture)</span>
+                                        </td>
+                                        <td class="text-end">
+                                            @if (!Model.IsReadOnly)
+                                            {
+                                                <input type="text" class="inp text-end line-price kiot-num" value="@line.DonGiaTra.ToString("N0", viCulture)" inputmode="numeric" style="width: 105px; height: 32px;" />
+                                            }
+                                            else
+                                            {
+                                                <span>@line.DonGiaTra.ToString("N0", viCulture)</span>
+                                            }
+                                        </td>
+                                        <td class="text-end fw-bold text-dark line-total">
+                                            @line.ThanhTien.ToString("N0", viCulture)
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+
+                    <!-- Trạng thái trống (Empty State) chuẩn Kiểm tồn -->
+                    <div class="xl-empty" id="emptyWrap" style="@(Model.Lines != null && Model.Lines.Any() ? "display: none !important;" : "display: flex !important;")">
+                        <b>Thêm sản phẩm từ file excel</b>
+                        <span class="text-muted small">(Tải về file mẫu: <a href="javascript:void(0)" id="btnDownloadTemplate" class="text-primary text-decoration-none fw-semibold">Excel file</a> )</span>
+                        @if (!Model.IsReadOnly)
+                        {
+                            <button type="button" class="btn solid" id="btnSelectFile">
+                                <i class="bi bi-file-earmark-spreadsheet fs-5"></i>
+                                <span>Chọn file dữ liệu</span>
+                            </button>
+                        }
+                        <span class="text-muted small">hoặc tìm hàng ở ô phía trên, bấm F3 để nhảy vào ô tìm</span>
+                    </div>
+                </div>
+
+                <!-- Footer tóm tắt ở đáy bảng hàng -->
+                <div class="grid-footer d-flex justify-content-between align-items-center px-3 py-2 border-top bg-light">
+                    <span class="text-muted small">Số mặt hàng: <strong class="text-primary fs-6" id="lblTotalItems">@(Model.Lines?.Count ?? 0)</strong></span>
+                    <span class="text-muted small">Tổng số lượng trả: <strong class="text-dark fs-6" id="lblTotalQty">@(Model.Lines?.Sum(l => l.SoLuong).ToString("N0", viCulture) ?? "0")</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL BÊN PHẢI (Thông tin trả hàng & Thanh toán) -->
+        <aside class="f-panel" id="thnRightPanel">
+            <div class="f-panel-inner" style="width: 440px; min-width: 440px; flex-shrink: 0;">
+                <!-- Người trả & Ngày giờ trả (popup .dtpop chuẩn Kiểm tồn) -->
+                <div class="pr">
+                    <div class="v left" style="flex: 0 0 auto;">
+                        <input type="hidden" id="fPayer" value="@(Model.MaNvtra?.ToString() ?? Model.MaNvlap.ToString())" />
+                        <div class="dropdown" id="payerDropdownWrap">
+                            <button class="btn btn-sm btn-white border dropdown-toggle payer-custom-select-btn d-flex align-items-center justify-content-between px-2"
+                                    type="button" id="btnSelectPayer" data-bs-toggle="dropdown" aria-expanded="false"
+                                    style="min-width: 165px; max-width: 195px; height: 34px; background: #fff; font-size: 13px; border-color: #cbd5e1 !important; border-radius: 6px;"
+                                    @(Model.IsReadOnly ? "disabled" : "")>
+                                <span class="payer-selected-text text-truncate text-dark fw-medium">
+                                    @(Model.NhanViens.FirstOrDefault(nv => nv.Value == (Model.MaNvtra?.ToString() ?? Model.MaNvlap.ToString()))?.Text ?? "Chọn người trả")
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu shadow-sm p-1 payer-custom-dropdown-menu" aria-labelledby="btnSelectPayer" style="min-width: 190px; max-height: 260px; overflow-y: auto; border-radius: 8px; border-color: #e2e8f0; z-index: 1050;">
+                                <li class="px-2 py-1 text-uppercase text-muted fw-bold" style="font-size: 11px;">Chọn nhân viên trả</li>
+                                @foreach (var nv in Model.NhanViens)
+                                {
+                                    bool isCur = nv.Value == (Model.MaNvtra?.ToString() ?? Model.MaNvlap.ToString());
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center justify-content-between py-2 px-2 rounded-2 payer-item-opt @(isCur ? "active fw-semibold" : "")"
+                                           href="javascript:void(0)" data-id="@nv.Value" data-name="@nv.Text" style="font-size: 13px;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-person text-secondary"></i>
+                                                <span>@nv.Text</span>
+                                            </div>
+                                            @if (isCur)
+                                            {
+                                                <i class="bi bi-check2 text-primary fw-bold payer-check-icon"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-check2 text-primary fw-bold payer-check-icon d-none"></i>
+                                            }
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="v relw" style="flex: 1 1 auto; justify-content: flex-end; position: relative;">
+                        <input type="text" class="inp" id="fDateInp" value="@Model.NgayTra.ToString("dd/MM/yyyy HH:mm")" @(Model.IsReadOnly ? "disabled" : "") autocomplete="off" style="max-width: 175px; width: 175px; height: 34px; font-size: 13px; cursor: pointer; text-align: right; color: #4b5563;" title="Nhấp để chọn ngày giờ trả hàng" />
+                        <input type="hidden" id="fDateIso" value="@Model.NgayTra.ToString("yyyy-MM-ddTHH:mm")" />
+
+                        <!-- Popup chọn ngày giờ chuẩn Kiểm tồn -->
+                        <div class="pop dtpop shadow-sm" id="dtPop"></div>
+                    </div>
+                </div>
+
+                <!-- Nhà cung cấp (Chip hoặc Autocomplete + Nút thêm nhanh) -->
+                <div class="supwrap my-2 position-relative" id="supwrap">
+                    @if (Model.MaDonViCapHang.HasValue && Model.MaDonViCapHang.Value > 0)
+                    {
+                        <div class="supchip d-flex justify-content-between align-items-center p-2 rounded-2" style="background: #eef4ff; border: 1px solid #cfe0fb;">
+                            <div>
+                                <b class="d-block text-dark small" id="supChipName">@Model.TenDonViCapHang</b>
+                                <small class="text-muted" style="font-size: 12px;">@(Model.MaNcc ?? $"NCC{Model.MaDonViCapHang:D4}") · @(Model.DienThoaiNcc ?? "---") · Nợ: <span class="text-danger fw-semibold">0</span></small>
+                            </div>
+                            @if (!Model.IsReadOnly)
+                            {
+                                <button type="button" class="btn-close" id="btnRemoveSup" aria-label="Bỏ chọn NCC" style="font-size: 10px;"></button>
+                            }
+                        </div>
+                        <input type="hidden" id="selectedSupplierId" value="@Model.MaDonViCapHang" />
+                    }
+                    else
+                    {
+                        <div class="supbox d-flex align-items-center border rounded-2 bg-white" style="height: 36px;">
+                            <input type="text" id="supQ" class="border-0 px-2 flex-grow-1" placeholder="Tìm nhà cung cấp theo tên, điện thoại..." @(Model.IsReadOnly ? "disabled" : "") autocomplete="off" style="outline: none; font-size: 13.5px;" />
+                            @if (!Model.IsReadOnly)
+                            {
+                                <button type="button" class="border-0 bg-transparent px-2 text-primary" id="btnOpenAddSupplier" title="Thêm mới nhanh nhà cung cấp">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            }
+                        </div>
+                        <input type="hidden" id="selectedSupplierId" value="" />
+                        <div class="pop supsg shadow-sm rounded-2 position-absolute" id="supsg" style="display: none; top: 40px; left: 0; right: 0; max-height: 250px; overflow-y: auto; background: #fff; z-index: 50; border: 1px solid #e2e8f0;"></div>
+                    }
+                </div>
+
+                <!-- Mã trả hàng nhập -->
+                <div class="pr">
+                    <label for="txtDocCode" class="l text-muted small mb-0">Mã trả hàng nhập</label>
+                    <div class="v">
+                        <input class="inp" id="txtDocCode" 
+                               value="@(Model.MaPhieuTraHang > 0 ? (!string.IsNullOrWhiteSpace(Model.MaPhieu) ? Model.MaPhieu : Model.MaPhieuHienThi) : (Model.MaPhieu ?? ""))" 
+                               placeholder="Mã phiếu tự động" 
+                               @(Model.IsReadOnly ? "disabled" : "") 
+                               autocomplete="off" style="max-width: 185px; width: 185px; height: 34px; color: #1e293b; text-transform: uppercase; text-align: right; font-size: 13px;" />
+                    </div>
+                </div>
+
+                <!-- Trạng thái -->
+                <div class="pr">
+                    <span class="l text-muted small">Trạng thái</span>
+                    <div class="v">
+                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle">@Model.TenTrangThai</span>
+                    </div>
+                </div>
+
+                <!-- Tổng tiền hàng -->
+                <div class="pr">
+                    <span class="l text-muted small">Tổng tiền hàng</span>
+                    <div class="v fw-bold text-dark" id="lblSubtotal">@Model.TongTienHang.ToString("N0", viCulture)</div>
+                </div>
+
+                <!-- Giảm giá (Hỗ trợ toggle VND / %) -->
+                <div class="pr">
+                    <span class="l text-muted small">Giảm giá</span>
+                    <div class="v d-flex align-items-center gap-1 justify-content-end">
+                        <div class="btn-group disc-toggle-group" role="group" style="height: 34px;">
+                            <button type="button" class="btn @(Model.LoaiGiamGia == "vnd" ? "btn-primary active" : "btn-outline-secondary")" id="btnDiscVnd" style="height: 34px; font-size: 12px; font-weight: 600; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center;">VND</button>
+                            <button type="button" class="btn @(Model.LoaiGiamGia == "pct" ? "btn-primary active" : "btn-outline-secondary")" id="btnDiscPct" style="height: 34px; font-size: 12px; font-weight: 600; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center;">%</button>
+                        </div>
+                        <input type="text" id="orderDiscountInput" class="inp kiot-num text-end" value="@Model.GiamGia.ToString("N0", viCulture)" @(Model.IsReadOnly ? "disabled" : "") style="max-width: 120px; height: 34px; font-size: 13.5px; text-align: right;" />
+                    </div>
+                </div>
+
+                <!-- Nhà cung cấp cần trả -->
+                <div class="pr due py-1">
+                    <span class="l fw-bold" style="font-size: 14.5px; color: #0f172a;">NCC cần trả</span>
+                    <div class="v fw-bold text-primary" style="font-size: 17px;" id="lblPayable">@Model.CanThuNcc.ToString("N0", viCulture)</div>
+                </div>
+
+                <!-- Tiền nhà cung cấp trả (F8) -->
+                <div class="pr">
+                    <span class="l text-muted small">Tiền NCC trả (F8)</span>
+                    <div class="v">
+                        <input type="text" id="orderPaidInput" class="inp kiot-num text-end" value="@Model.DaThuNcc.ToString("N0", viCulture)" @(Model.IsReadOnly ? "disabled" : "") style="max-width: 185px; width: 185px; height: 34px; font-size: 14px; font-weight: 600; text-align: right;" />
+                    </div>
+                </div>
+
+                <!-- Tính vào công nợ -->
+                <div class="pr">
+                    <span class="l text-muted small">Tính vào công nợ</span>
+                    <div class="v fw-semibold text-danger" id="lblDebt">0</div>
+                </div>
+
+                <!-- Ghi chú -->
+                <div class="mt-2">
+                    <textarea class="form-control" id="fNote" rows="2" placeholder="Ghi chú phiếu trả hàng nhập..." @(Model.IsReadOnly ? "disabled" : "") style="resize: none; font-size: 13.5px;">@Model.GhiChu</textarea>
+                </div>
+
+                <!-- Báo lỗi dòng thông báo -->
+                <div class="err-line text-danger small mt-2" id="fErr"></div>
+
+                <!-- Spacer đẩy nút xuống đáy -->
+                <div class="flex-grow-1" style="min-height: 20px;"></div>
+
+                <!-- 2 Nút hành động đáy form chuẩn Kiểm tồn (F9 & F10) -->
+                @if (!Model.IsReadOnly)
+                {
+                    <div class="f-actions">
+                        <button type="button" class="save" id="btnSaveDraft" title="Lưu tạm phiếu trả hàng (F9)">
+                            <i class="bi bi-floppy fs-5 mb-1"></i>
+                            <span>Lưu tạm (F9)</span>
+                        </button>
+                        <button type="button" class="done" id="btnSaveComplete" title="Hoàn thành trả hàng và trừ tồn kho (F10)">
+                            <i class="bi bi-check-lg fs-5 mb-1"></i>
+                            <span>Hoàn thành (F10)</span>
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex gap-2 mt-auto pt-2">
+                        <button type="button" class="btn btn-outline-secondary w-50 py-2" onclick="window.print();">
+                            <i class="bi bi-printer me-1"></i>In phiếu
+                        </button>
+                        <a href="@Url.Action("Index", "TraHangNhap")" class="btn btn-primary w-50 py-2">
+                            Quay lại
+                        </a>
+                    </div>
+                }
+            </div>
+        </aside>
+
+        <!-- NÚT TRÒN THU GỌN / MỞ RỘNG PANEL PHẢI (Phím tắt F4) ĐỒNG BỘ CHUYỂN KHO & KIỂM KHO -->
+        <button type="button" class="panel-toggle" id="btnToggleRightPanel" title="Thu gọn / mở rộng thông tin (Phím tắt F4)">
+            <i class="bi bi-chevron-right" id="rightPanelToggleIcon"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Modal đầy đủ Tạo mới Nhà cung cấp chuẩn KiotViet -->
+<partial name="~/Views/NhaCungCap/_NhaCungCapModal.cshtml" model="Model" />

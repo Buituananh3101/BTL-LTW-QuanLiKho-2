@@ -48,7 +48,7 @@ Gồm Topbar cố định (`_Header`, `_MainMenu`), vùng thân `@RenderBody()`,
 Hệ thống đóng gói các thành phần lặp lại thành các "mảnh ghép Lego" độc lập, gọi 1 dòng:
 
 1. **Bộ lọc Ngày tháng (`_KiotDateFilter.cshtml` & `KiotDateFilterVM`)**:
-   - Razor: `<partial name="_KiotDateFilter" model='new KiotDateFilterVM { TargetId = "date", Label = "Thời gian", PresetVal = "ALL", DateType = "past" }' />`
+   - Razor: `<partial name="_KiotDateFilter" model='new KiotDateFilterVM { TargetId = "date" }' />`
    - Client JS: `KiotFilter.initDateFilter("date", (from, to, text, val) => { ... })`
    - Backend: `var (from, to) = DateRangeHelper.Resolve(filter.DateFilterType, filter.FromDate, filter.ToDate);`
 2. **Phân trang AJAX (`_Pagination.cshtml` & `PagedResult<T>`)**:
@@ -56,20 +56,19 @@ Hệ thống đóng gói các thành phần lặp lại thành các "mảnh ghé
 3. **Hệ thống Toast KiotViet (`site.js` & `site.css`)**:
    - Cú pháp: `KiotToast.success("..."), KiotToast.error("..."), KiotToast.warning("..."), KiotToast.info("...")`.
 4. **Ẩn / Hiện Cột bảng (`KiotFilter.initColumnToggle`)**:
-   - Cú pháp: `KiotFilter.initColumnToggle({ menuSelector: '#colMenu', tableSelector: '#myTable', storageKey: '...', defaultCols: {...}, extraColsCount: 2 });`
-   - Tự động đồng bộ `colspan` dòng chi tiết và gán `.last-visible-col` khép kín viền bảng.
+   - Cú pháp: `KiotFilter.initColumnToggle({ menuSelector: '#colMenu', tableSelector: '#myTable', storageKey: '...', defaultCols: {...} });`
 5. **Đánh dấu Sao Bookmark (`KiotFilter.bindStarToggle`)**:
    - Cú pháp: `KiotFilter.bindStarToggle('#myTable', '/Controller/ToggleFavorite', callback);`
 6. **Ô nhập số tự định dạng (`.kiot-num` / `KiotNumber`)**:
-   - Cú pháp: Input gắn class `kiot-num` tự format `1,000,000`, select all khi focus; đọc số sạch qua `KiotNumber.get('#input')`.
+   - Cú pháp: Class `kiot-num` tự format `1,000,000`, select all khi focus; đọc số qua `KiotNumber.get('#input')`.
 7. **Khối gập mở Accordion (`.kiot-sec` / `KiotCollapsible`)**:
-   - Cấu trúc: Khối `.kiot-sec` chứa `.kiot-sec-h` (tiêu đề + icon `.kiot-chev`) và `.kiot-sec-b` (nội dung), click tự động đóng/mở.
+   - Cấu trúc: Khối `.kiot-sec` chứa `.kiot-sec-h` (tiêu đề + `.kiot-chev`) và `.kiot-sec-b` (nội dung).
 8. **Nút lưu đa năng Split Button (`.kiot-split`)**:
-   - Cấu trúc: Nút chính `.btn-main` + nút mũi tên `.caret` xổ menu `.kiot-menu`, tự đóng khi click ngoài.
-9. **Dropdown Combobox có bút chì ✎ sửa/xóa trực tiếp (`KiotFilter.initCombobox`)**:
-   - Cú pháp: `KiotFilter.initCombobox({ wrapSelector: '#wrap', items: [...], onEditItem: ... })` (vừa gõ tìm kiếm, vừa chọn, hover hiện icon bút chì ✎ sửa trực tiếp).
+   - Cấu trúc: Nút chính `.btn-main` + mũi tên `.caret` xổ menu `.kiot-menu`, tự đóng khi click ngoài.
+9. **Dropdown Combobox có bút chì ✎ (`KiotFilter.initCombobox`)**:
+   - Cú pháp: `KiotFilter.initCombobox({ wrapSelector: '#wrap', items: [...], onEditItem: ... })`.
 10. **Modal con dùng chung (`_KiotPromptModal.cshtml` / `KiotPrompt`)**:
-    - Cú pháp: `KiotPrompt.open({ title, label, value, showDelete, onSave, onDelete })` (tạo mới nhanh / sửa ✎ / xóa dùng chung toàn hệ thống).
+    - Cú pháp: `KiotPrompt.open({ title, label, value, showDelete, onSave, onDelete })` (tạo mới / sửa ✎ / xóa).
 11. **Bộ lọc Khoảng giá trị Từ - Tới (`_KiotValueFilter.cshtml` & `KiotValueFilterVM`)**:
     - Razor: `<partial name="_KiotValueFilter" model='new KiotValueFilterVM("TongMua", "Tổng mua", "Giá trị")' />`
     - Client JS: `KiotFilter.initValueFilter("TongMua", (from, to) => { ... })`
@@ -80,4 +79,14 @@ Hệ thống đóng gói các thành phần lặp lại thành các "mảnh ghé
     - Cú pháp: `KiotFilter.initRowDetail({ tableSelector: '#myTable', rowSelector: 'tr.product-row', onTabChange: ... })` (click dòng bung drawer êm ái, chuyển tab, tự đồng bộ `colspan` và `.last-visible-col`).
 14. **Thao tác Thực thể Danh mục (`KiotFilter.initEntityActions`)**:
     - Cú pháp: `KiotFilter.initEntityActions({ editSelector: '...', deleteSelector: '...', statusSelector: '...', onEdit: ..., onDelete: ..., onToggleStatus: ... })` (chuẩn hóa sự kiện Sửa, Xóa, Đổi trạng thái).
+15. **Chọn Ngày Giờ Chứng Từ (`KiotFilter.initDateTimePicker`)**:
+    - HTML: `<input id="fDate" class="f-date" />` + `<div id="dtPop" class="pop dtpop"></div>`
+    - Client JS: `KiotFilter.initDateTimePicker({ inputSelector: '#fDate', popupSelector: '#dtPop', onChange: (d, text, iso) => ... })` (lịch tháng 2 chiều, slot giờ 24h, tự đồng bộ ô input `dd/MM/yyyy HH:mm`).
+16. **Bộ máy Xuất Excel ClosedXML (`ExcelHelper.Export` & `ExcelHelper.ExportToExcel`)**:
+    - Cú pháp: `ExcelHelper.Export("TenSheet", data, col => col.AddCenter("Mã", x => x.Ma).AddDateTime("Ngày", x => x.Ngay).AddNumber("SL", x => x.SL).AddCurrency("Tiền", x => x.Tien))` (tự động Header xanh KiotViet, kẻ viền bảng, format số/tiền/ngày, co giãn cột).
+17. **Tìm Kiếm Hàng Hóa F3 (`KiotFilter.initProductSearch`)**:
+    - HTML: `<input id="productSearchInput" />` + `<div id="autocompleteDropdown" class="nh-autocomplete-dropdown"></div>`
+    - Client JS: `KiotFilter.initProductSearch({ inputSelector: '#productSearchInput', dropdownSelector: '#autocompleteDropdown', apiUrl: '...', getWarehouseId: () => whId, onSelect: p => addProduct(p) })` (phím tắt F3, debounce, điều hướng Up/Down/Enter/Esc, quét barcode, hiển thị tồn kho & giá).
+18. **Lưới Dòng Chứng Từ (`KiotFilter.initDocGrid`)**:
+    - Cú pháp: `KiotFilter.initDocGrid({ tableBodySelector: '#itemsTableBody', emptyBoxSelector: '#emptyLineBox', tableScrollSelector: '#tableScrollWrap', rowSelector: '.item-line-row', onRecalc: () => recalcTotals() })` (tự động đánh STT, chuyển đổi trạng thái rỗng/có dữ liệu, bắt sự kiện xóa dòng qua KiotConfirm, tính tổng).
 

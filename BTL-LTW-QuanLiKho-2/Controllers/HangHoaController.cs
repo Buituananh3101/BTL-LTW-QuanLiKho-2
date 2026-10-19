@@ -432,6 +432,26 @@ public class HangHoaController : BaseKhoController
                         ? allItems.OrderBy(x => x.TonKho).ToList()
                         : allItems.OrderByDescending(x => x.TonKho).ToList();
                     break;
+                case "nhomhang":
+                    allItems = isAsc
+                        ? allItems.OrderBy(x => x.TenNhom).ToList()
+                        : allItems.OrderByDescending(x => x.TenNhom).ToList();
+                    break;
+                case "dvt":
+                    allItems = isAsc
+                        ? allItems.OrderBy(x => x.TenDvt).ToList()
+                        : allItems.OrderByDescending(x => x.TenDvt).ToList();
+                    break;
+                case "vitri":
+                    allItems = isAsc
+                        ? allItems.OrderBy(x => x.ViTri ?? "").ToList()
+                        : allItems.OrderByDescending(x => x.ViTri ?? "").ToList();
+                    break;
+                case "trangthai":
+                    allItems = isAsc
+                        ? allItems.OrderBy(x => x.TrangThai).ToList()
+                        : allItems.OrderByDescending(x => x.TrangThai).ToList();
+                    break;
             }
         }
 

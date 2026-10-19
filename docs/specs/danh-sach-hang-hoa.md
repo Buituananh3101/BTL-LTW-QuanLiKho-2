@@ -7,20 +7,19 @@
 ## 1. Kiến trúc File & Bảng CSDL liên quan
 
 ### 1.1. Bản đồ File liên quan (File Map)
-- **Controller**: `Controllers/HangHoaController.cs` (gọn nhẹ, nhận `HangHoaFilterParams`, gọi `IHangHoaExcelService`, xử lý CRUD AJAX).
-- **Service & Helper Excel**: `Services/IHangHoaExcelService.cs`, `HangHoaExcelService.cs`, `Helpers/ExcelHelper.cs` (ClosedXML tái sử dụng cho toàn dự án).
-- **Service tồn kho & tiện ích**: `Services/ITonKhoService.cs`, `TonKhoService.cs`, `MaChungTuHelper.cs`.
-- **ViewModel**: `ViewModels/HangHoa/` (`HangHoaForm.cs`, `HangHoaFilterParams.cs`, `ExportHangHoaRequest.cs`, `ImportHangHoaResult.cs`) kế thừa `BaseFilterParams.cs` và `PagedResultBase.cs`.
-- **View & Partial Layout**: `Views/HangHoa/Index.cshtml` (~115 dòng), `_HangHoaFilterSidebar.cshtml`, `_HangHoaExcelActions.cshtml` (2 nút Nhập file & Xuất file), `_HangHoaTable.cshtml` (+ `_Pagination.cshtml`).
-- **Modal Modun**: `_HangHoaModal.cshtml` (thêm/sửa 5 ảnh CSDL), `_HangHoaExportModal.cshtml` (xuất Excel), `_HangHoaImportModal.cshtml` (nhập Excel kéo thả).
-- **Styles & Scripts**: `wwwroot/js/kiot-filter.js` (thư viện giao diện KiotViet dùng chung), `wwwroot/js/hang-hoa-index.js` (script trang hàng hóa), `hang-hoa-form.js`, `hang-hoa-excel.js`.
+### 1.1. Bản đồ File liên quan (File Map)
+- **Controller**: `Controllers/HangHoaController.cs` (nhận `HangHoaFilterParams`, gọi `IHangHoaExcelService`, xử lý CRUD AJAX).
+- **Service & Helper**: `IHangHoaExcelService.cs`, `HangHoaExcelService.cs`, `ExcelHelper.cs`, `ITonKhoService.cs`, `TonKhoService.cs`.
+- **ViewModel**: `ViewModels/HangHoa/` (`HangHoaForm.cs`, `HangHoaFilterParams.cs`, `ExportHangHoaRequest.cs`, `ImportHangHoaResult.cs`).
+- **View & Partial**: `Views/HangHoa/Index.cshtml`, `_HangHoaFilterSidebar.cshtml`, `_HangHoaExcelActions.cshtml`, `_HangHoaTable.cshtml` (+ `_Pagination.cshtml`).
+- **Modal Modun**: `_HangHoaModal.cshtml`, `_HangHoaExportModal.cshtml`, `_HangHoaImportModal.cshtml`.
+- **Styles & Scripts**: `kiot-filter.js`, `hang-hoa-index.js`, `hang-hoa-form.js`, `hang-hoa-excel.js`.
 - **DbContext & Entity**: `QuanLyKhoPhuQuocLtwContext`, Entity (`HangHoa`, `HinhAnhHangHoa`, `NhomHang`, `DonViTinh`, `NguongTonKho`, `VwTonKhoHienTai`).
 
 ### 1.2. Bảng CSDL tham gia:
 - `HangHoa`: `MaHang`, `MaHangNoiBo`, `TenHang`, `MaNhom`, `MaDvt`, `QuyCach`, `GiaBanThamKhao`, `GiaVon`, `HinhAnh`, `TrangThai`, `NgayTao`, `DaDanhDau`, `ViTri`, `TrongLuong`, `DonViTrongLuong`, `ThuocTinh`, `MoTa`.
-- `HinhAnhHangHoa`: `MaHinhAnh`, `MaHang`, `DuLieuAnh` (VARBINARY MAX), `ThuTu`, `LaAnhChinh`, `NgayTao` (tối đa 5 ảnh).
-- `NhomHang`, `DonViTinh`: Phân loại và ĐVT (tự sinh nếu nhập file có tên mới).
-- `NguongTonKho`: Định mức tồn theo kho (`MaHang`, `MaKho`, `TonToiThieu`, `TonCaoNhat`).
+- `HinhAnhHangHoa`: `MaHinhAnh`, `MaHang`, `DuLieuAnh`, `ThuTu`, `LaAnhChinh`, `NgayTao` (tối đa 5 ảnh).
+- `NhomHang`, `DonViTinh`, `NguongTonKho`: Phân loại, ĐVT và định mức tồn kho (`MaHang`, `MaKho`, `TonToiThieu`, `TonCaoNhat`).
 - `vw_TonKhoHienTai`: View tính tồn kho động hiện thời theo `(MaKho, MaHang)`.
 
 ---
@@ -29,15 +28,15 @@
 
 | Tên Luồng | 1. Tương tác | 2. Frontend (View / JS) | 3. Backend (Controller) | 4. CSDL & Phản hồi |
 |---|---|---|---|---|
-| **Load ban đầu** | Vào `/HangHoa` | Gửi GET `/HangHoa` | `Index()` nạp danh mục, kho | Nạp VM ➜ Render `Index.cshtml` |
-| **Tìm kiếm & Lọc** | Gõ tìm / Chọn lọc / Đánh dấu sao | JS debounce 300ms ➜ AJAX `GET /HangHoa/Filter` | `Filter(...)` query kết hợp `vw_TonKhoHienTai` | Render `_HangHoaTable.cshtml` (AJAX) |
-| **Phân trang** | Click trang | JS gán `pageIndex` ➜ AJAX `GET /HangHoa/Filter` | `Filter(...)` dùng `.Skip().Take()` | Cập nhật bảng và thanh phân trang |
-| **Thêm mới hàng** | "+ Thêm mới", nhập form, "Lưu" | JS gom form + Base64 ➜ `POST /HangHoa/Create` | `Create(...)` validate, tự sinh mã hàng | Lưu `HangHoa`, `NguongTonKho`, `PhieuNhap` đầu kỳ ➜ JSON `{success:true}` |
-| **Mở form Sửa** | Click Chỉnh sửa | JS AJAX `GET /HangHoa/GetItem?id=X` | `GetItem(id)` đọc thông tin hàng & tồn | Trả JSON ➜ điền form modal sửa |
-| **Lưu Sửa hàng** | Sửa form, "Cập nhật" | JS gom form ➜ AJAX `POST /HangHoa/Edit?id=X` | `Edit(id, form)` validate & cập nhật | Cập nhật `HangHoa`, `NguongTonKho` ➜ JSON `{success:true}` |
-| **Xóa hàng** | Click Xóa ➜ Xác nhận | Mở `#hhDeleteProductOv` ➜ AJAX `POST /HangHoa/Delete/{id}` | `Delete(id)` check 5 bảng GD, bọc Transaction xóa cascade ảnh & ngưỡng | Chưa có GD: Xóa thành công. Đã có GD: Trả `hasTransaction: true` kèm nút Ngừng bán |
-| **Xuất file Excel** | Bấm "Xuất file" ➜ Chọn cột ➜ Bấm Xuất | Mở `#hhExportModalOv`, chọn cột ➜ `POST /HangHoa/ExportExcel` | ClosedXML lọc theo bộ lọc/hàng chọn, xuất đúng cột chọn | Trả file `Danh_Sach_Hang_Hoa_yyyyMMdd_HHmmss.xlsx` |
-| **Nhập file Excel** | Kéo thả file ➜ Bấm Thực hiện nhập | Mở `#hhImportModalOv`, FormData ➜ `POST /HangHoa/ImportExcel` | Validate cột bắt buộc `TenHang`, parse 16 trường, xử lý trùng mã, tạo PN đầu kỳ nếu có tồn ban đầu | Commit Transaction ➜ Trả JSON tổng kết & lỗi chi tiết ➜ reload bảng |
+| **Load ban đầu** | Vào `/HangHoa` | Gửi GET `/HangHoa` | `Index()` nạp danh mục, kho | Render `Index.cshtml` |
+| **Tìm kiếm & Lọc** | Gõ tìm / Chọn lọc / Đánh dấu sao | JS debounce 300ms ➜ AJAX `GET /HangHoa/Filter` | `Filter(...)` query + `vw_TonKhoHienTai` | Render `_HangHoaTable.cshtml` (AJAX) |
+| **Phân trang** | Click trang | JS gán `pageIndex` ➜ AJAX `GET /HangHoa/Filter` | `Filter(...)` dùng `.Skip().Take()` | Cập nhật bảng và phân trang |
+| **Thêm mới hàng** | "+ Thêm mới", nhập form, "Lưu" | JS gom form + Base64 ➜ `POST /HangHoa/Create` | `Create(...)` validate, sinh mã hàng | Lưu CSDL + PN đầu kỳ ➜ JSON `{success:true}` |
+| **Mở form Sửa** | Click Chỉnh sửa | JS AJAX `GET /HangHoa/GetItem?id=X` | `GetItem(id)` đọc hàng & tồn | Trả JSON ➜ điền modal sửa |
+| **Lưu Sửa hàng** | Sửa form, "Cập nhật" | JS gom form ➜ AJAX `POST /HangHoa/Edit?id=X` | `Edit(id, form)` validate & cập nhật | Lưu CSDL ➜ JSON `{success:true}` |
+| **Xóa hàng** | Click Xóa ➜ Xác nhận | Mở `#hhDeleteProductOv` ➜ AJAX `POST /HangHoa/Delete/{id}` | `Delete(id)` check 5 bảng GD, bọc Trans | Chưa GD: Xóa. Đã có: Báo chặn & gợi ý ngừng bán |
+| **Xuất file Excel** | Bấm "Xuất file" ➜ Chọn cột ➜ Bấm Xuất | Mở `#hhExportModalOv` ➜ `POST /HangHoa/ExportExcel` | ClosedXML xuất đúng cột chọn | Trả file `.xlsx` |
+| **Nhập file Excel** | Kéo thả file ➜ Thực hiện nhập | Mở `#hhImportModalOv` ➜ `POST /HangHoa/ImportExcel` | Validate, parse 16 trường, xử lý trùng mã | Commit Trans ➜ reload bảng |
 
 ---
 
@@ -52,8 +51,9 @@
 6. **Vị trí**: Dropdown đa chọn kèm ô tìm kiếm nhanh `.kiot-ms-search`.
 7. **Thời gian tạo**: Hôm nay, Hôm qua, 7 ngày, 30 ngày hoặc tùy chọn ngày (Dual Calendar).
 
-### 3.2. Sắp xếp 3 trạng thái (3-State Column Sorting):
-Click header: Lần 1 Tăng dần (ASC `bi-arrow-up`) ➜ Lần 2 Giảm dần (DESC `bi-arrow-down`) ➜ Lần 3 Mặc định (Default, không hiện icon). Áp dụng cho 8 cột chính. Cột căn trái dùng inline-flex trong ô chống tràn viền (Dự kiến hết hàng 160px), cột số dùng padding-right 22px cố định vị trí icon không làm dịch chuyển chữ.
+### 3.2. Sắp xếp 3 trạng thái & Ẩn hiện cột:
+- **Sắp xếp 3 trạng thái**: Click header: Lần 1 ASC (`bi-arrow-up`) ➜ Lần 2 DESC (`bi-arrow-down`) ➜ Lần 3 Default. Cột căn trái dùng inline-flex chống tràn viền, cột số dùng padding-right 22px cố định icon.
+- **Tùy chọn hiển thị cột**: Nút `#btnColsDropdown` (`bi-view-list`), menu `#colMenu` 2 cột chuẩn KiotViet. Quản lý qua `KiotFilter.initColumnToggle` lưu `kiot_hang_hoa_cols_v1`. Quản lý 13 cột dữ liệu (`img`, `mahang`, `tenhang`, `nhomhang`, `dvt`, `giaban`, `giavon`, `tonkho`, `khachdat`, `vitri`, `ngaytao`, `dukienhethang`, `trangthai`) + 2 cột cố định. Tự động đồng bộ `colspan` và class `.last-visible-col`. Bảng `#productTable` áp dụng chuẩn `width: max-content; min-width: 760px; table-layout: fixed;` (chuẩn Kiểm tồn & Nhà cung cấp), khóa cố định `width`/`min-width` từng cột chống co rút khi thêm cột. Khung chi tiết `.kiot-detail-fixed-wrap` cố định 992px.
 
 ### 3.3. Tùy chọn Cột & Độ rộng Cố định (Fixed Columns & Horizontal Scroll):
 Nút `bi-grid-3x2-gap` mở popup 11 cột đồng bộ 100% với các trường dữ liệu của file xuất (Loại hàng, Nhóm hàng, Mã hàng, Tên hàng, Giá bán, Giá vốn, Tồn kho, Tồn nhỏ nhất, Tồn lớn nhất, Vị trí, Trạng thái). Dùng Dynamic CSS tức thì (0ms, không flicker), lưu vào `localStorage`. Toàn bộ cột được cố định chiều rộng (`table-layout: fixed; width: max-content; min-width: 100%;`), khi bật nhiều cột vượt màn hình sẽ xuất hiện thanh cuộn ngang mượt mà, không co ép méo mó cột.

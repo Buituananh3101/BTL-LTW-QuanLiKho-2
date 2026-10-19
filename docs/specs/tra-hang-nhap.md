@@ -55,8 +55,8 @@
 ## 2. Luồng Nghiệp vụ & Giao diện (KiotViet & Prototype)
 
 ### 2.1. Danh sách (`Index`)
-- **Cột lọc trái**: Thời gian (`_KiotDateFilter`), Trạng thái (Phiếu tạm, Đã trả hàng, Đã hủy), Người tạo, Người trả, NCC.
-- **Topbar**: Tìm mã phiếu, tìm nâng cao (NCC, hàng hóa), nút "+ Trả hàng nhập", "Xuất file", "Tùy chọn cột".
+- **Cột lọc trái (Leftmenu)**: Thời gian (`_KiotDateFilter`), Trạng thái (Phiếu tạm, Đã trả hàng, Đã hủy), MultiSelect dropdowns tag pills kèm tìm kiếm nội bộ (Người tạo, Người trả, NCC). Nút tròn F4 thò thụt có hover buffer chống flicker (khi thu gọn luôn bám sát lề trái 8px). Phím tắt F4 bật/tắt bộ lọc, F3 tìm kiếm nhanh, hỗ trợ mở/đóng trên mobile.
+- **Topbar**: Tìm mã phiếu (F3), tìm nâng cao (NCC, hàng hóa), nút "+ Trả hàng nhập", "Xuất file", "Tùy chọn cột".
 - **Bảng dữ liệu**:
   - Cuộn 2 chiều độc lập, hàng tổng hợp cố định dưới header.
   - Sắp xếp cột 3 trạng thái (Tăng -> Giảm -> Thường), sao bookmark, badges trạng thái chuẩn Bootstrap.
@@ -66,14 +66,13 @@
 ### 2.2. Lập / Sửa Phiếu (`_TraHangNhapForm`)
 - **Vùng bảng hàng hóa (Trái - `.f-main`)**:
   - Nút quay lại, ô tìm kiếm F3 autocomplete (hiển thị mã, tên, giá vốn, tồn kho).
-  - Nạp Excel/CSV (kèm nút tải mẫu `MauTraHangNhap.csv`), empty state.
+  - Nạp Excel/CSV (kèm nút tải mẫu `MauTraHangNhap.csv`), empty state với nút "Chọn file dữ liệu" (`#btnSelectFile`, icon `bi-box-arrow-in-down`, bo góc 6px, nền xanh `#0a66e8`).
   - Bảng lưới: Nút xóa, STT, Mã, Tên, ĐVT, Số lượng (.qty - cảnh báo đỏ nếu vượt tồn), Giá nhập, Giá trả lại (.qty), Thành tiền.
-- **Panel thông tin (Phải - `.f-panel`)**:
-  - Khung 440px cố định, nút tròn toggle F4 trượt mượt mà 0.25s cubic-bezier.
-  - Người trả + Ngày giờ trả (popup `.dtpop` chuẩn Kiểm tồn: lịch tháng + 48 mốc giờ 30 phút).
+- **Panel thông tin (Phải - `.f-panel` / Rightmenu)**:
+  - Khung 440px cố định `.f-panel-inner`, nút tròn toggle F4 trượt mượt mà 0.25s cubic-bezier (từ 425px về 8px khi thu gọn).
+  - Căn lề phải sắc nét (chuẩn 185px) cho: Người trả & Thời gian trả (popup `.dtpop` chuẩn Kiểm tồn), Mã trả hàng nhập (cho phép nhập tay hoặc để trống tự động sinh mã, tự động viết hoa, kiểm tra chống trùng), Giảm giá (toggle VND / %), Tiền NCC trả (F8).
   - NCC autocomplete chip + modal tạo nhanh NCC.
-  - Tổng tiền, Giảm giá (toggle VND / %), NCC cần trả, Tiền NCC trả (F8), Tính vào công nợ, Ghi chú.
-  - Ghim đáy: "Lưu tạm (F9)" & "Hoàn thành (F10)".
+  - Ghim đáy: Cụm 2 nút hành động `.f-actions` 56px xếp dọc icon/text chuẩn Kiểm tồn: "Lưu tạm (F9)" (`.save`, xanh dương `#0a66e8`) & "Hoàn thành (F10)" (`.done`, xanh lá `#12b34a`).
 
 ---
 

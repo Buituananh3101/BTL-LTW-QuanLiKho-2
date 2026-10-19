@@ -1,0 +1,11 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.TraHangNhap.TraHangNhapFormVM
+@{
+    ViewData["Title"] = "Trả hàng nhập";
+}
+
+<partial name="_TraHangNhapForm" model="Model" />
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="~/js/tra-hang-nhap-form.js" asp-append-version="true"></script>
+}

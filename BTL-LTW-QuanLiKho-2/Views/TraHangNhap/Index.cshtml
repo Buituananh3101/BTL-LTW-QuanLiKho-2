@@ -1,0 +1,133 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.TraHangNhap.TraHangNhapIndexVM
+@{
+    ViewData["Title"] = "Trả hàng nhập";
+}
+
+<link href="~/css/kiem-kho.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/nhap-hang.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/tra-hang-nhap.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="kiot-container position-relative" id="kiotContainer"
+     data-filter-url="@Url.Action("Filter", "TraHangNhap")"
+     data-toggle-star-url="@Url.Action("ToggleFavorite", "TraHangNhap")"
+     data-cancel-url="@Url.Action("Cancel", "TraHangNhap")"
+     data-save-note-url="@Url.Action("QuickUpdateNote", "TraHangNhap")"
+     data-export-url="@Url.Action("ExportExcel", "TraHangNhap")"
+     data-is-starred="@(Model.DaDanhDauFilter ? "true" : "false")"
+     data-sort-by="@(Model.SortBy ?? "")"
+     data-sort-dir="@(Model.SortDir ?? "")">
+
+    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + BỘ LỌC KIOTVIET (PARTIAL VIEW) -->
+    <partial name="_TraHangNhapFilterSidebar" model="Model" />
+
+    <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
+    <div class="kiot-sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Nút tròn thu gọn / mở rộng ở ranh giới giữa sidebar và bảng (Phím tắt F4) -->
+    <button type="button" class="kiot-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
+        <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
+    </button>
+
+    <!-- 2. CỘT BÊN PHẢI: THANH TÌM KIẾM + TOOLBAR + BẢNG PHIẾU TRẢ HÀNG NHẬP -->
+    <main class="kiot-main-col">
+        <!-- Toolbar trên cùng: Thanh tìm kiếm thẳng hàng với bảng bên dưới -->
+        <div class="kiot-toolbar-row">
+            <!-- Tiêu đề + Nút phễu bộ lọc trên mobile -->
+            <div class="kiot-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
+                <span class="kiot-mobile-title fw-bold fs-6 text-dark">Trả hàng nhập</span>
+                <button type="button" class="btn btn-sm btn-outline-primary kiot-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+
+            <!-- Ô tìm kiếm theo mã phiếu trả hàng + nút Tìm kiếm nâng cao (Prototype) -->
+            <div class="kiot-search-box position-relative d-flex align-items-center">
+                <i class="bi bi-search"></i>
+                <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã phiếu trả (F3)" value="@Model.Filter.Q" autocomplete="off" />
+                <button type="button" class="btn btn-sm btn-link text-secondary p-0 me-2" id="btnAdvSearch" title="Tìm kiếm nâng cao">
+                    <i class="bi bi-sliders"></i>
+                </button>
+
+                <!-- Popup Tìm kiếm nâng cao (NCC và Hàng hóa) -->
+                <div class="pop advbox shadow p-3 rounded-3" id="advbox" style="display: none; position: absolute; top: 44px; left: 0; width: 100%; max-width: 480px; z-index: 50; background: #fff; border: 1px solid #e2e8f0;">
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold mb-1" for="advSup">Nhà cung cấp</label>
+                        <input type="text" id="advSup" class="form-control form-control-sm" placeholder="Theo mã, tên NCC..." value="@Model.Filter.AdvSup" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold mb-1" for="advProd">Hàng hóa</label>
+                        <input type="text" id="advProd" class="form-control form-control-sm" placeholder="Theo mã, tên hàng..." value="@Model.Filter.AdvProd" />
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnAdvReset">Mặc định</button>
+                        <button type="button" class="btn btn-sm btn-primary" id="btnAdvApply">Áp dụng</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nhóm nút hành động KiotViet -->
+            <div class="kiot-actions-group">
+                <!-- Nút + Trả hàng nhập -->
+                <a href="@Url.Action("Create", "TraHangNhap")" class="btn btn-primary d-inline-flex align-items-center" id="btnNew" title="Lập phiếu trả hàng nhập mới" style="background-color: #0070f4; border-color: #0070f4;">
+                    <i class="bi bi-plus-lg me-1"></i><span>Trả hàng nhập</span>
+                </a>
+
+                <!-- Nút Xuất file Excel -->
+                <button type="button" class="btn btn-tool" id="btnExportExcel" title="Xuất file Excel danh sách">
+                    <i class="bi bi-box-arrow-up me-1"></i>Xuất file
+                </button>
+
+                <!-- Dropdown Tùy chọn hiển thị cột -->
+                <div class="dropdown">
+                    <button class="btn btn-tool" type="button" id="btnColsDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Tùy chọn hiển thị cột">
+                        <i class="bi bi-view-list"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end shadow p-3" id="colMenu" style="min-width: 380px;">
+                        <h6 class="dropdown-header px-0 pt-0 text-dark fw-bold mb-2">Hiển thị cột</h6>
+                        <div class="row g-2">
+                            <div class="col-6 d-flex flex-column gap-2 small">
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ma" checked> Mã trả hàng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tg" checked> Thời gian</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tgtao"> Thời gian tạo</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ncc" checked> Nhà cung cấp</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="chinhanh"> Chi nhánh</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="nguoitra"> Người trả</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="nguoitao"> Người tạo</label>
+                            </div>
+                            <div class="col-6 d-flex flex-column gap-2 small">
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tongsl"> Tổng số lượng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="slmathang"> SL mặt hàng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tongtien" checked> Tổng tiền hàng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="giamgia" checked> Giảm giá</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="canthu" checked> NCC cần trả</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="dathu" checked> NCC đã trả</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="st" checked> Trạng thái</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tải lại bảng -->
+                <button type="button" class="btn btn-tool d-none d-sm-inline-flex" title="Tải lại bảng" id="btnReloadTable">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+                <!-- Trợ giúp -->
+                <button type="button" class="btn btn-tool" title="Trợ giúp" id="btnHelp" onclick="alert('Hướng dẫn: Màn hình Trả hàng nhập cho nhà cung cấp KiotViet');">
+                    <i class="bi bi-question-circle"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách phiếu trả hàng nhập (Partial View AJAX) -->
+        <section id="content">
+            <div id="tableContainer" class="kiot-table-wrapper">
+                <partial name="_TraHangNhapTable" model="Model" />
+            </div>
+        </section>
+    </main>
+</div>
+
+@section Scripts {
+    <script src="~/js/kiot-filter.js" asp-append-version="true"></script>
+    <script src="~/js/tra-hang-nhap-index.js" asp-append-version="true"></script>
+}

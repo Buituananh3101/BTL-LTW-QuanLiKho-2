@@ -1,0 +1,617 @@
+/* tra-hang-nhap.css - Định kiểu cho phân hệ Trả hàng nhập chuẩn KiotViet & Kiểm kho */
+
+/* 1. Bảng dữ liệu Trả hàng nhập */
+#receiptTable {
+    width: max-content !important;
+    min-width: 760px !important;
+    table-layout: fixed !important;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+#receiptTable tr.tbl-row.open > td,
+#receiptTable tr.tbl-row.selected > td,
+#receiptTable tr.product-row.open > td,
+#receiptTable tr.product-row.selected > td {
+    background-color: #ffffff !important;
+    border-top: 2px solid #0070f3 !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    border-right: none !important;
+}
+
+#receiptTable tr.tbl-row.open > td:first-child,
+#receiptTable tr.tbl-row.selected > td:first-child,
+#receiptTable tr.product-row.open > td:first-child,
+#receiptTable tr.product-row.selected > td:first-child {
+    border-left: 3px solid #0070f3 !important;
+}
+
+#receiptTable tr.tbl-row.open > td:last-child,
+#receiptTable tr.tbl-row.selected > td:last-child,
+#receiptTable tr.product-row.open > td:last-child,
+#receiptTable tr.product-row.selected > td:last-child,
+#receiptTable tr.tbl-row.open > td.last-visible-col,
+#receiptTable tr.tbl-row.selected > td.last-visible-col,
+#receiptTable tr.product-row.open > td.last-visible-col,
+#receiptTable tr.product-row.selected > td.last-visible-col {
+    border-right: 3px solid #0070f3 !important;
+}
+
+#receiptTable tr.detail-row > td,
+#receiptTable tr.product-detail-row > td {
+    background-color: #ffffff !important;
+    padding: 0 !important;
+    border-top: none !important;
+    border-bottom: 2px solid #0070f3 !important;
+    border-left: 3px solid #0070f3 !important;
+    border-right: 3px solid #0070f3 !important;
+}
+
+/* Khung chi tiết cố định 992px chuẩn Nhà cung cấp & KiotViet (không kéo dài theo độ rộng bảng) */
+.thn-detail-fixed-wrap,
+.ncc-detail-fixed-wrap {
+    width: 992px !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: 1040px) {
+    .thn-detail-fixed-wrap,
+    .ncc-detail-fixed-wrap {
+        width: 100% !important;
+    }
+}
+
+/* 2. Dòng tổng hợp (Total row) */
+.total-summary-row td {
+    font-size: 13.5px !important;
+    padding: 10px 12px !important;
+    color: #1f2937;
+    white-space: nowrap;
+}
+
+/* 3. Panel phải (Right Menu) đóng mở mượt mà chuẩn Kiểm kho & Chuyển kho (Phiên 118) */
+#thnFormWrap {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+#thnRightPanel.f-panel {
+    width: 440px;
+    flex: 0 0 440px;
+    height: 100%;
+    background: #fff;
+    border-left: 1px solid var(--line, #e2e8f0);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: width 0.25s cubic-bezier(0.25, 1, 0.35, 1), flex-basis 0.25s cubic-bezier(0.25, 1, 0.35, 1);
+    box-sizing: border-box;
+}
+
+#thnRightPanel .f-panel-inner {
+    width: 440px !important;
+    min-width: 440px !important;
+    flex-shrink: 0 !important;
+    height: 100%;
+    padding: 16px 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#thnRightPanel.collapsed {
+    width: 0 !important;
+    flex: 0 0 0 !important;
+    overflow: hidden !important;
+    border-left: 0 !important;
+}
+
+/* Nút tròn thu gọn F4 trượt mượt */
+#thnFormWrap .panel-toggle,
+#thnFormWrap #btnToggleRightPanel {
+    position: absolute;
+    right: 425px; /* (440px - 15px) */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--blue, #0a66e8);
+    background: #ffffff;
+    color: var(--blue, #0a66e8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 0;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(10, 102, 232, 0.2);
+    transition: right 0.25s cubic-bezier(0.25, 1, 0.35, 1), background 0.15s, transform 0.15s;
+}
+
+#thnFormWrap .panel-toggle:hover,
+#thnFormWrap #btnToggleRightPanel:hover {
+    background: #eff6ff;
+    color: var(--blue, #0a66e8);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 12px rgba(10, 102, 232, 0.35);
+}
+
+#thnFormWrap.panel-collapsed .panel-toggle,
+#thnFormWrap.panel-collapsed #btnToggleRightPanel,
+#thnFormWrap #thnRightPanel.collapsed ~ #btnToggleRightPanel {
+    right: 8px !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Định dạng dòng thông tin Rightmenu chuẩn Kiểm kho & Chuyển kho */
+#thnRightPanel .pr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 36px;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+#thnRightPanel .pr > label,
+#thnRightPanel .pr > span.l {
+    color: #4b5563;
+    white-space: nowrap;
+    font-size: 13.5px;
+    margin-bottom: 0;
+}
+
+#thnRightPanel .pr .v {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    font-weight: 500;
+    font-size: 13.5px;
+    text-align: right;
+}
+
+#thnRightPanel .pr .v.relw {
+    position: relative;
+}
+
+#thnRightPanel .pr .inp,
+#thnRightPanel .pr select.inp {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 13.5px;
+    background: #fff;
+    outline: none;
+    transition: all 0.15s ease-in-out;
+    text-align: right;
+}
+
+#thnRightPanel .pr .inp:focus,
+#thnRightPanel .pr select.inp:focus {
+    border-color: #0070f3;
+    box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.15);
+}
+
+/* 4. Cảnh báo vượt tồn kho */
+.inp.line-qty.over {
+    border-color: #dc2626 !important;
+    background-color: #fef2f2 !important;
+    color: #dc2626 !important;
+    font-weight: 700;
+}
+
+.hint-over {
+    display: block;
+    font-size: 11px;
+    color: #dc2626;
+    margin-top: 2px;
+}
+
+/* 5. Autocomplete dropdowns */
+.nh-autocomplete-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 520px;
+    width: 100%;
+    max-width: 680px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    max-height: 380px;
+    overflow-y: auto;
+    z-index: 1050;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+    display: none;
+}
+
+.nh-autocomplete-dropdown.show {
+    display: block !important;
+}
+
+.ac-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.12s;
+}
+
+.ac-item:hover,
+.ac-item.active {
+    background-color: #eff6ff;
+}
+
+.ac-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: #e0f2fe;
+    color: #0284c7;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+}
+
+.ac-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ac-info b {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #0f172a;
+    font-size: 13.5px;
+}
+
+.ac-info small {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.ac-nums {
+    text-align: right;
+    font-size: 12.5px;
+    color: #64748b;
+}
+
+.ac-nums b {
+    color: #0f172a;
+}
+
+/* Popup calendar ngày giờ .dtpop (chuẩn 2 cột Kiểm tồn & Chuyển kho) */
+.dtpop {
+    display: none;
+    position: absolute;
+    top: 38px;
+    right: 0;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.15);
+    padding: 12px;
+    z-index: 1060;
+    width: 320px;
+    flex-direction: row;
+    gap: 12px;
+    box-sizing: border-box;
+}
+
+.dtpop.show {
+    display: flex !important;
+}
+
+.times {
+    width: 90px;
+    height: 230px;
+    overflow-y: auto;
+    border-left: 1px solid #e2e8f0;
+    padding-left: 8px;
+}
+
+.times button {
+    display: block;
+    width: 100%;
+    border: 0;
+    background: none;
+    padding: 6px 4px;
+    font-size: 13px;
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+    color: #374151;
+}
+
+.times button:hover {
+    background: #eef4ff;
+    color: #0070f3;
+}
+
+.times button.cur {
+    background: #0070f3;
+    color: #fff;
+    font-weight: 600;
+}
+
+.dtnav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #1f2937;
+}
+
+.rp-nav {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: #4b5563;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rp-nav:hover {
+    background: #f3f6fb;
+    color: #0070f3;
+    border-color: #0070f3;
+}
+
+.cal {
+    width: 200px;
+}
+
+.cal-h {
+    text-align: center;
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: #1f2937;
+}
+
+.cal-g {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    text-align: center;
+    font-size: 12px;
+}
+
+.cal-g .dow {
+    color: #94a3b8;
+    font-weight: 600;
+    padding: 4px 0;
+}
+
+.cal-g button.d {
+    width: 26px;
+    height: 26px;
+    margin: 1px auto;
+    border: 0;
+    background: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #334155;
+}
+
+.cal-g button.d:hover {
+    background: #eef4ff;
+    color: #0070f3;
+}
+
+.cal-g button.d.today {
+    border: 1px solid #0070f3;
+    font-weight: 600;
+}
+
+.cal-g button.d.sel {
+    background: #0070f3;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* 2 Nút hành động Lưu tạm (F9) & Hoàn thành (F10) chuẩn Kiểm tồn */
+.f-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+.f-actions button {
+    flex: 1;
+    height: 56px;
+    border: 0;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 13.5px;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transition: all 0.15s ease;
+}
+
+.f-actions .save,
+.f-actions #btnSaveDraft {
+    background: #0a66e8 !important;
+}
+
+.f-actions .save:hover,
+.f-actions #btnSaveDraft:hover {
+    background: #0852bd !important;
+}
+
+.f-actions .done,
+.f-actions #btnSaveComplete {
+    background: #12b34a !important;
+}
+
+.f-actions .done:hover,
+.f-actions #btnSaveComplete:hover {
+    background: #0e9a3e !important;
+}
+
+/* Khối trạng thái trống & Nút Chọn file dữ liệu chuẩn Kiểm tồn (prototype-kiemkho-full.html) */
+.xl-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.xl-empty b {
+    font-size: 19px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+#emptyWrap #btnSelectFile,
+.xl-empty #btnSelectFile {
+    height: 52px !important;
+    padding: 0 24px !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    background-color: #0a66e8 !important;
+    border: none !important;
+    color: #fff !important;
+    box-shadow: 0 2px 6px rgba(10, 102, 232, 0.25) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+#emptyWrap #btnSelectFile:hover,
+.xl-empty #btnSelectFile:hover {
+    background-color: #0852bd !important;
+}
+
+/* 7. Dropdown Người trả tùy chỉnh chuẩn Chuyển kho & KiotViet */
+.payer-custom-select-btn,
+.wh-custom-select-btn {
+    border: 1px solid #cbd5e1 !important;
+    background-color: #ffffff !important;
+    transition: all 0.15s ease-in-out;
+}
+
+.payer-custom-select-btn:hover,
+.payer-custom-select-btn:focus,
+.payer-custom-select-btn[aria-expanded="true"],
+.wh-custom-select-btn:hover,
+.wh-custom-select-btn:focus,
+.wh-custom-select-btn[aria-expanded="true"] {
+    border-color: #0a66e8 !important;
+    box-shadow: 0 0 0 3px rgba(10, 102, 232, 0.12) !important;
+}
+
+.payer-custom-dropdown-menu,
+.wh-custom-dropdown-menu {
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    background-color: #ffffff !important;
+    z-index: 1050 !important;
+}
+
+.payer-custom-dropdown-menu .dropdown-item,
+.wh-custom-dropdown-menu .dropdown-item {
+    padding: 7px 10px;
+    font-size: 13px;
+    color: #334155;
+    transition: all 0.12s;
+    border-radius: 6px;
+    margin-bottom: 2px;
+}
+
+.payer-custom-dropdown-menu .dropdown-item:hover,
+.wh-custom-dropdown-menu .dropdown-item:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+}
+
+.payer-custom-dropdown-menu .dropdown-item.active,
+.wh-custom-dropdown-menu .dropdown-item.active {
+    background-color: #e0f2fe !important;
+    color: #0284c7 !important;
+}
+
+.payer-custom-dropdown-menu .dropdown-item.active .bi-person,
+.wh-custom-dropdown-menu .dropdown-item.active .bi-person {
+    color: #0284c7 !important;
+}
+
+/* 8. Cụm nút chuyển đổi Giảm giá VND / % cao đều 34px */
+.disc-toggle-group {
+    height: 34px !important;
+}
+
+.disc-toggle-group .btn,
+#btnDiscVnd,
+#btnDiscPct {
+    height: 34px !important;
+    line-height: 32px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+}
+
+#btnDiscVnd.btn-primary.active,
+#btnDiscPct.btn-primary.active {
+    background-color: #0a66e8 !important;
+    border-color: #0a66e8 !important;
+    color: #ffffff !important;
+}
+
+#btnDiscVnd.btn-outline-secondary,
+#btnDiscPct.btn-outline-secondary {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #64748b !important;
+}
+
+#btnDiscVnd.btn-outline-secondary:hover,
+#btnDiscPct.btn-outline-secondary:hover {
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+}
+
+

@@ -278,7 +278,17 @@ window.KiotFilter = (function ($) {
     // 8. Quản lý Bộ lọc Thời gian & Lịch 2 tháng (Dual Calendar) dùng chung
     const calState = {};
 
-    function initDateFilter(target, onApplyCallback) {
+    function initDateFilter(targetOrOptions, onApplyCallback) {
+        let target = 'date';
+        let callback = onApplyCallback;
+
+        if (typeof targetOrOptions === 'object' && targetOrOptions !== null) {
+            target = targetOrOptions.target || 'date';
+            callback = targetOrOptions.onChange || targetOrOptions.onApply || onApplyCallback;
+        } else if (typeof targetOrOptions === 'string') {
+            target = targetOrOptions;
+        }
+
         const tgtCap = target.charAt(0).toUpperCase() + target.slice(1);
         const todayObj = new Date();
 
@@ -293,8 +303,13 @@ window.KiotFilter = (function ($) {
         const quickPopupSelector = `#popup${tgtCap}Quick`;
         const calPopupSelector = `#popup${tgtCap}Calendar`;
 
+        // Chặn nổi bọt khi click bên trong popup thời gian
+        $(`${quickPopupSelector}, ${calPopupSelector}`).on('click', function (e) {
+            e.stopPropagation();
+        });
+
         // Mở popup chọn nhanh
-        $(`#btnOpen${tgtCap}Quick, #label${tgtCap}All`).on('click', function (e) {
+        $(`#btnOpen${tgtCap}Quick, #label${tgtCap}All, #${target}All`).on('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
             $(`#${target}All`).prop('checked', true);
@@ -325,8 +340,8 @@ window.KiotFilter = (function ($) {
             $(`#${target}FromInput`).val('');
             $(`#${target}ToInput`).val('');
 
-            if (typeof onApplyCallback === 'function') {
-                onApplyCallback(null, null, labelText, val);
+            if (typeof callback === 'function') {
+                callback(null, null, labelText, val);
             }
         });
 
@@ -484,13 +499,14 @@ window.KiotFilter = (function ($) {
             $(`#${tgt}FromInput`).val(formatDateISO(s));
             $(`#${tgt}ToInput`).val(formatDateISO(eDate));
 
-            if (typeof onApplyCallback === 'function') {
-                onApplyCallback(formatDateISO(s), formatDateISO(eDate), rangeText, 'CUSTOM');
+            if (typeof callback === 'function') {
+                callback(formatDateISO(s), formatDateISO(eDate), rangeText, 'CUSTOM');
             }
         });
 
         // Tự đóng khi click ra ngoài
-        $(document).on('click', function (e) {
+        const docDateEvent = `click.kiotDateFilter_${target}`;
+        $(document).off(docDateEvent).on(docDateEvent, function (e) {
             if (!$(e.target).closest(`.kiot-date-filter-block[data-date-target="${target}"], ${quickPopupSelector}, ${calPopupSelector}`).length) {
                 $(quickPopupSelector).hide();
                 $(calPopupSelector).hide();
@@ -558,7 +574,7 @@ window.KiotFilter = (function ($) {
 
             // 1. Cập nhật colspan chính xác theo số cột hiển thị để không sinh cột ma
             const actualVisibleCols = currentTable.find('thead tr:first-child th:visible').length || (visibleCount + (opt.extraColsCount || 0));
-            currentTable.find('tr.product-detail-row > td, tr.kiot-detail-row > td, tr.dtl > td, tr.empty-row > td, tr:has(.empty) > td').attr('colspan', actualVisibleCols);
+            currentTable.find('tr.product-detail-row > td, tr.kiot-detail-row > td, tr.dtl > td, tr.detail-row > td, tr.empty-row > td, tr:has(.empty) > td').attr('colspan', actualVisibleCols);
 
             // 2. Gắn class last-visible-col cho ô hiển thị cuối cùng của mỗi dòng để khép kín hình chữ nhật
             currentTable.find('.last-visible-col').removeClass('last-visible-col');
@@ -1190,6 +1206,514 @@ window.KiotFilter = (function ($) {
         }
     }
 
+    // 20. Khởi tạo Bộ Chọn Ngày Giờ Lập Phiếu (DateTimePicker 24h) Chuẩn KiotViet
+    function initDateTimePicker(options) {
+        const opt = $.extend({
+            inputSelector: '#fDate',
+            popupSelector: '#dtPop',
+            initialDate: null,
+            isReadOnly: false,
+            stepMinutes: 30,
+            onChange: null
+        }, options);
+
+        const $inp = $(opt.inputSelector);
+        const $pop = $(opt.popupSelector);
+        if (!$inp.length || !$pop.length || opt.isReadOnly) return null;
+
+        let currentDate = opt.initialDate ? (opt.initialDate instanceof Date ? opt.initialDate : new Date(opt.initialDate)) : null;
+        if (!currentDate || isNaN(currentDate.getTime())) {
+            const rawVal = $inp.val();
+            if (rawVal) {
+                const parts = rawVal.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
+                if (parts) {
+                    const parsed = new Date(+parts[3], +parts[2] - 1, +parts[1], +parts[4], +parts[5]);
+                    if (!isNaN(parsed.getTime())) currentDate = parsed;
+                }
+            }
+        }
+        if (!currentDate || isNaN(currentDate.getTime())) {
+            currentDate = new Date();
+        }
+
+        const DOW = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+        const DT = { y: currentDate.getFullYear(), m: currentDate.getMonth() };
+
+        function p2(n) { return String(n).padStart(2, '0'); }
+        function sod(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+        function dTime(d) { return `${p2(d.getHours())}:${p2(d.getMinutes())}`; }
+        function dFull(d) {
+            return `${p2(d.getDate())}/${p2(d.getMonth() + 1)}/${d.getFullYear()} ${dTime(d)}`;
+        }
+        function formatISO(d) {
+            return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}T${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`;
+        }
+
+        function renderCal(y, m, sel) {
+            const first = new Date(y, m, 1);
+            const pad = (first.getDay() + 6) % 7;
+            const days = new Date(y, m + 1, 0).getDate();
+            const today = sod(new Date()).getTime();
+
+            let h = '<div class="cal"><div class="cal-g">' + DOW.map(x => `<span class="dow">${x}</span>`).join('');
+            for (let i = 0; i < pad; i++) h += '<span></span>';
+            for (let d = 1; d <= days; d++) {
+                const t = new Date(y, m, d).getTime();
+                let c = 'd';
+                if (t === today) c += ' today';
+                if (t === sel) c += ' sel';
+                h += `<button type="button" class="${c}" data-t="${t}">${d}</button>`;
+            }
+            return h + '</div></div>';
+        }
+
+        function renderPopup() {
+            if (!$pop.length) return;
+            const sel = sod(currentDate).getTime();
+            const times = [];
+            for (let h = 0; h < 24; h++) {
+                for (let m = 0; m < 60; m += opt.stepMinutes) {
+                    times.push(`${p2(h)}:${p2(m)}`);
+                }
+            }
+            const curH = currentDate.getHours();
+            const curM = currentDate.getMinutes();
+            const roundedM = Math.floor(curM / opt.stepMinutes) * opt.stepMinutes;
+            const curSlot = `${p2(curH)}:${p2(roundedM)}`;
+
+            $pop.html(`
+                <div style="flex:1">
+                    <div class="dtnav">
+                        <button type="button" class="rp-nav" data-dn="-1" title="Tháng trước"><i class="bi bi-chevron-left"></i></button>
+                        <span>Tháng ${DT.m + 1}/${DT.y}</span>
+                        <button type="button" class="rp-nav" data-dn="1" title="Tháng sau"><i class="bi bi-chevron-right"></i></button>
+                    </div>
+                    ${renderCal(DT.y, DT.m, sel)}
+                </div>
+                <div class="times">
+                    ${times.map(t => `<button type="button" data-tm="${t}" class="${t === curSlot ? 'cur' : ''}">${t}</button>`).join('')}
+                </div>
+            `);
+            const $times = $pop.find('.times');
+            const $cur = $times.find('.cur');
+            if ($times.length && $cur.length) {
+                $times[0].scrollTop = $cur[0].offsetTop - ($times[0].clientHeight / 2) + ($cur[0].clientHeight / 2);
+            }
+        }
+
+        let lastFocusTime = 0;
+        function openPopup() {
+            DT.y = currentDate.getFullYear();
+            DT.m = currentDate.getMonth();
+            renderPopup();
+            $('.pop.show, .dtpop.show').not($pop).removeClass('show');
+            $pop.attr('data-owner', opt.inputSelector).addClass('show');
+        }
+
+        function closePopup() {
+            $pop.removeClass('show');
+        }
+
+        $inp.on('focus', function () {
+            lastFocusTime = Date.now();
+            openPopup();
+        });
+
+        $inp.on('click', function (e) {
+            e.stopPropagation();
+            if (Date.now() - lastFocusTime < 300) return;
+            if ($pop.hasClass('show')) {
+                closePopup();
+            } else {
+                openPopup();
+            }
+        });
+
+        $inp.on('change', function () {
+            const val = $(this).val();
+            const m = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
+            if (m) {
+                const d = new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5]);
+                if (!isNaN(d.getTime())) {
+                    currentDate = d;
+                    if (typeof opt.onChange === 'function') {
+                        opt.onChange(currentDate, dFull(currentDate), formatISO(currentDate));
+                    }
+                }
+            }
+            $inp.val(dFull(currentDate));
+        });
+
+        $pop.off('click.kiotDtPop').on('click.kiotDtPop', function (e) {
+            e.stopPropagation();
+            const $n = $(e.target).closest('[data-dn]');
+            const $d = $(e.target).closest('button.d');
+            const $t = $(e.target).closest('[data-tm]');
+
+            if ($n.length) {
+                const dn = parseInt($n.data('dn'), 10);
+                const x = new Date(DT.y, DT.m + dn, 1);
+                DT.y = x.getFullYear();
+                DT.m = x.getMonth();
+                renderPopup();
+            }
+
+            if ($d.length) {
+                const tVal = parseInt($d.data('t'), 10);
+                const x = new Date(tVal);
+                currentDate = new Date(x.getFullYear(), x.getMonth(), x.getDate(), currentDate.getHours(), currentDate.getMinutes());
+                $inp.val(dFull(currentDate));
+                renderPopup();
+                if (typeof opt.onChange === 'function') {
+                    opt.onChange(currentDate, dFull(currentDate), formatISO(currentDate));
+                }
+            }
+
+            if ($t.length) {
+                const [h, m] = String($t.data('tm')).split(':');
+                currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), parseInt(h, 10), parseInt(m, 10));
+                $inp.val(dFull(currentDate));
+                renderPopup();
+                if (typeof opt.onChange === 'function') {
+                    opt.onChange(currentDate, dFull(currentDate), formatISO(currentDate));
+                }
+                closePopup();
+            }
+        });
+
+        const docEventNamespace = `click.kiotDtPop_${opt.popupSelector.replace(/[^a-zA-Z0-9_-]/g, '')}`;
+        $(document).off(docEventNamespace).on(docEventNamespace, function (e) {
+            if (!$(e.target).closest(`${opt.inputSelector}, ${opt.popupSelector}`).length) {
+                closePopup();
+            }
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.key === 'Escape' && $pop.hasClass('show')) {
+                closePopup();
+            }
+        });
+
+        if (!$inp.val() || !$inp.val().trim()) {
+            $inp.val(dFull(currentDate));
+        }
+
+        return {
+            getDate: () => currentDate,
+            setDate: function (d) {
+                currentDate = d instanceof Date ? d : new Date(d);
+                if (isNaN(currentDate.getTime())) currentDate = new Date();
+                $inp.val(dFull(currentDate));
+                renderPopup();
+            },
+            getText: () => dFull(currentDate),
+            getISO: () => formatISO(currentDate),
+            open: openPopup,
+            close: closePopup
+        };
+    }
+
+    // 21. Khởi tạo Tìm kiếm Hàng hóa Autocomplete F3 Chuẩn KiotViet
+    function initProductSearch(options) {
+        const opt = $.extend({
+            inputSelector: '#productSearchInput',
+            dropdownSelector: '#autocompleteDropdown',
+            apiUrl: '/NhapHang/SearchProducts',
+            getWarehouseId: function () { return 1; },
+            onSelect: function (product) {},
+            debounceMs: 200,
+            placeholder: 'Tìm mặt hàng (F3)...'
+        }, options);
+
+        const $inp = $(opt.inputSelector);
+        const $dropdown = $(opt.dropdownSelector);
+        if (!$inp.length || !$dropdown.length) return null;
+
+        let searchTimeout = null;
+        let currentItems = [];
+        let activeIndex = -1;
+
+        function setActiveIndex(idx, scrollIntoView) {
+            if (!currentItems.length) {
+                activeIndex = -1;
+                return;
+            }
+            if (idx < 0) idx = currentItems.length - 1;
+            if (idx >= currentItems.length) idx = 0;
+            activeIndex = idx;
+
+            const $items = $dropdown.find('.kk-autocomplete-item');
+            $items.removeClass('active');
+            const $target = $items.filter(`[data-index="${activeIndex}"]`);
+            $target.addClass('active');
+
+            if (scrollIntoView && $target.length) {
+                const el = $dropdown[0], tel = $target[0];
+                if (tel.offsetTop < el.scrollTop) {
+                    el.scrollTop = tel.offsetTop;
+                } else if (tel.offsetTop + tel.offsetHeight > el.scrollTop + el.clientHeight) {
+                    el.scrollTop = tel.offsetTop + tel.offsetHeight - el.clientHeight;
+                }
+            }
+        }
+
+        function selectProduct(product) {
+            if (!product) return;
+            opt.onSelect(product);
+            $dropdown.removeClass('show').hide();
+            currentItems = [];
+            activeIndex = -1;
+            $inp.val('').focus();
+        }
+
+        // Phím F3 toàn cục focus ô tìm kiếm
+        const f3EventName = 'keydown.kiotF3_' + opt.inputSelector.replace(/[^a-zA-Z0-9_-]/g, '');
+        $(document).off(f3EventName).on(f3EventName, function (e) {
+            if (e.key === 'F3' || e.keyCode === 114) {
+                e.preventDefault();
+                $inp.focus().select();
+            }
+        });
+
+        // Gõ phím tìm kiếm debounce
+        $inp.off('input.kiotF3').on('input.kiotF3', function () {
+            const q = $(this).val().trim();
+            clearTimeout(searchTimeout);
+
+            if (q.length === 0) {
+                currentItems = [];
+                activeIndex = -1;
+                $dropdown.removeClass('show').hide();
+                return;
+            }
+
+            searchTimeout = setTimeout(function () {
+                const whId = typeof opt.getWarehouseId === 'function' ? opt.getWarehouseId() : opt.getWarehouseId;
+                $.ajax({
+                    url: opt.apiUrl,
+                    type: 'GET',
+                    data: { q: q, warehouseId: whId, whId: whId },
+                    success: function (items) {
+                        renderDropdown(items);
+                    },
+                    error: function () {
+                        currentItems = [];
+                        activeIndex = -1;
+                        $dropdown.removeClass('show').hide();
+                    }
+                });
+            }, opt.debounceMs);
+        });
+
+        // Phím điều hướng Up, Down, Enter, Escape
+        $inp.off('keydown.kiotF3Nav').on('keydown.kiotF3Nav', function (e) {
+            const isVisible = $dropdown.is(':visible') || $dropdown.hasClass('show');
+            if (!isVisible || !currentItems.length) {
+                if (e.key === 'Escape') {
+                    $dropdown.removeClass('show').hide();
+                }
+                return;
+            }
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setActiveIndex(activeIndex + 1, true);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setActiveIndex(activeIndex - 1, true);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (activeIndex >= 0 && activeIndex < currentItems.length) {
+                    selectProduct(currentItems[activeIndex]);
+                }
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                $dropdown.removeClass('show').hide();
+            }
+        });
+
+        // Focus lại nếu có text
+        $inp.off('focus.kiotF3').on('focus.kiotF3', function () {
+            if ($(this).val().trim().length > 0 && currentItems.length > 0) {
+                $dropdown.addClass('show').show();
+            }
+        });
+
+        function renderDropdown(items) {
+            $dropdown.empty();
+            currentItems = items || [];
+            activeIndex = currentItems.length > 0 ? 0 : -1;
+
+            if (!currentItems || currentItems.length === 0) {
+                $dropdown.append('<div class="p-3 text-center text-muted small">Không tìm thấy hàng hóa phù hợp</div>');
+                $dropdown.addClass('show').show();
+                return;
+            }
+
+            currentItems.forEach(function (item, idx) {
+                const tenHang = item.tenHang || item.TenHang || '';
+                const maHangNoiBo = item.maHangNoiBo || item.MaHangNoiBo || '';
+                const tenDvt = item.tenDvt || item.TenDvt || '';
+                const tenNhom = item.tenNhom || item.TenNhom || '';
+                const tonKho = parseFloat(item.tonKho !== undefined ? item.tonKho : (item.TonKho !== undefined ? item.TonKho : 0)) || 0;
+                const gia = parseFloat(item.gia !== undefined ? item.gia : (item.Gia !== undefined ? item.Gia : (item.giaVon !== undefined ? item.giaVon : 0))) || 0;
+                const maHang = item.maHang || item.MaHang || item.id || item.Id;
+
+                const firstChar = (tenHang.trim().length > 0) ? tenHang.trim()[0].toUpperCase() : 'H';
+                const unitText = tenDvt ? ` · ${escapeHtml(tenDvt)}` : '';
+                const isActive = idx === activeIndex ? ' active' : '';
+
+                const html = `
+                    <div class="kk-autocomplete-item${isActive}" 
+                         data-index="${idx}"
+                         data-id="${maHang}" 
+                         data-code="${escapeHtml(maHangNoiBo)}" 
+                         data-name="${escapeHtml(tenHang)}" 
+                         data-unit="${escapeHtml(tenDvt)}" 
+                         data-group="${escapeHtml(tenNhom)}" 
+                         data-stock="${tonKho}" 
+                         data-cost="${gia}">
+                        <div class="kk-item-main">
+                            <div class="kk-item-thumb">${firstChar}</div>
+                            <div class="kk-item-info">
+                                <div class="kk-item-name" title="${escapeHtml(tenHang)}">${escapeHtml(tenHang)}</div>
+                                <div class="kk-item-code">${escapeHtml(maHangNoiBo)}${unitText}</div>
+                            </div>
+                        </div>
+                        <div class="kk-item-meta">
+                            <div class="kk-item-stock">Tồn: <strong>${tonKho.toLocaleString('vi-VN')}</strong></div>
+                            <div class="kk-item-price">Giá: <b>${gia.toLocaleString('vi-VN')} đ</b></div>
+                        </div>
+                    </div>
+                `;
+                $dropdown.append(html);
+            });
+
+            $dropdown.addClass('show').show();
+        }
+
+        $dropdown.off('mouseenter.kiotF3').on('mouseenter.kiotF3', '.kk-autocomplete-item', function () {
+            const idx = parseInt($(this).data('index'), 10);
+            if (!isNaN(idx)) setActiveIndex(idx, false);
+        });
+
+        $dropdown.off('click.kiotF3').on('click.kiotF3', '.kk-autocomplete-item', function (e) {
+            e.stopPropagation();
+            const idx = parseInt($(this).data('index'), 10);
+            if (!isNaN(idx) && currentItems[idx]) {
+                selectProduct(currentItems[idx]);
+            } else {
+                const product = {
+                    maHang: $(this).data('id'),
+                    maHangNoiBo: $(this).data('code'),
+                    tenHang: $(this).data('name'),
+                    tenDvt: $(this).data('unit'),
+                    tenNhom: $(this).data('group'),
+                    tonKho: parseFloat($(this).data('stock')) || 0,
+                    gia: parseFloat($(this).data('cost')) || 0
+                };
+                selectProduct(product);
+            }
+        });
+
+        const docClickEvent = 'click.kiotF3_' + opt.inputSelector.replace(/[^a-zA-Z0-9_-]/g, '');
+        $(document).off(docClickEvent).on(docClickEvent, function (e) {
+            if (!$(e.target).closest($inp).length && !$(e.target).closest($dropdown).length) {
+                $dropdown.removeClass('show').hide();
+            }
+        });
+
+        return {
+            focus: () => $inp.focus(),
+            clear: () => { $inp.val(''); $dropdown.removeClass('show').hide(); },
+            close: () => $dropdown.removeClass('show').hide()
+        };
+    }
+
+    // 22. Quản lý Lưới Dòng Hàng Hóa Chứng Từ (Document Grid) Chuẩn KiotViet
+    function initDocGrid(options) {
+        const opt = $.extend({
+            tableBodySelector: '#itemsTableBody',
+            emptyBoxSelector: '#emptyLineBox',
+            tableScrollSelector: '#tableScrollWrap',
+            rowSelector: '.item-line-row',
+            sttSelector: '.row-stt',
+            btnRemoveSelector: '.btn-remove-line, [data-del], .del',
+            qtyInputSelector: '.line-qty, [data-qty], .qty',
+            onRecalc: null,
+            onRemove: null,
+            confirmDelete: false,
+            confirmTitle: 'Xác nhận xóa hàng hóa',
+            confirmMessage: 'Bạn có chắc chắn muốn bỏ sản phẩm này khỏi phiếu?'
+        }, options);
+
+        const $tbody = $(opt.tableBodySelector);
+        if (!$tbody.length) return null;
+
+        function updateSTT() {
+            $tbody.find(opt.rowSelector).each(function (idx) {
+                $(this).find(opt.sttSelector).text(idx + 1);
+            });
+        }
+
+        function checkEmptyState() {
+            const count = $tbody.find(opt.rowSelector).length;
+            if (count === 0) {
+                if (opt.tableScrollSelector) $(opt.tableScrollSelector).hide();
+                if (opt.emptyBoxSelector) $(opt.emptyBoxSelector).show();
+            } else {
+                if (opt.tableScrollSelector) $(opt.tableScrollSelector).show();
+                if (opt.emptyBoxSelector) $(opt.emptyBoxSelector).hide();
+            }
+            updateSTT();
+            if (typeof opt.onRecalc === 'function') {
+                opt.onRecalc(count);
+            }
+        }
+
+        $tbody.off('click.kiotDocDel').on('click.kiotDocDel', opt.btnRemoveSelector, function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const $row = $(this).closest(opt.rowSelector);
+            const rowId = $row.data('id') || $row.data('i');
+
+            function doRemove() {
+                $row.remove();
+                checkEmptyState();
+                if (typeof opt.onRemove === 'function') {
+                    opt.onRemove(rowId, $row);
+                }
+            }
+
+            if (opt.confirmDelete && window.KiotConfirm) {
+                KiotConfirm.show({
+                    title: opt.confirmTitle,
+                    message: opt.confirmMessage,
+                    confirmText: 'Xóa',
+                    confirmClass: 'btn-danger',
+                    onConfirm: doRemove
+                });
+            } else {
+                doRemove();
+            }
+        });
+
+        $tbody.off('input.kiotDocQty change.kiotDocQty').on('input.kiotDocQty change.kiotDocQty', opt.qtyInputSelector, function () {
+            if (typeof opt.onRecalc === 'function') {
+                opt.onRecalc($tbody.find(opt.rowSelector).length);
+            }
+        });
+
+        checkEmptyState();
+
+        return {
+            checkEmpty: checkEmptyState,
+            updateSTT: updateSTT,
+            recalc: () => { if (typeof opt.onRecalc === 'function') opt.onRecalc($tbody.find(opt.rowSelector).length); },
+            getCount: () => $tbody.find(opt.rowSelector).length
+        };
+    }
+
     return {
         debounce: debounce,
         escapeHtml: escapeHtml,
@@ -1209,6 +1733,15 @@ window.KiotFilter = (function ($) {
         initValueFilter: initValueFilter,
         initStatusFilter: initStatusFilter,
         initRowDetail: initRowDetail,
-        initEntityActions: initEntityActions
+        initEntityActions: initEntityActions,
+        initDateTimePicker: initDateTimePicker,
+        initProductSearch: initProductSearch,
+        initDocGrid: initDocGrid
     };
 })(jQuery);
+
+// Global alias cho backwards compatibility
+if (typeof window !== 'undefined' && window.KiotFilter) {
+    window.initF3ProductSearch = window.KiotFilter.initProductSearch;
+}
+
