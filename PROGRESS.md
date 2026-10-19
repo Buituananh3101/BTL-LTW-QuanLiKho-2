@@ -1,22 +1,32 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-19 – Xây Dựng Hệ Thống Modal Trợ Giúp KiotHelp Dùng Chung & Loại Bỏ Triệt Để Alert Trên Nút Trợ Giúp (Phiên 162)
+Cập nhật lần cuối: 2026-10-19 – Gỡ Bỏ Phần Chọn Nhanh Đăng Nhập Tài Khoản Mẫu (Phiên 163)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất xây dựng Modal Trợ giúp KiotHelp dùng chung và loại bỏ triệt để alert popup trên toàn bộ 11 màn hình chính:
-  + Gỡ bỏ 100% thuộc tính inline `onclick="alert(...)"` trên nút `btnHelp` tại `PhieuKiemKe/Index.cshtml` và `TraHangNhap/Index.cshtml`, chấm dứt hoàn toàn tình trạng hiện alert trình duyệt trước khi mở popup.
-  + Tạo partial dùng chung `Views/Shared/_KiotHelpModal.cshtml` tích hợp vào `_Layout.cshtml`, CSS phân tầng z-index 1070 trong `site.css`.
-  + Module JS toàn cục `KiotHelp` trong `site.js` chứa từ điển `HELP_MAP` và cơ chế tự động nhận diện màn hình (`detectScreenKey`) cho 11 phân hệ (`HangHoa`, `NhapHang`, `TraHangNhap`, `XuatHuy`, `ChuyenKho`, `PhieuKiemKe`, `TheKho`, `TonKho`, `NguoiDung`, `Kho`, `NhaCungCap`).
-  + Đồng bộ nút trợ giúp chuẩn `<button type="button" class="btn btn-tool btn-help" id="btnHelp" title="Hướng dẫn sử dụng (F1)"><i class="bi bi-question-circle"></i></button>` trên toàn bộ các trang.
-  + Hỗ trợ phím tắt `F1` để mở và `Esc` để đóng modal trợ giúp tức thì ở bất kỳ màn hình nào.
+- Đã hoàn tất loại bỏ phần chọn nhanh đăng nhập tài khoản mẫu thử nghiệm (`.demo-hint`) tại màn hình Đăng nhập (`/Account/Login`):
+  + Xóa khối gợi ý tài khoản mẫu và các nút chọn nhanh `quanly`, `thukho`, `banhang` trong `Views/Account/Login.cshtml`.
+  + Gỡ bỏ hàm trợ giúp `window.quickFill` trong `wwwroot/js/dang-nhap.js`.
+  + Dọn sạch các CSS rules liên quan (`.demo-hint`, `.demo-tags`, `.demo-tag`) trong `wwwroot/css/dang-nhap.css`.
+  + Giao diện form đăng nhập gọn gàng, chuẩn xác thực tế cho người dùng tự nhập tài khoản.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế khi bấm nút `?` hoặc phím `F1` trên từng màn hình: Kiểm kho, Trả hàng nhập, Hàng hóa, Chuyển kho, Thẻ kho, Tồn kho...
+1. Kiểm tra trải nghiệm thực tế đăng nhập tại `/Account/Login`.
 2. Tiếp tục hoàn thiện các chức năng nâng cao theo yêu cầu người dùng.
+
+---
+
+- **Gỡ Bỏ Phần Chọn Nhanh Đăng Nhập Tài Khoản Mẫu (Phiên 163)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "trong phần login hãy bỏ phần chọn nhanh để đăng nhập đi" kèm ảnh chụp khối gợi ý tài khoản mẫu.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. `Views/Account/Login.cshtml`: Xóa bỏ thẻ `.demo-hint` chứa danh sách nút bấm `quickFill('quanly')`, `quickFill('thukho')`, `quickFill('banhang')`.
+    2. `wwwroot/js/dang-nhap.js`: Xóa hàm `window.quickFill`.
+    3. `wwwroot/css/dang-nhap.css`: Xóa các class định kiểu `.demo-hint`, `.demo-hint-title`, `.demo-tags`, `.demo-tag`.
+  - **Kiểm tra**:
+    + `dotnet build /t:Compile`: Biên dịch dự án thành công với **0 Errors**.
 
 ---
 
