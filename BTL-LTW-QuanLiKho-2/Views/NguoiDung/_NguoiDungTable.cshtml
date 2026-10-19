@@ -4,12 +4,12 @@
     var sortDir = (ViewBag.SortDir as string)?.ToLower() ?? "";
 }
 
-<div class="kiot-table-scroll-body">
-    <table class="tbl" id="userTable" style="width: 100%; min-width: 960px;">
+<div class="kiot-table-scroll-body" style="overflow-x: hidden;">
+    <table class="tbl" id="userTable" style="width: 100% !important; min-width: 0 !important; table-layout: fixed !important;">
         <thead>
             <tr>
-                <th style="width: 45px;" class="text-center">#</th>
-                <th data-col="tendangnhap" style="width: 140px;" class="sortable-th @(sortBy == "tendangnhap" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tên đăng nhập">
+                <th style="width: 40px;" class="text-center col-stt">#</th>
+                <th data-col="tendangnhap" style="width: 125px;" class="sortable-th @(sortBy == "tendangnhap" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tên đăng nhập">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Tên đăng nhập</span>
@@ -18,7 +18,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="hoten" style="width: 180px;" class="sortable-th @(sortBy == "hoten" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tên nhân viên">
+                <th data-col="hoten" style="width: 150px;" class="sortable-th @(sortBy == "hoten" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tên nhân viên">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Tên nhân viên</span>
@@ -27,9 +27,9 @@
                         </span>
                     </div>
                 </th>
-                <th style="width: 120px;">Điện thoại</th>
-                <th style="width: 180px;">Email</th>
-                <th data-col="vaitro" style="width: 150px;" class="sortable-th @(sortBy == "vaitro" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Vai trò">
+                <th style="width: 100px;">Điện thoại</th>
+                <th style="width: 150px;">Email</th>
+                <th data-col="vaitro" style="width: 125px;" class="sortable-th @(sortBy == "vaitro" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Vai trò">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Vai trò</span>
@@ -38,9 +38,9 @@
                         </span>
                     </div>
                 </th>
-                <th style="width: 220px;">Kho làm việc</th>
-                <th style="width: 140px;">Đăng nhập cuối</th>
-                <th data-col="trangthai" style="width: 130px;" class="text-center sortable-th @(sortBy == "trangthai" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Trạng thái">
+                <th>Kho làm việc</th>
+                <th style="width: 125px;">Đăng nhập cuối</th>
+                <th data-col="trangthai" style="width: 115px;" class="text-center sortable-th @(sortBy == "trangthai" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Trạng thái">
                     <div class="th-content justify-content-center">
                         <span class="th-title-wrap">
                             <span class="th-text">Trạng thái</span>
@@ -49,7 +49,7 @@
                         </span>
                     </div>
                 </th>
-                <th style="width: 110px;" class="text-center">Thao tác</th>
+                <th style="width: 95px;" class="text-center col-actions">Thao tác</th>
             </tr>
         </thead>
         <tbody>
@@ -68,45 +68,41 @@
                 foreach (var u in Model.Items)
                 {
                     <tr data-id="@u.MaTaiKhoan">
-                        <td class="text-center text-muted">@(stt++)</td>
+                        <td class="text-center text-muted col-stt">@(stt++)</td>
                         <td>
-                            <span class="text-break">@u.TenDangNhap</span>
-                            @if (u.IsCurrentUser)
-                            {
-                                <span class="badge bg-secondary-subtle text-secondary ms-1" style="font-size: 10px;">Bạn</span>
-                            }
+                            <div class="d-flex align-items-center overflow-hidden">
+                                <span class="text-truncate fw-medium" title="@u.TenDangNhap">@u.TenDangNhap</span>
+                                @if (u.IsCurrentUser)
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary ms-1 flex-shrink-0" style="font-size: 10px;">Bạn</span>
+                                }
+                            </div>
                         </td>
                         <td>
-                            <span class="text-break">@u.HoTen</span>
-                            @if (!string.IsNullOrWhiteSpace(u.GhiChu))
-                            {
-                                <div class="text-muted small text-truncate" style="max-width: 200px; font-size: 11.5px;" title="@u.GhiChu">
-                                    <i class="bi bi-chat-left-text me-1"></i>@u.GhiChu
-                                </div>
-                            }
+                            <span class="d-block text-truncate fw-medium" title="@u.HoTen">@u.HoTen</span>
                         </td>
-                        <td>
+                        <td class="text-truncate" title="@u.DienThoai">
                             @(string.IsNullOrWhiteSpace(u.DienThoai) ? "---" : u.DienThoai)
                         </td>
-                        <td>
+                        <td class="text-truncate" title="@u.Email">
                             @(string.IsNullOrWhiteSpace(u.Email) ? "---" : u.Email)
                         </td>
                         <td>
                             @if (u.TenVaiTro == "Quản lý")
                             {
-                                <span class="badge bg-primary text-white px-2 py-1">
+                                <span class="badge bg-primary text-white px-2 py-1 text-truncate d-inline-block" style="max-width: 100%;">
                                     <i class="bi bi-shield-check me-1"></i>Quản lý
                                 </span>
                             }
                             else if (u.TenVaiTro.Contains("kho", StringComparison.OrdinalIgnoreCase))
                             {
-                                <span class="badge bg-warning text-dark px-2 py-1">
+                                <span class="badge bg-warning text-dark px-2 py-1 text-truncate d-inline-block" style="max-width: 100%;">
                                     <i class="bi bi-box-seam me-1"></i>@u.TenVaiTro
                                 </span>
                             }
                             else
                             {
-                                <span class="badge bg-success text-white px-2 py-1">
+                                <span class="badge bg-success text-white px-2 py-1 text-truncate d-inline-block" style="max-width: 100%;">
                                     <i class="bi bi-cart3 me-1"></i>@u.TenVaiTro
                                 </span>
                             }
@@ -134,7 +130,7 @@
                                 }
                             </div>
                         </td>
-                        <td>
+                        <td class="text-truncate" title="@(u.LanDangNhapCuoi.HasValue ? u.LanDangNhapCuoi.Value.ToString("dd/MM/yyyy HH:mm") : "")">
                             @(u.LanDangNhapCuoi.HasValue ? u.LanDangNhapCuoi.Value.ToString("dd/MM/yyyy HH:mm") : "---")
                         </td>
                         <td class="text-center">
@@ -147,7 +143,7 @@
                                 <span class="badge bg-light text-secondary border">Đang khóa</span>
                             }
                         </td>
-                        <td class="text-center">
+                        <td class="text-center col-actions">
                             <div class="d-inline-flex align-items-center gap-1">
                                 <button type="button" class="btn btn-sm btn-light border p-1 text-primary btn-edit-user" data-id="@u.MaTaiKhoan" title="Chỉnh sửa thông tin & phân quyền" style="width: 28px; height: 28px; line-height: 1;">
                                     <i class="bi bi-pencil"></i>

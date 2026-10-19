@@ -1,0 +1,81 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.QuanLyKho.KhoIndexVM
+@{
+    ViewData["Title"] = "Quản lý Chi nhánh Kho";
+}
+
+<link rel="stylesheet" href="~/css/hang-hoa-form.css" asp-append-version="true" />
+<style>
+    .kho-user-card-item.selected {
+        border-color: var(--hh-blue, #0070f4) !important;
+        background: #f0f7ff !important;
+        box-shadow: 0 0 0 1px var(--hh-blue, #0070f4);
+    }
+</style>
+
+<div class="kiot-container position-relative" id="kiotContainer" data-sort-by="@Model.SortBy" data-sort-dir="@Model.SortDir">
+    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + BỘ LỌC LEGO CHUẨN KIOTVIET -->
+    <partial name="_KhoFilterSidebar" model="Model" />
+
+    <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
+    <div class="kiot-sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Nút tròn thu gọn / mở rộng ở ranh giới giữa sidebar và bảng (Phím tắt F4) -->
+    <button type="button" class="kiot-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
+        <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
+    </button>
+
+    <!-- 2. CỘT BÊN PHẢI: TOOLBAR + BẢNG DỮ LIỆU KHO -->
+    <main class="kiot-main-col">
+        <!-- Toolbar trên cùng: Thanh tìm kiếm thẳng hàng với bảng bên dưới -->
+        <div class="kiot-toolbar-row">
+            <!-- Tiêu đề + Nút phễu bộ lọc trên mobile -->
+            <div class="kiot-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
+                <span class="kiot-mobile-title fw-bold fs-6 text-dark">Kho hàng</span>
+                <button type="button" class="btn btn-sm btn-outline-primary kiot-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+
+            <!-- Ô tìm kiếm nhanh F3 -->
+            <div class="kiot-search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã kho, tên kho, địa chỉ (F3)" value="@Model.Filter.Q" autocomplete="off" />
+            </div>
+
+            <!-- Nhóm nút hành động KiotViet -->
+            <div class="kiot-actions-group">
+                <!-- Nút + Kho -->
+                <button type="button" class="btn btn-primary d-inline-flex align-items-center" id="btnOpenCreateKhoModal" title="Thêm mới chi nhánh kho">
+                    <i class="bi bi-plus-lg me-1"></i><span>Kho</span>
+                </button>
+
+                <!-- Nút tải lại bảng -->
+                <button type="button" class="btn btn-tool" title="Tải lại bảng" id="btnReloadTable">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+
+                <!-- Trợ giúp (F1) -->
+                <button type="button" class="btn btn-tool btn-help" id="btnHelp" title="Hướng dẫn sử dụng (F1)">
+                    <i class="bi bi-question-circle"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách kho nạp AJAX -->
+        <section id="content">
+            <div id="khoTableContainer">
+                <partial name="_KhoTable" model="Model.PagedData" />
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- ========================================================================
+     MODAL THÊM / SỬA CHI NHÁNH KHO
+     ======================================================================== -->
+<partial name="_KhoModal" model="Model" />
+
+@section Scripts {
+    <script src="~/js/kiot-filter.js" asp-append-version="true"></script>
+    <script src="~/js/kho-index.js" asp-append-version="true"></script>
+}

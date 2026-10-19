@@ -228,7 +228,7 @@
     border-radius: 8px;
     max-height: 380px;
     overflow-y: auto;
-    z-index: 1050;
+    z-index: 150;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
     display: none;
 }
@@ -305,7 +305,7 @@
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0,0,0,.15);
     padding: 12px;
-    z-index: 1060;
+    z-index: 500;
     width: 320px;
     flex-direction: row;
     gap: 12px;
@@ -545,7 +545,7 @@
     border: 1px solid #e2e8f0 !important;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
     background-color: #ffffff !important;
-    z-index: 1050 !important;
+    z-index: 150 !important;
 }
 
 .payer-custom-dropdown-menu .dropdown-item,

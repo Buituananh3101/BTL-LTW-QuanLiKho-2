@@ -44,7 +44,7 @@
 - **Sidebar lọc trái (`_NguoiDungFilterSidebar.cshtml`)**: Lọc theo từ khóa, Vai trò (`_KiotMultiSelectFilter`), Kho phụ trách (`_KiotMultiSelectFilter`), Trạng thái (`_KiotStatusFilter`).
 - **Bảng dữ liệu AJAX (`_NguoiDungTable.cshtml`)**:
   - Sắp xếp 3 trạng thái (`sortable-th`): Tên đăng nhập, Tên nhân viên, Vai trò, Trạng thái.
-  - Cột: Tên đăng nhập, Họ tên, SĐT, Email, Vai trò (badge màu), Kho làm việc (chip hoặc "Toàn bộ các kho"), Trạng thái, Thao tác (Sửa, Đổi mật khẩu, Khóa/Mở).
+  - Co giãn 100% không cuộn ngang (`table-layout: fixed`, `overflow-x: hidden`). Cột Kho làm việc tự động co giãn theo không gian còn lại.
   - Phân trang AJAX: Tái sử dụng Lego `_Pagination.cshtml`.
 
 ### 3.2. Modal Thêm/Sửa người dùng (`_NguoiDungModal.cshtml`)

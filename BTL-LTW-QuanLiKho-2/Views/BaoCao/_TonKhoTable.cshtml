@@ -1,0 +1,215 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.BaoCaoTonKhoIndexVM
+@{
+    var selectedKhos = Model.DanhSachKho.Where(k => Model.SelectedKhoIds.Contains(k.MaKho)).ToList();
+    var sortBy = Model.Filter.SortBy ?? "tenHang";
+    var sortDir = Model.Filter.SortDir ?? "asc";
+}
+
+<div class="table-responsive">
+    <table class="tbl tonkho-table mb-0" id="tableTonKho" style="width: max-content; min-width: 100%;">
+        <thead>
+            <tr>
+                <th class="text-center" style="width: 50px;">STT</th>
+                <th style="width: 120px; min-width: 120px;" class="sortable-th @(sortBy == "mahang" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="mahang" title="Nhấn để sắp xếp theo Mã hàng">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Mã hàng</span>
+                            @if (sortBy == "mahang" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "mahang" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 240px; min-width: 240px;" class="col-product-name sortable-th @(sortBy == "tenhang" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="tenhang" title="Nhấn để sắp xếp theo Tên hàng hóa">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Tên hàng hóa</span>
+                            @if (sortBy == "tenhang" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "tenhang" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 80px; min-width: 80px;" class="text-center sortable-th @(sortBy == "dvt" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="dvt" title="Nhấn để sắp xếp theo ĐVT">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">ĐVT</span>
+                            @if (sortBy == "dvt" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "dvt" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 140px; min-width: 140px;" class="sortable-th @(sortBy == "nhomhang" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="nhomhang" title="Nhấn để sắp xếp theo Nhóm hàng">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Nhóm hàng</span>
+                            @if (sortBy == "nhomhang" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "nhomhang" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 110px; min-width: 110px;" class="num sortable-th @(sortBy == "giavon" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="giavon" title="Nhấn để sắp xếp theo Giá vốn">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Giá vốn</span>
+                            @if (sortBy == "giavon" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "giavon" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 130px; min-width: 130px;" class="num sortable-th @(sortBy == "giatriton" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="giatriton" title="Nhấn để sắp xếp theo Giá trị tồn">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Giá trị tồn</span>
+                            @if (sortBy == "giatriton" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "giatriton" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+
+                @* Các cột phân bổ theo từng chi nhánh kho *@
+                @foreach (var kho in selectedKhos)
+                {
+                    var colKey = $"kho_{kho.MaKho}";
+                    <th style="width: 125px; min-width: 125px;" class="num sortable-th @(sortBy == colKey ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="@colKey" title="Nhấn để sắp xếp theo tồn kho @kho.TenKho">
+                        <div class="th-content">
+                            <span class="th-title-wrap">
+                                <span class="th-text">Tồn: @kho.TenKho</span>
+                                @if (sortBy == colKey && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                                else if (sortBy == colKey && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                            </span>
+                        </div>
+                    </th>
+                }
+
+                @* Cột Tổng tồn *@
+                <th style="width: 125px; min-width: 125px;" class="num sortable-th bg-light @(sortBy == "tongton" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="tongton" title="Nhấn để sắp xếp theo Tổng tồn">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Tổng tồn</span>
+                            @if (sortBy == "tongton" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "tongton" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th class="text-center" style="width: 44px; min-width: 44px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.PagedData.Items.Count == 0)
+            {
+                <tr>
+                    <td colspan="@(8 + selectedKhos.Count)" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                        Không có mặt hàng nào phù hợp với điều kiện lọc hiện tại.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                int stt = Model.PagedData.StartItemIndex;
+                foreach (var item in Model.PagedData.Items)
+                {
+                    <tr class="row-tonkho" data-id="@item.MaHang" style="cursor: pointer;">
+                        <td class="text-center text-muted" style="font-size: 12px;">@(stt++)</td>
+                        <td class="fw-semibold text-primary font-monospace">@item.MaHangNoiBo</td>
+                        <td>
+                            <div class="fw-bold text-dark">@item.TenHang</div>
+                            @if (!string.IsNullOrWhiteSpace(item.ViTri))
+                            {
+                                <div class="text-muted small" style="font-size: 11px;"><i class="bi bi-geo-alt me-1"></i>@item.ViTri</div>
+                            }
+                        </td>
+                        <td><span class="badge bg-light text-secondary border">@item.TenDvt</span></td>
+                        <td class="text-secondary small">@item.TenNhom</td>
+                        <td class="text-end">@item.GiaVon.ToString("#,##0")</td>
+                        <td class="text-end fw-semibold text-dark">@item.GiaTriTon.ToString("#,##0")</td>
+
+                        @* Tồn kho từng chi nhánh *@
+                        @foreach (var kho in selectedKhos)
+                        {
+                            decimal slKho = item.TonTheoKho.TryGetValue(kho.MaKho, out var sl) ? sl : 0m;
+                            item.DinhMucTheoKho.TryGetValue(kho.MaKho, out var dm);
+
+                            bool isUnderMin = dm.Item1 > 0 && slKho < dm.Item1;
+                            bool isOverMax = dm.Item2.HasValue && slKho > dm.Item2.Value;
+
+                            <td class="text-end position-relative">
+                                @if (slKho < 0)
+                                {
+                                    <span class="text-danger fw-bold">@slKho.ToString("#,##0.##")</span>
+                                }
+                                else if (slKho == 0)
+                                {
+                                    <span class="text-muted opacity-75">0</span>
+                                }
+                                else
+                                {
+                                    <span class="text-dark">@slKho.ToString("#,##0.##")</span>
+                                }
+
+                                @if (isUnderMin)
+                                {
+                                    <span class="badge rounded-pill bg-warning text-dark ms-1" title="Dưới định mức tối thiểu (@dm.Item1)" style="font-size: 9px; padding: 2px 4px;">▼</span>
+                                }
+                                else if (isOverMax)
+                                {
+                                    <span class="badge rounded-pill bg-info text-dark ms-1" title="Vượt định mức tối đa (@dm.Item2)" style="font-size: 9px; padding: 2px 4px;">▲</span>
+                                }
+                            </td>
+                        }
+
+                        @* Tổng tồn *@
+                        <td class="text-end bg-light fw-bold">
+                            @if (item.TongTon < 0)
+                            {
+                                <span class="text-danger">@item.TongTon.ToString("#,##0.##")</span>
+                            }
+                            else if (item.TongTon == 0)
+                            {
+                                <span class="text-muted">0</span>
+                            }
+                            else
+                            {
+                                <span class="text-primary">@item.TongTon.ToString("#,##0.##")</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-link text-secondary p-0 btn-view-drawer" data-id="@item.MaHang" title="Xem chi tiết định mức & tồn kho">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+        @if (Model.PagedData.Items.Count > 0)
+        {
+            <tfoot>
+                <tr class="fw-bold bg-light border-top-2">
+                    <td colspan="5" class="text-center py-2 text-uppercase small text-secondary">
+                        Tổng trang này (@Model.PagedData.Items.Count mặt hàng)
+                    </td>
+                    <td class="text-end text-muted small">-</td>
+                    <td class="text-end text-dark">
+                        @Model.PagedData.Items.Sum(x => x.GiaTriTon).ToString("#,##0")
+                    </td>
+                    @foreach (var kho in selectedKhos)
+                    {
+                        decimal tongKho = Model.PagedData.Items.Sum(x => x.TonTheoKho.TryGetValue(kho.MaKho, out var sl) ? sl : 0m);
+                        <td class="text-end @(tongKho < 0 ? "text-danger" : "text-dark")">
+                            @tongKho.ToString("#,##0.##")
+                        </td>
+                    }
+                    <td class="text-end text-primary bg-light">
+                        @Model.PagedData.Items.Sum(x => x.TongTon).ToString("#,##0.##")
+                    </td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        }
+    </table>
+</div>
+
+<!-- Khối Lego Phân trang AJAX -->
+<div class="px-3 py-2 border-top bg-white">
+    <partial name="_Pagination" model="Model.PagedData" />
+</div>

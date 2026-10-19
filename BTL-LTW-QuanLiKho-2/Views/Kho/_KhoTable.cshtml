@@ -1,0 +1,158 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.PagedResult<BTL_LTW_QuanLiKho_2.ViewModels.QuanLyKho.KhoListItemVM>
+@{
+    var sortBy = (ViewBag.SortBy as string)?.ToLower() ?? "";
+    var sortDir = (ViewBag.SortDir as string)?.ToLower() ?? "";
+}
+
+<div class="kiot-table-scroll-body" style="overflow-x: hidden;">
+    <table class="tbl" id="khoTable" style="width: 100% !important; min-width: 0 !important; table-layout: fixed !important;">
+        <thead>
+            <tr>
+                <th style="width: 40px;" class="text-center col-stt">#</th>
+                <th data-col="makho" style="width: 95px;" class="sortable-th @(sortBy == "makho" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Mã kho">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Mã kho</span>
+                            @if (sortBy == "makho" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "makho" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th data-col="tenkho" style="width: 190px;" class="sortable-th @(sortBy == "tenkho" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Tên kho">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Tên chi nhánh kho</span>
+                            @if (sortBy == "tenkho" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "tenkho" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th data-col="diachi" style="width: 230px;" class="sortable-th @(sortBy == "diachi" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Địa chỉ">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Địa chỉ</span>
+                            @if (sortBy == "diachi" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "diachi" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 180px;">Ghi chú / Mô tả</th>
+                <th data-col="nhanvien" style="width: 160px;" class="sortable-th @(sortBy == "nhanvien" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Nhân sự phụ trách">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Nhân sự phụ trách</span>
+                            @if (sortBy == "nhanvien" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "nhanvien" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 120px;" class="text-center">Số chứng từ</th>
+                <th data-col="trangthai" style="width: 125px;" class="text-center sortable-th @(sortBy == "trangthai" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Trạng thái">
+                    <div class="th-content justify-content-center">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Trạng thái</span>
+                            @if (sortBy == "trangthai" && sortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (sortBy == "trangthai" && sortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 85px;" class="text-center col-actions">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Items == null || !Model.Items.Any())
+            {
+                <tr class="empty-row">
+                    <td colspan="9" class="text-center py-5 text-muted">
+                        <i class="bi bi-building-x fs-1 d-block mb-2 text-secondary"></i>
+                        Không tìm thấy chi nhánh kho nào phù hợp với bộ lọc.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                int stt = Model.StartItemIndex;
+                foreach (var k in Model.Items)
+                {
+                    <tr data-id="@k.MaKho">
+                        <td class="text-center text-muted col-stt">@(stt++)</td>
+                        <td>
+                            <span class="badge bg-light text-secondary border font-monospace">KHO-@k.MaKho.ToString("D2")</span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center overflow-hidden">
+                                <span class="text-truncate fw-semibold text-dark" title="@k.TenKho">@k.TenKho</span>
+                                @if (k.IsCurrentWarehouse)
+                                {
+                                    <span class="badge bg-primary text-white ms-1 flex-shrink-0" style="font-size: 10px;" title="Kho bạn đang làm việc trong phiên này">Đang chọn</span>
+                                }
+                            </div>
+                        </td>
+                        <td class="text-truncate" title="@k.DiaChi">
+                            @if (!string.IsNullOrWhiteSpace(k.DiaChi))
+                            {
+                                <span><i class="bi bi-geo-alt me-1 text-primary"></i>@k.DiaChi</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic">Chưa cập nhật địa chỉ</span>
+                            }
+                        </td>
+                        <td class="text-truncate" title="@k.MoTa">
+                            @(string.IsNullOrWhiteSpace(k.MoTa) ? "---" : k.MoTa)
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1 align-items-center">
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" title="Danh sách: @string.Join(", ", k.DanhSachNhanVien)">
+                                    <i class="bi bi-people me-1"></i>@k.SoNhanVien nhân sự
+                                </span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            @if (k.SoChungTuLienQuan > 0)
+                            {
+                                <span class="badge bg-light text-dark border">@k.SoChungTuLienQuan phiếu</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">0</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (k.TrangThai == "HOAT_DONG")
+                            {
+                                <span class="badge bg-light text-success border border-success-subtle">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-secondary border">Ngừng hoạt động</span>
+                            }
+                        </td>
+                        <td class="text-center col-actions">
+                            <div class="d-inline-flex align-items-center gap-1">
+                                <button type="button" class="btn btn-sm btn-light border p-1 text-primary btn-edit-kho" data-id="@k.MaKho" title="Chỉnh sửa thông tin chi nhánh kho" style="width: 28px; height: 28px; line-height: 1;">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button type="button"
+                                        class="btn btn-sm btn-light border p-1 @(k.TrangThai == "HOAT_DONG" ? "text-danger" : "text-success") btn-toggle-status"
+                                        data-id="@k.MaKho"
+                                        data-name="@k.TenKho"
+                                        data-status="@k.TrangThai"
+                                        title="@(k.TrangThai == "HOAT_DONG" ? "Ngừng hoạt động kho này" : "Kích hoạt lại kho này")"
+                                        style="width: 28px; height: 28px; line-height: 1;">
+                                    <i class="bi @(k.TrangThai == "HOAT_DONG" ? "bi-lock" : "bi-unlock")"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Phân trang AJAX dùng chung -->
+@{
+    ViewData["ItemLabel"] = "kho";
+}
+<partial name="_Pagination" model="Model" />

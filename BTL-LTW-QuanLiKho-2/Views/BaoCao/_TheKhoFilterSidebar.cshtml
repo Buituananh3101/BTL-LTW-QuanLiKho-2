@@ -1,0 +1,110 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.TheKhoIndexVM
+@using BTL_LTW_QuanLiKho_2.ViewModels.Common
+
+<!-- CỘT BÊN TRÁI: TIÊU ĐỀ "THẺ KHO" + CÁC KHỐI BỘ LỌC KIOTVIET (MODULAR LEGO) -->
+<aside class="kiot-sidebar-col" id="sidebarFilterCol">
+    <!-- Header cho sidebar khi mở ở mobile/zoom -->
+    <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+        <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc Thẻ kho</div>
+        <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
+    </div>
+
+    <!-- Tiêu đề sidebar Desktop -->
+    <div class="kiot-sidebar-title d-none d-lg-flex">
+        Thẻ kho
+    </div>
+
+    <div class="kiot-filter-box" id="side">
+        <!-- 1. KHỐI CHỌN MẶT HÀNG THEO DÕI THẺ KHO (F3 LEGO) -->
+        <div class="f-block position-relative">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <h6 class="mb-0">Mặt hàng theo dõi <span class="filter-dot @(Model.TongHop != null ? "active" : "")" id="dotMatHang"></span></h6>
+                <span class="badge bg-light text-secondary border px-1" style="font-size: 10px; font-weight: 500;" title="Nhấn F3 để tìm kiếm">F3</span>
+            </div>
+
+            <!-- Ô tìm kiếm hàng hóa Autocomplete F3 -->
+            <div class="position-relative">
+                <i class="bi bi-search position-absolute text-muted" style="left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; pointer-events: none;"></i>
+                <input type="text" id="tkSearchProductInput" class="form-control form-control-sm"
+                       style="padding-left: 32px; height: 34px; font-size: 13px;"
+                       placeholder="Gõ tên hoặc mã hàng (F3)..." autocomplete="off" />
+                <div class="tk-autocomplete-dropdown shadow" id="tkProductSuggestDropdown"></div>
+            </div>
+
+            <!-- Thẻ hiển thị mặt hàng đang chọn -->
+            <div class="tk-selected-card mt-2 @(Model.TongHop == null ? "d-none" : "")" id="tkSelectedProductCard" data-ma-hang="@(Model.TongHop?.MaHang ?? 0)">
+                <div class="d-flex align-items-start justify-content-between w-100 gap-1">
+                    <div class="overflow-hidden flex-grow-1">
+                        <span class="product-code-badge" id="tkCardProductCode">@(Model.TongHop?.MaHangNoiBo ?? "")</span>
+                        <div class="product-title text-truncate" id="tkCardProductName" title="@(Model.TongHop?.TenHang ?? "")">
+                            @(Model.TongHop?.TenHang ?? "")
+                        </div>
+                        <div class="product-sub" id="tkCardProductSub">
+                            ĐVT: <strong>@(Model.TongHop?.TenDvt ?? "")</strong>
+                            @if (!string.IsNullOrEmpty(Model.TongHop?.TenNhomHang))
+                            {
+                                <span> • @Model.TongHop.TenNhomHang</span>
+                            }
+                        </div>
+                    </div>
+                    <button type="button" class="btn-remove-selected-product" id="btnRemoveSelectedProduct" title="Bỏ chọn mặt hàng">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gợi ý khi chưa chọn mặt hàng -->
+            <div class="text-muted small mt-2 @(Model.TongHop != null ? "d-none" : "")" id="tkNoProductHint" style="font-size: 11.5px; line-height: 1.4;">
+                <i class="bi bi-info-circle me-1"></i>Chọn một mặt hàng để theo dõi Thẻ kho.
+            </div>
+
+            <!-- Hidden input lưu trữ MaHang hiện tại -->
+            <input type="hidden" id="selectedMaHang" name="MaHang" value="@(Model.TongHop?.MaHang ?? Model.Filter.MaHang ?? 0)" />
+        </div>
+
+        <!-- 2. CHI NHÁNH KHO (LEGO SINGLE-SELECT KIOTVIET) -->
+        <div class="f-block position-relative">
+            <h6>Chi nhánh kho <span class="filter-dot @(Model.Filter.MaKho.HasValue && Model.Filter.MaKho.Value > 0 ? "active" : "")" id="dotKho"></span></h6>
+            <div class="position-relative">
+                <div class="kiot-single-select-box" id="boxKho">
+                    <span id="textKho">
+                        @{
+                            var selKho = Model.DanhSachKho.FirstOrDefault(k => k.Selected)
+                                         ?? (Model.Filter.MaKho.HasValue && Model.Filter.MaKho.Value > 0
+                                             ? Model.DanhSachKho.FirstOrDefault(k => k.Value == Model.Filter.MaKho.Value.ToString())
+                                             : Model.DanhSachKho.FirstOrDefault());
+                        }
+                        @(selKho?.Text ?? "Tất cả chi nhánh kho")
+                    </span>
+                    <i class="bi bi-chevron-down kiot-select-chevron"></i>
+                </div>
+                <div class="kiot-ss-dropdown shadow" id="dropdownKho">
+                    @foreach (var kho in Model.DanhSachKho)
+                    {
+                        var isSel = (kho == selKho) || (kho.Value == (Model.Filter.MaKho?.ToString() ?? ""));
+                        <div class="kiot-ss-item @(isSel ? "selected" : "")" data-val="@kho.Value">
+                            <span>@kho.Text</span>
+                            <i class="bi bi-check2 check-icon"></i>
+                        </div>
+                    }
+                </div>
+            </div>
+            <!-- Hidden input lưu trữ MaKho hiện tại để gửi AJAX -->
+            <input type="hidden" id="selectKhoLuuTru" name="MaKho" value="@(selKho?.Value ?? "")" />
+        </div>
+
+        <!-- 3. THỜI GIAN (Lego _KiotDateFilter) -->
+        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("thekho_date", "Thời gian", false)' />
+
+        <!-- 4. LOẠI CHỨNG TỪ (Lego _KiotStatusFilter) -->
+        <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Loại giao dịch", "dotLoaiGd", new() {
+            new("PHIEU_NHAP", "Nhập hàng", Model.Filter.LoaiChungTu.Contains("PHIEU_NHAP")),
+            new("XUAT_BAN", "Bán hàng", Model.Filter.LoaiChungTu.Contains("XUAT_BAN")),
+            new("XUAT_HUY", "Xuất hủy", Model.Filter.LoaiChungTu.Contains("XUAT_HUY")),
+            new("CHUYEN_XUAT", "Chuyển đi", Model.Filter.LoaiChungTu.Contains("CHUYEN_XUAT")),
+            new("CHUYEN_NHAP", "Chuyển đến", Model.Filter.LoaiChungTu.Contains("CHUYEN_NHAP")),
+            new("KIEM_KE", "Kiểm kê", Model.Filter.LoaiChungTu.Contains("KIEM_KE")),
+            new("TRA_HANG_NHAP", "Trả hàng nhập", Model.Filter.LoaiChungTu.Contains("TRA_HANG_NHAP"))
+        })' />
+    </div>
+</aside>

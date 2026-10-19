@@ -721,7 +721,83 @@ $(document).ready(function () {
 
         $panel.find('.tab-pane-content').hide();
         $panel.find('.tab-' + tabName).fadeIn(120);
+
+        if (tabName === 'thekho') {
+            loadTheKhoQuick($panel);
+        }
     });
+
+    // Nạp nhanh dữ liệu Thẻ kho thực tế từ API /BaoCao/GetTheKhoQuick
+    function loadTheKhoQuick($panel) {
+        const $box = $panel.find('.thekho-quick-box');
+        if (!$box.length) return;
+        if ($box.attr('data-loaded') === 'true') return;
+
+        const maHang = parseInt($box.data('ma-hang'), 10);
+        if (!maHang) return;
+
+        const $tbody = $box.find('.thekho-quick-tbody');
+        $tbody.html('<tr><td colspan="8" class="text-center py-3 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Đang nạp dữ liệu thẻ kho...</td></tr>');
+
+        $.ajax({
+            url: '/BaoCao/GetTheKhoQuick',
+            type: 'GET',
+            data: { maHang: maHang, soLuong: 10 },
+            success: function (res) {
+                if (res && res.success && res.data && res.data.length) {
+                    let html = '';
+                    res.data.forEach(function (d) {
+                        const codeHtml = d.urlChiTiet
+                            ? `<a href="${d.urlChiTiet}" class="text-primary text-decoration-none fw-semibold">${escapeHtml(d.maChungTuHienThi)}</a>`
+                            : `<span class="fw-semibold text-dark">${escapeHtml(d.maChungTuHienThi)}</span>`;
+
+                        const timeStr = d.ngayGiaoDich ? new Date(d.ngayGiaoDich).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+                        const tang = d.soLuongTang > 0 ? `<span class="text-success fw-bold">+${d.soLuongTang.toLocaleString('vi-VN')}</span>` : '-';
+                        const giam = d.soLuongGiam > 0 ? `<span class="text-danger fw-bold">-${d.soLuongGiam.toLocaleString('vi-VN')}</span>` : '-';
+                        const ton = `<span class="fw-bold">${d.tonLuyKe.toLocaleString('vi-VN')}</span>`;
+                        const giaStr = d.donGia > 0 ? d.donGia.toLocaleString('vi-VN') + ' ₫' : '-';
+
+                        // Chuẩn hóa badge class loại giao dịch đồng bộ KiotViet
+                        const badgeClass = (d.badgeClass && d.badgeClass.startsWith('badge-'))
+                            ? d.badgeClass
+                            : (function (loai) {
+                                switch (loai) {
+                                    case 'PHIEU_NHAP': return 'badge-nhap';
+                                    case 'XUAT_BAN': return 'badge-xuat-ban';
+                                    case 'XUAT_HUY': return 'badge-xuat-huy';
+                                    case 'CHUYEN_XUAT': return 'badge-chuyen-xuat';
+                                    case 'CHUYEN_NHAP': return 'badge-chuyen-nhap';
+                                    case 'KIEM_KE': return 'badge-kiem-ke';
+                                    case 'TRA_HANG_NHAP': return 'badge-tra-hang';
+                                    default: return 'badge-kiem-ke';
+                                }
+                            })(d.loaiChungTu);
+
+                        html += `<tr>
+                            <td>${codeHtml}</td>
+                            <td class="text-muted small">${timeStr}</td>
+                            <td><span class="badge-tk ${badgeClass}">${escapeHtml(d.tenLoaiChungTu)}</span></td>
+                            <td class="text-end text-muted">${giaStr}</td>
+                            <td class="text-end">${tang}</td>
+                            <td class="text-end">${giam}</td>
+                            <td class="text-end">${ton}</td>
+                            <td class="small text-muted text-truncate" style="max-width: 150px;" title="${escapeHtml(d.doiTac || '')}">${escapeHtml(d.doiTac || '-')}</td>
+                        </tr>`;
+                    });
+                    $tbody.html(html);
+                    $panel.find('.thekho-count-text').text(`Hiển thị ${res.data.length} giao dịch gần nhất`);
+                    $box.attr('data-loaded', 'true');
+                } else {
+                    $tbody.html('<tr><td colspan="8" class="text-center py-4 text-muted fst-italic"><i class="bi bi-inbox fs-4 d-block mb-1 text-secondary"></i>Chưa phát sinh giao dịch xuất nhập kho nào cho mặt hàng này</td></tr>');
+                    $panel.find('.thekho-count-text').text('0 giao dịch');
+                    $box.attr('data-loaded', 'true');
+                }
+            },
+            error: function () {
+                $tbody.html('<tr><td colspan="8" class="text-center py-3 text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Không thể nạp dữ liệu thẻ kho. Vui lòng thử lại sau.</td></tr>');
+            }
+        });
+    }
 
     // Sao chép hàng hóa
     $(document).on('click', '.btn-copy-product', function (e) {

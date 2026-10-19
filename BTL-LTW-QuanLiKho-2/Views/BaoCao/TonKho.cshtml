@@ -1,0 +1,171 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.BaoCaoTonKhoIndexVM
+@{
+    ViewData["Title"] = "Báo cáo Tồn kho theo kho";
+}
+
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+<style>
+/* Style riêng cho các thẻ Summary KPI */
+.kiot-stat-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.kiot-stat-card:hover {
+    box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+}
+.kiot-stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+.kiot-stat-info .stat-val {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.kiot-stat-info .stat-lbl {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+/* Nổi bật hover bảng Pivot */
+.tonkho-table tbody tr.row-tonkho:hover {
+    background-color: #f1f8ff !important;
+}
+</style>
+
+<!-- Cấu hình dữ liệu ban đầu cho JavaScript -->
+<div id="tonKhoConfig"
+     data-page="@Model.Filter.Page"
+     data-page-size="@Model.Filter.PageSize"
+     data-sort-by="@(Model.Filter.SortBy ?? "tenHang")"
+     data-sort-dir="@(Model.Filter.SortDir ?? "asc")"
+     data-tinh-trang="@(Model.Filter.TinhTrangTon ?? "ALL")"
+     data-trang-thai-hang="@(Model.Filter.TrangThaiHang ?? "DANG_KINH_DOANH")"
+     data-ma-nhom="@(Model.Filter.MaNhom ?? 0)"
+     data-selected-khos='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SelectedKhoIds))'
+     style="display:none;"></div>
+
+<div class="kiot-container position-relative" id="kiotContainer">
+    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + BỘ LỌC KIOTVIET (PARTIAL VIEW) -->
+    <partial name="_TonKhoFilterSidebar" model="Model" />
+
+    <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
+    <div class="kiot-sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Nút tròn thu gọn / mở rộng ở ranh giới giữa sidebar và bảng (Phím tắt F4) -->
+    <button type="button" class="kiot-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
+        <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
+    </button>
+
+    <!-- 2. CỘT BÊN PHẢI: THANH TÌM KIẾM + TOOLBAR + SUMMARY CARDS + BẢNG PIVOT -->
+    <main class="kiot-main-col">
+        <!-- Toolbar trên cùng: Thanh tìm kiếm F3 + Xuất file + In báo cáo -->
+        <div class="kiot-toolbar-row mb-3">
+            <div class="kiot-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
+                <span class="kiot-mobile-title fw-bold fs-6 text-dark">Báo cáo tồn kho</span>
+                <button type="button" class="btn btn-sm btn-outline-primary kiot-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+
+            <div class="kiot-search-box flex-grow-1" style="max-width: 400px;">
+                <i class="bi bi-search"></i>
+                <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã, tên hàng, vị trí (F3)" value="@Model.Filter.Q" autocomplete="off" />
+            </div>
+
+            <div class="kiot-actions-group ms-auto d-flex align-items-center gap-2">
+                <!-- Nút Xuất file Excel -->
+                <button type="button" class="btn btn-outline-success d-inline-flex align-items-center gap-1" id="btnExportExcel" title="Xuất file Excel báo cáo tồn kho">
+                    <i class="bi bi-file-earmark-excel"></i>
+                    <span class="d-none d-md-inline">Xuất file</span>
+                </button>
+
+                <!-- Nút In báo cáo -->
+                <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1" id="btnPrintReport" title="In báo cáo">
+                    <i class="bi bi-printer"></i>
+                    <span class="d-none d-md-inline">In</span>
+                </button>
+
+                <!-- Trợ giúp (F1) -->
+                <button type="button" class="btn btn-tool btn-help" id="btnHelp" title="Hướng dẫn sử dụng (F1)">
+                    <i class="bi bi-question-circle"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 4 Thẻ Summary KPI -->
+        <div class="row g-2 mb-3" id="summaryCardsRow">
+            <div class="col-6 col-md-3">
+                <div class="kiot-stat-card">
+                    <div class="kiot-stat-icon bg-primary-subtle text-primary">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <div class="kiot-stat-info">
+                        <div class="stat-val text-dark" id="sumMatHang">@Model.Summary.TongSoMatHang.ToString("N0")</div>
+                        <div class="stat-lbl">Mặt hàng</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="kiot-stat-card">
+                    <div class="kiot-stat-icon bg-success-subtle text-success">
+                        <i class="bi bi-layers"></i>
+                    </div>
+                    <div class="kiot-stat-info">
+                        <div class="stat-val text-success" id="sumSoLuongTon">@Model.Summary.TongSoLuongTon.ToString("#,##0.##")</div>
+                        <div class="stat-lbl">Tổng số lượng tồn</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="kiot-stat-card">
+                    <div class="kiot-stat-icon bg-info-subtle text-info">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div class="kiot-stat-info">
+                        <div class="stat-val text-dark" id="sumGiaTriTon">@Model.Summary.TongGiaTriTon.ToString("#,##0") ₫</div>
+                        <div class="stat-lbl">Tổng giá trị tồn</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="kiot-stat-card">
+                    <div class="kiot-stat-icon bg-warning-subtle text-warning-emphasis">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div class="kiot-stat-info">
+                        <div class="stat-val text-warning-emphasis" id="sumCanLuuY">@Model.Summary.SoMatHangCanLuuY.ToString("N0")</div>
+                        <div class="stat-lbl">Hàng cần lưu ý</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container Bảng Pivot Kho AJAX -->
+        <div class="kiot-table-wrap border rounded bg-white" id="tableWrapper">
+            <partial name="_TonKhoTable" model="Model" />
+        </div>
+    </main>
+
+    <!-- Drawer chi tiết định mức & tồn kho từng chi nhánh -->
+    <partial name="_TonKhoDetailDrawer" />
+</div>
+
+@section Scripts {
+    <script src="~/js/bao-cao-ton-kho.js" asp-append-version="true"></script>
+}

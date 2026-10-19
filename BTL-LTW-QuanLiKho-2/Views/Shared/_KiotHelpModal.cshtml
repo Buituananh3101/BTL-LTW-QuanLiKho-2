@@ -1,0 +1,63 @@
+@* ========================================================================
+   _KiotHelpModal.cshtml - Hộp thoại Trợ giúp & Hướng dẫn sử dụng toàn hệ thống
+   Chuẩn KiotViet: Phím tắt, Quy trình nghiệp vụ 1-2-3-4, Mẹo hữu ích
+   Tự động nhận diện ngữ cảnh màn hình hoặc gọi qua window.KiotHelp.show(screenKey)
+   ======================================================================== *@
+
+<div class="kiot-help-ov" id="kiotHelpOv" role="dialog" aria-modal="true" aria-labelledby="kiotHelpTitle">
+    <div class="kiot-help-modal">
+        <!-- Header -->
+        <div class="kiot-help-head">
+            <div class="d-flex align-items-center gap-2">
+                <div class="kiot-help-icon-wrap">
+                    <i class="bi bi-question-circle-fill text-primary"></i>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <h5 class="m-0 fw-bold text-dark" id="kiotHelpTitle">Hướng dẫn sử dụng</h5>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle" id="kiotHelpScreenBadge">KhoPro</span>
+                    </div>
+                    <div class="text-muted small" id="kiotHelpSubtitle" style="font-size: 12px;">Quản lý kho hàng chuyên nghiệp</div>
+                </div>
+            </div>
+            <button type="button" class="btn-close" id="kiotHelpClose" aria-label="Đóng"></button>
+        </div>
+
+        <!-- Body -->
+        <div class="kiot-help-body" id="kiotHelpBody">
+            <!-- 1. Phím tắt nhanh -->
+            <div class="kiot-help-section mb-3">
+                <h6 class="kiot-help-sec-title">
+                    <i class="bi bi-keyboard text-primary me-2"></i>Phím tắt thao tác nhanh
+                </h6>
+                <div class="kiot-help-shortcuts-grid" id="kiotHelpShortcuts">
+                    <!-- Dynamic shortcuts rendered by site.js -->
+                </div>
+            </div>
+
+            <!-- 2. Quy trình nghiệp vụ -->
+            <div class="kiot-help-section mb-3">
+                <h6 class="kiot-help-sec-title">
+                    <i class="bi bi-diagram-3 text-primary me-2"></i>Quy trình thao tác chuẩn
+                </h6>
+                <div class="kiot-help-steps" id="kiotHelpSteps">
+                    <!-- Dynamic steps rendered by site.js -->
+                </div>
+            </div>
+
+            <!-- 3. Mẹo & Lưu ý hữu ích -->
+            <div class="kiot-help-section mb-0">
+                <div class="alert alert-warning-subtle border border-warning-subtle rounded-3 py-2 px-3 mb-0 text-dark small" id="kiotHelpTips">
+                    <!-- Dynamic tips rendered by site.js -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="kiot-help-foot">
+            <button type="button" class="btn btn-primary px-4" id="kiotHelpOk">
+                <i class="bi bi-check2 me-1"></i>Đã hiểu
+            </button>
+        </div>
+    </div>
+</div>

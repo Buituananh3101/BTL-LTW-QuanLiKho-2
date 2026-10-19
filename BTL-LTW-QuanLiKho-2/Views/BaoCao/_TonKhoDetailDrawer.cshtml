@@ -1,0 +1,82 @@
+<!-- Drawer chi tiết định mức & tồn kho từng chi nhánh cho mặt hàng -->
+<div class="kiot-drawer-overlay" id="tonKhoDrawerOverlay" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 1050;"></div>
+
+<div class="kiot-drawer" id="tonKhoDrawer" style="display:none; position: fixed; top: 0; right: 0; bottom: 0; width: 480px; max-width: 90vw; background: #fff; z-index: 1051; box-shadow: -4px 0 20px rgba(0,0,0,0.15); flex-direction: column;">
+    <!-- Drawer Header -->
+    <div class="p-3 border-bottom d-flex align-items-center justify-content-between bg-light">
+        <div>
+            <div class="fw-bold fs-6 text-dark" id="drwTenHang">Tên hàng hóa</div>
+            <div class="text-muted small">
+                Mã: <span class="fw-semibold text-primary font-monospace" id="drwMaHangNoiBo">SP000001</span>
+                &bull; <span id="drwTenNhom">Nhóm hàng</span>
+            </div>
+        </div>
+        <button type="button" class="btn-close" id="btnCloseDrawer" aria-label="Đóng"></button>
+    </div>
+
+    <!-- Drawer Body -->
+    <div class="p-3 overflow-auto flex-grow-1" style="font-size: 13px;">
+        <!-- Card tổng quan mặt hàng -->
+        <div class="card border-0 bg-light mb-3">
+            <div class="card-body p-3">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="text-muted small">Đơn vị tính:</div>
+                        <div class="fw-bold text-dark" id="drwDvt">-</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small">Vị trí kệ:</div>
+                        <div class="fw-bold text-dark" id="drwViTri">-</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small">Giá vốn:</div>
+                        <div class="fw-bold text-dark" id="drwGiaVon">0 ₫</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small">Giá bán:</div>
+                        <div class="fw-bold text-primary" id="drwGiaBan">0 ₫</div>
+                    </div>
+                    <div class="col-6 border-top pt-2">
+                        <div class="text-muted small">Tổng tồn hệ thống:</div>
+                        <div class="fw-bold fs-6 text-success" id="drwTongTon">0</div>
+                    </div>
+                    <div class="col-6 border-top pt-2">
+                        <div class="text-muted small">Tổng giá trị tồn:</div>
+                        <div class="fw-bold fs-6 text-dark" id="drwTongGiaTri">0 ₫</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bảng chi tiết định mức & tồn kho từng chi nhánh -->
+        <div class="fw-bold mb-2 text-dark d-flex align-items-center gap-1">
+            <i class="bi bi-diagram-3 text-primary"></i> Phân bổ theo chi nhánh kho
+        </div>
+        <div class="table-responsive border rounded">
+            <table class="table table-sm table-hover mb-0" style="font-size: 12px;">
+                <thead class="table-light">
+                    <tr>
+                        <th>Chi nhánh kho</th>
+                        <th class="text-end">Tồn hiện tại</th>
+                        <th class="text-end">Tối thiểu</th>
+                        <th class="text-end">Tối đa</th>
+                        <th class="text-center">Định mức</th>
+                    </tr>
+                </thead>
+                <tbody id="drwKhoTableBody">
+                    <!-- Dữ liệu JS nạp động -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert alert-light border small mt-3 text-secondary p-2">
+            <i class="bi bi-info-circle me-1 text-primary"></i>
+            Tồn kho sổ sách được tính toán tự động qua <strong>vw_TonKhoHienTai</strong> dựa trên tất cả các phiếu nhập, xuất, chuyển và kiểm kê đã xác nhận.
+        </div>
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="p-3 border-top bg-light text-end">
+        <button type="button" class="btn btn-secondary btn-sm" id="btnDismissDrawer">Đóng</button>
+    </div>
+</div>
