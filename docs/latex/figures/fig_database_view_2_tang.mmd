@@ -1,0 +1,52 @@
+flowchart LR
+    %% Định nghĩa Style
+    classDef plus fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,rx:6px,ry:6px,font-size:14px;
+    classDef minus fill:#ffebee,stroke:#c62828,stroke-width:2px,rx:6px,ry:6px,font-size:14px;
+    classDef balance fill:#fff8e1,stroke:#f57f17,stroke-width:2px,rx:6px,ry:6px,font-size:14px;
+    classDef tier1 fill:#e3f2fd,stroke:#1565c0,stroke-width:2.5px,rx:8px,ry:8px,font-size:15px;
+    classDef tier2 fill:#ede7f6,stroke:#4a148c,stroke-width:2.5px,rx:8px,ry:8px,font-size:15px;
+    classDef app fill:#e0f2f1,stroke:#00695c,stroke-width:2px,rx:6px,ry:6px,font-size:14px;
+
+    subgraph SOURCES ["1. NGUỒN BIẾN ĐỘNG GỐC (6 CHỨNG TỪ)"]
+        direction TB
+        subgraph S_PLUS ["Nhóm Tăng Tồn Kho (+)"]
+            direction TB
+            S1["<b>Phiếu Nhập Hàng</b><br/><i>DA_XAC_NHAN</i><br/>➕ <b>Cộng SL Nhập</b>"]:::plus
+            S4["<b>Nhận Chuyển Kho</b><br/><i>DA_NHAN</i><br/>➕ <b>Cộng SL Nhận</b>"]:::plus
+        end
+        subgraph S_BAL ["Cân Bằng Kiểm Kê (±)"]
+            direction TB
+            S5["<b>Phiếu Kiểm Kê</b><br/><i>DA_DUYET</i><br/>➗ <b>± Chênh lệch</b>"]:::balance
+        end
+        subgraph S_MINUS ["Nhóm Giảm Tồn Kho (-)"]
+            direction TB
+            S2["<b>Xuất Hủy Hàng</b><br/><i>DA_XAC_NHAN</i><br/>➖ <b>Trừ SL Hủy</b>"]:::minus
+            S3["<b>Xuất Chuyển Kho</b><br/><i>DA_XUAT / DA_NHAN</i><br/>➖ <b>Trừ SL Gửi</b>"]:::minus
+            S6["<b>Trả Hàng NCC</b><br/><i>DA_TRA_HANG</i><br/>➖ <b>Trừ SL Trả</b>"]:::minus
+        end
+    end
+
+    subgraph ENGINE ["2. KIẾN TRÚC DATABASE VIEW 2 TẦNG (TỒN KHO ĐỘNG)"]
+        direction TB
+        V1["<b>TẦNG 1: vw_BienDongKho</b><br/>──────────────────────────────────────<br/><i>Hợp nhất 6 luồng chứng từ qua <b>UNION ALL</b></i><br/>• NgayGiaoDich (Thời điểm phát sinh)<br/>• MaKho, MaHang (Kho & Mặt hàng)<br/>• SoLuongTang, SoLuongGiam (Biến động)<br/>• LoaiChungTu, MaChungTu (Truy vết nguồn)"]:::tier1
+
+        V2["<b>TẦNG 2: vw_TonKhoHienTai</b><br/>──────────────────────────────────────<br/><i>Tính toán tức thời qua <b>GROUP BY MaKho, MaHang</b></i><br/><b>TonHienTai = ∑ SoLuongTang - ∑ SoLuongGiam</b><br/><i>(Triệt tiêu 100% Race Condition & Lost Updates)</i>"]:::tier2
+
+        V1 ==>|"GROUP BY (MaKho, MaHang)<br/>Tính số dư hiện tại"| V2
+    end
+
+    subgraph OUTPUTS ["3. PHÂN HỆ ĐẦU RA"]
+        direction TB
+        A1["<b>BÁO CÁO THẺ KHO</b><br/>• Lọc theo Kho, Hàng, Dải ngày<br/>• Tự động tính Số dư đầu kỳ<br/>• Lũy kế từng biến động chi tiết"]:::app
+        A2["<b>BÁO CÁO TỒN KHO PIVOT</b><br/>• Ma trận tồn kho tức thời đa kho<br/>• 4 Thẻ KPI: Mã, Tồn, Tiền, Cảnh báo<br/>• Kiểm tra tồn khả dụng / Chặn xuất âm"]:::app
+    end
+
+    S1 -->|"UNION ALL"| V1
+    S4 -->|"UNION ALL"| V1
+    S5 -->|"UNION ALL"| V1
+    S2 -->|"UNION ALL"| V1
+    S3 -->|"UNION ALL"| V1
+    S6 -->|"UNION ALL"| V1
+
+    V1 ==>|"Truy vấn lịch sử<br/>theo dải ngày"| A1
+    V2 ==>|"Truy vấn số dư tức thời<br/>theo chi nhánh"| A2
