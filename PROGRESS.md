@@ -1,23 +1,34 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-19 – Gỡ Bỏ Bảng Phân Công Công Việc Khỏi Báo Cáo LaTeX (Phiên 187)
+Cập nhật lần cuối: 2026-10-19 – Dọn Dẹp và Xóa Toàn Bộ File Tạm, File Rác Khỏi Repository (Phiên 188)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất 100% việc gỡ bỏ phần Bảng phân công công việc khỏi Báo cáo LaTeX ([`docs/latex/main.tex`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/docs/latex/main.tex)) theo yêu cầu của người dùng:
-  + Gỡ bỏ phần `\section*{Bảng phân công công việc}` và toàn bộ bảng `tab:phan_cong_cong_viec`.
-  + Phần `Danh mục thuật ngữ và từ viết tắt` được chuyển tiếp tự nhiên lên Trang 3 ngay sau Lời nói đầu.
-  + Mục lục tự động (TOC) được đồng bộ: loại bỏ mục Bảng phân công công việc.
-  + Biên dịch 2 lượt XeLaTeX thành công: 75 trang chuẩn mực, **0 Lỗi**, **0 Overfull `\hbox`**, **0 Overfull `\vbox`**.
-  + Cập nhật gói nén [`docs/BaoCao_LaTeX_Overleaf.zip`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/docs/BaoCao_LaTeX_Overleaf.zip).
-  + Kiểm tra `dotnet build /t:Compile` đạt 0 Error.
+- Đã hoàn tất 100% việc dọn dẹp và xóa các tệp tin tạm, file rác không dùng đến:
+  + Xóa toàn bộ 86 tệp tin tạm trong thư mục `scratch/` (các file script kiểm thử Kroki/Mermaid, ảnh chụp màn hình kiểm tra trang).
+  + Xóa 44 file PNG kiểm tra bố cục trang trong `docs/latex/verify_pages/`.
+  + Xóa các file rác phát sinh tại thư mục gốc: `main.aux`, `main.out`, `main.pdf` (15 byte), `main.synctex(busy)`, `main.log`.
+  + Xóa các file test và backup cũ: `docs/latex/main.tex.bak`, `docs/latex/figures/test_er.svg`, `docs/latex/figures/test_kroki.png`.
+  + Cập nhật `.gitignore` để chặn vĩnh viễn: `scratch/`, `docs/latex/verify_pages/`, `*.synctex*`, `*.bak`.
+  + Tối ưu lại gói nén [`docs/BaoCao_LaTeX_Overleaf.zip`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/docs/BaoCao_LaTeX_Overleaf.zip): giảm từ 16.1 MB xuống còn 4.85 MB (chỉ chứa `main.tex`, 2 logo GTVT và thư mục `figures/` chứa 28 hình ảnh hợp lệ).
+  + Biên dịch kiểm tra kép: XeLaTeX đạt chuẩn 75 trang (0 lỗi) và `dotnet build /t:Compile` đạt chuẩn **0 Error**.
 
 ---
 
 ## Việc kế tiếp
 1. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
 2. Chuẩn bị slide thuyết trình hoặc báo cáo bảo vệ đồ án.
+
+---
+
+- **Dọn Dẹp và Xóa Toàn Bộ File Tạm, File Rác Khỏi Repository (Phiên 188)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "làm sạch, xóa những file ko dùng đến".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Gỡ bỏ 137 file tạm / file rác đã bị commit hoặc sinh ra ngoài ý muốn (`scratch/`, `docs/latex/verify_pages/`, các file `main.*` ở thư mục gốc, file backup `.bak`, file hình vẽ test `test_*`).
+    2. Cập nhật `.gitignore` với các quy tắc chặn thư mục nháp và file tạm LaTeX.
+    3. Đóng gói lại file zip Overleaf sạch sẽ, giảm dung lượng từ 16MB xuống 4.8MB.
+    4. Kiểm tra biên dịch hệ thống: .NET (0 Error) và XeLaTeX (75 trang, 0 Error).
 
 ---
 

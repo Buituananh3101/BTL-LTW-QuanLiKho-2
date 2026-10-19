@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Temporary scratch, inspection and LaTeX auxiliary files
+scratch/
+docs/latex/verify_pages/
+*.synctex*
+*.bak
