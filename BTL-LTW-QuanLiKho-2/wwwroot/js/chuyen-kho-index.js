@@ -1,5 +1,6 @@
 /**
  * chuyen-kho-index.js - Điều khiển giao diện Danh sách Chuyển kho chuẩn KiotViet
+ * Tái sử dụng KiotFilter.createListPage (Lego Engine)
  */
 (function ($) {
     'use strict';
@@ -19,268 +20,62 @@
 
     const currentWh = Number($container.data('current-wh')) || 0;
 
-    // Đối tượng trạng thái lọc tập trung
-    const F = {
-        q: $('#keywordSearch').val() || '',
-        dir: $('input[name="filterDir"]:checked').val() || 'all',
-        statuses: ['NHAP', 'DA_XUAT', 'DA_NHAN'],
-        preset: 'thangnay',
-        fromDate: null,
-        toDate: null,
-        starred: $container.data('is-starred') === true || $container.data('is-starred') === 'true',
-        sortBy: $container.data('sort-by') || null,
-        sortDir: $container.data('sort-dir') || null,
-        page: 1,
-        pageSize: 15,
-        openId: null
-    };
-
     // Đọc trạng thái checkbox ban đầu
-    function syncInitialStatuses() {
-        const checked = [];
-        $('#side input[type="checkbox"][value]').each(function () {
-            if ($(this).is(':checked')) {
-                checked.push($(this).val());
-            }
-        });
-        if (checked.length) {
-            F.statuses = checked;
-        }
-    }
-    syncInitialStatuses();
+    const initialStatuses = [];
+    $('#side input[type="checkbox"][value]:checked').each(function () {
+        initialStatuses.push($(this).val());
+    });
 
-    // Quản lý hiển thị cột (KiotFilter.initColumnToggle)
-    let chuyenKhoColumnToggler = null;
-
-    function initColumnToggle() {
-        if (!window.KiotFilter || typeof KiotFilter.initColumnToggle !== 'function') return;
-        chuyenKhoColumnToggler = KiotFilter.initColumnToggle({
-            menuSelector: '#colMenu',
+    // Khởi tạo trang bằng KiotFilter.createListPage
+    const listPage = (window.KiotFilter && typeof KiotFilter.createListPage === 'function')
+        ? KiotFilter.createListPage({
+            containerSelector: '#kiotContainer',
             tableSelector: '#transferTable',
-            storageKey: 'kiot_chuyen_kho_cols_v2',
+            tableWrapperSelector: '#tableContainer',
+            searchInputSelector: '#keywordSearch',
+            storageKeyCols: 'kiot_chuyen_kho_cols_v2',
             defaultCols: { maphieu: 1, ngaylap: 1, khonguon: 1, khodich: 1, ngaychuyen: 1, ngaynhan: 1, slchuyen: 1, slnhan: 1, giatri: 1, ghi: 1, st: 1 },
-            extraColsCount: 2 // 1 chk + 1 star
-        });
-    }
-
-    function applyColumnVisibility() {
-        if (chuyenKhoColumnToggler && typeof chuyenKhoColumnToggler.apply === 'function') {
-            chuyenKhoColumnToggler.apply();
-        }
-    }
-
-    // Quản lý Accordion Drawer Master-Detail
-    let transferRowDetailHandler = null;
-
-    function initRowDetail() {
-        if (window.KiotFilter && typeof KiotFilter.initRowDetail === 'function') {
-            transferRowDetailHandler = KiotFilter.initRowDetail({
-                tableSelector: '#transferTable',
-                rowSelector: 'tr.product-row, tr.tbl-row',
-                detailRowSelector: '#dtl-{id}',
+            extraColsCount: 2,
+            initialState: {
+                dir: $('input[name="filterDir"]:checked').val() || 'all',
+                statuses: initialStatuses.length ? initialStatuses : ['NHAP', 'DA_XUAT', 'DA_NHAN'],
+                preset: 'thangnay'
+            },
+            dateFilterId: 'date',
+            rowDetailOptions: {
                 wrapSelector: '.product-detail-panel-wrap',
                 tabBtnSelector: '.product-detail-tab-btn, .dp-tab',
-                tabPaneSelector: '.tab-pane-content, .tab-pane',
-                excludeClickSelector: 'input, button, a, label, .cell-checkbox, .cell-star, .star-btn',
-                slideDuration: 150,
-                fadeDuration: 120,
-                autoCenter: false,
-                onOpen: function (id) {
-                    F.openId = id;
-                },
-                onClose: function () {
-                    F.openId = null;
-                }
-            });
-        }
-    }
-
-    // 1. Khởi tạo các khối LEGO giao diện
-    function initLegoComponents() {
-        if (window.KiotFilter) {
-            initColumnToggle();
-            applyColumnVisibility();
-
-            // Sidebar F4
-            if (typeof KiotFilter.initSidebar === 'function') {
-                KiotFilter.initSidebar({
-                    containerSelector: '#kiotContainer',
-                    sidebarSelector: '#sidebarFilterCol',
-                    toggleBtnSelector: '#btnToggleSidebar',
-                    mobileBtnSelector: '#btnMobileFilter',
-                    closeMobileBtnSelector: '#btnCloseSidebarMobile',
-                    backdropSelector: '#sidebarBackdrop'
-                });
-            }
-
-            // Bộ lọc ngày
-            if (typeof KiotFilter.initDateFilter === 'function') {
-                KiotFilter.initDateFilter('date', function (range) {
-                    F.preset = range.preset || '';
-                    F.fromDate = range.fromDate || null;
-                    F.toDate = range.toDate || null;
-                    F.page = 1;
-                    loadTable();
-                });
-            }
-
-            // Master-Detail viền xanh chữ nhật
-            initRowDetail();
-        }
-    }
-
-    // 2. Tải lại bảng dữ liệu qua AJAX
-    let loadTimer = null;
-    function loadTable() {
-        clearTimeout(loadTimer);
-        const params = {
-            Q: F.q,
-            Dir: F.dir,
-            Statuses: F.statuses,
-            DateFilterType: F.preset,
-            FromDate: F.fromDate,
-            ToDate: F.toDate,
-            DaDanhDau: F.starred,
-            SortBy: F.sortBy || '',
-            SortDir: F.sortDir || '',
-            Page: F.page,
-            PageSize: F.pageSize
-        };
-
-        $('#tableContainer').css('opacity', '0.6');
-
-        $.ajax({
-            url: urls.filter,
-            type: 'GET',
-            data: $.param(params, true),
-            success: function (html) {
-                $('#tableContainer').html(html).css('opacity', '1');
-                applyColumnVisibility();
-                paintFilters();
-                initRowDetail();
-
-                if (F.openId && transferRowDetailHandler && typeof transferRowDetailHandler.expand === 'function') {
-                    transferRowDetailHandler.expand(F.openId);
-                }
+                tabPaneSelector: '.tab-pane-content, .tab-pane'
             },
-            error: function (xhr) {
-                $('#tableContainer').css('opacity', '1');
-                if (window.KiotToast) {
-                    KiotToast.error('Không thể tải dữ liệu bảng chuyển kho.');
-                }
+            buildParams: function (params, state) {
+                params.append('Dir', state.dir || 'all');
+            },
+            onPaintFilters: function (state) {
+                $('#dDir').toggleClass('on', state.dir !== 'all' && currentWh !== 0);
+                const defaultSt = ['NHAP', 'DA_XUAT', 'DA_NHAN'];
+                const isStModified = state.statuses.length !== defaultSt.length || !defaultSt.every(s => state.statuses.includes(s));
+                $('#dSt').toggleClass('on', isStModified);
             }
-        });
-    }
+        })
+        : null;
 
-    // 3. Cập nhật các chấm cam chỉ thị bộ lọc
-    function paintFilters() {
-        $('#dDir').toggleClass('on', F.dir !== 'all' && currentWh !== 0);
-        const defaultSt = ['NHAP', 'DA_XUAT', 'DA_NHAN'];
-        const isStModified = F.statuses.length !== defaultSt.length || !defaultSt.every(s => F.statuses.includes(s));
-        $('#dSt').toggleClass('on', isStModified);
-    }
+    const F = listPage ? listPage.state : {};
+    const loadTable = listPage ? listPage.loadTable : function () {};
 
-    // 4. Bắt sự kiện lọc hướng chuyển
+    // Bắt sự kiện lọc hướng chuyển
     $(document).on('change', 'input[name="filterDir"]', function () {
         F.dir = $(this).val();
-        F.page = 1;
-        loadTable();
+        listPage ? listPage.reload(true) : loadTable();
     });
 
-    // 5. Bắt sự kiện lọc trạng thái checkbox
+    // Bắt sự kiện lọc trạng thái checkbox
     $(document).on('change', '#side input[type="checkbox"][value]', function () {
         const checked = [];
-        $('#side input[type="checkbox"][value]').each(function () {
-            if ($(this).is(':checked')) {
-                checked.push($(this).val());
-            }
+        $('#side input[type="checkbox"][value]:checked').each(function () {
+            checked.push($(this).val());
         });
         F.statuses = checked;
-        F.page = 1;
-        loadTable();
-    });
-
-    // 6. Tìm kiếm từ khóa F3 (Debounce 350ms)
-    let searchTimer = null;
-    $(document).on('input', '#keywordSearch', function () {
-        clearTimeout(searchTimer);
-        const val = $(this).val();
-        searchTimer = setTimeout(function () {
-            F.q = val;
-            F.page = 1;
-            loadTable();
-        }, 350);
-    });
-
-    // Phím tắt F3 focus ô tìm kiếm
-    $(document).on('keydown', function (e) {
-        if (e.key === 'F3') {
-            e.preventDefault();
-            const $inp = $('#keywordSearch');
-            $inp.focus().select();
-        }
-    });
-
-    // 7. Sắp xếp 3 trạng thái cột (Tăng -> Giảm -> Bình thường)
-    $(document).on('click', '#transferTable thead th.sortable-th', function (e) {
-        e.preventDefault();
-        const col = $(this).data('col');
-        if (!col) return;
-
-        if (F.sortBy === col) {
-            if (F.sortDir === 'asc') {
-                F.sortDir = 'desc';
-            } else if (F.sortDir === 'desc') {
-                F.sortBy = null;
-                F.sortDir = null;
-            } else {
-                F.sortDir = 'asc';
-            }
-        } else {
-            F.sortBy = col;
-            F.sortDir = 'asc';
-        }
-        F.page = 1;
-        loadTable();
-    });
-
-    // 8. Đánh dấu sao lọc trên Header
-    window.toggleStarHeaderFilter = function (e) {
-        e.stopPropagation();
-        F.starred = !F.starred;
-        F.page = 1;
-        loadTable();
-    };
-
-    // Đánh dấu sao trên từng dòng (silent toggle)
-    window.toggleFavoriteTransfer = function (e, id, el) {
-        e.stopPropagation();
-        const $star = $(el).find('.star-btn');
-        $.post(urls.toggleStar, { id: id }, function (res) {
-            if (res && res.success) {
-                if (res.isFavorite) {
-                    $star.addClass('starred').find('i').removeClass('bi-star').addClass('bi-star-fill');
-                } else {
-                    $star.removeClass('starred').find('i').removeClass('bi-star-fill').addClass('bi-star');
-                }
-            }
-        });
-    };
-
-    // 9. Phân trang & Đổi số dòng
-    $(document).on('click', '.pagination .page-link[data-page]', function (e) {
-        e.preventDefault();
-        const p = parseInt($(this).data('page'));
-        if (!isNaN(p) && p !== F.page) {
-            F.page = p;
-            loadTable();
-        }
-    });
-
-    $(document).on('change', '#pageSizeSelect, select[name="pageSize"]', function () {
-        F.pageSize = parseInt($(this).val()) || 15;
-        F.page = 1;
-        loadTable();
+        listPage ? listPage.reload(true) : loadTable();
     });
 
     // Nút Xóa bộ lọc khi rỗng
@@ -295,13 +90,12 @@
             $(this).prop('checked', F.statuses.includes($(this).val()));
         });
         F.starred = false;
-        F.sortBy = null;
-        F.sortDir = null;
-        F.page = 1;
-        loadTable();
+        F.sortBy = '';
+        F.sortDir = '';
+        listPage ? listPage.reload(true) : loadTable();
     });
 
-    // 10. Lưu nhanh ghi chú trong Drawer
+    // Lưu nhanh ghi chú trong Drawer
     $(document).on('click', '.btn-save-note', function () {
         const id = $(this).data('id');
         const $panel = $(this).closest('.product-detail-panel');
@@ -313,8 +107,8 @@
             contentType: 'application/json',
             data: JSON.stringify({ MaPhieuChuyen: id, GhiChu: note }),
             success: function (res) {
-                if (res && res.success) {
-                    if (window.KiotToast) KiotToast.success(res.message || 'Đã lưu ghi chú.');
+                if (res && res.success && window.KiotToast) {
+                    KiotToast.success(res.message || 'Đã lưu ghi chú.');
                 }
             },
             error: function (xhr) {
@@ -324,7 +118,7 @@
         });
     });
 
-    // 11. Hủy phiếu chuyển (Phiếu tạm hoặc Đang chuyển)
+    // Hủy phiếu chuyển (Phiếu tạm hoặc Đang chuyển)
     $(document).on('click', '.btn-cancel-transfer', function () {
         const id = $(this).data('id');
         const code = $(this).data('code') || ('#' + id);
@@ -340,8 +134,8 @@
                 if (res && res.success) {
                     if (window.KiotToast) KiotToast.success(res.message);
                     loadTable();
-                } else {
-                    if (window.KiotToast) KiotToast.error(res?.message || 'Không thể hủy phiếu.');
+                } else if (window.KiotToast) {
+                    KiotToast.error(res?.message || 'Không thể hủy phiếu.');
                 }
             }).fail(function (xhr) {
                 const m = xhr.responseJSON?.message || 'Đã xảy ra lỗi khi hủy phiếu.';
@@ -362,29 +156,17 @@
         }
     });
 
-    // 12. Chuyển hàng từ Drawer (Đối với phiếu tạm)
+    // Chuyển hàng từ Drawer (Đối với phiếu tạm)
     $(document).on('click', '.btn-send-transfer', function () {
         const id = $(this).data('id');
-        const code = $(this).data('code') || ('#' + id);
-
-        const doSend = function () {
-            // Đọc các dòng chi tiết từ bảng hiển thị trong drawer
-            const $panel = $(`#dtl-${id}`);
-            const lines = [];
-            // Chuyển hướng sang trang Edit để chuyển hoặc gọi API trực tiếp
-            window.location.href = `/ChuyenKho/Edit/${id}`;
-        };
-
-        doSend();
+        window.location.href = `/ChuyenKho/Edit/${id}`;
     });
 
-    // 13. Mở Modal Nhận hàng
+    // Mở Modal Nhận hàng
     $(document).on('click', '.btn-open-receive', function () {
         const id = $(this).data('id');
         const code = $(this).data('code') || ('#' + id);
         const fromName = $(this).data('from') || 'kho gửi';
-
-        // Lấy chi tiết từ bảng trong drawer
         const $detailRow = $(`#dtl-${id}`);
         const lines = [];
 
@@ -396,12 +178,7 @@
             const qty = Number($tr.data('qty')) || Number($tr.find('td:eq(3)').text().trim().replace(/\D/g, '')) || 0;
 
             if (codeText && qty > 0) {
-                lines.push({
-                    id: hangId,
-                    code: codeText,
-                    name: nameText,
-                    qty: qty
-                });
+                lines.push({ id: hangId, code: codeText, name: nameText, qty: qty });
             }
         });
 
@@ -412,7 +189,7 @@
         }
     });
 
-    // 14. Xuất file Excel danh sách
+    // Xuất file Excel danh sách
     $(document).on('click', '#btnExpList', function () {
         const params = {
             Q: F.q,
@@ -426,7 +203,7 @@
         window.location.href = urls.export + '?' + $.param(params, true);
     });
 
-    // 15. Checkbox chọn tất cả các dòng
+    // Checkbox chọn tất cả các dòng
     $(document).on('change', '#selectAllRows', function () {
         $('.row-select').prop('checked', $(this).is(':checked'));
     });
@@ -437,7 +214,7 @@
         $('#selectAllRows').prop('checked', allCount > 0 && allCount === checkedCount);
     });
 
-    // 16. Tìm kiếm nhanh hàng hóa bên trong dòng chi tiết phiếu chuyển
+    // Tìm kiếm nhanh hàng hóa bên trong dòng chi tiết phiếu chuyển
     $(document).on('input', '.dtl-search-code, .dtl-search-name', function () {
         const $dp = $(this).closest('.product-detail-panel, .dp');
         const codeKw = ($dp.find('.dtl-search-code').val() || '').trim().toLowerCase();
@@ -450,8 +227,7 @@
         });
     });
 
-    // Khởi tạo ban đầu
-    initLegoComponents();
-    paintFilters();
+    // Cập nhật giao diện lọc ban đầu
+    listPage?.paintFilters();
 
 })(jQuery);

@@ -783,11 +783,14 @@ window.KiotFilter = (function ($) {
             filtered.forEach(item => {
                 const val = typeof item === 'object' ? item.val : item;
                 const text = typeof item === 'object' ? item.text : item;
+                const level = (typeof item === 'object' && item.level) ? Number(item.level) : 0;
                 const isSel = selected.includes(val);
+                const indentStyle = level > 0 ? `style="padding-left: ${12 + level * 16}px;"` : '';
+                const treePrefix = level > 0 ? `<span class="kiot-tree-branch text-muted me-1" style="font-family:monospace;font-size:12px;">└─</span>` : '';
 
                 html += `
-                    <div class="kiot-combobox-item hh-multiselect-item ${isSel ? 'selected' : ''}" data-val="${escapeHtml(val)}">
-                        <span class="kiot-combobox-text hh-multiselect-text">${escapeHtml(text)}</span>
+                    <div class="kiot-combobox-item hh-multiselect-item ${isSel ? 'selected' : ''}" data-val="${escapeHtml(val)}" ${indentStyle}>
+                        <span class="kiot-combobox-text hh-multiselect-text">${treePrefix}${escapeHtml(text)}</span>
                         ${opt.allowEdit ? `
                         <button type="button" class="kiot-item-edit-btn hh-item-edit-btn" data-val="${escapeHtml(val)}" title="Sửa">
                             <i class="bi bi-pencil" style="font-size:12px;pointer-events:none;"></i>
@@ -1714,6 +1717,706 @@ window.KiotFilter = (function ($) {
         };
     }
 
+    // 21. KiotImageUploader – Quản lý tải ảnh (1 ảnh chính + 4 ảnh phụ, nén Canvas, kéo-thả, paste Ctrl+V)
+    function initImageUploader(options) {
+        const opt = $.extend({
+            mainBoxSelector: '#hhImgMain',
+            thumbsBoxSelector: '#hhThumbs',
+            fileInputSelector: '#hhImgFile',
+            fileReplaceMainSelector: '#hhImgFileReplaceMain',
+            modalSelector: '#hhModalOv',
+            maxImages: 5,
+            maxDimension: 1200,
+            quality: 0.88,
+            maxFileSizeMB: 15,
+            initialImages: [],
+            onToast: function (msg, type) {
+                if (window.KiotToast) {
+                    if (type === 'error') KiotToast.error(msg);
+                    else if (type === 'warning') KiotToast.warning(msg);
+                    else KiotToast.info(msg);
+                } else if (typeof showToast === 'function') {
+                    showToast(msg);
+                }
+            },
+            onConfirm: function (msg, title, cb) {
+                if (window.KiotConfirm) {
+                    window.KiotConfirm.show({
+                        title: title || 'Xác nhận xóa',
+                        message: msg,
+                        confirmText: 'Xóa',
+                        confirmClass: 'btn-danger',
+                        onConfirm: cb
+                    });
+                } else if (confirm(msg)) {
+                    cb();
+                }
+            },
+            onChange: null
+        }, options);
+
+        const $mainBox = $(opt.mainBoxSelector);
+        const $thumbsBox = $(opt.thumbsBoxSelector);
+        const $fileInput = $(opt.fileInputSelector);
+        const $fileReplaceMain = $(opt.fileReplaceMainSelector);
+        const $modal = $(opt.modalSelector);
+
+        let imgs = [];
+        if (opt.initialImages && opt.initialImages.length) {
+            imgs = opt.initialImages.map(item => {
+                if (typeof item === 'string') return { base64: item, url: item };
+                return { base64: item.base64 || item.url, url: item.url || item.base64 };
+            });
+        }
+
+        function notifyChange() {
+            if (typeof opt.onChange === 'function') {
+                opt.onChange(imgs);
+            }
+        }
+
+        // Nén và tối ưu kích thước ảnh bằng Canvas (nền trắng chống lỗi nền đen của PNG/WebP trong suốt khi xuất JPEG)
+        function compressImage(file, maxDimension, quality) {
+            const maxDim = maxDimension || opt.maxDimension;
+            const q = quality || opt.quality;
+            return new Promise((resolve) => {
+                if (!file || !file.type || !file.type.startsWith('image/')) {
+                    resolve(null);
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxDim || height > maxDim) {
+                            if (width > height) {
+                                height = Math.round((height * maxDim) / width);
+                                width = maxDim;
+                            } else {
+                                width = Math.round((width * maxDim) / height);
+                                height = maxDim;
+                            }
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+
+                        // Đổ nền trắng tinh khiết
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, width, height);
+
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const compressed = canvas.toDataURL('image/jpeg', q);
+                        resolve(compressed);
+                    };
+                    img.onerror = () => resolve(e.target.result);
+                    img.src = e.target.result;
+                };
+                reader.onerror = () => resolve(null);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderImgs() {
+            if (!$mainBox.length || !$thumbsBox.length) return;
+
+            // 1. Render Ảnh chính (imgs[0])
+            if (imgs.length > 0 && imgs[0]) {
+                $mainBox.html(`
+                    <img src="${imgs[0].url}" alt="Ảnh chính hàng hóa">
+                    <span class="hh-main-badge">Ảnh chính</span>
+                    <button type="button" class="hh-main-x" id="btnRemoveMainImg" title="Xóa ảnh chính" aria-label="Xóa ảnh chính">×</button>
+                    <div class="hh-main-change-hint">Bấm để đổi ảnh</div>
+                `);
+            } else {
+                $mainBox.html(`
+                    <svg class="hh-ic" style="width:44px;height:44px;"><use href="#i-img"/></svg>
+                    <span>Chưa có ảnh</span>
+                    <small style="font-size:11.5px;color:#9ca3af;margin-top:2px;">(Bấm để thêm ảnh chính)</small>
+                `);
+            }
+
+            // 2. Render đúng (maxImages - 1) ảnh phụ bên phải
+            const maxSubs = Math.max(1, opt.maxImages - 1);
+            const subImgs = imgs.slice(1);
+            let h = '';
+
+            for (let i = 0; i < maxSubs; i++) {
+                if (i < subImgs.length) {
+                    h += `
+                        <div class="hh-th" data-sub-idx="${i}" role="button" tabindex="0" title="Ảnh phụ ${i + 1} (Bấm để đổi thành ảnh chính)">
+                            <img src="${subImgs[i].url}" alt="Ảnh phụ ${i + 1}">
+                            <button type="button" class="hh-th-x" data-del-sub="${i}" aria-label="Xóa ảnh phụ ${i + 1}">×</button>
+                        </div>
+                    `;
+                } else if (i === subImgs.length && imgs.length < opt.maxImages) {
+                    h += `
+                        <button type="button" class="hh-th add" id="btnAddImgThumb" title="Thêm ảnh phụ (${imgs.length}/${opt.maxImages})">
+                            <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M12 5v14M5 12h14"/></svg>
+                        </button>
+                    `;
+                } else {
+                    h += `
+                        <div class="hh-th placeholder" tabindex="-1" aria-hidden="true" title="Vị trí ảnh ${i + 2}">
+                            <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        </div>
+                    `;
+                }
+            }
+
+            $thumbsBox.html(h);
+        }
+
+        // Click vùng ảnh chính
+        $mainBox.off('click.kiotImg').on('click.kiotImg', function (e) {
+            if ($(e.target).closest('#btnRemoveMainImg').length) {
+                e.stopPropagation();
+                if (imgs.length > 0) {
+                    opt.onConfirm('Bạn có chắc chắn muốn xóa ảnh đại diện chính này không? Thao tác này không thể hoàn tác.', 'Xóa ảnh chính', function () {
+                        imgs.splice(0, 1);
+                        renderImgs();
+                        notifyChange();
+                        opt.onToast('Đã xóa ảnh chính');
+                    });
+                }
+                return;
+            }
+            if (!imgs.length) {
+                $fileInput.trigger('click');
+            } else if ($fileReplaceMain.length) {
+                $fileReplaceMain.trigger('click');
+            } else {
+                $fileInput.trigger('click');
+            }
+        });
+
+        // Click thumbs
+        $thumbsBox.off('click.kiotImg').on('click.kiotImg', function (e) {
+            const delBtn = e.target.closest('[data-del-sub]');
+            if (delBtn) {
+                e.stopPropagation();
+                const subIdx = +delBtn.dataset.delSub;
+                opt.onConfirm('Bạn có chắc chắn muốn xóa ảnh phụ này không? Thao tác này không thể hoàn tác.', 'Xóa ảnh phụ', function () {
+                    imgs.splice(subIdx + 1, 1);
+                    renderImgs();
+                    notifyChange();
+                    opt.onToast('Đã xóa ảnh phụ');
+                });
+                return;
+            }
+
+            const addBtn = e.target.closest('#btnAddImgThumb');
+            if (addBtn) {
+                e.stopPropagation();
+                $fileInput.trigger('click');
+                return;
+            }
+
+            const th = e.target.closest('[data-sub-idx]');
+            if (th) {
+                const subIdx = +th.dataset.subIdx;
+                const targetIdx = subIdx + 1;
+                if (targetIdx < imgs.length) {
+                    const tmp = imgs[0];
+                    imgs[0] = imgs[targetIdx];
+                    imgs[targetIdx] = tmp;
+                    renderImgs();
+                    notifyChange();
+                    opt.onToast('Đã đổi làm ảnh chính');
+                }
+            }
+        });
+
+        // Input file change (thêm ảnh)
+        $fileInput.off('change.kiotImg').on('change.kiotImg', async function (e) {
+            const files = [...(e.target.files || [])];
+            if (!files.length) return;
+
+            for (const f of files) {
+                if (imgs.length >= opt.maxImages) {
+                    opt.onToast('Chỉ được chọn tối đa ' + opt.maxImages + ' ảnh (1 ảnh chính và ' + (opt.maxImages - 1) + ' ảnh phụ).', 'warning');
+                    break;
+                }
+                if (f.size > opt.maxFileSizeMB * 1024 * 1024) {
+                    opt.onToast('Ảnh "' + f.name + '" vượt quá dung lượng ' + opt.maxFileSizeMB + 'MB.', 'warning');
+                    continue;
+                }
+
+                const b64 = await compressImage(f);
+                if (b64 && imgs.length < opt.maxImages) {
+                    imgs.push({ base64: b64, url: b64 });
+                    renderImgs();
+                    notifyChange();
+                }
+            }
+            this.value = '';
+        });
+
+        // Input file change (thay ảnh chính)
+        if ($fileReplaceMain.length) {
+            $fileReplaceMain.off('change.kiotImg').on('change.kiotImg', async function (e) {
+                const file = e.target.files && e.target.files[0];
+                if (!file) return;
+
+                if (file.size > opt.maxFileSizeMB * 1024 * 1024) {
+                    opt.onToast('Ảnh "' + file.name + '" vượt quá dung lượng ' + opt.maxFileSizeMB + 'MB.', 'warning');
+                    return;
+                }
+
+                const b64 = await compressImage(file);
+                if (b64) {
+                    if (imgs.length > 0) {
+                        imgs[0] = { base64: b64, url: b64 };
+                    } else {
+                        imgs.push({ base64: b64, url: b64 });
+                    }
+                    renderImgs();
+                    notifyChange();
+                    opt.onToast('Đã thay đổi ảnh chính');
+                }
+                this.value = '';
+            });
+        }
+
+        // Kéo thả ảnh vào mainBox
+        $mainBox.off('dragenter.kiotImg dragover.kiotImg dragleave.kiotImg drop.kiotImg');
+        $mainBox.on('dragenter.kiotImg dragover.kiotImg', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $mainBox.addClass('drag-over');
+        });
+        $mainBox.on('dragleave.kiotImg drop.kiotImg', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $mainBox.removeClass('drag-over');
+        });
+        $mainBox.on('drop.kiotImg', async function (e) {
+            const dt = e.originalEvent?.dataTransfer;
+            const files = [...(dt?.files || [])].filter(f => f.type && f.type.startsWith('image/'));
+            if (!files.length) return;
+
+            for (const f of files) {
+                if (imgs.length >= opt.maxImages) {
+                    opt.onToast('Chỉ được chọn tối đa ' + opt.maxImages + ' ảnh.', 'warning');
+                    break;
+                }
+                if (f.size > opt.maxFileSizeMB * 1024 * 1024) {
+                    opt.onToast('Ảnh "' + f.name + '" vượt quá dung lượng ' + opt.maxFileSizeMB + 'MB.', 'warning');
+                    continue;
+                }
+                const b64 = await compressImage(f);
+                if (b64 && imgs.length < opt.maxImages) {
+                    imgs.push({ base64: b64, url: b64 });
+                    renderImgs();
+                    notifyChange();
+                }
+            }
+        });
+
+        // Dán ảnh từ Clipboard Ctrl + V
+        $(window).off('paste.kiotImgUploader');
+        $(window).on('paste.kiotImgUploader', async function (e) {
+            if ($modal.length && ($modal.hasClass('hidden') || $modal.css('display') === 'none' || !$modal.is(':visible'))) {
+                return;
+            }
+
+            const active = document.activeElement;
+            if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA') && active.type !== 'file') {
+                return;
+            }
+
+            const clipboardData = e.originalEvent?.clipboardData || e.clipboardData;
+            const items = clipboardData?.items;
+            if (!items) return;
+
+            for (const item of items) {
+                if (item.type && item.type.startsWith('image/')) {
+                    const file = item.getAsFile();
+                    if (file) {
+                        if (imgs.length >= opt.maxImages) {
+                            opt.onToast('Chỉ được chọn tối đa ' + opt.maxImages + ' ảnh.', 'warning');
+                            break;
+                        }
+                        const b64 = await compressImage(file);
+                        if (b64 && imgs.length < opt.maxImages) {
+                            imgs.push({ base64: b64, url: b64 });
+                            renderImgs();
+                            notifyChange();
+                            opt.onToast('Đã thêm ảnh từ clipboard');
+                        }
+                    }
+                }
+            }
+        });
+
+        // Render khởi tạo
+        renderImgs();
+
+        return {
+            getImages: () => imgs,
+            setImages: (arr, mainIndex = 0) => {
+                imgs = (arr || []).map(item => {
+                    if (typeof item === 'string') return { base64: item, url: item };
+                    return { base64: item.base64 || item.url, url: item.url || item.base64 };
+                });
+                if (mainIndex > 0 && mainIndex < imgs.length) {
+                    const mainImg = imgs.splice(mainIndex, 1)[0];
+                    imgs.unshift(mainImg);
+                }
+                renderImgs();
+                notifyChange();
+            },
+            clear: () => {
+                imgs = [];
+                renderImgs();
+                notifyChange();
+            },
+            compressImage: compressImage,
+            render: renderImgs
+        };
+    }
+
+    // 22. KiotListPage – Bộ máy điều khiển trang danh sách chuẩn KiotViet (Boilerplate Engine)
+    function createListPage(options) {
+        const opt = $.extend({
+            containerSelector: '#kiotContainer',
+            filterUrl: '',
+            tableSelector: '#mainTable, .kiot-table, .tbl',
+            tableWrapperSelector: '#tableContainer, #tableWrapper',
+            searchInputSelector: '#keywordSearch, #filterSearch, #topSearch, input[name="Q"]',
+            storageKeyCols: '',
+            defaultCols: null,
+            extraColsCount: 2,
+            initialState: {},
+            dateFilterId: 'date',
+            rowDetailOptions: null,
+            toggleStarUrl: '',
+            buildParams: null,
+            onTableLoaded: null,
+            onPaintFilters: null
+        }, options);
+
+        const $container = $(opt.containerSelector);
+        const filterUrl = opt.filterUrl || $container.data('filter-url') || '';
+        const toggleStarUrl = opt.toggleStarUrl || $container.data('toggle-star-url') || '';
+        const isStarredInit = $container.data('is-starred') === true || $container.data('is-starred') === 'true';
+
+        // Khởi tạo state F tập trung
+        const F = $.extend({
+            q: $(opt.searchInputSelector).val() || '',
+            mode: 'preset',
+            preset: 'ALL',
+            fromDate: null,
+            toDate: null,
+            statuses: [],
+            starred: isStarredInit,
+            sortBy: $container.data('sort-by') || '',
+            sortDir: $container.data('sort-dir') || '',
+            page: 1,
+            pageSize: 15,
+            openId: null
+        }, opt.initialState);
+
+        let columnToggler = null;
+        let rowDetailHandler = null;
+        let searchTimer = null;
+
+        // 1. Quản lý ẩn/hiện cột
+        if (opt.storageKeyCols && opt.defaultCols && typeof initColumnToggle === 'function') {
+            columnToggler = initColumnToggle({
+                menuSelector: '#colMenu',
+                tableSelector: opt.tableSelector,
+                storageKey: opt.storageKeyCols,
+                defaultCols: opt.defaultCols,
+                extraColsCount: opt.extraColsCount
+            });
+        }
+
+        function applyColumnVisibility() {
+            if (columnToggler && typeof columnToggler.apply === 'function') {
+                columnToggler.apply();
+            }
+        }
+
+        // 2. Quản lý Accordion Drawer Master-Detail
+        function initRowDetailHandler() {
+            if (opt.rowDetailOptions && typeof initRowDetail === 'function') {
+                const rowDetailConfig = $.extend({
+                    tableSelector: opt.tableSelector,
+                    rowSelector: 'tr.product-row, tr.tbl-row',
+                    detailRowSelector: '#dtl-{id}',
+                    wrapSelector: '.product-detail-panel-wrap, .kiot-detail-panel-wrap',
+                    tabBtnSelector: '.product-detail-tab-btn, .dp-tab',
+                    tabPaneSelector: '.tab-pane-content, .tab-pane, .dp-pane',
+                    excludeClickSelector: 'input, button, a, label, .w-chk, .w-star, .cell-star, .star-btn, .cell-checkbox, .row-select',
+                    onOpen: function (id) {
+                        F.openId = id;
+                    },
+                    onClose: function () {
+                        F.openId = null;
+                    }
+                }, opt.rowDetailOptions);
+
+                rowDetailHandler = initRowDetail(rowDetailConfig);
+            }
+        }
+
+        // 3. Tải bảng dữ liệu qua AJAX
+        function loadTable() {
+            if (!filterUrl) return;
+            const $wrap = $(opt.tableWrapperSelector);
+            if ($wrap.length) $wrap.css('opacity', '0.6');
+
+            const params = new URLSearchParams();
+            if (F.q && F.q.trim()) params.append('Q', F.q.trim());
+
+            if (F.mode === 'preset' || (F.preset && !F.fromDate)) {
+                params.append('DateFilterType', F.preset || 'ALL');
+            } else {
+                params.append('DateFilterType', 'CUSTOM');
+            }
+
+            if (F.fromDate) {
+                const fromStr = typeof F.fromDate === 'string' ? F.fromDate : formatDateISO(F.fromDate);
+                if (fromStr) params.append('FromDate', fromStr);
+            }
+            if (F.toDate) {
+                const toStr = typeof F.toDate === 'string' ? F.toDate : formatDateISO(F.toDate);
+                if (toStr) params.append('ToDate', toStr);
+            }
+
+            if (Array.isArray(F.statuses)) {
+                F.statuses.forEach(s => params.append('Statuses', s));
+            }
+
+            if (F.starred) {
+                params.append('DaDanhDau', 'true');
+            }
+
+            if (F.sortBy) {
+                params.append('SortBy', F.sortBy);
+                params.append('SortDir', F.sortDir || 'asc');
+            }
+
+            params.append('Page', F.page);
+            params.append('PageSize', F.pageSize);
+
+            // Hook cho phép module riêng thêm tham số lọc đặc thù
+            if (typeof opt.buildParams === 'function') {
+                opt.buildParams(params, F);
+            }
+
+            const fetchUrl = filterUrl.includes('?') 
+                ? `${filterUrl}&${params.toString()}` 
+                : `${filterUrl}?${params.toString()}`;
+
+            $.ajax({
+                url: fetchUrl,
+                type: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                success: function (html) {
+                    if ($wrap.length) {
+                        $wrap.html(html).css('opacity', '1');
+                    }
+                    applyColumnVisibility();
+                    initRowDetailHandler();
+
+                    if (F.openId && rowDetailHandler && typeof rowDetailHandler.expand === 'function') {
+                        rowDetailHandler.expand(F.openId);
+                    }
+
+                    if (typeof opt.onTableLoaded === 'function') {
+                        opt.onTableLoaded($wrap, F);
+                    }
+                    paintFilters();
+                },
+                error: function () {
+                    if ($wrap.length) $wrap.css('opacity', '1');
+                    if (window.KiotToast) {
+                        KiotToast.error('Không thể tải dữ liệu bảng.');
+                    }
+                }
+            });
+        }
+
+        // 4. Vẽ lại các chỉ thị bộ lọc
+        function paintFilters() {
+            const $starHeader = $('#starHeaderFilter');
+            if ($starHeader.length) {
+                $starHeader.toggleClass('starred', !!F.starred);
+            }
+
+            if (typeof opt.onPaintFilters === 'function') {
+                opt.onPaintFilters(F);
+            }
+        }
+
+        // 5. Gắn sự kiện chuẩn hóa toàn hệ thống
+        // Ô tìm kiếm (Debounce + Enter)
+        const $searchInput = $(opt.searchInputSelector);
+        if ($searchInput.length) {
+            $searchInput.off('input.kiotList').on('input.kiotList', function () {
+                clearTimeout(searchTimer);
+                F.q = $(this).val();
+                searchTimer = setTimeout(() => {
+                    F.page = 1;
+                    loadTable();
+                }, 350);
+            });
+
+            $searchInput.off('keydown.kiotList').on('keydown.kiotList', function (e) {
+                if (e.key === 'Enter') {
+                    clearTimeout(searchTimer);
+                    F.q = $(this).val();
+                    F.page = 1;
+                    loadTable();
+                }
+            });
+        }
+
+        // Phân trang AJAX
+        $(document).off('click.kiotListPageAjax', '.page-ajax').on('click.kiotListPageAjax', '.page-ajax', function (e) {
+            e.preventDefault();
+            const p = parseInt($(this).data('page'));
+            if (p && p > 0 && p !== F.page) {
+                F.page = p;
+                loadTable();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        // Sắp xếp cột 3 trạng thái (Không sort -> ASC -> DESC -> Không sort)
+        $(document).off('click.kiotListSort', `${opt.tableSelector} thead th.sortable-th`).on('click.kiotListSort', `${opt.tableSelector} thead th.sortable-th`, function (e) {
+            e.preventDefault();
+            const col = $(this).data('col');
+            if (!col) return;
+
+            if (F.sortBy === col) {
+                if (F.sortDir === 'asc') {
+                    F.sortDir = 'desc';
+                } else if (F.sortDir === 'desc') {
+                    F.sortBy = '';
+                    F.sortDir = '';
+                } else {
+                    F.sortDir = 'asc';
+                }
+            } else {
+                F.sortBy = col;
+                F.sortDir = 'asc';
+            }
+
+            F.page = 1;
+            loadTable();
+        });
+
+        // Đánh dấu sao trên Header
+        $(document).off('click.kiotListStarHeader', '#starHeaderFilter').on('click.kiotListStarHeader', '#starHeaderFilter', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            F.starred = !F.starred;
+            F.page = 1;
+            loadTable();
+        });
+
+        // Đánh dấu sao trên dòng bảng
+        if (toggleStarUrl) {
+            $(document).off('click.kiotListStarRow', '.star-btn:not(#starHeaderFilter)').on('click.kiotListStarRow', '.star-btn:not(#starHeaderFilter)', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const $btn = $(this);
+                const id = $btn.data('id');
+                if (!id) return;
+
+                $.ajax({
+                    url: `${toggleStarUrl}?id=${id}`,
+                    type: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    success: function (res) {
+                        if (res && res.success) {
+                            if (res.isFavorite) {
+                                $btn.addClass('starred').attr('title', 'Bỏ đánh dấu sao').html('<i class="bi bi-star-fill"></i>');
+                            } else {
+                                $btn.removeClass('starred').attr('title', 'Đánh dấu sao').html('<i class="bi bi-star"></i>');
+                                if (F.starred) {
+                                    const $tr = $btn.closest('tr');
+                                    $(`#dtl-${id}`).remove();
+                                    $tr.remove();
+                                    if ($(`${opt.tableSelector} tbody tr.tbl-row, ${opt.tableSelector} tbody tr.product-row`).length === 0) {
+                                        loadTable();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        // Phím tắt toàn cục: F3 focus tìm kiếm & F4 gập mở sidebar
+        $(document).off('keydown.kiotListHotkeys').on('keydown.kiotListHotkeys', function (e) {
+            if (e.key === 'F3') {
+                e.preventDefault();
+                const $inp = $(opt.searchInputSelector);
+                if ($inp.length) {
+                    $inp.focus().select();
+                }
+            } else if (e.key === 'F4') {
+                const $toggleBtn = $('#btnToggleSidebar');
+                if ($toggleBtn.length) {
+                    e.preventDefault();
+                    $toggleBtn.trigger('click');
+                }
+            }
+        });
+
+        // Tự động khởi tạo Sidebar nếu có
+        if (typeof initSidebar === 'function' && $('#sidebarFilterCol').length) {
+            initSidebar({
+                containerSelector: opt.containerSelector,
+                sidebarSelector: '#sidebarFilterCol',
+                toggleBtnSelector: '#btnToggleSidebar',
+                mobileBtnSelector: '#btnMobileFilter',
+                closeMobileBtnSelector: '#btnCloseSidebarMobile',
+                backdropSelector: '#sidebarBackdrop'
+            });
+        }
+
+        // Tự động kết nối bộ lọc ngày tháng
+        if (opt.dateFilterId && typeof initDateFilter === 'function') {
+            initDateFilter(opt.dateFilterId, function (from, to, text, val) {
+                F.mode = val === 'CUSTOM' ? 'custom' : 'preset';
+                F.preset = val;
+                F.fromDate = from;
+                F.toDate = to;
+                F.page = 1;
+                loadTable();
+            });
+        }
+
+        initRowDetailHandler();
+        applyColumnVisibility();
+
+        return {
+            state: F,
+            loadTable: loadTable,
+            reload: function (resetPage) {
+                if (resetPage) F.page = 1;
+                loadTable();
+            },
+            paintFilters: paintFilters,
+            columnToggler: columnToggler,
+            rowDetail: rowDetailHandler
+        };
+    }
+
     return {
         debounce: debounce,
         escapeHtml: escapeHtml,
@@ -1736,7 +2439,9 @@ window.KiotFilter = (function ($) {
         initEntityActions: initEntityActions,
         initDateTimePicker: initDateTimePicker,
         initProductSearch: initProductSearch,
-        initDocGrid: initDocGrid
+        initDocGrid: initDocGrid,
+        initImageUploader: initImageUploader,
+        createListPage: createListPage
     };
 })(jQuery);
 

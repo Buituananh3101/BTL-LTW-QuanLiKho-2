@@ -1,21 +1,121 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-18 – Triển Khai Giai Đoạn 2 Đóng Gói Lego: F3 Product Search & DocGrid Engine (Phiên 138)
+Cập nhật lần cuối: 2026-10-18 – Chuẩn Hóa Phân Hệ Xuất Nhập File Excel / CSV – Giai Đoạn 2 (Phiên 143)
 
 ---
 
 ## Đang làm
-- Hoàn thành xuất sắc Giai đoạn 2 kế hoạch đóng gói Lego:
-  + Đóng gói `KiotFilter.initProductSearch` (Tìm kiếm hàng hóa Autocomplete F3, quét barcode, hiển thị tồn/giá, phím mũi tên) dùng chung toàn hệ thống, hợp nhất cả 5 form chứng từ (Kiểm kho, Nhập hàng, Xuất hủy, Chuyển kho, Trả hàng nhập).
-  + Đóng gói `KiotFilter.initDocGrid` (Quản lý lưới dòng chứng từ, tự động đánh STT, chuyển đổi trạng thái rỗng/có dữ liệu, bắt sự kiện xóa dòng qua KiotConfirm, tính toán realtime).
-  + Loại bỏ hoàn toàn mã nhúng file dư thừa `f3-product-search.js` trên 6 View (`ChuyenKho`, `NhapHang`, `TraHangNhap`).
-- Sẵn sàng chuẩn bị Giai đoạn 3: Đóng gói `KiotFilter.initImageUploader` (Quản lý 5 ảnh, kéo thả, nén Canvas, paste clipboard) và Combobox phân cấp danh mục.
+- Đã hoàn thành Giai đoạn 2: Tối ưu Import server-side (ClosedXML) và Template cho Trả hàng nhập & Chuyển kho.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế tìm kiếm F3 và lưới dòng chứng từ trên môi trường chạy thử.
-2. Triển khai Giai đoạn 3 theo kế hoạch đóng gói Lego (`ke-hoach-dong-goi-lego.md`).
+1. Kiểm tra trải nghiệm thực tế Import/Export file Excel trên trình duyệt (`/ChuyenKho/Create`, `/TraHangNhap/Create`, `/NhapHang/Create`).
+2. Khảo sát giai đoạn 3 nếu cần (Kiểm kho, Xuất hủy hoặc Danh mục hàng hóa).
+
+---
+
+- **Chuẩn Hóa Phân Hệ Xuất Nhập File Excel / CSV – Giai Đoạn 2 (Phiên 143)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "triển khai giai đoạn 2" tiếp nối kế hoạch chuẩn hóa Excel/CSV toàn hệ thống.
+  - **Mục tiêu Giai đoạn 2**:
+    1. Chuẩn hóa phân hệ Trả hàng nhập (`TraHangNhap`): Loại bỏ triệt để vòng lặp AJAX đồng bộ client-side `$.ajax({ async: false })`, thay bằng API `ImportExcel` server-side (ClosedXML) hỗ trợ đồng thời cả `.xlsx` và `.csv`, tự động đối soát tồn kho nguồn và tra cứu mã hàng hóa.
+    2. Triển khai Import & File mẫu cho phân hệ Chuyển kho (`ChuyenKho`): Bổ sung `DownloadTemplate` xuất `Mau_Chuyen_Kho_KiotViet.xlsx` (kèm tuỳ chọn `.csv`), `ImportExcel` server-side đọc file và nạp số lượng kèm kiểm tra tồn kho nguồn, nút `#btnImportExcel` trên toolbar và empty state "Thêm sản phẩm từ file excel" với nút "Chọn file dữ liệu" (`#btnPickExcel`).
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`Controllers/TraHangNhapController.cs`**:
+      * Nâng cấp `DownloadTemplate(string? format)` hỗ trợ xuất file Excel `Mau_Tra_Hang_Nhap_KiotViet.xlsx` (ClosedXML) hoặc file CSV `MauTraHangNhap.csv`.
+      * Bổ sung Action `ImportExcel(IFormFile file, int warehouseId)`: Hỗ trợ tự động nhận diện cả `.csv` lẫn `.xlsx`/`.xls`, tra cứu danh mục `HangHoas`, lấy số dư tồn kho từ `VwTonKhoHienTais` theo kho gửi, trả về danh sách mặt hàng hợp lệ.
+    + **`Views/TraHangNhap/_TraHangNhapForm.cshtml` & `tra-hang-nhap-form.js`**:
+      * Bổ sung `data-import-url="@Url.Action("ImportExcel", "TraHangNhap")"` vào container.
+      * Thay thế toàn bộ đoạn xử lý `FileReader` và vòng lặp AJAX đồng bộ bằng 1 lệnh gọi AJAX FormData gửi file lên server, nạp trực tiếp danh sách hàng vào bảng.
+    + **`Controllers/ChuyenKhoController.cs`**:
+      * Bổ sung `DownloadTemplate(string? format)` xuất `Mau_Chuyen_Kho_KiotViet.xlsx` (ClosedXML) và `MauChuyenKho.csv`.
+      * Bổ sung `ImportExcel(IFormFile file, int warehouseId)`: Hỗ trợ đọc cả `.xlsx` và `.csv`, lấy số dư tồn kho nguồn qua `_tonKhoService.LayTonKhoTheoKhoAsync`, tự động map mã hàng nội bộ và trả về danh sách hàng chuyển.
+    + **`Views/ChuyenKho/_ChuyenKhoForm.cshtml` & `chuyen-kho-form.js`**:
+      * Bổ sung `data-template-url` và `data-import-url` trên container `#ckFormApp`.
+      * Bổ sung nút `#btnImportExcel` và input file ẩn `#excelFileInput` trên toolbar.
+      * Cập nhật empty state `#emptyLineBox` chuẩn KiotViet với nút "Chọn file dữ liệu" (`#btnPickExcel`) và link "Tải về file mẫu" (`#btnDownloadTemplate`).
+      * Nâng cấp `addProduct(item, customQty)` cho phép truyền số lượng từ file nạp, gắn các sự kiện tải mẫu và upload file AJAX FormData.
+    + **Đồng bộ tài liệu**:
+      * Cập nhật `docs/specs/tra-hang-nhap.md` (7.264 bytes) và `docs/specs/chuyen-kho.md` (7.607 bytes) bảo đảm tuân thủ Luật 12 dưới 8.000 ký tự.
+      * Cập nhật sổ quyết định `docs/quyet-dinh.md` (7.595 bytes).
+  - **Kiểm tra**:
+    + `node -c` xác nhận cú pháp 100% hợp lệ trên cả `tra-hang-nhap-form.js` và `chuyen-kho-form.js`.
+    + `dotnet build -t:Compile` biên dịch hoàn tất với **0 Errors**.
+
+---
+
+- **Sửa Lỗi & Chuẩn Hóa Phân Hệ Xuất Nhập File Excel / CSV – Giai Đoạn 1 (Phiên 142)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "kiểm tra phần xuất nhập file excel csv trong tất cả các chức năng, lên kế hoạch sửa lỗi nếu có và chuẩn hóa" -> "triển khai giai đoạn 1".
+  - **Nguyên nhân cốt lõi**:
+    + Nút "Xuất file" Nhà cung cấp trên Topbar (`#btnExportExcel`) trỏ đến query `?export=excel` nhưng `NhaCungCapController` bỏ qua, trang chỉ reload mà không tải file.
+    + Nút "Xuất file" chi tiết trong drawer Chuyển kho trỏ đến `Export` không truyền ID, dẫn đến tải toàn bộ danh sách chuyển kho thay vì mặt hàng chi tiết.
+    + Nút "Xuất file" chi tiết trong drawer Trả hàng nhập chỉ gọi xuất 1 dòng tóm tắt danh sách thay vì các dòng hàng trả.
+    + Form Nhập hàng import bằng SheetJS client-side gán `MaHang: 0`, khi lưu phiếu (F9/F10) gây lỗi crash SQL Foreign Key `FK_ChiTietPhieuNhap_HangHoa`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`Controllers/NhaCungCapController.cs` & `nha-cung-cap-index.js`**:
+      * Bổ sung Action `Export(NhaCungCapFilterParams filter)` sử dụng Lego `ExcelHelper.Export` xuất `DanhSachNhaCungCap_{yyyyMMdd_HHmm}.xlsx` đầy đủ 11 cột chuẩn KiotViet.
+      * Cập nhật sự kiện click `#btnExportExcel` truyền toàn bộ các tham số lọc hiện hành (từ khóa, nhóm NCC, trạng thái, thời gian, công nợ).
+    + **`Controllers/NhapHangController.cs` & `nhap-hang-form.js`**:
+      * Bổ sung Action `DownloadTemplate()` xuất file `Mau_Nhap_Hang_KiotViet.xlsx` chuẩn ClosedXML.
+      * Bổ sung Action `ImportExcel(IFormFile file, int warehouseId)` xử lý phía server: tra cứu chính xác `MaHang` từ database, đơn vị tính, tồn kho hiện tại, loại bỏ triệt để lỗi gán `MaHang: 0`.
+      * Nâng cấp `nhap-hang-form.js` gọi AJAX FormData upload file lên server và điền dữ liệu an toàn vào form.
+    + **`Controllers/ChuyenKhoController.cs` & `_ChuyenKhoTable.cshtml`**:
+      * Nâng cấp `Export(string? type, ChuyenKhoFilterVM filter, int? id = null)` hỗ trợ xuất chi tiết phiếu chuyển (`ChiTietChuyenHang_{MaPhieu}.xlsx`: STT, Mã chuyển hàng, Thời gian, Kho gửi, Kho nhận, Mã hàng, Tên hàng, ĐVT, SL chuyển, SL nhận, Đơn giá, Thành tiền, Trạng thái, Ghi chú).
+      * Cập nhật nút "Xuất file" trong drawer truyền `new { type = "detail", id = item.MaPhieuChuyen }`.
+    + **`Controllers/TraHangNhapController.cs` & `_TraHangNhapTable.cshtml`**:
+      * Nâng cấp `ExportExcel(string? type, TraHangNhapFilterVM filter, int? id = null)` sử dụng Lego `ExcelHelper.Export` cho cả danh sách và chi tiết phiếu trả (`ChiTietTraHangNhap_{MaPhieu}.xlsx`: STT, Mã trả hàng, Thời gian, Chi nhánh, NCC, Người trả, Người tạo, Mã hàng, Tên hàng, ĐVT, SL trả, Giá vốn, Giá trả lại, Thành tiền, Trạng thái, Ghi chú).
+      * Cập nhật nút "Xuất file" trong drawer truyền `new { type = "detail", id = item.MaPhieuTraHang }`.
+  - **Kiểm tra**:
+    + `node -c nha-cung-cap-index.js` & `node -c nhap-hang-form.js` thành công 100%.
+    + `dotnet build -t:Compile` biên dịch hoàn tất với **0 Errors**.
+
+---
+
+- **Bỏ Gạch Chân Khi Hover Vào Nút Tạo Mới Trên Form Hàng Hóa (Phiên 141)**:
+  - **Nhu cầu**: Người dùng yêu cầu kèm ảnh chụp màn hình (`media_1792337485927_9137a651.png`): "sửa giúp tôi khi trỏ con trỏ chuột vào chữ tạo mới thì ko hiện gạch chân nữa".
+  - **Nguyên nhân cốt lõi**:
+    + Trong `wwwroot/css/hang-hoa-form.css`, class `.hh-link:hover` và `.hh-add-link:hover` có thuộc tính `text-decoration: underline;`, dẫn đến khi hover chuột vào nút "+ Tạo mới" (ở phần Nhóm hàng, Đơn vị tính, Vị trí), chữ bị gạch chân.
+  - **Giải pháp & Kết quả thực hiện**:
+    + Cập nhật `.hh-link:hover` và `.hh-add-link:hover` trong `hang-hoa-form.css`: gán `text-decoration: none;`, chuyển màu chữ sang xanh đậm hơn `#0852bd` với hiệu ứng chuyển tiếp mượt mà `transition: color 0.15s ease`.
+    + **Kiểm tra**:
+      * `dotnet build -t:Compile` đạt **0 Errors**.
+
+
+- **Triển Khai Giai Đoạn 4 Đóng Gói Lego: Khung Trang Danh Sách Boilerplate KiotListPage (Phiên 140)**:
+  - **Nhu cầu**: Người dùng yêu cầu triển khai Giai đoạn 4 của Kế hoạch đóng gói Lego (`ke-hoach-dong-goi-lego.md`).
+  - **Mục tiêu Giai đoạn 4**:
+    1. Đóng gói Lego Khung Điều Khiển Trang Danh Sách (`KiotFilter.createListPage`) vào `kiot-filter.js`: Quản lý state tập trung `F`, nạp bảng AJAX `loadTable` với hiệu ứng mờ nhẹ opacity, tự động hóa phân trang AJAX `.page-ajax`, sắp xếp cột 3 trạng thái (Không sort -> ASC -> DESC -> Bỏ sort), lọc bookmark sao header `#starHeaderFilter` & toggle sao từng dòng `.star-btn`, tự động gắn `initColumnToggle`, phục hồi Master-Detail drawer `initRowDetail`, hotkeys toàn cục F3 / F4 và sidebar KiotViet.
+    2. Cung cấp các hooks mở rộng `buildParams(params, state)`, `onTableLoaded($wrap, state)`, `onPaintFilters(state)` cho phép từng màn hình bổ sung tiêu chí lọc riêng mà không phá vỡ khung chuẩn.
+    3. Tái cấu trúc thực nghiệm 2 file danh sách lớn: `chuyen-kho-index.js` (từ 458 dòng xuống 180 dòng) và `phieu-kiem-ke-index.js` (từ 755 dòng xuống 360 dòng), giảm hơn 50% mã nguồn lặp lại.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`wwwroot/js/kiot-filter.js`**: Triển khai Lego block 20 `KiotFilter.createListPage(options)` hoàn chỉnh, xuất ra ngoài return object của module.
+    + **`wwwroot/js/chuyen-kho-index.js`**: Tinh gọn toàn bộ boilerplate, chỉ giữ lại logic riêng của nghiệp vụ Chuyển kho (modal nhận hàng, hủy chuyển kho, lưu ghi chú drawer).
+    + **`wwwroot/js/phieu-kiem-ke-index.js`**: Tinh gọn toàn bộ boilerplate, giữ lại logic nghiệp vụ Kiểm kho (multiselect người tạo, hủy phiếu kiểm kho, lưu ghi chú drawer).
+    + **Đồng bộ tài liệu**: Cập nhật `.agent/rules/03-giao-dien-layout.md` (7.249 bytes), `docs/quyet-dinh.md` (7.153 bytes), bảo đảm 100% tuân thủ hạn mức 8.000 ký tự theo Luật 12.
+  - **Kiểm tra**:
+    + `node -c` xác nhận cú pháp 100% hợp lệ trên cả 3 file JavaScript (`kiot-filter.js`, `chuyen-kho-index.js`, `phieu-kiem-ke-index.js`).
+    + `dotnet build` biên dịch thành công hoàn hảo với **0 Errors**.
+
+---
+
+- **Triển Khai Giai Đoạn 3 Đóng Gói Lego: ImageUploader & Combobox Tree Phân Cấp (Phiên 139)**:
+  - **Nhu cầu**: Người dùng yêu cầu triển khai Giai đoạn 3 của Kế hoạch đóng gói Lego (`ke-hoach-dong-goi-lego.md`).
+  - **Mục tiêu Giai đoạn 3**:
+    1. Đóng gói Lego Tải & Quản Lý Ảnh (`KiotFilter.initImageUploader`) vào `kiot-filter.js`: quản lý 5 ảnh (1 ảnh chính + 4 ảnh phụ), nén ảnh client-side bằng Canvas với nền trắng `#FFFFFF` chống lỗi nền đen khi nén PNG trong suốt sang JPEG, hỗ trợ kéo-thả trực tiếp, dán ảnh từ clipboard `Ctrl + V`, thay thế riêng ảnh chính, swap đổi ảnh phụ thành ảnh chính, xóa ảnh qua KiotConfirm.
+    2. Nâng cấp Dropdown Combobox (`KiotFilter.initCombobox`) hỗ trợ hiển thị phân cấp cây danh mục (Tree Select) dựa trên `level`, thụt lề 16px và tiền tố nhánh cây `└─`.
+    3. Tái cấu trúc `hang-hoa-form.js`: Thay thế toàn bộ hơn 300 dòng mã upload, drag-drop, paste và nén canvas thủ công bằng `KiotFilter.initImageUploader`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **`wwwroot/js/kiot-filter.js`**:
+      * Triển khai Lego block 19: `KiotFilter.initImageUploader(options)` với đầy đủ options cấu hình, nén Canvas 2D khử răng cưa cao cấp, đổ nền trắng `#FFFFFF`, drag-drop, paste `Ctrl + V`, và các phương thức `getImages()`, `setImages()`, `clear()`, `render()`.
+      * Nâng cấp `KiotFilter.initCombobox`: Nhận diện thuộc tính `level` trong từng item, áp dụng thụt lề `padding-left: ${12 + level * 16}px` và tiền tố `<span class="kiot-tree-branch">└─</span>`.
+    + **`wwwroot/js/hang-hoa-form.js`**:
+      * Thay thế khối code upload ảnh thủ công (dòng 131–432) bằng 1 dòng khai báo `const imgUploader = KiotFilter.initImageUploader({...})`.
+      * Đồng bộ các phương thức `collectFormData()`, `resetForm()`, `doSave()` và tải form sửa `setImages()` qua `imgUploader`.
+      * Nâng cấp `initSingleSelect.syncOptions()` hỗ trợ phân cấp cây `data-level` đồng bộ.
+    + **Đồng bộ tài liệu**: Cập nhật `.agent/rules/03-giao-dien-layout.md` (7.668 bytes), `docs/quyet-dinh.md` (6.671 bytes), bảo đảm 100% tuân thủ hạn mức 8.000 ký tự theo Luật 12.
+  - **Kiểm tra**:
+    + `node -c` xác nhận cú pháp 100% hợp lệ trên cả `kiot-filter.js` và `hang-hoa-form.js`.
+    + `dotnet build` biên dịch thành công hoàn hảo với **0 Errors**.
 
 ---
 

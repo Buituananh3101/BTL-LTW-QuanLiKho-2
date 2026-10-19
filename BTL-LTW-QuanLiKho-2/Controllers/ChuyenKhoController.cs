@@ -591,15 +591,65 @@ public class ChuyenKhoController : BaseKhoController
         return Json(result);
     }
 
-    // 12. Xuất file Excel danh sách chuyển kho
+    // 12. Xuất file Excel danh sách hoặc chi tiết chuyển kho
     [HttpGet]
-    public async Task<IActionResult> Export(ChuyenKhoFilterVM filter)
+    public async Task<IActionResult> Export(string? type, ChuyenKhoFilterVM filter, int? id = null)
     {
         filter.Page = 1;
         filter.PageSize = 10000;
         var model = await BuildIndexViewModelAsync(filter);
 
-        var bytes = ExcelHelper.Export("ChuyenHang", model.PagedData.Items, col => col
+        if (id.HasValue && id.Value > 0)
+        {
+            model.PagedData.Items = model.PagedData.Items.Where(p => p.MaPhieuChuyen == id.Value).ToList();
+        }
+
+        bool isDetail = string.Equals(type, "detail", StringComparison.OrdinalIgnoreCase);
+
+        if (isDetail)
+        {
+            var detailRows = new List<(int Stt, ChuyenKhoListItemVM Item, ChuyenKhoLineVM? Line)>();
+            int stt = 1;
+            foreach (var p in model.PagedData.Items)
+            {
+                if (p.Lines.Any())
+                {
+                    foreach (var line in p.Lines)
+                    {
+                        detailRows.Add((stt++, p, line));
+                    }
+                }
+                else
+                {
+                    detailRows.Add((stt++, p, null));
+                }
+            }
+
+            var bytes = ExcelHelper.Export("ChiTietChuyenHang", detailRows, col => col
+                .AddCenter("STT", x => x.Stt)
+                .AddCenter("Mã chuyển hàng", x => x.Item.MaPhieuHienThi)
+                .AddDateTime("Thời gian tạo", x => x.Item.NgayLap)
+                .AddText("Kho gửi", x => x.Item.TenKhoNguon)
+                .AddText("Kho nhận", x => x.Item.TenKhoDich)
+                .AddCenter("Mã hàng", x => x.Line?.MaHangNoiBo ?? "")
+                .AddText("Tên hàng", x => x.Line?.TenHang ?? "(Phiếu chưa có danh sách hàng)")
+                .AddCenter("ĐVT", x => x.Line?.TenDvt ?? "")
+                .AddNumber("Số lượng chuyển", x => x.Line?.SoLuong ?? 0)
+                .AddNumber("Số lượng nhận", x => x.Line?.SoLuongNhan ?? (x.Item.TrangThai == "DA_NHAN" ? x.Line?.SoLuong ?? 0 : 0))
+                .AddCurrency("Đơn giá chuyển", x => x.Line?.DonGiaChuyen ?? 0)
+                .AddCurrency("Thành tiền", x => x.Line?.ThanhTien ?? 0)
+                .AddCenter("Trạng thái", x => x.Item.TenTrangThai)
+                .AddText("Ghi chú", x => x.Item.GhiChu ?? "")
+            );
+
+            string fileDetailName = id.HasValue && model.PagedData.Items.Any()
+                ? $"ChiTietChuyenHang_{model.PagedData.Items.First().MaPhieuHienThi}_{DateTime.Now:yyyyMMdd_HHmm}.xlsx"
+                : $"ChiTietChuyenHang_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDetailName);
+        }
+
+        var listBytes = ExcelHelper.Export("ChuyenHang", model.PagedData.Items, col => col
             .AddCenter("Mã chuyển hàng", x => x.MaPhieuHienThi)
             .AddDateTime("Thời gian tạo", x => x.NgayLap)
             .AddText("Kho gửi", x => x.TenKhoNguon)
@@ -614,7 +664,151 @@ public class ChuyenKhoController : BaseKhoController
             .AddText("Ghi chú", x => x.GhiChu ?? "")
         );
 
-        return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachChuyenHang_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+        return File(listBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachChuyenHang_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+    }
+
+    // 13. Tải file mẫu chuyển kho (.xlsx chuẩn ClosedXML hoặc .csv)
+    [HttpGet]
+    public IActionResult DownloadTemplate(string? format)
+    {
+        if (string.Equals(format, "csv", StringComparison.OrdinalIgnoreCase))
+        {
+            var csv = "\uFEFFMã hàng,Số lượng,Ghi chú\r\nHH000001,5,Chuyển hàng chi nhánh\r\nHH000002,2,\r\n";
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(csv);
+            return File(bytes, "text/csv;charset=utf-8", "MauChuyenKho.csv");
+        }
+
+        using var workbook = new XLWorkbook();
+        var ws = workbook.Worksheets.Add("MauChuyenKho");
+
+        var headers = new[] { "Mã hàng (*)", "Số lượng (*)", "Ghi chú" };
+        for (int i = 0; i < headers.Length; i++)
+        {
+            ws.Cell(1, i + 1).Value = headers[i];
+        }
+
+        ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
+        ws.Row(1).Height = 26;
+
+        // Dữ liệu mẫu
+        ws.Cell(2, 1).Value = "HH000001";
+        ws.Cell(2, 2).Value = 5;
+        ws.Cell(2, 3).Value = "Chuyển bù tồn kho chi nhánh";
+
+        ws.Cell(3, 1).Value = "HH000002";
+        ws.Cell(3, 2).Value = 2;
+        ws.Cell(3, 3).Value = "";
+
+        ExcelHelper.ApplyTableBorders(ws.Range(1, 1, 3, headers.Length));
+        ws.Columns().AdjustToContents();
+
+        using var ms = new MemoryStream();
+        workbook.SaveAs(ms);
+        return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_Chuyen_Kho_KiotViet.xlsx");
+    }
+
+    // 14. Nhập danh sách hàng hóa chuyển kho từ file Excel / CSV (ClosedXML)
+    [HttpPost]
+    public async Task<IActionResult> ImportExcel(IFormFile file, int warehouseId)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest(new { success = false, message = "Vui lòng chọn file dữ liệu để nhập." });
+        }
+
+        warehouseId = warehouseId > 0 ? warehouseId : GetCurrentWarehouseId();
+
+        try
+        {
+            var rowsData = new List<(string Code, decimal Qty)>();
+
+            if (file.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
+            {
+                using var reader = new StreamReader(file.OpenReadStream(), System.Text.Encoding.UTF8);
+                string? line;
+                bool isFirst = true;
+                while ((line = await reader.ReadLineAsync()) != null)
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    var parts = line.Split(new[] { ',', ';', '\t' });
+                    if (parts.Length < 2) continue;
+                    string code = parts[0].Trim().Trim('"');
+                    if (isFirst)
+                    {
+                        isFirst = false;
+                        if (!decimal.TryParse(parts[1].Trim().Trim('"'), out _)) continue;
+                    }
+                    if (string.IsNullOrEmpty(code)) continue;
+                    decimal.TryParse(parts[1].Trim().Trim('"'), out decimal sl);
+                    rowsData.Add((code, sl > 0 ? sl : 1));
+                }
+            }
+            else
+            {
+                using var stream = file.OpenReadStream();
+                using var workbook = new XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null)
+                {
+                    return BadRequest(new { success = false, message = "File Excel không có dữ liệu." });
+                }
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? 0;
+                for (int r = 2; r <= lastRow; r++)
+                {
+                    string code = ws.Cell(r, 1).GetString().Trim();
+                    if (string.IsNullOrEmpty(code)) continue;
+
+                    decimal sl = 1;
+                    if (decimal.TryParse(ws.Cell(r, 2).GetString().Trim(), out var parsedSl) && parsedSl > 0)
+                    {
+                        sl = parsedSl;
+                    }
+
+                    rowsData.Add((code, sl));
+                }
+            }
+
+            var tonKhoDict = await _tonKhoService.LayTonKhoTheoKhoAsync(warehouseId);
+
+            var allHangHoa = await _context.HangHoas
+                .Include(h => h.MaDvtNavigation)
+                .ToDictionaryAsync(h => h.MaHangNoiBo.Trim().ToUpper(), h => h);
+
+            var items = new List<object>();
+            foreach (var row in rowsData)
+            {
+                string code = row.Code;
+                if (!allHangHoa.TryGetValue(code.ToUpper(), out var hang))
+                {
+                    if (int.TryParse(code.Replace("HH", "", StringComparison.OrdinalIgnoreCase).Replace("SP", "", StringComparison.OrdinalIgnoreCase), out int hhId))
+                    {
+                        hang = await _context.HangHoas.Include(h => h.MaDvtNavigation).FirstOrDefaultAsync(h => h.MaHang == hhId);
+                    }
+                }
+
+                if (hang == null) continue;
+
+                decimal ton = tonKhoDict.TryGetValue(hang.MaHang, out var currentTon) ? currentTon : 0;
+
+                items.Add(new
+                {
+                    id = hang.MaHang,
+                    code = hang.MaHangNoiBo,
+                    name = hang.TenHang,
+                    unit = hang.MaDvtNavigation?.TenDvt ?? "Cái",
+                    cost = hang.GiaVon,
+                    stock = ton,
+                    qty = row.Qty,
+                    soLuong = row.Qty
+                });
+            }
+
+            return Ok(new { success = true, items, count = items.Count });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { success = false, message = "Lỗi đọc file dữ liệu: " + ex.Message });
+        }
     }
 
     #region Private Helpers

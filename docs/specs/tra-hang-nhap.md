@@ -66,7 +66,7 @@
 ### 2.2. Lập / Sửa Phiếu (`_TraHangNhapForm`)
 - **Vùng bảng hàng hóa (Trái - `.f-main`)**:
   - Nút quay lại, ô tìm kiếm F3 autocomplete (hiển thị mã, tên, giá vốn, tồn kho).
-  - Nạp Excel/CSV (kèm nút tải mẫu `MauTraHangNhap.csv`), empty state với nút "Chọn file dữ liệu" (`#btnSelectFile`, icon `bi-box-arrow-in-down`, bo góc 6px, nền xanh `#0a66e8`).
+  - Nạp Excel/CSV (kèm nút tải mẫu `Mau_Tra_Hang_Nhap_KiotViet.xlsx` hoặc `MauTraHangNhap.csv`), empty state với nút "Chọn file dữ liệu" (`#btnSelectFile`), xử lý server-side ClosedXML qua API `TraHangNhap/ImportExcel` tra cứu tồn kho và thông tin hàng từ CSDL.
   - Bảng lưới: Nút xóa, STT, Mã, Tên, ĐVT, Số lượng (.qty - cảnh báo đỏ nếu vượt tồn), Giá nhập, Giá trả lại (.qty), Thành tiền.
 - **Panel thông tin (Phải - `.f-panel` / Rightmenu)**:
   - Khung 440px cố định `.f-panel-inner`, nút tròn toggle F4 trượt mượt mà 0.25s cubic-bezier (từ 425px về 8px khi thu gọn).

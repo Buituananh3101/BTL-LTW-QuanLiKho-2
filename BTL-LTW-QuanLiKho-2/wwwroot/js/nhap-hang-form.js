@@ -13,6 +13,8 @@ $(function () {
     const indexUrl = $app.data('index-url') || '/NhapHang/Index';
     const searchSuppliersUrl = $app.data('search-suppliers-url') || '/NhapHang/SearchSuppliers';
     const quickSupplierUrl = $app.data('quick-supplier-url') || '/NhapHang/QuickCreateSupplier';
+    const importUrl = $app.data('import-url') || '/NhapHang/ImportExcel';
+    const templateUrl = $app.data('template-url') || '/NhapHang/DownloadTemplate';
 
     // 1. Khởi tạo Autocomplete tìm kiếm hàng hóa F3 dùng Lego KiotFilter.initProductSearch
     if (!isReadOnly && window.KiotFilter && typeof KiotFilter.initProductSearch === 'function') {
@@ -836,24 +838,12 @@ $(function () {
         $('#excelFileInput').click();
     });
 
-    // Tải file mẫu Excel
+    // Tải file mẫu Excel (.xlsx chuẩn ClosedXML từ Server)
     $('#btnDownloadTemplate').on('click', function () {
-        if (typeof XLSX !== 'undefined') {
-            const sampleData = [
-                ['STT', 'Mã hàng', 'Tên hàng', 'ĐVT', 'Số lượng', 'Đơn giá', 'Giảm giá'],
-                [1, 'SP00001', 'Bia Sài Gòn Lager', 'Lon', 10, 12000, 0],
-                [2, 'SP00002', 'Nước ngọt Coca Cola 330ml', 'Lon', 24, 10000, 0]
-            ];
-            const ws = XLSX.utils.aoa_to_sheet(sampleData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'MauNhapHang');
-            XLSX.writeFile(wb, 'MauNhapHang_KiotViet.xlsx');
-        } else {
-            alert('Tính năng tải file mẫu đang chuẩn bị...');
-        }
+        window.location.href = templateUrl;
     });
 
-    // 9. Nhập từ file Excel (SheetJS)
+    // 9. Nhập từ file Excel (Server-side ClosedXML qua API NhapHang/ImportExcel)
     $('#btnImportExcel').on('click', function () {
         $('#excelFileInput').click();
     });
@@ -863,59 +853,42 @@ $(function () {
         if (!files || !files.length) return;
         const file = files[0];
 
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('warehouseId', warehouseId);
 
-                if (!json || json.length < 2) {
-                    if (window.KiotToast) KiotToast.warning('File Excel không có dữ liệu.');
-                    return;
+        if (window.KiotToast) KiotToast.info('Đang đối soát dữ liệu file Excel với hệ thống...');
+
+        $.ajax({
+            url: importUrl,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                if (res && res.success && res.items && res.items.length) {
+                    let importedCount = 0;
+                    res.items.forEach(item => {
+                        addProductLine(item, item.soLuong, item.donGia, item.giamGia);
+                        importedCount++;
+                    });
+                    if (window.KiotToast) {
+                        KiotToast.success(`Đã nạp thành công ${importedCount} mặt hàng từ file Excel!`);
+                    }
+                } else {
+                    if (window.KiotToast) {
+                        KiotToast.warning(res.message || 'Không tìm thấy mặt hàng nào phù hợp trong file.');
+                    }
                 }
-
-                // Tìm cột mã hàng, số lượng, giá
-                let codeIdx = 1, qtyIdx = 4, priceIdx = 5;
-                const header = json[0];
-                for (let i = 0; i < header.length; i++) {
-                    const h = (header[i] || '').toString().toLowerCase();
-                    if (h.includes('mã hàng') || h.includes('barcode')) codeIdx = i;
-                    if (h.includes('số lượng') || h.includes('sl')) qtyIdx = i;
-                    if (h.includes('đơn giá') || h.includes('giá nhập')) priceIdx = i;
-                }
-
-                let importedCount = 0;
-                for (let r = 1; r < json.length; r++) {
-                    const row = json[r];
-                    if (!row || !row[codeIdx]) continue;
-
-                    const code = row[codeIdx].toString().trim();
-                    const qty = parseFloat(row[qtyIdx]) || 1;
-                    const price = parseFloat(row[priceIdx]) || 0;
-
-                    // Thêm sản phẩm tạm thời dựa trên mã
-                    addProductLine({
-                        maHang: 0,
-                        maHangNoiBo: code,
-                        tenHang: `Hàng nhập (${code})`,
-                        tenDvt: 'Cái',
-                        gia: price,
-                        tonKho: 0
-                    }, qty, price, 0);
-
-                    importedCount++;
-                }
-
-                if (window.KiotToast) KiotToast.success(`Đã nạp ${importedCount} mặt hàng từ file Excel!`);
-            } catch (err) {
-                if (window.KiotToast) KiotToast.error('Không thể đọc file Excel: ' + err.message);
+            },
+            error: function (xhr) {
+                const msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Lỗi khi nhập file Excel.';
+                if (window.KiotToast) KiotToast.error(msg);
+            },
+            complete: function () {
+                $('#excelFileInput').val('');
             }
-        };
-        reader.readAsArrayBuffer(file);
-        $(this).val('');
+        });
     });
 
     // 9. Lưu phiếu (Lưu tạm F9 hoặc Hoàn thành F10)

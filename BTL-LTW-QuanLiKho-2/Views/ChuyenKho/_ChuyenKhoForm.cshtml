@@ -10,6 +10,8 @@
 
 <div class="kk-container" id="ckFormApp"
      data-search-products-url="@Url.Action("SearchProducts", "ChuyenKho")"
+     data-template-url="@Url.Action("DownloadTemplate", "ChuyenKho")"
+     data-import-url="@Url.Action("ImportExcel", "ChuyenKho")"
      data-save-url="@Url.Action("Save", "ChuyenKho")"
      data-index-url="@Url.Action("Index", "ChuyenKho")"
      data-warehouse-id="@Model.MaKhoNguon"
@@ -36,6 +38,10 @@
                 </div>
 
                 <div class="tools relw">
+                    <button type="button" class="btn btn-tool" id="btnImportExcel" title="Nhập danh sách hàng từ file Excel/CSV">
+                        <i class="bi bi-box-arrow-in-down"></i>
+                    </button>
+                    <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" style="display: none;" />
                     <button type="button" class="btn btn-tool" id="tNote" title="Lưu ý khi chuyển kho">
                         <i class="bi bi-info-circle"></i>
                     </button>
@@ -100,11 +106,12 @@
 
                 <!-- Trạng thái trống (Empty State) -->
                 <div class="xl-empty" id="emptyLineBox" style="@(Model.Lines != null && Model.Lines.Any() ? "display: none;" : "")">
-                    <div class="empty-icon-wrap mb-2">
-                        <i class="bi bi-boxes" style="font-size: 48px; color: #94a3b8;"></i>
-                    </div>
-                    <b style="font-size: 16px; color: #1e293b;">Chưa có hàng hóa nào được chọn</b>
-                    <span class="text-muted small">Tìm hàng hóa ở thanh tìm kiếm phía trên (F3), nhập mã hoặc quét mã vạch để thêm vào phiếu chuyển.</span>
+                    <b>Thêm sản phẩm từ file excel</b>
+                    <span class="text-muted small">(Tải về file mẫu: <a href="javascript:void(0)" id="btnDownloadTemplate" class="text-primary text-decoration-none fw-semibold">Excel file</a> )</span>
+                    <button type="button" class="btn solid mt-2" id="btnPickExcel">
+                        <i class="bi bi-file-earmark-excel"></i> Chọn file dữ liệu
+                    </button>
+                    <span class="text-muted small mt-2" style="font-size: 12px;">Hoặc tìm hàng hóa ở thanh tìm kiếm phía trên (F3)</span>
                 </div>
 
                 <!-- Footer tóm tắt số liệu hàng hóa -->

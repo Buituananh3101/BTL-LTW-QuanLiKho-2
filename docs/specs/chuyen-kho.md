@@ -63,19 +63,17 @@
   - Dòng cha + Dòng chi tiết viền chữ nhật `#0070f3` (`KiotFilter.initRowDetail`).
   - Dòng tổng hợp `tr.summary-row` ngay dưới thead hiển thị tổng SL chuyển, tổng SL nhận, tổng Giá trị chuyển.
   - Drawer chi tiết chuẩn Kiểm tồn (`PhieuKiemKe`):
-    - Tab bar `.dp-tabs` với nút tab `.dp-tab.active` gạch chân xanh KiotViet.
-    - Tiêu đề mã phiếu `h2` với mã in đậm `18px`, badge trạng thái bo tròn pill chuẩn mực.
-    - Hàng thông tin tóm tắt `.meta` thẳng hàng ngăn cách bằng gạch đứng `border-right: 1px solid #cfd5de`: Từ kho, Tới kho, Người tạo, Ngày tạo; gãy dòng `<i class="br"></i>` Người chuyển, Ngày chuyển, Người nhận, Ngày nhận.
-    - Bảng danh sách hàng hóa `.dtl-tbl` với header `#f8fafc`, hàng tìm kiếm nhanh `tr.fin` (`.dtl-search-code`, `.dtl-search-name`), định dạng số lượng và thành tiền canh phải sắc nét.
-    - Khối ghi chú và tóm tắt số liệu `.dp-bottom`: ô ghi chú `.dp-note` bên trái, danh sách số liệu `.sums` bên phải (không dùng thẻ đóng hộp).
-    - Hàng nút hành động `.dp-actions` phân cách gạch trên, các nút phụ bên trái, dồn nút chính sang phải qua `.ms-auto`.
+    - Tab bar `.dp-tabs`, tiêu đề mã phiếu in đậm `18px`, badge trạng thái pill chuẩn mực.
+    - Hàng thông tin tóm tắt `.meta` (Kho gửi, Kho nhận, Người tạo/chuyển/nhận, Ngày tạo/chuyển/nhận).
+    - Bảng danh sách hàng hóa `.dtl-tbl` với header `#f8fafc`, hàng tìm kiếm nhanh `tr.fin`.
+    - Khối ghi chú và tóm tắt số liệu `.dp-bottom`, hàng nút hành động `.dp-actions`.
   - Tùy chọn ẩn/hiển thị 11 cột lưu `localStorage` (`KiotFilter.initColumnToggle`).
-  - Sắp xếp cột 3 trạng thái click-to-sort (ASC -> DESC -> Bỏ sắp xếp) với icon mũi tên trên 11 cột dữ liệu.
+  - Sắp xếp cột 3 trạng thái click-to-sort (ASC -> DESC -> Bỏ sắp xếp) trên 11 cột dữ liệu.
   - Phân trang AJAX (`_Pagination.cshtml`).
 
 ### 4.2. Màn hình 2: Lập/Sửa phiếu (`/ChuyenKho/Create`, `/ChuyenKho/Edit/{id}`)
 - Layout 2 cột chuẩn KiotViet:
-  - Cột trái: Nút quay lại, ô tìm hàng F3 autocomplete (icon chuẩn tách biệt chữ, không bị đè chữ), bảng lưới hàng hóa có cảnh báo vượt tồn.
+  - Cột trái: Nút quay lại, ô tìm hàng F3 autocomplete, nút nhập Excel (`#btnImportExcel`), empty state "Thêm sản phẩm từ file excel" với nút "Chọn file dữ liệu" (`#btnPickExcel`) & link tải file mẫu (`Mau_Chuyen_Kho_KiotViet.xlsx`, `DownloadTemplate`), import server-side ClosedXML qua API `ChuyenKho/ImportExcel`, bảng lưới hàng hóa có cảnh báo vượt tồn.
   - Cột phải: Box lộ trình `routebox` (Kho gửi -> Kho nhận), dropdown kho nhận `.wh-custom-select-btn`, thời gian `.dtpop` & mã chuyển hàng `.inp` căn phải đồng bộ Kiểm kho (nhập tay hoặc để trống tự sinh `CK000001`...), tổng SL, tổng giá trị, ghi chú.
   - Thu gọn/mở rộng panel phải mượt mà 0.25s chuẩn Kiểm kho (F4, `.f-panel-inner` 440px cố định chống giật méo nội dung, nút trượt đồng bộ mép).
   - Nút cố định đáy: "Lưu tạm" (`NHAP`) và "Chuyển hàng" (`DA_XUAT`).
@@ -90,6 +88,6 @@
 1. Migration SQL `13_bo_sung_chuyen_kho.sql` & cập nhật Model EF Core.
 2. ViewModel và `ChuyenKhoController.cs` (Transaction, chặn âm kho, BaseKhoController).
 3. Giao diện Danh sách `Index`, `_ChuyenKhoFilterSidebar`, `_ChuyenKhoTable`.
-4. Giao diện Lập/Sửa `Create`, `Edit`, `_ChuyenKhoForm` (F3 autocomplete, custom dtPop, toggle panel).
+4. Giao diện Lập/Sửa `Create`, `Edit`, `_ChuyenKhoForm` (F3 autocomplete, custom dtPop, toggle panel, nạp Excel/CSV).
 5. Modal `_ReceiveModal` nhận hàng & cập nhật `_MainMenu.cshtml`.
 6. Biên dịch và đồng bộ `PROGRESS.md`.

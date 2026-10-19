@@ -128,307 +128,20 @@
     };
   });
 
-  /* ---------- Quản lý 5 ảnh sản phẩm: 1 ảnh to + 4 ảnh nhỏ bên phải ---------- */
-  let imgs = []; // Mảng chứa tối đa 5 ảnh: imgs[0] là ảnh to (Ảnh chính), imgs[1..4] là 4 ảnh nhỏ bên phải (Ảnh phụ)
-  const MAX_IMG = 5;
-
-  function renderImgs() {
-    const mainBox = $('#hhImgMain');
-    const thumbsBox = $('#hhThumbs');
-    if (!mainBox || !thumbsBox) return;
-
-    // 1. Render Ảnh to (imgs[0])
-    if (imgs.length > 0 && imgs[0]) {
-      mainBox.innerHTML = `
-        <img src="${imgs[0].url}" alt="Ảnh chính hàng hóa">
-        <span class="hh-main-badge">Ảnh chính</span>
-        <button type="button" class="hh-main-x" id="btnRemoveMainImg" title="Xóa ảnh chính" aria-label="Xóa ảnh chính">×</button>
-        <div class="hh-main-change-hint">Bấm để đổi ảnh</div>
-      `;
-    } else {
-      mainBox.innerHTML = `
-        <svg class="hh-ic" style="width:44px;height:44px;"><use href="#i-img"/></svg>
-        <span>Chưa có ảnh</span>
-        <small style="font-size:11.5px;color:#9ca3af;margin-top:2px;">(Bấm để thêm ảnh chính)</small>
-      `;
-    }
-
-    // 2. Render đúng 4 ảnh nhỏ bên phải (tương ứng imgs[1..4])
-    const subImgs = imgs.slice(1);
-    let h = '';
-
-    for (let i = 0; i < 4; i++) {
-      if (i < subImgs.length) {
-        // Đã có ảnh phụ thứ i + 1
-        h += `
-          <div class="hh-th" data-sub-idx="${i}" role="button" tabindex="0" title="Ảnh phụ ${i + 1} (Bấm để đổi thành ảnh chính)">
-            <img src="${subImgs[i].url}" alt="Ảnh phụ ${i + 1}">
-            <button type="button" class="hh-th-x" data-del-sub="${i}" aria-label="Xóa ảnh phụ ${i + 1}">×</button>
-          </div>
-        `;
-      } else if (i === subImgs.length && imgs.length < MAX_IMG) {
-        // Nút thêm ảnh vào slot kế tiếp
-        h += `
-          <button type="button" class="hh-th add" id="btnAddImgThumb" title="Thêm ảnh phụ (${imgs.length}/5)">
-            ${ICON('i-plus')}
-          </button>
-        `;
-      } else {
-        // Slot trống placeholder
-        h += `
-          <div class="hh-th placeholder" tabindex="-1" aria-hidden="true" title="Vị trí ảnh ${i + 2}">
-            ${ICON('i-img')}
-          </div>
-        `;
-      }
-    }
-
-    thumbsBox.innerHTML = h;
-  }
-
-  // Click vào vùng ảnh chính:
-  // - Nếu chưa có ảnh: mở chọn ảnh mới
-  // - Nếu đã có ảnh: mở chọn ảnh thay thế ảnh chính
-  $('#hhImgMain').onclick = (e) => {
-    if (e.target.closest('#btnRemoveMainImg')) {
-      e.stopPropagation();
-      if (imgs.length > 0) {
-        const doRemove = () => {
-          imgs.splice(0, 1);
-          renderImgs();
-          showToast('Đã xóa ảnh chính');
-        };
-        if (window.KiotConfirm) {
-          window.KiotConfirm.show({
-            title: 'Xóa ảnh chính',
-            message: 'Bạn có chắc chắn muốn xóa ảnh đại diện chính này không? Thao tác này không thể hoàn tác.',
-            onConfirm: doRemove
-          });
-        } else if (confirm('Bạn có chắc chắn muốn xóa ảnh chính này không?')) {
-          doRemove();
-        }
-      }
-      return;
-    }
-    if (!imgs.length) {
-      $('#hhImgFile').click();
-    } else {
-      $('#hhImgFileReplaceMain')?.click();
-    }
-  };
-
-  // Click trên 4 ảnh nhỏ bên phải:
-  $('#hhThumbs').addEventListener('click', e => {
-    // 1. Xóa ảnh phụ
-    const delBtn = e.target.closest('[data-del-sub]');
-    if (delBtn) {
-      e.stopPropagation();
-      const subIdx = +delBtn.dataset.delSub;
-      const doRemove = () => {
-        imgs.splice(subIdx + 1, 1);
-        renderImgs();
-        showToast('Đã xóa ảnh phụ');
-      };
-      if (window.KiotConfirm) {
-        window.KiotConfirm.show({
-          title: 'Xóa ảnh phụ',
-          message: 'Bạn có chắc chắn muốn xóa ảnh phụ này không? Thao tác này không thể hoàn tác.',
-          onConfirm: doRemove
-        });
-      } else if (confirm('Bạn có chắc chắn muốn xóa ảnh phụ này không?')) {
-        doRemove();
-      }
-      return;
-    }
-
-    // 2. Click nút thêm ảnh phụ
-    const addBtn = e.target.closest('#btnAddImgThumb');
-    if (addBtn) {
-      $('#hhImgFile').click();
-      return;
-    }
-
-    // 3. Click vào ảnh phụ để ĐỔI LÀM ẢNH CHÍNH (swap với imgs[0])
-    const th = e.target.closest('[data-sub-idx]');
-    if (th) {
-      const subIdx = +th.dataset.subIdx;
-      const targetIdx = subIdx + 1;
-      if (targetIdx < imgs.length) {
-        const tmp = imgs[0];
-        imgs[0] = imgs[targetIdx];
-        imgs[targetIdx] = tmp;
-        renderImgs();
-        showToast('Đã đổi làm ảnh chính');
-      }
-    }
-  });
-
-  // Nén và tối ưu kích thước ảnh trên Canvas trước khi nạp (giảm từ 5MB xuống ~100-200KB, tăng tốc độ 10x)
-  function compressImage(file, maxDimension = 1200, quality = 0.88) {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        const img = new Image();
-        img.onload = () => {
-          let width = img.width;
-          let height = img.height;
-
-          if (width > maxDimension || height > maxDimension) {
-            if (width > height) {
-              height = Math.round((height * maxDimension) / width);
-              width = maxDimension;
-            } else {
-              width = Math.round((width * maxDimension) / height);
-              height = maxDimension;
-            }
-          }
-
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-
-          // Bật khử răng cưa chất lượng cao khi thu nhỏ ảnh
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-
-          // Đổ nền trắng tinh khiết toàn bộ canvas trước khi vẽ
-          // Khắc phục triệt để lỗi ảnh trong suốt (PNG, WebP, GIF) bị browser chuyển thành nền đen khi nén sang JPEG
-          ctx.fillStyle = '#FFFFFF';
-          ctx.fillRect(0, 0, width, height);
-
-          // Vẽ ảnh lên nền trắng
-          ctx.drawImage(img, 0, 0, width, height);
-          const compressed = canvas.toDataURL('image/jpeg', quality);
-          resolve(compressed);
-        };
-        img.onerror = () => resolve(e.target.result);
-        img.src = e.target.result;
-      };
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(file);
-    });
-  }
-
-  // Chọn ảnh từ máy tính (thêm mới)
-  $('#hhImgFile')?.addEventListener('change', async e => {
-    const files = [...e.target.files];
-    if (!files.length) return;
-
-    for (const f of files) {
-      if (imgs.length >= MAX_IMG) {
-        showToast('Chỉ được chọn tối đa ' + MAX_IMG + ' ảnh (1 ảnh chính và 4 ảnh phụ).');
-        break;
-      }
-      if (f.size > 15 * 1024 * 1024) {
-        showToast('Ảnh "' + f.name + '" vượt quá dung lượng 15MB.');
-        continue;
-      }
-
-      const b64 = await compressImage(f);
-      if (b64 && imgs.length < MAX_IMG) {
-        imgs.push({ base64: b64, url: b64 });
-        renderImgs();
-      }
-    }
-
-    e.target.value = '';
-  });
-
-  // Thay thế riêng ảnh chính
-  $('#hhImgFileReplaceMain')?.addEventListener('change', async e => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    if (file.size > 15 * 1024 * 1024) {
-      showToast('Ảnh "' + file.name + '" vượt quá dung lượng 15MB.');
-      return;
-    }
-
-    const b64 = await compressImage(file);
-    if (b64) {
-      if (imgs.length > 0) {
-        imgs[0] = { base64: b64, url: b64 };
-      } else {
-        imgs.push({ base64: b64, url: b64 });
-      }
-      renderImgs();
-      showToast('Đã thay đổi ảnh chính');
-    }
-
-    e.target.value = '';
-  });
-
-  // Hỗ trợ Kéo & Thả ảnh trực tiếp vào khung ảnh chính
-  const mainImgEl = $('#hhImgMain');
-  if (mainImgEl) {
-    ['dragenter', 'dragover'].forEach(name => {
-      mainImgEl.addEventListener(name, e => {
-        e.preventDefault();
-        e.stopPropagation();
-        mainImgEl.classList.add('drag-over');
-      });
-    });
-    ['dragleave', 'drop'].forEach(name => {
-      mainImgEl.addEventListener(name, e => {
-        e.preventDefault();
-        e.stopPropagation();
-        mainImgEl.classList.remove('drag-over');
-      });
-    });
-    mainImgEl.addEventListener('drop', async e => {
-      const files = [...(e.dataTransfer?.files || [])].filter(f => f.type && f.type.startsWith('image/'));
-      if (!files.length) return;
-
-      for (const f of files) {
-        if (imgs.length >= MAX_IMG) {
-          showToast('Chỉ được chọn tối đa ' + MAX_IMG + ' ảnh.');
-          break;
-        }
-        if (f.size > 15 * 1024 * 1024) {
-          showToast('Ảnh "' + f.name + '" vượt quá dung lượng 15MB.');
-          continue;
-        }
-        const b64 = await compressImage(f);
-        if (b64 && imgs.length < MAX_IMG) {
-          imgs.push({ base64: b64, url: b64 });
-          renderImgs();
-        }
-      }
-    });
-  }
-
-  // Hỗ trợ Dán ảnh trực tiếp từ Clipboard (Ctrl + V) khi đang mở modal
-  window.addEventListener('paste', async e => {
-    const ov = $('#hhModalOv');
-    if (!ov || ov.classList.contains('hidden') || ov.style.display === 'none') return;
-
-    const active = document.activeElement;
-    if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA') && active.type !== 'file') {
-      return;
-    }
-
-    const items = e.clipboardData?.items;
-    if (!items) return;
-
-    for (const item of items) {
-      if (item.type && item.type.startsWith('image/')) {
-        const file = item.getAsFile();
-        if (file) {
-          if (imgs.length >= MAX_IMG) {
-            showToast('Chỉ được chọn tối đa ' + MAX_IMG + ' ảnh.');
-            break;
-          }
-          const b64 = await compressImage(file);
-          if (b64 && imgs.length < MAX_IMG) {
-            imgs.push({ base64: b64, url: b64 });
-            renderImgs();
-            showToast('Đã thêm ảnh từ clipboard');
-          }
-        }
-      }
-    }
-  });
+  /* ---------- Quản lý 5 ảnh sản phẩm (Đóng gói KiotFilter.initImageUploader) ---------- */
+  const imgUploader = (window.KiotFilter && typeof KiotFilter.initImageUploader === 'function')
+    ? KiotFilter.initImageUploader({
+        mainBoxSelector: '#hhImgMain',
+        thumbsBoxSelector: '#hhThumbs',
+        fileInputSelector: '#hhImgFile',
+        fileReplaceMainSelector: '#hhImgFileReplaceMain',
+        modalSelector: '#hhModalOv',
+        maxImages: 5,
+        maxDimension: 1200,
+        quality: 0.88,
+        onToast: (msg) => showToast(msg)
+      })
+    : null;
 
   /* ---------- Modal Nhập Tên Nhanh (Nhóm / ĐVT / Vị trí / Thuộc tính) ---------- */
   let promptCb = null;
@@ -951,16 +664,21 @@
       Array.from(select.options).forEach(opt => {
         if (opt.value === '') return;
         const isSel = (String(select.value) === String(opt.value));
+        const level = opt.dataset.level ? parseInt(opt.dataset.level) : 0;
         const it = document.createElement('div');
         it.className = `hh-cs-item ${isSel ? 'selected' : ''}`;
         it.dataset.val = opt.value;
+        if (level > 0) {
+          it.style.paddingLeft = (12 + level * 16) + 'px';
+        }
+        const treePrefix = level > 0 ? `<span class="kiot-tree-branch text-muted me-1" style="font-family:monospace;font-size:12px;">└─</span>` : '';
         const editBtnHtml = isNhom ? `
           <button type="button" class="hh-item-edit-btn" data-type="nhom" data-id="${opt.value}" data-val="${esc(opt.textContent.trim())}" title="Sửa nhóm hàng" aria-label="Sửa nhóm hàng ${esc(opt.textContent.trim())}">
             <svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>
           </button>
         ` : '';
         it.innerHTML = `
-          <span>${esc(opt.textContent.trim())}</span>
+          <span>${treePrefix}${esc(opt.textContent.trim())}</span>
           ${editBtnHtml}
           <svg class="hh-check-icon" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#2563eb;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 12l5 5L20 6"/></svg>
         `;
@@ -1661,10 +1379,10 @@
       thuocTinhJson: JSON.stringify(attrData),
       moTa: moTaHtml || null,
       trangThai: isDirectSale ? 'DANG_BAN' : 'NGUNG_BAN',
-      hinhAnhBase64: (imgs.length > 0 && imgs[0]) ? imgs[0].base64 : null,
-      danhSachHinhAnhBase64: imgs.map(i => i.base64).filter(Boolean),
+      hinhAnhBase64: (imgUploader && imgUploader.getImages().length > 0 && imgUploader.getImages()[0]) ? imgUploader.getImages()[0].base64 : null,
+      danhSachHinhAnhBase64: imgUploader ? imgUploader.getImages().map(i => i.base64).filter(Boolean) : [],
       viTriAnhChinh: 0,
-      xoaHinhAnh: imgs.length === 0
+      xoaHinhAnh: imgUploader ? (imgUploader.getImages().length === 0) : true
     };
   }
 
@@ -1696,8 +1414,7 @@
     $('#formMoTa').innerHTML = '';
     $('#chkBanTrucTiep').checked = true;
 
-    imgs = [];
-    renderImgs();
+    if (imgUploader) imgUploader.clear();
 
     attrRows.innerHTML = '';
     addAttrRow();
@@ -1713,7 +1430,8 @@
     const payload = collectFormData();
     const isEdit = payload.maHang > 0;
     const url = isEdit ? ('/HangHoa/Edit/' + payload.maHang) : '/HangHoa/Create';
-    const mainImgUrl = (imgs.length > 0 && imgs[0]) ? imgs[0].url : null;
+    const curImgs = imgUploader ? imgUploader.getImages() : [];
+    const mainImgUrl = (curImgs.length > 0 && curImgs[0]) ? curImgs[0].url : null;
 
     const saveBtn = $('#btnSaveProduct');
     const origText = saveBtn.textContent;
@@ -1839,19 +1557,15 @@
         $('#chkBanTrucTiep').checked = (res.trangThai === 'DANG_BAN');
 
         // Nạp tối đa 5 ảnh (1 ảnh to + 4 ảnh nhỏ bên phải)
-        imgs = [];
-        if (Array.isArray(res.danhSachHinhAnhBase64) && res.danhSachHinhAnhBase64.length > 0) {
-          imgs = res.danhSachHinhAnhBase64.map(b => ({ base64: b, url: b }));
-          const pMain = Math.min(res.viTriAnhChinh || 0, imgs.length - 1);
-          if (pMain > 0 && pMain < imgs.length) {
-            // Đưa ảnh chính lên vị trí đầu imgs[0] (Ảnh to)
-            const mainImg = imgs.splice(pMain, 1)[0];
-            imgs.unshift(mainImg);
+        if (imgUploader) {
+          if (Array.isArray(res.danhSachHinhAnhBase64) && res.danhSachHinhAnhBase64.length > 0) {
+            imgUploader.setImages(res.danhSachHinhAnhBase64, res.viTriAnhChinh || 0);
+          } else if (res.hinhAnhBase64) {
+            imgUploader.setImages([res.hinhAnhBase64]);
+          } else {
+            imgUploader.clear();
           }
-        } else if (res.hinhAnhBase64) {
-          imgs = [{ base64: res.hinhAnhBase64, url: res.hinhAnhBase64 }];
         }
-        renderImgs();
 
         // Nạp thuộc tính
         if (attrRows) {
@@ -1982,5 +1696,7 @@
   }
   renderLocationTags();
   renderLocationDropdown();
-  renderImgs();
+  if (imgUploader) {
+    imgUploader.render();
+  }
 })();
