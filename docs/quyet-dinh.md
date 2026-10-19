@@ -41,5 +41,8 @@
 - **2026-10-19 (Phiên 151)** – Báo cáo Tồn kho theo kho (`/BaoCao/TonKho`) dạng Pivot Kho – Tính toán động từ `vw_TonKhoHienTai`; bảng Pivot sinh động cột theo kho; 4 thẻ Summary KPI; drawer chi tiết định mức; xuất Excel ClosedXML; lọc AJAX multi-select kho, nhóm hàng, tình trạng tồn.
 - **2026-10-19 (Phiên 155)** – Báo cáo Thẻ kho (`/BaoCao/TheKho`) chuyên nghiệp – Tính toán động Tồn đầu kỳ, Tồn lũy kế và Tồn cuối kỳ từ `vw_BienDongKho`; 4 thẻ KPI Summary; tích hợp Autocomplete F3 chọn hàng, Lego `_KiotDateFilter`, `_KiotStatusFilter`, xuất Excel ClosedXML; nạp động Tab Thẻ kho trong Drawer Hàng hóa.
 - **2026-10-19 (Phiên 161)** – Chuẩn hóa Hệ thống Z-Index Đa Tầng Toàn Hệ Thống – Loại bỏ `z-index: 1` trên `.app-main-body` tránh tạo stacking context giam cầm modal/overlay; chuẩn hóa dropdowns/autocompletes/popovers trong trang ở Layer 2 (150–500), Header/Mega Menu ở Layer 3 (1020), Modals/Drawers ở Layer 4 (1050–1065), Confirmation Prompts ở Layer 5 (1090–1095) và Toasts ở Layer 6 (9999).
+- **2026-10-19 (Phiên 176)** – Đổi tên đề tài thành "Xây dựng ứng dụng Web quản lý kho hàng nội bộ đa chi nhánh" – Phản ánh chuẩn xác hàm lượng kỹ thuật (Web Application), bản chất WMS/ERP nội bộ doanh nghiệp và khoanh vùng phạm vi học thuật khi bảo vệ đồ án.
+- **2026-10-19 (Phiên 181)** – Cập nhật Giảng viên hướng dẫn & Lớp học phần – GVHD: thầy Lại Mạnh Dũng; Lớp học phần: Nhóm 3 -- Lớp N05 -- K65 trên toàn bộ trang bìa và lời nói đầu.
+- **2026-10-19 (Phiên 182)** – Tinh gọn Mục 3.2 Báo cáo LaTeX: Gỡ bỏ 3.2.4 (Lego UI) và 3.2.5 (Stacking Context) – Tập trung Mục 3.2 vào các cơ chế kiến trúc phần mềm cốt lõi (Cookie Authentication, BaseKhoController, ACID Transaction); tự động kéo phân hệ 3.3 lên liền mạch, giữ tổng 76 trang A4 chuẩn mực, 0 Overfull hbox.
 
 
