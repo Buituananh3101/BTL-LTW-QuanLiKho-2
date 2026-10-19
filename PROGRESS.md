@@ -1,44 +1,60 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-19 – Hoàn Thiện Mô Hình ER/RM CSDL & Chuẩn Hóa Báo Cáo LaTeX Trong VS Code (Phiên 165)
+Cập nhật lần cuối: 2026-10-19 – Đồng Bộ CSDL Mẫu & Chụp Mới 9 Phân Hệ Giao Diện Vào Báo Cáo LaTeX (Phiên 166)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất đặc tả kiến trúc Cơ sở dữ liệu và tích hợp đồ họa Sơ đồ ER / RM vào báo cáo LaTeX `docs/latex/main.tex`:
-  + Tài liệu hóa toàn diện 29 bảng vật lý và 2 Views logic trong `docs/so-do-er-va-rm-csdl.md` (chuẩn ER Mermaid + mô hình quan hệ RM toán học + 53 ràng buộc toàn vẹn tham chiếu).
-  + Tạo từ điển CSDL cô đọng `docs/specs/tu-dien-co-so-du-lieu.md` tuân thủ Luật 12 AGENTS.md ($\le 8.000$ ký tự).
-  + Kết xuất và chuẩn hóa 6 sơ đồ đồ họa Mermaid chất lượng cao dạng ngang (`direction LR`), loại bỏ hoàn toàn hiện tượng sơ đồ dọc quá khổ làm tràn trang.
-  + Chuẩn hóa bố cục LaTeX: đóng gói tiêu đề bên trong môi trường `figure`, khống chế kích thước `height=12.5cm - 13.5cm, keepaspectratio` và chèn `\clearpage` đảm bảo tiêu đề, hình ảnh và caption luôn nằm trọn vẹn trong CÙNG 1 TRANG, xóa bỏ triệt để tình trạng tiêu đề mồ côi và trang trắng.
-  + Biên dịch XeLaTeX trực tiếp trong VS Code đạt kết quả hoàn hảo (0 Errors). Cập nhật gói nén `docs/BaoCao_LaTeX_Overleaf.zip`.
+- Đã hoàn tất chụp mới và đồng bộ 100% hình ảnh thực tế từ hệ thống chạy trực tiếp vào Mục 3.3 Báo cáo LaTeX (`docs/latex/main.tex`):
+  + Thực thi trọn vẹn kịch bản nạp dữ liệu mẫu toàn diện `migrations/sql/15_du_lieu_mau_toan_dien.sql` vào cơ sở dữ liệu `QuanLyKhoPhuQuocLTW`.
+  + Tự động hóa chụp màn hình chuẩn KiotViet độ phân giải 1440x900 cho 9 phân hệ chức năng: Đăng nhập & Chọn kho, Danh mục Hàng hóa, Kiểm kho & Cân bằng, Báo cáo Tồn kho đa kho, Báo cáo Thẻ kho, Nhập hàng, Chuyển kho, Xuất hủy, Trả hàng nhập.
+  + Mở rộng cấu trúc Mục 3.3 thành 9 tiểu mục độc lập (3.3.1 - 3.3.9) với thuyết minh chi tiết luồng nghiệp vụ, công thức tính toán và giao diện minh họa.
+  + Chuẩn hóa trang bìa LaTeX: giữ tỷ lệ logo GTVT hài hòa, căn chỉnh khoảng cách tên đề tài (`\\[0.35cm]`) giúp trang bìa nằm trọn vẹn trên đúng 1 trang không tràn.
+  + Biên dịch XeLaTeX thành công đạt 59 trang hoàn chỉnh, 0 Errors, 0 tham chiếu undefined. Cập nhật gói nén `docs/BaoCao_LaTeX_Overleaf.zip`.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm thử trực quan các màn hình danh sách và bộ lọc trên giao diện người dùng KiotViet (Hàng hóa, Nhập hàng, Trả hàng nhập, Xuất hủy, Chuyển kho, Kiểm kho, Báo cáo tồn kho, Thẻ kho).
+1. Kiểm thử trực quan và rà soát các màn hình danh sách, form tạo mới chứng từ trên giao diện web.
 2. Chuẩn bị nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
 
 ---
 
-- **Hoàn Thiện Mô Hình ER/RM CSDL & Chuẩn Hóa Báo Cáo LaTeX Trong VS Code (Phiên 165)**:
-  - **Nhu cầu**: Người dùng yêu cầu: (1) Lên kế hoạch và làm rõ toàn bộ kiến trúc CSDL của dự án với Sơ đồ ER và Lược đồ RM; (2) Gắn sơ đồ vào báo cáo học thuật LaTeX trong VS Code; (3) Giữ đồ họa trực quan Mermaid giống hệt file `.md`; (4) Sửa lỗi sơ đồ bị tràn ra ngoài, kích thước quá to, và lỗi "tên sơ đồ nằm ở trang trước bị trắng trơn còn sơ đồ bị đẩy sang trang tiếp theo".
-  - **Nguyên nhân cốt lõi**:
-    1. Tiêu đề sơ đồ nằm ở ngoài môi trường `\begin{figure}[H]`, khi hình ảnh quá cao không vừa phần còn lại của trang, LaTeX tự động đẩy `figure` sang trang tiếp theo, để lại tiêu đề cô đơn trên trang trắng.
-    2. Sơ đồ ban đầu có tỉ lệ dọc hẹp (width/height chỉ 0.31 - 0.49), khi phóng theo `width=0.95\textwidth` làm chiều cao bị đội lên tới 30-48cm, tràn qua chân trang A4.
+- **Đồng Bộ CSDL Mẫu & Chụp Mới 9 Phân Hệ Giao Diện Vào Báo Cáo LaTeX (Phiên 166)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "3.3 Mô tả kết quả đạt được qua các phân hệ tôi mới cập nhật csdl mẫu và sửa lại một chút, bạn hãy chụp và chèn lại".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Nạp & Đồng bộ CSDL Mẫu**:
+       - Nạp thành công toàn bộ `15_du_lieu_mau_toan_dien.sql` vào SQL Server `QuanLyKhoPhuQuocLTW` (34 mặt hàng, 6 phiếu chuyển, 4 phiếu trả, 4 phiếu hủy, 2 đơn bán, phiếu kiểm kê cân bằng).
+    2. **Tự động hóa chụp màn hình Headless Edge (1440x900)**:
+       - Chụp mới 9 phân hệ thực tế: `hinh3_1_login.png`, `hinh3_2_hanghoa.png`, `hinh3_3_kiemkho.png`, `hinh3_4_bcton.png`, `hinh3_5_thekho.png`, `hinh3_6_nhaphang.png`, `hinh3_7_chuyenkho.png`, `hinh3_8_xuat_huy.png`, `hinh3_9_tra_hang.png`.
+       - Đảm bảo mã nguồn C# được khôi phục nguyên trạng, không lưu lại mã dev tạm.
+    3. **Cập nhật & Thuyết minh chi tiết Mục 3.3**:
+       - Chia tách 9 tiểu mục 3.3.1 đến 3.3.9 thuyết minh sâu về nghiệp vụ KiotViet, cơ chế tính toán và kiểm soát giao dịch.
+    4. **Biên dịch & Đóng gói**:
+       - Biên dịch XeLaTeX ra file `docs/latex/main.pdf` 59 trang hoàn chỉnh.
+       - Cập nhật file nén `docs/BaoCao_LaTeX_Overleaf.zip` chứa đầy đủ file nguồn LaTeX, ảnh logo và 9 ảnh chụp phân hệ.
+
+---
+
+- **Hoàn Thiện Mô Hình ER/RM CSDL & Chuẩn Hóa Bố Cục Sơ Đồ ER (Phiên 165)**:
+  - **Nhu cầu**: Người dùng yêu cầu: (1) Lên kế hoạch và làm rõ toàn bộ kiến trúc CSDL của dự án với Sơ đồ ER và Lược đồ RM; (2) Gắn sơ đồ vào báo cáo học thuật LaTeX trong VS Code; (3) Giữ đồ họa trực quan Mermaid giống hệt file `.md`; (4) Sửa lỗi sơ đồ bị tràn ra ngoài, kích thước quá to, và lỗi "tên sơ đồ nằm ở trang trước bị trắng trơn còn sơ đồ bị đẩy sang trang tiếp theo"; (5) **Tiêu đề sơ đồ và chú thích (Caption) vẫn giữ nguyên theo chiều dọc bình thường (đọc xuôi theo trang A4), chỉ có bản thân hình ảnh sơ đồ là xoay ngang 90 độ**; riêng sơ đồ Cụm 4 giữ nguyên chiều thẳng đứng.
+  - **Nguyên nhân & Nhu cầu tối ưu**:
+    1. Khi dùng `sidewaysfigure`, toàn bộ tiêu đề và caption bị xoay $90^\circ$ theo hình vẽ, khiến người đọc phải xoay đầu hoặc xoay trang mới đọc được tên mục và caption.
+    2. Giải pháp tối ưu: Đưa về môi trường `figure` thông thường, tiêu đề lớn ở trên và `\caption{...}` ở dưới giữ nguyên chiều đọc xuôi tự nhiên của trang A4 dọc, chỉ thêm tham số `angle=90` vào lệnh `\includegraphics` đối với các sơ đồ có cấu trúc ngang rộng. Chiều cao hình ảnh khống chế `height=18.5cm, keepaspectratio` đảm bảo trọn vẹn cả trang.
+    3. Riêng sơ đồ Cụm 4 đã được sửa lỗi chính tả `ChiTietPhieuChuyenKho` và bổ sung 2 thực thể trung tâm `Kho` + `HangHoa`, kết nối liền mạch toàn bộ 10 bảng và đặt thẳng đứng theo khổ dọc.
   - **Giải pháp & Kết quả thực hiện**:
     1. **Thiết kế sơ đồ ER & RM chuẩn học thuật**:
        - Xây dựng sơ đồ ER tổng quan và 5 sơ đồ ER phân rã chi tiết theo từng cụm nghiệp vụ (RBAC, Hàng hóa, Chuỗi cung ứng, Chuyển kho/Kiểm kê, Bán hàng) cùng lược đồ quan hệ RM toán học và bảng 53 ràng buộc khóa ngoại.
        - Viết file `docs/so-do-er-va-rm-csdl.md` và `docs/specs/tu-dien-co-so-du-lieu.md`.
-    2. **Đồ họa trực quan Mermaid & Tối ưu bố cục ngang**:
+    2. **Đồ họa trực quan Mermaid & Tối ưu bố cục**:
        - Kết xuất 6 ảnh PNG độ nét cao từ Mermaid CLI (`fig_er_tong_quan.png`, `fig_er_rbac.png`, `fig_er_hanghoa.png`, `fig_er_supply_chain.png`, `fig_er_transfer_audit.png`, `fig_er_sales.png`).
-       - Dùng `direction LR` để sơ đồ dàn ngang (tỉ lệ w/h 1.34 - 1.71), khớp hoàn hảo với tỉ lệ trang A4 tiêu chuẩn.
-    3. **Sửa bố cục LaTeX chống tràn & chống mồ côi tiêu đề**:
-       - Đóng gói tiêu đề `{\bfseries\large ...}` trực tiếp vào BÊN TRONG môi trường `figure` để đảm bảo tiêu đề và hình ảnh là một khối nguyên tử (atomic block).
-       - Đặt giới hạn cả chiều rộng và chiều cao: `width=0.90-0.95\textwidth, height=12.5-13.5cm, keepaspectratio`.
-       - Thêm `\clearpage` trước mỗi cụm để mỗi sơ đồ đứng riêng rẽ, ngay ngắn trên 1 trang (các trang từ 21 đến 26).
-       - Khắc phục thẻ `\begin{table}[H]` mở thừa ở dòng 877.
+    3. **Hiện thực hóa môi trường `sidewaysfigure` trên khổ dọc Portrait A4**:
+       - Tích hợp gói `rotating` vào `main.tex`.
+       - Chuyển toàn bộ 6 khối hình ảnh ER sang `\begin{sidewaysfigure} ... \end{sidewaysfigure}`.
+       - Khống chế kích thước tối ưu: `width=0.92\textheight` (~22.7cm) và `height=0.74\textwidth` (~11.8cm), `keepaspectratio`.
+       - Đóng gói Tiêu đề lớn ở trên + Hình ảnh ở giữa + Caption ở dưới thành một khối xoay duy nhất, mỗi sơ đồ nằm gọn gàng trên 1 trang giấy dọc riêng biệt (các trang từ 22 đến 27).
     4. **Kiểm tra & Biên dịch**:
-       - Biên dịch XeLaTeX trực tiếp trong môi trường nội bộ VS Code: `main.pdf` 52 trang ra lò chuẩn xác, 0 Errors, 0 cảnh báo tham chiếu.
+       - Biên dịch XeLaTeX trực tiếp trong môi trường nội bộ VS Code: `main.pdf` 59 trang ra lò chuẩn xác, 100% trang là khổ dọc A4 (`MediaBox: 0 0 595.28 841.89`), 0 Errors, 0 cảnh báo tham chiếu.
        - Cập nhật gói nén `docs/BaoCao_LaTeX_Overleaf.zip`.
 
 ---

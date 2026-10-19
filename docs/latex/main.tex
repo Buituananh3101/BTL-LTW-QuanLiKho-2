@@ -31,6 +31,7 @@
 \usepackage{caption}
 \usepackage{tabularx}
 \usepackage{float}
+\usepackage{rotating}
 
 % Định nghĩa màu sắc in ấn học thuật (100% Black)
 \definecolor{kiotblue}{RGB}{0, 0, 0}
@@ -646,64 +647,67 @@ Các tập thực thể (Entities) cốt lõi trong hệ thống gồm:
     \item \textbf{TAI\_KHOAN (Người dùng):} Nhân sự vận hành hệ thống, được gán vai trò và chi nhánh phụ trách.
 \end{itemize}
 
-Hình~\ref{fig:so_do_er} biểu diễn Sơ đồ ER của hệ thống với các thực thể (hình chữ nhật), mối kết hợp (hình thoi) và các bản số tham gia ($1, N, M$):
+Hình~\ref{fig:so_do_er} biểu diễn Sơ đồ ER của hệ thống với các thực thể (hình chữ nhật), mối kết hợp (hình thoi) và các bản số tham gia ($1, N, M$).
 
-\begin{figure}[H]
+\subsubsection{Các sơ đồ ER phân rã chi tiết theo cụm nghiệp vụ}
+
+Để thể hiện trực quan đầy đủ cấu trúc thuộc tính, kiểu dữ liệu, các ràng buộc khóa (PK, FK, UK) và bản số tham gia (Crow's Foot Notation) chính xác như trong tài liệu đặc tả, hệ thống được phân rã thành 5 sơ đồ cụm nghiệp vụ. Nhằm tối ưu hóa độ rộng quan sát trong khi vẫn giữ tiêu đề và chú thích đọc xuôi theo chiều dọc trang A4 tiêu chuẩn, các sơ đồ có cấu trúc ngang được xoay $90^\circ$ trên trang riêng biệt:
+
+\clearpage
+\begin{figure}[p]
 \centering
-\includegraphics[width=0.98\textwidth, height=11.5cm, keepaspectratio]{figures/fig_er_tong_quan.png}
+{\bfseries\large Mô hình thực thể -- liên kết tổng quát (Sơ đồ ER - Entity-Relationship Diagram)}\par\vspace{0.3cm}
+\includegraphics[angle=90, width=0.95\textwidth, height=18.5cm, keepaspectratio]{figures/fig_er_tong_quan.png}
+\vspace{0.2cm}
 \caption{Mô hình thực thể -- liên kết tổng quát (Sơ đồ ER - Entity-Relationship Diagram)}
 \label{fig:so_do_er}
 \end{figure}
 
-\subsubsection{Các sơ đồ ER phân rã chi tiết theo cụm nghiệp vụ}
-
-Để thể hiện trực quan đầy đủ cấu trúc thuộc tính, kiểu dữ liệu, các ràng buộc khóa (PK, FK, UK) và bản số tham gia (Crow's Foot Notation) chính xác như trong tài liệu đặc tả, hệ thống được phân rã thành 5 sơ đồ cụm nghiệp vụ:
-
 \clearpage
-\begin{figure}[H]
+\begin{figure}[p]
 \centering
 {\bfseries\large a) Cụm 1: Quản trị Hệ thống, Nhân sự \& Phân quyền kho (RBAC)}\par\vspace{0.3cm}
-\includegraphics[width=0.92\textwidth, height=13cm, keepaspectratio]{figures/fig_er_rbac.png}
+\includegraphics[angle=90, width=0.95\textwidth, height=18.5cm, keepaspectratio]{figures/fig_er_rbac.png}
 \vspace{0.2cm}
 \caption{Sơ đồ ER Cụm Quản trị Hệ thống, Nhân sự \& Phân quyền kho (RBAC)}
 \label{fig:er_rbac}
 \end{figure}
 
 \clearpage
-\begin{figure}[H]
+\begin{figure}[p]
 \centering
 {\bfseries\large b) Cụm 2: Danh mục Hàng hóa, Định mức tồn \& Đơn vị tính}\par\vspace{0.3cm}
-\includegraphics[width=0.92\textwidth, height=13cm, keepaspectratio]{figures/fig_er_hanghoa.png}
+\includegraphics[angle=90, width=0.95\textwidth, height=18.5cm, keepaspectratio]{figures/fig_er_hanghoa.png}
 \vspace{0.2cm}
 \caption{Sơ đồ ER Cụm Danh mục Hàng hóa, Định mức tồn \& Đơn vị tính}
 \label{fig:er_hanghoa}
 \end{figure}
 
 \clearpage
-\begin{figure}[H]
+\begin{figure}[p]
 \centering
 {\bfseries\large c) Cụm 3: Chuỗi cung ứng (Nhập hàng \& Trả hàng Nhà cung cấp)}\par\vspace{0.3cm}
-\includegraphics[width=0.95\textwidth, height=13cm, keepaspectratio]{figures/fig_er_supply_chain.png}
+\includegraphics[angle=90, width=0.95\textwidth, height=18.5cm, keepaspectratio]{figures/fig_er_supply_chain.png}
 \vspace{0.2cm}
 \caption{Sơ đồ ER Cụm Chuỗi cung ứng Nhập kho \& Xuất trả nhà cung cấp}
 \label{fig:er_supply_chain}
 \end{figure}
 
 \clearpage
-\begin{figure}[H]
+\begin{figure}[p]
 \centering
 {\bfseries\large d) Cụm 4: Luân chuyển nội bộ, Xuất hủy \& Kiểm kê - Cân bằng kho}\par\vspace{0.3cm}
-\includegraphics[width=0.90\textwidth, height=13.5cm, keepaspectratio]{figures/fig_er_transfer_audit.png}
+\includegraphics[width=0.95\textwidth, height=18.5cm, keepaspectratio]{figures/fig_er_transfer_audit.png}
 \vspace{0.2cm}
 \caption{Sơ đồ ER Cụm Điều chuyển kho, Xuất hủy \& Kiểm kê cân bằng kho}
 \label{fig:er_transfer_audit}
 \end{figure}
 
 \clearpage
-\begin{figure}[H]
+\begin{figure}[p]
 \centering
 {\bfseries\large e) Cụm 5: Bán hàng \& Quản lý dòng tiền (Khách hàng \& Khoản thu)}\par\vspace{0.3cm}
-\includegraphics[width=0.92\textwidth, height=12.5cm, keepaspectratio]{figures/fig_er_sales.png}
+\includegraphics[angle=90, width=0.95\textwidth, height=18.5cm, keepaspectratio]{figures/fig_er_sales.png}
 \vspace{0.2cm}
 \caption{Sơ đồ ER Cụm Đơn bán hàng \& Quản lý khoản thu}
 \label{fig:er_sales}
@@ -1267,7 +1271,10 @@ Hệ thống thiết lập thang đo z-index 6 tầng chuẩn hóa:
 
 \section{Mô tả kết quả đạt được qua các phân hệ}
 
-Dưới đây là mô tả kết quả đạt được và vị trí đính kèm ảnh minh họa các phân hệ chức năng:
+Dưới đây là mô tả chi tiết kết quả xây dựng các phân hệ chức năng kèm hình ảnh chụp giao diện thực tế của hệ thống sau khi nạp tập dữ liệu mẫu toàn diện:
+
+\subsection{Phân hệ Xác thực, Đăng nhập và Lựa chọn Chi nhánh làm việc}
+Màn hình Đăng nhập được thiết kế tinh giản, hỗ trợ người dùng xác thực thông tin tài khoản và lựa chọn chi nhánh kho làm việc trực tiếp ngay tại thời điểm đăng nhập (Hình~\ref{fig:res_login}).
 
 \begin{figure}[H]
 \centering
@@ -1276,6 +1283,9 @@ Dưới đây là mô tả kết quả đạt được và vị trí đính kèm
 \label{fig:res_login}
 \end{figure}
 
+\subsection{Phân hệ Quản lý Danh mục Hàng hóa \& Cảnh báo định mức}
+Giao diện quản lý hàng hóa tuân thủ bố cục 2 cột chuẩn KiotViet: Sidebar bên trái chứa ô tìm kiếm nhanh F3 và cây nhóm hàng; vùng làm việc hiển thị danh sách 34 mặt hàng mẫu phong phú (Bình gas, Bếp gas, Phụ kiện, Khí công nghiệp) kèm cảnh báo tồn tối thiểu/tối đa (Hình~\ref{fig:res_hanghoa}).
+
 \begin{figure}[H]
 \centering
 \fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_2_hanghoa.png}}
@@ -1283,26 +1293,8 @@ Dưới đây là mô tả kết quả đạt được và vị trí đính kèm
 \label{fig:res_hanghoa}
 \end{figure}
 
-\begin{figure}[H]
-\centering
-\fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_3_kiemkho.png}}
-\caption{Phân hệ Kiểm kho \& Đối chiếu tồn sổ sách với số lượng đếm thực tế}
-\label{fig:res_kiemkho}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_4_bcton.png}}
-\caption{Báo cáo Tồn kho theo kho dạng Pivot đa chi nhánh và 4 thẻ KPI tổng hợp}
-\label{fig:res_bcton}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_5_thekho.png}}
-\caption{Báo cáo Thẻ kho chi tiết biến động xuất nhập tồn lũy kế từng mặt hàng}
-\label{fig:res_thekho}
-\end{figure}
+\subsection{Phân hệ Quản lý Giao dịch Nhập hàng từ Nhà cung cấp}
+Hỗ trợ lập và quản lý các phiếu nhập hàng từ 6 nhà cung cấp đối tác. Hệ thống tự động tính toán tổng tiền hàng, công nợ phát sinh và cập nhật giá vốn bình quân gia quyền ngay khi phiếu chuyển trạng thái \texttt{DA\_XAC\_NHAN} (Hình~\ref{fig:res_nhaphang}).
 
 \begin{figure}[H]
 \centering
@@ -1311,11 +1303,64 @@ Dưới đây là mô tả kết quả đạt được và vị trí đính kèm
 \label{fig:res_nhaphang}
 \end{figure}
 
+\subsection{Phân hệ Quản lý Trả hàng nhập Nhà cung cấp}
+Cho phép thủ kho lập phiếu hoàn trả hàng lỗi/hỏng cho đối tác, tự động trừ tồn kho chi nhánh và ghi nhận giảm công nợ phải trả nhà cung cấp (Hình~\ref{fig:res_trahang}).
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_9_tra_hang.png}}
+\caption{Phân hệ Quản lý Giao dịch Trả hàng nhập cho Nhà cung cấp}
+\label{fig:res_trahang}
+\end{figure}
+
+\subsection{Phân hệ Quản lý Điều chuyển kho nội bộ liên chi nhánh}
+Quản lý luồng luân chuyển hàng hóa giữa 3 chi nhánh kho (Kho trung tâm, Kho An Thới, Kho phụ kiện Tuna). Kiểm soát chặt chẽ số lượng chuyển không vượt quá tồn khả dụng và bảo toàn tổng tồn toàn chuỗi (Hình~\ref{fig:res_chuyenkho}).
+
 \begin{figure}[H]
 \centering
 \fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_7_chuyenkho.png}}
 \caption{Phân hệ Quản lý Điều chuyển hàng hóa nội bộ liên chi nhánh}
 \label{fig:res_chuyenkho}
+\end{figure}
+
+\subsection{Phân hệ Quản lý Giao dịch Xuất hủy hàng hóa}
+Xử lý các trường hợp hàng hóa bị móp méo, hư hỏng trong quá trình vận chuyển hoặc hết hạn sử dụng. Ghi nhận rõ lý do xuất hủy và giảm trừ tồn kho tương ứng (Hình~\ref{fig:res_xuathuy}).
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_8_xuat_huy.png}}
+\caption{Phân hệ Quản lý Giao dịch Xuất hủy hàng hóa hư hỏng / hết hạn}
+\label{fig:res_xuathuy}
+\end{figure}
+
+\subsection{Phân hệ Kiểm kho \& Tự động Cân bằng sai lệch tồn kho}
+Giao diện kiểm kê cho phép nhân viên nhập số lượng kiểm đếm thực tế, hệ thống tự động đối chiếu với số tồn sổ sách trích xuất từ Database View. Khi bấm 'Cân bằng kho', hệ thống bọc giao dịch ACID tự động sinh phiếu điều chỉnh kho và khóa vĩnh viễn chứng từ (Hình~\ref{fig:res_kiemkho}).
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_3_kiemkho.png}}
+\caption{Phân hệ Kiểm kho \& Đối chiếu tồn sổ sách với số lượng đếm thực tế}
+\label{fig:res_kiemkho}
+\end{figure}
+
+\subsection{Phân hệ Báo cáo Tồn kho đa chi nhánh dạng Pivot}
+Trình bày ma trận tồn kho trực quan giữa các chi nhánh, tích hợp 4 thẻ KPI tổng hợp (Tổng mã hàng, Tổng tồn, Giá trị kho, Cảnh báo hết hàng) và hỗ trợ xuất báo cáo định dạng Excel ClosedXML (Hình~\ref{fig:res_bcton}).
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_4_bcton.png}}
+\caption{Báo cáo Tồn kho theo kho dạng Pivot đa chi nhánh và 4 thẻ KPI tổng hợp}
+\label{fig:res_bcton}
+\end{figure}
+
+\subsection{Phân hệ Báo cáo Thẻ kho chi tiết biến động tịnh tiến lũy kế}
+Công cụ truy vết lịch sử xuất nhập tồn chuyên sâu của từng mặt hàng theo dòng thời gian, thể hiện chi tiết số dư đầu kỳ, các giao dịch phát sinh và số tồn lũy kế tức thời sau mỗi giao dịch (Hình~\ref{fig:res_thekho}).
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.95\linewidth]{figures/hinh3_5_thekho.png}}
+\caption{Báo cáo Thẻ kho chi tiết biến động xuất nhập tồn lũy kế từng mặt hàng}
+\label{fig:res_thekho}
 \end{figure}
 
 \cleardoublepage

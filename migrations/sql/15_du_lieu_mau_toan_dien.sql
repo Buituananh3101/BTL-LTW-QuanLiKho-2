@@ -230,7 +230,7 @@ DECLARE @pnNewId INT;
 IF NOT EXISTS (SELECT 1 FROM PhieuNhap WHERE MaPhieu = 'PN-SEED-K1')
 BEGIN
     INSERT INTO PhieuNhap (MaPhieu, MaKho, MaDonViCapHang, MaNVLap, MaNVXacNhan, NgayLap, NgayXacNhan, LoaiPhieuNhap, TrangThai, GhiChu, DaDanhDau, SoHoaDon, GiamGia, TongTien, CanTraNcc)
-    VALUES ('PN-SEED-K1', 1, 1, 1, 1, DATEADD(DAY, -20, GETDATE()), DATEADD(DAY, -20, GETDATE()), 'THONG_THUONG', 'DA_XAC_NHAN', N'Nhập bổ sung lượng lớn bình gas và bếp cho Kho trung tâm', 1, 'HD00892', 0, 150000000, 150000000);
+    VALUES ('PN-SEED-K1', 1, 1, 1, 1, DATEADD(DAY, -20, GETDATE()), DATEADD(DAY, -20, GETDATE()), 'THONG_THUONG', 'DA_XAC_NHAN', N'Nhập bổ sung lượng lớn bình gas và bếp cho Kho trung tâm', 1, 'HD00892', 0, 488640000, 488640000);
     SET @pnNewId = SCOPE_IDENTITY();
 
     INSERT INTO ChiTietPhieuNhap (MaPhieuNhap, MaHang, SoLuong, DonGiaNhap, GiamGia, ThanhTien)
@@ -243,7 +243,7 @@ END
 IF NOT EXISTS (SELECT 1 FROM PhieuNhap WHERE MaPhieu = 'PN-SEED-K2')
 BEGIN
     INSERT INTO PhieuNhap (MaPhieu, MaKho, MaDonViCapHang, MaNVLap, MaNVXacNhan, NgayLap, NgayXacNhan, LoaiPhieuNhap, TrangThai, GhiChu, DaDanhDau, SoHoaDon, GiamGia, TongTien, CanTraNcc)
-    VALUES ('PN-SEED-K2', 2, 2, 2, 2, DATEADD(DAY, -18, GETDATE()), DATEADD(DAY, -18, GETDATE()), 'THONG_THUONG', 'DA_XAC_NHAN', N'Nhập hàng cấp tồn độc lập cho chi nhánh Kho An Thới', 1, 'HD00895', 500000, 75000000, 74500000);
+    VALUES ('PN-SEED-K2', 2, 2, 2, 2, DATEADD(DAY, -18, GETDATE()), DATEADD(DAY, -18, GETDATE()), 'THONG_THUONG', 'DA_XAC_NHAN', N'Nhập hàng cấp tồn độc lập cho chi nhánh Kho An Thới', 1, 'HD00895', 500000, 146000000, 145500000);
     SET @pnNewId = SCOPE_IDENTITY();
 
     INSERT INTO ChiTietPhieuNhap (MaPhieuNhap, MaHang, SoLuong, DonGiaNhap, GiamGia, ThanhTien)
@@ -256,7 +256,7 @@ END
 IF NOT EXISTS (SELECT 1 FROM PhieuNhap WHERE MaPhieu = 'PN-SEED-K3')
 BEGIN
     INSERT INTO PhieuNhap (MaPhieu, MaKho, MaDonViCapHang, MaNVLap, MaNVXacNhan, NgayLap, NgayXacNhan, LoaiPhieuNhap, TrangThai, GhiChu, DaDanhDau, SoHoaDon, GiamGia, TongTien, CanTraNcc)
-    VALUES ('PN-SEED-K3', 3, 2, 1, 1, DATEADD(DAY, -15, GETDATE()), DATEADD(DAY, -15, GETDATE()), 'THONG_THUONG', 'DA_XAC_NHAN', N'Khởi tạo tồn kho các loại phụ kiện và thiết bị cho Kho Tuna', 0, 'HD00901', 0, 48000000, 48000000);
+    VALUES ('PN-SEED-K3', 3, 2, 1, 1, DATEADD(DAY, -15, GETDATE()), DATEADD(DAY, -15, GETDATE()), 'THONG_THUONG', 'DA_XAC_NHAN', N'Khởi tạo tồn kho các loại phụ kiện và thiết bị cho Kho Tuna', 0, 'HD00901', 0, 162300000, 162300000);
     SET @pnNewId = SCOPE_IDENTITY();
 
     INSERT INTO ChiTietPhieuNhap (MaPhieuNhap, MaHang, SoLuong, DonGiaNhap, GiamGia, ThanhTien)
@@ -269,7 +269,7 @@ END
 IF NOT EXISTS (SELECT 1 FROM PhieuNhap WHERE MaPhieu = 'PN-DRAFT-01')
 BEGIN
     INSERT INTO PhieuNhap (MaPhieu, MaKho, MaDonViCapHang, MaNVLap, NgayLap, LoaiPhieuNhap, TrangThai, GhiChu, DaDanhDau, GiamGia, TongTien, CanTraNcc)
-    VALUES ('PN-DRAFT-01', 1, 3, 1, DATEADD(HOUR, -5, GETDATE()), 'THONG_THUONG', 'NHAP', N'Đang chờ nhà xe giao bình oxy y tế tới cảng', 1, 0, 15000000, 15000000);
+    VALUES ('PN-DRAFT-01', 1, 3, 1, DATEADD(HOUR, -5, GETDATE()), 'THONG_THUONG', 'NHAP', N'Đang chờ nhà xe giao bình oxy y tế tới cảng', 1, 0, 13000000, 13000000);
     SET @pnNewId = SCOPE_IDENTITY();
 
     INSERT INTO ChiTietPhieuNhap (MaPhieuNhap, MaHang, SoLuong, DonGiaNhap, GiamGia, ThanhTien)
@@ -280,13 +280,26 @@ END
 IF NOT EXISTS (SELECT 1 FROM PhieuNhap WHERE MaPhieu = 'PN-CANCEL-01')
 BEGIN
     INSERT INTO PhieuNhap (MaPhieu, MaKho, MaDonViCapHang, MaNVLap, NgayLap, LoaiPhieuNhap, TrangThai, GhiChu, DaDanhDau, GiamGia, TongTien, CanTraNcc)
-    VALUES ('PN-CANCEL-01', 1, 2, 2, DATEADD(DAY, -7, GETDATE()), 'THONG_THUONG', 'HUY', N'Hủy do nhà cung cấp giao trễ tiến độ phà biển', 0, 0, 12000000, 12000000);
+    VALUES ('PN-CANCEL-01', 1, 2, 2, DATEADD(DAY, -7, GETDATE()), 'THONG_THUONG', 'HUY', N'Hủy do nhà cung cấp giao trễ tiến độ phà biển', 0, 0, 4200000, 4200000);
     SET @pnNewId = SCOPE_IDENTITY();
 
     INSERT INTO ChiTietPhieuNhap (MaPhieuNhap, MaHang, SoLuong, DonGiaNhap, GiamGia, ThanhTien)
     SELECT @pnNewId, MaHang, 15, GiaVon, 0, 15 * GiaVon
     FROM HangHoa WHERE MaHangNoiBo = 'BEP01';
 END
+
+-- Đảm bảo đồng bộ tuyệt đối TongTien và CanTraNcc theo chi tiết
+UPDATE pn
+SET pn.TongTien = ctSum.TongThanhTien,
+    pn.CanTraNcc = ctSum.TongThanhTien - ISNULL(pn.GiamGia, 0)
+FROM PhieuNhap pn
+CROSS APPLY (
+    SELECT ISNULL(SUM(ct.ThanhTien), 0) AS TongThanhTien
+    FROM ChiTietPhieuNhap ct
+    WHERE ct.MaPhieuNhap = pn.MaPhieuNhap
+) ctSum
+WHERE pn.MaPhieu IN ('PN-SEED-K1', 'PN-SEED-K2', 'PN-SEED-K3', 'PN-DRAFT-01', 'PN-CANCEL-01')
+  AND ctSum.TongThanhTien > 0;
 
 PRINT N'   [5/11] Đã cấp tồn dồi dào cho cả 3 kho và đa dạng hóa trạng thái PhieuNhap.';
 

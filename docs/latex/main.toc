@@ -1,62 +1,71 @@
 \xpg@aux {}{vietnamese}
 \contentsline {chapter}{Bảng phân công công việc}{3}{Doc-Start}%
 \contentsline {chapter}{Danh mục thuật ngữ và từ viết tắt}{4}{table.caption.1}%
-\contentsline {chapter}{Danh mục hình vẽ}{7}{table.caption.2}%
-\contentsline {chapter}{Danh mục bảng biểu}{8}{table.caption.2}%
-\contentsline {chapter}{\numberline {1}TỔNG QUAN VÀ PHÂN TÍCH YÊU CẦU BÀI TOÁN}{9}{chapter.1}%
-\contentsline {section}{\numberline {1.1}Bối cảnh thực tiễn và lý do chọn đề tài}{9}{section.1.1}%
-\contentsline {subsection}{\numberline {1.1.1}Thực trạng quản lý lưu chuyển hàng hóa tại các chuỗi chi nhánh kho}{9}{subsection.1.1.1}%
-\contentsline {subsection}{\numberline {1.1.2}Những bất cập của phương pháp quản lý thủ công và yêu cầu chuyển đổi số}{9}{subsection.1.1.2}%
-\contentsline {subsection}{\numberline {1.1.3}Mô hình tham chiếu thực tế: Triết lý vận hành phần mềm quản trị KiotViet}{10}{subsection.1.1.3}%
-\contentsline {section}{\numberline {1.2}Phân tích các nghiệp vụ kho cốt lõi}{10}{section.1.2}%
-\contentsline {subsection}{\numberline {1.2.1}Quản lý danh mục hàng hóa, nhóm hàng và phân cấp đơn vị tính}{10}{subsection.1.2.1}%
-\contentsline {subsection}{\numberline {1.2.2}Nghiệp vụ Nhập kho từ Nhà cung cấp và tính toán giá vốn}{11}{subsection.1.2.2}%
-\contentsline {subsection}{\numberline {1.2.3}Nghiệp vụ Trả hàng nhà cung cấp và Nghiệp vụ Xuất hủy hàng hỏng/hết hạn}{11}{subsection.1.2.3}%
-\contentsline {subsection}{\numberline {1.2.4}Nghiệp vụ Điều chuyển kho nội bộ liên chi nhánh}{11}{subsection.1.2.4}%
-\contentsline {subsection}{\numberline {1.2.5}Nghiệp vụ Kiểm kê kho định kỳ và Cân bằng sai lệch kho tự động}{12}{subsection.1.2.5}%
-\contentsline {subsection}{\numberline {1.2.6}Hệ thống Báo cáo phân tích chuyên sâu}{12}{subsection.1.2.6}%
-\contentsline {section}{\numberline {1.3}Phân tích yêu cầu chức năng (Functional Requirements)}{12}{section.1.3}%
-\contentsline {subsection}{\numberline {1.3.1}Xác định các tác nhân hệ thống (Actors)}{12}{subsection.1.3.1}%
-\contentsline {subsection}{\numberline {1.3.2}Bảng đặc tả yêu cầu chức năng chi tiết cho từng tác nhân}{13}{subsection.1.3.2}%
-\contentsline {subsection}{\numberline {1.3.3}Ma trận phân quyền chức năng và phạm vi chi nhánh}{14}{subsection.1.3.3}%
-\contentsline {section}{\numberline {1.4}Phân tích yêu cầu phi chức năng (Non-Functional Requirements)}{14}{section.1.4}%
-\contentsline {subsection}{\numberline {1.4.1}Độ chính xác và tính toàn vẹn dữ liệu tồn kho (Nguyên tắc ACID)}{14}{subsection.1.4.1}%
-\contentsline {subsection}{\numberline {1.4.2}Bảo mật, xác thực người dùng và bảo vệ dữ liệu theo kho làm việc}{15}{subsection.1.4.2}%
-\contentsline {subsection}{\numberline {1.4.3}Hiệu năng tải trang, phản hồi dữ liệu và tính thân thiện giao diện (UX)}{15}{subsection.1.4.3}%
-\contentsline {chapter}{\numberline {2}PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG}{16}{chapter.2}%
-\contentsline {section}{\numberline {2.1}Mô hình hóa chức năng bằng biểu đồ Use Case (UML)}{16}{section.2.1}%
-\contentsline {subsection}{\numberline {2.1.1}Biểu đồ Use Case tổng quan toàn hệ thống}{16}{subsection.2.1.1}%
-\contentsline {subsection}{\numberline {2.1.2}Kịch bản Use Case chi tiết cho các luồng nghiệp vụ chính}{16}{subsection.2.1.2}%
-\contentsline {section}{\numberline {2.2}Thiết kế luồng xử lý nghiệp vụ (Activity Diagrams)}{19}{section.2.2}%
-\contentsline {section}{\numberline {2.3}Thiết kế Cơ sở dữ liệu quan hệ (Database Design)}{20}{section.2.3}%
-\contentsline {subsection}{\numberline {2.3.1}Mô hình thực thể -- liên kết (Sơ đồ ER - Entity-Relationship Diagram)}{20}{subsection.2.3.1}%
-\contentsline {subsubsection}{Các sơ đồ ER phân rã chi tiết theo cụm nghiệp vụ}{21}{subsubsection*.11}%
-\contentsline {subsection}{\numberline {2.3.2}Mô hình dữ liệu quan hệ (Sơ đồ RM - Relational Model)}{27}{subsection.2.3.2}%
-\contentsline {subsubsection}{Lược đồ quan hệ chuẩn (Relational Schema Notation)}{27}{subsubsection*.17}%
-\contentsline {subsubsection}{Sơ đồ cấu trúc liên kết các bảng quan hệ (Sơ đồ RM vật lý)}{29}{subsubsection*.18}%
-\contentsline {subsubsection}{Bảng các ràng buộc toàn vẹn tham chiếu (Referential Integrity Constraints)}{29}{subsubsection*.20}%
-\contentsline {subsubsection}{Đánh giá chuẩn hóa cơ sở dữ liệu (3NF / BCNF)}{30}{subsubsection*.22}%
-\contentsline {subsection}{\numberline {2.3.3}Từ điển dữ liệu chi tiết các bảng chính}{31}{subsection.2.3.3}%
-\contentsline {subsection}{\numberline {2.3.4}Giải thuật Database View 2 tầng tính toán tồn kho động}{34}{subsection.2.3.4}%
-\contentsline {section}{\numberline {2.4}Thiết kế Kiến trúc phần mềm và Giao diện người dùng}{35}{section.2.4}%
-\contentsline {subsection}{\numberline {2.4.1}Mô hình kiến trúc MVC phân tầng trên ASP.NET Core}{35}{subsection.2.4.1}%
-\contentsline {subsection}{\numberline {2.4.2}Sơ đồ cấu trúc điều hướng trang (Sitemap)}{36}{subsection.2.4.2}%
-\contentsline {subsection}{\numberline {2.4.3}Thiết kế khung giao diện Wireframe chuẩn KiotViet}{36}{subsection.2.4.3}%
-\contentsline {chapter}{\numberline {3}HIỆN THỰC HÓA VÀ LẬP TRÌNH HỆ THỐNG}{37}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Môi trường công nghệ và công cụ phát triển}{37}{section.3.1}%
-\contentsline {section}{\numberline {3.2}Xây dựng các cơ chế kiến trúc nền tảng (Core Framework)}{37}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}Cơ chế Xác thực và Phân quyền theo Chi nhánh qua Cookie Authentication}{37}{subsection.3.2.1}%
-\contentsline {subsection}{\numberline {3.2.2}Cơ chế Controller cơ sở (BaseKhoController)}{38}{subsection.3.2.2}%
-\contentsline {subsection}{\numberline {3.2.3}Cơ chế giao dịch an toàn (ACID Transaction) trong lưu trữ Master-Detail}{38}{subsection.3.2.3}%
-\contentsline {subsection}{\numberline {3.2.4}Hệ sinh thái Khối Lego UI tái sử dụng}{39}{subsection.3.2.4}%
-\contentsline {subsection}{\numberline {3.2.5}Giải pháp phân tầng Stacking Context giải quyết xung đột Dropdown và Modal}{39}{subsection.3.2.5}%
-\contentsline {section}{\numberline {3.3}Mô tả kết quả đạt được qua các phân hệ}{40}{section.3.3}%
-\contentsline {chapter}{\numberline {4}KIỂM THỬ HỆ THỐNG VÀ ĐÁNH GIÁ CHẤT LƯỢNG}{44}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Kế hoạch và phương pháp kiểm thử}{44}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Danh mục kịch bản kiểm thử chi tiết (Test Cases)}{44}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Báo cáo kết quả kiểm thử và quá trình khắc phục lỗi}{46}{section.4.3}%
-\contentsline {chapter}{\numberline {5}KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}{48}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Kết quả đạt được}{48}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Bài học rút ra}{48}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Đề xuất phương hướng phát triển}{49}{section.5.3}%
-\contentsline {chapter}{Tài liệu tham khảo và Phụ lục}{50}{chapter*.41}%
+\contentsline {chapter}{Danh mục hình vẽ}{8}{table.caption.2}%
+\contentsline {chapter}{Danh mục bảng biểu}{9}{table.caption.2}%
+\contentsline {chapter}{\numberline {1}TỔNG QUAN VÀ PHÂN TÍCH YÊU CẦU BÀI TOÁN}{10}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Bối cảnh thực tiễn và lý do chọn đề tài}{10}{section.1.1}%
+\contentsline {subsection}{\numberline {1.1.1}Thực trạng quản lý lưu chuyển hàng hóa tại các chuỗi chi nhánh kho}{10}{subsection.1.1.1}%
+\contentsline {subsection}{\numberline {1.1.2}Những bất cập của phương pháp quản lý thủ công và yêu cầu chuyển đổi số}{10}{subsection.1.1.2}%
+\contentsline {subsection}{\numberline {1.1.3}Mô hình tham chiếu thực tế: Triết lý vận hành phần mềm quản trị KiotViet}{11}{subsection.1.1.3}%
+\contentsline {section}{\numberline {1.2}Phân tích các nghiệp vụ kho cốt lõi}{11}{section.1.2}%
+\contentsline {subsection}{\numberline {1.2.1}Quản lý danh mục hàng hóa, nhóm hàng và phân cấp đơn vị tính}{11}{subsection.1.2.1}%
+\contentsline {subsection}{\numberline {1.2.2}Nghiệp vụ Nhập kho từ Nhà cung cấp và tính toán giá vốn}{12}{subsection.1.2.2}%
+\contentsline {subsection}{\numberline {1.2.3}Nghiệp vụ Trả hàng nhà cung cấp và Nghiệp vụ Xuất hủy hàng hỏng/hết hạn}{12}{subsection.1.2.3}%
+\contentsline {subsection}{\numberline {1.2.4}Nghiệp vụ Điều chuyển kho nội bộ liên chi nhánh}{12}{subsection.1.2.4}%
+\contentsline {subsection}{\numberline {1.2.5}Nghiệp vụ Kiểm kê kho định kỳ và Cân bằng sai lệch kho tự động}{13}{subsection.1.2.5}%
+\contentsline {subsection}{\numberline {1.2.6}Hệ thống Báo cáo phân tích chuyên sâu}{13}{subsection.1.2.6}%
+\contentsline {section}{\numberline {1.3}Phân tích yêu cầu chức năng (Functional Requirements)}{13}{section.1.3}%
+\contentsline {subsection}{\numberline {1.3.1}Xác định các tác nhân hệ thống (Actors)}{13}{subsection.1.3.1}%
+\contentsline {subsection}{\numberline {1.3.2}Bảng đặc tả yêu cầu chức năng chi tiết cho từng tác nhân}{14}{subsection.1.3.2}%
+\contentsline {subsection}{\numberline {1.3.3}Ma trận phân quyền chức năng và phạm vi chi nhánh}{15}{subsection.1.3.3}%
+\contentsline {section}{\numberline {1.4}Phân tích yêu cầu phi chức năng (Non-Functional Requirements)}{15}{section.1.4}%
+\contentsline {subsection}{\numberline {1.4.1}Độ chính xác và tính toàn vẹn dữ liệu tồn kho (Nguyên tắc ACID)}{15}{subsection.1.4.1}%
+\contentsline {subsection}{\numberline {1.4.2}Bảo mật, xác thực người dùng và bảo vệ dữ liệu theo kho làm việc}{16}{subsection.1.4.2}%
+\contentsline {subsection}{\numberline {1.4.3}Hiệu năng tải trang, phản hồi dữ liệu và tính thân thiện giao diện (UX)}{16}{subsection.1.4.3}%
+\contentsline {chapter}{\numberline {2}PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG}{17}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Mô hình hóa chức năng bằng biểu đồ Use Case (UML)}{17}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Biểu đồ Use Case tổng quan toàn hệ thống}{17}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Kịch bản Use Case chi tiết cho các luồng nghiệp vụ chính}{17}{subsection.2.1.2}%
+\contentsline {section}{\numberline {2.2}Thiết kế luồng xử lý nghiệp vụ (Activity Diagrams)}{20}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Thiết kế Cơ sở dữ liệu quan hệ (Database Design)}{21}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Mô hình thực thể -- liên kết (Sơ đồ ER - Entity-Relationship Diagram)}{21}{subsection.2.3.1}%
+\contentsline {subsubsection}{Các sơ đồ ER phân rã chi tiết theo cụm nghiệp vụ}{22}{subsubsection*.10}%
+\contentsline {subsection}{\numberline {2.3.2}Mô hình dữ liệu quan hệ (Sơ đồ RM - Relational Model)}{29}{subsection.2.3.2}%
+\contentsline {subsubsection}{Lược đồ quan hệ chuẩn (Relational Schema Notation)}{29}{subsubsection*.17}%
+\contentsline {subsubsection}{Sơ đồ cấu trúc liên kết các bảng quan hệ (Sơ đồ RM vật lý)}{31}{subsubsection*.18}%
+\contentsline {subsubsection}{Bảng các ràng buộc toàn vẹn tham chiếu (Referential Integrity Constraints)}{31}{subsubsection*.20}%
+\contentsline {subsubsection}{Đánh giá chuẩn hóa cơ sở dữ liệu (3NF / BCNF)}{32}{subsubsection*.22}%
+\contentsline {subsection}{\numberline {2.3.3}Từ điển dữ liệu chi tiết các bảng chính}{33}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.4}Giải thuật Database View 2 tầng tính toán tồn kho động}{36}{subsection.2.3.4}%
+\contentsline {section}{\numberline {2.4}Thiết kế Kiến trúc phần mềm và Giao diện người dùng}{37}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}Mô hình kiến trúc MVC phân tầng trên ASP.NET Core}{37}{subsection.2.4.1}%
+\contentsline {subsection}{\numberline {2.4.2}Sơ đồ cấu trúc điều hướng trang (Sitemap)}{38}{subsection.2.4.2}%
+\contentsline {subsection}{\numberline {2.4.3}Thiết kế khung giao diện Wireframe chuẩn KiotViet}{38}{subsection.2.4.3}%
+\contentsline {chapter}{\numberline {3}HIỆN THỰC HÓA VÀ LẬP TRÌNH HỆ THỐNG}{39}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Môi trường công nghệ và công cụ phát triển}{39}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Xây dựng các cơ chế kiến trúc nền tảng (Core Framework)}{39}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Cơ chế Xác thực và Phân quyền theo Chi nhánh qua Cookie Authentication}{39}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Cơ chế Controller cơ sở (BaseKhoController)}{40}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Cơ chế giao dịch an toàn (ACID Transaction) trong lưu trữ Master-Detail}{40}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.4}Hệ sinh thái Khối Lego UI tái sử dụng}{41}{subsection.3.2.4}%
+\contentsline {subsection}{\numberline {3.2.5}Giải pháp phân tầng Stacking Context giải quyết xung đột Dropdown và Modal}{41}{subsection.3.2.5}%
+\contentsline {section}{\numberline {3.3}Mô tả kết quả đạt được qua các phân hệ}{42}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Phân hệ Xác thực, Đăng nhập và Lựa chọn Chi nhánh làm việc}{42}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Phân hệ Quản lý Danh mục Hàng hóa \& Cảnh báo định mức}{42}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.3}Phân hệ Quản lý Giao dịch Nhập hàng từ Nhà cung cấp}{43}{subsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.3.4}Phân hệ Quản lý Trả hàng nhập Nhà cung cấp}{44}{subsection.3.3.4}%
+\contentsline {subsection}{\numberline {3.3.5}Phân hệ Quản lý Điều chuyển kho nội bộ liên chi nhánh}{45}{subsection.3.3.5}%
+\contentsline {subsection}{\numberline {3.3.6}Phân hệ Quản lý Giao dịch Xuất hủy hàng hóa}{46}{subsection.3.3.6}%
+\contentsline {subsection}{\numberline {3.3.7}Phân hệ Kiểm kho \& Tự động Cân bằng sai lệch tồn kho}{47}{subsection.3.3.7}%
+\contentsline {subsection}{\numberline {3.3.8}Phân hệ Báo cáo Tồn kho đa chi nhánh dạng Pivot}{48}{subsection.3.3.8}%
+\contentsline {subsection}{\numberline {3.3.9}Phân hệ Báo cáo Thẻ kho chi tiết biến động tịnh tiến lũy kế}{49}{subsection.3.3.9}%
+\contentsline {chapter}{\numberline {4}KIỂM THỬ HỆ THỐNG VÀ ĐÁNH GIÁ CHẤT LƯỢNG}{51}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Kế hoạch và phương pháp kiểm thử}{51}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Danh mục kịch bản kiểm thử chi tiết (Test Cases)}{51}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Báo cáo kết quả kiểm thử và quá trình khắc phục lỗi}{53}{section.4.3}%
+\contentsline {chapter}{\numberline {5}KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}{55}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Kết quả đạt được}{55}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Bài học rút ra}{55}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Đề xuất phương hướng phát triển}{56}{section.5.3}%
+\contentsline {chapter}{Tài liệu tham khảo và Phụ lục}{57}{chapter*.43}%
