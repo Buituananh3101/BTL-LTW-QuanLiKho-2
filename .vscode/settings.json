@@ -2,7 +2,7 @@
   "latex-workshop.latex.tools": [
     {
       "name": "xelatex",
-      "command": "xelatex",
+      "command": "D:/MiKTeX/miktex/bin/x64/xelatex",
       "args": [
         "-synctex=1",
         "-interaction=nonstopmode",
@@ -12,7 +12,7 @@
     },
     {
       "name": "pdflatex",
-      "command": "pdflatex",
+      "command": "D:/MiKTeX/miktex/bin/x64/pdflatex",
       "args": [
         "-synctex=1",
         "-interaction=nonstopmode",
