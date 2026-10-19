@@ -1,4 +1,4 @@
-/**
+﻿/**
  * xuat-huy-form.js - Quản lý form Lập / Sửa / Chi tiết phiếu xuất hủy
  * Chuẩn hóa 100% theo kiến trúc, tương tác và giao diện phieu-kiem-ke-form.js
  */
@@ -469,7 +469,7 @@
     const bDone = $('#bDone');
     if (bDone) bDone.onclick = submitComplete;
 
-    /* ===== MODAL CHUẨN KIOTVIET (#ov) ===== */
+    /* ===== MODAL chuẩn chuyên nghiệp (#ov) ===== */
     const ov = $('#ov');
     function openModal({ title, icon, body, okText = 'Đồng ý', okClass = 'btn btn-primary', onOk }) {
         if (!ov) return;

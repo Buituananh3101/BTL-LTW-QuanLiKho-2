@@ -1,22 +1,336 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-19 – Xây Dựng Hệ Thống Modal Trợ Giúp KiotHelp Dùng Chung & Loại Bỏ Triệt Để Alert Trên Nút Trợ Giúp (Phiên 162)
+Cập nhật lần cuối: 2026-10-19 – Tạo Tài Liệu Giới Thiệu Dự Án & Hướng Dẫn Cài Đặt README.md (Phiên 183)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất xây dựng Modal Trợ giúp KiotHelp dùng chung và loại bỏ triệt để alert popup trên toàn bộ 11 màn hình chính:
-  + Gỡ bỏ 100% thuộc tính inline `onclick="alert(...)"` trên nút `btnHelp` tại `PhieuKiemKe/Index.cshtml` và `TraHangNhap/Index.cshtml`, chấm dứt hoàn toàn tình trạng hiện alert trình duyệt trước khi mở popup.
-  + Tạo partial dùng chung `Views/Shared/_KiotHelpModal.cshtml` tích hợp vào `_Layout.cshtml`, CSS phân tầng z-index 1070 trong `site.css`.
-  + Module JS toàn cục `KiotHelp` trong `site.js` chứa từ điển `HELP_MAP` và cơ chế tự động nhận diện màn hình (`detectScreenKey`) cho 11 phân hệ (`HangHoa`, `NhapHang`, `TraHangNhap`, `XuatHuy`, `ChuyenKho`, `PhieuKiemKe`, `TheKho`, `TonKho`, `NguoiDung`, `Kho`, `NhaCungCap`).
-  + Đồng bộ nút trợ giúp chuẩn `<button type="button" class="btn btn-tool btn-help" id="btnHelp" title="Hướng dẫn sử dụng (F1)"><i class="bi bi-question-circle"></i></button>` trên toàn bộ các trang.
-  + Hỗ trợ phím tắt `F1` để mở và `Esc` để đóng modal trợ giúp tức thì ở bất kỳ màn hình nào.
+- Đã soạn thảo hoàn tất file [`README.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/README.md) chuẩn mực, chuyên nghiệp và đầy đủ cho toàn bộ dự án:
+  + Giới thiệu tổng quan hệ thống Quản lý kho hàng nội bộ đa chi nhánh KhoPro (Phú Quốc).
+  + Bảng tổng hợp công nghệ sử dụng: ASP.NET Core MVC (.NET 10), EF Core 10, SQL Server, Bootstrap 5, ClosedXML...
+  + Mô tả chi tiết 8 phân hệ cốt lõi: Hàng hóa, Nhập hàng, Chuyển kho, Trả hàng nhập, Xuất hủy, Kiểm kho & Cân bằng, Báo cáo & Thẻ kho, Quản trị & Nhật ký thao tác.
+  + Sơ đồ luồng vận hành luân chuyển hàng hóa đa chi nhánh bằng Mermaid diagram.
+  + Hướng dẫn cài đặt và thiết lập nhanh trên máy mới với 2 tùy chọn CSDL: Restore file backup `docs/QuanLyKhoPhuQuocLTW.bak` (5 giây) hoặc chạy script trọn gói `docs/QuanLyKhoPhuQuocLTW_FullScript.sql`.
+  + Danh sách tài khoản kiểm thử nghiệm thu (`quanly`, `thukho`, `banhang` / `123456`) kèm phạm vi phân quyền.
+  + Sơ đồ cây thư mục dự án và 5 quy ước kỹ thuật nổi bật (Tồn kho động qua View, Transaction toàn vẹn, Chứng từ bất biến, Khối Lego UI, Z-Index 6 tầng).
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế khi bấm nút `?` hoặc phím `F1` trên từng màn hình: Kiểm kho, Trả hàng nhập, Hàng hóa, Chuyển kho, Thẻ kho, Tồn kho...
-2. Tiếp tục hoàn thiện các chức năng nâng cao theo yêu cầu người dùng.
+1. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
+2. Chuẩn bị slide thuyết trình hoặc báo cáo bảo vệ đồ án.
+
+---
+
+- **Tạo Tài Liệu Giới Thiệu Dự Án & Hướng Dẫn Cài Đặt README.md (Phiên 183)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "bạn có thể viết file readme hướng dẫn và giới thiệu nhanh về dự án giúp tôi ko".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Tạo file `README.md` tại thư mục gốc dự án theo phong cách GitHub Markdown chuẩn mực:
+       - Có đầy đủ huy hiệu (badges), mục lục điều hướng nhanh (Table of Contents), bảng biểu công nghệ rõ ràng.
+       - Trình bày sơ đồ luồng dữ liệu Mermaid luân chuyển hàng hóa giữa 3 kho (Kho trung tâm, Kho An Thới, Kho phụ kiện Tuna).
+       - Hướng dẫn cài đặt từng bước chi tiết (Quick Start Guide): Clone repo, 2 phương thức dựng CSDL (File `.bak` hoặc `.sql`), cấu hình connection string, chạy `dotnet run`.
+       - Bảng thông tin tài khoản demo phân quyền (`quanly`, `thukho`, `banhang`).
+       - Tổng kết kiến trúc kỹ thuật và cây thư mục dự án.
+    2. Kiểm tra biên dịch dự án: `dotnet build -t:Compile` đạt **0 Errors**.
+
+---
+
+- **Tinh Gọn Mục 3.2 Báo Cáo LaTeX: Gỡ Bỏ 3.2.4 & 3.2.5 (Phiên 182)**:
+  - **Nhu cầu**: Người dùng yêu cầu gỡ bỏ 2 phần: `3.2.4 Hệ sinh thái Khối Lego UI tái sử dụng` và `3.2.5 Giải pháp phân tầng Stacking Context giải quyết xung đột Dropdown và Modal`.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Xóa bỏ 2 tiểu mục tại cuối Mục 3.2 trong `docs/latex/main.tex`.
+    2. Biên dịch 2 lượt XeLaTeX để đồng bộ mục lục tự động và danh mục bảng biểu/hình ảnh.
+    3. Kiểm tra trực quan trang mục lục (Trang 6) và các trang chuyển tiếp 58, 59, 60: cấu trúc mạch lạc, hình chụp phân hệ 3.3 hiển thị đồng đều.
+    4. Cập nhật `docs/BaoCao_LaTeX_Overleaf.zip`.
+    5. Kiểm tra `dotnet build` đạt 0 lỗi.
+
+---
+
+- **Cập Nhật GVHD Thầy Lại Mạnh Dũng & Lớp N05 (Phiên 181)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "đổi tên giáo viên hướng dẫn thành Lại Mạnh Dũng, Lớp N05".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Cập nhật bảng thông tin trang bìa: `Giảng viên hướng dẫn: Lại Mạnh Dũng`, `Nhóm thực hiện: Nhóm 3 -- Lớp N05 -- K65`.
+    2. Cập nhật trang Lời nói đầu: Sửa lời cảm ơn thành "thầy Lại Mạnh Dũng" và dòng thông tin lớp `Nhóm 3 -- Lớp N05 -- K65`.
+    3. Biên dịch XeLaTeX và kết xuất ảnh kiểm tra trực quan các trang 1, 2, 3: hoàn hảo, sắc nét.
+    4. Cập nhật `docs/BaoCao_LaTeX_Overleaf.zip`. `dotnet build` đạt 0 lỗi.
+
+---
+
+- **Đổi Tên Đề Tài Thành "Xây Dựng Ứng Dụng Web Quản Lý Kho Hàng Nội Bộ Đa Chi Nhánh" (Phiên 180)**:
+  - **Nhu cầu**: Người dùng hỏi ý kiến: "tôi muốn đổi tên dự án thành Xây dựng ứng dụng Web quản lý kho hàng nội bộ đa chi nhánh có hợp lí ko" và ra lệnh: "đổi tên".
+  - **Lý do & Ý nghĩa học thuật**:
+    1. Chuyển từ "Website" sang "Ứng dụng Web" phản ánh đúng hàm lượng kỹ thuật và bản chất của hệ thống phần mềm quản trị nghiệp vụ phức tạp.
+    2. Thêm từ "nội bộ" giúp khoanh vùng phạm vi nghiệp vụ (WMS/ERP nội bộ doanh nghiệp), giải thích rõ ràng trước hội đồng tại sao không làm giỏ hàng bán lẻ công khai cho khách ngoài.
+    3. Giữ trọn vẹn điểm sáng cốt lõi "đa chi nhánh".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Cập nhật trang bìa, metadata, lời nói đầu, mục tiêu và kết luận trong `main.tex`.
+    2. Căn chỉnh tiêu đề trang bìa thành 2 dòng cân đối, không rớt chữ "Hàng" lẻ loi.
+    3. Tinh chỉnh tiêu đề Phụ lục B gọn gàng trong 1 dòng.
+    4. Cập nhật `AGENTS.md`, `docs/quyet-dinh.md`, đóng gói `docs/BaoCao_LaTeX_Overleaf.zip`.
+    5. Biên dịch XeLaTeX 0 lỗi, 0 Overfull. `dotnet build` đạt 0 lỗi.
+
+---
+
+- **Thiết Kế Sơ Đồ Mermaid Kiến Trúc Database View 2 Tầng (Hình 2.18) Thay Thế TikZ Cũ (Phiên 179)**:
+  - **Nhu cầu**: Người dùng yêu cầu vẽ lại sơ đồ Database View 2 tầng tại Mục 2.3.4 bằng Mermaid cho trực quan, đẹp mắt và đồng bộ đồ họa.
+  - **Bản chất**: Trước đó, sơ đồ được vẽ bằng khối lệnh `tikzpicture` thô sơ trong LaTeX với các hộp xám đơn điệu, không toát lên được vai trò kiến trúc của 2 tầng View và 6 luồng chứng từ gốc.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Soạn thảo mã nguồn Mermaid chuẩn tại `docs/latex/figures/fig_database_view_2_tang.mmd`.
+    2. Kết xuất ảnh PNG độ phân giải 2x bằng `npx @mermaid-js/mermaid-cli`.
+    3. Cập nhật `docs/latex/main.tex` tại Mục 2.3.4, thay thế khối TikZ cũ.
+    4. Biên dịch 2 lượt XeLaTeX thành công (76 trang, 0 Errors, danh mục hình vẽ Hình 2.18 cập nhật tự động).
+    5. Đóng gói cập nhật `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+  - **Nhu cầu**: Người dùng yêu cầu: "tôi muốn bạn trả lại hình 2.7 cũ".
+  - **Bản chất**: Trả lại sơ đồ hoạt động Nhập hàng nguyên bản dạng phân làn trách nhiệm 3 tầng dọc chuyên nghiệp (Thủ kho $\rightarrow$ Backend Service $\rightarrow$ CSDL) đã được thiết kế chuẩn từ trước.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Khôi phục `docs/latex/figures/fig_activity_nhaphang.png` và `docs/so-do-activity-nghiep-vu.md` từ bản gốc Git HEAD.
+    2. Cập nhật `docs/latex/main.tex`: thiết lập lại trang riêng cực đại cho Hình 2.7 (Trang 31) ngay sau trang thuyết minh công thức MAC (Trang 30).
+    3. Biên dịch XeLaTeX 76 trang, 0 Errors, đóng gói lại `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+
+- **Tối Ưu Bố Cục 2 Cột (Trái - Phải) Cho Biểu Đồ Hoạt Động Nhập Hàng Hình 2.7 (Phiên 177)**:
+  - **Nhu cầu**: Người dùng yêu cầu tối ưu lại Hình 2.7: "khối hình chữ nhật đầu tiền sửa sang trái, khối thứ 2 để sang phải để tối ưu hơn được ko".
+  - **Bản chất**: Trước đó, sơ đồ hoạt động xếp tầng theo chiều dọc khiến Khối 1 (Thủ kho) nằm ở trên và Khối 2 (Hệ thống) nằm ở dưới, tạo thành dải dọc quá dài và khiến trang in bị trống nhiều khoảng trắng.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Tái cấu trúc mã nguồn Mermaid sang dạng 2 khối ngang (`flowchart LR`) với các luồng rẽ nhánh Validation và phản hồi kết quả tuần hoàn.
+    2. Xuất ảnh độ nét cực cao qua `mermaid-cli` cục bộ (scale 3, 2352x930px).
+    3. Cân chỉnh trong `docs/latex/main.tex`: ghép Hình 2.7 vừa khít dưới phần thuyết minh Mục 2.2.1 trên cùng trang 30, loại bỏ lệnh ngắt trang gây lãng phí.
+    4. Biên dịch XeLaTeX thành công 75 trang, 0 Errors, đóng gói `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+
+- **Loại Bỏ Sơ Đồ TikZ RM Trùng Lặp Cũ Khỏi Báo Cáo LaTeX (Phiên 176)**:
+  - **Nhu cầu**: Người dùng phản hồi kèm ảnh chụp sơ đồ TikZ: "er, rm bên trên rồi. Hình này có ý nghĩa j".
+  - **Bản chất**: Đây là sơ đồ tóm tắt cũ vẽ tay bằng TikZ từ phiên sơ khởi của đồ án. Sau khi đã bổ sung 5 sơ đồ RM chi tiết bằng Mermaid/Crow's Foot ở Mục 2.3.2, hình vẽ này trở nên hoàn toàn thừa thãi, thiếu bảng trầm trọng và có lỗi đồ họa (mũi tên đè qua thân bảng).
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Gỡ bỏ triệt để tiểu mục `\subsubsection{Sơ đồ cấu trúc liên kết các bảng quan hệ cốt lõi (Sơ đồ RM tổng hợp)}` và khối `\begin{figure}[H] ... \begin{tikzpicture} ... \end{figure}`.
+    2. Cấu trúc Mục 2.3 trở nên liền mạch: từ Lược đồ Text $\rightarrow$ 5 Sơ đồ RM trực quan $\rightarrow$ Bảng ràng buộc FK $\rightarrow$ Chuẩn hóa 3NF/BCNF.
+    3. Biên dịch XeLaTeX 2 lượt đạt 76 trang, 0 Errors, mục lục và danh sách hình vẽ tự động đánh số lại chuẩn xác. Đóng gói `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+
+## Việc kế tiếp
+1. Kiểm tra toàn bộ Báo cáo từ Chương 1 đến Chương 5 trước khi in ấn/nộp bài.
+2. Chuẩn bị slide thuyết trình hoặc nghiệm thu đồ án Bài tập lớn Lập trình Web.
+
+---
+
+- **Khắc Phục Triệt Để Toàn Bộ Lỗi Tràn Lề Phải (Overfull \\hbox) Trên Toàn Bộ Báo Cáo LaTeX (Phiên 175)**:
+  - **Nhu cầu**: Người dùng gửi ảnh chụp trang Báo cáo (Mục 2.2.5 Quy trình Trả hàng nhập cho NCC) bị tràn lề phải nghiêm trọng: từ `ChiTietPhieuTraHangNhap` thò dài qua lề phải ~100pt và yêu cầu: "hiện tại trong dự án xảy ra lỗi tràn lề phải như này, tôi muốn bạn sửa lại toàn bộ".
+  - **Nguyên nhân**:
+    1. Các định danh PascalCase dài không chứa dấu cách hay dấu gạch ngang (`ChiTietPhieuTraHangNhap`, `ChiTietPhieuDieuChinh`, `ChiTietPhieuNhap`, `SoLuongTonHeThong`) không thể tự ngắt dòng trong font chữ La-tinh/Times của LaTeX.
+    2. Các tiêu đề `\chapter`, `\section` sử dụng kiểu `[hang]` cứng nhắc không cho phép ngắt dòng.
+    3. Bảng `tab:fk_constraints` và 5 bảng từ điển dữ liệu có tổng độ rộng cột cố định chiếm trọn chiều rộng trang in, khiến cột cuối hoặc ô chứa chữ dài không đủ chỗ hiển thị.
+    4. Ma trận phân quyền `tab:ma_tran_quyen` sử dụng các cột `c` cố định vượt quá `\textwidth` (17.7cm > 16.0cm).
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Thiết lập các thông số dung sai chống tràn toàn cục trong preamble (`\tolerance=2500`, `\emergencystretch=2.5em`, `\hfuzz=1pt`, `\hbadness=5000`, breakable `\_`).
+    2. Cập nhật `\titleformat` với `\raggedright` và kiểu `[block]`.
+    3. Thêm điểm ngắt từ mềm `\-` cho toàn bộ các định danh dài trong văn bản và bảng biểu.
+    4. Tái cấu trúc Bảng 2.7, Bảng 2.8 và 5 bảng Từ điển dữ liệu bằng `tabularx` với `tabcolsep` tối ưu.
+    5. Định dạng Phụ lục B với `\path`.
+    6. Kiểm tra log biên dịch XeLaTeX: **Overfull `\hbox` giảm từ > 40 trường hợp xuống chính xác 0 trường hợp**. File `main.pdf` 78 trang chuẩn mực, đóng gói `docs/BaoCao_LaTeX_Overleaf.zip`.
+    7. `dotnet build /t:Compile` đạt 0 lỗi.
+
+---
+
+- **Khắc Phục Triệt Để Lỗi Bảng 1.2 Tràn Lề Phải Trong Báo Cáo LaTeX (Phiên 174)**:
+  - **Nhu cầu**: Người dùng phản hồi kèm ảnh chụp trang tài liệu: "hiện tại bảng 1.2 này đang bị tràn phải, bạn hãy khắc phục".
+  - **Nguyên nhân**: Bảng 1.2 sử dụng `\begin{tabularx}{\textwidth}{|p{5.5cm}|c|c|c|}` nhưng không có cột `X` nào, khiến 3 cột `c` nở rộng theo độ dài tự nhiên của nội dung (vượt quá 19.5cm so với `\textwidth = 16.0cm`), làm bảng bị tràn 3.5cm qua lề phải.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Định nghĩa kiểu cột chuẩn `\newcolumntype{Z}{>{\centering\arraybackslash}X}` trong phần tiền sự (preamble) của `main.tex`.
+    2. Thiết lập `\setlength{\tabcolsep}{4.5pt}`, giãn dòng `\renewcommand{\arraystretch}{1.2}` và cấu trúc bảng `\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5.4cm}|Z|Z|Z|}`.
+    3. Tinh chỉnh từ ngữ ngắn gọn chuẩn nghiệp vụ (`Lập & Hoàn tất Phiếu...`) giúp 100% dòng ở cột 1 nằm gọn gàng trên 1 dòng duy nhất, không rớt chữ mồ côi.
+    4. Thêm ngắt dòng `\newline` cân đối ở các ô dài của cột vai trò ("Xem tất cả \newline chi nhánh", "Được lập \newline phiếu kiểm", "Chỉ xem \newline tồn hiện tại").
+    5. Kết xuất trang PDF và kiểm tra trực quan: Bảng nằm gọn gàng, hai lề trái/phải thẳng tắp với văn bản, cách mục 1.4 an toàn.
+    6. Biên dịch XeLaTeX 0 Errors, cập nhật `docs/BaoCao_LaTeX_Overleaf.zip`. `dotnet build` đạt 0 lỗi.
+
+---
+
+- **Chuẩn Hóa Mục 2.1 Use Case (UML) Bằng Mermaid & Khắc Phục Triệt Để Lỗi Bảng Tràn Đè Trang (Phiên 173)**:
+  - **Nhu cầu**: Người dùng yêu cầu chuẩn hóa Mục 2.1 Sử dụng biểu đồ Use Case Mermaid thay thế TikZ vector, và sửa lỗi nghiêm trọng: "bảng lỗi, bị tràn", "lỗi tràn đè sửa lỗi này" khiến các bảng đặc tả Use Case bị tràn qua lề đáy đè lên số trang và sinh trang trắng vô lý.
+  - **Nguyên nhân**: Cỡ chữ `\small` kết hợp giãn dòng `\arraystretch=1.25` và cột 1 hẹp khiến chiều cao các bảng vượt quá chiều cao trang in (`\textheight = 24.7cm`), buộc LaTeX phải đẩy bảng tràn qua lề trang hoặc đẩy sang trang sau tạo các trang trắng.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Chuyển đổi toàn bộ biểu đồ Use Case sang ảnh vẽ bằng Mermaid CLI chất lượng cao.
+    2. Chuẩn hóa Bảng 2.1 sang `tabularx` cột `Y`.
+    3. Định dạng lại Bảng 2.2 – 2.6 với `\footnotesize`, `\arraystretch=1.05`, `p{3.0cm}`, inline danh sách các bước dài.
+    4. Cô lập từng bảng bằng `\clearpage`, giúp bảng chiếm ~65-75% diện tích trang, cách số trang > 3.5cm an toàn tuyệt đối.
+    5. Kết xuất trang PDF sang ảnh PNG và kiểm tra trực quan từng trang 17–29: hoàn toàn sạch đẹp, không lỗi.
+    6. `dotnet build` đạt 0 lỗi, cập nhật `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+
+- **Loại Bỏ Hoàn Toàn Tham Chiếu KiotViet Trong Toàn Bộ Báo Cáo & Dự Án (Phiên 172)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "trong báo cáo và dự án của tôi, bạn hãy bỏ tất cả những câu, đoạn nhắc tới kiotviet. Ví dụ Mô hình tham chiếu thực tế: Triết lý vận hành phần mềm quản trị KiotViet bỏ hết mấy cái này đi, không nhắc tới nó nữa".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Báo cáo LaTeX (`docs/latex/main.tex`)**:
+       - Xóa bỏ hoàn toàn tiểu mục "Mô hình tham chiếu thực tế: Triết lý vận hành phần mềm quản trị KiotViet".
+       - Chuẩn hóa lại toàn bộ 22 vị trí trong file `.tex`: Lời mở đầu, Use case, Wireframe, Lego UI, Phân hệ Hàng hóa, Stacking context, Kết luận và Danh mục tài liệu tham khảo.
+       - Biên dịch XeLaTeX thành công, `main.pdf` không còn bất kỳ ký tự nào nhắc tới KiotViet.
+    2. **Tài liệu đặc tả & Quy chuẩn**:
+       - Cập nhật đồng bộ `AGENTS.md`, `.agent/rules/01-phong-cach-code.md`, `.agent/rules/03-giao-dien-layout.md`, `docs/quyet-dinh.md` và toàn bộ 12 file trong `docs/specs/*.md`.
+    3. **Controllers & Giao diện**:
+       - Sửa tên các file mẫu tải về: `Mau_Chuyen_Kho.xlsx`, `Mau_Nhap_Hang.xlsx`, `Mau_Tra_Hang_Nhap.xlsx`, `Mau_Xuat_Huy.xlsx`, `Mau_Nhap_Hang_Hoa.xlsx`.
+       - Dọn dẹp toàn bộ comment trong Views và JS.
+       - `dotnet build` đạt 0 lỗi. Cập nhật `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+
+- **Tối Ưu Hóa Kích Thước Tối Đa Cho Sơ Đồ ER Tổng Quan Trong Báo Cáo LaTeX (Phiên 171)**:
+  - **Nhu cầu**: Người dùng gửi ảnh trang chứa Sơ đồ ER tổng quan và yêu cầu: "riêng hình này bạn hãy cố gắng căn to nhất có thể nhưng ko được tràn đè".
+  - **Nguyên nhân**: Bản cũ bị giới hạn cứng `height=18.5cm` (do trước đó còn dòng tiêu đề thừa phía trên), khiến hình sau khi xoay 90 độ bị co lại chỉ rộng 8.8cm và cao 18.5cm, để lại nhiều khoảng trống trắng xung quanh.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Thiết lập `height=23.4cm` và `\vspace{0.2cm}` trong môi trường `figure[p]`.
+    2. Chiều dài sơ đồ mở rộng tối đa lên 23.4cm, bề ngang mở rộng lên ~11.2cm (tăng hơn 60% diện tích).
+    3. Căn giữa trang cân đối, giữ nguyên tỷ lệ khung hình (`keepaspectratio`), caption ở dưới cách số trang hơn 1.2cm an toàn tuyệt đối.
+    4. Biên dịch XeLaTeX 0 Errors ra file `main.pdf` 76 trang. Đóng gói `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+
+- **Thiết Kế Lại Toàn Diện Mục 2.2 Biểu Đồ Hoạt Động (Activity Diagrams) Bằng Mermaid (Phiên 170)**:
+
+- **Thiết Kế Lại Toàn Diện Mục 2.2 Biểu Đồ Hoạt Động (Activity Diagrams) Bằng Mermaid (Phiên 170)**:
+  - **Nhu cầu**: Người dùng yêu cầu: (1) "tôi muốn làm lại phần 2.2 Thiết kế luồng xử lý nghiệp vụ (Activity Diagrams) cho chuẩn và cụ thể. Bạn hãy lên kế hoạch"; (2) "tôi muốn dùng mermaid"; (3) "triển khai".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Tài liệu nguồn `docs/so-do-activity-nghiep-vu.md`**:
+       - Xây dựng 5 biểu đồ hoạt động Mermaid phân làn trách nhiệm 3 tầng (Client UI $\leftrightarrow$ Web App Backend $\leftrightarrow$ Database & Transaction) bao phủ toàn bộ các chu trình lưu chuyển kho hàng cốt lõi.
+    2. **Kết xuất ảnh tự động qua Kroki.io**:
+       - Kết xuất 5 ảnh PNG độ nét cao (2K resolution, sắc nét từng chi tiết): `fig_activity_nhaphang.png`, `fig_activity_chuyenkho.png`, `fig_activity_kiemkho.png`, `fig_activity_xuathuy.png`, `fig_activity_trahang.png`.
+    3. **Tái cấu trúc & Nâng cấp toàn diện Mục 2.2 trong `docs/latex/main.tex`**:
+       - *2.2.1: Quy trình Nhập hàng từ NCC & Cập nhật giá vốn*: Công thức MAC, bọc Transaction lưu Master-Detail, ghi nhận công nợ NCC.
+       - *2.2.2: Quy trình Điều chuyển kho 2 chặng*: Xuất chuyển trừ kho nguồn $\rightarrow$ hàng đi đường $\rightarrow$ nhận chuyển tại kho đích, đối soát hao hụt thất thoát trên biển.
+       - *2.2.3: Quy trình Kiểm kê & Tự động Cân bằng kho*: Lấy tồn sổ sách thời gian thực từ View, tính chênh lệch thừa/thiếu, nhánh Lưu tạm vs Cân bằng kho sinh `PhieuDieuChinh` và khóa vĩnh viễn (Luật 6 AGENTS.md).
+       - *2.2.4: Quy trình Xuất hủy hàng hỏng*: Kiểm tra tồn khả dụng, ghi nhận lý do rỉ sét/vỡ hỏng, trừ tồn kho ngay lập tức.
+       - *2.2.5: Quy trình Trả hàng nhập cho NCC*: Kiểm tra tồn khả dụng, giảm trừ công nợ phải trả NCC hoặc hoàn tiền.
+    4. **Biên dịch & Đóng gói**:
+       - Biên dịch XeLaTeX 3 lượt hoàn tất: `main.pdf` 78 trang, 0 Errors, 0 tham chiếu undefined.
+       - Cập nhật gói nén `docs/BaoCao_LaTeX_Overleaf.zip` (13.2 MB).
+
+- **Chuẩn Hóa Bố Cục & Tiêu Đề Tiểu Mục Sơ Đồ RM Trong Báo Cáo LaTeX (Phiên 169)**:
+  - **Nhu cầu**: Người dùng phản hồi kèm ảnh chụp trang 27: "hiện tại ảnh oke rồi nhưng các phần như a) Sơ đồ RM Cụm 1: Quản trị Hệ thống, Nhân sự & Phân quyền kho (RBAC) tôi thấy đang lơ lửng, font size to hơn bình thường ko tuân theo format chung".
+  - **Nguyên nhân**:
+    1. Tiêu đề cụm bị đặt bên trong môi trường `figure[p]`, chịu ảnh hưởng của lệnh `\centering` và cơ chế căn giữa dọc (`\vfill`) của float figure làm tiêu đề bị tụt xuống 1/4 trang, lơ lửng giữa khoảng trắng.
+    2. Cỡ chữ bị gán `\large` (14.4pt) to bất thường so với cỡ chữ chuẩn 12pt (`\normalsize`) của toàn bộ văn bản báo cáo.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Đưa các tiêu đề `a) Cụm 1...` đến `e) Cụm 5...` ra ngoài `figure`, đặt ngay sau `\clearpage` với `\noindent\textbf{...}\par\vspace{0.3cm}`: căn lề trái thẳng hàng với toàn văn bản, cỡ chữ 12pt chuẩn mực.
+    2. Sử dụng môi trường `figure[H]` với kích thước `height=17.5cm, keepaspectratio`: tiêu đề ở đầu trang, sơ đồ ở giữa, caption ở chân trang nằm trọn vẹn trên đúng 1 trang A4, giải quyết triệt để vấn đề lơ lửng.
+    3. Xóa bỏ dòng tiêu đề thừa lơ lửng ở Hình ER tổng quan.
+    4. Biên dịch XeLaTeX 0 lỗi, mục lục và danh sách hình vẽ cập nhật chuẩn xác. Đóng gói `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+
+- **Chuẩn Hóa Mô Hình Hóa Use Case (UML) Bằng Mermaid & 5 Bảng Đặc Tả Chi Tiết Trong Báo Cáo LaTeX (Phiên 168)**:
+  - **Nhu cầu**: Người dùng yêu cầu: (1) "2.1 Mô hình hóa chức năng bằng biểu đồ Use Case (UML) tôi muốn làm phần 2.1 này thật chuẩn chỉ, bạn hãy lên kế hoạch"; (2) "thay TikZ vector và mermaid được ko"; (3) "triển khai".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Thiết kế tài liệu chuẩn `docs/so-do-use-case.md`**:
+       - Xây dựng 6 sơ đồ Use Case bằng cú pháp Mermaid: 1 sơ đồ tổng quan cấp hệ thống có System Boundary + 5 sơ đồ phân hệ nghiệp vụ chi tiết.
+    2. **Tự động hóa kết xuất Mermaid CLI (`mmdc -s 2 -b white`)**:
+       - Kết xuất thành công 6 tệp ảnh PNG độ nét cao (2K/3K, nền trắng sắc nét): `fig_uc_tong_quan.png`, `fig_uc_phanhe1_quantri.png`, `fig_uc_phanhe2_danhmuc.png`, `fig_uc_phanhe3_biendong.png`, `fig_uc_phanhe4_chuyen_kiem.png`, `fig_uc_phanhe5_baocao.png`.
+    3. **Tái cấu trúc & Nâng cấp toàn diện Mục 2.1 trong `docs/latex/main.tex`**:
+       - *2.1.1*: Định nghĩa 3 tác nhân nghiệp vụ (Quản trị viên, Thủ kho, Nhân viên bán hàng/kho), nguyên lý kế thừa tác nhân và Bảng 2.1 Ma trận ánh xạ Tác nhân -- Chức năng cho 20 Use Cases.
+       - *2.1.2*: Biểu đồ Use Case tổng quan cấp hệ thống (Hình 2.1 - `fig_uc_tong_quan.png`).
+       - *2.1.3*: 5 Tiểu mục phân rã biểu đồ Use Case theo phân hệ kèm phân tích nghiệp vụ các quan hệ $\ll\text{include}\gg$ và $\ll\text{extend}\gg$ (Hình 2.2 đến 2.6).
+       - *2.1.4*: Bộ 5 Bảng đặc tả Use Case chi tiết chuẩn 2 cột đối ứng (Thao tác Người dùng $\leftrightarrow$ Phản hồi Hệ thống) cho UC-01 (Đăng nhập & Chọn kho), UC-02 (Nhập hàng NCC), UC-03 (Chuyển kho), UC-04 (Kiểm kê cân bằng), UC-05 (Thẻ kho) kèm quy tắc nghiệp vụ BR-01 đến BR-10.
+    4. **Biên dịch & Đóng gói**:
+       - Biên dịch XeLaTeX 2 lượt thành công ra file `main.pdf` 68 trang, 0 Errors, mục lục LOF/LOT đồng bộ 100%.
+       - Đóng gói mới file `docs/BaoCao_LaTeX_Overleaf.zip` chứa đầy đủ mã nguồn và toàn bộ hình ảnh mới.
+    5. **Kiểm tra biên dịch dự án**:
+       - `dotnet build /t:Compile`: Biên dịch dự án thành công với **0 Errors**.
+
+---
+
+- **Chuẩn Hóa Phân Tách Mô Hình ER Và Lược Đồ RM CSDL Trong Báo Cáo LaTeX (Phiên 167)**:
+  - **Nhu cầu**: Người dùng phản hồi: "rất tốt nhưng đây là sơ đồ RM, bạn hãy đưa xuống phần rm cho đúng" kèm ảnh chụp trang tài liệu chứa Hình 2.4.
+  - **Nguyên nhân & Chuẩn mực học thuật**:
+    + Mục 2.2 là Sơ đồ ER quan niệm (Conceptual Entity-Relationship Diagram): chỉ biểu diễn các thực thể cốt lõi, mối kết hợp hình thoi và bản số tham gia (Hình 2.3).
+    + Mục 2.3 là Sơ đồ RM (Relational Model): mô hình vật lý biểu diễn các bảng thực tế (Table), danh sách trường, kiểu dữ liệu, các ràng buộc PK, FK, UK và đường nối Crow's Foot. Do đó, 5 sơ đồ cấu trúc cụm nghiệp vụ phân rã thuộc về Mục 2.3.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Tái cấu trúc Mục 2.2**: Giữ nguyên Sơ đồ ER tổng quan mức quan niệm Hình 2.3 (`fig_er_tong_quan.png`), dọn sạch các sơ đồ bảng vật lý.
+    2. **Tái cấu trúc Mục 2.3**:
+       - 2.3.1: Lược đồ quan hệ chuẩn (Relational Schema Notation) phân theo 5 nhóm nghiệp vụ a, b, c, d, e.
+       - 2.3.2: Các sơ đồ cấu trúc quan hệ RM phân rã theo cụm nghiệp vụ: đưa 5 khối hình ảnh Hình 2.4 (Cụm 1: RBAC), Hình 2.5 (Cụm 2: Hàng hóa), Hình 2.6 (Cụm 3: Chuỗi cung ứng), Hình 2.7 (Cụm 4: Luân chuyển / Kiểm kê - đứng dọc), Hình 2.8 (Cụm 5: Bán hàng).
+       - 2.3.3: Sơ đồ cấu trúc liên kết các bảng quan hệ cốt lõi (Sơ đồ RM tổng hợp - Hình 2.9 TikZ).
+       - 2.3.4: Bảng các ràng buộc toàn vẹn tham chiếu (Referential Integrity Constraints).
+       - 2.3.5: Đánh giá chuẩn hóa cơ sở dữ liệu (3NF / BCNF).
+    3. **Đổi tên tiêu đề & Caption chuẩn RM**: Toàn bộ tiêu đề lớn và caption chuyển từ "Sơ đồ ER Cụm..." sang "Sơ đồ RM Cụm...".
+    4. **Biên dịch & Đóng gói**:
+       - Biên dịch XeLaTeX 2 lượt thành công ra file `main.pdf` 60 trang, mục lục và danh sách hình vẽ cập nhật chính xác 100%.
+       - Đóng gói mới file `docs/BaoCao_LaTeX_Overleaf.zip` chứa 19 tệp nguồn hoàn chỉnh.
+
+---
+
+- **Đồng Bộ CSDL Mẫu & Chụp Mới 9 Phân Hệ Giao Diện Vào Báo Cáo LaTeX (Phiên 166)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "3.3 Mô tả kết quả đạt được qua các phân hệ tôi mới cập nhật csdl mẫu và sửa lại một chút, bạn hãy chụp và chèn lại".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Nạp & Đồng bộ CSDL Mẫu**:
+       - Nạp thành công toàn bộ `15_du_lieu_mau_toan_dien.sql` vào SQL Server `QuanLyKhoPhuQuocLTW` (34 mặt hàng, 6 phiếu chuyển, 4 phiếu trả, 4 phiếu hủy, 2 đơn bán, phiếu kiểm kê cân bằng).
+    2. **Tự động hóa chụp màn hình Headless Edge (1440x900)**:
+       - Chụp mới 9 phân hệ thực tế: `hinh3_1_login.png`, `hinh3_2_hanghoa.png`, `hinh3_3_kiemkho.png`, `hinh3_4_bcton.png`, `hinh3_5_thekho.png`, `hinh3_6_nhaphang.png`, `hinh3_7_chuyenkho.png`, `hinh3_8_xuat_huy.png`, `hinh3_9_tra_hang.png`.
+       - Đảm bảo mã nguồn C# được khôi phục nguyên trạng, không lưu lại mã dev tạm.
+    3. **Cập nhật & Thuyết minh chi tiết Mục 3.3**:
+       - Chia tách 9 tiểu mục 3.3.1 đến 3.3.9 thuyết minh sâu về nghiệp vụ KiotViet, cơ chế tính toán và kiểm soát giao dịch.
+    4. **Biên dịch & Đóng gói**:
+       - Biên dịch XeLaTeX ra file `docs/latex/main.pdf` 59 trang hoàn chỉnh.
+       - Cập nhật file nén `docs/BaoCao_LaTeX_Overleaf.zip` chứa đầy đủ file nguồn LaTeX, ảnh logo và 9 ảnh chụp phân hệ.
+
+---
+
+- **Hoàn Thiện Mô Hình ER/RM CSDL & Chuẩn Hóa Bố Cục Sơ Đồ ER (Phiên 165)**:
+  - **Nhu cầu**: Người dùng yêu cầu: (1) Lên kế hoạch và làm rõ toàn bộ kiến trúc CSDL của dự án với Sơ đồ ER và Lược đồ RM; (2) Gắn sơ đồ vào báo cáo học thuật LaTeX trong VS Code; (3) Giữ đồ họa trực quan Mermaid giống hệt file `.md`; (4) Sửa lỗi sơ đồ bị tràn ra ngoài, kích thước quá to, và lỗi "tên sơ đồ nằm ở trang trước bị trắng trơn còn sơ đồ bị đẩy sang trang tiếp theo"; (5) **Tiêu đề sơ đồ và chú thích (Caption) vẫn giữ nguyên theo chiều dọc bình thường (đọc xuôi theo trang A4), chỉ có bản thân hình ảnh sơ đồ là xoay ngang 90 độ**; riêng sơ đồ Cụm 4 giữ nguyên chiều thẳng đứng.
+  - **Nguyên nhân & Nhu cầu tối ưu**:
+    1. Khi dùng `sidewaysfigure`, toàn bộ tiêu đề và caption bị xoay $90^\circ$ theo hình vẽ, khiến người đọc phải xoay đầu hoặc xoay trang mới đọc được tên mục và caption.
+    2. Giải pháp tối ưu: Đưa về môi trường `figure` thông thường, tiêu đề lớn ở trên và `\caption{...}` ở dưới giữ nguyên chiều đọc xuôi tự nhiên của trang A4 dọc, chỉ thêm tham số `angle=90` vào lệnh `\includegraphics` đối với các sơ đồ có cấu trúc ngang rộng. Chiều cao hình ảnh khống chế `height=18.5cm, keepaspectratio` đảm bảo trọn vẹn cả trang.
+    3. Riêng sơ đồ Cụm 4 đã được sửa lỗi chính tả `ChiTietPhieuChuyenKho` và bổ sung 2 thực thể trung tâm `Kho` + `HangHoa`, kết nối liền mạch toàn bộ 10 bảng và đặt thẳng đứng theo khổ dọc.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Thiết kế sơ đồ ER & RM chuẩn học thuật**:
+       - Xây dựng sơ đồ ER tổng quan và 5 sơ đồ ER phân rã chi tiết theo từng cụm nghiệp vụ (RBAC, Hàng hóa, Chuỗi cung ứng, Chuyển kho/Kiểm kê, Bán hàng) cùng lược đồ quan hệ RM toán học và bảng 53 ràng buộc khóa ngoại.
+       - Viết file `docs/so-do-er-va-rm-csdl.md` và `docs/specs/tu-dien-co-so-du-lieu.md`.
+    2. **Đồ họa trực quan Mermaid & Tối ưu bố cục**:
+       - Kết xuất 6 ảnh PNG độ nét cao từ Mermaid CLI (`fig_er_tong_quan.png`, `fig_er_rbac.png`, `fig_er_hanghoa.png`, `fig_er_supply_chain.png`, `fig_er_transfer_audit.png`, `fig_er_sales.png`).
+    3. **Hiện thực hóa môi trường `sidewaysfigure` trên khổ dọc Portrait A4**:
+       - Tích hợp gói `rotating` vào `main.tex`.
+       - Chuyển toàn bộ 6 khối hình ảnh ER sang `\begin{sidewaysfigure} ... \end{sidewaysfigure}`.
+       - Khống chế kích thước tối ưu: `width=0.92\textheight` (~22.7cm) và `height=0.74\textwidth` (~11.8cm), `keepaspectratio`.
+       - Đóng gói Tiêu đề lớn ở trên + Hình ảnh ở giữa + Caption ở dưới thành một khối xoay duy nhất, mỗi sơ đồ nằm gọn gàng trên 1 trang giấy dọc riêng biệt (các trang từ 22 đến 27).
+    4. **Kiểm tra & Biên dịch**:
+       - Biên dịch XeLaTeX trực tiếp trong môi trường nội bộ VS Code: `main.pdf` 59 trang ra lò chuẩn xác, 100% trang là khổ dọc A4 (`MediaBox: 0 0 595.28 841.89`), 0 Errors, 0 cảnh báo tham chiếu.
+       - Cập nhật gói nén `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+  - **Nhu cầu**: Người dùng yêu cầu: "hiện tại dự án đã gần đạt, tôi muốn bạn tạo thêm dữ liệu để test đầy đủ các chức năng".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Thiết kế & Thực thi script migration `migrations/sql/15_du_lieu_mau_toan_dien.sql`**:
+       - Bổ sung 5 nhóm nhà cung cấp mới và 6 nhà cung cấp KiotViet chuẩn chỉ thông tin (Mã số thuế, email, khu vực, người tạo).
+       - Bổ sung 8 khách hàng thực tế tại Phú Quốc thuộc cả 2 nhóm `CUA_HANG` và `LE`.
+       - Bổ sung 15 mặt hàng phong phú chất lượng cao thuộc đầy đủ các nhóm hàng (Bình gas, Phụ kiện gas, Thiết bị an toàn, Khí công nghiệp, Than/Cồn, Xe đẩy).
+       - Khởi tạo ngưỡng tồn an toàn `NguongTonKho` cho toàn bộ các mặt hàng mới trên cả 3 kho.
+       - Cấp tồn dồi dào qua phiếu nhập `THONG_THUONG` cho Kho trung tâm, Kho An Thới và Kho phụ kiện Tuna.
+       - Tạo 6 chứng từ Chuyển kho mô phỏng đầy đủ luồng thực tế (bao gồm chuyển có mất mát/thất thoát trên phà biển, chuyển đang đi đường, chuyển nháp, chuyển hủy).
+       - Tạo 4 phiếu Trả hàng nhập đầy đủ các trạng thái và các nhà cung cấp khác nhau.
+       - Tạo 4 phiếu Xuất hủy (`XUAT_HUY`) phản ánh các nguyên nhân hao hụt thực tế (rỉ sét chân đế, ngấm nước mưa bão, bể kính bếp...).
+       - Tạo 2 đơn bán hàng `DonBan` và phiếu xuất bán `XUAT_BAN` tương ứng cho Resort Vinpearl và Đại lý Cửa Cạn.
+       - Tạo 2 phiếu Kiểm kho `PhieuKiemKe` (1 phiếu đã duyệt cân bằng qua `PhieuDieuChinh` và 1 phiếu bản nháp đang kiểm kê).
+       - Bổ sung lịch sử hoạt động vào bảng `NhatKyThaoTac`.
+    2. **Kiểm tra & Xác thực**:
+       - Nạp dữ liệu qua `sqlcmd` với cờ UTF-8 `-f 65001`, toàn bộ 11/11 phần thực thi hoàn tất với 0 lỗi.
+       - View tồn kho `vw_TonKhoHienTai` phản ánh chính xác số liệu:
+         * Kho trung tâm: 29 mặt hàng, 2,102 đơn vị tồn, tổng trị giá ~2.42 tỷ VNĐ.
+         * Kho An Thới: 11 mặt hàng, 491 đơn vị tồn, tổng trị giá ~165.5 triệu VNĐ.
+         * Kho phụ kiện Tuna: 8 mặt hàng, 460 đơn vị tồn, tổng trị giá ~159.2 triệu VNĐ.
+       - `dotnet build -t:Compile`: Biên dịch dự án thành công với **0 Errors**.
+
+---
+
+- **Gỡ Bỏ Phần Chọn Nhanh Đăng Nhập Tài Khoản Mẫu (Phiên 163)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "trong phần login hãy bỏ phần chọn nhanh để đăng nhập đi" kèm ảnh chụp khối gợi ý tài khoản mẫu.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. `Views/Account/Login.cshtml`: Xóa bỏ thẻ `.demo-hint` chứa danh sách nút bấm `quickFill('quanly')`, `quickFill('thukho')`, `quickFill('banhang')`.
+    2. `wwwroot/js/dang-nhap.js`: Xóa hàm `window.quickFill`.
+    3. `wwwroot/css/dang-nhap.css`: Xóa các class định kiểu `.demo-hint`, `.demo-hint-title`, `.demo-tags`, `.demo-tag`.
+  - **Kiểm tra**:
+    + `dotnet build /t:Compile`: Biên dịch dự án thành công với **0 Errors**.
 
 ---
 

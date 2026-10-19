@@ -1,5 +1,5 @@
-/**
- * chuyen-kho-form.js - Quản lý form Lập / Sửa Phiếu Chuyển Kho chuẩn KiotViet
+﻿/**
+ * chuyen-kho-form.js - Quản lý form Lập / Sửa Phiếu Chuyển Kho chuẩn chuyên nghiệp
  */
 (function ($) {
     'use strict';

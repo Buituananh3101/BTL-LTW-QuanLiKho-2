@@ -1,4 +1,4 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.HangHoaIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.HangHoaIndexVM
 @{
     ViewData["Title"] = "Hàng hóa";
 }
@@ -17,7 +17,7 @@
      style="display:none;"></div>
 
 <div class="kiot-container position-relative" id="kiotContainer">
-    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + 7 BỘ LỌC KIOTVIET (PARTIAL VIEW) -->
+    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + 7 BỘ LỌC chuyên nghiệp (PARTIAL VIEW) -->
     <partial name="_HangHoaFilterSidebar" model="Model" />
 
     <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
@@ -60,10 +60,10 @@
                     </ul>
                 </div>
 
-                <!-- Cụm nút Nhập file & Xuất file Excel chuẩn KiotViet -->
+                <!-- Cụm nút Nhập file & Xuất file Excel chuẩn chuyên nghiệp -->
                 <partial name="_HangHoaExcelActions" />
 
-                <!-- Dropdown tùy chọn hiển thị cột chuẩn Nhập hàng & KiotViet -->
+                <!-- Dropdown tùy chọn hiển thị cột chuẩn Nhập hàng & chuyên nghiệp -->
                 <div class="dropdown">
                     <button class="btn btn-tool" type="button" id="btnColsDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Tùy chọn hiển thị cột">
                         <i class="bi bi-view-list"></i>
@@ -92,7 +92,7 @@
                     </div>
                 </div>
 
-                <!-- Các icon tiện ích KiotViet -->
+                <!-- Các icon tiện ích chuyên nghiệp -->
                 <button type="button" class="btn btn-tool d-none d-sm-inline-flex" title="Tải lại bảng" id="btnReloadTable">
                     <i class="bi bi-arrow-clockwise"></i>
                 </button>
@@ -136,7 +136,7 @@
 </div>
 
 <!-- ========================================================================
-     CÁC MODAL KIOTVIET (THÊM/SỬA, XUẤT EXCEL, NHẬP EXCEL, TẠO NHÓM)
+     CÁC MODAL chuyên nghiệp (THÊM/SỬA, XUẤT EXCEL, NHẬP EXCEL, TẠO NHÓM)
      ======================================================================== -->
 <partial name="_HangHoaModal" model="Model" />
 <partial name="_HangHoaExportModal" />

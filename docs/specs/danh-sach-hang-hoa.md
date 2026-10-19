@@ -1,6 +1,6 @@
-# Đặc tả Chức năng: Quản lý Hàng hóa (Product Catalog)
+﻿# Đặc tả Chức năng: Quản lý Hàng hóa (Product Catalog)
 
-> **Mục tiêu**: **Khuôn mẫu chuẩn cho toàn bộ màn hình Danh mục (CRUD)** trong hệ thống. Lọc sidebar, phân trang AJAX, modal JSON, bảo toàn dữ liệu, nhập/xuất Excel chuẩn KiotViet.
+> **Mục tiêu**: **Khuôn mẫu chuẩn cho toàn bộ màn hình Danh mục (CRUD)** trong hệ thống. Lọc sidebar, phân trang AJAX, modal JSON, bảo toàn dữ liệu, nhập/xuất Excel chuẩn chuyên nghiệp.
 
 ---
 
@@ -44,7 +44,7 @@
 
 ### 3.1. Cột lọc bên trái (Sidebar Filter):
 1. **Nhóm hàng**: Multi-select Tag Dropdown + ô tìm kiếm dính đỉnh + Tạo mới, Sửa và Xóa trực tiếp từ dropdown (icon ✎ khi hover).
-2. **Tồn kho**: Custom Single Select KiotViet (Tất cả / Còn hàng / Hết hàng / Dưới định mức tồn).
+2. **Tồn kho**: Custom Single Select hệ thống (Tất cả / Còn hàng / Hết hàng / Dưới định mức tồn).
 3. **Dự kiến hết hàng**: Hôm nay, 3 ngày tới, 7 ngày tới, Trong tháng, > 30 ngày.
 4. **Nhà cung cấp**: Multi-select tag dropdown theo NCC đã từng nhập.
 5. **Loại hàng**: Hàng hóa / Dịch vụ / Combo đóng gói.
@@ -53,7 +53,7 @@
 
 ### 3.2. Sắp xếp 3 trạng thái & Ẩn hiện cột:
 - **Sắp xếp 3 trạng thái**: Click header: Lần 1 ASC (`bi-arrow-up`) ➜ Lần 2 DESC (`bi-arrow-down`) ➜ Lần 3 Default. Cột căn trái dùng inline-flex chống tràn viền, cột số dùng padding-right 22px cố định icon.
-- **Tùy chọn hiển thị cột**: Nút `#btnColsDropdown` (`bi-view-list`), menu `#colMenu` 2 cột chuẩn KiotViet. Quản lý qua `KiotFilter.initColumnToggle` lưu `kiot_hang_hoa_cols_v1`. Quản lý 13 cột dữ liệu (`img`, `mahang`, `tenhang`, `nhomhang`, `dvt`, `giaban`, `giavon`, `tonkho`, `khachdat`, `vitri`, `ngaytao`, `dukienhethang`, `trangthai`) + 2 cột cố định. Tự động đồng bộ `colspan` và class `.last-visible-col`. Bảng `#productTable` áp dụng chuẩn `width: max-content; min-width: 760px; table-layout: fixed;` (chuẩn Kiểm tồn & Nhà cung cấp), khóa cố định `width`/`min-width` từng cột chống co rút khi thêm cột. Khung chi tiết `.kiot-detail-fixed-wrap` cố định 992px.
+- **Tùy chọn hiển thị cột**: Nút `#btnColsDropdown` (`bi-view-list`), menu `#colMenu` 2 cột chuẩn chuyên nghiệp. Quản lý qua `KiotFilter.initColumnToggle` lưu `kiot_hang_hoa_cols_v1`. Quản lý 13 cột dữ liệu (`img`, `mahang`, `tenhang`, `nhomhang`, `dvt`, `giaban`, `giavon`, `tonkho`, `khachdat`, `vitri`, `ngaytao`, `dukienhethang`, `trangthai`) + 2 cột cố định. Tự động đồng bộ `colspan` và class `.last-visible-col`. Bảng `#productTable` áp dụng chuẩn `width: max-content; min-width: 760px; table-layout: fixed;` (chuẩn Kiểm tồn & Nhà cung cấp), khóa cố định `width`/`min-width` từng cột chống co rút khi thêm cột. Khung chi tiết `.kiot-detail-fixed-wrap` cố định 992px.
 
 ### 3.3. Tùy chọn Cột & Độ rộng Cố định (Fixed Columns & Horizontal Scroll):
 Nút `bi-grid-3x2-gap` mở popup 11 cột đồng bộ 100% với các trường dữ liệu của file xuất (Loại hàng, Nhóm hàng, Mã hàng, Tên hàng, Giá bán, Giá vốn, Tồn kho, Tồn nhỏ nhất, Tồn lớn nhất, Vị trí, Trạng thái). Dùng Dynamic CSS tức thì (0ms, không flicker), lưu vào `localStorage`. Toàn bộ cột được cố định chiều rộng (`table-layout: fixed; width: max-content; min-width: 100%;`), khi bật nhiều cột vượt màn hình sẽ xuất hiện thanh cuộn ngang mượt mà, không co ép méo mó cột.

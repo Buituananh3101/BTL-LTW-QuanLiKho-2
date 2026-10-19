@@ -1,5 +1,5 @@
-/* ==========================================================================
-   JAVASCRIPT QUẢN LÝ FORM TẠO & CẬP NHẬT HÀNG HÓA CHUẨN KIOTVIET
+﻿/* ==========================================================================
+   JAVASCRIPT QUẢN LÝ FORM TẠO & CẬP NHẬT HÀNG HÓA chuẩn chuyên nghiệp
    Hỗ trợ 5 ảnh CSDL, định mức Min/Max, vị trí, trọng lượng, thuộc tính động, tab mô tả
    ========================================================================== */
 
@@ -180,7 +180,7 @@
   });
   $('#pInput').addEventListener('input', () => $('#pField').classList.remove('invalid'));
 
-  /* ---------- Modal Sửa & Xóa Vị trí / Thuộc tính (Chuẩn KiotViet) ---------- */
+  /* ---------- Modal Sửa & Xóa Vị trí / Thuộc tính (chuẩn chuyên nghiệp) ---------- */
   let editItemType = null; // 'vitri' | 'thuoctinh'
   let editItemOldVal = '';
 
@@ -735,7 +735,7 @@
   csMaDvt?.updateUI();
   csDonViTrongLuong?.updateUI();
 
-  /* ---------- Vị trí đa chọn (Multi-select dropdown tags chuẩn KiotViet) ---------- */
+  /* ---------- Vị trí đa chọn (Multi-select dropdown tags chuẩn chuyên nghiệp) ---------- */
   let availableLocations = [
     'Kho trung tâm',
     'Kệ A1 - Tầng 1',
@@ -1596,7 +1596,7 @@
     });
   };
 
-  /* ---------- Xóa hàng hóa & Chuyển trạng thái Ngừng bán (Chuẩn KiotViet) ---------- */
+  /* ---------- Xóa hàng hóa & Chuyển trạng thái Ngừng bán (chuẩn chuyên nghiệp) ---------- */
   window.openDeleteProductModal = function (id, name) {
     if (!id) return;
     const hiddenId = $('#delProdId');

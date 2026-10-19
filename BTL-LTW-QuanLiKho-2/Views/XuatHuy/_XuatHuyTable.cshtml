@@ -1,4 +1,4 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.XuatHuyIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.XuatHuyIndexVM
 @using System.Globalization
 @{
     var viCulture = CultureInfo.GetCultureInfo("vi-VN");
@@ -166,7 +166,7 @@
                         </td>
                     </tr>
 
-                    <!-- Khối chi tiết bung ra (Inline Drawer / Accordion) khớp chuẩn Nhà cung cấp & KiotViet -->
+                    <!-- Khối chi tiết bung ra (Inline Drawer / Accordion) khớp chuẩn Nhà cung cấp & chuyên nghiệp -->
                     <tr class="product-detail-row dtl" id="detail-@item.MaPhieuXuat" style="display: none;">
                         <td colspan="11" class="p-0">
                             <div class="product-detail-panel-wrap" style="display: none;">
@@ -250,7 +250,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- Hàng nút hành động chuẩn KiotViet Screenshot 1 -->
+                                        <!-- Hàng nút hành động chuẩn chuyên nghiệp Screenshot 1 -->
                                         <div class="dp-actions d-flex align-items-center gap-2 mt-3 pt-3 border-top">
                                             @if (item.TrangThai != "HUY")
                                             {
@@ -292,5 +292,5 @@
     </table>
 </div>
 
-<!-- Phân trang chuẩn KiotViet LEGO -->
+<!-- Phân trang chuẩn chuyên nghiệp LEGO -->
 @await Html.PartialAsync("_Pagination", Model.PagedData, new ViewDataDictionary(ViewData) { { "ItemLabel", "phiếu xuất hủy" } })

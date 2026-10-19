@@ -1,5 +1,5 @@
-/**
- * chuyen-kho-index.js - Điều khiển giao diện Danh sách Chuyển kho chuẩn KiotViet
+﻿/**
+ * chuyen-kho-index.js - Điều khiển giao diện Danh sách Chuyển kho chuẩn chuyên nghiệp
  * Tái sử dụng KiotFilter.createListPage (Lego Engine)
  */
 (function ($) {

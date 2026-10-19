@@ -1,4 +1,4 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.ChuyenKho.ChuyenKhoIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.ChuyenKho.ChuyenKhoIndexVM
 @{
     ViewData["Title"] = "Chuyển kho";
 }
@@ -19,7 +19,7 @@
      data-sort-dir="@(Model.Filter.SortDir ?? "")"
      data-current-wh="@Model.CurrentKhoId">
 
-    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + BỘ LỌC KIOTVIET (PARTIAL VIEW) -->
+    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + BỘ LỌC chuyên nghiệp (PARTIAL VIEW) -->
     <partial name="_ChuyenKhoFilterSidebar" model="Model" />
 
     <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
@@ -48,7 +48,7 @@
                 <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã phiếu chuyển, tên hàng (F3)" value="@Model.Filter.Q" autocomplete="off" />
             </div>
 
-            <!-- Nhóm nút hành động KiotViet -->
+            <!-- Nhóm nút hành động chuyên nghiệp -->
             <div class="kiot-actions-group">
                 <!-- Nút + Chuyển hàng -->
                 <a href="@Url.Action("Create", "ChuyenKho")" class="btn btn-primary d-inline-flex align-items-center" id="btnNew" title="Lập phiếu chuyển hàng mới" style="background-color: #0070f4; border-color: #0070f4;">

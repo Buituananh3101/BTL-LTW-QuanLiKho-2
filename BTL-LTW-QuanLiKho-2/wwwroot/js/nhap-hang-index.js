@@ -1,6 +1,6 @@
-/**
+﻿/**
  * nhap-hang-index.js
- * Quản lý danh sách Phiếu Nhập Hàng (Chuẩn KiotViet)
+ * Quản lý danh sách Phiếu Nhập Hàng (chuẩn chuyên nghiệp)
  * Tái sử dụng đồng bộ 100% khối LEGO KiotFilter & KiotConfirm
  */
 
@@ -46,7 +46,7 @@ $(function () {
         if (!F.statuses.includes(s)) F.statuses.push(s);
     });
 
-    // Cấu hình 20 cột hiển thị mặc định khớp với KiotViet
+    // Cấu hình 20 cột hiển thị mặc định khớp với chuyên nghiệp
     const DEFAULT_RECEIPT_COLS = {
         ma: 1,
         matra: 0,
@@ -392,7 +392,7 @@ $(function () {
         });
     });
 
-    // Sắp xếp cột 3 trạng thái (Tăng -> Giảm -> Bình thường) chuẩn KiotViet & Kiểm kho
+    // Sắp xếp cột 3 trạng thái (Tăng -> Giảm -> Bình thường) chuẩn chuyên nghiệp & Kiểm kho
     $(document).on('click', '#receiptTable thead th.sortable-th', function (e) {
         e.preventDefault();
         const col = $(this).data('col');

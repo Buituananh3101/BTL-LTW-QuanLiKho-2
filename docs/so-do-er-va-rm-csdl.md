@@ -283,6 +283,18 @@ erDiagram
 
 ```mermaid
 erDiagram
+    Kho {
+        int MaKho PK
+        string TenKho
+        string DiaChi
+    }
+
+    HangHoa {
+        int MaHang PK
+        string MaHangNoiBo UK
+        string TenHang
+    }
+
     PhieuChuyenKho {
         int MaPhieuChuyen PK
         string MaPhieu UK
@@ -370,12 +382,20 @@ erDiagram
         decimal SoLuongDieuChinh
     }
 
-    PhieuChuyenKho ||--|{ ChiTietPhuyenKho : "chuyen_chi_tiet"
+    Kho ||--o{ PhieuChuyenKho : "kho_nguon_va_dich"
+    Kho ||--o{ PhieuXuat : "xuat_tai_kho"
+    Kho ||--o{ PhieuKiemKe : "kiem_tai_kho"
+
+    PhieuChuyenKho ||--|{ ChiTietPhieuChuyenKho : "chuyen_chi_tiet"
     PhieuXuat ||--|{ ChiTietPhieuXuat : "xuat_chi_tiet"
     PhieuKiemKe ||--|{ ChiTietPhieuKiemKe : "kiem_chi_tiet"
     PhieuKiemKe ||--o| PhieuDieuChinh : "sinh_phieu_can_bang"
     PhieuDieuChinh ||--|{ ChiTietPhieuDieuChinh : "dieu_chinh_chi_tiet"
     ChiTietPhieuKiemKe ||--o| ChiTietPhieuDieuChinh : "can_bang_lech"
+
+    HangHoa ||--o{ ChiTietPhieuChuyenKho : "chuyen_mat_hang"
+    HangHoa ||--o{ ChiTietPhieuXuat : "xuat_mat_hang"
+    HangHoa ||--o{ ChiTietPhieuKiemKe : "kiem_mat_hang"
 ```
 
 ---

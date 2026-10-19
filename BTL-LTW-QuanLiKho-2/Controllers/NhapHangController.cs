@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -646,7 +646,7 @@ public class NhapHangController : BaseKhoController
 
         using var ms = new MemoryStream();
         workbook.SaveAs(ms);
-        return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_Nhap_Hang_KiotViet.xlsx");
+        return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_Nhap_Hang.xlsx");
     }
 
     // 15. Nhập danh sách hàng từ file Excel (Server-side ClosedXML)

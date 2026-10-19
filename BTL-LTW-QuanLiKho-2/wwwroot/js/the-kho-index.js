@@ -1,6 +1,6 @@
-/**
+﻿/**
  * the-kho-index.js - Quản lý tương tác màn hình Báo cáo Thẻ kho
- * Chuẩn hóa 100% theo khuôn mẫu LEGO KiotViet
+ * Chuẩn hóa 100% theo khuôn mẫu Lego hệ thống
  */
 (function ($) {
     'use strict';

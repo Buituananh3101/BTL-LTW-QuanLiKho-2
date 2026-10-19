@@ -1,4 +1,4 @@
-# Đặc tả Chức năng: Quản lý Người dùng & Phân quyền Kho
+﻿# Đặc tả Chức năng: Quản lý Người dùng & Phân quyền Kho
 
 > **Mô-đun**: Thiết lập hệ thống ➜ Người dùng & Phân quyền  
 > **Tài liệu tham chiếu**: [`.agent/rules/04-xac-thuc-phan-quyen.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/.agent/rules/04-xac-thuc-phan-quyen.md) | [`AGENTS.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/AGENTS.md)
@@ -7,7 +7,7 @@
 
 ## 1. Mục tiêu & Phạm vi nghiệp vụ
 
-- **Mục tiêu**: Cung cấp giao diện trực quan chuẩn KiotViet để Quản lý quản lý nhân sự, tài khoản đăng nhập, vai trò (Quản lý, Bán hàng, Thủ kho) và phân quyền chi nhánh kho phụ trách.
+- **Mục tiêu**: Cung cấp giao diện trực quan chuẩn chuyên nghiệp để Quản lý quản lý nhân sự, tài khoản đăng nhập, vai trò (Quản lý, Bán hàng, Thủ kho) và phân quyền chi nhánh kho phụ trách.
 - **Phạm vi truy cập**: URL `/NguoiDung`. Phân quyền bắt buộc: Chỉ vai trò **Quản lý** (`[Authorize(Roles = "Quản lý")]`) mới có quyền truy cập. Các vai trò khác bị từ chối truy cập (HTTP 403).
 - **Hành động nghiệp vụ**:
   - Xem danh sách tài khoản kèm bộ lọc tìm kiếm theo từ khóa (tên đăng nhập, họ tên nhân viên, SĐT), theo Vai trò, Trạng thái (Hoạt động / Bị khóa) và Kho phụ trách.
@@ -37,7 +37,7 @@
 
 ---
 
-## 3. Luồng màn hình & Giao diện (KiotViet style)
+## 3. Luồng màn hình & Giao diện (Chuẩn giao diện hệ thống)
 
 ### 3.1. Màn hình Danh sách (`Index.cshtml`)
 - **Topbar**: Nút `F3` tìm kiếm nhanh, nút `+ Người dùng` (`#btnOpenCreateUser`), nút `F4` mở/đóng sidebar lọc.
@@ -48,7 +48,7 @@
   - Phân trang AJAX: Tái sử dụng Lego `_Pagination.cshtml`.
 
 ### 3.2. Modal Thêm/Sửa người dùng (`_NguoiDungModal.cshtml`)
-- Giao diện Modal Overlay KiotViet dựa trên khuôn mẫu Tạo hàng hóa (`_HangHoaModal.cshtml`).
+- Giao diện Modal Overlay hệ thống dựa trên khuôn mẫu Tạo hàng hóa (`_HangHoaModal.cshtml`).
 - **Header (`.hh-m-head`)**: Tiêu đề "Thêm mới người dùng" / "Cập nhật người dùng: [Tên]", nút đóng `X` (`.hh-x`).
 - **Body (`.hh-m-body`)**:
   - Khối 1: **Các trường thông tin tài khoản & nhân sự** (`.hh-fields`, `.hh-f`): Tên đăng nhập `*`, Mật khẩu `*` (icon mắt ẩn/hiện), Họ và tên `*`, Vai trò `*`, SĐT, Email, và ô nhập Ghi chú nhân sự.
@@ -95,7 +95,7 @@
 ## 7. Checklist nghiệm thu
 
 - [x] Biên dịch dự án hoàn tất với 0 Errors.
-- [x] Giao diện Thêm mới & Cập nhật người dùng chuẩn Modal Overlay KiotViet dựa trên màn hình Hàng hóa.
+- [x] Giao diện Thêm mới & Cập nhật người dùng chuẩn Modal Overlay hệ thống dựa trên màn hình Hàng hóa.
 - [x] Hộp thoại xác nhận Khóa / Mở khóa tài khoản chuẩn KiotConfirm thay thế hoàn toàn browser confirm().
 - [x] Cấm truy cập với tài khoản không phải vai trò "Quản lý".
 - [x] Thêm mới tài khoản thành công kèm gán kho và mã hóa SHA-256.

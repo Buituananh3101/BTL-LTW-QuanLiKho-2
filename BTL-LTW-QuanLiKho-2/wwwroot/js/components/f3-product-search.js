@@ -1,6 +1,6 @@
-/**
+﻿/**
  * f3-product-search.js
- * Component tìm kiếm hàng hóa Autocomplete hỗ trợ phím tắt F3 chuẩn phong cách KiotViet
+ * Component tìm kiếm hàng hóa Autocomplete hỗ trợ phím tắt F3 chuẩn phong cách chuyên nghiệp
  * Dùng chung cho: Lập phiếu kiểm kho, Lập phiếu nhập kho, Lập phiếu xuất kho, Chuyển kho
  */
 

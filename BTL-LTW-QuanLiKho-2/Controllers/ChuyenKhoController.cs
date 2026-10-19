@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -704,7 +704,7 @@ public class ChuyenKhoController : BaseKhoController
 
         using var ms = new MemoryStream();
         workbook.SaveAs(ms);
-        return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_Chuyen_Kho_KiotViet.xlsx");
+        return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_Chuyen_Kho.xlsx");
     }
 
     // 14. Nhập danh sách hàng hóa chuyển kho từ file Excel / CSV (ClosedXML)

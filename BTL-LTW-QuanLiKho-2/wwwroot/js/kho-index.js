@@ -1,6 +1,6 @@
-/**
+﻿/**
  * kho-index.js - Quản lý tương tác màn hình Chi nhánh Kho
- * Chuẩn hóa 100% theo khuôn mẫu KiotViet LEGO & Form Hàng Hóa
+ * Chuẩn hóa 100% theo khuôn mẫu chuyên nghiệp LEGO & Form Hàng Hóa
  */
 (function ($) {
     'use strict';
@@ -18,7 +18,7 @@
         });
     }
 
-    // 3. Helper modal overlay KiotViet
+    // 3. Helper modal overlay chuyên nghiệp
     function showOverlay(id) {
         const ov = document.getElementById(id);
         if (ov) {
@@ -82,7 +82,7 @@
         }
     });
 
-    // 7. Split Button Lưu tùy chọn KiotViet
+    // 7. Split Button Lưu tùy chọn chuyên nghiệp
     $(document).on('click', '#btnKhoCaret', function (e) {
         e.stopPropagation();
         $('#khoSplitMenu').toggleClass('show');

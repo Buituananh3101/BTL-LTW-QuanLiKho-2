@@ -1,6 +1,6 @@
 # 03. Giao diện, Layout & Thành phần dùng chung
 
-## 1. Cấu trúc Layout chuẩn KiotViet
+## 1. Cấu trúc Layout chuẩn chuyên nghiệp
 - Duy nhất một Layout chính: [`Views/Shared/_Layout.cshtml`](../../BTL-LTW-QuanLiKho-2/Views/Shared/_Layout.cshtml) qua `_ViewStart.cshtml`. Cấm khai báo lại trong View con.
 - Ngoại lệ: `_LoginLayout.cshtml` (Đăng nhập), `_PrintLayout.cshtml` (In A4/A5).
 - Khung trang: Topbar (`_Header`, `_MainMenu`), `@RenderBody()`, `_KiotPromptModal`, scripts `jquery`, `site.js`, `kiot-filter.js`.
@@ -18,8 +18,8 @@
 - **`@section Scripts`**: Chứa code JS, AJAX riêng của từng màn hình.
 
 ## 5. Quy chuẩn bảng & Modal
-- **Bảng dữ liệu**: Chuẩn KiotViet, header `table-light`, phân trang AJAX.
-- **Modal**: Overlay KiotViet, gửi AJAX JSON nhận `{ success, message }`, toast thông báo.
+- **Bảng dữ liệu**: Chuẩn chuyên nghiệp, header `table-light`, phân trang AJAX.
+- **Modal**: Overlay chuyên nghiệp, gửi AJAX JSON nhận `{ success, message }`, toast thông báo.
 
 ---
 
@@ -33,7 +33,7 @@ Hệ thống đóng gói các thành phần lặp lại thành các "mảnh ghé
    - Backend: `var (from, to) = DateRangeHelper.Resolve(filter.DateFilterType, filter.FromDate, filter.ToDate);`
 2. **Phân trang AJAX (`_Pagination.cshtml` & `PagedResult<T>`)**:
    - Razor: `<partial name="_Pagination" model="Model.PagedData" />` (kết hợp `BaseFilterParams`).
-3. **Hệ thống Toast KiotViet (`site.js` & `site.css`)**:
+3. **Hệ thống Toast thông báo (`site.js` & `site.css`)**:
    - Cú pháp: `KiotToast.success("..."), KiotToast.error("..."), KiotToast.warning("..."), KiotToast.info("...")`.
 4. **Ẩn / Hiện Cột bảng (`KiotFilter.initColumnToggle`)**:
    - Cú pháp: `KiotFilter.initColumnToggle({ menuSelector: '#colMenu', tableSelector: '#myTable', storageKey: '...', defaultCols: {...} });`

@@ -83,20 +83,4 @@
       });
     });
   }
-
-  window.quickFill = function (u, p) {
-    if (user) {
-      user.value = u;
-      if (fUser) fUser.classList.remove('invalid');
-    }
-    if (pass) {
-      pass.value = p;
-      if (fPass) fPass.classList.remove('invalid');
-    }
-    if (errorBox) {
-      errorBox.classList.remove('show');
-      errorBox.textContent = '';
-    }
-    if (user) user.focus();
-  };
 })();

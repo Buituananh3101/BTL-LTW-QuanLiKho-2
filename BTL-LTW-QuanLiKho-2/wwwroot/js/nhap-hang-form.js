@@ -1,6 +1,6 @@
-/**
+﻿/**
  * nhap-hang-form.js
- * Quản lý màn hình Lập / Sửa / Xem Phiếu Nhập Hàng (Chuẩn KiotViet)
+ * Quản lý màn hình Lập / Sửa / Xem Phiếu Nhập Hàng (chuẩn chuyên nghiệp)
  * Hỗ trợ Autocomplete F3, Import Excel, Tính toán tự động, Phím tắt F4/F9/F10
  */
 

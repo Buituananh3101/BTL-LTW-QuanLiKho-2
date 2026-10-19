@@ -1,7 +1,7 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.QuanLyKho.KhoIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.QuanLyKho.KhoIndexVM
 
 <!-- ========================================================================
-     MODAL CHÍNH: TẠO & CẬP NHẬT CHI NHÁNH KHO CHUẨN KIOTVIET
+     MODAL CHÍNH: TẠO & CẬP NHẬT CHI NHÁNH KHO chuẩn chuyên nghiệp
      Kế thừa 100% kiến trúc từ Form Thêm Hàng Hóa (_HangHoaModal.cshtml):
      - Tabs Thông tin & Mô tả (.hh-tabs, .hh-tab, .hh-pane)
      - Khối trường cơ bản Grid 2 cột (.hh-fields, .hh-f, .hh-span2)
@@ -89,7 +89,7 @@
                 </div>
               </div>
 
-              <!-- Lưới thẻ nhân sự trực quan chuẩn KiotViet -->
+              <!-- Lưới thẻ nhân sự trực quan chuẩn chuyên nghiệp -->
               <div class="kho-user-card-grid" id="listUserCheckboxes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin-top: 6px;">
                 @foreach (var u in Model.DanhSachTaiKhoan)
                 {
@@ -135,7 +135,7 @@
       </form>
     </div>
 
-    <!-- Footer Modal chuẩn KiotViet Form Hàng Hóa -->
+    <!-- Footer Modal chuẩn chuyên nghiệp Form Hàng Hóa -->
     <div class="hh-m-foot">
       <!-- Checkbox trạng thái kho bên trái chân modal -->
       <label class="hh-chk" style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; font-size: 14px; font-weight: 500;">
@@ -147,7 +147,7 @@
 
       <button type="button" class="hh-btn" data-close="khoModalOv">Bỏ qua</button>
       
-      <!-- Split Button Lego KiotViet: Lưu & Thêm mới / Lưu & Sao chép -->
+      <!-- Split Button Lego chuyên nghiệp: Lưu & Thêm mới / Lưu & Sao chép -->
       <div class="hh-split">
         <button type="button" class="hh-btn" id="btnSaveKhoAndNew">Lưu &amp; Thêm mới</button>
         <button type="button" class="hh-btn caret" id="btnKhoCaret" aria-label="Thêm tùy chọn">

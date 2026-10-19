@@ -1,4 +1,4 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.NguoiDung.NguoiDungIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.NguoiDung.NguoiDungIndexVM
 @{
     ViewData["Title"] = "Quản lý Người dùng & Phân quyền";
 }
@@ -13,7 +13,7 @@
 </style>
 
 <div class="kiot-container position-relative" id="kiotContainer" data-sort-by="@Model.SortBy" data-sort-dir="@Model.SortDir">
-    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + BỘ LỌC LEGO CHUẨN KIOTVIET -->
+    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + BỘ LỌC LEGO chuẩn chuyên nghiệp -->
     <partial name="_NguoiDungFilterSidebar" model="Model" />
 
     <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
@@ -42,7 +42,7 @@
                 <input type="text" id="keywordSearch" class="form-control" placeholder="Theo tên đăng nhập, tên nhân viên, điện thoại (F3)" value="@Model.Filter.Q" autocomplete="off" />
             </div>
 
-            <!-- Nhóm nút hành động KiotViet -->
+            <!-- Nhóm nút hành động chuyên nghiệp -->
             <div class="kiot-actions-group">
                 <!-- Nút + Người dùng -->
                 <button type="button" class="btn btn-primary d-inline-flex align-items-center" id="btnOpenCreateUserModal" title="Thêm mới người dùng & phân quyền">

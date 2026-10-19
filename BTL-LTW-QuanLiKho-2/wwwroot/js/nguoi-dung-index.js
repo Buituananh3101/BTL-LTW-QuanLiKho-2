@@ -1,6 +1,6 @@
-/**
+﻿/**
  * nguoi-dung-index.js - Quản lý tương tác màn hình Người dùng & Phân quyền
- * Chuẩn hóa 100% theo khuôn mẫu KiotViet LEGO
+ * Chuẩn hóa 100% theo khuôn mẫu chuyên nghiệp LEGO
  */
 (function ($) {
     'use strict';
@@ -22,7 +22,7 @@
         });
     }
 
-    // 3. Helper modal overlay KiotViet
+    // 3. Helper modal overlay chuyên nghiệp
     function showOverlay(id) {
         const ov = document.getElementById(id);
         if (ov) ov.classList.add('show');
@@ -145,7 +145,7 @@
         });
     }
 
-    // 6. Xử lý bộ lọc Sidebar (Lego KiotViet)
+    // 6. Xử lý bộ lọc Sidebar (Lego hệ thống)
     function renderMultiSelect(boxSelector, dropdownSelector, selectedIds, namesMap, dotSelector, placeholder) {
         const $box = $(boxSelector);
         const $dropdown = $(dropdownSelector);

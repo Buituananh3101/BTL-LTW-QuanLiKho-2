@@ -1,6 +1,6 @@
-# Đặc tả Chức năng: Quản lý Nhà cung cấp (Supplier Management)
+﻿# Đặc tả Chức năng: Quản lý Nhà cung cấp (Supplier Management)
 
-> **Mục tiêu**: Quản lý danh mục Nhà cung cấp chuẩn giao diện & nghiệp vụ KiotViet. Tìm kiếm, lọc đa tiêu chí, Master-Detail xem lịch sử & nợ, modal thêm/sửa với Accordions, đánh dấu sao yêu thích.
+> **Mục tiêu**: Quản lý danh mục Nhà cung cấp chuẩn giao diện & nghiệp vụ hệ thống. Tìm kiếm, lọc đa tiêu chí, Master-Detail xem lịch sử & nợ, modal thêm/sửa với Accordions, đánh dấu sao yêu thích.
 
 ---
 
@@ -11,7 +11,7 @@
 - **ViewModels (`ViewModels/NhaCungCap/`)**: `NhaCungCapIndexVM`, `NhaCungCapFilterParams`, `NhaCungCapItemVM`, `NhaCungCapFormVM`, `NhaCungCapDetailVM`.
 - **Views (`Views/NhaCungCap/`)**:
   - `Index.cshtml`: Khung trang, topbar công cụ, bảng dữ liệu.
-  - `_NhaCungCapFilterSidebar.cshtml`: 5 khối lọc KiotViet (Nhóm, Tổng mua, Thời gian, Nợ, Trạng thái).
+  - `_NhaCungCapFilterSidebar.cshtml`: 5 khối lọc hệ thống (Nhóm, Tổng mua, Thời gian, Nợ, Trạng thái).
   - `_NhaCungCapTable.cshtml`: Bảng AJAX (`product-row`, inline panel, cột sao, ẩn/hiện 12 cột).
   - `_NhaCungCapModal.cshtml`: Modal tạo mới/sửa NCC (3 Accordion, sub-modals nhóm).
   - `_NhaCungCapDetail.cshtml`: Panel chi tiết (Tabs: Thông tin, Lịch sử nhập/trả, Nợ cần trả).

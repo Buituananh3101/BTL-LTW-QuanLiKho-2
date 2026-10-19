@@ -1,6 +1,6 @@
-# Đặc tả Chức năng: Xuất hủy (Waste-Disposal Export)
+﻿# Đặc tả Chức năng: Xuất hủy (Waste-Disposal Export)
 
-> **Mục tiêu**: Chuẩn hóa toàn diện phân hệ Xuất hủy theo khuôn mẫu LEGO KiotViet dựa trên giao diện thực tế KiotViet.
+> **Mục tiêu**: Chuẩn hóa toàn diện phân hệ Xuất hủy theo khuôn mẫu LEGO hệ thống dựa trên giao diện thực tế hệ thống.
 
 ---
 
@@ -21,7 +21,7 @@
 - [`UpdateXuatHuyNoteRequest`](../../BTL-LTW-QuanLiKho-2/ViewModels/XuatHuy/XuatHuyViewModels.cs): DTO cập nhật nhanh ghi chú inline.
 
 ### 1.3. Cấu trúc View & Script:
-- `Views/XuatHuy/Index.cshtml`: Layout `.kiot-container`, `.kiot-main-col`, toolbar KiotViet, phím tắt F4.
+- `Views/XuatHuy/Index.cshtml`: Layout `.kiot-container`, `.kiot-main-col`, toolbar hệ thống, phím tắt F4.
 - `Views/XuatHuy/_XuatHuyFilterSidebar.cshtml`: Sidebar lọc thời gian (Tháng này), trạng thái, người tạo, người xuất hủy.
 - `Views/XuatHuy/_XuatHuyTable.cshtml`: Bảng chứng từ, sao bookmark, accordion `tr.dtl`, `_Pagination.cshtml`.
 - `Views/XuatHuy/Create.cshtml`, `Edit.cshtml`, `Details.cshtml`: Màn hình tạo, sửa và xem chi tiết (read-only).

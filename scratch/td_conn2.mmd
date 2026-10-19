@@ -1,0 +1,9 @@
+flowchart TD
+    subgraph Left [1. Cột Trái: Thủ kho]
+        L1[Bước 1] --> L2[Bước 2] --> L3[Bước 3] --> L4[Bước 4]
+    end
+    subgraph Right [2. Cột Phải: Server]
+        R1[Lắng nghe] --> R2[Nhận request] --> R3[Xử lý] --> R4[Kết thúc]
+    end
+
+    L2 --> R2

@@ -1,6 +1,6 @@
-/**
+﻿/**
  * nha-cung-cap-index.js - Quản lý tương tác màn hình Danh sách Nhà cung cấp
- * Chuẩn hóa 100% theo quy chuẩn LEGO KiotViet và Rule 10 (AGENTS.md)
+ * Chuẩn hóa 100% theo quy chuẩn Lego hệ thống và Rule 10 (AGENTS.md)
  */
 
 (function ($) {
@@ -618,7 +618,7 @@
     }
 
     /* ==========================================================================
-       7. MODAL THÊM MỚI / CHỈNH SỬA NHÀ CUNG CẤP CHUẨN KIOTVIET (THEO HÀNG HÓA)
+       7. MODAL THÊM MỚI / CHỈNH SỬA NHÀ CUNG CẤP chuẩn chuyên nghiệp (THEO HÀNG HÓA)
        ========================================================================== */
     function showModal(id) {
         $('#' + id).addClass('show');
