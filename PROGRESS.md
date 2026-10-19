@@ -1,22 +1,76 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-19 – Đồng Bộ CSDL Mẫu & Chụp Mới 9 Phân Hệ Giao Diện Vào Báo Cáo LaTeX (Phiên 166)
+Cập nhật lần cuối: 2026-10-19 – Chuẩn Hóa Bố Cục & Tiêu Đề Tiểu Mục Sơ Đồ RM Trong Báo Cáo LaTeX (Phiên 169)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất chụp mới và đồng bộ 100% hình ảnh thực tế từ hệ thống chạy trực tiếp vào Mục 3.3 Báo cáo LaTeX (`docs/latex/main.tex`):
-  + Thực thi trọn vẹn kịch bản nạp dữ liệu mẫu toàn diện `migrations/sql/15_du_lieu_mau_toan_dien.sql` vào cơ sở dữ liệu `QuanLyKhoPhuQuocLTW`.
-  + Tự động hóa chụp màn hình chuẩn KiotViet độ phân giải 1440x900 cho 9 phân hệ chức năng: Đăng nhập & Chọn kho, Danh mục Hàng hóa, Kiểm kho & Cân bằng, Báo cáo Tồn kho đa kho, Báo cáo Thẻ kho, Nhập hàng, Chuyển kho, Xuất hủy, Trả hàng nhập.
-  + Mở rộng cấu trúc Mục 3.3 thành 9 tiểu mục độc lập (3.3.1 - 3.3.9) với thuyết minh chi tiết luồng nghiệp vụ, công thức tính toán và giao diện minh họa.
-  + Chuẩn hóa trang bìa LaTeX: giữ tỷ lệ logo GTVT hài hòa, căn chỉnh khoảng cách tên đề tài (`\\[0.35cm]`) giúp trang bìa nằm trọn vẹn trên đúng 1 trang không tràn.
-  + Biên dịch XeLaTeX thành công đạt 59 trang hoàn chỉnh, 0 Errors, 0 tham chiếu undefined. Cập nhật gói nén `docs/BaoCao_LaTeX_Overleaf.zip`.
+- Đã hoàn tất chuẩn hóa toàn bộ bố cục, vị trí và font chữ của các tiêu đề sơ đồ RM trong Báo cáo LaTeX (`docs/latex/main.tex`):
+  + **Khắc phục triệt để hiện tượng lơ lửng & font to bất thường**:
+    - Chuyển toàn bộ các dòng tiêu đề cụm `a) Cụm 1...` đến `e) Cụm 5...` ra ngoài môi trường `figure`, đặt tại dòng đầu tiên ngay sau lệnh `\clearpage` của mỗi trang.
+    - Căn lề trái chuẩn xác (`\noindent\textbf{...}`), cỡ chữ Times New Roman 12pt đậm (`\normalsize`) hoàn toàn đồng nhất với format chung của toàn bộ đề mục trong báo cáo.
+    - Chuyển môi trường hình sang `\begin{figure}[H]` với `height=17.5cm, keepaspectratio`, đảm bảo tiêu đề mục nằm trên cùng mép trang, hình ảnh xoay ngang căn giữa và caption nằm dưới chân trên đúng 1 trang A4 duy nhất, không có khoảng trắng lơ lửng.
+  + **Làm sạch Sơ đồ ER tổng quan (Hình 2.8)**: Loại bỏ dòng tiêu đề thủ công thừa phía trên hình, chỉ giữ lại Caption chuẩn LaTeX ở dưới chân hình.
+  + **Biên dịch & Đóng gói**: XeLaTeX biên dịch thành công 68 trang hoàn chỉnh, 0 Errors, 0 cảnh báo tham chiếu. Cập nhật gói nén `docs/BaoCao_LaTeX_Overleaf.zip`.
 
 ---
 
 ## Việc kế tiếp
 1. Kiểm thử trực quan và rà soát các màn hình danh sách, form tạo mới chứng từ trên giao diện web.
 2. Chuẩn bị nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
+
+---
+
+- **Chuẩn Hóa Bố Cục & Tiêu Đề Tiểu Mục Sơ Đồ RM Trong Báo Cáo LaTeX (Phiên 169)**:
+  - **Nhu cầu**: Người dùng phản hồi kèm ảnh chụp trang 27: "hiện tại ảnh oke rồi nhưng các phần như a) Sơ đồ RM Cụm 1: Quản trị Hệ thống, Nhân sự & Phân quyền kho (RBAC) tôi thấy đang lơ lửng, font size to hơn bình thường ko tuân theo format chung".
+  - **Nguyên nhân**:
+    1. Tiêu đề cụm bị đặt bên trong môi trường `figure[p]`, chịu ảnh hưởng của lệnh `\centering` và cơ chế căn giữa dọc (`\vfill`) của float figure làm tiêu đề bị tụt xuống 1/4 trang, lơ lửng giữa khoảng trắng.
+    2. Cỡ chữ bị gán `\large` (14.4pt) to bất thường so với cỡ chữ chuẩn 12pt (`\normalsize`) của toàn bộ văn bản báo cáo.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Đưa các tiêu đề `a) Cụm 1...` đến `e) Cụm 5...` ra ngoài `figure`, đặt ngay sau `\clearpage` với `\noindent\textbf{...}\par\vspace{0.3cm}`: căn lề trái thẳng hàng với toàn văn bản, cỡ chữ 12pt chuẩn mực.
+    2. Sử dụng môi trường `figure[H]` với kích thước `height=17.5cm, keepaspectratio`: tiêu đề ở đầu trang, sơ đồ ở giữa, caption ở chân trang nằm trọn vẹn trên đúng 1 trang A4, giải quyết triệt để vấn đề lơ lửng.
+    3. Xóa bỏ dòng tiêu đề thừa lơ lửng ở Hình ER tổng quan.
+    4. Biên dịch XeLaTeX 0 lỗi, mục lục và danh sách hình vẽ cập nhật chuẩn xác. Đóng gói `docs/BaoCao_LaTeX_Overleaf.zip`.
+
+---
+
+- **Chuẩn Hóa Mô Hình Hóa Use Case (UML) Bằng Mermaid & 5 Bảng Đặc Tả Chi Tiết Trong Báo Cáo LaTeX (Phiên 168)**:
+  - **Nhu cầu**: Người dùng yêu cầu: (1) "2.1 Mô hình hóa chức năng bằng biểu đồ Use Case (UML) tôi muốn làm phần 2.1 này thật chuẩn chỉ, bạn hãy lên kế hoạch"; (2) "thay TikZ vector và mermaid được ko"; (3) "triển khai".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Thiết kế tài liệu chuẩn `docs/so-do-use-case.md`**:
+       - Xây dựng 6 sơ đồ Use Case bằng cú pháp Mermaid: 1 sơ đồ tổng quan cấp hệ thống có System Boundary + 5 sơ đồ phân hệ nghiệp vụ chi tiết.
+    2. **Tự động hóa kết xuất Mermaid CLI (`mmdc -s 2 -b white`)**:
+       - Kết xuất thành công 6 tệp ảnh PNG độ nét cao (2K/3K, nền trắng sắc nét): `fig_uc_tong_quan.png`, `fig_uc_phanhe1_quantri.png`, `fig_uc_phanhe2_danhmuc.png`, `fig_uc_phanhe3_biendong.png`, `fig_uc_phanhe4_chuyen_kiem.png`, `fig_uc_phanhe5_baocao.png`.
+    3. **Tái cấu trúc & Nâng cấp toàn diện Mục 2.1 trong `docs/latex/main.tex`**:
+       - *2.1.1*: Định nghĩa 3 tác nhân nghiệp vụ (Quản trị viên, Thủ kho, Nhân viên bán hàng/kho), nguyên lý kế thừa tác nhân và Bảng 2.1 Ma trận ánh xạ Tác nhân -- Chức năng cho 20 Use Cases.
+       - *2.1.2*: Biểu đồ Use Case tổng quan cấp hệ thống (Hình 2.1 - `fig_uc_tong_quan.png`).
+       - *2.1.3*: 5 Tiểu mục phân rã biểu đồ Use Case theo phân hệ kèm phân tích nghiệp vụ các quan hệ $\ll\text{include}\gg$ và $\ll\text{extend}\gg$ (Hình 2.2 đến 2.6).
+       - *2.1.4*: Bộ 5 Bảng đặc tả Use Case chi tiết chuẩn 2 cột đối ứng (Thao tác Người dùng $\leftrightarrow$ Phản hồi Hệ thống) cho UC-01 (Đăng nhập & Chọn kho), UC-02 (Nhập hàng NCC), UC-03 (Chuyển kho), UC-04 (Kiểm kê cân bằng), UC-05 (Thẻ kho) kèm quy tắc nghiệp vụ BR-01 đến BR-10.
+    4. **Biên dịch & Đóng gói**:
+       - Biên dịch XeLaTeX 2 lượt thành công ra file `main.pdf` 68 trang, 0 Errors, mục lục LOF/LOT đồng bộ 100%.
+       - Đóng gói mới file `docs/BaoCao_LaTeX_Overleaf.zip` chứa đầy đủ mã nguồn và toàn bộ hình ảnh mới.
+    5. **Kiểm tra biên dịch dự án**:
+       - `dotnet build /t:Compile`: Biên dịch dự án thành công với **0 Errors**.
+
+---
+
+- **Chuẩn Hóa Phân Tách Mô Hình ER Và Lược Đồ RM CSDL Trong Báo Cáo LaTeX (Phiên 167)**:
+  - **Nhu cầu**: Người dùng phản hồi: "rất tốt nhưng đây là sơ đồ RM, bạn hãy đưa xuống phần rm cho đúng" kèm ảnh chụp trang tài liệu chứa Hình 2.4.
+  - **Nguyên nhân & Chuẩn mực học thuật**:
+    + Mục 2.2 là Sơ đồ ER quan niệm (Conceptual Entity-Relationship Diagram): chỉ biểu diễn các thực thể cốt lõi, mối kết hợp hình thoi và bản số tham gia (Hình 2.3).
+    + Mục 2.3 là Sơ đồ RM (Relational Model): mô hình vật lý biểu diễn các bảng thực tế (Table), danh sách trường, kiểu dữ liệu, các ràng buộc PK, FK, UK và đường nối Crow's Foot. Do đó, 5 sơ đồ cấu trúc cụm nghiệp vụ phân rã thuộc về Mục 2.3.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Tái cấu trúc Mục 2.2**: Giữ nguyên Sơ đồ ER tổng quan mức quan niệm Hình 2.3 (`fig_er_tong_quan.png`), dọn sạch các sơ đồ bảng vật lý.
+    2. **Tái cấu trúc Mục 2.3**:
+       - 2.3.1: Lược đồ quan hệ chuẩn (Relational Schema Notation) phân theo 5 nhóm nghiệp vụ a, b, c, d, e.
+       - 2.3.2: Các sơ đồ cấu trúc quan hệ RM phân rã theo cụm nghiệp vụ: đưa 5 khối hình ảnh Hình 2.4 (Cụm 1: RBAC), Hình 2.5 (Cụm 2: Hàng hóa), Hình 2.6 (Cụm 3: Chuỗi cung ứng), Hình 2.7 (Cụm 4: Luân chuyển / Kiểm kê - đứng dọc), Hình 2.8 (Cụm 5: Bán hàng).
+       - 2.3.3: Sơ đồ cấu trúc liên kết các bảng quan hệ cốt lõi (Sơ đồ RM tổng hợp - Hình 2.9 TikZ).
+       - 2.3.4: Bảng các ràng buộc toàn vẹn tham chiếu (Referential Integrity Constraints).
+       - 2.3.5: Đánh giá chuẩn hóa cơ sở dữ liệu (3NF / BCNF).
+    3. **Đổi tên tiêu đề & Caption chuẩn RM**: Toàn bộ tiêu đề lớn và caption chuyển từ "Sơ đồ ER Cụm..." sang "Sơ đồ RM Cụm...".
+    4. **Biên dịch & Đóng gói**:
+       - Biên dịch XeLaTeX 2 lượt thành công ra file `main.pdf` 60 trang, mục lục và danh sách hình vẽ cập nhật chính xác 100%.
+       - Đóng gói mới file `docs/BaoCao_LaTeX_Overleaf.zip` chứa 19 tệp nguồn hoàn chỉnh.
 
 ---
 

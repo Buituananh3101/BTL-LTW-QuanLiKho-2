@@ -2,20 +2,23 @@
 \contentsline {table}{\numberline {1.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả yêu cầu chức năng của hệ thống}}{14}{table.caption.3}%
 \contentsline {table}{\numberline {1.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Ma trận phân quyền chức năng chi tiết theo vai trò}}{15}{table.caption.4}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {2.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả Use Case UC-01: Lập và Cân bằng Phiếu Kiểm kho}}{18}{table.caption.6}%
-\contentsline {table}{\numberline {2.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả Use Case UC-02: Điều chuyển kho nội bộ liên chi nhánh}}{19}{table.caption.7}%
-\contentsline {table}{\numberline {2.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả Use Case UC-03: Nhập hàng từ Nhà cung cấp}}{20}{table.caption.8}%
-\contentsline {table}{\numberline {2.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng các ràng buộc toàn vẹn tham chiếu trọng tâm trong cơ sở dữ liệu}}{32}{table.caption.21}%
-\contentsline {table}{\numberline {2.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng HangHoa (Hàng hóa)}}{34}{table.caption.23}%
-\contentsline {table}{\numberline {2.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng Kho (Chi nhánh kho vật lý)}}{34}{table.caption.24}%
-\contentsline {table}{\numberline {2.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuNhap \& ChiTietPhieuNhap}}{35}{table.caption.25}%
-\contentsline {table}{\numberline {2.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuChuyenKho \& ChiTietPhieuChuyenKho}}{35}{table.caption.26}%
-\contentsline {table}{\numberline {2.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuKiemKe \& ChiTietPhieuKiemKe}}{36}{table.caption.27}%
+\contentsline {table}{\numberline {2.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Ma trận ánh xạ Tác nhân -- Chức năng (Actor -- Use Case Matrix)}}{18}{table.caption.5}%
+\contentsline {table}{\numberline {2.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả Use Case UC-01: Đăng nhập và Lựa chọn Chi nhánh Kho làm việc}}{24}{table.caption.17}%
+\contentsline {table}{\numberline {2.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả Use Case UC-02: Lập Phiếu Nhập hàng từ Nhà cung cấp}}{25}{table.caption.18}%
+\contentsline {table}{\numberline {2.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả Use Case UC-03: Điều chuyển Kho Nội bộ Liên Chi nhánh}}{26}{table.caption.19}%
+\contentsline {table}{\numberline {2.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả Use Case UC-04: Kiểm kê và Cân bằng Kho Tự động qua Transaction}}{27}{table.caption.20}%
+\contentsline {table}{\numberline {2.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng đặc tả Use Case UC-05: Tra cứu Thẻ kho và Phân tích Biến động Lũy kế}}{28}{table.caption.21}%
+\contentsline {table}{\numberline {2.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bảng các ràng buộc toàn vẹn tham chiếu trọng tâm trong cơ sở dữ liệu}}{41}{table.caption.34}%
+\contentsline {table}{\numberline {2.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng HangHoa (Hàng hóa)}}{43}{table.caption.36}%
+\contentsline {table}{\numberline {2.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng Kho (Chi nhánh kho vật lý)}}{43}{table.caption.37}%
+\contentsline {table}{\numberline {2.10}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuNhap \& ChiTietPhieuNhap}}{44}{table.caption.38}%
+\contentsline {table}{\numberline {2.11}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuChuyenKho \& ChiTietPhieuChuyenKho}}{44}{table.caption.39}%
+\contentsline {table}{\numberline {2.12}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Từ điển dữ liệu bảng PhieuKiemKe \& ChiTietPhieuKiemKe}}{45}{table.caption.40}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-01: Tính tồn tức thời sau Nhập hàng}}{51}{table.caption.38}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-02: Điều chuyển hàng hóa nội bộ}}{52}{table.caption.39}%
-\contentsline {table}{\numberline {4.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-03: Cân bằng kiểm kê và Khóa chứng từ}}{52}{table.caption.40}%
-\contentsline {table}{\numberline {4.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-04: Khắc phục lỗi Stacking Context Modal}}{53}{table.caption.41}%
-\contentsline {table}{\numberline {4.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-05: Sửa lỗi Token AntiForgery trên AJAX JSON}}{53}{table.caption.42}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-01: Tính tồn tức thời sau Nhập hàng}}{60}{table.caption.51}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-02: Điều chuyển hàng hóa nội bộ}}{61}{table.caption.52}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-03: Cân bằng kiểm kê và Khóa chứng từ}}{61}{table.caption.53}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-04: Khắc phục lỗi Stacking Context Modal}}{62}{table.caption.54}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kịch bản kiểm thử TC-05: Sửa lỗi Token AntiForgery trên AJAX JSON}}{62}{table.caption.55}%
 \addvspace {10\p@ }

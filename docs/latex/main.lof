@@ -1,24 +1,29 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ Use Case tổng quát hệ thống Quản lý kho hàng đa chi nhánh}}{17}{figure.caption.5}%
-\contentsline {figure}{\numberline {2.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ hoạt động quy trình Kiểm kê và Cân bằng kho tự động}}{21}{figure.caption.9}%
-\contentsline {figure}{\numberline {2.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Mô hình thực thể -- liên kết tổng quát (Sơ đồ ER - Entity-Relationship Diagram)}}{23}{figure.caption.11}%
-\contentsline {figure}{\numberline {2.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ ER Cụm Quản trị Hệ thống, Nhân sự \& Phân quyền kho (RBAC)}}{24}{figure.caption.12}%
-\contentsline {figure}{\numberline {2.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ ER Cụm Danh mục Hàng hóa, Định mức tồn \& Đơn vị tính}}{25}{figure.caption.13}%
-\contentsline {figure}{\numberline {2.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ ER Cụm Chuỗi cung ứng Nhập kho \& Xuất trả nhà cung cấp}}{26}{figure.caption.14}%
-\contentsline {figure}{\numberline {2.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ ER Cụm Điều chuyển kho, Xuất hủy \& Kiểm kê cân bằng kho}}{27}{figure.caption.15}%
-\contentsline {figure}{\numberline {2.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ ER Cụm Đơn bán hàng \& Quản lý khoản thu}}{28}{figure.caption.16}%
-\contentsline {figure}{\numberline {2.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ cấu trúc liên kết các bảng quan hệ (Sơ đồ RM - Relational Model)}}{31}{figure.caption.19}%
-\contentsline {figure}{\numberline {2.10}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kiến trúc Database View 2 tầng tính toán tồn kho động}}{37}{figure.caption.28}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ Use Case tổng quan cấp hệ thống (System Boundary)}}{19}{figure.caption.6}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ Use Case Phân hệ Xác thực \& Quản trị Hệ thống}}{20}{figure.caption.8}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ Use Case Phân hệ Quản lý Danh mục \& Giá}}{21}{figure.caption.10}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ Use Case Phân hệ Biến động Kho (Nhập / Trả / Hủy)}}{21}{figure.caption.12}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ Use Case Phân hệ Điều chuyển Kho \& Kiểm kê Cân bằng}}{22}{figure.caption.14}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ Use Case Phân hệ Báo cáo \& Thống kê Tồn kho}}{23}{figure.caption.16}%
+\contentsline {figure}{\numberline {2.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ hoạt động quy trình Kiểm kê và Cân bằng kho tự động}}{29}{figure.caption.22}%
+\contentsline {figure}{\numberline {2.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Mô hình thực thể -- liên kết tổng quát (Sơ đồ ER - Entity-Relationship Diagram)}}{31}{figure.caption.23}%
+\contentsline {figure}{\numberline {2.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ RM Cụm 1: Quản trị Hệ thống, Nhân sự \& Phân quyền kho (RBAC)}}{35}{figure.caption.26}%
+\contentsline {figure}{\numberline {2.10}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ RM Cụm 2: Danh mục Hàng hóa, Định mức tồn \& Đơn vị tính}}{36}{figure.caption.27}%
+\contentsline {figure}{\numberline {2.11}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ RM Cụm 3: Chuỗi cung ứng (Nhập hàng \& Trả hàng Nhà cung cấp)}}{37}{figure.caption.28}%
+\contentsline {figure}{\numberline {2.12}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ RM Cụm 4: Luân chuyển nội bộ, Xuất hủy \& Kiểm kê - Cân bằng kho}}{38}{figure.caption.29}%
+\contentsline {figure}{\numberline {2.13}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ RM Cụm 5: Bán hàng \& Quản lý dòng tiền (Khách hàng \& Khoản thu)}}{39}{figure.caption.30}%
+\contentsline {figure}{\numberline {2.14}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ cấu trúc liên kết các bảng quan hệ (Sơ đồ RM - Relational Model)}}{40}{figure.caption.32}%
+\contentsline {figure}{\numberline {2.15}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kiến trúc Database View 2 tầng tính toán tồn kho động}}{46}{figure.caption.41}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Màn hình Đăng nhập hệ thống và Lựa chọn chi nhánh kho làm việc}}{42}{figure.caption.29}%
-\contentsline {figure}{\numberline {3.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Quản lý Danh mục Hàng hóa và Bộ lọc thông minh chuẩn KiotViet}}{43}{figure.caption.30}%
-\contentsline {figure}{\numberline {3.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Quản lý Giao dịch Nhập hàng từ Nhà cung cấp}}{44}{figure.caption.31}%
-\contentsline {figure}{\numberline {3.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Quản lý Giao dịch Trả hàng nhập cho Nhà cung cấp}}{45}{figure.caption.32}%
-\contentsline {figure}{\numberline {3.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Quản lý Điều chuyển hàng hóa nội bộ liên chi nhánh}}{46}{figure.caption.33}%
-\contentsline {figure}{\numberline {3.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Quản lý Giao dịch Xuất hủy hàng hóa hư hỏng / hết hạn}}{47}{figure.caption.34}%
-\contentsline {figure}{\numberline {3.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Kiểm kho \& Đối chiếu tồn sổ sách với số lượng đếm thực tế}}{48}{figure.caption.35}%
-\contentsline {figure}{\numberline {3.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Báo cáo Tồn kho theo kho dạng Pivot đa chi nhánh và 4 thẻ KPI tổng hợp}}{49}{figure.caption.36}%
-\contentsline {figure}{\numberline {3.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Báo cáo Thẻ kho chi tiết biến động xuất nhập tồn lũy kế từng mặt hàng}}{50}{figure.caption.37}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Màn hình Đăng nhập hệ thống và Lựa chọn chi nhánh kho làm việc}}{51}{figure.caption.42}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Quản lý Danh mục Hàng hóa và Bộ lọc thông minh chuẩn KiotViet}}{52}{figure.caption.43}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Quản lý Giao dịch Nhập hàng từ Nhà cung cấp}}{53}{figure.caption.44}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Quản lý Giao dịch Trả hàng nhập cho Nhà cung cấp}}{54}{figure.caption.45}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Quản lý Điều chuyển hàng hóa nội bộ liên chi nhánh}}{55}{figure.caption.46}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Quản lý Giao dịch Xuất hủy hàng hóa hư hỏng / hết hạn}}{56}{figure.caption.47}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Phân hệ Kiểm kho \& Đối chiếu tồn sổ sách với số lượng đếm thực tế}}{57}{figure.caption.48}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Báo cáo Tồn kho theo kho dạng Pivot đa chi nhánh và 4 thẻ KPI tổng hợp}}{58}{figure.caption.49}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Báo cáo Thẻ kho chi tiết biến động xuất nhập tồn lũy kế từng mặt hàng}}{59}{figure.caption.50}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
