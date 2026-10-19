@@ -1,0 +1,11 @@
+flowchart TD
+    subgraph Left [1. Cột Trái: Client UI]
+        L1[Bước 1: Mở form] --> L2[Bước 2: Bấm Gửi]
+        L3[Bước 5: Nhận phản hồi] --> L4[Bước 6: Hoàn tất]
+    end
+    subgraph Right [2. Cột Phải: Server & DB]
+        R1[Bước 3: Nhận Request] --> R2[Bước 4: Lưu CSDL]
+    end
+
+    L2 --> R1
+    R2 --> L3

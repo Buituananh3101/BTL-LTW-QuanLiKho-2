@@ -1,54 +1,63 @@
-import urllib.request, zlib, base64, struct
+import subprocess, struct
 
-test_2 = '''flowchart TD
-    subgraph Left["1. Thủ kho / Client UI"]
-        A1([Bắt đầu]) --> A2["Mở form Tạo phiếu"]
-        A2 --> A3["Chọn NCC và Kho đích"]
-        A3 --> A4["F3 Tìm hàng, nhập SL & Giá"]
-        A4 --> A5["Bấm nút Hoàn thành"]
-        A6([Kết thúc: Thành công])
+def test_code(code, name):
+    with open(f'scratch/{name}.mmd', 'w', encoding='utf-8') as f:
+        f.write(code)
+    cmd = f'npx @mermaid-js/mermaid-cli -i scratch/{name}.mmd -o scratch/{name}.png -b white -s 2'
+    res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    with open(f'scratch/{name}.png', 'rb') as f:
+        f.seek(16)
+        w, h = struct.unpack('>LL', f.read(8))
+    print(f"[{name}] size: {w}x{h}, w/h={w/h:.2f}, h/w={h/w:.2f}")
+
+# Thử nghiệm 2 cột song song chuẩn mực
+code_side = '''flowchart TD
+    subgraph UI ["1. THỦ KHO / CLIENT UI (Giao diện người dùng)"]
+        direction TB
+        A1([Bắt đầu: Lập phiếu nhập])
+        A2["1. Mở form 'Tạo phiếu nhập hàng'"]
+        A3["2. Chọn Nhà cung cấp & Chi nhánh kho"]
+        A4["3. F3 Tìm kiếm hàng hóa, nhập SL & Đơn giá"]
+        A5["4. Bấm nút 'Hoàn thành'"]
+        
+        A6["5. Chờ phản hồi từ Hệ thống"]
+        A7["6. Hiển thị thông báo thành công<br>& Điều hướng danh sách chứng từ"]
+        A8([Kết thúc: Nhập hàng thành công])
+        
+        A1 --> A2 --> A3 --> A4 --> A5
+        A5 -.-> A6
+        A6 --> A7 --> A8
     end
 
-    subgraph Center["2. Web App / Logic Backend"]
-        B1["Nhận POST Create"] --> B2{"Validate hợp lệ?"}
-        B2 -- Lỗi --> B3["Báo lỗi Validation"]
-        B2 -- Hợp lệ --> B4["Mở Transaction CSDL"]
-        B4 --> B5["Tính Giá vốn bình quân MAC"]
-        B6["Commit Transaction"]
-        B7["Trả kết quả thành công"]
+    subgraph BE ["2. HỆ THỐNG / SERVER & CSDL (Backend Logic & Transaction)"]
+        direction TB
+        B1["Nhận Request POST Create"]
+        B2{"Kiểm tra hợp lệ?<br>(Có NCC, Chi tiết >= 1 dòng, SL > 0)"}
+        B3["Trả về thông báo lỗi Validation"]
+        B4["Mở Transaction CSDL (BeginTransactionAsync)"]
+        B5["Tính lại Giá vốn MAC:<br>GiaVonMoi = (TonCu*GiaCu + SL*GiaNhap)/(TonCu+SL)"]
+        
+        subgraph DB ["Ghi dữ liệu & Tồn kho trong Transaction"]
+            direction TB
+            C1[("Lưu Master-Detail: PhieuNhap & ChiTietPhieuNhap (DA_XAC_NHAN)")]
+            C2[("Cập nhật Giá vốn mới vào bảng HangHoa")]
+            C3[("Tăng số lượng tồn kho qua View vw_TonKhoHienTai")]
+            C4[("Cập nhật Công nợ phải trả bảng DonViCapHang")]
+            C5[("Ghi Nhật ký thao tác kiểm toán vào bảng NhatKyThaoTac")]
+            C1 --> C2 --> C3 --> C4 --> C5
+        end
+        
+        B6["Commit Transaction & Khóa chứng từ vĩnh viễn"]
+        
+        B1 --> B2
+        B2 -- Hợp lệ --> B4 --> B5 --> DB --> B6
+        B2 -- Không hợp lệ --> B3
     end
 
-    subgraph Right["3. CSDL và Tồn kho"]
-        C1[("Lưu PhieuNhap & ChiTiet")]
-        C2[("Cập nhật Giá vốn HangHoa")]
-        C3[("Tăng tồn vw_TonKhoHienTai")]
-        C4[("Cập nhật Công nợ NCC")]
-        C5[("Ghi Audit Log NhatKyThaoTac")]
-    end
-
-    %% Force side by side
-    A1 ~~~ B1 ~~~ C1
-    
-    A5 --> B1
-    B3 --> A4
-    B5 --> C1
-    B5 --> C2
-    B5 --> C3
-    B5 --> C4
-    C1 & C2 & C3 & C4 --> C5
-    C5 --> B6 --> B7 --> A6
+    %% Giao tiếp giữa 2 khối
+    A5 ==>|Gửi Form POST| B1
+    B3 -.->|Báo lỗi form| A4
+    B6 ==>|Thành công HTTP 200| A6
 '''
 
-compressed = zlib.compress(test_2.encode('utf-8'), 9)
-encoded = base64.urlsafe_b64encode(compressed).decode('utf-8')
-url = f'https://kroki.io/mermaid/png/{encoded}'
-req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-try:
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        data = resp.read()
-        w, h = struct.unpack('>LL', data[16:24])
-        print(f'Test 2 with ~~~: {w}x{h}, ratio h/w = {h/w:.2f}, w/h = {w/h:.2f}')
-        with open('scratch/test_side_2.png', 'wb') as f:
-            f.write(data)
-except Exception as e:
-    print('Error:', e)
+test_code(code_side, 'side_test')
