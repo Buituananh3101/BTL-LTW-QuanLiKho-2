@@ -1,24 +1,40 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-19 – Dọn Dẹp và Xóa Toàn Bộ File Tạm, File Rác Khỏi Repository (Phiên 188)
+Cập nhật lần cuối: 2026-10-31 – Chuẩn Hóa Bảng Phân Công Tiến Độ WBS: Loại Bỏ Hoàn Toàn Tham Chiếu KiotViet (Phiên 189)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất 100% việc dọn dẹp và xóa các tệp tin tạm, file rác không dùng đến:
-  + Xóa toàn bộ 86 tệp tin tạm trong thư mục `scratch/` (các file script kiểm thử Kroki/Mermaid, ảnh chụp màn hình kiểm tra trang).
-  + Xóa 44 file PNG kiểm tra bố cục trang trong `docs/latex/verify_pages/`.
-  + Xóa các file rác phát sinh tại thư mục gốc: `main.aux`, `main.out`, `main.pdf` (15 byte), `main.synctex(busy)`, `main.log`.
-  + Xóa các file test và backup cũ: `docs/latex/main.tex.bak`, `docs/latex/figures/test_er.svg`, `docs/latex/figures/test_kroki.png`.
-  + Cập nhật `.gitignore` để chặn vĩnh viễn: `scratch/`, `docs/latex/verify_pages/`, `*.synctex*`, `*.bak`.
-  + Tối ưu lại gói nén [`docs/BaoCao_LaTeX_Overleaf.zip`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/docs/BaoCao_LaTeX_Overleaf.zip): giảm từ 16.1 MB xuống còn 4.85 MB (chỉ chứa `main.tex`, 2 logo GTVT và thư mục `figures/` chứa 28 hình ảnh hợp lệ).
-  + Biên dịch kiểm tra kép: XeLaTeX đạt chuẩn 75 trang (0 lỗi) và `dotnet build /t:Compile` đạt chuẩn **0 Error**.
+- Đã hoàn tất 100% việc chuẩn hóa Bảng phân công tiến độ WBS (88 đầu việc) và loại bỏ hoàn toàn các nhắc đến "KiotViet" / "Kiot":
+  + Rà soát và thay thế toàn bộ 23 điểm nhắc đến KiotViet/Kiot trong file CSV `docs/ke-hoach-tien-do-WBS-chi-tiet.csv` và Markdown `docs/ke-hoach-tien-do-WBS-chi-tiet.md`.
+  + Chuẩn hóa tên giai đoạn: `GĐ 3: Nâng cấp CSDL v2 & Giao diện chuẩn` (thay vì `UI KiotViet`).
+  + Chuẩn hóa mô tả công việc: Layout chuẩn chuyên nghiệp, hệ thống CSS token, module Toast & Modal xác nhận, bộ lọc thời gian dùng chung, bố cục giao diện quản trị kho thực tế.
+  + Đồng bộ dữ liệu sang file Artifact hệ thống và kiểm tra 0 lỗi biên dịch `dotnet build /t:Compile`.
 
 ---
 
 ## Việc kế tiếp
 1. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
 2. Chuẩn bị slide thuyết trình hoặc báo cáo bảo vệ đồ án.
+
+---
+
+- **Chuẩn Hóa Bảng Phân Công Tiến Độ WBS: Loại Bỏ Hoàn Toàn Tham Chiếu KiotViet (Phiên 189)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "sửa phân công ko nhắc j đến kiot viet".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Quét toàn bộ nội dung trong bảng phân công WBS 88 đầu việc gồm Sheet 1, Sheet 2, Sheet 3:
+       - Task 02: "Nghiên cứu mô hình giao diện và nghiệp vụ chuẩn thực tế của hệ thống Quản lý kho".
+       - GĐ 3 (10 task): Đổi tên giai đoạn thành "GĐ 3: Nâng cấp CSDL v2 & Giao diện chuẩn".
+       - Task 26: "Xây dựng layout chuẩn chuyên nghiệp: Views/Shared/_Layout.cshtml với Topbar 2 tầng xanh dương".
+       - Task 29: "Xây dựng thư viện Style CSS Token hệ thống: Hệ màu chủ đạo, nút bấm, bảng dữ liệu, badge".
+       - Task 40: "Xây dựng hệ thống thông báo Toast và hộp thoại xác nhận Modal dùng chung".
+       - Task 44: "Thiết kế bố cục màn hình Hàng hóa chuyên nghiệp: Sidebar bộ lọc bên trái & Bảng lưới bên phải".
+       - Task 62: "Thiết kế Khối Lego bộ lọc thời gian tiện ích DateTimeFilter tích hợp trên các chứng từ".
+       - Task 81: "Soạn thảo Chương 1 LaTeX: Giới thiệu đề tài, Khảo sát thực tế hệ thống kho, Phân tích yêu cầu bài toán".
+       - Sheet 2: Cập nhật trách nhiệm Nguyễn Minh Khuê (Layout chuẩn chuyên nghiệp, bộ lọc thời gian dùng chung).
+    2. Cập nhật và lưu lại file CSV `docs/ke-hoach-tien-do-WBS-chi-tiet.csv` (UTF-8-BOM) và `docs/ke-hoach-tien-do-WBS-chi-tiet.md`.
+    3. Đồng bộ vào Artifact lưu trữ.
+    4. Kiểm tra biên dịch hệ thống: `dotnet build /t:Compile` đạt **0 Error**.
 
 ---
 
