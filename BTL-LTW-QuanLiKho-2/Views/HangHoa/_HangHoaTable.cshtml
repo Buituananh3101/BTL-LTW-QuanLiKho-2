@@ -336,7 +336,7 @@
                                                 <button type="button" class="btn btn-primary btn-sm btn-edit-product" data-id="@item.MaHang">
                                                     <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
                                                 </button>
-                                                <button type="button" class="btn btn-outline-secondary btn-sm">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm btn-print-barcode" data-id="@item.MaHang" data-name="@item.TenHang" data-code="@(string.IsNullOrWhiteSpace(item.MaHangNoiBo) ? ("HH" + item.MaHang.ToString("D6")) : item.MaHangNoiBo)" data-price="@item.GiaBan" data-ton="@item.TonKho" title="In tem mã vạch dán hàng hóa">
                                                     <i class="bi bi-printer me-1"></i> In tem mã
                                                 </button>
                                                 <button type="button" class="btn btn-outline-secondary btn-sm">

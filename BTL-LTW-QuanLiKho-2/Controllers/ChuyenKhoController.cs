@@ -1045,4 +1045,63 @@ public class ChuyenKhoController : BaseKhoController
     }
 
     #endregion
+    [HttpGet]
+    public async Task<IActionResult> Print(int id)
+    {
+        var phieu = await _context.PhieuChuyenKhos
+            .Include(p => p.MaKhoNguonNavigation)
+            .Include(p => p.MaKhoDichNavigation)
+            .Include(p => p.MaNvlapNavigation)
+            .Include(p => p.MaNvxuatNavigation)
+            .Include(p => p.MaNvnhanNavigation)
+            .Include(p => p.ChiTietPhieuChuyenKhos)
+                .ThenInclude(ct => ct.MaHangNavigation)
+                    .ThenInclude(h => h.MaDvtNavigation)
+            .FirstOrDefaultAsync(p => p.MaPhieuChuyen == id);
+
+        if (phieu == null)
+        {
+            return NotFound("Không tìm thấy phiếu chuyển kho.");
+        }
+
+        ViewBag.TenKho = phieu.MaKhoNguonNavigation?.TenKho;
+
+        var vm = new ChuyenKhoListItemVM
+        {
+            MaPhieuChuyen = phieu.MaPhieuChuyen,
+            MaPhieu = phieu.MaPhieu,
+            MaKhoNguon = phieu.MaKhoNguon,
+            TenKhoNguon = phieu.MaKhoNguonNavigation?.TenKho ?? "",
+            MaKhoDich = phieu.MaKhoDich,
+            TenKhoDich = phieu.MaKhoDichNavigation?.TenKho ?? "",
+            MaNvlap = phieu.MaNvlap,
+            TenNguoiLap = phieu.MaNvlapNavigation?.HoTen ?? "",
+            MaNvxuat = phieu.MaNvxuat,
+            TenNguoiXuat = phieu.MaNvxuatNavigation?.HoTen,
+            MaNvnhan = phieu.MaNvnhan,
+            TenNguoiNhan = phieu.MaNvnhanNavigation?.HoTen,
+            NgayLap = phieu.NgayLap,
+            ThoiDiemXuat = phieu.ThoiDiemXuat,
+            ThoiDiemNhan = phieu.ThoiDiemNhan,
+            TrangThai = phieu.TrangThai,
+            GhiChu = phieu.GhiChu,
+            GhiChuNhan = phieu.GhiChuNhan,
+            TongSoLuongChuyen = phieu.ChiTietPhieuChuyenKhos.Sum(ct => ct.SoLuong),
+            TongSoLuongNhan = phieu.ChiTietPhieuChuyenKhos.Sum(ct => ct.SoLuongNhan ?? 0),
+            TongGiaTriChuyen = phieu.ChiTietPhieuChuyenKhos.Sum(ct => ct.ThanhTien),
+            Lines = phieu.ChiTietPhieuChuyenKhos.Select(ct => new ChuyenKhoLineVM
+            {
+                MaCtphieuChuyen = ct.MaCtphieuChuyen,
+                MaHang = ct.MaHang,
+                MaHangNoiBo = ct.MaHangNavigation?.MaHangNoiBo ?? "",
+                TenHang = ct.MaHangNavigation?.TenHang ?? "",
+                TenDvt = ct.MaHangNavigation?.MaDvtNavigation?.TenDvt ?? "",
+                SoLuong = ct.SoLuong,
+                SoLuongNhan = ct.SoLuongNhan,
+                DonGiaChuyen = ct.DonGiaChuyen
+            }).ToList()
+        };
+
+        return View("Print", vm);
+    }
 }

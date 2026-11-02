@@ -48,8 +48,8 @@
   - Phân trang AJAX: Tái sử dụng Lego `_Pagination.cshtml`.
 
 ### 3.2. Modal Thêm/Sửa người dùng (`_NguoiDungModal.cshtml`)
-- Header: Tiêu đề, nút đóng `X`.
-- Body: Thông tin tài khoản & nhân sự (Tên đăng nhập, Mật khẩu, Họ tên, Vai trò, SĐT, Email), Accordion Địa chỉ và Accordion Phân quyền kho (`.kho-card-grid`).
+- Header: Tiêu đề, nút đóng `X`. Căn giữa viewport tuyệt đối (`display: flex; align-items: center; justify-content: center; margin: auto;`) cho cả Modal Thêm/Sửa `#userModalOv` và Modal Đổi mật khẩu `#pwdModalOv`.
+- Body: Thông tin tài khoản & nhân sự (Tên đăng nhập, Mật khẩu, Họ tên, SĐT, Email), trường Vai trò người dùng sử dụng Custom Single-Select chuẩn Danh sách hàng hóa (`.hh-cs-wrap`, `.hh-cs-box`, `.hh-cs-dropdown`, icon checkmark xanh), Accordion Địa chỉ và Accordion Phân quyền kho sử dụng Dropdown Multi-Select chuẩn Lego Danh sách hàng hóa (`.kiot-multiselect-box`, `.kiot-ms-dropdown`, tìm kiếm chi nhánh con, tag pills có nút xóa nhanh & huy hiệu số lượng).
 - Footer: Checkbox Trạng thái "Đang hoạt động", nút Bỏ qua và nút Lưu người dùng.
 
 ### 3.3. Modal Đổi mật khẩu nhanh (`_DoiMatKhauModal.cshtml`)

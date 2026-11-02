@@ -31,6 +31,12 @@
     function hideOverlay(id) {
         const ov = document.getElementById(id);
         if (ov) ov.classList.remove('show');
+        if (id === 'userModalOv') {
+            $('#dropdownUserKho').removeClass('show');
+            $('#boxUserKho').removeClass('open');
+            $('#wrapMaVaiTro').removeClass('open');
+            $('#dropdownMaVaiTro').hide();
+        }
     }
 
     // Đóng modal khi bấm nút [data-close] hoặc click nền mờ
@@ -47,6 +53,18 @@
 
     $(document).on('keydown', function (e) {
         if (e.key === 'Escape') {
+            if ($('#dropdownMaVaiTro').is(':visible')) {
+                $('#wrapMaVaiTro').removeClass('open');
+                $('#dropdownMaVaiTro').hide();
+                e.stopPropagation();
+                return;
+            }
+            if ($('#dropdownUserKho').hasClass('show')) {
+                $('#dropdownUserKho').removeClass('show');
+                $('#boxUserKho').removeClass('open');
+                e.stopPropagation();
+                return;
+            }
             $('.hh-ov.show').removeClass('show');
         }
     });
@@ -319,48 +337,181 @@
     setupPasswordToggle('#btnToggleUserPw', '#userMatKhau', '#iconUserPw');
     setupPasswordToggle('#btnToggleNewPw', '#pwdMatKhauMoi', '#iconNewPw');
 
-    // 8. Cập nhật số lượng kho được chọn & class selected
+    // 8. Cập nhật số lượng kho được chọn & class selected & render tag pills trong box dropdown
     function updateWarehouseSelectionState() {
-        let count = 0;
-        $('.kho-card-item').each(function () {
-            const chk = $(this).find('.user-kho-chk');
-            if (chk.is(':checked')) {
-                $(this).addClass('selected');
-                count++;
-            } else {
-                $(this).removeClass('selected');
+        const checkedItems = [];
+        $('.user-kho-chk').each(function () {
+            const isChecked = $(this).is(':checked');
+            const $item = $(this).closest('.user-kho-ms-item');
+            $item.toggleClass('selected', isChecked);
+            if (isChecked) {
+                const val = parseInt($(this).val(), 10);
+                const name = $item.data('name') || $item.find('.kiot-ms-text').text().trim();
+                checkedItems.push({ id: val, name: name });
             }
         });
+
+        const count = checkedItems.length;
+        const totalCount = $('.user-kho-chk').length;
         $('#selectedWarehouseCount').text(count + ' kho');
+
+        const $box = $('#boxUserKho');
+        if (!$box.length) return;
+
+        if (count === 0) {
+            $box.html('<span class="kiot-ms-placeholder" id="placeholderUserKho">Chọn chi nhánh kho</span><i class="bi bi-chevron-down kiot-select-chevron ms-auto text-secondary"></i>');
+        } else if (count === totalCount && totalCount > 2) {
+            $box.html(`<span class="kiot-pill-tag" data-val="all" style="background-color: var(--blue, #0070f4);"><span class="tag-text">Tất cả chi nhánh (${count} kho)</span></span><i class="bi bi-chevron-down kiot-select-chevron ms-auto text-secondary"></i>`);
+        } else if (count <= 2) {
+            let html = '';
+            checkedItems.forEach(it => {
+                html += `<span class="kiot-pill-tag" data-val="${it.id}"><span class="tag-text">${it.name}</span><span class="tag-remove" data-id="${it.id}" title="Bỏ chọn">&times;</span></span>`;
+            });
+            html += '<i class="bi bi-chevron-down kiot-select-chevron ms-auto text-secondary"></i>';
+            $box.html(html);
+        } else {
+            let html = '';
+            checkedItems.slice(0, 2).forEach(it => {
+                html += `<span class="kiot-pill-tag" data-val="${it.id}"><span class="tag-text">${it.name}</span><span class="tag-remove" data-id="${it.id}" title="Bỏ chọn">&times;</span></span>`;
+            });
+            html += `<span class="kiot-pill-more">+${count - 2}</span>`;
+            html += '<i class="bi bi-chevron-down kiot-select-chevron ms-auto text-secondary"></i>';
+            $box.html(html);
+        }
     }
 
-    $(document).on('click', '.kho-card-item', function (e) {
-        if ($(e.target).is('input[type="checkbox"]')) {
+    // Toggle mở/đóng dropdown kho trong modal người dùng
+    $('#boxUserKho').on('click', function (e) {
+        const $removeBtn = $(e.target).closest('.tag-remove');
+        if ($removeBtn.length) {
+            e.stopPropagation();
+            const id = $removeBtn.data('id');
+            $(`#chkKho_${id}`).prop('checked', false);
             updateWarehouseSelectionState();
             return;
         }
+
+        const $dd = $('#dropdownUserKho');
+        const isOpen = $dd.hasClass('show');
+        if (isOpen) {
+            $dd.removeClass('show');
+            $(this).removeClass('open');
+        } else {
+            $('.kiot-ms-dropdown').not('#dropdownUserKho').removeClass('show');
+            $('.kiot-multiselect-box').not('#boxUserKho').removeClass('open');
+            $dd.addClass('show');
+            $(this).addClass('open');
+            $('#searchUserKho').val('').trigger('input');
+            setTimeout(() => $('#searchUserKho').focus(), 100);
+        }
+    });
+
+    // Click vào item trong dropdown để toggle chọn kho
+    $(document).on('click', '.user-kho-ms-item', function (e) {
+        e.stopPropagation();
         const chk = $(this).find('.user-kho-chk');
-        chk.prop('checked', !chk.is(':checked'));
+        if (!$(e.target).is('input[type="checkbox"]') && !$(e.target).is('label')) {
+            chk.prop('checked', !chk.is(':checked'));
+        }
         updateWarehouseSelectionState();
+    });
+
+    // Ngăn đóng dropdown khi click vào ô tìm kiếm
+    $('#searchUserKho').on('click', function (e) {
+        e.stopPropagation();
+    });
+
+    // Tìm kiếm chi nhánh realtime trong dropdown
+    $('#searchUserKho').on('input', function () {
+        const kw = $(this).val().toLowerCase().trim();
+        let matched = 0;
+        $('.user-kho-ms-item').each(function () {
+            const name = ($(this).data('name') || $(this).text()).toLowerCase();
+            const match = !kw || name.includes(kw);
+            $(this).toggle(match);
+            if (match) matched++;
+        });
+        $('#emptyUserKho').toggleClass('d-none', matched > 0);
     });
 
     $(document).on('change', '.user-kho-chk', function () {
         updateWarehouseSelectionState();
     });
 
-    $('#btnSelectAllKho').on('click', function () {
+    $('#btnSelectAllKho').on('click', function (e) {
+        e.stopPropagation();
         $('.user-kho-chk').prop('checked', true);
         updateWarehouseSelectionState();
     });
 
-    $('#btnDeselectAllKho').on('click', function () {
+    $('#btnDeselectAllKho').on('click', function (e) {
+        e.stopPropagation();
         $('.user-kho-chk').prop('checked', false);
         updateWarehouseSelectionState();
     });
 
+    // Đóng dropdown khi click ra ngoài
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#boxUserKho, #dropdownUserKho').length) {
+            $('#dropdownUserKho').removeClass('show');
+            $('#boxUserKho').removeClass('open');
+        }
+    });
+
     const ADMIN_DEFAULT_NOTE = 'Tài khoản có vai trò Quản lý mặc định có toàn quyền thao tác trên toàn bộ các chi nhánh kho trong hệ thống.';
 
-    // 9. Cập nhật phân quyền theo Vai trò
+    // 9. Quản lý Dropdown Vai trò người dùng (Custom Select chuẩn Danh sách hàng hóa)
+    function setRoleDropdown(val) {
+        const $select = $('#userMaVaiTro');
+        $select.val(val);
+        const $opt = $select.find(`option[value="${val}"]`);
+        const roleText = $opt.data('name') || $opt.text() || 'Chọn vai trò';
+        $('#inputMaVaiTro').val(roleText);
+        $('#listMaVaiTro .hh-cs-item').removeClass('selected').filter(function () {
+            return String($(this).data('val')) === String(val);
+        }).addClass('selected');
+        updateRoleDescription();
+    }
+
+    // Mở / đóng dropdown Vai trò
+    $('#boxMaVaiTro').on('click', function (e) {
+        e.stopPropagation();
+        const $wrap = $('#wrapMaVaiTro');
+        const $dd = $('#dropdownMaVaiTro');
+        const isOpen = $wrap.hasClass('open');
+
+        // Đóng các dropdown khác nếu đang mở
+        $('#dropdownUserKho').removeClass('show');
+        $('#boxUserKho').removeClass('open');
+        $('.hh-cs-wrap').not($wrap).removeClass('open').find('.hh-cs-dropdown').hide();
+
+        if (isOpen) {
+            $wrap.removeClass('open');
+            $dd.hide();
+        } else {
+            $wrap.addClass('open');
+            $dd.show();
+        }
+    });
+
+    // Chọn item trong dropdown Vai trò
+    $(document).on('click', '#listMaVaiTro .hh-cs-item', function (e) {
+        e.stopPropagation();
+        const val = $(this).data('val');
+        setRoleDropdown(val);
+        $('#wrapMaVaiTro').removeClass('open');
+        $('#dropdownMaVaiTro').hide();
+    });
+
+    // Đóng dropdown Vai trò khi click ra ngoài
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#wrapMaVaiTro').length) {
+            $('#wrapMaVaiTro').removeClass('open');
+            $('#dropdownMaVaiTro').hide();
+        }
+    });
+
+    // Cập nhật phân quyền theo Vai trò
     function updateRoleDescription() {
         const sel = $('#userMaVaiTro');
         const roleText = sel.find('option:selected').data('name') || sel.find('option:selected').text();
@@ -405,7 +556,7 @@
         $('#iconUserPw').removeClass('bi-eye-slash').addClass('bi-eye');
         $('#userMatKhauRequired').show();
         $('#userMatKhauHint').text('(Tối thiểu 6 ký tự)');
-        $('#userMaVaiTro').val('2'); // Mặc định Thủ kho
+        setRoleDropdown('2'); // Mặc định Thủ kho
         $('#userTrangThaiChk').prop('checked', true);
         $('#userTrangThaiText').text('Đang hoạt động');
 
@@ -413,7 +564,6 @@
         $('.user-kho-chk').prop('checked', false);
         $('.user-kho-chk').first().prop('checked', true);
         updateWarehouseSelectionState();
-        updateRoleDescription();
 
         $('#userModalTitle').text('Thêm mới người dùng');
         showOverlay('userModalOv');
@@ -448,7 +598,7 @@
                 $('#iconUserPw').removeClass('bi-eye-slash').addClass('bi-eye');
                 $('#userMatKhauRequired').hide();
                 $('#userMatKhauHint').text('(Để trống nếu không đổi)');
-                $('#userMaVaiTro').val(d.maVaiTro);
+                setRoleDropdown(d.maVaiTro);
                 $('#userTrangThaiChk').prop('checked', d.trangThai === 'HOAT_DONG');
                 $('#userTrangThaiText').text(d.trangThai === 'HOAT_DONG' ? 'Đang hoạt động' : 'Khóa tài khoản');
 
@@ -460,7 +610,6 @@
                     });
                 }
                 updateWarehouseSelectionState();
-                updateRoleDescription();
 
                 $('#userModalTitle').text('Cập nhật người dùng: ' + d.tenDangNhap);
                 showOverlay('userModalOv');

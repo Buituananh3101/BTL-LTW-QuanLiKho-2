@@ -1,4 +1,4 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.BaoCaoTonKhoIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.BaoCaoTonKhoIndexVM
 @{
     var selectedKhos = (Model.SelectedKhoIds != null && Model.SelectedKhoIds.Count > 0) ? Model.DanhSachKho.Where(k => Model.SelectedKhoIds.Contains(k.MaKho)).ToList() : Model.DanhSachKho;
     var sortBy = Model.Filter.SortBy ?? "tenHang";
@@ -181,11 +181,11 @@
 
                                 @if (isUnderMin)
                                 {
-                                    <span class="badge rounded-pill bg-primary text-white ms-1" title="Dưới định mức tối thiểu (@dm.Item1)" style="font-size: 9px; padding: 1px 4px;">▼</span>
+                                    <i class="bi bi-arrow-down ms-1 text-secondary" title="Dưới định mức tối thiểu (@dm.Item1)" style="font-size: 11px;"></i>
                                 }
                                 else if (isOverMax)
                                 {
-                                    <span class="badge rounded-pill bg-info text-dark ms-1" title="Vượt định mức tối đa (@dm.Item2)" style="font-size: 9px; padding: 1px 4px;">▲</span>
+                                    <i class="bi bi-arrow-up ms-1 text-secondary" title="Vượt định mức tối đa (@dm.Item2)" style="font-size: 11px;"></i>
                                 }
                             </td>
                         }

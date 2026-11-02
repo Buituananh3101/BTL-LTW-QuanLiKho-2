@@ -110,7 +110,7 @@ public class XuatHuyController : BaseKhoController
             .Include(p => p.MaNvxacNhanNavigation)
             .Include(p => p.ChiTietPhieuXuats)
                 .ThenInclude(ct => ct.MaHangNavigation!)
-                    .ThenInclude(h => h.MaDvtNavigation)
+                    .ThenInclude(h => h!.MaDvtNavigation)
             .Where(p => p.LoaiPhieuXuat == "XUAT_HUY")
             .AsQueryable();
 
@@ -973,5 +973,52 @@ public class XuatHuyController : BaseKhoController
 
             return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachXuatHuy_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
+    }
+    [HttpGet]
+    public async Task<IActionResult> Print(int id)
+    {
+        var phieu = await _context.PhieuXuats
+            .Include(p => p.MaKhoNavigation)
+            .Include(p => p.MaNvlapNavigation)
+            .Include(p => p.MaNvxacNhanNavigation)
+            .Include(p => p.ChiTietPhieuXuats)
+                .ThenInclude(ct => ct.MaHangNavigation)
+                    .ThenInclude(h => h.MaDvtNavigation)
+            .FirstOrDefaultAsync(p => p.MaPhieuXuat == id);
+
+        if (phieu == null)
+        {
+            return NotFound("Không tìm thấy phiếu xuất hủy.");
+        }
+
+        ViewBag.TenKho = phieu.MaKhoNavigation?.TenKho;
+
+        var vm = new XuatHuyFormVM
+        {
+            MaPhieuXuat = phieu.MaPhieuXuat,
+            MaPhieu = phieu.MaPhieu,
+            MaKho = phieu.MaKho,
+            TenKho = phieu.MaKhoNavigation?.TenKho ?? "",
+            NgayLap = phieu.NgayLap,
+            NgayXacNhan = phieu.NgayXacNhan,
+            MaNvlap = phieu.MaNvlap,
+            TenNguoiLap = phieu.MaNvlapNavigation?.HoTen ?? "",
+            MaNvxacNhan = phieu.MaNvxacNhan,
+            TenNguoiXacNhan = phieu.MaNvxacNhanNavigation?.HoTen,
+            TrangThai = phieu.TrangThai,
+            GhiChu = phieu.GhiChu,
+            IsReadOnly = true,
+            Lines = phieu.ChiTietPhieuXuats.Select(ct => new XuatHuyLineVM
+            {
+                MaHang = ct.MaHang,
+                MaHangNoiBo = ct.MaHangNavigation?.MaHangNoiBo ?? "",
+                TenHang = ct.MaHangNavigation?.TenHang ?? "",
+                TenDvt = ct.MaHangNavigation?.MaDvtNavigation?.TenDvt ?? "",
+                SoLuongXuat = ct.SoLuongXuat,
+                DonGiaXuat = ct.DonGiaXuat
+            }).ToList()
+        };
+
+        return View("Print", vm);
     }
 }

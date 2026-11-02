@@ -1,0 +1,246 @@
+/* ==========================================================================
+   CSS Cho Tính Năng In Tem Mã Vạch Hàng Hóa (Barcode Printing)
+   Chuẩn chuyên nghiệp theo mô hình KiotViet & Máy in mã vạch công nghiệp
+   ========================================================================== */
+
+/* 1. KHUNG XEM TRƯỚC TEM MÃ VẠCH (Live Preview trên Modal) */
+.barcode-preview-box {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+}
+
+.barcode-preview-label {
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 240px;
+    transition: all 0.2s ease;
+}
+
+.barcode-shop-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.barcode-prod-name {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.3;
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-height: 33px;
+}
+
+.barcode-svg-container {
+    width: 90%;
+    margin: 4px 0 2px;
+}
+
+.barcode-code-text {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #1e293b;
+    letter-spacing: 1px;
+    font-family: Consolas, "Courier New", monospace;
+    margin-bottom: 3px;
+}
+
+.barcode-price-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0284c7;
+    margin-top: 1px;
+}
+
+/* Nút chọn số lượng nhanh */
+.quick-qty-btn {
+    padding: 3px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.quick-qty-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+/* ==========================================================================
+   2. KHỔ GIẤY & LỆNH IN THỰC TẾ TRÊN MÁY IN (@media print)
+   ========================================================================== */
+#printBarcodeArea {
+    display: none;
+}
+
+@media print {
+    /* Ẩn toàn bộ giao diện website khi bấm In */
+    html, body {
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+    }
+
+    body * {
+        visibility: hidden !important;
+    }
+
+    /* Chỉ hiển thị duy nhất khu vực chứa các tem nhãn cần in */
+    #printBarcodeArea, #printBarcodeArea * {
+        visibility: visible !important;
+    }
+
+    #printBarcodeArea {
+        display: block !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+    }
+
+    /* Mẫu 1: Tem nhiệt 35x22mm (Máy in mã vạch cuộn Xprinter) */
+    #printBarcodeArea.mode-35x22 {
+        width: 35mm !important;
+    }
+
+    #printBarcodeArea.mode-35x22 .print-item {
+        width: 35mm !important;
+        height: 22mm !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        padding: 1mm 1.5mm !important;
+        margin: 0 auto !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        text-align: center !important;
+        overflow: hidden !important;
+    }
+
+    /* Mẫu 2: Tem nhiệt 50x30mm (Khổ trung bình) */
+    #printBarcodeArea.mode-50x30 {
+        width: 50mm !important;
+    }
+
+    #printBarcodeArea.mode-50x30 .print-item {
+        width: 50mm !important;
+        height: 30mm !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        padding: 1.5mm 2mm !important;
+        margin: 0 auto !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        text-align: center !important;
+        overflow: hidden !important;
+    }
+
+    /* Mẫu 3: Giấy A4 (In lưới nhiều tem trên 1 trang văn phòng) */
+    #printBarcodeArea.mode-a4 {
+        width: 100% !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 2mm !important;
+        padding: 8mm !important;
+    }
+
+    #printBarcodeArea.mode-a4 .print-item {
+        width: 36mm !important;
+        height: 24mm !important;
+        border: 1px dashed #e2e8f0 !important;
+        padding: 1.5mm !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        text-align: center !important;
+        overflow: hidden !important;
+    }
+
+    /* Định dạng text khi in */
+    .print-item .p-shop {
+        font-size: 8px !important;
+        font-weight: bold !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+        text-transform: uppercase !important;
+        max-width: 100% !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+    }
+
+    .print-item .p-name {
+        font-size: 8.5px !important;
+        font-weight: 600 !important;
+        line-height: 1.15 !important;
+        margin: 1px 0 !important;
+        max-height: 20px !important;
+        overflow: hidden !important;
+    }
+
+    .print-item .p-svg-wrap {
+        width: 95% !important;
+        height: 24px !important;
+        margin: 1px 0 !important;
+    }
+
+    .print-item .p-svg-wrap svg {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .print-item .p-code {
+        font-size: 8px !important;
+        font-family: monospace !important;
+        font-weight: bold !important;
+        line-height: 1 !important;
+        letter-spacing: 0.5px !important;
+        margin: 0 !important;
+    }
+
+    .print-item .p-price {
+        font-size: 10px !important;
+        font-weight: 800 !important;
+        line-height: 1.1 !important;
+        margin: 0 !important;
+    }
+}

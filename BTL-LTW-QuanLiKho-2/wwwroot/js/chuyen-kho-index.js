@@ -1,4 +1,4 @@
-﻿/**
+/**
  * chuyen-kho-index.js - Điều khiển giao diện Danh sách Chuyển kho chuẩn chuyên nghiệp
  * Tái sử dụng KiotFilter.createListPage (Lego Engine)
  */
@@ -97,9 +97,13 @@
 
     // Lưu nhanh ghi chú trong Drawer
     $(document).on('click', '.btn-save-note', function () {
-        const id = $(this).data('id');
-        const $panel = $(this).closest('.product-detail-panel');
-        const note = $panel.find('.dp-note').val();
+        const $btn = $(this);
+        const id = $btn.data('id');
+        const $panel = $btn.closest('.product-detail-panel');
+        const note = $panel.find('.dp-note').val() || '';
+
+        const origHtml = $btn.html();
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Lưu');
 
         $.ajax({
             url: urls.saveNote,
@@ -107,11 +111,22 @@
             contentType: 'application/json',
             data: JSON.stringify({ MaPhieuChuyen: id, GhiChu: note }),
             success: function (res) {
+                $btn.prop('disabled', false).html(origHtml);
                 if (res && res.success && window.KiotToast) {
                     KiotToast.success(res.message || 'Đã lưu ghi chú.');
                 }
+                // Cập nhật DOM cột ghi chú trên dòng bảng cha
+                const $parentRow = $(`tr.tbl-row[data-id="${id}"], tr[data-id="${id}"]`);
+                if ($parentRow.length) {
+                    const $noteCol = $parentRow.find('[data-col="ghi"]');
+                    if ($noteCol.length) {
+                        const trimmed = note.trim();
+                        $noteCol.text(trimmed ? trimmed : '---').attr('title', trimmed);
+                    }
+                }
             },
             error: function (xhr) {
+                $btn.prop('disabled', false).html(origHtml);
                 const msg = xhr.responseJSON?.message || 'Không thể lưu ghi chú.';
                 if (window.KiotToast) KiotToast.error(msg);
             }

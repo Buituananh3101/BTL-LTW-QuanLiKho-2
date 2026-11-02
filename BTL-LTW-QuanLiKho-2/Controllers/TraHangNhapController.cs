@@ -1119,4 +1119,62 @@ public class TraHangNhapController : BaseKhoController
     }
 
     #endregion
+
+    [HttpGet]
+    public async Task<IActionResult> Print(int id)
+    {
+        var phieu = await _context.PhieuTraHangNhaps
+            .Include(p => p.MaKhoNavigation)
+            .Include(p => p.MaNvlapNavigation)
+            .Include(p => p.MaNvtraNavigation)
+            .Include(p => p.MaDonViCapHangNavigation)
+            .Include(p => p.ChiTietPhieuTraHangNhaps)
+                .ThenInclude(ct => ct.MaHangNavigation)
+                    .ThenInclude(h => h.MaDvtNavigation)
+            .FirstOrDefaultAsync(p => p.MaPhieuTraHang == id);
+
+        if (phieu == null)
+        {
+            return NotFound("Không tìm thấy phiếu trả hàng nhập.");
+        }
+
+        ViewBag.TenKho = phieu.MaKhoNavigation?.TenKho;
+
+        var vm = new TraHangNhapFormVM
+        {
+            MaPhieuTraHang = phieu.MaPhieuTraHang,
+            MaPhieu = phieu.MaPhieu,
+            MaKho = phieu.MaKho,
+            TenKho = phieu.MaKhoNavigation?.TenKho ?? "",
+            NgayLap = phieu.NgayLap,
+            NgayTra = phieu.NgayTra,
+            MaNvlap = phieu.MaNvlap,
+            TenNguoiLap = phieu.MaNvlapNavigation?.HoTen ?? "",
+            MaNvtra = phieu.MaNvtra,
+            TenNguoiTra = phieu.MaNvtraNavigation?.HoTen,
+            MaDonViCapHang = phieu.MaDonViCapHang,
+            TenDonViCapHang = phieu.MaDonViCapHangNavigation?.TenDonVi,
+            MaNcc = phieu.MaDonViCapHangNavigation?.MaNcc,
+            GhiChu = phieu.GhiChu,
+            GiamGia = phieu.GiamGia,
+            TongTienHang = phieu.TongTienHang,
+            CanThuNcc = phieu.CanThuNcc,
+            DaThuNcc = phieu.DaThuNcc,
+            TrangThai = phieu.TrangThai,
+            IsReadOnly = true,
+            Lines = phieu.ChiTietPhieuTraHangNhaps.Select(ct => new TraHangNhapLineVM
+            {
+                MaHang = ct.MaHang,
+                MaHangNoiBo = ct.MaHangNavigation?.MaHangNoiBo ?? "",
+                TenHang = ct.MaHangNavigation?.TenHang ?? "",
+                TenDvt = ct.MaHangNavigation?.MaDvtNavigation?.TenDvt ?? "",
+                SoLuong = ct.SoLuong,
+                GiaVon = ct.GiaVon,
+                DonGiaTra = ct.DonGiaTra,
+                GhiChu = ct.GhiChu
+            }).ToList()
+        };
+
+        return View("Print", vm);
+    }
 }

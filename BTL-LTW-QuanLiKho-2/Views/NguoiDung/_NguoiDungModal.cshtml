@@ -1,4 +1,4 @@
-﻿@model BTL_LTW_QuanLiKho_2.ViewModels.NguoiDung.NguoiDungIndexVM
+@model BTL_LTW_QuanLiKho_2.ViewModels.NguoiDung.NguoiDungIndexVM
 
 <!-- ========================================================================
      MODAL CHÍNH: TẠO & CẬP NHẬT NGƯỜI DÙNG chuẩn chuyên nghiệp (THEO HÀNG HÓA)
@@ -65,15 +65,33 @@
             <span class="hh-err" id="errHoTen">Vui lòng nhập họ và tên nhân viên.</span>
           </div>
 
-          <!-- Vai trò người dùng -->
+          <!-- Vai trò người dùng (Custom Select chuẩn Danh sách hàng hóa) -->
           <div class="hh-f" id="fldVaiTro">
-            <label for="userMaVaiTro">Vai trò người dùng <span style="color:var(--hh-danger)">*</span></label>
-            <select id="userMaVaiTro">
+            <label for="inputMaVaiTro">Vai trò người dùng <span style="color:var(--hh-danger)">*</span></label>
+            <div class="hh-cs-wrap" id="wrapMaVaiTro">
+              <div class="hh-cs-box" id="boxMaVaiTro" style="cursor: pointer;">
+                <input type="text" class="hh-cs-input" id="inputMaVaiTro" placeholder="Chọn vai trò người dùng" readonly autocomplete="off" style="cursor: pointer;" />
+                <svg class="hh-cs-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="hh-cs-dropdown shadow" id="dropdownMaVaiTro" style="display: none; z-index: 1060;">
+                <div class="hh-cs-list" id="listMaVaiTro">
+                  @foreach (var vt in Model.VaiTroList)
+                  {
+                    <div class="hh-cs-item" data-val="@vt.MaVaiTro" data-name="@vt.TenVaiTro">
+                      <span>@vt.TenVaiTro</span>
+                      <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+            <select id="userMaVaiTro" style="display: none;">
               @foreach (var vt in Model.VaiTroList)
               {
                 <option value="@vt.MaVaiTro" data-name="@vt.TenVaiTro">@vt.TenVaiTro</option>
               }
             </select>
+            <span class="hh-err" id="errVaiTro">Vui lòng chọn vai trò người dùng.</span>
           </div>
 
           <!-- Số điện thoại -->
@@ -115,7 +133,7 @@
         </section>
 
         <!-- KHỐI 3: SECTION PHÂN QUYỀN CHI NHÁNH KHO (ACCORDION GẬP MỞ) -->
-        <section class="hh-sec open">
+        <section class="hh-sec open" style="overflow: visible;">
           <div class="hh-sec-h">
             <div>
               <h3>Phân quyền chi nhánh kho</h3>
@@ -123,7 +141,7 @@
             </div>
             <svg class="hh-chev"><use href="#i-chev"/></svg>
           </div>
-          <div class="hh-sec-b">
+          <div class="hh-sec-b" style="overflow: visible; padding-bottom: 20px;">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <span class="small fw-semibold text-dark">
                 Chi nhánh được phân công: <span class="badge bg-primary-subtle text-primary border ms-1" id="selectedWarehouseCount">0 kho</span>
@@ -135,23 +153,38 @@
               </div>
             </div>
 
-            <!-- Lưới thẻ chi nhánh kho trực quan -->
-            <div class="kho-card-grid" id="listKhoCheckboxes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px;">
-              @foreach (var k in Model.KhoList)
-              {
-                <div class="kho-card-item" data-id="@k.MaKho" style="border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; background: #fff; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: flex-start; gap: 10px; user-select: none;">
-                  <input class="form-check-input user-kho-chk" type="checkbox" value="@k.MaKho" id="chkKho_@k.MaKho" style="width: 17px; height: 17px; margin-top: 2px; cursor: pointer;" />
-                  <div style="flex: 1; min-width: 0;">
-                    <div style="font-size: 13.5px; font-weight: 600; color: #1e293b; display: flex; justify-content: space-between; align-items: center;">
-                      <label for="chkKho_@k.MaKho" style="cursor: pointer; margin: 0;">@k.TenKho</label>
-                      <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 10px;">Hoạt động</span>
-                    </div>
-                    <div style="font-size: 12px; color: #64748b; line-height: 1.35; margin-top: 2px;">
-                      <i class="bi bi-geo-alt me-1 text-muted"></i>@(string.IsNullOrWhiteSpace(k.DiaChi) ? "Chưa cập nhật địa chỉ" : k.DiaChi)
-                    </div>
-                  </div>
+            <!-- Dropdown Multi-Select chọn chi nhánh chuẩn danh sách hàng hóa -->
+            <div class="position-relative" id="userKhoDropdownWrap">
+              <div class="kiot-multiselect-box user-kho-select-box" id="boxUserKho" style="cursor: pointer;">
+                <span class="kiot-ms-placeholder" id="placeholderUserKho">Chọn chi nhánh kho</span>
+                <i class="bi bi-chevron-down kiot-select-chevron ms-auto text-secondary"></i>
+              </div>
+              <div class="kiot-ms-dropdown shadow" id="dropdownUserKho" style="width: 100%; z-index: 1060;">
+                <div class="kiot-ms-search">
+                  <input type="text" id="searchUserKho" placeholder="Tìm chi nhánh kho..." autocomplete="off" />
                 </div>
-              }
+                <div class="user-kho-list-wrap" style="max-height: 220px; overflow-y: auto;">
+                  @foreach (var k in Model.KhoList)
+                  {
+                    <div class="kiot-ms-item user-kho-ms-item" data-val="@k.MaKho" data-name="@k.TenKho" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer;">
+                      <input class="form-check-input user-kho-chk flex-shrink-0" type="checkbox" value="@k.MaKho" id="chkKho_@k.MaKho" style="width: 16px; height: 16px; margin: 0; cursor: pointer;" />
+                      <div class="d-flex align-items-center gap-2" style="flex: 1 1 auto; min-width: 0;">
+                        <label for="chkKho_@k.MaKho" class="kiot-ms-text" style="cursor: pointer; margin: 0; font-size: 13.5px; font-weight: 500; color: #1e293b; white-space: nowrap;">@k.TenKho</label>
+                        @if (!string.IsNullOrWhiteSpace(k.DiaChi))
+                        {
+                          <span class="text-muted small" style="font-size: 11.5px; max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="@k.DiaChi">
+                            <i class="bi bi-geo-alt me-1"></i>@k.DiaChi
+                          </span>
+                        }
+                      </div>
+                      <div class="ms-auto flex-shrink-0">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 10.5px; padding: 3px 8px; font-weight: 500;">Hoạt động</span>
+                      </div>
+                    </div>
+                  }
+                  <div class="kiot-ms-empty text-center text-muted py-3 small d-none" id="emptyUserKho">Không tìm thấy chi nhánh phù hợp</div>
+                </div>
+              </div>
             </div>
           </div>
         </section>

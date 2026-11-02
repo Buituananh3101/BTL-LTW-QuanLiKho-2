@@ -35,8 +35,14 @@
             <div class="text-muted smaller" style="font-size: 11px;">@User.GetVaiTro()</div>
           </li>
           <li>
-            <a class="dropdown-item small text-danger py-2" asp-controller="Account" asp-action="LogoutGet">
-              <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+            <a class="dropdown-item small py-2 d-flex align-items-center" href="javascript:void(0)" onclick="if(window.openDoiMatKhauModal) window.openDoiMatKhauModal();">
+              <i class="bi bi-key text-primary me-2 fs-6"></i>Đổi mật khẩu
+            </a>
+          </li>
+          <li><hr class="dropdown-divider my-1"></li>
+          <li>
+            <a class="dropdown-item small text-danger py-2 d-flex align-items-center" asp-controller="Account" asp-action="LogoutGet">
+              <i class="bi bi-box-arrow-right me-2 fs-6"></i>Đăng xuất
             </a>
           </li>
         </ul>
@@ -138,9 +144,14 @@
               <div class="text-muted smaller" style="font-size: 11px;">@User.GetVaiTro()</div>
             </div>
           </div>
-          <a class="btn btn-outline-danger btn-sm py-1 px-2" asp-controller="Account" asp-action="LogoutGet" title="Đăng xuất">
-            <i class="bi bi-box-arrow-right"></i>
-          </a>
+          <div class="d-flex align-items-center gap-1">
+            <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-2" onclick="if(window.openDoiMatKhauModal) window.openDoiMatKhauModal();" title="Đổi mật khẩu">
+              <i class="bi bi-key"></i>
+            </button>
+            <a class="btn btn-outline-danger btn-sm py-1 px-2" asp-controller="Account" asp-action="LogoutGet" title="Đăng xuất">
+              <i class="bi bi-box-arrow-right"></i>
+            </a>
+          </div>
         </div>
       }
       else

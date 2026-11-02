@@ -492,6 +492,249 @@ body {
   padding-right: 2px !important;
 }
 
+/* Bảng Quản lý Chi nhánh Kho co giãn 100% khớp chiều ngang màn hình, không thanh cuộn ngang */
+#khoTable {
+  width: 100% !important;
+  min-width: 0 !important;
+  table-layout: fixed !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+#khoTableContainer .kiot-table-scroll-body {
+  overflow-x: hidden !important;
+  width: 100% !important;
+}
+#khoTable th,
+#khoTable td {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  vertical-align: middle;
+}
+#khoTable th.col-stt,
+#khoTable td.col-stt {
+  padding-left: 2px !important;
+  padding-right: 2px !important;
+}
+#khoTable th.col-actions,
+#khoTable td.col-actions {
+  padding-left: 2px !important;
+  padding-right: 2px !important;
+  white-space: nowrap !important;
+}
+
+/* ==========================================================================
+   DROPDOWN MULTI-SELECT NHÂN SỰ PHÂN CÔNG KHO (_KhoModal.cshtml)
+   ========================================================================== */
+#khoModalOv,
+#userModalOv,
+#pwdModalOv {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 20px !important;
+}
+#userModalOv .hh-modal,
+#pwdModalOv .hh-modal {
+  margin: auto !important;
+}
+#khoModalOv .hh-modal {
+  margin: auto !important;
+  min-height: 680px !important;
+  max-width: 900px !important;
+}
+#khoModalOv .hh-m-body {
+  min-height: 540px !important;
+}
+#khoModalOv #kho-pane-info {
+  min-height: 500px;
+}
+.kho-user-select-wrap {
+  width: 100%;
+}
+.kho-user-dropdown-box {
+  min-height: 40px;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+}
+.kho-user-dropdown-box:hover {
+  border-color: #9ca3af;
+}
+.kho-user-select-wrap.open .kho-user-dropdown-box,
+.kho-user-dropdown-box:focus {
+  outline: none;
+  border-color: #0070f4 !important;
+  box-shadow: 0 0 0 3px rgba(0, 112, 244, 0.15) !important;
+}
+.kho-user-arrow {
+  color: #64748b;
+  font-size: 13px;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+.kho-user-select-wrap.open .kho-user-arrow {
+  transform: rotate(180deg);
+  color: #0070f4;
+}
+.kho-user-selected-display {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  line-height: 1.4;
+  font-size: 13.5px;
+}
+.kho-user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1e293b;
+  white-space: nowrap;
+}
+.kho-user-chip .btn-remove-chip {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: #94a3b8;
+  cursor: pointer;
+  line-height: 1;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+}
+.kho-user-chip .btn-remove-chip:hover {
+  color: #ef4444;
+}
+.kho-user-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+  z-index: 1055;
+  overflow: hidden;
+}
+.kho-user-dropdown-header {
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.kho-user-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+.kho-user-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 13px;
+  pointer-events: none;
+}
+.hh-f .kho-user-search-input,
+.kho-user-search-input {
+  width: 100% !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  padding: 0 10px 0 32px !important;
+  font-size: 13px !important;
+  outline: none !important;
+  background: #fff !important;
+  color: #1e293b !important;
+  box-sizing: border-box !important;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.hh-f .kho-user-search-input:focus,
+.kho-user-search-input:focus {
+  border-color: #0070f4 !important;
+  box-shadow: 0 0 0 2px rgba(0, 112, 244, 0.15) !important;
+}
+.kho-user-actions-quick {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.btn-quick-action {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1;
+}
+.btn-quick-action:hover {
+  text-decoration: underline;
+}
+.action-sep {
+  color: #cbd5e1;
+  font-size: 12px;
+}
+.kho-user-dropdown-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+.kho-user-dropdown-item {
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.12s ease;
+  user-select: none;
+}
+.kho-user-dropdown-item:last-child {
+  border-bottom: none;
+}
+.kho-user-dropdown-item:hover {
+  background-color: #f1f5f9;
+}
+.kho-user-dropdown-item.selected {
+  background-color: #f8fafc;
+}
+.kho-user-dropdown-item .form-check-input {
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+}
+.kho-user-dropdown-item .user-sub-text {
+  font-size: 11.5px;
+  line-height: 1.2;
+}
+
 /* Bảng Hàng hóa giữ độ rộng cột cố định chuẩn KiotViet & Kiểm kho, không co rút khi thêm cột */
 #productTable {
   width: max-content !important;
@@ -3234,4 +3477,90 @@ tr.product-detail-row > td {
 
 
 
-
+
+
+
+/* ==========================================================================
+   PRINT MEDIA STYLES - CHUẨN IN BÁO CÁO & THẺ KHO
+   ========================================================================== */
+@media print {
+    @page {
+        size: landscape;
+        margin: 10mm;
+    }
+
+    header,
+    nav,
+    .navbar,
+    .kiot-sidebar-col,
+    .filter-sidebar,
+    .kiot-toolbar-row,
+    .kiot-actions-group,
+    .kiot-search-box,
+    .kiot-btn-toggle-sidebar,
+    #btnToggleSidebar,
+    .pagination-container,
+    .pagination,
+    .pager,
+    .btn,
+    .btn-tool,
+    .kiot-help-modal,
+    footer,
+    .no-print {
+        display: none !important;
+    }
+
+    body, html {
+        background: #fff !important;
+        color: #000 !important;
+        font-size: 11pt !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    main,
+    .kiot-main-col,
+    .container-fluid,
+    .container,
+    .kiot-layout-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    table, .table, .kiot-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        background: #fff !important;
+    }
+
+    table th, table td,
+    .table th, .table td,
+    .kiot-table th, .kiot-table td {
+        border: 1px solid #333 !important;
+        color: #000 !important;
+        padding: 4px 6px !important;
+        font-size: 10pt !important;
+    }
+
+    table thead th,
+    .table thead th,
+    .kiot-table thead th {
+        background-color: #f1f5f9 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        font-weight: bold !important;
+    }
+
+    .kiot-kpi-row,
+    .kiot-summary-cards,
+    .summary-card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        background: #fff !important;
+    }
+}

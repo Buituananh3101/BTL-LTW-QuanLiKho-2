@@ -1122,4 +1122,59 @@ public class NhapHangController : BaseKhoController
     }
 
     #endregion
+
+    [HttpGet]
+    public async Task<IActionResult> Print(int id)
+    {
+        var phieu = await _context.PhieuNhaps
+            .Include(p => p.MaKhoNavigation)
+            .Include(p => p.MaNvlapNavigation)
+            .Include(p => p.MaNvxacNhanNavigation)
+            .Include(p => p.MaDonViCapHangNavigation)
+            .Include(p => p.ChiTietPhieuNhaps)
+                .ThenInclude(ct => ct.MaHangNavigation)
+                    .ThenInclude(h => h.MaDvtNavigation)
+            .FirstOrDefaultAsync(p => p.MaPhieuNhap == id);
+
+        if (phieu == null)
+        {
+            return NotFound("Không tìm thấy phiếu nhập cần in.");
+        }
+
+        ViewBag.TenKho = phieu.MaKhoNavigation?.TenKho;
+
+        var vm = new NhapHangFormVM
+        {
+            MaPhieuNhap = phieu.MaPhieuNhap,
+            MaPhieu = phieu.MaPhieu,
+            MaKho = phieu.MaKho,
+            TenKho = phieu.MaKhoNavigation?.TenKho ?? "",
+            NgayLap = phieu.NgayLap,
+            MaNvlap = phieu.MaNvlap,
+            TenNguoiLap = phieu.MaNvlapNavigation?.HoTen ?? "",
+            MaDonViCapHang = phieu.MaDonViCapHang,
+            TenDonViCapHang = phieu.MaDonViCapHangNavigation?.TenDonVi,
+            MaNcc = phieu.MaDonViCapHangNavigation?.MaNcc,
+            SoHoaDon = phieu.SoHoaDon,
+            MaDatHangNhap = phieu.MaDatHangNhap,
+            GhiChu = phieu.GhiChu,
+            GiamGia = phieu.GiamGia,
+            TongTien = phieu.TongTien,
+            CanTraNcc = phieu.CanTraNcc,
+            TrangThai = phieu.TrangThai,
+            IsReadOnly = true,
+            Lines = phieu.ChiTietPhieuNhaps.Select(ct => new NhapHangLineVM
+            {
+                MaHang = ct.MaHang,
+                MaHangNoiBo = ct.MaHangNavigation?.MaHangNoiBo ?? "",
+                TenHang = ct.MaHangNavigation?.TenHang ?? "",
+                TenDvt = ct.MaHangNavigation?.MaDvtNavigation?.TenDvt ?? "",
+                SoLuong = ct.SoLuong,
+                DonGiaNhap = ct.DonGiaNhap,
+                GiamGia = ct.GiamGia
+            }).ToList()
+        };
+
+        return View("Print", vm);
+    }
 }

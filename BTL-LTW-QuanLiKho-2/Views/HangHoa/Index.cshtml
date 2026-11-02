@@ -5,6 +5,7 @@
 
 <link rel="stylesheet" href="~/css/hang-hoa-form.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/hang-hoa-excel.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/hang-hoa-barcode.css" asp-append-version="true" />
 
 <!-- Cấu hình dữ liệu ban đầu cho JavaScript (tránh inline script trong view) -->
 <div id="hangHoaConfig"
@@ -117,6 +118,7 @@
 <partial name="_HangHoaModal" model="Model" />
 <partial name="_HangHoaExportModal" />
 <partial name="_HangHoaImportModal" />
+<partial name="_HangHoaBarcodeModal" />
 
 <!-- Modal Tạo nhanh nhóm hàng -->
 <div class="modal fade" id="quickGroupModal" tabindex="-1" aria-hidden="true">
@@ -143,4 +145,5 @@
     <script src="~/js/hang-hoa-index.js" asp-append-version="true"></script>
     <script src="~/js/hang-hoa-form.js" asp-append-version="true"></script>
     <script src="~/js/hang-hoa-excel.js" asp-append-version="true"></script>
+    <script src="~/js/hang-hoa-barcode.js" asp-append-version="true"></script>
 }

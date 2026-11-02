@@ -1134,5 +1134,57 @@ public class PhieuKiemKeController : BaseKhoController
         if (string.IsNullOrEmpty(val)) return "";
         return val.Replace("\"", "\"\"").Replace("\r", " ").Replace("\n", " ");
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Print(int id)
+    {
+        var pkk = await _context.PhieuKiemKes
+            .Include(p => p.MaKhoNavigation)
+            .Include(p => p.MaNvlapNavigation)
+            .Include(p => p.PhieuDieuChinh)
+                .ThenInclude(pdc => pdc!.MaNvduyetNavigation)
+            .Include(p => p.ChiTietPhieuKiemKes)
+                .ThenInclude(ct => ct.MaHangNavigation)
+                    .ThenInclude(h => h.MaDvtNavigation)
+            .Include(p => p.ChiTietPhieuKiemKes)
+                .ThenInclude(ct => ct.MaHangNavigation)
+                    .ThenInclude(h => h.MaNhomNavigation)
+            .FirstOrDefaultAsync(p => p.MaPhieuKiemKe == id);
+
+        if (pkk == null) return NotFound("Không tìm thấy phiếu kiểm kê.");
+
+        ViewBag.TenKho = pkk.MaKhoNavigation?.TenKho;
+
+        var lines = pkk.ChiTietPhieuKiemKes.Select(ct => new PhieuKiemKeLineVM
+        {
+            MaHang = ct.MaHang,
+            MaHangNoiBo = ct.MaHangNavigation?.MaHangNoiBo ?? "",
+            TenHang = ct.MaHangNavigation?.TenHang ?? "",
+            TenDvt = ct.MaHangNavigation?.MaDvtNavigation?.TenDvt ?? "",
+            TenNhom = ct.MaHangNavigation?.MaNhomNavigation?.TenNhom ?? "",
+            SoLuongTheoSo = ct.SoLuongTheoSo,
+            SoLuongThucTe = ct.SoLuongThucTe,
+            DonGia = ct.DonGia > 0 ? ct.DonGia : ((ct.MaHangNavigation != null && ct.MaHangNavigation.GiaVon > 0) ? ct.MaHangNavigation.GiaVon : (ct.MaHangNavigation?.GiaBanThamKhao ?? 0))
+        }).ToList();
+
+        var model = new PhieuKiemKeFormVM
+        {
+            MaPhieuKiemKe = pkk.MaPhieuKiemKe,
+            MaPhieu = pkk.MaPhieu,
+            MaKho = pkk.MaKho,
+            TenKho = pkk.MaKhoNavigation?.TenKho ?? $"Kho {pkk.MaKho}",
+            MaNvlap = pkk.MaNvlap,
+            TenNguoiLap = pkk.MaNvlapNavigation?.HoTen ?? $"NV {pkk.MaNvlap}",
+            ThoiDiemChot = pkk.ThoiDiemChot,
+            TrangThai = pkk.TrangThai,
+            GhiChu = pkk.GhiChu,
+            IsReadOnly = true,
+            NgayCanBang = pkk.PhieuDieuChinh?.NgayDuyet ?? (pkk.TrangThai == "DA_DIEU_CHINH" ? pkk.ThoiDiemChot : null),
+            TenNguoiCanBang = pkk.PhieuDieuChinh?.MaNvduyetNavigation?.HoTen ?? pkk.MaNvlapNavigation?.HoTen,
+            Lines = lines
+        };
+
+        return View("Print", model);
+    }
 }
 

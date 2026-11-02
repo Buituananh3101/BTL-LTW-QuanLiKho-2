@@ -1,0 +1,266 @@
+<!-- ========================================================================
+     MODAL ĐỔI MẬT KHẨU CÁ NHÂN TOÀN HỆ THỐNG (CHUẨN FORM DANH SÁCH HÀNG HÓA)
+     Cấu trúc .hh-ov, .hh-modal, .hh-m-head, .hh-m-body, .hh-f, .hh-m-foot
+     ======================================================================== -->
+
+<!-- Sprite icon SVG dùng cho modal nếu trang chưa nạp -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-x-dmk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 6l12 12M18 6L6 18"/>
+  </symbol>
+</svg>
+
+<div class="hh-ov" id="modalDoiMatKhauCaNhan" role="dialog" aria-modal="true" aria-labelledby="titleDoiMatKhauCaNhan" style="align-items: center;">
+    <div class="hh-modal" style="max-width: 480px;">
+        <!-- Header Modal -->
+        <div class="hh-m-head" style="padding-bottom: 14px; border-bottom: 1px solid var(--hh-line-l);">
+            <h2 id="titleDoiMatKhauCaNhan" style="font-size: 18px; margin: 0; font-weight: 600; color: #111827;">
+                Đổi mật khẩu tài khoản
+            </h2>
+            <button type="button" class="hh-x" data-close="modalDoiMatKhauCaNhan" aria-label="Đóng">
+                <svg style="width:18px;height:18px;"><use href="#i-x-dmk"/></svg>
+            </button>
+        </div>
+
+        <!-- Body Modal -->
+        <div class="hh-m-body" style="padding: 20px 24px;">
+            <form id="formDoiMatKhauCaNhan" onsubmit="return false;" autocomplete="off">
+                <!-- Alert thông báo lỗi nội bộ form -->
+                <div class="alert alert-danger py-2 px-3 small d-none mb-3" id="alertDoiMatKhauCaNhan" style="font-size: 13px;"></div>
+
+                <!-- Danh sách các trường nhập theo chuẩn .hh-f của Hàng hóa -->
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    <!-- Mật khẩu hiện tại -->
+                    <div class="hh-f" id="fldOldPw">
+                        <label for="txtMatKhauHienTai">
+                            <span>Mật khẩu hiện tại <span style="color:var(--hh-danger)">*</span></span>
+                        </label>
+                        <div style="position: relative;">
+                            <input type="password" id="txtMatKhauHienTai" placeholder="Nhập mật khẩu đang sử dụng" autocomplete="current-password" style="padding-right: 38px;" />
+                            <button type="button" id="btnToggleOldPw" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: 0; background: none; color: #6b7280; padding: 4px; cursor: pointer;" title="Hiện/ẩn mật khẩu">
+                                <i class="bi bi-eye" id="iconOldPw"></i>
+                            </button>
+                        </div>
+                        <span class="hh-err" id="errOldPw">Vui lòng nhập mật khẩu hiện tại.</span>
+                    </div>
+
+                    <!-- Mật khẩu mới -->
+                    <div class="hh-f" id="fldNewPw">
+                        <label for="txtMatKhauMoiCaNhan">
+                            <span>Mật khẩu mới <span style="color:var(--hh-danger)">*</span></span>
+                            <span class="text-muted fw-normal" style="font-size: 11px; margin-left: 4px;">(Tối thiểu 6 ký tự)</span>
+                        </label>
+                        <div style="position: relative;">
+                            <input type="password" id="txtMatKhauMoiCaNhan" placeholder="Tối thiểu 6 ký tự" autocomplete="new-password" style="padding-right: 38px;" />
+                            <button type="button" id="btnToggleNewPwCaNhan" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: 0; background: none; color: #6b7280; padding: 4px; cursor: pointer;" title="Hiện/ẩn mật khẩu">
+                                <i class="bi bi-eye" id="iconNewPwCaNhan"></i>
+                            </button>
+                        </div>
+                        <span class="hh-err" id="errNewPw">Mật khẩu mới phải có ít nhất 6 ký tự.</span>
+                    </div>
+
+                    <!-- Xác nhận mật khẩu mới -->
+                    <div class="hh-f" id="fldConfirmPw">
+                        <label for="txtXacNhanMatKhauCaNhan">
+                            <span>Xác nhận mật khẩu mới <span style="color:var(--hh-danger)">*</span></span>
+                        </label>
+                        <div style="position: relative;">
+                            <input type="password" id="txtXacNhanMatKhauCaNhan" placeholder="Nhập lại chính xác mật khẩu mới" autocomplete="new-password" style="padding-right: 38px;" />
+                            <button type="button" id="btnToggleConfirmPwCaNhan" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: 0; background: none; color: #6b7280; padding: 4px; cursor: pointer;" title="Hiện/ẩn mật khẩu">
+                                <i class="bi bi-eye" id="iconConfirmPwCaNhan"></i>
+                            </button>
+                        </div>
+                        <span class="hh-err" id="errConfirmPw">Mật khẩu xác nhận không trùng khớp.</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Footer Modal -->
+        <div class="hh-m-foot">
+            <span class="sp"></span>
+            <button type="button" class="hh-btn" data-close="modalDoiMatKhauCaNhan">Bỏ qua</button>
+            <button type="button" class="hh-btn primary" id="btnSubmitDoiMatKhauCaNhan">
+                <i class="bi bi-check-lg me-1"></i>Lưu mật khẩu
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const modalEl = document.getElementById('modalDoiMatKhauCaNhan');
+    if (!modalEl) return;
+
+    const alertBox = document.getElementById('alertDoiMatKhauCaNhan');
+    const fldOld = document.getElementById('fldOldPw');
+    const fldNew = document.getElementById('fldNewPw');
+    const fldConfirm = document.getElementById('fldConfirmPw');
+
+    const txtOld = document.getElementById('txtMatKhauHienTai');
+    const txtNew = document.getElementById('txtMatKhauMoiCaNhan');
+    const txtConfirm = document.getElementById('txtXacNhanMatKhauCaNhan');
+    const btnSubmit = document.getElementById('btnSubmitDoiMatKhauCaNhan');
+
+    // Hàm mở modal toàn cục
+    window.openDoiMatKhauModal = function () {
+        // Reset form & class invalid
+        if (alertBox) {
+            alertBox.classList.add('d-none');
+            alertBox.innerHTML = '';
+        }
+        [fldOld, fldNew, fldConfirm].forEach(f => f && f.classList.remove('invalid'));
+
+        if (txtOld) { txtOld.value = ''; txtOld.type = 'password'; }
+        if (txtNew) { txtNew.value = ''; txtNew.type = 'password'; }
+        if (txtConfirm) { txtConfirm.value = ''; txtConfirm.type = 'password'; }
+
+        const icoOld = document.getElementById('iconOldPw'); if (icoOld) icoOld.className = 'bi bi-eye';
+        const icoNew = document.getElementById('iconNewPwCaNhan'); if (icoNew) icoNew.className = 'bi bi-eye';
+        const icoCfm = document.getElementById('iconConfirmPwCaNhan'); if (icoCfm) icoCfm.className = 'bi bi-eye';
+
+        modalEl.classList.add('show');
+        setTimeout(() => txtOld && txtOld.focus(), 150);
+    };
+
+    // Hàm đóng modal
+    window.closeDoiMatKhauModal = function () {
+        modalEl.classList.remove('show');
+    };
+
+    // Bắt sự kiện đóng modal khi bấm nút [data-close]
+    modalEl.querySelectorAll('[data-close="modalDoiMatKhauCaNhan"]').forEach(btn => {
+        btn.addEventListener('click', closeDoiMatKhauModal);
+    });
+
+    // Đóng khi click ra ngoài nền mờ
+    modalEl.addEventListener('click', function (e) {
+        if (e.target === this) {
+            closeDoiMatKhauModal();
+        }
+    });
+
+    // Đóng khi nhấn phím Escape
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modalEl.classList.contains('show')) {
+            closeDoiMatKhauModal();
+        }
+    });
+
+    // Toggle ẩn/hiện mật khẩu
+    function bindPwToggle(btnId, inputId, iconId) {
+        const btn = document.getElementById(btnId);
+        const inp = document.getElementById(inputId);
+        const ico = document.getElementById(iconId);
+        if (btn && inp && ico) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const isPw = inp.type === 'password';
+                inp.type = isPw ? 'text' : 'password';
+                ico.className = isPw ? 'bi bi-eye-slash' : 'bi bi-eye';
+            });
+        }
+    }
+
+    bindPwToggle('btnToggleOldPw', 'txtMatKhauHienTai', 'iconOldPw');
+    bindPwToggle('btnToggleNewPwCaNhan', 'txtMatKhauMoiCaNhan', 'iconNewPwCaNhan');
+    bindPwToggle('btnToggleConfirmPwCaNhan', 'txtXacNhanMatKhauCaNhan', 'iconConfirmPwCaNhan');
+
+    // Xóa class invalid khi người dùng gõ
+    [txtOld, txtNew, txtConfirm].forEach((inp, idx) => {
+        if (!inp) return;
+        inp.addEventListener('input', function () {
+            const fld = [fldOld, fldNew, fldConfirm][idx];
+            if (fld) fld.classList.remove('invalid');
+            if (alertBox) alertBox.classList.add('d-none');
+        });
+    });
+
+    // Submit đổi mật khẩu
+    if (btnSubmit) {
+        btnSubmit.addEventListener('click', function () {
+            const oldPw = (txtOld?.value || '').trim();
+            const newPw = (txtNew?.value || '').trim();
+            const cfmPw = (txtConfirm?.value || '').trim();
+
+            if (alertBox) {
+                alertBox.classList.add('d-none');
+                alertBox.innerHTML = '';
+            }
+            [fldOld, fldNew, fldConfirm].forEach(f => f && f.classList.remove('invalid'));
+
+            if (!oldPw) {
+                fldOld && fldOld.classList.add('invalid');
+                txtOld?.focus();
+                return;
+            }
+
+            if (!newPw || newPw.length < 6) {
+                fldNew && fldNew.classList.add('invalid');
+                const err = document.getElementById('errNewPw');
+                if (err) err.textContent = 'Mật khẩu mới phải có ít nhất 6 ký tự.';
+                txtNew?.focus();
+                return;
+            }
+
+            if (newPw === oldPw) {
+                fldNew && fldNew.classList.add('invalid');
+                const err = document.getElementById('errNewPw');
+                if (err) err.textContent = 'Mật khẩu mới không được trùng với mật khẩu hiện tại.';
+                txtNew?.focus();
+                return;
+            }
+
+            if (newPw !== cfmPw) {
+                fldConfirm && fldConfirm.classList.add('invalid');
+                txtConfirm?.focus();
+                return;
+            }
+
+            // Disable nút và hiện spinner
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang lưu...';
+
+            fetch('/Account/DoiMatKhau', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    matKhauHienTai: oldPw,
+                    matKhauMoi: newPw,
+                    xacNhanMatKhau: cfmPw
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = '<i class="bi bi-check-lg me-1"></i>Lưu mật khẩu';
+
+                if (data.success) {
+                    closeDoiMatKhauModal();
+
+                    if (window.KiotToast && typeof window.KiotToast.success === 'function') {
+                        window.KiotToast.success(data.message || 'Đổi mật khẩu thành công!');
+                    } else {
+                        alert(data.message || 'Đổi mật khẩu thành công!');
+                    }
+                } else {
+                    if (alertBox) {
+                        alertBox.innerHTML = data.message || 'Đã có lỗi xảy ra.';
+                        alertBox.classList.remove('d-none');
+                    }
+                }
+            })
+            .catch(err => {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = '<i class="bi bi-check-lg me-1"></i>Lưu mật khẩu';
+                if (alertBox) {
+                    alertBox.innerHTML = 'Lỗi kết nối máy chủ: ' + err.message;
+                    alertBox.classList.remove('d-none');
+                }
+            });
+        });
+    }
+})();
+</script>

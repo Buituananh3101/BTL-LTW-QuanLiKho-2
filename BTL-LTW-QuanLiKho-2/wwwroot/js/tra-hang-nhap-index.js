@@ -1,4 +1,4 @@
-﻿/**
+/**
  * tra-hang-nhap-index.js
  * Quản lý danh sách Phiếu Trả Hàng Nhập (chuẩn chuyên nghiệp & Prototype)
  * Tái sử dụng đồng bộ 100% khối LEGO KiotFilter & KiotToast
@@ -553,14 +553,18 @@ $(function () {
     });
 
     // Lưu nhanh ghi chú, người trả, ngày trả
-    $(document).on('click', '.btn-quick-save-note', function () {
-        const id = $(this).data('id');
+    $(document).on('click', '.btn-quick-save-note, .btn-save-note', function () {
+        const $btn = $(this);
+        const id = $btn.data('id');
         const $row = $(`#detail-row-${id}`);
-        const note = $row.find('.dp-note').val();
+        const note = $row.find('.dp-note').val() || '';
         const payerId = $row.find('.inp-payer').val();
         const returnDate = $row.find('.inp-date').val();
 
         const token = $('input[name="__RequestVerificationToken"]').val();
+
+        const originalHtml = $btn.html();
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Lưu');
 
         $.ajax({
             url: saveNoteUrl,
@@ -574,10 +578,24 @@ $(function () {
                 NgayTra: returnDate || null
             }),
             success: function (res) {
+                $btn.prop('disabled', false).html(originalHtml);
                 if (window.KiotToast) KiotToast.success(res.message || 'Đã lưu thông tin phiếu.');
-                fetchTable();
+                
+                // Cập nhật DOM trên dòng bảng cha mà không reload bảng (không sập drawer)
+                const $parentRow = $(`tr.tbl-row[data-id="${id}"], tr[data-id="${id}"]`);
+                if ($parentRow.length) {
+                    const $noteCol = $parentRow.find('[data-col="ghi"]');
+                    if ($noteCol.length) {
+                        $noteCol.text(note.trim() ? note.trim() : '---').attr('title', note.trim());
+                    }
+                    if (res.tenNguoiTra) {
+                        const $payerCol = $parentRow.find('[data-col="nguoitra"]');
+                        if ($payerCol.length) $payerCol.text(res.tenNguoiTra);
+                    }
+                }
             },
             error: function (xhr) {
+                $btn.prop('disabled', false).html(originalHtml);
                 const msg = xhr.responseJSON?.message || 'Lỗi khi lưu thông tin.';
                 if (window.KiotToast) KiotToast.error(msg);
                 else alert(msg);

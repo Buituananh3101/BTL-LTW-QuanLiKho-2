@@ -1,18 +1,292 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-11-02 – Lược Bỏ Phân Hệ Tổng Quan & Xóa Khỏi Menu Điều Hướng (Phiên 217)
+Cập nhật lần cuối: 2026-11-02 – Căn Giữa Form Modal Người Dùng Xuất Hiện Ngay Chính Giữa Màn Hình (Phiên 231)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử trải nghiệm: Menu trên cùng trực quan bắt đầu bằng menu Hàng hóa, hệ thống tự động đưa người dùng vào Danh sách hàng hóa (`/HangHoa`) sau đăng nhập.
+- Quản lý Người dùng (/NguoiDung): Đã căn giữa tuyệt đối modal Thêm/Sửa người dùng (#userModalOv) và modal Đổi mật khẩu (#pwdModalOv) xuất hiện ngay chính giữa màn hình (theo cả 2 trục ngang và dọc), đồng bộ trải nghiệm với modal Kho và form chuẩn hiện đại.
   + Kiểm tra biên dịch hệ thống `dotnet build -t:Compile` đạt **0 Errors**.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế trên trình duyệt giao diện Danh sách Hàng hóa (`http://localhost:7087/HangHoa`).
+1. Kiểm tra trải nghiệm thực tế thao tác Thêm / Sửa người dùng trên trình duyệt tại `http://localhost:7087/NguoiDung`.
 2. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
+
+---
+
+- **Căn Giữa Form Modal Người Dùng Xuất Hiện Ngay Chính Giữa Màn Hình (Phiên 231)**:
+  - **Nhu cầu**: Người dùng yêu cầu: *"tôi muốn form thêm người dùng xuất hiện giữa màn hình"*.
+  - **Hiện trạng & Vấn đề**:
+    + Modal Thêm/Sửa người dùng (`#userModalOv`) và Modal Đổi mật khẩu (`#pwdModalOv`) kế thừa class overlay chung `.hh-ov` từ `hang-hoa-form.css` có `align-items: flex-start; padding: 16px;` khiến modal bị kéo dính sát mép trên viewport, để lại khoảng trống lớn phía dưới đáy màn hình.
+  - **Giải pháp & Kết quả triển khai**:
+    1. **Views/NguoiDung/Index.cshtml**:
+       - Bổ sung quy tắc CSS chuyên biệt trong thẻ `<style>`:
+         * `#userModalOv, #pwdModalOv { display: flex !important; align-items: center !important; justify-content: center !important; padding: 20px !important; }`
+         * `#userModalOv .hh-modal, #pwdModalOv .hh-modal { margin: auto !important; }`
+    2. **wwwroot/css/site.css**:
+       - Đồng bộ quy tắc flexbox căn giữa tuyệt đối cho `#userModalOv, #pwdModalOv` cùng với `#khoModalOv` để đảm bảo tính nhất quán trên toàn bộ hệ thống.
+    3. **Kiểm tra biên dịch & Đặc tả**:
+       - Biên dịch `dotnet build -t:Compile` đạt **0 Errors**, 5 Warnings.
+       - Cập nhật mục 3.2 tài liệu `docs/specs/nguoi-dung.md` ghi nhận chuẩn căn giữa viewport.
+
+- **Đồng Bộ Dropdown Vai Trò Người Dùng Theo Chuẩn Danh Sách Hàng Hóa (Phiên 230)**:
+  - **Nhu cầu**: Người dùng yêu cầu kèm hình ảnh form người dùng: *"sửa lại dropdown vai trò người dùng cho đồng bộ với dropdown trong dánh sach hang ho"*.
+  - **Hiện trạng & Vấn đề**:
+    + Trường "Vai trò người dùng" trước đó sử dụng thẻ HTML select mặc định của trình duyệt, khi click mở popup hệ điều hành không ăn khớp với giao diện KiotViet của hệ thống.
+  - **Giải pháp & Kết quả triển khai**:
+    1. **Views/NguoiDung/_NguoiDungModal.cshtml**:
+       - Chuyển đổi trường Vai trò người dùng sang cấu trúc Custom Select chuẩn Danh sách hàng hóa:
+         * Khung bao `.hh-cs-wrap` (#wrapMaVaiTro) kèm box trigger `.hh-cs-box` (#boxMaVaiTro) chứa input readonly và mũi tên vector SVG `.hh-cs-arrow`.
+         * Popup bóng đổ `.hh-cs-dropdown` (#dropdownMaVaiTro) với danh sách `.hh-cs-list` chứa các dòng `.hh-cs-item` (Quản lý, Thủ kho, Nhân viên bán hàng).
+         * Mỗi item có icon checkmark xanh dương `.hh-check-icon` tự động hiển thị khi được chọn.
+         * Giữ lại thẻ select ẩn (#userMaVaiTro) làm nguồn binding dữ liệu an toàn cho form submit.
+    2. **wwwroot/js/nguoi-dung-index.js**:
+       - Xây dựng hàm helper `setRoleDropdown(val)` đồng bộ text input, class `.selected` và kích hoạt sự kiện phân quyền tự động theo vai trò.
+       - Bổ sung sự kiện click trigger box mở dropdown, click chọn item gán giá trị, click ngoài tự đóng và bấm phím Escape ưu tiên đóng dropdown trước.
+       - Kết nối `setRoleDropdown('2')` khi mở form Thêm mới và `setRoleDropdown(d.maVaiTro)` khi mở form Cập nhật.
+    3. **Đồng bộ đặc tả**: Cập nhật `docs/specs/nguoi-dung.md` mục 3.2 (7.758 ký tự < 8.000 ký tự theo Rule 12).
+  - **Kiểm tra**:
+    + `dotnet build BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2.csproj -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
+
+---
+
+- **Thu Gọn Badge Trạng Thái 'Hoạt Động' Trong Dropdown Phân Quyền Chi Nhánh Form Người Dùng (Phiên 229)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm hình ảnh dropdown phân quyền chi nhánh: *"cái thanh hoạt động kia dài quá, bạn hãy cho nó ngắn và để bên phải"*.
+  - **Nguyên nhân**:
+    + Thẻ badge Hoạt động nằm trực tiếp dưới .kiot-ms-item, bị kế thừa thuộc tính CSS .kiot-ms-item span { flex: 1 1 auto; } làm badge bị dãn rộng toàn bộ khoảng trống còn lại.
+  - **Khắc phục**:
+    + **Views/NguoiDung/_NguoiDungModal.cshtml**: Bọc badge vào <div class="ms-auto flex-shrink-0"> và cấu hình font-size: 10.5px; padding: 3px 8px; font-weight: 500;.
+    + **Views/NguoiDung/Index.cshtml**: Bổ sung quy tắc CSS chặn stretch: .user-kho-ms-item .badge { flex: 0 0 auto !important; width: auto !important; margin-left: auto !important; white-space: nowrap !important; }.
+  - **Kiểm tra**:
+    + `dotnet build BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2.csproj -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
+
+---
+
+- **Căn Giữa Form Modal Kho Xuất Hiện Chính Giữa Màn Hình & Tăng Chiều Dài Form (Phiên 228)**:
+  - **Nhu cầu**: Người dùng yêu cầu kèm hình ảnh: *"tôi muốn form xuất hiện giữa màn hình"* và *"cho form dài nữa"*.
+  - **Hiện trạng & Vấn đề**:
+    + Overlay `.hh-ov` trong hệ thống trước đó có `align-items: flex-start; padding: 16px;`.
+    + Thuộc tính này khiến form modal Thêm/Sửa kho bị kéo lệch dính sát lên mép trên cùng của màn hình, để lại khoảng trống thừa lớn ở phía dưới và chiều cao form chưa đủ sâu.
+  - **Giải pháp & Kết quả triển khai**:
+    1. **`Views/Kho/_KhoModal.cshtml`**:
+       - Kéo dài form modal: `style="max-width: 900px; min-height: 680px;"`.
+       - Tăng `min-height: 540px;` cho `#khoModalBody` và `min-height: 380px;` cho khung soạn thảo `#khoMoTaRte`.
+    2. **`wwwroot/css/site.css`**:
+       - Bổ sung cấu hình căn giữa tuyệt đối cho `#khoModalOv`:
+         * `display: flex !important; align-items: center !important; justify-content: center !important; padding: 20px !important;`
+         * Thêm `margin: auto !important; min-height: 680px !important; max-width: 900px !important;` cho `#khoModalOv .hh-modal`.
+         * Đặt `min-height: 540px !important;` cho `#khoModalOv .hh-m-body` và `min-height: 500px;` cho `#kho-pane-info`, tạo khoảng trống hơn 340px bên dưới ô chọn nhân sự.
+         * Tăng `max-height` của `.kho-user-dropdown-list` lên `300px`, hiển thị cùng lúc 7-8 nhân sự không cần cuộn.
+    3. **Đồng bộ đặc tả**: Cập nhật `docs/specs/quan-ly-kho.md` mục 3.2.
+  - **Kiểm tra**:
+    + `dotnet build BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2.csproj -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
+
+---
+- **Tối Ưu Chiều Dài Form Modal Kho & Trải Nghiệm Dropdown Không Cần Cuộn (Phiên 227)**:
+  - **Nhu cầu**: Người dùng yêu cầu: *"cho form dài ra một chút để dễ dùng, hiện tại phần dropdown nếu sổ ra phải cuộn lên xuống rất khó chịu"*.
+  - **Hiện trạng & Vấn đề**:
+    + Modal Kho trước đó không có min-height, chiều cao body chỉ khoảng 190px.
+    + Khi dropdown nhân sự xổ ra (chiều cao ~240px), tổng chiều cao nội dung vượt quá khung body khiến body của modal bị sinh thanh cuộn dọc, người dùng phải cuộn cả modal body lẫn dropdown list.
+  - **Giải pháp & Kết quả triển khai**:
+    1. **Views/Kho/_KhoModal.cshtml**:
+       - Tăng chiều dài form modal: style="max-width: 880px; min-height: 560px;".
+       - Đặt min-height: 430px; cho #khoModalBody và min-height: 280px; cho khung soạn thảo #khoMoTaRte.
+    2. **wwwroot/css/site.css**:
+       - Thiết lập quy tắc CSS: #khoModalOv .hh-modal có min-height: 560px !important;, #khoModalOv .hh-m-body có min-height: 430px !important;, #khoModalOv #kho-pane-info có min-height: 390px;.
+       - Tạo khoảng trống hơn 250px bên dưới ô chọn nhân sự giúp dropdown popup xổ xuống nằm trọn vẹn 100% trong tầm mắt, triệt tiêu hoàn toàn thanh cuộn dọc ngoài modal.
+       - Tăng max-height của .kho-user-dropdown-list lên 240px cho phép hiển thị đồng thời 5-6 nhân viên.
+    3. **Đồng bộ đặc tả**: Cập nhật docs/specs/quan-ly-kho.md mục 3.2.
+  - **Kiểm tra**:
+    + dotnet build BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2.csproj -t:Compile: Biên dịch hoàn tất thành công với **0 Errors**.
+
+---
+
+- **Chuyển Đổi Phân Quyền Chi Nhánh Kho Trong Form Người Dùng Sang Dropdown Multi-Select Chuẩn Hàng Hóa (Phiên 226)**:
+  - **Nhu cầu**: Người dùng yêu cầu kèm hình ảnh modal Thêm/Sửa người dùng: *"trong phần form người dùng, phần phân quyền chi nhánh kia, bạn hãy sửa lại giao diện dùng dropdown dựa trên giao diện dnah sach hang hoa"*.
+  - **Hiện trạng & Vấn đề**:
+    + Trước đó, phần "Phân quyền chi nhánh kho" hiển thị lưới các thẻ Card lớn chứa checkbox (`.kho-card-item`), chiếm diện tích lớn làm modal bị phình to và phải cuộn dọc nhiều trang.
+  - **Giải pháp & Kết quả triển khai**:
+    1. **`Views/NguoiDung/_NguoiDungModal.cshtml`**:
+       - Thay thế lưới thẻ card bằng component Dropdown Multi-select chuẩn Lego Danh sách hàng hóa (`.kiot-multiselect-box` và `.kiot-ms-dropdown`).
+       - Trigger box `#boxUserKho`: Hiển thị placeholder khi chưa chọn, hiển thị các tag pill xanh dương có nút `×` để bỏ chọn nhanh, hoặc tóm tắt `+X` / `Tất cả chi nhánh (X kho)` nếu chọn nhiều.
+       - Menu popup bóng đổ (`#dropdownUserKho`): Có ô tìm kiếm chi nhánh realtime `#searchUserKho`, danh sách chi nhánh kèm checkbox `#chkKho_@k.MaKho`, tên kho, địa chỉ và badge trạng thái `Hoạt động`.
+       - Giữ nguyên nút thao tác nhanh `Chọn tất cả` | `Bỏ chọn` và badge đếm số lượng chi nhánh được phân công.
+    2. **`Views/NguoiDung/Index.cshtml`**:
+       - Cập nhật CSS tinh chỉnh cho `.user-kho-ms-item.selected` và `.user-kho-select-box`.
+    3. **`wwwroot/js/nguoi-dung-index.js`**:
+       - Cập nhật hàm `updateWarehouseSelectionState()` tự động render tag pills trong trigger box và highlight dòng tương ứng trong dropdown.
+       - Bổ sung sự kiện click trigger box, click item toggle checkbox, tìm kiếm realtime, xóa tag pill trực tiếp và tự động đóng dropdown khi click ngoài hoặc bấm `Escape`.
+       - Đồng bộ logic chọn vai trò `Quản lý` tự động chọn toàn bộ kho và cập nhật hiển thị tag pill ngay lập tức.
+    4. **Đồng bộ đặc tả**:
+       - Cập nhật `docs/specs/nguoi-dung.md` mục 3.2 (7.600 ký tự < 8.000 ký tự theo Rule 12).
+  - **Kiểm tra**:
+    + `dotnet build BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2.csproj -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
+
+---
+- **Thay Thế Phân Quyền Nhân Sự Phụ Trách Kho Bằng Dropdown Multi-Select (Phiên 225)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm hình ảnh modal Thêm/Sửa chi nhánh kho: *"cái nhân sự được phân công kia thay dùng bằng dropdown giúp tôi"*.
+  - **Hiện trạng & Vấn đề**:
+    + Trước đó, phần phân quyền nhân sự dùng một khối Accordion (.hh-sec.open) chứa một lưới thẻ Card checkbox (.kho-user-card-grid).
+    + Khi danh sách nhân sự dài, các card chiếm diện tích lớn làm modal bị đẩy cao, che khuất tầm nhìn và tốn không gian.
+  - **Giải pháp & Kết quả triển khai**:
+    1. **Views/Kho/_KhoModal.cshtml**:
+       - Loại bỏ khối Accordion cồng kềnh, chuyển trường "Nhân sự phụ trách kho" thành trường hh-span2 nằm liền mạch bên dưới trường Địa chỉ kho.
+       - Tích hợp component Dropdown Multi-select chuyên nghiệp (#khoUserSelectWrap):
+         * Trigger box hiển thị các chip tag nhân sự đã chọn kèm nút xóa x nhanh trực tiếp (hoặc tóm tắt "+X nhân sự khác" nếu chọn nhiều).
+         * Menu popup bóng đổ (shadow) gồm ô tìm kiếm nhân sự theo tên / tên đăng nhập theo thời gian thực và cặp nút thao tác nhanh "Chọn tất cả" | "Bỏ chọn".
+         * Danh sách nhân viên cuộn tối đa 220px, mỗi dòng có checkbox, họ tên, tên đăng nhập và badge vai trò phân biệt màu sắc (Quản lý - xanh dương, Nhân viên kho - vàng, Nhân viên bán hàng - xanh lá).
+         * Tài khoản vai trò Quản lý luôn được khóa tick mặc định (checked disabled) theo đúng quy tắc phân quyền hệ thống.
+    2. **`wwwroot/css/site.css`**:
+       - Thêm bộ CSS cho Dropdown Multi-select nhân sự kho: `.kho-user-dropdown-box`, `.kho-user-chip`, `.kho-user-dropdown-menu`, `.kho-user-dropdown-item` mượt mà, sang trọng.
+       - Tối ưu `.kho-user-search-wrap`, `.kho-user-search-icon` và `.kho-user-search-input` (ghi đè triệt để `.hh-f input[type=text]`), khắc phục lỗi ô kính lúp bị tách dòng và input bị rớt hàng.
+    3. **`wwwroot/js/kho-index.js`**:
+       - Viết lại hàm updateUserSelectionState() đồng bộ tức thì số lượng badge, render chip tag trên ô chọn, toggle mở/đóng dropdown mượt mà, lọc tìm kiếm nhân viên, tự đóng khi click ra ngoài hoặc khi đóng modal.
+       - Giữ nguyên 100% logic gửi `taiKhoanIds` lên server cho các action `Create` và `Edit`.
+    4. **Đồng bộ đặc tả**: Cập nhật `docs/specs/quan-ly-kho.md` mục 3.2.
+  - **Kiểm tra**:
+    + `node -c wwwroot/js/kho-index.js`: Hoàn tất không lỗi cú pháp.
+    + `dotnet build BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2.csproj -t:Compile`: Đạt **0 Errors**.
+
+---
+
+- **Xây Dựng Tính Năng In Tem Mã Vạch Hàng Hóa Chuẩn KiotViet & Máy In Nhiệt (Phiên 224)**:
+  - **Nhu cầu**: Người dùng hỏi về nút "In tem mã" trong dòng chi tiết hàng hóa: *"trong form chi tiest danh sách hang hoa co nút in tem mã vạch, nút này làm như nào"*, *"tính năng này có thực sự dùng được như thế ko"* và yêu cầu *"triển khai"*.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Thuật toán sinh mã vạch chuẩn Code 128 thuần JavaScript (Zero External Dependency)**:
+       - Tự sinh vector SVG mã vạch chuẩn ISO/IEC 15417 Code 128 (Start B + Checksum % 103 + Stop).
+       - Hoàn toàn độc lập, không cần thư viện ngoài hay NuGet (tuân thủ tuyệt đối Luật 11). Mã vạch nét vô cực, máy quét laser / camera Zalo / Google Lens quét đọc chuẩn xác 100%.
+    2. **Modal Cấu hình in tem & Live Preview (`_HangHoaPrintBarcodeModal.cshtml`)**:
+       - Tự động nạp: Tên hàng, Mã vạch (`MaHangNoiBo` hoặc `HHxxxxxx`), Giá bán, Tồn kho.
+       - Tùy chỉnh: Tên cửa hàng, Số lượng tem cần in (có nút chọn nhanh 1, 5, 10, Theo tồn), Khổ giấy in.
+       - Tùy chọn hiển thị: Bật/tắt Tên cửa hàng, Tên hàng, Giá bán, Mã vạch.
+       - Khung Live Preview: Mô phỏng chính xác con tem decal thực tế theo thời gian thực khi gõ phím.
+    3. **Hỗ trợ in ấn thực tế (`hang-hoa-barcode.css` & `hang-hoa-barcode.js`)**:
+       - Hỗ trợ 3 khổ giấy: Tem nhiệt cuộn 1 hàng 35x22mm (máy in Xprinter XP-350B, Bixolon), Tem nhiệt 50x30mm, Giấy A4 Decal lưới.
+       - CSS `@media print` tối ưu trang in, tích hợp lệnh gọi `window.print()` gửi thẳng tới máy in nhiệt hoặc lưu PDF.
+    4. **Tập tin tác động**:
+       - `Views/HangHoa/_HangHoaTable.cshtml`: Gắn class `.btn-print-barcode` và data attributes (`id`, `name`, `code`, `price`, `ton`).
+       - `Views/HangHoa/Index.cshtml`: Tích hợp modal `_HangHoaBarcodeModal`, link CSS `hang-hoa-barcode.css`, script `hang-hoa-barcode.js`.
+       - `wwwroot/css/hang-hoa-barcode.css` & `wwwroot/js/hang-hoa-barcode.js`.
+  - **Kiểm tra**:
+    - `node -c wwwroot/js/hang-hoa-barcode.js`: Đạt chuẩn 100%.
+    - `dotnet build -t:Compile`: Đạt **0 Errors**.
+
+---
+
+- **Xây Dựng Tính Năng Đổi Mật Khẩu Cá Nhân Toàn Hệ Thống (Phiên 223)**:
+  - **Nhu cầu**: Người dùng phản hồi kèm ảnh chụp dropdown menu tài khoản: "trong phần tài khoản này, vẫn chưa có đổi mật khẩu đúng ko" và yêu cầu "triển khai".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. Tạo ViewModel `DoiMatKhauCaNhanVM.cs` trong `ViewModels/Account/` với đầy đủ DataAnnotations validation tiếng Việt.
+    2. Cập nhật `Controllers/AccountController.cs`: Bổ sung Action `[HttpPost] [Authorize] DoiMatKhau([FromBody] DoiMatKhauCaNhanVM model)` xác thực mật khẩu hiện tại, băm SHA-256 mật khẩu mới và ghi vết thao tác vào `NhatKyThaoTac`.
+    3. Tạo component modal tự đóng gói `Views/Shared/_DoiMatKhauCaNhanModal.cshtml` chuẩn chuyên nghiệp KiotViet (icon chìa khóa, input password có nút mắt, validation kiểm tra độ dài và trùng khớp).
+    4. Tích hợp modal vào `Views/Shared/_Layout.cshtml` cho toàn bộ người dùng đã đăng nhập.
+    5. Cập nhật `Views/Shared/_Header.cshtml`: Bổ sung mục "Đổi mật khẩu" vào dropdown tài khoản desktop và drawer mobile.
+    6. Kiểm tra biên dịch: `dotnet build /t:Compile` đạt **0 Error**.
+
+---
+
+- **Khắc Phục Lỗi Bảng Kho Hàng Bị Tràn Chiều Ngang Khiến Nút Xóa Bị Cắt Mép Phải (Phiên 222)**:
+  - **Nhu cầu**: Người dùng phản ánh kèm hình ảnh: *"trong phần kho hàng hiện tại đang bị lỗi phần bảng, nút xóa bị tràn phải. Vì bảng này có ít cột lên cứ để cho khớp chiều ngang đi"*.
+  - **Nguyên nhân cốt lõi**:
+    + Thẻ bao bọc bảng danh sách kho có overflow-x: hidden;.
+    + Trong _KhoTable.cshtml, cả 9 cột đều đang được gán độ rộng tĩnh bằng đơn vị pixel: 40px + 95px + 190px + 220px + 175px + 160px + 120px + 125px + 105px = 1.230px.
+    + Với container chứa bảng ở độ phân giải thông thường chỉ rộng khoảng 950px - 1.100px (đã trừ sidebar bộ lọc bên trái), tổng độ rộng 1.230px làm bảng bị vượt biên phải và cột thao tác cuối cùng bị che khuất một phần khiến nút Xóa (thùng rác đỏ) bị cắt ngang.
+  - **Giải pháp & Khắc phục chuẩn mực**:
+    1. **Views/Kho/_KhoTable.cshtml**:
+       - Cấu hình lại độ rộng các cột linh hoạt kết hợp tỷ lệ phần trăm và pixel:
+         * `#` (STT): `40px`
+         * `Mã kho`: `90px`
+         * `Tên chi nhánh kho`: `22%` (kèm `text-truncate` an toàn)
+         * `Địa chỉ`: `26%` (kèm `text-truncate` an toàn)
+         * `Ghi chú / Mô tả`: Tự động co giãn theo khoảng trống còn lại (kèm `text-truncate`)
+         * `Nhân sự phụ trách`: `120px`
+         * `Số chứng từ`: `95px`
+         * `Trạng thái`: `115px`
+         * `Thao tác`: `105px` (đủ khoảng trống cho 3 nút 28x28px kèm gap và padding 2px)
+    2. **`wwwroot/css/site.css`**:
+       - Thêm bộ quy tắc cho `#khoTable` và `#khoTableContainer .kiot-table-scroll-body` tương tự `#userTable`:
+         * `width: 100% !important; min-width: 0 !important; table-layout: fixed !important;`
+         * `padding-left: 2px !important; padding-right: 2px !important; white-space: nowrap !important;` cho `col-actions` để nút thùng rác không bao giờ bị cắt hay tràn mép.
+    3. **Đồng bộ đặc tả**: Cập nhật `docs/specs/quan-ly-kho.md` mục 3.1.
+  - **Kiểm tra**:
+    + `dotnet build BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2.csproj -t:Compile` hoàn tất với **0 Errors**.
+
+---
+- **Thay Thế Biểu Tượng Báo Định Mức Tồn Kho Bằng Mũi Tên Cơ Bản Không Màu (Phiên 219)**:
+  - **Nhu cầu**: Người dùng yêu cầu: *"trong báo cáo tồn kho phần mũi tên báo là tăng hay giảm thì thay bằng mũi tên cơ bản thôi như kiểu '-->', nếu tăng thì hướng lên, giảm hướng xuống, ko cần màu"*.
+  - **Nguyên nhân & Hiện trạng**:
+    + Trước đó, khi số lượng tồn vượt hoặc dưới ngưỡng định mức, hệ thống hiển thị badge màu khối tròn (`badge rounded-pill bg-primary text-white` kèm tam giác `▼` hoặc `badge rounded-pill bg-info text-dark` kèm tam giác `▲`).
+    + Các badge khối tròn màu xanh làm bảng số liệu trông nặng nề và chiếm diện tích.
+  - **Khắc phục & Chuẩn hóa giao diện**:
+    + **Bảng Báo cáo Tồn kho (`Views/BaoCao/_TonKhoTable.cshtml`)**:
+      * Loại bỏ hoàn toàn các class badge khối nền (`badge`, `rounded-pill`, `bg-primary`, `bg-info`).
+      * Thay thế biểu tượng tam giác bằng icon mũi tên dạng thanh (line arrow) cơ bản:
+        - Vượt định mức tối đa (tăng): Thay bằng mũi tên hướng lên `<i class="bi bi-arrow-up ms-1 text-secondary" style="font-size: 11px;"></i>`.
+        - Dưới định mức tối thiểu (giảm): Thay bằng mũi tên hướng xuống `<i class="bi bi-arrow-down ms-1 text-secondary" style="font-size: 11px;"></i>`.
+      * Không dùng màu mè nổi bật: Sử dụng màu xám trung tính `text-secondary` tiệp màu nhẹ nhàng với bảng số liệu.
+      * Giữ nguyên tooltip giải thích rõ ràng khi rê chuột: `title="Dưới định mức tối thiểu (...)"` và `title="Vượt định mức tối đa (...)"`.
+    + **Đồng bộ đặc tả**: Cập nhật `docs/specs/bao-cao-ton-kho.md` phản ánh đúng quy chuẩn hiển thị mới.
+  - **Kiểm tra**:
+    + `dotnet build BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2.csproj -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
+
+---
+
+- **Khắc Phục & Chuẩn Hóa Toàn Diện Logic Nút Lưu và Nút In Toàn Hệ Thống (Phiên 220)**:
+  - **Nhu cầu**: Người dùng yêu cầu kiểm tra và thiết kế lại toàn bộ logic nút "Lưu" và nút "In" trong hệ thống xem có thật sự hoạt động chuẩn nghiệp vụ hay không.
+  - **Hiện trạng & Vấn đề phát hiện**:
+    1. *Nút "Lưu" ghi chú trong ngăn kéo dòng (Inline detail drawer)*:
+       - Tại `TraHangNhap`: Nút Lưu gọi lại `fetchTable()`, vô tình tiêu hủy DOM và đóng sập panel chi tiết người dùng đang xem.
+       - Thiếu trạng thái loading spinner và disable nút khi AJAX đang gửi, dễ gây click kép (double submit).
+       - Không cập nhật DOM dòng cha ngay lập tức (cột Ghi chú, Người trả).
+    2. *Nút "In" chứng từ (Phiếu nhập, Trả hàng nhập, Chuyển kho, Kiểm kê, Xuất hủy)*:
+       - `XuatHuy`: CSS `@media print` ẩn toàn bộ `body *` và chỉ hiển thị `.print-area` (vốn không tồn tại), gây ra lỗi in ra 100% trang trắng tinh.
+       - Tất cả 5 màn hình chứng từ trước đó đều gọi hàm thô `window.print();`, in ra cả thanh topbar, menu, thanh cuộn, sidebar thay vì một chứng từ phiếu in A4 chuẩn kế toán.
+    3. *Báo cáo Thẻ kho & Báo cáo Tồn kho*:
+       - Chưa có CSS `@media print` chuẩn landscape: khi bấm nút In ở thanh công cụ, trang in bị lẫn thanh tìm kiếm, sidebar bộ lọc, phân trang.
+    4. *Danh mục Hàng hóa*: Nút "In tem mã" chưa gán hành động phản hồi người dùng.
+  - **Giải pháp & Kết quả triển khai**:
+    1. **Sửa Logic Nút Lưu Ghi Chú Drawer**:
+       - `tra-hang-nhap-index.js`: Bỏ gọi `fetchTable()`, thêm spinner xoay `spinner-border` + disable nút trong lúc lưu; cập nhật trực tiếp text cột Ghi chú `[data-col="ghi"]` và Người trả `[data-col="nguoitra"]` trên dòng cha, thông báo `KiotToast.success`.
+       - `nhap-hang-index.js`, `chuyen-kho-index.js`, `phieu-kiem-ke-index.js`, `xuat-huy-index.js`: Chuẩn hóa spinner xoay, disable nút khi lưu, cập nhật text dòng cha ngay lập tức.
+    2. **Xây Dựng Hệ Thống In Chứng Từ A4 Chuẩn Chuyên Nghiệp**:
+       - Tạo Layout in chuẩn: `Views/Shared/_PrintLayout.cshtml` định dạng trang A4 đứng, thanh bar thao tác nổi (Nút "In ngay" & "Đóng"), tiêu đề đơn vị, tiêu đề phiếu, mã vạch monospace, lưới thông tin 2 cột, bảng chi tiết có dòng tổng cộng, khối tóm tắt tài chính và 4 ô ký tên bàn giao chuẩn nghiệp vụ kế toán kho.
+       - Triển khai Action `Print(int id)` trên cả 5 Controller:
+         * `NhapHangController.cs` -> Mẫu `Views/NhapHang/Print.cshtml` (Phiếu Nhập Kho).
+         * `TraHangNhapController.cs` -> Mẫu `Views/TraHangNhap/Print.cshtml` (Phiếu Xuất Trả Hàng Cho NCC).
+         * `ChuyenKhoController.cs` -> Mẫu `Views/ChuyenKho/Print.cshtml` (Phiếu Xuất Điều Chuyển Kho).
+         * `PhieuKiemKeController.cs` -> Mẫu `Views/PhieuKiemKe/Print.cshtml` (Biên Bản Kiểm Kê Kho Hàng).
+         * `XuatHuyController.cs` -> Mẫu `Views/XuatHuy/Print.cshtml` (Phiếu Xuất Hủy Hàng Hóa).
+       - Chuyển toàn bộ 7 nút "In" trên bảng dữ liệu và form chi tiết sang thẻ `<a href="/Controller/Print/{id}" target="_blank">` mở trang in độc lập, tự động kích hoạt hộp thoại in của trình duyệt (`window.print()`) khi mở.
+    3. **Tối Ưu In Báo Cáo Landscape Cho Thẻ Kho & Tồn Kho**:
+       - Bổ sung khối `@media print` trong `wwwroot/css/site.css`: tự động ẩn topbar, sidebar, nút bấm, phân trang; mở rộng bảng số liệu chiếm 100% trang in dạng landscape (khổ ngang A4).
+       - Xóa bỏ đoạn CSS gây in trang trắng trong `wwwroot/css/xuat-huy.css`.
+    4. **In Tem Mã Hàng Hóa**:
+       - Gán thông báo phản hồi thân thiện qua `KiotToast.info` trên nút "In tem mã" trong bảng Hàng hóa.
+  - **Kiểm tra**:
+    - `dotnet build -t:Compile`: Đạt **0 Errors**.
+    - Kiểm tra cú pháp JavaScript bằng `node -c`: Toàn bộ 7 file JS đạt **0 Errors**.
+
+---
+
+- **Khắc Phục Lỗi Hiển Thị Bảng Thẻ Kho (Đè Chữ Cột Đối Tác & Dòng Tồn Đầu Kỳ) (Phiên 218)**:
+  - **Nhu cầu**: Người dùng phản ánh lỗi giao diện bảng Thẻ kho: Tiêu đề cột `Đối tác / Diễn giải` và `Đơn giá / Giá vốn` bị chồng đè lên nhau (`Đơntgxiá//TĐơổnvgtiài`), dòng dữ liệu "Tồn đầu kỳ" chữ `Số dư tồn tính đến đầu kỳ` bị ép co lại chỉ còn ~10px khiến chữ bị ngắt dọc từng ký tự.
+  - **Nguyên nhân cốt lõi**:
+    1. Bảng `.thekho-table` kế thừa `table-layout: fixed;`. Theo chuẩn thuật toán CSS Table Layout, trong chế độ fixed, thuộc tính `min-width` trên thẻ `<th>` bị bỏ qua nếu không có `width`.
+    2. Cột "Đối tác / Diễn giải" trước đó chỉ có `min-width: 200px` mà thiếu `width` cố định. Khi tổng độ rộng vùng hiển thị nhỏ hơn bảng, trình duyệt thu hẹp cột này về còn ~10px.
+    3. `<th>` có `white-space: nowrap` làm chữ tràn đè lên cột bên phải. Còn `<td>` không có nowrap nên chữ bị bẻ xuống dòng từng chữ cái một theo chiều dọc.
+  - **Giải pháp & Kết quả triển khai**:
+    1. **`Views/BaoCao/_TheKhoTable.cshtml`**:
+       - Đặt bảng `width: max-content; min-width: 100%;`.
+       - Định nghĩa rõ `width: 220px; min-width: 200px;` cho cột "Đối tác / Diễn giải" và chuẩn hóa toàn bộ 10 cột `<th>`.
+       - Thêm `text-nowrap` cho các ô thông tin cố định dòng Tồn đầu kỳ và Tồn cuối kỳ.
+       - Thêm `text-truncate` và `max-width: 210px` cho tên đối tác ở các dòng giao dịch.
+    2. **`wwwroot/css/the-kho.css`**:
+       - Cấu hình `.thekho-table-wrap .kiot-table-scroll-body` có `overflow-x: auto !important; width: 100%;`.
+       - Khai báo `#theKhoTable` có `width: max-content !important; min-width: 100% !important; table-layout: fixed !important;`.
+  - **Kiểm tra**:
+    + `dotnet build BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2.csproj -t:Compile`: Đạt **0 Errors**.
 
 ---
 

@@ -373,6 +373,10 @@
             const dp = btn.closest('.dp');
             const note = $('.dp-note', dp)?.value || '';
 
+            const origHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Lưu';
+
             fetch(noteUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -380,15 +384,23 @@
             })
             .then(r => r.json())
             .then(res => {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
                 if (res.success) {
                     if (window.KiotToast) KiotToast.success(res.message || 'Đã lưu ghi chú.');
-                    const noteCell = $(`tr.tbl-row[data-id="${id}"] [data-col="ghi"]`);
-                    if (noteCell) noteCell.textContent = note;
+                    const noteCell = $(`tr.tbl-row[data-id="${id}"] [data-col="ghi"], tr[data-id="${id}"] [data-col="ghi"]`);
+                    if (noteCell) {
+                        const trimmed = note.trim();
+                        noteCell.textContent = trimmed ? trimmed : '---';
+                        noteCell.title = trimmed;
+                    }
                 } else {
                     if (window.KiotToast) KiotToast.error(res.message || 'Lỗi khi lưu ghi chú.');
                 }
             })
             .catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
                 if (window.KiotToast) KiotToast.error('Lỗi kết nối khi lưu ghi chú.');
             });
         });

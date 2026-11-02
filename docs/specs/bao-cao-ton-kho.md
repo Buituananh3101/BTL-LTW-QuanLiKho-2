@@ -1,4 +1,4 @@
-# Đặc tả Chức năng: Báo cáo Tồn kho theo kho (Pivot Kho)
+﻿# Đặc tả Chức năng: Báo cáo Tồn kho theo kho (Pivot Kho)
 
 > **Mã chức năng**: `BaoCao_TonKho`  
 > **Đường dẫn**: `/BaoCao/TonKho`  
@@ -65,7 +65,7 @@
 2. **Bảng Pivot AJAX (`_TonKhoTable.cshtml`)**:
    - Thead: Cố định thông tin mặt hàng, sinh động các cột `<th>` theo danh sách kho đang chọn lọc, cột cuối là `Tổng tồn`. Hỗ trợ sắp xếp 3 trạng thái.
    - Dòng tổng hợp (Summary Row): Đặt ngay đầu bảng `<tbody>`, hiển thị tổng số mặt hàng, tổng giá trị tồn, tổng tồn từng kho và toàn hệ thống, cuộn tự nhiên cùng nội dung bảng (đồng bộ Danh sách Hàng hóa).
-   - Tbody: Từng dòng hàng hóa hiển thị số lượng tồn tại từng kho. Nếu tồn < 0 bôi đỏ, = 0 màu xám, dưới định mức có chấm cảnh báo vàng.
+   - Tbody: Từng dòng hàng hóa hiển thị số lượng tồn tại từng kho. Nếu tồn < 0 bôi đỏ, = 0 màu xám; cảnh báo định mức dùng mũi tên thanh cơ bản không màu: dưới định mức hiển thị mũi tên xuống ↓ (i-arrow-down text-secondary), vượt định mức hiển thị mũi tên lên ↑ (i-arrow-up text-secondary).
 3. **Chi tiết mở rộng Inline Subrow (Master - Detail)**:
    - Hiển thị khi click vào dòng sản phẩm: Mở rộng dòng phụ dạng accordion ngay bên dưới gồm 3 tab: (1) Tồn kho chi nhánh & Định mức; (2) Thông tin hàng hóa; (3) Thẻ kho gần đây (nạp qua `/BaoCao/GetTheKhoQuick`).
 

@@ -1,0 +1,147 @@
+@* ==========================================================================
+   MODAL IN TEM MÃ VẠCH HÀNG HÓA (BARCODE PRINTING MODAL)
+   Chuẩn KiotViet & Máy in mã vạch công nghiệp
+   ========================================================================== *@
+
+<div class="hh-ov" id="hhBarcodeModalOv">
+    <div class="hh-modal" role="dialog" aria-modal="true" aria-labelledby="bcModalTitle" style="max-width: 760px; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 45px -10px rgba(0,0,0,0.3);">
+        <!-- Header -->
+        <div class="hh-m-head" style="border-bottom: 1px solid #e5e7eb; padding: 14px 20px; background: #ffffff;">
+            <h2 id="bcModalTitle" style="color: #111827; display: flex; align-items: center; gap: 10px; margin: 0; font-size: 17px; font-weight: 700;">
+                <span class="d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px; border-radius: 8px; background: #eff6ff; color: #0284c7; flex-shrink: 0;">
+                    <i class="bi bi-printer" style="font-size: 17px;"></i>
+                </span>
+                <span>In tem mã vạch hàng hóa</span>
+            </h2>
+            <button type="button" class="hh-x" data-close="hhBarcodeModalOv" aria-label="Đóng" style="top: 14px; right: 14px;">
+                <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="hh-m-body" style="padding: 20px; font-size: 13.5px; background: #ffffff;">
+            <div class="row g-4">
+                <!-- Cột trái: Cấu hình in tem (Col 7) -->
+                <div class="col-md-7">
+                    <!-- Tên cửa hàng trên tem -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary mb-1">Tên cửa hàng / Đơn vị</label>
+                        <input type="text" class="form-control form-control-sm" id="bcShopName" value="TỔNG KHO GAS PHÚ QUỐC" style="border-radius: 6px;" />
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <!-- Tên hàng -->
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold text-secondary mb-1">Tên hàng hóa</label>
+                            <input type="text" class="form-control form-control-sm" id="bcItemName" style="border-radius: 6px;" />
+                        </div>
+                        <!-- Mã vạch -->
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-secondary mb-1">Mã vạch (Barcode)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="bcItemCode" style="border-radius: 6px; font-weight: 600;" />
+                        </div>
+                        <!-- Giá bán -->
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-secondary mb-1">Giá bán niêm yết</label>
+                            <input type="text" class="form-control form-control-sm" id="bcItemPrice" style="border-radius: 6px; font-weight: 600; color: #0284c7;" />
+                        </div>
+                    </div>
+
+                    <!-- Số lượng tem cần in -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary mb-1">Số lượng tem cần in</label>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <div class="input-group input-group-sm" style="width: 140px;">
+                                <button class="btn btn-outline-secondary" type="button" id="btnBcQtyMinus" style="border-radius: 6px 0 0 6px;">-</button>
+                                <input type="number" class="form-control text-center fw-bold" id="bcPrintQty" value="1" min="1" max="500" />
+                                <button class="btn btn-outline-secondary" type="button" id="btnBcQtyPlus" style="border-radius: 0 6px 6px 0;">+</button>
+                            </div>
+                            <div class="d-flex gap-1">
+                                <button type="button" class="quick-qty-btn" data-qty="1">1 tem</button>
+                                <button type="button" class="quick-qty-btn" data-qty="5">5 tem</button>
+                                <button type="button" class="quick-qty-btn" data-qty="10">10 tem</button>
+                                <button type="button" class="quick-qty-btn" id="btnSetTonQty" data-qty="ton">Theo tồn</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chọn khổ giấy in tem -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary mb-1">Khổ giấy in tem</label>
+                        <div class="d-flex flex-column gap-1">
+                            <label class="form-check-label d-flex align-items-center gap-2 p-2 border rounded" style="cursor: pointer; background: #f8fafc;">
+                                <input class="form-check-input mt-0" type="radio" name="bcPaperSize" value="35x22" checked />
+                                <span class="small">
+                                    <strong class="text-dark">Tem nhiệt cuộn 35 x 22 mm</strong>
+                                    <span class="text-muted d-block" style="font-size: 11px;">Chuẩn máy in tem Xprinter XP-350B, Bixolon (1 tem/hàng)</span>
+                                </span>
+                            </label>
+                            <label class="form-check-label d-flex align-items-center gap-2 p-2 border rounded" style="cursor: pointer;">
+                                <input class="form-check-input mt-0" type="radio" name="bcPaperSize" value="50x30" />
+                                <span class="small">
+                                    <strong class="text-dark">Tem nhiệt cuộn 50 x 30 mm</strong>
+                                    <span class="text-muted d-block" style="font-size: 11px;">Khổ tem nhãn cỡ vừa (1 tem/hàng)</span>
+                                </span>
+                            </label>
+                            <label class="form-check-label d-flex align-items-center gap-2 p-2 border rounded" style="cursor: pointer;">
+                                <input class="form-check-input mt-0" type="radio" name="bcPaperSize" value="a4" />
+                                <span class="small">
+                                    <strong class="text-dark">Giấy A4 Decal (In lưới văn phòng)</strong>
+                                    <span class="text-muted d-block" style="font-size: 11px;">In nhiều tem trên 1 trang giấy A4 thường</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Tùy chọn hiển thị trên tem -->
+                    <div>
+                        <label class="form-label small fw-semibold text-secondary mb-1">Tùy chọn hiển thị trên con tem</label>
+                        <div class="d-flex flex-wrap gap-3 small">
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" id="bcOptShop" checked /> Tên cửa hàng</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" id="bcOptName" checked /> Tên hàng</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" id="bcOptCode" checked /> Mã vạch & Số</label>
+                            <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" id="bcOptPrice" checked /> Giá bán</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Bản xem trước trực quan (Col 5) -->
+                <div class="col-md-5 d-flex flex-column">
+                    <div class="small fw-semibold text-secondary mb-2 d-flex justify-content-between align-items-center">
+                        <span>BẢN XEM TRƯỚC CON TEM</span>
+                        <span class="badge bg-light text-primary border border-primary-subtle" style="font-size: 10px;">Live Preview</span>
+                    </div>
+
+                    <div class="barcode-preview-box flex-grow-1">
+                        <!-- Mô phỏng con tem dán nhãn -->
+                        <div class="barcode-preview-label" id="previewLabelCard">
+                            <div class="barcode-shop-name" id="previewShopName">TỔNG KHO GAS PHÚ QUỐC</div>
+                            <div class="barcode-prod-name" id="previewProdName">Tên hàng hóa</div>
+                            <div class="barcode-svg-container" id="previewSvgWrap">
+                                <!-- Mã vạch SVG được vẽ động tại đây -->
+                            </div>
+                            <div class="barcode-code-text" id="previewCodeText">HH000000</div>
+                            <div class="barcode-price-text" id="previewPriceText">0 đ</div>
+                        </div>
+
+                        <!-- Hướng dẫn kiểm tra quét mã -->
+                        <div class="mt-3 text-center text-muted" style="font-size: 11.5px; line-height: 1.4; max-width: 250px;">
+                            <i class="bi bi-qr-code-scan text-primary me-1"></i>
+                            Mã vạch chuẩn <strong>Code 128</strong>. Bạn có thể dùng camera điện thoại (Zalo/Lens) để quét thử ngay trên màn hình.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="hh-m-foot" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 12px 20px; display: flex; justify-content: flex-end; gap: 8px;">
+            <button type="button" class="btn btn-outline-secondary" data-close="hhBarcodeModalOv" style="height: 36px; padding: 0 16px; font-weight: 500; font-size: 13.5px; border-radius: 6px;">
+                Bỏ qua
+            </button>
+            <button type="button" class="btn btn-primary" id="btnExecutePrintBarcode" style="height: 36px; padding: 0 18px; font-weight: 600; font-size: 13.5px; border-radius: 6px;">
+                <i class="bi bi-printer me-1"></i> In tem ngay
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,14 +1,37 @@
-﻿@model BTL_LTW_QuanLiKho_2.ViewModels.NguoiDung.NguoiDungIndexVM
+@model BTL_LTW_QuanLiKho_2.ViewModels.NguoiDung.NguoiDungIndexVM
 @{
     ViewData["Title"] = "Quản lý Người dùng & Phân quyền";
 }
 
 <link rel="stylesheet" href="~/css/hang-hoa-form.css" asp-append-version="true" />
 <style>
-    .kho-card-item.selected {
-        border-color: var(--hh-blue, #0070f4) !important;
-        background: #f0f7ff !important;
-        box-shadow: 0 0 0 1px var(--hh-blue, #0070f4);
+    .user-kho-ms-item.selected {
+        background-color: #eff6ff;
+    }
+    .user-kho-ms-item:hover {
+        background-color: #f1f5f9;
+    }
+    .user-kho-select-box {
+        min-height: 40px;
+        border-color: #d1d5db;
+        border-radius: 8px;
+    }
+    .user-kho-ms-item .badge {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        margin-left: auto !important;
+        white-space: nowrap !important;
+    }
+    #userModalOv,
+    #pwdModalOv {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 20px !important;
+    }
+    #userModalOv .hh-modal,
+    #pwdModalOv .hh-modal {
+        margin: auto !important;
     }
 </style>
 

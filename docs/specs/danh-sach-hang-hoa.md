@@ -12,8 +12,8 @@
 - **Service & Helper**: `IHangHoaExcelService.cs`, `HangHoaExcelService.cs`, `ExcelHelper.cs`, `ITonKhoService.cs`, `TonKhoService.cs`.
 - **ViewModel**: `ViewModels/HangHoa/` (`HangHoaForm.cs`, `HangHoaFilterParams.cs`, `ExportHangHoaRequest.cs`, `ImportHangHoaResult.cs`).
 - **View & Partial**: `Views/HangHoa/Index.cshtml`, `_HangHoaFilterSidebar.cshtml`, `_HangHoaExcelActions.cshtml`, `_HangHoaTable.cshtml` (+ `_Pagination.cshtml`).
-- **Modal Modun**: `_HangHoaModal.cshtml`, `_HangHoaExportModal.cshtml`, `_HangHoaImportModal.cshtml`.
-- **Styles & Scripts**: `kiot-filter.js`, `hang-hoa-index.js`, `hang-hoa-form.js`, `hang-hoa-excel.js`.
+- **Modal Modun**: `_HangHoaModal.cshtml`, `_HangHoaExportModal.cshtml`, `_HangHoaImportModal.cshtml`, `_HangHoaBarcodeModal.cshtml`.
+- **Styles & Scripts**: `kiot-filter.js`, `hang-hoa-index.js`, `hang-hoa-form.js`, `hang-hoa-excel.js`, `hang-hoa-barcode.js`, `hang-hoa-barcode.css`.
 - **DbContext & Entity**: `QuanLyKhoPhuQuocLtwContext`, Entity (`HangHoa`, `HinhAnhHangHoa`, `NhomHang`, `DonViTinh`, `NguongTonKho`, `VwTonKhoHienTai`).
 
 ### 1.2. Bảng CSDL tham gia:
@@ -36,7 +36,8 @@
 | **Lưu Sửa hàng** | Sửa form, "Cập nhật" | JS gom form ➜ AJAX `POST /HangHoa/Edit?id=X` | `Edit(id, form)` validate & cập nhật | Lưu CSDL ➜ JSON `{success:true}` |
 | **Xóa hàng** | Click Xóa ➜ Xác nhận | Pre-check `GET /HangHoa/CheckCanDelete/{id}`. Chưa GD: hiện nút Xóa. Đã có: ẩn nút Xóa, chỉ hiện nút Khóa | `Delete(id)` check 6 bảng GD, bọc Trans | Chưa GD: Xóa. Đã có GD: Chặn xóa vĩnh viễn, chỉ cho khóa |
 | **Xuất file Excel** | Bấm "Xuất file" ➜ Chọn cột ➜ Bấm Xuất | Mở `#hhExportModalOv` ➜ `POST /HangHoa/ExportExcel` | ClosedXML xuất đúng cột chọn | Trả file `.xlsx` |
-| **Nhập file Excel** | Kéo thả file ➜ Thực hiện nhập | Mở `#hhImportModalOv` ➜ `POST /HangHoa/ImportExcel` | Validate, parse 16 trường, xử lý trùng mã | Commit Trans ➜ reload bảng |
+| **Nhập file Excel** | Kéo thả file ➜ Thực hiện nhập | Mở `#hhImportModalOv` ➜ `POST /HangHoa/ImportExcel` | Validate, parse 16 trường, xử lý trùng mã | Commit Trans ➜ reload bảng |
+| **In tem mã** | Bấm "In tem mã" trên dòng chi tiết | Mở modal `#hhBarcodeModalOv`, live preview mã vạch SVG Code 128 | Client-side thuần JS (zero-dependency) | In qua `window.print()` khổ 35x22, 50x30, A4 |
 
 ---
 

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * xuat-huy-index.js - Quản lý tương tác màn hình danh sách xuất hủy
  * Tái sử dụng trọn vẹn khối Lego KiotFilter & KiotConfirm
  */
@@ -388,7 +388,7 @@
                 const id = parseInt(btn.dataset.id);
                 const dp = btn.closest('.dp');
                 const noteText = $('.dp-note', dp)?.value || '';
-                saveNote(id, noteText);
+                saveNote(id, noteText, btn);
             };
         });
 
@@ -470,7 +470,12 @@
     };
 
     /* ===== LƯU GHI CHÚ ===== */
-    async function saveNote(id, note) {
+    async function saveNote(id, note, btn) {
+        const origHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Lưu';
+        }
         try {
             const res = await fetch(noteUrl, {
                 method: 'POST',
@@ -487,8 +492,9 @@
                 if (row) {
                     const noteTd = $('[data-col="ghi"]', row);
                     if (noteTd) {
-                        noteTd.textContent = note;
-                        noteTd.title = note;
+                        const trimmed = (note || '').trim();
+                        noteTd.textContent = trimmed ? trimmed : '---';
+                        noteTd.title = trimmed;
                     }
                 }
             } else {
@@ -497,6 +503,11 @@
         } catch (err) {
             console.error(err);
             if (window.KiotToast) KiotToast.error('Lỗi khi gửi yêu cầu lưu ghi chú.');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
         }
     }
 

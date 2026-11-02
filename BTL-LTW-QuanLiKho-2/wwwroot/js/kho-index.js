@@ -1,4 +1,4 @@
-/**
+﻿/**
  * kho-index.js - Quản lý tương tác màn hình Chi nhánh Kho
  * Chuẩn hóa 100% theo khuôn mẫu chuyên nghiệp LEGO & Form Hàng Hóa
  */
@@ -27,10 +27,20 @@
         }
     }
 
+    function resetUserDropdown() {
+        $('#khoUserSelectWrap').removeClass('open');
+        $('#khoUserDropdownMenu').hide();
+        $('#searchUserInDropdown').val('');
+        $('.kho-user-dropdown-item').show();
+    }
+
     function hideOverlay(id) {
         const ov = document.getElementById(id);
         if (ov) {
             ov.classList.remove('show');
+            if (id === 'khoModalOv') {
+                resetUserDropdown();
+            }
             if (!$('.hh-ov.show').length) {
                 document.body.classList.remove('noscroll');
             }
@@ -183,22 +193,108 @@
         loadTable(1);
     });
 
-    // 10. Cập nhật số lượng nhân sự phụ trách được tick chọn
+    // 10. Quản lý Dropdown chọn nhân sự phụ trách kho
     function updateUserSelectionState() {
         let count = 0;
-        $('.kho-user-card-item').each(function () {
+        const selectedUsers = [];
+        $('.kho-user-dropdown-item').each(function () {
             const chk = $(this).find('.kho-user-chk');
+            const name = $(this).data('name') || '';
+            const role = $(this).data('role') || '';
+            const id = $(this).data('id');
+            const isManager = role === 'Quản lý' || chk.is(':disabled');
+
             if (chk.is(':checked')) {
                 $(this).addClass('selected');
                 count++;
+                selectedUsers.push({ id: id, name: name, role: role, isManager: isManager });
             } else {
                 $(this).removeClass('selected');
             }
         });
-        $('#selectedUserCount').text(count + ' nhân sự');
+
+        // Cập nhật badge số lượng
+        $('#selectedUserBadge').text(count + ' nhân sự');
+
+        // Cập nhật nội dung hiển thị trong Trigger Box
+        const displayBox = $('#khoUserSelectedDisplay');
+        if (count === 0) {
+            displayBox.html('<span class="text-muted">Chọn nhân sự phụ trách kho...</span>');
+        } else if (count <= 3) {
+            let html = '';
+            selectedUsers.forEach(function (u) {
+                html += `<span class="kho-user-chip" data-id="${u.id}">
+                            <i class="bi bi-person-fill text-primary" style="font-size: 11px;"></i>
+                            <span>${u.name}</span>
+                            ${!u.isManager ? `<button type="button" class="btn-remove-chip" data-id="${u.id}" title="Bỏ chọn">&times;</button>` : ''}
+                         </span>`;
+            });
+            displayBox.html(html);
+        } else {
+            let html = '';
+            // Hiện 2 người đầu kèm badge +X
+            selectedUsers.slice(0, 2).forEach(function (u) {
+                html += `<span class="kho-user-chip" data-id="${u.id}">
+                            <i class="bi bi-person-fill text-primary" style="font-size: 11px;"></i>
+                            <span>${u.name}</span>
+                            ${!u.isManager ? `<button type="button" class="btn-remove-chip" data-id="${u.id}" title="Bỏ chọn">&times;</button>` : ''}
+                         </span>`;
+            });
+            html += `<span class="badge bg-secondary-subtle text-secondary border ms-1" style="font-size: 11px; padding: 3px 6px;">+${count - 2} nhân sự khác</span>`;
+            displayBox.html(html);
+        }
     }
 
-    $(document).on('click', '.kho-user-card-item', function (e) {
+    // Mở / Đóng Dropdown
+    $('#khoUserDropdownTrigger').on('click', function (e) {
+        if ($(e.target).closest('.btn-remove-chip').length) return;
+        e.stopPropagation();
+        const wrap = $('#khoUserSelectWrap');
+        const menu = $('#khoUserDropdownMenu');
+        const isOpen = wrap.hasClass('open');
+
+        if (isOpen) {
+            wrap.removeClass('open');
+            menu.hide();
+        } else {
+            wrap.addClass('open');
+            menu.show();
+            $('#searchUserInDropdown').val('').trigger('input').focus();
+        }
+    });
+
+    // Bỏ chọn nhanh bằng nút X trên chip
+    $(document).on('click', '.btn-remove-chip', function (e) {
+        e.stopPropagation();
+        const id = $(this).data('id');
+        const chk = $(`#chkUser_${id}`);
+        if (chk.length && !chk.is(':disabled')) {
+            chk.prop('checked', false);
+            updateUserSelectionState();
+        }
+    });
+
+    // Đóng Dropdown khi click ra ngoài
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#khoUserSelectWrap').length) {
+            $('#khoUserSelectWrap').removeClass('open');
+            $('#khoUserDropdownMenu').hide();
+        }
+    });
+
+    // Tìm kiếm trong dropdown
+    $('#searchUserInDropdown').on('input', function () {
+        const kw = $(this).val().toLowerCase().trim();
+        $('.kho-user-dropdown-item').each(function () {
+            const name = String($(this).data('name') || '').toLowerCase();
+            const username = String($(this).data('username') || '').toLowerCase();
+            const match = !kw || name.includes(kw) || username.includes(kw);
+            $(this).toggle(match);
+        });
+    });
+
+    // Click chọn dòng trong dropdown
+    $(document).on('click', '.kho-user-dropdown-item', function (e) {
         if ($(e.target).is('input[type="checkbox"]')) {
             updateUserSelectionState();
             return;
@@ -213,12 +309,16 @@
         updateUserSelectionState();
     });
 
-    $('#btnSelectAllUsers').on('click', function () {
+    // Nút Chọn tất cả trong dropdown
+    $('#btnDropdownSelectAll').on('click', function (e) {
+        e.stopPropagation();
         $('.kho-user-chk').prop('checked', true);
         updateUserSelectionState();
     });
 
-    $('#btnDeselectAllUsers').on('click', function () {
+    // Nút Bỏ chọn trong dropdown
+    $('#btnDropdownDeselectAll').on('click', function (e) {
+        e.stopPropagation();
         $('.kho-user-chk:not(:disabled)').prop('checked', false);
         updateUserSelectionState();
     });
@@ -239,6 +339,7 @@
 
     // 11. Mở Modal Thêm mới chi nhánh kho
     $('#btnOpenCreateKhoModal').on('click', function () {
+        resetUserDropdown();
         $('#khoFormAlert').addClass('d-none').text('');
         $('.hh-f').removeClass('invalid');
         $('#khoMaKho').val('0');
@@ -269,6 +370,7 @@
     // 12. Mở Modal Cập nhật chi nhánh kho
     $(document).on('click', '.btn-edit-kho', function () {
         const id = $(this).data('id');
+        resetUserDropdown();
         $('#khoFormAlert').addClass('d-none').text('');
         $('.hh-f').removeClass('invalid');
 

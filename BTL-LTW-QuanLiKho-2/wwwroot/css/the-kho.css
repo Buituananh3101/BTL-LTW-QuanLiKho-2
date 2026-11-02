@@ -179,6 +179,8 @@
     display: flex;
     align-items: center;
     gap: 14px;
+    flex: 1;
+    min-width: 0;
 }
 
 .thekho-product-banner .icon-box {
@@ -296,17 +298,31 @@
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     overflow: hidden;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
-.thekho-table {
-    margin-bottom: 0;
+.thekho-table-wrap .kiot-table-scroll-body {
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    flex: 1;
+    min-height: 0;
     width: 100%;
-    min-width: 860px;
+}
+
+.thekho-table,
+#theKhoTable {
+    margin-bottom: 0;
+    width: max-content !important;
+    min-width: 100% !important;
+    table-layout: fixed !important;
     border-collapse: separate !important;
     border-spacing: 0 !important;
 }
 
-.thekho-table th {
+.thekho-table th,
+#theKhoTable th {
     background: var(--brand-soft, #eef4fc) !important;
     font-weight: 600 !important;
     font-size: 13px !important;
@@ -318,7 +334,8 @@
     white-space: nowrap !important;
 }
 
-.thekho-table td {
+.thekho-table td,
+#theKhoTable td {
     padding: 10px 12px !important;
     font-size: 13px !important;
     font-weight: 400 !important;

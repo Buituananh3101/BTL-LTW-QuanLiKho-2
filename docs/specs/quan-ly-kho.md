@@ -43,8 +43,9 @@
 - **Topbar**: Nút tìm kiếm F3, nút `+ Kho` (`#btnOpenCreateKhoModal`), nút F4 gập mở sidebar, nút làm mới `#btnReloadTable`.
 - **Sidebar lọc trái (`_KhoFilterSidebar.cshtml`)**: Lọc Trạng thái qua Lego `_KiotStatusFilter.cshtml`.
 - **Bảng dữ liệu AJAX (`_KhoTable.cshtml`)**:
+  - Bảng co giãn 100% khớp chiều ngang màn hình (`width: 100%`, `table-layout: fixed`), không bị tràn thanh cuộn ngang.
   - Sắp xếp 3 trạng thái (`sortable-th`): Mã kho, Tên kho, Địa chỉ, Nhân sự, Trạng thái.
-  - Cột: STT, Mã kho, Tên kho (kèm badge "Đang chọn"), Địa chỉ, Ghi chú, Nhân sự phụ trách, Số chứng từ, Trạng thái, Thao tác (Sửa, Khóa/Mở).
+  - Cột: STT (40px), Mã kho (90px), Tên kho (22%), Địa chỉ (26%), Ghi chú (tự do), Nhân sự phụ trách (120px), Số chứng từ (95px), Trạng thái (115px), Thao tác (105px - hiển thị trọn vẹn 3 nút Sửa, Khóa/Mở, Xóa).
   - Phân trang AJAX: Tái sử dụng Lego `_Pagination.cshtml`.
 
 ### 3.2. Modal Thêm/Sửa Chi nhánh Kho (`_KhoModal.cshtml`)
@@ -53,7 +54,7 @@
 - **Body (`.hh-m-body`)**:
   - **Tab 1: Thông tin (`#kho-pane-info`)**:
     * Khối 1 (`.hh-fields` Grid 2 cột): Mã kho (tự động, readonly), Tên kho `*` (bắt buộc), Địa chỉ kho (`.hh-span2`).
-    * Khối 2: Accordion Phân quyền nhân sự phụ trách (`.hh-sec open`, `.hh-sec-h`, `.hh-chev`): Nút Chọn tất cả / Bỏ chọn, badge số lượng, lưới thẻ Card nhân viên (`.kho-user-card-grid`, highlight viền xanh khi chọn, không dùng banner alert thừa).
+    * Khối 2: Dropdown Multi-select Phân quyền nhân sự phụ trách kho (`.kho-user-select-wrap`): Ô chọn dạng chip tag tóm tắt gọn gàng, menu popup tìm kiếm nhân viên thời gian thực, badge màu vai trò và hỗ trợ Chọn tất cả / Bỏ chọn nhanh chóng.
   - **Tab 2: Mô tả (`#kho-pane-desc`)**:
     * Thanh công cụ định dạng `.hh-rte-bar` (Bold, Italic, Underline, Bullet list) và khung soạn thảo `.hh-rte#khoMoTaRte`.
 - **Footer (`.hh-m-foot`)**: Checkbox trạng thái "Đang hoạt động" (`.hh-chk`), nút Bỏ qua, cụm Split Button Lego ("Lưu & Thêm mới", "Lưu & Sao chép") và nút chính "Lưu chi nhánh kho" (`.hh-btn.primary`).
