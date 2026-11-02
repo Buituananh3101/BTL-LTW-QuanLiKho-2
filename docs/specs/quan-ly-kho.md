@@ -1,4 +1,4 @@
-﻿# Đặc tả Chức năng: Quản lý Chi nhánh Kho
+# Đặc tả Chức năng: Quản lý Chi nhánh Kho
 
 > **Mô-đun**: Thiết lập hệ thống ➜ Quản lý Kho  
 > **Tài liệu tham chiếu**: [`.agent/rules/02-nghiep-vu-kho.md`](../../.agent/rules/02-nghiep-vu-kho.md) | [`.agent/rules/04-xac-thuc-phan-quyen.md`](../../.agent/rules/04-xac-thuc-phan-quyen.md) | [`AGENTS.md`](../../AGENTS.md)
@@ -13,8 +13,11 @@
   - Xem danh sách kho kèm tìm kiếm theo từ khóa (Mã, Tên, Địa chỉ, Ghi chú), lọc Trạng thái (Đang hoạt động / Ngừng hoạt động).
   - Thêm mới kho: Nhập Tên kho (*chống trùng tên*), Địa chỉ, Mô tả và phân công nhân sự phụ trách (`TaiKhoanKho`).
   - Chỉnh sửa kho: Cập nhật thông tin và đồng bộ danh sách nhân sự phụ trách.
-  - Ngừng hoạt động / Kích hoạt lại kho: Xác nhận bằng modal Lego `KiotConfirm` (`#kiotConfirmOv`), chặn ngừng hoạt động nếu là kho duy nhất.
-  - Chống xóa cứng: Không xóa cứng bảng `Kho` để bảo toàn lịch sử chứng từ và tồn kho theo Luật 5 & 8.
+  - Ngừng hoạt động (Khóa kho) / Kích hoạt lại kho: Xác nhận bằng modal Lego `KiotConfirm` (`#kiotConfirmOv`), chặn ngừng hoạt động nếu là kho duy nhất hoặc kho đang làm việc trong phiên hiện tại.
+  - Xóa chi nhánh kho an toàn (Luật 5 & 8):
+    * Kho chưa phát sinh chứng từ (lỡ tạo nhầm / kho mới thử nghiệm): Cho phép xóa vĩnh viễn khỏi CSDL, tự dọn dẹp `TaiKhoanKho`, `NguongTonKho` và ghi nhật ký kiểm toán `INhatKyThaoTacService`.
+    * Kho đã phát sinh chứng từ (nhập, xuất, chuyển, kiểm, trả hàng, đơn bán): Chặn xóa tuyệt đối để bảo toàn lịch sử dữ liệu, hỗ trợ chuyển nhanh sang trạng thái Ngừng hoạt động (Khóa kho) qua modal Lego.
+    * Chặn xóa nếu là kho duy nhất của hệ thống hoặc kho đang được chọn làm việc trong phiên hiện tại.
 
 ---
 
@@ -61,11 +64,14 @@
 
 1. **Bảo mật truy cập**: Áp dụng `[Authorize(Roles = "Quản lý")]` trên `KhoController`.
 2. **Kiểm tra trùng tên kho**: Kiểm tra case-insensitive tên kho trước khi thêm hoặc sửa, báo lỗi tiếng Việt thân thiện.
-3. **Bảo vệ kho duy nhất**: Chặn thao tác ngừng hoạt động nếu chỉ còn 1 kho hoạt động duy nhất trong hệ thống.
+3. **Bảo vệ kho duy nhất & kho hiện tại**: Chặn thao tác ngừng hoạt động (khóa) hoặc xóa nếu chỉ còn 1 kho hoạt động duy nhất hoặc nếu kho đang được chọn làm việc trong phiên hiện tại.
 4. **Tự động phân quyền Quản lý**: Kho mới tạo tự động gán quyền truy cập cho tất cả tài khoản Quản lý trong `TaiKhoanKho`.
-5. **Giao dịch toàn vẹn (Luật 7)**: Bọc lưu kho và gán tài khoản trong `BeginTransactionAsync()`.
-6. **Kiểm toán (Audit Log)**: Ghi nhật ký đầy đủ qua `INhatKyThaoTacService`.
-7. **Modal xác nhận Lego**: Dùng `window.KiotConfirm.show(...)` khi Ngừng hoạt động / Kích hoạt kho, không dùng `confirm()` mặc định của trình duyệt.
+5. **Giao dịch toàn vẹn (Luật 7)**: Bọc lưu kho, xóa kho và gán tài khoản trong `BeginTransactionAsync()`.
+6. **Kiểm toán (Audit Log)**: Ghi nhật ký đầy đủ qua `INhatKyThaoTacService` cho mọi thao tác (Tạo mới, Cập nhật, Khóa, Kích hoạt, Xóa).
+7. **Modal xác nhận Lego**: Dùng `window.KiotConfirm.show(...)` khi Ngừng hoạt động / Kích hoạt / Xóa kho, không dùng `confirm()` mặc định của trình duyệt.
+8. **Quy tắc Xóa & Chuyển khóa kho**:
+   - Nếu chưa có chứng từ: Xóa triệt để khỏi `Kho`, dọn sạch `TaiKhoanKho` và `NguongTonKho`.
+   - Nếu đã có chứng từ: Chặn xóa, cho phép chuyển sang `NGUNG_HOAT_DONG` (Khóa kho) để dừng phân bổ giao dịch mới mà vẫn giữ trọn vẹn số liệu sổ sách.
 
 ---
 
@@ -74,7 +80,7 @@
 - [x] **Modal Thao tác & Xác nhận**: `_KhoModal.cshtml` chuẩn Form Hàng hóa + `KiotConfirm` (`#kiotConfirmOv`).
 - [x] **Bộ lọc Trạng thái checkbox**: `_KiotStatusFilter.cshtml` cho trạng thái kho.
 - [x] **Phân trang AJAX**: `_Pagination.cshtml` + `BaseFilterParams`.
-- [x] **Thông báo Toast**: `KiotToast.success()`, `KiotToast.error()`, `KiotToast.info()`.
+- [x] **Thông báo Toast**: `KiotToast.success()`, `KiotToast.error()`, `KiotToast.info()`, `KiotToast.warning()`.
 - [x] **Sidebar thu gọn**: `KiotFilter.initSidebar` (Phím tắt F4).
 
 ---
@@ -88,5 +94,8 @@
 | Thêm kho mới trùng tên | Nhập "Kho trung tâm" | Báo lỗi trùng tên kho |
 | Thêm kho mới hợp lệ | Tên: "Kho Bãi Thơm", Địa chỉ: "Bãi Thơm, Phú Quốc" | Lưu thành công, tự gán quyền cho Quản lý và nhân viên đã chọn |
 | Sửa thông tin kho | Cập nhật địa chỉ, thêm nhân sự | Cập nhật thành công, đồng bộ `TaiKhoanKho` |
+| Khóa/Xóa kho đang chọn trong phiên | Bấm nút khóa hoặc xóa kho đang có badge "Đang chọn" | Chặn thao tác và cảnh báo cần chuyển sang kho khác trước khi thực hiện |
 | Ngừng hoạt động kho duy nhất | Hệ thống chỉ còn 1 kho hoạt động | Chặn thao tác và cảnh báo hệ thống cần ít nhất 1 kho hoạt động |
 | Ngừng hoạt động kho khi có nhiều kho | Bấm nút khóa tại kho phụ | Hiện modal KiotConfirm, đổi trạng thái sang "Ngừng hoạt động" |
+| Xóa kho tạo nhầm (chưa có chứng từ) | Tạo kho test mới rồi bấm nút thùng rác 🗑️ | Hiện modal KiotConfirm, xóa thành công kho và dữ liệu liên quan |
+| Xóa kho đã phát sinh chứng từ | Bấm nút thùng rác 🗑️ tại kho đã có phiếu nhập/xuất/chuyển/kiểm | Chặn xóa, hiện modal thông báo và hỏi có muốn chuyển sang Ngừng hoạt động (Khóa kho) |

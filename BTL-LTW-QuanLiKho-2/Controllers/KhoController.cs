@@ -223,9 +223,14 @@ public class KhoController : BaseKhoController
             return Json(new { success = false, message = $"Tên kho '{tenKho}' đã được sử dụng cho chi nhánh khác. Vui lòng chọn tên khác." });
         }
 
-        // Chặn chuyển sang ngừng hoạt động nếu là kho hoạt động duy nhất của hệ thống
+        // Chặn chuyển sang ngừng hoạt động nếu là kho hoạt động duy nhất của hệ thống hoặc là kho hiện tại
         if (model.TrangThai == "NGUNG_HOAT_DONG" && kho.TrangThai == "HOAT_DONG")
         {
+            if (kho.MaKho == CurrentWarehouseId)
+            {
+                return Json(new { success = false, message = "Không thể ngừng hoạt động (khóa) chi nhánh kho bạn đang làm việc trong phiên này. Vui lòng chuyển sang chi nhánh kho khác trên thanh tiêu đề trước khi thao tác." });
+            }
+
             var activeKhoCount = await _context.Khos.CountAsync(k => k.TrangThai == "HOAT_DONG");
             if (activeKhoCount <= 1)
             {
@@ -312,6 +317,11 @@ public class KhoController : BaseKhoController
         var isDisabling = kho.TrangThai == "HOAT_DONG";
         if (isDisabling)
         {
+            if (kho.MaKho == CurrentWarehouseId)
+            {
+                return Json(new { success = false, message = "Không thể ngừng hoạt động (khóa) chi nhánh kho bạn đang làm việc trong phiên này. Vui lòng chuyển sang chi nhánh kho khác trên thanh tiêu đề trước khi thao tác." });
+            }
+
             var activeKhoCount = await _context.Khos.CountAsync(k => k.TrangThai == "HOAT_DONG");
             if (activeKhoCount <= 1)
             {
@@ -339,6 +349,138 @@ public class KhoController : BaseKhoController
                 ? $"Đã ngừng hoạt động kho '{kho.TenKho}'."
                 : $"Đã kích hoạt kho '{kho.TenKho}' hoạt động trở lại."
         });
+    }
+
+    /// <summary>
+    /// Xóa chi nhánh kho (Chỉ cho phép xóa khi kho tạo nhầm, chưa phát sinh chứng từ; Nếu đã có chứng từ -> Chặn xóa và gợi ý Khóa/Ngừng hoạt động)
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> Delete(int id, bool chuyenKhoa = false)
+    {
+        if (id <= 0)
+        {
+            return Json(new { success = false, message = "Mã chi nhánh kho không hợp lệ." });
+        }
+
+        var kho = await _context.Khos.FindAsync(id);
+        if (kho == null)
+        {
+            return Json(new { success = false, message = "Không tìm thấy thông tin chi nhánh kho cần xóa." });
+        }
+
+        // Chặn xóa kho đang làm việc trong phiên
+        if (kho.MaKho == CurrentWarehouseId)
+        {
+            return Json(new { success = false, message = "Không thể xóa chi nhánh kho bạn đang làm việc trong phiên này. Vui lòng chuyển sang chi nhánh kho khác trên thanh tiêu đề trước khi thao tác." });
+        }
+
+        // Chặn xóa nếu hệ thống chỉ còn 1 kho duy nhất
+        var totalKhoCount = await _context.Khos.CountAsync();
+        if (totalKhoCount <= 1)
+        {
+            return Json(new { success = false, message = "Hệ thống phải có ít nhất một chi nhánh kho hoạt động. Không thể xóa kho duy nhất này." });
+        }
+
+        // Kiểm tra tất cả các loại chứng từ/giao dịch liên quan đến kho này
+        var hasPhieuNhap = await _context.PhieuNhaps.AnyAsync(p => p.MaKho == id);
+        var hasPhieuXuat = await _context.PhieuXuats.AnyAsync(p => p.MaKho == id);
+        var hasChuyenKho = await _context.PhieuChuyenKhos.AnyAsync(p => p.MaKhoNguon == id || p.MaKhoDich == id);
+        var hasKiemKe = await _context.PhieuKiemKes.AnyAsync(p => p.MaKho == id);
+        var hasTraHangNhap = await _context.PhieuTraHangNhaps.AnyAsync(p => p.MaKho == id);
+        var hasDonBan = await _context.DonBans.AnyAsync(d => d.MaKho == id);
+
+        var hasTransactions = hasPhieuNhap || hasPhieuXuat || hasChuyenKho || hasKiemKe || hasTraHangNhap || hasDonBan;
+
+        if (hasTransactions)
+        {
+            // Nếu người dùng xác nhận chuyển sang khóa/ngừng hoạt động kho
+            if (chuyenKhoa)
+            {
+                if (kho.TrangThai == "NGUNG_HOAT_DONG")
+                {
+                    return Json(new { success = true, action = "ALREADY_LOCKED", message = $"Chi nhánh kho '{kho.TenKho}' vốn đã ở trạng thái Ngừng hoạt động." });
+                }
+
+                var activeKhoCount = await _context.Khos.CountAsync(k => k.TrangThai == "HOAT_DONG");
+                if (activeKhoCount <= 1)
+                {
+                    return Json(new { success = false, message = "Hệ thống phải có ít nhất một kho đang hoạt động. Không thể ngừng hoạt động kho duy nhất này." });
+                }
+
+                kho.TrangThai = "NGUNG_HOAT_DONG";
+                await _context.SaveChangesAsync();
+
+                await _nhatKyService.GhiNhatKyAsync(
+                    CurrentUserId,
+                    "Ngừng hoạt động",
+                    "Kho",
+                    kho.MaKho.ToString(),
+                    $"Ngừng hoạt động chi nhánh kho '{kho.TenKho}' do đã phát sinh chứng từ không thể xóa"
+                );
+
+                return Json(new
+                {
+                    success = true,
+                    action = "LOCKED",
+                    message = $"Đã chuyển chi nhánh kho '{kho.TenKho}' sang trạng thái Ngừng hoạt động."
+                });
+            }
+
+            // Chưa xác nhận chuyển khóa -> Chặn xóa và thông báo cho người dùng
+            return Json(new
+            {
+                success = false,
+                hasTransaction = true,
+                isLocked = (kho.TrangThai == "NGUNG_HOAT_DONG"),
+                message = $"Chi nhánh kho '<b>{kho.TenKho}</b>' đã phát sinh chứng từ (nhập, xuất, chuyển kho hoặc kiểm kê) trong hệ thống.<br>" +
+                          "Để bảo toàn lịch sử sổ sách và số liệu kho, bạn <b>không thể xóa vĩnh viễn</b> kho này."
+            });
+        }
+
+        // Trường hợp kho chưa từng phát sinh chứng từ (tạo nhầm / kho mới thử nghiệm) -> Xóa vĩnh viễn an toàn
+        using var trans = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            // 1. Xóa các phân quyền tài khoản phụ trách kho trong TaiKhoanKho
+            var assignedAccounts = await _context.TaiKhoanKhos.Where(t => t.MaKho == id).ToListAsync();
+            if (assignedAccounts.Any())
+            {
+                _context.TaiKhoanKhos.RemoveRange(assignedAccounts);
+            }
+
+            // 2. Xóa các cấu hình ngưỡng tồn kho nếu có
+            var nguongTons = await _context.NguongTonKhos.Where(n => n.MaKho == id).ToListAsync();
+            if (nguongTons.Any())
+            {
+                _context.NguongTonKhos.RemoveRange(nguongTons);
+            }
+
+            // 3. Xóa chi nhánh kho
+            _context.Khos.Remove(kho);
+            await _context.SaveChangesAsync();
+
+            // 4. Ghi nhật ký kiểm toán
+            await _nhatKyService.GhiNhatKyAsync(
+                CurrentUserId,
+                "Xóa",
+                "Kho",
+                id.ToString(),
+                $"Xóa chi nhánh kho '{kho.TenKho}' (kho tạo nhầm, chưa phát sinh chứng từ)"
+            );
+
+            await trans.CommitAsync();
+
+            return Json(new
+            {
+                success = true,
+                message = $"Đã xóa chi nhánh kho '{kho.TenKho}' thành công."
+            });
+        }
+        catch (Exception ex)
+        {
+            await trans.RollbackAsync();
+            return Json(new { success = false, message = "Đã xảy ra lỗi khi xóa kho: " + ex.Message });
+        }
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * kho-index.js - Quản lý tương tác màn hình Chi nhánh Kho
  * Chuẩn hóa 100% theo khuôn mẫu chuyên nghiệp LEGO & Form Hàng Hóa
  */
@@ -66,11 +66,6 @@
         $('#kho-pane-' + tab).addClass('on');
         const body = document.getElementById('khoModalBody');
         if (body) body.scrollTop = 0;
-    });
-
-    // 5. Khối gập mở Accordion (.hh-sec, .hh-sec-h)
-    $(document).on('click', '#khoModalOv .hh-sec-h', function () {
-        $(this).closest('.hh-sec').toggleClass('open');
     });
 
     // 6. RTE Toolbar các nút định dạng trong Tab Mô tả
@@ -427,13 +422,13 @@
         doSaveKho('copy');
     });
 
-    // 14. Chuyển đổi trạng thái nhanh (Kích hoạt / Ngừng hoạt động)
+    // 14. Chuyển đổi trạng thái nhanh (Kích hoạt / Ngừng hoạt động kho)
     $(document).on('click', '.btn-toggle-status', function () {
         const id = $(this).data('id');
         const name = $(this).data('name') || '';
         const currentStatus = $(this).data('status');
         const isDisabling = currentStatus === 'HOAT_DONG';
-        const actionTitle = isDisabling ? 'Ngừng hoạt động kho' : 'Kích hoạt lại kho';
+        const actionTitle = isDisabling ? 'Ngừng hoạt động (khóa) kho' : 'Kích hoạt lại kho';
         const safeName = $('<div>').text(name).html();
 
         const doToggle = function () {
@@ -460,7 +455,7 @@
                 icon: isDisabling ? 'bi-lock-fill' : 'bi-unlock-fill',
                 iconColor: isDisabling ? '#dc2626' : '#0d6efd',
                 message: isDisabling
-                    ? `Bạn có chắc chắn muốn <strong>ngừng hoạt động chi nhánh kho</strong> <strong>${safeName}</strong> không?<br><span class="text-muted small mt-1 d-block">Sau khi ngừng hoạt động, nhân viên sẽ không thể tạo mới các chứng từ trên kho này.</span>`
+                    ? `Bạn có chắc chắn muốn <strong>ngừng hoạt động (khóa) chi nhánh kho</strong> <strong>${safeName}</strong> không?<br><span class="text-muted small mt-1 d-block">Sau khi ngừng hoạt động, nhân viên sẽ không thể tạo mới các chứng từ trên kho này.</span>`
                     : `Bạn có chắc chắn muốn <strong>kích hoạt chi nhánh kho</strong> <strong>${safeName}</strong> hoạt động trở lại không?`,
                 confirmText: isDisabling ? 'Đồng ý ngừng hoạt động' : 'Đồng ý kích hoạt',
                 confirmClass: isDisabling ? 'btn btn-danger' : 'btn btn-primary',
@@ -469,6 +464,73 @@
             });
         } else {
             doToggle();
+        }
+    });
+
+    // 15. Xóa chi nhánh kho (Nếu chưa có chứng từ -> Xóa vĩnh viễn; Nếu đã có chứng từ -> Chặn và hỏi chuyển sang Ngừng hoạt động / Khóa)
+    $(document).on('click', '.btn-delete-kho', function () {
+        const id = $(this).data('id');
+        const name = $(this).data('name') || '';
+        const safeName = $('<div>').text(name).html();
+
+        const executeDelete = function (chuyenKhoa = false) {
+            $.ajax({
+                url: '/Kho/Delete?id=' + id + (chuyenKhoa ? '&chuyenKhoa=true' : ''),
+                type: 'POST',
+                success: function (res) {
+                    if (res.success) {
+                        if (window.KiotToast) KiotToast.success(res.message);
+                        loadTable(currentPage);
+                    } else if (res.hasTransaction) {
+                        if (res.isLocked) {
+                            if (window.KiotToast) {
+                                KiotToast.warning(`Chi nhánh kho <b>${safeName}</b> đã phát sinh chứng từ và hiện đang ở trạng thái <b>Ngừng hoạt động</b>, không thể xóa vĩnh viễn.`);
+                            }
+                        } else {
+                            setTimeout(function () {
+                                if (window.KiotConfirm && typeof window.KiotConfirm.show === 'function') {
+                                    window.KiotConfirm.show({
+                                        title: 'Không thể xóa chi nhánh kho',
+                                        icon: 'bi-shield-exclamation',
+                                        iconColor: '#f59e0b',
+                                        message: `Chi nhánh kho <strong>${safeName}</strong> đã phát sinh chứng từ trong hệ thống nên <strong>không thể xóa vĩnh viễn</strong> để bảo toàn lịch sử dữ liệu.<br><br>Bạn có muốn chuyển sang <strong>NGỪNG HOẠT ĐỘNG (KHÓA KHO)</strong> để ngừng phân bổ chứng từ mới không?`,
+                                        confirmText: 'Ngừng hoạt động kho',
+                                        confirmClass: 'btn btn-warning text-dark fw-semibold',
+                                        cancelText: 'Bỏ qua',
+                                        onConfirm: function () {
+                                            executeDelete(true);
+                                        }
+                                    });
+                                } else {
+                                    if (window.KiotToast) KiotToast.warning(res.message);
+                                }
+                            }, 200);
+                        }
+                    } else {
+                        if (window.KiotToast) KiotToast.error(res.message);
+                    }
+                },
+                error: function (xhr) {
+                    if (window.KiotToast) KiotToast.error(xhr.responseJSON?.message || 'Không thể thực hiện thao tác xóa.');
+                }
+            });
+        };
+
+        if (window.KiotConfirm && typeof window.KiotConfirm.show === 'function') {
+            window.KiotConfirm.show({
+                title: 'Xóa chi nhánh kho',
+                icon: 'bi-trash3-fill',
+                iconColor: '#dc2626',
+                message: `Bạn có chắc chắn muốn xóa chi nhánh kho <strong>${safeName}</strong> không?<br><span class="text-muted small mt-1 d-block">Lưu ý: Chỉ chi nhánh kho chưa từng phát sinh chứng từ mới có thể xóa hoàn toàn khỏi hệ thống.</span>`,
+                confirmText: 'Đồng ý xóa',
+                confirmClass: 'btn btn-danger',
+                cancelText: 'Bỏ qua',
+                onConfirm: function () {
+                    executeDelete(false);
+                }
+            });
+        } else {
+            executeDelete(false);
         }
     });
 

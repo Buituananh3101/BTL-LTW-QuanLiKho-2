@@ -27,7 +27,7 @@
                         </span>
                     </div>
                 </th>
-                <th data-col="diachi" style="width: 230px;" class="sortable-th @(sortBy == "diachi" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Địa chỉ">
+                <th data-col="diachi" style="width: 220px;" class="sortable-th @(sortBy == "diachi" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Địa chỉ">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Địa chỉ</span>
@@ -36,7 +36,7 @@
                         </span>
                     </div>
                 </th>
-                <th style="width: 180px;">Ghi chú / Mô tả</th>
+                <th style="width: 175px;">Ghi chú / Mô tả</th>
                 <th data-col="nhanvien" style="width: 160px;" class="sortable-th @(sortBy == "nhanvien" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" title="Nhấn để sắp xếp theo Nhân sự phụ trách">
                     <div class="th-content">
                         <span class="th-title-wrap">
@@ -56,7 +56,7 @@
                         </span>
                     </div>
                 </th>
-                <th style="width: 85px;" class="text-center col-actions">Thao tác</th>
+                <th style="width: 105px;" class="text-center col-actions">Thao tác</th>
             </tr>
         </thead>
         <tbody>
@@ -134,13 +134,22 @@
                                     <i class="bi bi-pencil"></i>
                                 </button>
                                 <button type="button"
-                                        class="btn btn-sm btn-light border p-1 @(k.TrangThai == "HOAT_DONG" ? "text-danger" : "text-success") btn-toggle-status"
+                                        class="btn btn-sm btn-light border p-1 @(k.TrangThai == "HOAT_DONG" ? "text-secondary" : "text-success") btn-toggle-status"
                                         data-id="@k.MaKho"
                                         data-name="@k.TenKho"
                                         data-status="@k.TrangThai"
-                                        title="@(k.TrangThai == "HOAT_DONG" ? "Ngừng hoạt động kho này" : "Kích hoạt lại kho này")"
+                                        title="@(k.TrangThai == "HOAT_DONG" ? "Ngừng hoạt động (khóa) kho này" : "Kích hoạt lại kho này")"
                                         style="width: 28px; height: 28px; line-height: 1;">
                                     <i class="bi @(k.TrangThai == "HOAT_DONG" ? "bi-lock" : "bi-unlock")"></i>
+                                </button>
+                                <button type="button"
+                                        class="btn btn-sm btn-light border p-1 text-danger btn-delete-kho"
+                                        data-id="@k.MaKho"
+                                        data-name="@k.TenKho"
+                                        data-has-trans="@(k.SoChungTuLienQuan > 0 ? "true" : "false")"
+                                        title="Xóa chi nhánh kho"
+                                        style="width: 28px; height: 28px; line-height: 1;">
+                                    <i class="bi bi-trash"></i>
                                 </button>
                             </div>
                         </td>

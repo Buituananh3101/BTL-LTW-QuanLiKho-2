@@ -712,11 +712,6 @@
         if (e.target === this) closeModal();
     });
 
-    // Accordion co giãn đóng/mở
-    $(document).on('click', '.hh-sec-h', function () {
-        $(this).closest('.hh-sec').toggleClass('open');
-    });
-
     // Chuyển đổi Radio Thông tin xuất hóa đơn (Cá nhân ⇋ Doanh nghiệp)
     function updateXhdView(type) {
         if (type === 'DOANH_NGHIEP') {

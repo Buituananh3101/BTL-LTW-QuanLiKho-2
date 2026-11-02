@@ -1,6 +1,6 @@
 # Đặc tả Chức năng: Quản lý Khách hàng (Customer Management)
 
-> **Mục tiêu**: Quản lý danh mục Khách hàng chuẩn giao diện & nghiệp vụ hệ thống theo đúng 4 ảnh KiotViet thực tế và đồng bộ 100% với khuôn mẫu Danh mục Hàng hóa (`HangHoa`). Tìm kiếm nhanh (F3), thu gọn sidebar (F4), lọc Segmented buttons, Master-Detail Inline Drawer 0ms, Modal Thêm/Sửa avatar tròn <= 2MB, Accordion Địa chỉ, Nhóm/Ghi chú và Thông tin Xuất hóa đơn linh hoạt (Cá nhân / Doanh nghiệp).
+> **Mục tiêu**: Quản lý danh mục Khách hàng chuẩn giao diện & nghiệp vụ thực tế KiotViet, đồng bộ 100% khuôn mẫu Hàng hóa (`HangHoa`). Tìm kiếm nhanh F3, thu gọn sidebar F4, lọc Segmented, Master-Detail Drawer 0ms, Modal Thêm/Sửa avatar <= 2MB, Accordion Lego `KiotCollapsible` tự động gập mở (Địa chỉ, Nhóm/Ghi chú, Xuất hóa đơn Cá nhân/Doanh nghiệp).
 
 ---
 
@@ -11,16 +11,16 @@
 - **ViewModels (`ViewModels/KhachHang/`)**:
   - `KhachHangIndexVM.cs`: Dữ liệu phân trang, nhóm khách hàng, nhân viên tạo, tỉnh thành.
   - `KhachHangFilterParams.cs`: Tiêu chí lọc (Q, NhomKhachHangs, LoaiKhachHangSegment, GioiTinh, TgTaoFilter, SinhNhatFilter, NguoiTao, DaDanhDau, TongBan, No).
-  - `KhachHangItemVM.cs`: 25 trường hiển thị bảng & drawer (Mã KH, Tên KH, SĐT 1 & 2, Nhóm KH, Địa chỉ, Khu vực, MST, Ngày sinh, Giới tính, Email, Doanh thu, Xuất HĐ).
-  - `KhachHangFormVM.cs`: Form thêm/sửa, hỗ trợ upload ảnh avatar <= 2MB, Data Annotations validation.
+  - `KhachHangItemVM.cs`: 25 trường bảng & drawer (Mã KH, Tên KH, SĐT 1 & 2, Nhóm, Địa chỉ, Khu vực, MST, Sinh nhật, Giới tính, Doanh thu, Xuất HĐ).
+  - `KhachHangFormVM.cs`: Form thêm/sửa, upload avatar <= 2MB, Data Annotations validation.
   - `KhachHangDetailVM.cs`: Chi tiết nạp vào drawer (Thông tin chung, Lưới thuộc tính 4 cột, Khối xuất HĐ, Lịch sử `DonBan`, Công nợ).
 - **Views (`Views/KhachHang/`)**:
   - `Index.cshtml`: Khung trang `kiot-container`, topbar (F3, + Khách hàng, Xuất file, Tùy chọn 15 cột `#colMenu`, F4).
   - `_KhachHangFilterSidebar.cshtml`: Sidebar lọc (Nhóm KH có link `+ Tạo mới` & sửa ✎, Segmented buttons Loại KH & Giới tính, Ngày tạo, Sinh nhật, Người tạo, Doanh số & Nợ, Trạng thái).
-  - `_KhachHangTable.cshtml`: Bảng AJAX fixed width, sắp xếp 3 trạng thái, cột sao ⭐, pre-rendering drawer chi tiết 0ms.
-  - `_KhachHangModal.cshtml`: Modal `.hh-modal` (Top grid kèm avatar tròn, Accordion Địa chỉ, Nhóm/Ghi chú, và Accordion Xuất HĐ Cá nhân ⇋ Doanh nghiệp).
+  - `_KhachHangTable.cshtml`: Bảng AJAX fixed width, sắp xếp 3 trạng thái, cột sao ⭐, drawer chi tiết 0ms.
+  - `_KhachHangModal.cshtml`: Modal `.hh-modal` (Top grid kèm avatar, Accordion gập mở Địa chỉ, Nhóm/Ghi chú, và Xuất HĐ Cá nhân ⇋ Doanh nghiệp).
   - `_KhachHangDetail.cshtml`: Inline Drawer hiển thị 3 Tabs (Thông tin đầy đủ, Lịch sử mua hàng, Nợ cần thu).
-- **Styles & Scripts**: `wwwroot/css/hang-hoa-form.css`, `wwwroot/js/khach-hang-index.js`.
+- **Styles & Scripts**: `wwwroot/css/hang-hoa-form.css`, `wwwroot/js/khach-hang-index.js`, `wwwroot/js/site.js` (Lego `KiotCollapsible`).
 
 ### 1.2. Bảng CSDL tham gia
 - `NhomKhachHang`: `MaNhomKhachHang` (PK), `TenNhom`, `GhiChu`.

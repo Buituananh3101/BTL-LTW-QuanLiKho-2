@@ -1,4 +1,4 @@
-﻿/**
+/**
  * nha-cung-cap-index.js - Quản lý tương tác màn hình Danh sách Nhà cung cấp
  * Chuẩn hóa 100% theo quy chuẩn Lego hệ thống và Rule 10 (AGENTS.md)
  */
@@ -647,11 +647,6 @@
                 .find(el => el && el.classList.contains('show'));
             if (topModal) hideModal(topModal.id);
         }
-    });
-
-    // Accordion gập mở trong Modal chuẩn .hh-sec
-    $(document).on('click', '.hh-sec-h', function () {
-        $(this).closest('.hh-sec').toggleClass('open');
     });
 
     // 7.1. Custom Combobox Nhóm nhà cung cấp trong Modal

@@ -116,10 +116,6 @@
     };
   });
 
-  $$('.hh-sec-h').forEach(h => {
-    h.onclick = () => h.parentElement.classList.toggle('open');
-  });
-
   // Tab mô tả: các nút định dạng
   $$('.hh-rte-bar button').forEach(b => {
     b.onmousedown = e => {
@@ -1601,17 +1597,89 @@
     if (!id) return;
     const hiddenId = $('#delProdId');
     const nameEl = $('#delProdName');
-    const errBox = $('#delProdErrorBox');
+    const normalBox = $('#delProdNormalBox');
+    const blockedBox = $('#delProdBlockedBox');
+    const blockedMsg = $('#delProdBlockedMsg');
     const btnDel = $('#btnConfirmDeleteProd');
+    const btnNgung = $('#btnSwitchNgungBan');
+    const titleText = $('#delProdHeaderText');
+    const titleEl = $('#delProdTitle');
 
     if (hiddenId) hiddenId.value = id;
     if (nameEl) nameEl.textContent = name || ('Mã #' + id);
-    if (errBox) errBox.style.display = 'none';
+
+    // Trạng thái ban đầu: chờ nạp kết quả kiểm tra
+    if (normalBox) normalBox.style.display = 'block';
+    if (blockedBox) blockedBox.style.display = 'none';
     if (btnDel) {
-      btnDel.disabled = false;
-      btnDel.textContent = 'Đồng ý xóa';
+      btnDel.style.display = 'none';
+      btnDel.disabled = true;
     }
+    if (btnNgung) {
+      btnNgung.style.display = 'none';
+      btnNgung.disabled = true;
+    }
+    if (titleText) titleText.textContent = 'Đang kiểm tra giao dịch...';
+    if (titleEl) titleEl.style.color = '#111827';
+
     show($('#hhDeleteProductOv'));
+
+    // Pre-check trước khi hiển thị hành động xóa
+    jQuery.ajax({
+      url: '/HangHoa/CheckCanDelete/' + id,
+      type: 'GET',
+      success: function (res) {
+        if (!res || !res.success) {
+          renderNormalMode();
+          return;
+        }
+
+        if (res.hasTransaction) {
+          // ĐÃ CÓ GIAO DỊCH: CHỈ CHO KHÓA, CẤM XÓA TUYỆT ĐỐI
+          if (titleText) titleText.textContent = res.isNgungBan ? 'Hàng hóa đã ngừng kinh doanh' : 'Không thể xóa hàng hóa';
+          if (titleEl) titleEl.style.color = '#111827';
+          if (normalBox) normalBox.style.display = 'none';
+          if (blockedBox) blockedBox.style.display = 'block';
+          if (blockedMsg) blockedMsg.textContent = res.message;
+
+          // Nút xóa BỊ ẨN HOÀN TOÀN
+          if (btnDel) {
+            btnDel.style.display = 'none';
+            btnDel.disabled = true;
+          }
+
+          // Nút Khóa / Ngừng bán
+          if (btnNgung) {
+            if (res.isNgungBan) {
+              btnNgung.style.display = 'none';
+            } else {
+              btnNgung.style.display = 'inline-flex';
+              btnNgung.disabled = false;
+              btnNgung.innerHTML = '<i class="bi bi-lock me-1"></i> Khóa hàng (Ngừng kinh doanh)';
+            }
+          }
+        } else {
+          // CHƯA CÓ GIAO DỊCH: CHO PHÉP XÓA
+          renderNormalMode();
+        }
+      },
+      error: function () {
+        renderNormalMode();
+      }
+    });
+
+    function renderNormalMode() {
+      if (titleText) titleText.textContent = 'Xóa hàng hóa';
+      if (titleEl) titleEl.style.color = '#111827';
+      if (normalBox) normalBox.style.display = 'block';
+      if (blockedBox) blockedBox.style.display = 'none';
+      if (btnDel) {
+        btnDel.style.display = 'inline-flex';
+        btnDel.disabled = false;
+        btnDel.textContent = 'Đồng ý xóa';
+      }
+      if (btnNgung) btnNgung.style.display = 'none';
+    }
   };
 
   $('#btnDeleteProductInModal')?.addEventListener('click', () => {
@@ -1648,13 +1716,31 @@
         btn.disabled = false;
         btn.textContent = origText;
         const msg = xhr.responseJSON?.message || 'Không thể xóa hàng hóa do lỗi hệ thống.';
-        const errBox = $('#delProdErrorBox');
-        const errMsg = $('#delProdErrorMsg');
+        const normalBox = $('#delProdNormalBox');
+        const blockedBox = $('#delProdBlockedBox');
+        const blockedMsg = $('#delProdBlockedMsg');
         const btnNgung = $('#btnSwitchNgungBan');
-        if (errMsg) errMsg.textContent = msg;
-        if (errBox) errBox.style.display = 'block';
-        if (btnNgung) {
-          btnNgung.style.display = xhr.responseJSON?.hasTransaction ? 'inline-flex' : 'none';
+        const titleText = $('#delProdHeaderText');
+        const titleEl = $('#delProdTitle');
+
+        if (xhr.responseJSON?.hasTransaction) {
+          if (titleText) titleText.textContent = 'Không thể xóa hàng hóa';
+          if (titleEl) titleEl.style.color = '#111827';
+          if (normalBox) normalBox.style.display = 'none';
+          if (blockedBox) blockedBox.style.display = 'block';
+          if (blockedMsg) blockedMsg.textContent = msg;
+
+          // ẨN HOÀN TOÀN nút xóa
+          btn.style.display = 'none';
+          btn.disabled = true;
+
+          if (btnNgung) {
+            btnNgung.style.display = 'inline-flex';
+            btnNgung.disabled = false;
+            btnNgung.innerHTML = '<i class="bi bi-lock me-1"></i> Khóa hàng (Ngừng kinh doanh)';
+          }
+        } else {
+          alert('Lỗi: ' + msg);
         }
       }
     });
@@ -1665,26 +1751,26 @@
     if (id <= 0) return;
 
     const btn = $('#btnSwitchNgungBan');
-    const origText = btn.textContent;
+    const origHtml = btn.innerHTML;
     btn.disabled = true;
-    btn.textContent = 'Đang chuyển...';
+    btn.textContent = 'Đang khóa hàng...';
 
     jQuery.ajax({
       url: '/HangHoa/NgungBan/' + id,
       type: 'POST',
       success: function (res) {
         btn.disabled = false;
-        btn.textContent = origText;
+        btn.innerHTML = origHtml;
         hide($('#hhDeleteProductOv'));
         hide($('#hangHoaModalOv'));
-        showToast(res.message || 'Đã chuyển hàng hóa sang Ngừng bán.');
+        showToast(res.message || 'Đã chuyển hàng hóa sang Ngừng kinh doanh.');
         if (typeof window.loadTable === 'function') {
           window.loadTable();
         }
       },
       error: function (xhr) {
         btn.disabled = false;
-        btn.textContent = origText;
+        btn.innerHTML = origHtml;
         alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể cập nhật trạng thái.'));
       }
     });

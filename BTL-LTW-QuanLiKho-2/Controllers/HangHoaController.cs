@@ -991,6 +991,41 @@ public class HangHoaController : BaseKhoController
         return Json(new { success = true, id = item.MaHang, message = $"Đã cập nhật hàng hóa {item.TenHang} thành công." });
     }
 
+    /// <summary>
+    /// Kiểm tra khả năng xóa hàng hóa (Pre-check trước khi mở modal xóa).
+    /// Nếu đã từng phát sinh bất kỳ giao dịch/chứng từ nào, chỉ cho phép khóa (Ngừng bán) chứ không cho xóa.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> CheckCanDelete(int id)
+    {
+        var item = await _context.HangHoas.FindAsync(id);
+        if (item == null) return NotFound(new { success = false, message = "Không tìm thấy hàng hóa." });
+
+        bool hasTransaction = await _context.ChiTietDonBans.AnyAsync(x => x.MaHang == id)
+            || await _context.ChiTietPhieuNhaps.AnyAsync(x => x.MaHang == id)
+            || await _context.ChiTietPhieuXuats.AnyAsync(x => x.MaHang == id)
+            || await _context.ChiTietPhieuChuyenKhos.AnyAsync(x => x.MaHang == id)
+            || await _context.ChiTietPhieuKiemKes.AnyAsync(x => x.MaHang == id)
+            || await _context.ChiTietPhieuTraHangNhaps.AnyAsync(x => x.MaHang == id);
+
+        bool isNgungBan = item.TrangThai == "NGUNG_BAN" || item.TrangThai == "NGUNG_KINH_DOANH";
+
+        return Json(new
+        {
+            success = true,
+            hasTransaction,
+            isNgungBan,
+            tenHang = item.TenHang,
+            maHangNoiBo = item.MaHangNoiBo,
+            trangThai = item.TrangThai,
+            message = hasTransaction
+                ? (isNgungBan
+                    ? $"Hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) đã phát sinh giao dịch trong hệ thống và hiện đã ở trạng thái 'Ngừng kinh doanh', không thể xóa để bảo toàn số liệu sổ sách."
+                    : $"Hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) đã phát sinh giao dịch/chứng từ trong hệ thống, không thể xóa để bảo toàn lịch sử sổ sách kế toán. Bạn chỉ có thể chuyển sang trạng thái 'Ngừng kinh doanh' để ẩn khỏi danh mục bán hàng.")
+                : $"Bạn có chắc chắn muốn xóa hàng hóa '{item.TenHang}' ({item.MaHangNoiBo})? Hàng hóa này chưa phát sinh giao dịch và sẽ bị xóa hoàn toàn khỏi hệ thống."
+        });
+    }
+
     [HttpPost]
     public async Task<IActionResult> Delete(int id)
     {
@@ -1001,7 +1036,8 @@ public class HangHoaController : BaseKhoController
             || await _context.ChiTietPhieuNhaps.AnyAsync(x => x.MaHang == id)
             || await _context.ChiTietPhieuXuats.AnyAsync(x => x.MaHang == id)
             || await _context.ChiTietPhieuChuyenKhos.AnyAsync(x => x.MaHang == id)
-            || await _context.ChiTietPhieuKiemKes.AnyAsync(x => x.MaHang == id);
+            || await _context.ChiTietPhieuKiemKes.AnyAsync(x => x.MaHang == id)
+            || await _context.ChiTietPhieuTraHangNhaps.AnyAsync(x => x.MaHang == id);
 
         if (used)
         {

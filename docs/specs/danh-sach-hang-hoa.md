@@ -34,7 +34,7 @@
 | **Thêm mới hàng** | "+ Thêm mới", nhập form, "Lưu" | JS gom form + Base64 ➜ `POST /HangHoa/Create` | `Create(...)` validate, sinh mã hàng | Lưu CSDL + PN đầu kỳ ➜ JSON `{success:true}` |
 | **Mở form Sửa** | Click Chỉnh sửa | JS AJAX `GET /HangHoa/GetItem?id=X` | `GetItem(id)` đọc hàng & tồn | Trả JSON ➜ điền modal sửa |
 | **Lưu Sửa hàng** | Sửa form, "Cập nhật" | JS gom form ➜ AJAX `POST /HangHoa/Edit?id=X` | `Edit(id, form)` validate & cập nhật | Lưu CSDL ➜ JSON `{success:true}` |
-| **Xóa hàng** | Click Xóa ➜ Xác nhận | Mở `#hhDeleteProductOv` ➜ AJAX `POST /HangHoa/Delete/{id}` | `Delete(id)` check 5 bảng GD, bọc Trans | Chưa GD: Xóa. Đã có: Báo chặn & gợi ý ngừng bán |
+| **Xóa hàng** | Click Xóa ➜ Xác nhận | Pre-check `GET /HangHoa/CheckCanDelete/{id}`. Chưa GD: hiện nút Xóa. Đã có: ẩn nút Xóa, chỉ hiện nút Khóa | `Delete(id)` check 6 bảng GD, bọc Trans | Chưa GD: Xóa. Đã có GD: Chặn xóa vĩnh viễn, chỉ cho khóa |
 | **Xuất file Excel** | Bấm "Xuất file" ➜ Chọn cột ➜ Bấm Xuất | Mở `#hhExportModalOv` ➜ `POST /HangHoa/ExportExcel` | ClosedXML xuất đúng cột chọn | Trả file `.xlsx` |
 | **Nhập file Excel** | Kéo thả file ➜ Thực hiện nhập | Mở `#hhImportModalOv` ➜ `POST /HangHoa/ImportExcel` | Validate, parse 16 trường, xử lý trùng mã | Commit Trans ➜ reload bảng |
 
@@ -59,7 +59,7 @@
 
 ## 4. Các Quy tắc Nghiệp vụ Bất biến
 
-1. **BẢO TOÀN DỮ LIỆU & RÀNG BUỘC CHỨNG TỪ**: Kiểm tra cả 5 bảng: `ChiTietDonBan`, `ChiTietPhieuNhap`, `ChiTietPhieuXuat`, `ChiTietPhieuChuyenKho`, `ChiTietPhieuKiemKe`. Có giao dịch: chặn xóa, gợi ý chuyển `NGUNG_BAN`. Chưa có: xóa cascade ảnh và ngưỡng tồn trong Transaction.
+1. **BẢO TOÀN DỮ LIỆU & RÀNG BUỘC CHỨNG TỪ**: Kiểm tra cả 6 bảng: `ChiTietDonBan`, `ChiTietPhieuNhap`, `ChiTietPhieuXuat`, `ChiTietPhieuChuyenKho`, `ChiTietPhieuKiemKe`, `ChiTietPhieuTraHangNhap`. Có giao dịch: chặn xóa vĩnh viễn, ẩn nút 'Đồng ý xóa', chỉ cho phép chuyển sang `NGUNG_BAN` (Khóa hàng). Chưa có giao dịch: cho phép xóa cascade ảnh và ngưỡng tồn trong Transaction.
 2. **QUY CHUẨN XUẤT NHẬP EXCEL ĐỒNG BỘ 16 TRƯỜNG**:
    - 16 trường quản lý chuẩn: Loại hàng, Nhóm hàng, Mã hàng, Tên hàng (*), Giá bán, Giá vốn, Tồn kho, Tồn nhỏ nhất, Tồn lớn nhất, Đơn vị tính, Thuộc tính, Trọng lượng, Đơn vị TL, Vị trí, Mô tả, Trạng thái.
    - Khi xuất file, người bán được chọn cột muốn xuất. Có cảnh báo: Nếu bỏ chọn các cột thiết yếu (Tên hàng, Mã hàng, Loại hàng, ĐVT) thì file xuất ra KHÔNG THỂ làm file nhập ngược lại.

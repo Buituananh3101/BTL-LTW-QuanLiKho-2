@@ -1,17 +1,86 @@
 ﻿# Tiến độ dự án
 
-Cập nhật lần cuối: 2026-11-02 – Thay Nút Khóa Bằng Nút Xóa Người Dùng & Chặn Xóa Khi Đã Phát Sinh Giao Dịch (Phiên 208)
+Cập nhật lần cuối: 2026-11-02 – Triển Khai Nghiệp Vụ Xóa & Khóa Chi Nhánh Kho An Toàn Dữ Liệu (Phiên 211)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử trải nghiệm phân hệ Người dùng (`/NguoiDung`): nút Xóa (icon thùng rác đỏ) thay thế nút Khóa trên bảng danh sách; khi bấm Xóa hệ thống tự động kiểm tra phát sinh chứng từ trên 7 bảng nghiệp vụ (nếu chưa có giao dịch -> xóa vĩnh viễn; nếu đã có chứng từ -> thông báo lý do bảo toàn lịch sử và chuyển sang Khóa tài khoản).
+- Đã hoàn tất triển khai nghiệp vụ Xóa và Khóa (Ngừng hoạt động) chi nhánh kho tại `/Kho`:
+  + Nghiệp vụ Xóa: Cho phép xóa vĩnh viễn chi nhánh kho khi tạo nhầm (chưa phát sinh bất kỳ chứng từ nào); nếu đã phát sinh chứng từ (nhập, xuất, chuyển, kiểm, trả hàng, bán) thì chặn xóa và thông báo hỏi chuyển sang Khóa kho.
+  + Nghiệp vụ Khóa: Bổ sung bảo vệ chặn khóa hoặc xóa kho đang được chọn làm việc trong phiên hiện tại hoặc kho duy nhất của hệ thống.
+  + Giao diện & Modal: Bổ sung nút thùng rác 🗑️, modal xác nhận Lego `KiotConfirm`, thông báo Toast rõ ràng.
+  + Kiểm tra biên dịch hệ thống `dotnet build -t:Compile` đạt **0 Errors**.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế trên trình duyệt tại URL `http://localhost:7087/NguoiDung`.
+1. Kiểm tra trải nghiệm thực tế trên trình duyệt giao diện Quản lý Kho (`http://localhost:7087/Kho`).
 2. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
+
+---
+
+- **Triển Khai Nghiệp Vụ Xóa & Khóa Chi Nhánh Kho An Toàn Dữ Liệu (Phiên 211)**:
+  - **Nhu cầu**: Người dùng yêu cầu: *"triển khai nghiệp vụ xóa và khóa"* cho phân hệ Quản lý Chi nhánh Kho (`/Kho`).
+  - **Nguyên nhân & Hiện trạng trước đó**:
+    + Trước đây đặc tả thiết kế "chống xóa cứng" chung chung, khiến người dùng lỡ tạo nhầm kho test/kho thừa thì không có cách nào xóa vĩnh viễn khỏi danh mục.
+    + Thao tác ngừng hoạt động (khóa) kho trước đó chưa kiểm tra xem kho có phải là chi nhánh mà tài khoản Quản lý đang làm việc trong phiên hay không.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`Controllers/KhoController.cs`**:
+       - Bổ sung Action `[HttpPost] Delete(int id, bool chuyenKhoa = false)`:
+         * Chặn xóa kho đang làm việc (`CurrentWarehouseId`) hoặc kho duy nhất của hệ thống.
+         * Kiểm tra toàn bộ 7 loại giao dịch/chứng từ (`PhieuNhap`, `PhieuXuat`, `PhieuChuyenKho` nguồn/đích, `PhieuKiemKe`, `PhieuTraHangNhap`, `DonBan`).
+         * Nếu đã có chứng từ: Chặn xóa vĩnh viễn, hỗ trợ chuyển trạng thái sang `NGUNG_HOAT_DONG` (Khóa kho) khi xác nhận `chuyenKhoa = true`.
+         * Nếu chưa có chứng từ (lỡ tạo nhầm): Bọc Transaction xóa sạch `TaiKhoanKho`, `NguongTonKho` và bản ghi `Kho`, ghi nhật ký kiểm toán `INhatKyThaoTacService`.
+       - Nâng cấp Action `ToggleStatus(int id)` và `Edit(...)`: Chặn ngừng hoạt động kho đang làm việc trong phiên.
+    2. **`Views/Kho/_KhoTable.cshtml`**:
+       - Cân đối độ rộng cột: tăng cột Thao tác lên `105px`.
+       - Bổ sung nút Xóa màu đỏ 🗑️ (`.btn-delete-kho`) cạnh nút Sửa và nút Khóa/Mở.
+    3. **`wwwroot/js/kho-index.js`**:
+       - Bắt sự kiện click `.btn-delete-kho`, hiển thị modal xác nhận Lego `KiotConfirm.show(...)`.
+       - Nếu kho đã có chứng từ, tự động hiển thị modal cảnh báo vàng và hỏi người dùng có muốn chuyển sang "Ngừng hoạt động (Khóa kho)" hay không.
+    4. **Tài liệu & Kiểm tra**:
+       - Đồng bộ đặc tả [`docs/specs/quan-ly-kho.md`].
+       - Kiểm tra JavaScript `node -c kho-index.js` hợp lệ 100%.
+       - Biên dịch .NET `dotnet build -t:Compile` hoàn thành đạt **0 Errors**.
+
+- **Khắc Phục Triệt Để Lỗi Double-Toggle Khiến Accordion Cụm Thông Tin Khách Hàng Không Hoạt Động (Phiên 210)**:
+  - **Nhu cầu**: Người dùng phản ánh: *"trong phần khách hàng, những cái toggle đúng mở cụm thông tin ko hoạt động"* kèm ảnh modal Khách hàng chứa 3 cụm Accordion (".hh-sec": Địa chỉ, Nhóm khách hàng ghi chú, Thông tin xuất hóa đơn).
+  - **Nguyên nhân cốt lõi**:
+    + Thư viện dùng chung `site.js` đã có Lego `KiotCollapsible` (lắng nghe `document.addEventListener('click')` trên `.kiot-sec-h, .hh-sec-h` để tự động toggle `.open` theo Luật 10).
+    + Tuy nhiên trong `khach-hang-index.js` (và một số file cũ như `kho-index.js`, `nha-cung-cap-index.js`, `nhap-hang-form.js`, `hang-hoa-form.js`) lại tiếp tục gắn thêm listener jQuery `$(document).on('click', '.hh-sec-h', ...)`.
+    + Khi người dùng click vào header accordion, cả 2 listener cùng chạy trong 1 sự kiện click: `site.js` chuyển từ `open` thành không `open`, ngay lập tức script con lại chuyển ngược lại từ không `open` thành `open` -> Bị toggle 2 lần (double-toggle) triệt tiêu nhau, khiến mắt thường nhìn thấy giao diện đứng im không có phản hồi gì.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **site.js (KiotCollapsible)**:
+      * Bổ sung điều kiện chặn nếu click trúng các controls form bên trong header: `if (e.target.closest('button, a, input, select, textarea, label, .form-check')) return;`.
+      * Bổ sung cờ chống đúp `e._kiotCollapsibleHandled` đảm bảo an toàn tuyệt đối nếu có sự kiện click lan truyền.
+    + **Dọn dẹp triệt để mã trùng lặp ở các trang**:
+      * Loại bỏ sự kiện click `.hh-sec-h` thừa tại: `khach-hang-index.js`, `kho-index.js`, `nha-cung-cap-index.js`, `nhap-hang-form.js`, `hang-hoa-form.js`. Giao toàn bộ việc quản lý gập mở cho Khối Lego `KiotCollapsible` theo đúng Rule 10.
+    + **hang-hoa-form.css**:
+      * Bổ sung `pointer-events: none;` cho `.hh-sec-h .hh-chev` để loại trừ trường hợp click trúng SVG/use icon trên một số trình duyệt.
+      * Thêm hiệu ứng hover nền nhẹ `#f8fafc` và `transition: background-color 0.15s ease` cho `.hh-sec-h` giúp trực quan, người dùng dễ nhận biết khối có thể click gập mở.
+    + **Kiểm tra**:
+      * `node -c`: Tất cả 6 file JS đều hợp lệ 100%.
+      * `dotnet build -t:Compile`: Biên dịch hoàn tất với **0 Errors**.
+      * Đồng bộ `docs/specs/khach-hang.md` đạt 7.984 ký tự (< 8.000 ký tự theo Rule 12).
+
+---
+- **Chuẩn Hóa Kiểm Tra Trước Khi Xóa Hàng Hóa: Chặn Xóa Khi Đã Phát Sinh Giao Dịch, Chỉ Cho Phép Khóa (Phiên 209)**:
+  - **Nhu cầu**: Người dùng yêu cầu: *"kiểm tra phần xóa hàng hóa, xem đã có phần kiểm tra trước khi xóa, nếu hàng hóa từng phát sinh giao dịch thì chỉ cho khóa chứ ko cho xxoas"*.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Backend (HangHoaController.cs)**:
+      * Bổ sung `ChiTietPhieuTraHangNhaps` vào danh sách 6 bảng giao dịch cần kiểm tra trong hàm `Delete(int id)` (`ChiTietDonBan`, `ChiTietPhieuNhap`, `ChiTietPhieuXuat`, `ChiTietPhieuChuyenKho`, `ChiTietPhieuKiemKe`, `ChiTietPhieuTraHangNhap`).
+      * Thêm Action `[HttpGet] CheckCanDelete(int id)` để thực hiện Pre-check kiểm tra ngay khi người dùng bấm nút "Xóa", trả về `hasTransaction`, `isNgungBan`, `message` thân thiện.
+    + **Giao diện Modal (Views/HangHoa/_HangHoaModal.cshtml)**:
+      * Nâng cấp Modal `#hhDeleteProductOv`: Tách rõ 2 chế độ:
+        - Chế độ 1 (Chưa có giao dịch): Hỏi xác nhận xóa vĩnh viễn, hiển thị nút "Đồng ý xóa".
+        - Chế độ 2 (ĐÃ CÓ GIAO DỊCH): Khung cảnh báo thông tin chuẩn mực đồng bộ 100% chữ đen (`#111827`, `#1f2937`), **ẨN HOÀN TOÀN nút "Đồng ý xóa"**, chỉ hiển thị nút **"Khóa hàng (Ngừng kinh doanh)"** (hoặc thông báo đã bị khóa nếu vốn ở trạng thái `NGUNG_BAN`).
+    + **JavaScript (wwwroot/js/hang-hoa-form.js)**:
+      * Cập nhật `window.openDeleteProductModal(id, name)`: Gọi `GET /HangHoa/CheckCanDelete/{id}` để Pre-check tức thì.
+      * Xử lý ẩn/hiện nút "Đồng ý xóa" và "Khóa hàng (Ngừng kinh doanh)" chuẩn xác, click "Khóa hàng" sẽ gọi `POST /HangHoa/NgungBan/{id}`, nạp lại bảng mượt mà.
+    + **Kiểm tra & Đồng bộ**:
+      * `node -c hang-hoa-form.js`: Hợp lệ 100%.
+      * `dotnet build -t:Compile`: Biên dịch hoàn tất **0 Errors**.
+      * Đồng bộ `docs/specs/danh-sach-hang-hoa.md`.
 
 ---
 

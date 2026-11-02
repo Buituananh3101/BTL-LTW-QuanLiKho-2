@@ -1,4 +1,4 @@
-﻿/**
+/**
  * site.js – Thư viện tiện ích JavaScript dùng chung toàn hệ thống KhoPro
  */
 
@@ -123,8 +123,16 @@ window.KiotNumber = (function () {
 // 3. KiotCollapsible – Tự động gập mở khối Accordion (.kiot-sec / .hh-sec)
 // ========================================================================
 document.addEventListener('click', function (e) {
+    // Không toggle nếu click vào button, link, form controls bên trong header
+    if (e.target.closest('button, a, input, select, textarea, label, .form-check')) {
+        return;
+    }
     const header = e.target.closest('.kiot-sec-h, .hh-sec-h');
     if (header) {
+        // Ngăn chặn double-toggle trong cùng một sự kiện click
+        if (e._kiotCollapsibleHandled) return;
+        e._kiotCollapsibleHandled = true;
+
         const sec = header.closest('.kiot-sec, .hh-sec');
         if (sec) {
             sec.classList.toggle('open');

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * nhap-hang-form.js
  * Quản lý màn hình Lập / Sửa / Xem Phiếu Nhập Hàng (chuẩn chuyên nghiệp)
  * Hỗ trợ Autocomplete F3, Import Excel, Tính toán tự động, Phím tắt F4/F9/F10
@@ -424,11 +424,6 @@ $(function () {
         if (e.target === this) {
             hideNccModal(this.id);
         }
-    });
-
-    // Accordion Sections (.hh-sec)
-    $(document).on('click', '.hh-sec-h', function () {
-        $(this).closest('.hh-sec').toggleClass('open');
     });
 
     // Custom Combobox Nhóm NCC trong Modal

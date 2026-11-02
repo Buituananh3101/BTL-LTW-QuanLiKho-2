@@ -1,6 +1,6 @@
-/* ==========================================================================
-   CSS FORM TẠO & CẬP NHẬT HÀNG HÓA CHUẨN KIOTVIET (PROTOTYPE MATCH)
-   Hỗ trợ 5 ảnh, định mức tồn Min/Max, vị trí, trọng lượng, thuộc tính động, tab mô tả
+﻿/* ==========================================================================
+   CSS FORM Táº O & Cáº¬P NHáº¬T HĂ€NG HĂ“A CHUáº¨N KIOTVIET (PROTOTYPE MATCH)
+   Há»— trá»£ 5 áº£nh, Ä‘á»‹nh má»©c tá»“n Min/Max, vá»‹ trĂ­, trá»ng lÆ°á»£ng, thuá»™c tĂ­nh Ä‘á»™ng, tab mĂ´ táº£
    ========================================================================== */
 
 :root {
@@ -338,7 +338,7 @@
   text-align: right;
 }
 
-/* ===== Quản lý 5 ảnh sản phẩm ===== */
+/* ===== Quáº£n lĂ½ 5 áº£nh sáº£n pháº©m ===== */
 .hh-imgs {
   display: flex;
   gap: 10px;
@@ -525,7 +525,7 @@
   background: #ef4444;
 }
 
-/* ===== Khối gập mở (Accordion sections) ===== */
+/* ===== Khá»‘i gáº­p má»Ÿ (Accordion sections) ===== */
 .hh-sec {
   border: 1px solid var(--hh-line-l);
   border-radius: 10px;
@@ -542,6 +542,10 @@
   gap: 12px;
   background: #fff;
   border-radius: 10px;
+  transition: background-color 0.15s ease;
+}
+.hh-sec-h:hover {
+  background-color: #f8fafc;
 }
 .hh-sec-h h3 {
   margin: 0;
@@ -556,6 +560,12 @@
 }
 .hh-sec-h .hh-chev {
   transition: transform 0.2s;
+  color: #374151;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  pointer-events: none;
+} transition: transform 0.2s;
   color: #374151;
   width: 18px;
   height: 18px;
@@ -597,7 +607,7 @@
   border-left: 0;
 }
 
-/* ===== Multi-select Tag Dropdown (Vị trí) chuẩn hình ảnh KiotViet ===== */
+/* ===== Multi-select Tag Dropdown (Vá»‹ trĂ­) chuáº©n hĂ¬nh áº£nh KiotViet ===== */
 .hh-multiselect-wrap {
   position: relative;
   width: 100%;
@@ -664,7 +674,7 @@
 .hh-loc-tag button.hh-loc-tag-del:hover {
   color: #dc3545;
 }
-/* QUAN TRỌNG: Ghi đè quy tắc .hh-f input[type=text] để không bị vỡ chiều cao */
+/* QUAN TRá»ŒNG: Ghi Ä‘Ă¨ quy táº¯c .hh-f input[type=text] Ä‘á»ƒ khĂ´ng bá»‹ vá»¡ chiá»u cao */
 .hh-f .hh-multiselect-box input[type=text],
 .hh-multiselect-box input {
   flex: 1 1 80px;
@@ -741,7 +751,7 @@
   text-align: center;
 }
 
-/* ===== Single-select Custom Dropdown (Nhóm hàng, Đơn vị tính, Trọng lượng, Thuộc tính) ===== */
+/* ===== Single-select Custom Dropdown (NhĂ³m hĂ ng, ÄÆ¡n vá»‹ tĂ­nh, Trá»ng lÆ°á»£ng, Thuá»™c tĂ­nh) ===== */
 .hh-cs-wrap {
   position: relative;
   width: 100%;
@@ -898,7 +908,7 @@
 .hh-cs-item.selected .hh-check-icon {
   display: block;
 }
-/* Nút bút chì sửa item khi hover trong dropdown Vị trí và Thuộc tính (Chuẩn KiotViet) */
+/* NĂºt bĂºt chĂ¬ sá»­a item khi hover trong dropdown Vá»‹ trĂ­ vĂ  Thuá»™c tĂ­nh (Chuáº©n KiotViet) */
 .hh-item-edit-btn {
   display: none;
   align-items: center;
@@ -969,7 +979,7 @@
   border-left: 0 !important;
 }
 
-/* ===== Drop-up Mode (Hiển thị ngược lên khi dropdown ở vị trí thấp) ===== */
+/* ===== Drop-up Mode (Hiá»ƒn thá»‹ ngÆ°á»£c lĂªn khi dropdown á»Ÿ vá»‹ trĂ­ tháº¥p) ===== */
 .hh-cs-wrap.drop-up .hh-cs-dropdown,
 .hh-multiselect-wrap.drop-up .hh-multiselect-dropdown {
   top: auto !important;
@@ -977,7 +987,7 @@
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.12) !important;
 }
 
-/* Thuộc tính */
+/* Thuá»™c tĂ­nh */
 .hh-sub-t {
   font-size: 13.5px;
   font-weight: 700;
@@ -1102,7 +1112,7 @@
   color: #0852bd;
 }
 
-/* Tab Mô tả */
+/* Tab MĂ´ táº£ */
 .hh-rte-bar {
   display: flex;
   gap: 4px;
@@ -1144,7 +1154,7 @@
   color: #9ca3af;
 }
 
-/* Chân modal & Split buttons */
+/* ChĂ¢n modal & Split buttons */
 .hh-chk {
   display: flex;
   align-items: center;
@@ -1234,7 +1244,7 @@
   color: #111;
 }
 
-/* Modal Con (Tạo nhanh & Chọn giá trị) */
+/* Modal Con (Táº¡o nhanh & Chá»n giĂ¡ trá»‹) */
 .hh-modal.small .hh-m-body {
   padding: 10px 24px 20px;
 }
@@ -1399,7 +1409,7 @@
   font-weight: 600;
 }
 
-/* Nút Xóa ở góc trái chân modal Sửa vị trí / Sửa thuộc tính */
+/* NĂºt XĂ³a á»Ÿ gĂ³c trĂ¡i chĂ¢n modal Sá»­a vá»‹ trĂ­ / Sá»­a thuá»™c tĂ­nh */
 .hh-btn-del {
   display: inline-flex;
   align-items: center;
@@ -1486,7 +1496,7 @@
 
 
 /* ==========================================================================
-   CSS BỔ TRỢ CHO PHÂN HỆ KHÁCH HÀNG (CHUẨN 4 ẢNH KIOTVIET)
+   CSS Bá»” TRá»¢ CHO PHĂ‚N Há»† KHĂCH HĂ€NG (CHUáº¨N 4 áº¢NH KIOTVIET)
    ========================================================================== */
 .kiot-segmented-group {
   display: flex;
