@@ -16,5 +16,5 @@ public class DoiMatKhauCaNhanVM
 
     [Required(ErrorMessage = "Vui lòng xác nhận mật khẩu mới.")]
     [Compare("MatKhauMoi", ErrorMessage = "Mật khẩu xác nhận không trùng khớp.")]
-    public string XacNhanMatKhau { get; set; } = string.Empty;
+    public string XacNhanMatKhau { get; set; } = string.Empty; 
 }
