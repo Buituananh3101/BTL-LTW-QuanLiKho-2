@@ -1,20 +1,38 @@
-# Tiến độ dự án
+﻿# Tiến độ dự án
 
-Cập nhật lần cuối: 2026-11-02 – Căn Chỉnh Vị Trí Picturebox Khách Hàng Dịch Xuống Dưới Cân Đối Tuyệt Đối (Phiên 207)
+Cập nhật lần cuối: 2026-11-02 – Thay Nút Khóa Bằng Nút Xóa Người Dùng & Chặn Xóa Khi Đã Phát Sinh Giao Dịch (Phiên 208)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất gỡ bỏ huy hiệu [F3] trên tiêu đề "Mặt hàng theo dõi" ở sidebar Thẻ kho (`/BaoCao/TheKho`):
-  + Tiêu đề phẳng sạch sẽ, đồng bộ 100% với các khối bộ lọc `Chi nhánh kho`, `Thời gian`, `Loại giao dịch`.
-  + Phím tắt F3 trên bàn phím vẫn hoạt động nhanh nhạy và mượt mà.
-  + Kiểm tra biên dịch hệ thống `dotnet build -t:Compile` đạt **0 Errors**.
+- Sẵn sàng kiểm thử trải nghiệm phân hệ Người dùng (`/NguoiDung`): nút Xóa (icon thùng rác đỏ) thay thế nút Khóa trên bảng danh sách; khi bấm Xóa hệ thống tự động kiểm tra phát sinh chứng từ trên 7 bảng nghiệp vụ (nếu chưa có giao dịch -> xóa vĩnh viễn; nếu đã có chứng từ -> thông báo lý do bảo toàn lịch sử và chuyển sang Khóa tài khoản).
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế trên trình duyệt giao diện Thẻ kho (`http://localhost:7087/BaoCao/TheKho`).
+1. Kiểm tra trải nghiệm thực tế trên trình duyệt tại URL `http://localhost:7087/NguoiDung`.
 2. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
+
+---
+
+- **Thay Nút Khóa Bằng Nút Xóa Người Dùng & Chặn Xóa Khi Đã Phát Sinh Giao Dịch (Phiên 208)**:
+  - **Nhu cầu**: Người dùng yêu cầu: *"thay nút khóa bằng xóa, khi ấn xóa sẽ kiêm tra xem đã phát sinh giao dịch cho, nếu rồi thì chỉ cho khóa"*.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Backend (Controllers/NguoiDungController.cs)**:
+      * Bổ sung hàm kiểm tra phát sinh chứng từ `KiemTraNhanVienCoGiaoDichAsync` quét qua 7 bảng nghiệp vụ (`PhieuNhap`, `PhieuXuat`, `PhieuChuyenKho`, `PhieuKiemKe`, `PhieuDieuChinh`, `DonBan`, `KhoanThu`, `PhieuTraHangNhap`).
+      * Bổ sung Action `Delete(int id, bool chuyenKhoa = false)`:
+        - Chặn tự xóa tài khoản của chính mình (`id == CurrentUserId`) và tài khoản quản trị hệ thống gốc (`admin`, `quanly`).
+        - Nếu **đã phát sinh giao dịch**: Chặn xóa vĩnh viễn (trả về `hasTransaction = true`). Nếu người dùng xác nhận chuyển sang khóa tài khoản (`chuyenKhoa = true`), hệ thống chuyển trạng thái sang `KHOA` và nhân viên sang `NGHI_VIEC`.
+        - Nếu **chưa phát sinh giao dịch**: Bọc trong giao dịch Transaction `BeginTransactionAsync()`, xóa dọn sạch phân quyền kho `TaiKhoanKho`, nhật ký thao tác `NhatKyThaoTac`, tài khoản `TaiKhoan` và hồ sơ nhân sự `NhanVien` (nếu không có tài khoản khác trỏ tới).
+    + **Giao diện Bảng (Views/NguoiDung/_NguoiDungTable.cshtml)**:
+      * Thay nút `btn-toggle-status` bằng nút Xóa `btn-delete-user` (icon `bi-trash text-danger`). Nếu là tài khoản chính mình thì nút Xóa bị vô hiệu hóa mờ `disabled`.
+    + **JavaScript (wwwroot/js/nguoi-dung-index.js)**:
+      * Bắt sự kiện click `.btn-delete-user` hiển thị hộp thoại xác nhận chuyên nghiệp `KiotConfirm`.
+      * Khi có phản hồi đã phát sinh giao dịch, hiển thị hộp thoại cảnh báo: *"Người dùng [Tên] đã phát sinh chứng từ trong hệ thống nên không thể xóa vĩnh viễn để bảo toàn lịch sử dữ liệu. Bạn có muốn chuyển sang KHÓA TÀI KHOẢN để ngừng quyền truy cập không?"* kèm nút "Khóa tài khoản" và xử lý chuyển trạng thái mượt mà.
+    + **Kiểm tra**:
+      * `node -c nguoi-dung-index.js`: Hợp lệ 100%.
+      * `dotnet build -t:Compile`: Biên dịch hoàn thành với **0 Errors**.
+      * Đồng bộ đặc tả `docs/specs/nguoi-dung.md` đạt 7.417 ký tự (< 8.000 ký tự theo Rule 12).
 
 ---
 

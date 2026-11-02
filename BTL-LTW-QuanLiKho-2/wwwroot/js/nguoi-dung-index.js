@@ -1,4 +1,4 @@
-﻿/**
+/**
  * nguoi-dung-index.js - Quản lý tương tác màn hình Người dùng & Phân quyền
  * Chuẩn hóa 100% theo khuôn mẫu chuyên nghiệp LEGO
  */
@@ -588,48 +588,85 @@
         });
     });
 
-    // 12. Khóa / Mở khóa tài khoản
-    $(document).on('click', '.btn-toggle-status', function () {
+    // 12. Xóa người dùng (Nếu chưa có giao dịch -> Xóa vĩnh viễn; Nếu đã có giao dịch -> Chỉ cho phép Khóa tài khoản)
+    $(document).on('click', '.btn-delete-user', function () {
         const id = $(this).data('id');
         const username = $(this).data('username') || '';
-        const currentStatus = $(this).data('status');
-        const isLocking = currentStatus === 'HOAT_DONG';
-        const actionTitle = isLocking ? 'Khóa tài khoản' : 'Mở khóa tài khoản';
         const safeUsername = $('<div>').text(username).html();
 
-        const doToggle = function () {
+        const executeDelete = function () {
             $.ajax({
-                url: '/NguoiDung/ToggleStatus?id=' + id,
+                url: '/NguoiDung/Delete?id=' + id,
                 type: 'POST',
                 success: function (res) {
                     if (res.success) {
                         if (window.KiotToast) KiotToast.success(res.message);
                         loadTable(currentPage);
+                    } else if (res.hasTransaction) {
+                        // Đã phát sinh giao dịch: Chặn xóa và hỏi có muốn chuyển sang Khóa tài khoản không
+                        if (res.isLocked) {
+                            if (window.KiotToast) {
+                                KiotToast.warning(`Người dùng <b>${safeUsername}</b> đã phát sinh chứng từ và hiện đang ở trạng thái <b>Bị khóa</b>, không thể xóa vĩnh viễn.`);
+                            }
+                        } else {
+                            setTimeout(function () {
+                                if (window.KiotConfirm && typeof window.KiotConfirm.show === 'function') {
+                                    window.KiotConfirm.show({
+                                        title: 'Không thể xóa người dùng',
+                                        icon: 'bi-shield-exclamation',
+                                        iconColor: '#f59e0b',
+                                        message: `Người dùng <strong>${safeUsername}</strong> đã phát sinh chứng từ trong hệ thống (nhập, xuất, kiểm kê hoặc bán hàng) nên <strong>không thể xóa vĩnh viễn</strong> để bảo toàn lịch sử dữ liệu.<br><br>Bạn có muốn chuyển sang <strong>KHÓA TÀI KHOẢN</strong> để ngừng quyền truy cập của người dùng này không?`,
+                                        confirmText: 'Khóa tài khoản',
+                                        confirmClass: 'btn btn-warning text-dark fw-semibold',
+                                        cancelText: 'Bỏ qua',
+                                        onConfirm: function () {
+                                            $.ajax({
+                                                url: '/NguoiDung/Delete?id=' + id + '&chuyenKhoa=true',
+                                                type: 'POST',
+                                                success: function (lockRes) {
+                                                    if (lockRes.success) {
+                                                        if (window.KiotToast) KiotToast.success(lockRes.message);
+                                                        loadTable(currentPage);
+                                                    } else {
+                                                        if (window.KiotToast) KiotToast.error(lockRes.message);
+                                                    }
+                                                },
+                                                error: function (xhr) {
+                                                    if (window.KiotToast) KiotToast.error(xhr.responseJSON?.message || 'Không thể khóa tài khoản.');
+                                                }
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    if (window.KiotToast) KiotToast.warning(res.message);
+                                }
+                            }, 200);
+                        }
                     } else {
-                        if (window.KiotToast) KiotToast.error(res.message);
+                        if (window.KiotToast) KiotToast.error(res.message || 'Không thể xóa người dùng.');
                     }
                 },
                 error: function (xhr) {
-                    if (window.KiotToast) KiotToast.error(xhr.responseJSON?.message || 'Không thể thực hiện thao tác.');
+                    if (window.KiotToast) KiotToast.error(xhr.responseJSON?.message || 'Đã xảy ra lỗi khi thực hiện thao tác.');
                 }
             });
         };
 
         if (window.KiotConfirm && typeof window.KiotConfirm.show === 'function') {
             window.KiotConfirm.show({
-                title: actionTitle,
-                icon: isLocking ? 'bi-lock-fill' : 'bi-unlock-fill',
-                iconColor: isLocking ? '#dc2626' : '#0d6efd',
-                message: isLocking
-                    ? `Bạn có chắc chắn muốn <strong>khóa tài khoản</strong> của người dùng <strong>${safeUsername}</strong> không?<br><span class="text-muted small mt-1 d-block">Sau khi khóa, người dùng này sẽ không thể đăng nhập vào hệ thống.</span>`
-                    : `Bạn có chắc chắn muốn <strong>mở khóa tài khoản</strong> của người dùng <strong>${safeUsername}</strong> không?<br><span class="text-muted small mt-1 d-block">Người dùng này sẽ có thể đăng nhập và tiếp tục thao tác trên hệ thống.</span>`,
-                confirmText: isLocking ? 'Đồng ý khóa' : 'Đồng ý mở khóa',
-                confirmClass: isLocking ? 'btn btn-danger' : 'btn btn-primary',
+                title: 'Xác nhận xóa người dùng',
+                icon: 'bi-trash-fill',
+                iconColor: '#dc2626',
+                message: `Bạn có chắc chắn muốn xóa người dùng <strong>${safeUsername}</strong> không?<br><span class="text-muted small mt-1 d-block">Hệ thống sẽ kiểm tra giao dịch: nếu chưa phát sinh phiếu sẽ xóa vĩnh viễn, nếu đã có chứng từ sẽ yêu cầu chuyển sang khóa tài khoản.</span>`,
+                confirmText: 'Xóa người dùng',
+                confirmClass: 'btn btn-danger',
                 cancelText: 'Bỏ qua',
-                onConfirm: doToggle
+                onConfirm: executeDelete
             });
         } else {
-            doToggle();
+            if (confirm(`Bạn có chắc chắn muốn xóa người dùng "${username}" không?`)) {
+                executeDelete();
+            }
         }
     });
 

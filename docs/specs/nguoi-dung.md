@@ -1,4 +1,4 @@
-﻿# Đặc tả Chức năng: Quản lý Người dùng & Phân quyền Kho
+# Đặc tả Chức năng: Quản lý Người dùng & Phân quyền Kho
 
 > **Mô-đun**: Thiết lập hệ thống ➜ Người dùng & Phân quyền  
 > **Tài liệu tham chiếu**: [`.agent/rules/04-xac-thuc-phan-quyen.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/.agent/rules/04-xac-thuc-phan-quyen.md) | [`AGENTS.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/AGENTS.md)
@@ -12,8 +12,8 @@
 - **Hành động nghiệp vụ**:
   - Xem danh sách tài khoản kèm bộ lọc tìm kiếm theo từ khóa (tên đăng nhập, họ tên nhân viên, SĐT), theo Vai trò, Trạng thái (Hoạt động / Bị khóa) và Kho phụ trách.
   - Thêm mới tài khoản: Tạo đồng thời hồ sơ `NhanVien`, `TaiKhoan` (mã hóa SHA-256) và bảng ánh xạ `TaiKhoanKho`.
-  - Chỉnh sửa tài khoản: Cập nhật thông tin nhân viên, vai trò và đồng bộ danh sách kho phụ trách.
-  - Khóa / Mở khóa tài khoản: Đổi trạng thái `DangHoatDong` (chống người dùng tự khóa tài khoản chính mình).
+  - Chỉnh sửa tài khoản: Cập nhật thông tin nhân viên, vai trò, trạng thái và đồng bộ danh sách kho phụ trách.
+  - Xóa người dùng: Kiểm tra phát sinh chứng từ trên 7 bảng nghiệp vụ (Nhập, Xuất, Chuyển, Kiểm kê, Điều chỉnh, Bán hàng, Trả hàng nhập). Nếu chưa có giao dịch thì xóa vĩnh viễn; nếu đã có chứng từ thì chặn xóa và hướng dẫn người dùng chuyển sang Khóa tài khoản để bảo toàn lịch sử.
   - Đổi / Đặt lại mật khẩu (Reset password) nhanh.
 
 ---
@@ -48,16 +48,12 @@
   - Phân trang AJAX: Tái sử dụng Lego `_Pagination.cshtml`.
 
 ### 3.2. Modal Thêm/Sửa người dùng (`_NguoiDungModal.cshtml`)
-- Giao diện Modal Overlay hệ thống dựa trên khuôn mẫu Tạo hàng hóa (`_HangHoaModal.cshtml`).
-- **Header (`.hh-m-head`)**: Tiêu đề "Thêm mới người dùng" / "Cập nhật người dùng: [Tên]", nút đóng `X` (`.hh-x`).
-- **Body (`.hh-m-body`)**:
-  - Khối 1: **Các trường thông tin tài khoản & nhân sự** (`.hh-fields`, `.hh-f`): Tên đăng nhập `*`, Mật khẩu `*` (icon mắt ẩn/hiện), Họ và tên `*`, Vai trò `*`, SĐT, Email, và ô nhập Ghi chú nhân sự.
-  - Khối 2: **Accordion Địa chỉ cư trú** (`.hh-sec open`, `.hh-sec-h`, `.hh-sec-b`): Địa chỉ chi tiết.
-  - Khối 3: **Accordion Phân quyền chi nhánh kho** (`.hh-sec open`): Nút Chọn tất cả/Bỏ chọn, banner Quản lý, lưới thẻ Card kho trực quan (`.kho-card-grid`).
-- **Footer (`.hh-m-foot`)**: Checkbox Trạng thái "Đang hoạt động" bên trái (`.hh-chk`), nút Bỏ qua (`.hh-btn`) và nút Lưu người dùng (`.hh-btn.primary`).
+- Header: Tiêu đề, nút đóng `X`.
+- Body: Thông tin tài khoản & nhân sự (Tên đăng nhập, Mật khẩu, Họ tên, Vai trò, SĐT, Email), Accordion Địa chỉ và Accordion Phân quyền kho (`.kho-card-grid`).
+- Footer: Checkbox Trạng thái "Đang hoạt động", nút Bỏ qua và nút Lưu người dùng.
 
 ### 3.3. Modal Đổi mật khẩu nhanh (`_DoiMatKhauModal.cshtml`)
-- Đặt lại mật khẩu nhanh từ bảng với ô xác nhận và icon mắt ẩn/hiện mật khẩu.
+- Đặt lại mật khẩu nhanh từ bảng với ô xác nhận và icon mắt ẩn/hiện.
 
 ---
 
@@ -65,16 +61,17 @@
 
 1. **Bảo mật truy cập**: Áp dụng `[Authorize(Roles = "Quản lý")]` trên `NguoiDungController`. Menu chỉ hiển thị cho `Quản lý`.
 2. **Mã hóa mật khẩu**: Sử dụng `SHA-256` đồng bộ qua `PasswordHelper.HashPassword`.
-3. **Chống tự khóa tài khoản**: Chặn tự khóa ở Controller và ẩn nút khóa tài khoản của chính mình.
-4. **Phân quyền kho**: Vai trò Quản lý có toàn quyền trên mọi kho. Vai trò Thủ kho/Bán hàng chỉ truy cập các kho trong `TaiKhoanKho`.
-5. **Giao dịch toàn vẹn**: Bọc lưu đa bảng (`NhanVien`, `TaiKhoan`, `TaiKhoanKho`) trong `BeginTransactionAsync()`.
-6. **Nhật ký thao tác**: Ghi vết đầy đủ qua `INhatKyThaoTacService`.
+3. **Chống tự xóa / tự khóa**: Chặn tự xóa và tự khóa tài khoản của chính mình. Chặn xóa tài khoản admin gốc.
+4. **Quy tắc Xóa người dùng an toàn**: Chỉ cho phép xóa vĩnh viễn khi chưa phát sinh chứng từ trong 7 bảng nghiệp vụ (`PhieuNhap`, `PhieuXuat`, `PhieuChuyenKho`, `PhieuKiemKe`, `PhieuDieuChinh`, `DonBan`, `PhieuTraHangNhap`). Nếu đã có chứng từ, hệ thống chặn xóa và hỏi người dùng có muốn chuyển sang Khóa tài khoản không.
+5. **Phân quyền kho**: Vai trò Quản lý có toàn quyền trên mọi kho. Vai trò Thủ kho/Bán hàng chỉ truy cập các kho trong `TaiKhoanKho`.
+6. **Giao dịch toàn vẹn**: Bọc lưu đa bảng (`NhanVien`, `TaiKhoan`, `TaiKhoanKho`) trong `BeginTransactionAsync()`.
+7. **Nhật ký thao tác**: Ghi vết đầy đủ qua `INhatKyThaoTacService`.
 
 ---
 
 ## 5. Danh mục Khối Lego tái sử dụng (Luật 10 AGENTS.md)
 
-- [x] **Modal Thao tác & Xác nhận**: `_NguoiDungModal.cshtml` chuẩn khuôn mẫu Hàng hóa + `KiotConfirm` (`window.KiotConfirm.show()`) khi Khóa / Mở khóa tài khoản.
+- [x] **Modal Thao tác & Xác nhận**: `_NguoiDungModal.cshtml` chuẩn khuôn mẫu Hàng hóa + `KiotConfirm` (`window.KiotConfirm.show()`) khi Xóa / Khóa tài khoản.
 - [x] **Bộ lọc Dropdown chọn nhiều**: `_KiotMultiSelectFilter.cshtml` cho vai trò và kho.
 - [x] **Bộ lọc Trạng thái checkbox**: `_KiotStatusFilter.cshtml` cho trạng thái.
 - [x] **Phân trang AJAX**: `_Pagination.cshtml` + `BaseFilterParams`.
@@ -95,12 +92,7 @@
 ## 7. Checklist nghiệm thu
 
 - [x] Biên dịch dự án hoàn tất với 0 Errors.
-- [x] Giao diện Thêm mới & Cập nhật người dùng chuẩn Modal Overlay hệ thống dựa trên màn hình Hàng hóa.
-- [x] Hộp thoại xác nhận Khóa / Mở khóa tài khoản chuẩn KiotConfirm thay thế hoàn toàn browser confirm().
-- [x] Cấm truy cập với tài khoản không phải vai trò "Quản lý".
-- [x] Thêm mới tài khoản thành công kèm gán kho và mã hóa SHA-256.
-- [x] Sửa thông tin tài khoản và cập nhật danh sách kho đồng bộ chính xác.
-- [x] Đổi mật khẩu thành công và đăng nhập được bằng mật khẩu mới.
-- [x] Khóa tài khoản thành công; tài khoản bị khóa không thể đăng nhập.
-- [x] Cơ chế chống tự khóa tài khoản hoạt động ở cả frontend và backend.
-- [x] Sắp xếp cột 3 trạng thái hoạt động trơn tru qua AJAX.
+- [x] Phân quyền Quản lý bắt buộc, chặn truy cập trái phép.
+- [x] CRUD tài khoản kèm phân quyền kho và mã hóa mật khẩu SHA-256.
+- [x] Thay nút khóa bằng nút Xóa trên bảng: kiểm tra 7 bảng chứng từ; nếu chưa có giao dịch thì xóa vĩnh viễn, nếu đã có chứng từ thì chỉ cho phép chuyển sang Khóa tài khoản.
+- [x] Chống tự xóa / tự khóa tài khoản của chính mình và tài khoản admin gốc.

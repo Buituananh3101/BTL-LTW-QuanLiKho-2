@@ -153,20 +153,20 @@
                                 </button>
                                 @if (u.IsCurrentUser)
                                 {
-                                    <button type="button" class="btn btn-sm btn-light border p-1 text-muted disabled" title="Không thể tự khóa tài khoản của chính mình" disabled style="width: 28px; height: 28px; line-height: 1;">
-                                        <i class="bi bi-slash-circle"></i>
+                                    <button type="button" class="btn btn-sm btn-light border p-1 text-muted disabled" title="Không thể tự xóa tài khoản của chính mình" disabled style="width: 28px; height: 28px; line-height: 1;">
+                                        <i class="bi bi-trash"></i>
                                     </button>
                                 }
                                 else
                                 {
                                     <button type="button"
-                                            class="btn btn-sm btn-light border p-1 @(u.TrangThai == "HOAT_DONG" ? "text-danger" : "text-success") btn-toggle-status"
+                                            class="btn btn-sm btn-light border p-1 text-danger btn-delete-user"
                                             data-id="@u.MaTaiKhoan"
                                             data-username="@u.TenDangNhap"
                                             data-status="@u.TrangThai"
-                                            title="@(u.TrangThai == "HOAT_DONG" ? "Khóa tài khoản này" : "Mở khóa tài khoản này")"
+                                            title="Xóa người dùng này"
                                             style="width: 28px; height: 28px; line-height: 1;">
-                                        <i class="bi @(u.TrangThai == "HOAT_DONG" ? "bi-lock" : "bi-unlock")"></i>
+                                        <i class="bi bi-trash"></i>
                                     </button>
                                 }
                             </div>
