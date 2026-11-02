@@ -15,6 +15,7 @@
     let currentPage = parseInt($cfg.data('page'), 10) || 1;
     let pageSize = parseInt($cfg.data('page-size'), 10) || 20;
     let searchDebounceTimer = null;
+    let currentProductText = $('#tkSearchProductInput').val().trim();
 
     // 2. Khởi tạo Sidebar thu gọn (F4)
     if (window.KiotFilter && typeof KiotFilter.initSidebar === 'function') {
@@ -39,6 +40,7 @@
             inputSelector: '#tkSearchProductInput',
             dropdownSelector: '#tkProductSuggestDropdown',
             apiUrl: '/BaoCao/SearchHangHoa',
+            clearOnSelect: false,
             getWarehouseId: function () {
                 return $('#selectKhoLuuTru').val() || 0;
             },
@@ -54,31 +56,49 @@
         });
     }
 
-    // Cập nhật mặt hàng đang chọn trên sidebar và nạp lại Thẻ kho
+    // Cập nhật mặt hàng đang chọn trên ô tìm kiếm và nạp lại Thẻ kho
     function applySelectedProduct(maHang, code, name, dvt, nhom) {
         if (!maHang) return;
         selectedMaHang = maHang;
         $('#selectedMaHang').val(maHang);
 
-        // Đóng dropdown tìm kiếm và xóa từ khóa input
+        // Đóng dropdown tìm kiếm và cập nhật tên hàng vào ô input
         $('#tkProductSuggestDropdown').removeClass('show').hide();
-        $('#tkSearchProductInput').val('');
-
-        // Cập nhật card trên sidebar
-        $('#tkCardProductCode').text(code);
-        $('#tkCardProductName').text(name).attr('title', name);
-        let subHtml = `ĐVT: <strong>${escapeHtml(dvt)}</strong>`;
-        if (nhom) {
-            subHtml += ` · ${escapeHtml(nhom)}`;
-        }
-        $('#tkCardProductSub').html(subHtml);
-        $('#tkSelectedProductCard').removeClass('d-none');
-        $('#tkNoProductHint').addClass('d-none');
+        const displayText = code ? `${code} - ${name}` : name;
+        currentProductText = displayText;
+        $('#tkSearchProductInput').val(displayText).attr('title', displayText);
+        $('#btnRemoveSelectedProduct').removeClass('d-none');
         $('#dotMatHang').addClass('active');
 
         // Tải lại bảng thẻ kho cho mặt hàng mới
         loadData(1);
     }
+
+    // Bôi đen toàn bộ chữ khi click vào ô tìm kiếm để người dùng dễ gõ tìm mặt hàng khác
+    $('#tkSearchProductInput').on('focus', function () {
+        $(this).select();
+    });
+
+    // Ẩn/hiện nút (x) theo nội dung gõ vào
+    $('#tkSearchProductInput').on('input', function () {
+        if ($(this).val().trim().length === 0) {
+            $('#btnRemoveSelectedProduct').addClass('d-none');
+        } else {
+            $('#btnRemoveSelectedProduct').removeClass('d-none');
+        }
+    });
+
+    // Khi người dùng click ra ngoài mà chưa chọn hàng mới, phục hồi lại tên mặt hàng đang theo dõi
+    $('#tkSearchProductInput').on('blur', function () {
+        setTimeout(function () {
+            if (!$('#tkProductSuggestDropdown').is(':visible') && selectedMaHang > 0 && currentProductText) {
+                if ($('#tkSearchProductInput').val().trim() !== currentProductText) {
+                    $('#tkSearchProductInput').val(currentProductText);
+                    $('#btnRemoveSelectedProduct').removeClass('d-none');
+                }
+            }
+        }, 200);
+    });
 
     // Đảm bảo dropdown luôn cuộn về đầu và không bị kéo lệch
     const suggestDropdownEl = document.getElementById('tkProductSuggestDropdown');
@@ -103,7 +123,7 @@
             $('#tkProductSuggestDropdown').removeClass('show').hide();
         } else if (e.key === 'F3' || e.keyCode === 114) {
             e.preventDefault();
-            $('#keywordSearch').trigger('focus').select();
+            $('#tkSearchProductInput').trigger('focus').select();
         }
     });
 
@@ -119,16 +139,16 @@
         }
     });
 
-    // Sự kiện bỏ chọn mặt hàng trên sidebar
+    // Sự kiện nút xóa (x) mặt hàng đã chọn
     $(document).on('click', '#btnRemoveSelectedProduct', function (e) {
         e.preventDefault();
         e.stopPropagation();
         selectedMaHang = 0;
+        currentProductText = '';
         $('#selectedMaHang').val(0);
-        $('#tkSelectedProductCard').addClass('d-none');
-        $('#tkNoProductHint').removeClass('d-none');
+        $('#btnRemoveSelectedProduct').addClass('d-none');
         $('#dotMatHang').removeClass('active');
-        $('#tkSearchProductInput').val('').focus();
+        $('#tkSearchProductInput').val('').removeAttr('title').focus();
         loadData(1);
     });
 

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * kiot-filter.js – Bộ thư viện JavaScript giao diện chuẩn chuyên nghiệp dùng chung
  * Phục vụ các màn hình Danh mục & Chứng từ: Hàng hóa, Kiểm kho, Nhập kho, Khách hàng, NCC...
  */
@@ -1425,7 +1425,8 @@ window.KiotFilter = (function ($) {
             getWarehouseId: function () { return 1; },
             onSelect: function (product) {},
             debounceMs: 200,
-            placeholder: 'Tìm mặt hàng (F3)...'
+            placeholder: 'Tìm mặt hàng (F3)...',
+            clearOnSelect: true
         }, options);
 
         const $inp = $(opt.inputSelector);
@@ -1466,7 +1467,9 @@ window.KiotFilter = (function ($) {
             $dropdown.removeClass('show').hide();
             currentItems = [];
             activeIndex = -1;
-            $inp.val('').focus();
+            if (opt.clearOnSelect !== false) {
+                $inp.val('').focus();
+            }
         }
 
         // Phím F3 toàn cục focus ô tìm kiếm

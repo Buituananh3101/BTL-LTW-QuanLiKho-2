@@ -1,4 +1,4 @@
-﻿# Đặc tả Chức năng: Báo cáo Thẻ kho (Stock Card Report)
+# Đặc tả Chức năng: Báo cáo Thẻ kho (Stock Card Report)
 
 > **Mục tiêu**: Cung cấp cho Thủ kho và Quản lý báo cáo theo dõi chi tiết lịch sử xuất - nhập - tồn của từng mặt hàng tại một chi nhánh kho hoặc toàn hệ thống theo trình tự thời gian chuẩn chuyên nghiệp. Tái sử dụng 100% các khối LEGO: `KiotFilter`, `ExcelHelper`, `_KiotDateFilter`, `_KiotStatusFilter`, `_Pagination`.
 
@@ -64,7 +64,7 @@ Số liệu Thẻ kho được truy vấn từ View CSDL **`vw_BienDongKho`** (h
 
 ### 4.1. Màn hình Báo cáo Thẻ kho (`/BaoCao/TheKho`)
 1. **Sidebar bộ lọc bên trái**:
-   - Khối tìm kiếm hàng hóa Autocomplete F3: Gõ từ khóa tìm kiếm theo tên hoặc mã, nhấn phím điều hướng Up/Down/Enter để chọn, thẻ mặt hàng cập nhật tức thì.
+   - Khối tìm kiếm hàng hóa Autocomplete F3: Gõ từ khóa tìm kiếm theo tên hoặc mã, hỗ trợ phím điều hướng Up/Down/Enter để chọn; khi chọn xong tên mặt hàng hiển thị trực tiếp trong ô tìm kiếm kèm nút xóa nhanh `(x)` nội dòng (`#btnRemoveSelectedProduct`) để bỏ chọn hoặc đổi mặt hàng (tối ưu không gian sidebar, không lặp thông tin với Banner chính).
    - Dropdown chi nhánh kho: Thủ kho cố định kho làm việc; Quản lý được chọn "Tất cả chi nhánh kho".
    - Bộ lọc thời gian: Lego `_KiotDateFilter` (Hôm nay, Hôm qua, 7 ngày qua, Tháng này, Tháng trước, Tùy chọn dải ngày).
    - Bộ lọc loại giao dịch: Checkbox Lego `_KiotStatusFilter` kèm chấm chỉ báo `filter-dot` (`#dotLoaiGd`).

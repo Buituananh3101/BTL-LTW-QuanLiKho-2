@@ -282,7 +282,77 @@
     };
 
     /* ==========================================================================
-       6. PHÂN TRANG AJAX & TÌM KIẾM
+       6.1. SIDEBAR CO-GIÃN & RESPONSIVE MOBILE (CHUẨN KIOTVIET)
+       ========================================================================== */
+    const container = $('#kiotContainer');
+
+    function toggleSidebar(forceState) {
+        const isCollapsed = container.hasClass('sidebar-collapsed');
+        const shouldCollapse = forceState !== undefined ? forceState : !isCollapsed;
+
+        if (shouldCollapse) {
+            container.addClass('sidebar-collapsed');
+            $('#sidebarToggleIcon').removeClass('bi-chevron-left').addClass('bi-chevron-right');
+            $('#btnToggleSidebar').attr('title', 'Mở rộng bộ lọc (F4)');
+            localStorage.setItem('kiot_sidebar_state', 'collapsed');
+        } else {
+            container.removeClass('sidebar-collapsed');
+            $('#sidebarToggleIcon').removeClass('bi-chevron-right').addClass('bi-chevron-left');
+            $('#btnToggleSidebar').attr('title', 'Thu gọn bộ lọc (F4)');
+            localStorage.setItem('kiot_sidebar_state', 'expanded');
+        }
+    }
+
+    if (localStorage.getItem('kiot_sidebar_state') === 'collapsed') {
+        toggleSidebar(true);
+    }
+
+    $('#btnToggleSidebar').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleSidebar();
+    });
+
+    let toggleHoverTimer = null;
+    $('#sidebarFilterCol, #btnToggleSidebar').on('mouseenter', function () {
+        clearTimeout(toggleHoverTimer);
+        $('#btnToggleSidebar').addClass('btn-visible');
+    }).on('mouseleave', function () {
+        clearTimeout(toggleHoverTimer);
+        toggleHoverTimer = setTimeout(function () {
+            if (!$('#sidebarFilterCol:hover').length && !$('#btnToggleSidebar:hover').length) {
+                $('#btnToggleSidebar').removeClass('btn-visible');
+            }
+        }, 120);
+    });
+
+    // Mobile Sidebar Drawer
+    function openMobileSidebar() {
+        $('#sidebarFilterCol').addClass('show-mobile');
+        $('#sidebarBackdrop').addClass('show');
+        $('body').addClass('noscroll');
+    }
+    function closeMobileSidebar() {
+        $('#sidebarFilterCol').removeClass('show-mobile');
+        $('#sidebarBackdrop').removeClass('show');
+        $('body').removeClass('noscroll');
+    }
+    $('#btnMobileFilter').on('click', openMobileSidebar);
+    $('#btnCloseSidebarMobile, #sidebarBackdrop').on('click', closeMobileSidebar);
+
+    // Khởi tạo bộ lọc ngày tạo KiotDateFilter
+    if (window.KiotFilter && typeof window.KiotFilter.initDateFilter === 'function') {
+        window.KiotFilter.initDateFilter('tgt', function (from, to, text, val) {
+            state.tgTaoFilter = val || 'ALL';
+            state.tgTaoTu = from || null;
+            state.tgTaoDen = to || null;
+            state.page = 1;
+            loadTable();
+        });
+    }
+
+    /* ==========================================================================
+       6.2. PHÂN TRANG AJAX & TÌM KIẾM
        ========================================================================== */
     $(document).on('click', '.kiot-pagination-wrap .pagination .page-link', function (e) {
         e.preventDefault();
@@ -379,16 +449,131 @@
         loadTable();
     });
 
-    // Bộ lọc Nhóm khách hàng (Multi-select)
-    $(document).on('change', '#dropdownNhomKhachHang input[type="checkbox"]', function () {
-        state.nhomKhachHangs = [];
-        $('#dropdownNhomKhachHang input[type="checkbox"]:checked').each(function () {
-            const val = parseInt($(this).val());
-            if (!isNaN(val)) state.nhomKhachHangs.push(val);
+    // Bộ lọc Nhóm khách hàng (Lego Multi-Select với Tags Dropdown chuẩn KiotViet)
+    let selectedNhomKhachHang = [];
+
+    function renderNhomBox() {
+        const box = $('#boxNhomKhachHang');
+        const dropdown = $('#dropdownNhomKhachHang');
+        const dot = $('#dotNhomKhachHang');
+
+        dot.css('display', selectedNhomKhachHang.length > 0 ? 'inline-block' : 'none');
+
+        dropdown.find('.kiot-ms-item').each(function () {
+            const val = String($(this).data('val'));
+            const isSel = selectedNhomKhachHang.some(x => String(x.val) === val);
+            $(this).toggleClass('selected', isSel);
+            $(this).find('input[type="checkbox"]').prop('checked', isSel);
         });
-        state.page = 1;
-        loadTable();
-    });
+
+        if (window.KiotFilter && typeof window.KiotFilter.renderTagPills === 'function') {
+            window.KiotFilter.renderTagPills(box, selectedNhomKhachHang, 'Chọn nhóm khách hàng', 2);
+        }
+    }
+
+    function setupNhomKhachHangFilter() {
+        const box = $('#boxNhomKhachHang');
+        const dropdown = $('#dropdownNhomKhachHang');
+
+        // Click vào box để mở / đóng dropdown
+        box.on('click', function (e) {
+            if ($(e.target).closest('.tag-remove').length) return;
+            e.stopPropagation();
+
+            $('.kiot-ms-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
+            $('.kiot-multiselect-box').not(box).removeClass('open');
+            $('.quick-date-popup, .dual-calendar-popup').hide();
+
+            const willShow = !dropdown.hasClass('show');
+            if (willShow) {
+                if (window.KiotFilter && typeof window.KiotFilter.checkSidebarDropdownDirection === 'function') {
+                    window.KiotFilter.checkSidebarDropdownDirection(box[0], dropdown[0]);
+                }
+                dropdown.addClass('show');
+                box.addClass('open');
+                dropdown.find('.kiot-ms-search input').focus();
+            } else {
+                dropdown.removeClass('show drop-up').css('max-height', '');
+                box.removeClass('open');
+            }
+        });
+
+        // Xóa tag từ pill viên thuốc trực tiếp trên box
+        box.on('click', '.tag-remove', function (e) {
+            e.stopPropagation();
+            const val = String($(this).closest('.kiot-pill-tag').data('val'));
+            selectedNhomKhachHang = selectedNhomKhachHang.filter(x => String(x.val) !== val);
+            state.nhomKhachHangs = selectedNhomKhachHang.map(x => parseInt(x.val)).filter(n => !isNaN(n));
+            renderNhomBox();
+            state.page = 1;
+            loadTable();
+        });
+
+        // Click vào ô +N nhóm khác
+        box.on('click', '.kiot-pill-more', function (e) {
+            e.stopPropagation();
+            if (window.KiotFilter && typeof window.KiotFilter.checkSidebarDropdownDirection === 'function') {
+                window.KiotFilter.checkSidebarDropdownDirection(box[0], dropdown[0]);
+            }
+            dropdown.addClass('show');
+            box.addClass('open');
+        });
+
+        // Click chọn / bỏ chọn item trong dropdown
+        dropdown.on('click', '.kiot-ms-item', function (e) {
+            if ($(e.target).closest('.kiot-item-edit-btn, .hh-item-edit-btn').length) {
+                return;
+            }
+            e.stopPropagation();
+            const val = String($(this).data('val'));
+            const name = $(this).data('name') || $(this).find('.kiot-ms-text').text().trim();
+            const idx = selectedNhomKhachHang.findIndex(x => String(x.val) === val);
+
+            if (idx >= 0) {
+                selectedNhomKhachHang.splice(idx, 1);
+            } else {
+                selectedNhomKhachHang.push({ val: val, name: name });
+            }
+
+            state.nhomKhachHangs = selectedNhomKhachHang.map(x => parseInt(x.val)).filter(n => !isNaN(n));
+            renderNhomBox();
+            state.page = 1;
+            loadTable();
+        });
+
+        // Tìm kiếm con bên trong dropdown nhóm
+        dropdown.find('.kiot-ms-search input').on('input', function (e) {
+            e.stopPropagation();
+            const term = $(this).val().trim().toLowerCase();
+            dropdown.find('.kiot-ms-item').each(function () {
+                const text = ($(this).data('name') || $(this).text()).toLowerCase();
+                if (!term || text.includes(term)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        });
+
+        // Đóng dropdown khi click ra ngoài document
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('#boxNhomKhachHang, #dropdownNhomKhachHang').length) {
+                dropdown.removeClass('show drop-up').css('max-height', '');
+                box.removeClass('open');
+            }
+        });
+
+        // Quét các checkbox được render có sẵn
+        dropdown.find('.kiot-ms-item.selected').each(function () {
+            const val = String($(this).data('val'));
+            const name = $(this).data('name') || $(this).find('.kiot-ms-text').text().trim();
+            if (!selectedNhomKhachHang.some(x => String(x.val) === val)) {
+                selectedNhomKhachHang.push({ val: val, name: name });
+            }
+        });
+        state.nhomKhachHangs = selectedNhomKhachHang.map(x => parseInt(x.val)).filter(n => !isNaN(n));
+        renderNhomBox();
+    }
 
     // Bộ lọc Giá trị (Tổng bán & Nợ hiện tại)
     function setupValueFilter(containerId, onApply) {
@@ -874,11 +1059,25 @@
                     if (window.KiotToast) KiotToast.success(res.message);
                     $('#hhPromptNhomKhOv').removeClass('show');
 
-                    // Thêm option vào select nhóm trong modal
-                    const newOpt = new Option(res.name, res.id, true, true);
-                    $('#formMaNhomKhachHang').append(newOpt).trigger('change');
+                    // 1. Thêm HTML vào dropdown sidebar để chọn ngay
+                    const newItemHtml = `
+                        <div class="kiot-ms-item" data-val="${res.id}" data-name="${res.name}">
+                            <input type="checkbox" class="form-check-input" />
+                            <span class="kiot-ms-text">${res.name}</span>
+                            <button type="button" class="kiot-item-edit-btn hh-item-edit-btn" data-id="${res.id}" data-name="${res.name}" data-type="nhomkhachhang" title="Sửa nhóm khách hàng" aria-label="Sửa ${res.name}">
+                                <i class="bi bi-pencil" style="font-size:12px;pointer-events:none;"></i>
+                            </button>
+                        </div>`;
+                    $('#dropdownNhomKhachHang').append(newItemHtml);
 
-                    // Reload lại trang hoặc reload table để đồng bộ sidebar
+                    // 2. Thêm option vào select nhóm trong modal
+                    const newOpt = new Option(res.name, res.id, true, true);
+                    $('#formMaNhomKhachHang').append(newOpt);
+
+                    // 3. Tự động chọn nhóm vừa tạo vào bộ lọc
+                    selectedNhomKhachHang.push({ val: String(res.id), name: res.name });
+                    state.nhomKhachHangs = selectedNhomKhachHang.map(x => parseInt(x.val)).filter(n => !isNaN(n));
+                    renderNhomBox();
                     loadTable();
                 } else {
                     if (window.KiotToast) KiotToast.error(res.message);
@@ -892,10 +1091,145 @@
     });
 
     /* ==========================================================================
+       9.1. MODAL CON: SỬA / XÓA NHÓM KHÁCH HÀNG (ICON BÚT CHÌ ✎)
+       ========================================================================== */
+    // Mở modal sửa nhóm từ icon bút chì
+    $(document).on('click', '#dropdownNhomKhachHang .kiot-item-edit-btn, #dropdownNhomKhachHang .hh-item-edit-btn', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        const id = $(this).data('id') || $(this).closest('.kiot-ms-item').data('val');
+        const name = $(this).data('name') || $(this).closest('.kiot-ms-item').find('.kiot-ms-text').text().trim();
+
+        $('#editNhomId').val(id);
+        $('#editNhomInput').val(name);
+        $('#editNhomGhiChu').val('');
+        $('#editNhomField').removeClass('invalid');
+        $('#hhEditNhomKhOv').addClass('show');
+
+        // Đóng dropdown để giao diện thông thoáng
+        $('#dropdownNhomKhachHang').removeClass('show drop-up').css('max-height', '');
+        $('#boxNhomKhachHang').removeClass('open');
+
+        setTimeout(() => $('#editNhomInput').focus().select(), 100);
+    });
+
+    $(document).on('click', '[data-close="hhEditNhomKhOv"]', function () {
+        $('#hhEditNhomKhOv').removeClass('show');
+    });
+
+    $('#hhEditNhomKhOv').on('click', function (e) {
+        if (e.target === this) $(this).removeClass('show');
+    });
+
+    // Lưu sửa tên nhóm
+    $('#btnEditNhomSave').on('click', function () {
+        const id = parseInt($('#editNhomId').val());
+        const newName = ($('#editNhomInput').val() || '').trim();
+        const newGhiChu = ($('#editNhomGhiChu').val() || '').trim();
+
+        if (!newName) {
+            $('#editNhomField').addClass('invalid');
+            return;
+        }
+
+        const $btn = $(this);
+        $btn.prop('disabled', true);
+
+        $.ajax({
+            url: `/KhachHang/UpdateNhom/${id}`,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ maNhomKhachHang: id, tenNhom: newName, ghiChu: newGhiChu }),
+            success: function (res) {
+                $btn.prop('disabled', false);
+                if (res.success) {
+                    if (window.KiotToast) KiotToast.success(res.message);
+                    $('#hhEditNhomKhOv').removeClass('show');
+
+                    // 1. Cập nhật trong dropdown sidebar
+                    const $item = $(`#dropdownNhomKhachHang .kiot-ms-item[data-val="${id}"]`);
+                    $item.data('name', res.name).attr('data-name', res.name);
+                    $item.find('.kiot-ms-text').text(res.name);
+                    $item.find('.kiot-item-edit-btn').data('name', res.name).attr('data-name', res.name);
+
+                    // 2. Cập nhật trong select modal khách hàng
+                    $(`#formMaNhomKhachHang option[value="${id}"]`).text(res.name);
+
+                    // 3. Cập nhật mảng selectedNhomKhachHang nếu nhóm này đang được chọn
+                    const sel = selectedNhomKhachHang.find(x => String(x.val) === String(id));
+                    if (sel) {
+                        sel.name = res.name;
+                    }
+                    renderNhomBox();
+                    loadTable();
+                } else {
+                    if (window.KiotToast) KiotToast.error(res.message);
+                }
+            },
+            error: function () {
+                $btn.prop('disabled', false);
+                if (window.KiotToast) KiotToast.error('Không thể cập nhật nhóm khách hàng.');
+            }
+        });
+    });
+
+    // Xóa nhóm khách hàng
+    $('#btnEditNhomDelete').on('click', function () {
+        const id = parseInt($('#editNhomId').val());
+        const name = $('#editNhomInput').val();
+
+        const doDelete = () => {
+            $.ajax({
+                url: `/KhachHang/DeleteNhom/${id}`,
+                type: 'POST',
+                success: function (res) {
+                    if (res.success) {
+                        if (window.KiotToast) KiotToast.success(res.message);
+                        $('#hhEditNhomKhOv').removeClass('show');
+
+                        // 1. Xóa khỏi dropdown sidebar
+                        $(`#dropdownNhomKhachHang .kiot-ms-item[data-val="${id}"]`).remove();
+
+                        // 2. Xóa khỏi select trong modal khách hàng
+                        $(`#formMaNhomKhachHang option[value="${id}"]`).remove();
+
+                        // 3. Bỏ chọn nếu đang lọc theo nhóm này
+                        selectedNhomKhachHang = selectedNhomKhachHang.filter(x => String(x.val) !== String(id));
+                        state.nhomKhachHangs = selectedNhomKhachHang.map(x => parseInt(x.val)).filter(n => !isNaN(n));
+                        renderNhomBox();
+                        state.page = 1;
+                        loadTable();
+                    } else {
+                        if (window.KiotToast) KiotToast.error(res.message);
+                    }
+                },
+                error: function () {
+                    if (window.KiotToast) KiotToast.error('Lỗi khi xóa nhóm khách hàng.');
+                }
+            });
+        };
+
+        if (window.KiotConfirm) {
+            KiotConfirm.show({
+                title: 'Xóa nhóm khách hàng',
+                message: `Bạn có chắc chắn muốn xóa nhóm khách hàng <strong>${name}</strong>? Các khách hàng thuộc nhóm này sẽ không còn thuộc nhóm nào.`,
+                confirmText: 'Đồng ý xóa',
+                isDanger: true,
+                onConfirm: doDelete
+            });
+        } else if (confirm(`Bạn có chắc muốn xóa nhóm khách hàng ${name}?`)) {
+            doDelete();
+        }
+    });
+
+    /* ==========================================================================
        10. KHỞI TẠO BAN ĐẦU
        ========================================================================== */
     $(document).ready(function () {
         initColumnToggle();
+        setupNhomKhachHangFilter();
     });
 
 })(jQuery);

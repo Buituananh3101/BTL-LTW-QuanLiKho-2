@@ -1,6 +1,6 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-11-02 – Triển Khai Nâng Cấp Toàn Diện Phân Hệ Khách Hàng Chuẩn 4 Ảnh KiotViet & Danh Mục Hàng Hóa (Phiên 201)
+Cập nhật lần cuối: 2026-11-02 – Tối Ưu Giao Diện Chọn Mặt Hàng F3 Sidebar Thẻ Kho & Bỏ Thẻ Hiển Thị Trùng Lặp (Phiên 203)
 
 ---
 
@@ -34,6 +34,43 @@ Cập nhật lần cuối: 2026-11-02 – Triển Khai Nâng Cấp Toàn Diện 
 ## Việc kế tiếp
 1. Kiểm tra trải nghiệm thực tế trên trình duyệt tại URL `http://localhost:7087/KhachHang`.
 2. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
+
+---
+
+- **Tối Ưu Giao Diện Chọn Mặt Hàng F3 Sidebar Thẻ Kho & Bỏ Thẻ Hiển Thị Trùng Lặp (Phiên 203)**:
+  - **Nhu cầu**: Người dùng gửi ảnh màn hình (`media_1793588283137_31a66571.png`) và yêu cầu: *"trong thẻ ko khi chọn hàng hóa thì ko cần hiện hàng bên dưới phần tìm kiếm hàng hóa đâu"*.
+  - **Nguyên nhân cốt lõi**:
+    + Thẻ `.tk-selected-card` hiển thị dưới ô input chiếm 70px chiều dọc của sidebar, lặp lại thông tin với banner hàng hóa lớn ở cột chính.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`Views/BaoCao/_TheKhoFilterSidebar.cshtml`**:
+       - Loại bỏ hoàn toàn khối `.tk-selected-card` và dòng gợi ý `#tkNoProductHint`.
+       - Hiển thị tên/mã mặt hàng đã chọn trực tiếp trong ô `#tkSearchProductInput` (`value="@(Model.TongHop != null ? $"{Model.TongHop.MaHangNoiBo} - {Model.TongHop.TenHang}" : "")"`).
+       - Thêm nút xóa nhanh `(x)` nội dòng (`#btnRemoveSelectedProduct`) nằm ngay trong ô tìm kiếm ở góc phải với icon `bi-x-circle-fill`, ẩn khi chưa chọn hàng (`d-none`).
+       - Bổ sung `padding-right: 28px` cho input chống đè chữ lên icon xóa.
+    2. **`wwwroot/js/kiot-filter.js`**:
+       - Bổ sung tùy chọn `clearOnSelect: true` (mặc định) cho `KiotFilter.initProductSearch`. Khi truyền `clearOnSelect: false`, hàm không tự động xóa trống ô tìm kiếm sau khi chọn mặt hàng, cho phép hiển thị tên hàng đã chọn trên input.
+    3. **`wwwroot/js/the-kho-index.js`**:
+       - Cấu hình `clearOnSelect: false` trong `KiotFilter.initProductSearch`.
+       - Cập nhật `applySelectedProduct`: điền chuỗi `${code} - ${name}` vào `#tkSearchProductInput`, hiện nút xóa `(x)` `#btnRemoveSelectedProduct`, bật chấm chỉ báo `#dotMatHang`, đóng dropdown và nạp lại bảng Thẻ kho.
+       - Tự động bôi đen toàn bộ text khi focus vào `#tkSearchProductInput` để người dùng dễ dàng gõ đè từ khóa tìm kiếm mới.
+       - Tự động phục hồi tên hàng đang chọn nếu người dùng click ra ngoài mà chưa chọn hàng mới.
+       - Sự kiện click nút xóa `(x)` `#btnRemoveSelectedProduct`: xóa trắng ô tìm kiếm, ẩn nút `(x)`, reset `selectedMaHang = 0`, tắt chấm `#dotMatHang`, focus lại ô input và nạp lại trạng thái rỗng.
+    4. **`wwwroot/css/the-kho.css`**:
+       - Đơn giản hóa CSS `.btn-remove-selected-product` thành nút xóa nội dòng gọn gàng, hover chuyển màu đỏ.
+       - Dọn dẹp các selector `.tk-selected-card` không còn sử dụng.
+    5. **Kiểm tra**:
+       - Cú pháp JavaScript `node -c`: Hợp lệ 100%.
+       - Biên dịch .NET `dotnet build -t:Compile`: Thành công với **0 Errors**.
+
+---
+
+
+- **Khắc Phục Lỗi Click Ô Chọn nhóm khách hàng Không Phản Hồi (Phiên 202)**:
+  + Bổ sung setupNhomKhachHangFilter() và renderNhomBox() cho #boxNhomKhachHang.
+  + Tích hợp đầy đủ Tag pills, checkSidebarDropdownDirection, tìm kiếm con trong dropdown, click outside tự đóng.
+  + Tích hợp modal con #hhEditNhomKhOv sửa/xóa nhóm (icon bút chì ✎) qua AJAX UpdateNhom/DeleteNhom.
+  + Tự động chèn HTML nhóm mới vào dropdown và chọn ngay sau khi tạo nhanh.
+  + Bổ sung KiotDateFilter('tgt') và F4 / mobile drawer co giãn sidebar.
 
 ---
 

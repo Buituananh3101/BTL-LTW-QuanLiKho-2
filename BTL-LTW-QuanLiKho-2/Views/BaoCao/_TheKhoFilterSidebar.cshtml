@@ -26,36 +26,15 @@
             <div class="position-relative">
                 <i class="bi bi-search position-absolute text-muted" style="left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; pointer-events: none;"></i>
                 <input type="text" id="tkSearchProductInput" class="form-control form-control-sm"
-                       style="padding-left: 32px; height: 34px; font-size: 13px;"
-                       placeholder="Gõ tên hoặc mã hàng (F3)..." autocomplete="off" />
+                       style="padding-left: 32px; padding-right: 28px; height: 34px; font-size: 13px;"
+                       placeholder="Gõ tên hoặc mã hàng (F3)..." autocomplete="off"
+                       value="@(Model.TongHop != null ? $"{Model.TongHop.MaHangNoiBo} - {Model.TongHop.TenHang}" : "")"
+                       title="@(Model.TongHop != null ? $"{Model.TongHop.MaHangNoiBo} - {Model.TongHop.TenHang}" : "")" />
+                <button type="button" id="btnRemoveSelectedProduct" class="btn-remove-selected-product position-absolute @(Model.TongHop == null ? "d-none" : "")"
+                        style="right: 8px; top: 50%; transform: translateY(-50%); z-index: 5;" title="Xóa mặt hàng đã chọn">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
                 <div class="tk-autocomplete-dropdown shadow" id="tkProductSuggestDropdown"></div>
-            </div>
-
-            <!-- Thẻ hiển thị mặt hàng đang chọn -->
-            <div class="tk-selected-card mt-2 @(Model.TongHop == null ? "d-none" : "")" id="tkSelectedProductCard" data-ma-hang="@(Model.TongHop?.MaHang ?? 0)">
-                <div class="d-flex align-items-start justify-content-between w-100 gap-1">
-                    <div class="overflow-hidden flex-grow-1">
-                        <span class="product-code-badge" id="tkCardProductCode">@(Model.TongHop?.MaHangNoiBo ?? "")</span>
-                        <div class="product-title text-truncate" id="tkCardProductName" title="@(Model.TongHop?.TenHang ?? "")">
-                            @(Model.TongHop?.TenHang ?? "")
-                        </div>
-                        <div class="product-sub" id="tkCardProductSub">
-                            ĐVT: <strong>@(Model.TongHop?.TenDvt ?? "")</strong>
-                            @if (!string.IsNullOrEmpty(Model.TongHop?.TenNhomHang))
-                            {
-                                <span> • @Model.TongHop.TenNhomHang</span>
-                            }
-                        </div>
-                    </div>
-                    <button type="button" class="btn-remove-selected-product" id="btnRemoveSelectedProduct" title="Bỏ chọn mặt hàng">
-                        <i class="bi bi-x-circle-fill"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Gợi ý khi chưa chọn mặt hàng -->
-            <div class="text-muted small mt-2 @(Model.TongHop != null ? "d-none" : "")" id="tkNoProductHint" style="font-size: 11.5px; line-height: 1.4;">
-                <i class="bi bi-info-circle me-1"></i>Chọn một mặt hàng để theo dõi Thẻ kho.
             </div>
 
             <!-- Hidden input lưu trữ MaHang hiện tại -->
