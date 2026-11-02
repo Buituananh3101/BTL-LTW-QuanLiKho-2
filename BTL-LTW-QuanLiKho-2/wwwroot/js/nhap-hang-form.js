@@ -174,6 +174,21 @@ $(function () {
         recalcAll();
     });
 
+    // Format số khi rời khỏi ô nhập (blur) và chọn toàn bộ khi focus
+    $(document).on('blur', '.line-price, .line-discount', function () {
+        const val = parseFormattedNumber($(this).val());
+        $(this).val(val.toLocaleString('vi-VN'));
+    });
+
+    $(document).on('focus', '.line-price, .line-discount, .line-qty, #orderDiscountInput', function () {
+        $(this).select();
+    });
+
+    $('#orderDiscountInput').on('blur', function () {
+        const val = parseFormattedNumber($(this).val());
+        $(this).val(val.toLocaleString('vi-VN'));
+    });
+
     // 4. Tính toán toàn bộ phiếu nhập
     function recalcAll() {
         let totalItems = 0;
@@ -203,9 +218,42 @@ $(function () {
     }
 
     function parseFormattedNumber(val) {
-        if (!val) return 0;
-        const clean = val.toString().replace(/[^\d.-]/g, '');
-        return parseFloat(clean) || 0;
+        if (val === null || val === undefined || val === '') return 0;
+        if (typeof val === 'number') return isNaN(val) ? 0 : val;
+        let s = val.toString().trim();
+        if (!s) return 0;
+
+        // Bỏ ký tự tiền tệ và khoảng trắng
+        s = s.replace(/[\s\u00A0đ₫VNĐvnd$]/g, '');
+
+        if (s.includes('.') && s.includes(',')) {
+            const lastDot = s.lastIndexOf('.');
+            const lastComma = s.lastIndexOf(',');
+            if (lastDot > lastComma) {
+                // Định dạng US: 1,234.56 -> bỏ phẩy
+                s = s.replace(/,/g, '');
+            } else {
+                // Định dạng VN: 1.234,56 -> bỏ chấm, đổi phẩy thành chấm
+                s = s.replace(/\./g, '').replace(',', '.');
+            }
+        } else if (s.includes('.')) {
+            // Có dấu chấm. Trong tiếng Việt phân tách hàng nghìn bằng dấu chấm (VD: 11.111.110 hoặc 50.000)
+            const parts = s.split('.');
+            if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
+                s = s.replace(/\./g, '');
+            }
+        } else if (s.includes(',')) {
+            const parts = s.split(',');
+            if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
+                s = s.replace(/,/g, '');
+            } else {
+                s = s.replace(',', '.');
+            }
+        }
+
+        const clean = s.replace(/[^\d.-]/g, '');
+        const num = parseFloat(clean);
+        return isNaN(num) ? 0 : num;
     }
 
     // 5. Thu gọn / Mở rộng Panel bên phải (F4)
@@ -920,6 +968,15 @@ $(function () {
         }
 
         const supplierId = parseInt($('#selectedSupplierId').val() || '0', 10);
+        if (!supplierId || supplierId <= 0) {
+            if (window.KiotToast) {
+                KiotToast.error('Vui lòng chọn nhà cung cấp cho phiếu nhập.');
+            } else {
+                alert('Vui lòng chọn nhà cung cấp cho phiếu nhập.');
+            }
+            $('#supplierSearchInput').focus();
+            return;
+        }
 
         const payload = {
             MaPhieuNhap: docId,

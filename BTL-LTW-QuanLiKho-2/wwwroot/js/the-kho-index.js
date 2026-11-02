@@ -41,6 +41,7 @@
             dropdownSelector: '#tkProductSuggestDropdown',
             apiUrl: '/BaoCao/SearchHangHoa',
             clearOnSelect: false,
+            emptyThumbWhenNoImage: true,
             getWarehouseId: function () {
                 return $('#selectKhoLuuTru').val() || 0;
             },
@@ -54,6 +55,50 @@
                 applySelectedProduct(maHang, code, name, dvt, nhom);
             }
         });
+    }
+
+    // Đưa dropdown gợi ý ra body để thoát khỏi overflow: hidden của sidebar, giúp bung rộng to đẹp
+    if ($('#tkProductSuggestDropdown').length && $('#tkProductSuggestDropdown').parent()[0] !== document.body) {
+        $('#tkProductSuggestDropdown').appendTo('body');
+    }
+
+    // Hàm căn chỉnh vị trí động cho dropdown kết quả tìm kiếm hàng hóa
+    function updateSuggestDropdownPosition() {
+        const $inp = $('#tkSearchProductInput');
+        const $drop = $('#tkProductSuggestDropdown');
+        if (!$inp.length || !$drop.length) return;
+        const rect = $inp[0].getBoundingClientRect();
+
+        // Nếu input không còn hiển thị (bị ẩn hoặc cuộn khuất)
+        if (rect.width === 0 || rect.height === 0 || rect.bottom < 0 || rect.top > window.innerHeight) {
+            $drop.removeClass('show').hide();
+            return;
+        }
+
+        const isMobile = window.innerWidth < 640;
+        if (isMobile) {
+            $drop.css({
+                position: 'fixed',
+                top: (rect.bottom + 4) + 'px',
+                left: '10px',
+                right: '10px',
+                width: 'auto',
+                minWidth: '0',
+                maxWidth: 'calc(100vw - 20px)'
+            });
+        } else {
+            const availWidth = window.innerWidth - rect.left - 20;
+            const targetWidth = Math.min(540, Math.max(480, availWidth));
+            $drop.css({
+                position: 'fixed',
+                top: (rect.bottom + 4) + 'px',
+                left: rect.left + 'px',
+                right: 'auto',
+                width: targetWidth + 'px',
+                minWidth: '460px',
+                maxWidth: 'calc(100vw - ' + (rect.left + 16) + 'px)'
+            });
+        }
     }
 
     // Cập nhật mặt hàng đang chọn trên ô tìm kiếm và nạp lại Thẻ kho
@@ -110,16 +155,32 @@
         }, 200);
     });
 
-    // Đảm bảo dropdown luôn cuộn về đầu và không bị kéo lệch
+    // Đảm bảo dropdown luôn được định vị đúng, cuộn về đầu khi mở
     const suggestDropdownEl = document.getElementById('tkProductSuggestDropdown');
     if (suggestDropdownEl && window.MutationObserver) {
         const observer = new MutationObserver(function () {
-            if (suggestDropdownEl.classList.contains('show')) {
+            if (suggestDropdownEl.classList.contains('show') || $(suggestDropdownEl).is(':visible')) {
+                updateSuggestDropdownPosition();
                 suggestDropdownEl.scrollTop = 0;
             }
         });
-        observer.observe(suggestDropdownEl, { childList: true, attributes: true, attributeFilter: ['class'] });
+        observer.observe(suggestDropdownEl, { childList: true, attributes: true, attributeFilter: ['class', 'style'] });
     }
+
+    // Tự động căn lại vị trí khi người dùng gõ tìm kiếm, focus, resize màn hình hoặc cuộn sidebar
+    $('#tkSearchProductInput').on('input focus', function () {
+        updateSuggestDropdownPosition();
+    });
+    $(window).on('resize', function () {
+        if ($('#tkProductSuggestDropdown').hasClass('show') || $('#tkProductSuggestDropdown').is(':visible')) {
+            updateSuggestDropdownPosition();
+        }
+    });
+    $('#side, .kiot-filter-box').on('scroll', function () {
+        if ($('#tkProductSuggestDropdown').hasClass('show') || $('#tkProductSuggestDropdown').is(':visible')) {
+            updateSuggestDropdownPosition();
+        }
+    });
 
     // Đóng dropdown tìm kiếm khi click ra ngoài hoặc nhấn phím Escape
     $(document).on('click', function (e) {

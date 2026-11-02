@@ -1,21 +1,110 @@
 ﻿# Tiến độ dự án
 
-Cập nhật lần cuối: 2026-11-02 – Triển Khai Nghiệp Vụ Xóa & Khóa Chi Nhánh Kho An Toàn Dữ Liệu (Phiên 211)
+Cập nhật lần cuối: 2026-11-02 – Rà Soát & Đồng Bộ Dấu * Đỏ Cho Toàn Bộ Các Trường Bắt Buộc Nhập Trên Toàn Hệ Thống (Phiên 215)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất triển khai nghiệp vụ Xóa và Khóa (Ngừng hoạt động) chi nhánh kho tại `/Kho`:
-  + Nghiệp vụ Xóa: Cho phép xóa vĩnh viễn chi nhánh kho khi tạo nhầm (chưa phát sinh bất kỳ chứng từ nào); nếu đã phát sinh chứng từ (nhập, xuất, chuyển, kiểm, trả hàng, bán) thì chặn xóa và thông báo hỏi chuyển sang Khóa kho.
-  + Nghiệp vụ Khóa: Bổ sung bảo vệ chặn khóa hoặc xóa kho đang được chọn làm việc trong phiên hiện tại hoặc kho duy nhất của hệ thống.
-  + Giao diện & Modal: Bổ sung nút thùng rác 🗑️, modal xác nhận Lego `KiotConfirm`, thông báo Toast rõ ràng.
+- Sẵn sàng kiểm thử trải nghiệm giao diện toàn bộ hệ thống form modal: Mọi trường bắt buộc nhập đều hiển thị dấu * màu đỏ nằm ngay sát bên phải chữ nhãn.
   + Kiểm tra biên dịch hệ thống `dotnet build -t:Compile` đạt **0 Errors**.
+  + Kiểm tra cú pháp JavaScript `hang-hoa-form.js` đạt chuẩn **0 Errors**.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế trên trình duyệt giao diện Quản lý Kho (`http://localhost:7087/Kho`).
+1. Kiểm tra trải nghiệm thực tế trên trình duyệt giao diện Quản lý Hàng hóa và Quản lý Kho (`http://localhost:7087/HangHoa`).
 2. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
+
+- **Rà Soát & Đồng Bộ Dấu * Đỏ Cho Toàn Bộ Các Trường Bắt Buộc Nhập Trên Toàn Hệ Thống (Phiên 215)**:
+  - **Nhu cầu**: Người dùng yêu cầu: *"bạn hãy kiểm tra lại toàn bộ form nhập, trường nào bắt buộc nhập thì phải có dấu * đỏ như vậy"*.
+  - **Kết quả rà soát & đồng bộ**:
+    1. **Khách hàng (`_KhachHangModal.cshtml`)**:
+       - `Tên khách hàng *` (bắt buộc nhập theo `KhachHangFormVM`).
+       - `Mã số thuế *` và `Địa chỉ *` (bắt buộc nhập khi chọn loại khách hàng là Doanh nghiệp).
+       - Modal tạo nhanh nhóm khách hàng: `Tên nhóm khách hàng *`.
+       - Modal sửa nhóm khách hàng: `Tên nhóm khách hàng *`.
+    2. **Hàng hóa (`_HangHoaModal.cshtml` & `hang-hoa-form.js`)**:
+       - `Tên hàng *` (bắt buộc theo `HangHoaForm`).
+       - Modal tạo nhanh/sửa (`#hhPromptOv` & `#hhEditItemOv`): Bổ sung `Tên *` và `Vị trí *`.
+    3. **Nhà cung cấp (`_NhaCungCapModal.cshtml`)**:
+       - `Tên nhà cung cấp *` (bắt buộc).
+       - Modal tạo mới nhanh nhóm NCC (`#nccPromptOv`): Bổ sung `Tên nhóm *`.
+       - Modal sửa/xóa nhóm NCC (`#nccEditGroupOv`): Bổ sung `Tên nhóm *`.
+    4. **Chi nhánh Kho (`_KhoModal.cshtml`)**:
+       - `Tên chi nhánh kho *` (bắt buộc).
+    5. **Người dùng (`_NguoiDungModal.cshtml` & `_DoiMatKhauModal.cshtml`)**:
+       - `Tên đăng nhập *`, `Mật khẩu *`, `Họ và tên nhân viên *`, `Vai trò người dùng *`.
+       - `Mật khẩu mới *`, `Xác nhận mật khẩu mới *`.
+    6. **Lego dùng chung toàn hệ thống (`_KiotPromptModal.cshtml` & `site.js`)**:
+       - Hàm `KiotPrompt.open`: Bổ sung tự động `opt.label + ' <span class="text-danger">*</span>'` cho mọi popup prompt nhập liệu dùng chung.
+    7. **Chứng từ (`_NhapHangForm.cshtml`, `_ChuyenKhoForm.cshtml`, `_ReceiveModal.cshtml`)**:
+       - `Nhà cung cấp *` (nhập hàng).
+       - `Kho nhận *` (chuyển kho).
+       - `Ghi chú nhận hàng *` (bắt buộc khi phát hiện nhận thiếu hàng).
+  - **Kiểm tra**:
+    + `node -c site.js hang-hoa-form.js`: Đạt chuẩn 100%.
+    + `dotnet build -t:Compile`: Biên dịch hoàn tất với **0 Errors**.
+
+---
+---
+
+- **Hiển Thị Ảnh Chính Trong Dropdown Tìm Kiếm Hàng Hóa Thẻ Kho, Để Trống Khi Không Có Ảnh (Phiên 214)**:
+  - **Nhu cầu**: Người dùng yêu cầu: *"trong tìm kiếm hàng phần thẻ kho, hàng hóa nào có ảnh thì phải lấy ảnh chính của hàng hóa đó luôn, cái nào ko cso thể để trống"*.
+  - **Khắc phục & Thiết kế mới**:
+    1. **Bổ sung kiểm tra & trả về URL ảnh chính (Controllers/BaoCaoController.cs)**:
+       - Trong action `SearchHangHoa`, kiểm tra nhanh danh sách `MaHang` có ảnh từ bảng `HinhAnhHangHoas` và `HangHoas.HinhAnh` (không load dữ liệu binary vào RAM).
+       - Bổ sung trường `hasImage` (boolean) và `hinhAnh` (`/HangHoa/GetImage/{maHang}`) vào JSON trả về. Action `GetImage` tự động ưu tiên ảnh đánh dấu `LaAnhChinh == true`, hoặc ảnh đầu tiên theo `ThuTu`.
+    2. **Hỗ trợ hiển thị ảnh chính & cấu hình để trống khi không có ảnh (wwwroot/js/kiot-filter.js & the-kho-index.js)**:
+       - Cập nhật hàm `renderDropdown` trong Lego `kiot-filter.js`: Khi `hasImage == true`, render `<img src="${imgUrl}" class="kk-thumb-img" />`.
+       - Thêm tùy chọn `emptyThumbWhenNoImage: true` cho Thẻ kho: Hàng hóa không có ảnh sẽ để trống ô thumbnail (`kk-item-thumb no-image`) hoàn toàn thay vì hiện chữ cái đầu, giữ layout thẳng hàng với các dòng có ảnh.
+    3. **Định dạng CSS thumbnail (wwwroot/css/the-kho.css & site.css)**:
+       - `.kk-thumb-img`: `width: 100%; height: 100%; object-fit: cover; border-radius: 5px;`.
+       - `.kk-item-thumb.no-image`: `background: transparent; border: 1px dashed #cbd5e1;` (khung trống sạch sẽ, tinh tế).
+  - **Kiểm tra**:
+    - `node -c wwwroot/js/kiot-filter.js`: Hợp lệ 100%.
+    - `node -c wwwroot/js/the-kho-index.js`: Hợp lệ 100%.
+    - `dotnet build -t:Compile`: Biên dịch đạt **0 Errors**.
+
+---
+
+- **Mở Rộng Dropdown Tìm Kiếm Hàng Hóa Thẻ Kho Thoát Khỏi Giới Hạn Left Menu (Phiên 213)**:
+  - **Nhu cầu**: Người dùng phản ánh ô tìm kiếm mặt hàng theo dõi trên Thẻ kho có dropdown kết quả gợi ý bị bó hẹp trong menu trái (`width: 100% ~ 220px`), khiến tên hàng hóa bị cắt cụt (`Bếp gas d...`, `Bình gas 1...`), tồn kho và đơn giá bị ép sát nhau rất khó quan sát. Yêu cầu làm cho phần hiển thị hàng hóa tìm kiếm to hẳn ra để dễ nhìn hơn.
+  - **Khắc phục & Thiết kế mới**:
+    1. **Bung rộng kích thước sang chuẩn Enterprise (wwwroot/css/the-kho.css)**:
+       - Thay đổi `.tk-autocomplete-dropdown`: Sử dụng `position: fixed; width: 520px; min-width: 480px; max-width: 600px; z-index: 1080;` cùng bóng mờ sâu `box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18)`, chiều cao cuộn lên tới `380px`.
+       - Đồng bộ typography item: Thumbnail chuẩn `36x36px` bo góc 6px, tên hàng hiển thị font 13.5px bold rõ ràng không bị cụt chữ, mã hàng & ĐVT font 12px, cột tồn kho màu xanh đậm và đơn giá căn phải thoáng đãng.
+    2. **Định vị động & Thoát khỏi `overflow: hidden` của Sidebar (wwwroot/js/the-kho-index.js)**:
+       - Tự động di chuyển `#tkProductSuggestDropdown` ra `document.body` khi khởi tạo, tránh hoàn toàn hiện tượng bị `overflow: hidden` của sidebar hoặc `overflow-x: hidden` của `kiot-filter-box` cắt mất.
+       - Viết hàm `updateSuggestDropdownPosition()`: Căn chuẩn tọa độ theo mép dưới ô `#tkSearchProductInput` (`rect.bottom + 4`, `rect.left`), tự động co giãn theo viewport khi thay đổi kích thước cửa sổ hoặc cuộn sidebar.
+       - Tối ưu responsive trên màn hình điện thoại nhỏ (<640px) với `left: 10px; right: 10px; width: auto;`.
+  - **Kiểm tra**:
+    - `node -c wwwroot/js/the-kho-index.js`: Hợp lệ 100%.
+    - `dotnet build -t:Compile`: Biên dịch đạt **0 Errors**.
+
+---
+
+- **Thiết Kế Lại Bố Cục Form Thông Báo Không Thể Xóa Hàng Hóa Chuẩn Đẹp Chuyên Nghiệp (Phiên 212)**:
+  - **Nhu cầu**: Người dùng yêu cầu: *"thiết kế lại bố cục form thông báo ko thể xóa cho hợp lí, đẹp"*, gửi kèm ảnh chụp màn hình modal `Không thể xóa hàng hóa` đang có bố cục lộn xộn (icon thùng rác mâu thuẫn trên tiêu đề modal báo chặn xóa, cấu trúc lồng hộp "box-in-a-box" xám xịt, văn bản lặp lại 2 đoạn trùng ý nhau, thiếu thẻ tóm tắt thông tin sản phẩm).
+  - **Khắc phục & Thiết kế mới**:
+    1. **Header động thông minh**:
+       - Khi chặn xóa (đã có chứng từ): Header hiển thị icon huy hiệu ổ khóa bảo mật `bi-shield-lock` (nền vàng cam `#fef3c7`, màu `#d97706`), tiêu đề "Không thể xóa hàng hóa".
+       - Khi xác nhận xóa (chưa có chứng từ): Header hiển thị icon thùng rác `bi-trash3` (nền đỏ nhạt `#fee2e2`, màu `#dc2626`), tiêu đề "Xóa hàng hóa".
+    2. **Loại bỏ hoàn toàn layout "Hộp trong hộp" (Box-inside-a-box)**:
+       - Chuyển thành mặt phẳng thẻ đơn (single-surface) với đường bo viền 12px hiện đại và bóng mờ mềm mại.
+       - Khu vực Hero trên cùng: Biểu tượng tròn lớn nổi bật (`bi-shield-lock` màu cam hoặc `bi-exclamation-triangle` màu đỏ) đi kèm tiêu đề đậm nét và 1 câu giải thích súc tích, ngắn gọn.
+    3. **Thẻ tóm tắt thông tin mặt hàng chuẩn Enterprise**:
+       - Thiết kế mini-card gọn gàng (`#f8fafc` + viền `#e2e8f0`): Nhãn "THÔNG TIN MẶT HÀNG", Badge trạng thái kinh doanh (`Đang kinh doanh` xanh lá / `Ngừng kinh doanh` xám), Tên mặt hàng (15px bold `#0f172a`), Mã hàng (`#0f172a` semi-bold).
+    4. **Khối gợi ý giải pháp (Callout Tip)**:
+       - Thêm dòng hướng dẫn thân thiện kèm icon bóng đèn vàng `bi-lightbulb-fill`: Hướng dẫn chuyển sang `Khóa hàng (Ngừng kinh doanh)` để ẩn khỏi danh mục bán hàng mà vẫn bảo toàn số liệu kế toán.
+    5. **Chân trang (Footer) phân cấp chuẩn**:
+       - Nút phụ: `Bỏ qua` / `Đóng` (`btn-outline-secondary`).
+       - Nút chính: `Khóa hàng (Ngừng kinh doanh)` (màu xanh dương đậm `.btn-primary` kèm icon `bi-lock-fill`) hoặc `Đồng ý xóa` (màu đỏ `.btn-danger` kèm icon `bi-trash3-fill`).
+    6. **Tập tin tác động**:
+       - `Views/HangHoa/_HangHoaModal.cshtml`: Dựng lại toàn bộ DOM modal `#hhDeleteProductOv`.
+       - `wwwroot/js/hang-hoa-form.js`: Đồng bộ logic hiển thị, binding dữ liệu tên hàng, mã hàng, badge trạng thái và icon header.
+  - **Kiểm tra**:
+    - `node -c wwwroot/js/hang-hoa-form.js` đạt chuẩn **0 Errors**.
+    - `dotnet build -t:Compile` hoàn thành với **0 Errors**.
 
 ---
 

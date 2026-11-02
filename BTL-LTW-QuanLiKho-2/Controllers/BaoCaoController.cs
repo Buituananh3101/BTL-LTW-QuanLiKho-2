@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -425,6 +425,7 @@ public class BaoCaoController : BaseKhoController
 
         // Lấy tồn kho theo chi nhánh kho đã chọn
         var stockMap = new Dictionary<int, decimal>();
+        var setWithImage = new HashSet<int>();
         if (productIds.Any())
         {
             if (targetWhId > 0)
@@ -441,18 +442,37 @@ public class BaoCaoController : BaseKhoController
                     .Select(g => new { MaHang = g.Key, TongTon = g.Sum(x => x.SoLuongTon ?? 0) })
                     .ToDictionaryAsync(s => s.MaHang, s => s.TongTon);
             }
+
+            var imgIds = await _context.HinhAnhHangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang))
+                .Select(x => x.MaHang)
+                .Distinct()
+                .ToListAsync();
+
+            var legacyImgIds = await _context.HangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang) && x.HinhAnh != null)
+                .Select(x => x.MaHang)
+                .ToListAsync();
+
+            setWithImage = new HashSet<int>(imgIds.Concat(legacyImgIds));
         }
 
-        var items = products.Select(h => new
+        var items = products.Select(h =>
         {
-            id = h.MaHang,
-            maHang = h.MaHang,
-            maHangNoiBo = h.MaHangNoiBo,
-            tenHang = h.TenHang,
-            tenDvt = h.MaDvtNavigation != null ? h.MaDvtNavigation.TenDvt : "Cái",
-            tenNhom = h.MaNhomNavigation != null ? h.MaNhomNavigation.TenNhom : "",
-            gia = h.GiaVon > 0 ? h.GiaVon : (h.GiaBanThamKhao > 0 ? h.GiaBanThamKhao : 0),
-            tonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0
+            bool hasImg = setWithImage.Contains(h.MaHang);
+            return new
+            {
+                id = h.MaHang,
+                maHang = h.MaHang,
+                maHangNoiBo = h.MaHangNoiBo,
+                tenHang = h.TenHang,
+                tenDvt = h.MaDvtNavigation != null ? h.MaDvtNavigation.TenDvt : "Cái",
+                tenNhom = h.MaNhomNavigation != null ? h.MaNhomNavigation.TenNhom : "",
+                gia = h.GiaVon > 0 ? h.GiaVon : (h.GiaBanThamKhao > 0 ? h.GiaBanThamKhao : 0),
+                tonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0,
+                hasImage = hasImg,
+                hinhAnh = hasImg ? $"/HangHoa/GetImage/{h.MaHang}" : null
+            };
         }).ToList();
 
         return Json(items);

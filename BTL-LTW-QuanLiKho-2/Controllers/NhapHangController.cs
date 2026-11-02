@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -78,7 +78,7 @@ public class NhapHangController : BaseKhoController
     {
         int whId = GetCurrentWarehouseId();
         var kho = await _context.Khos.FindAsync(whId);
-        int currentNvId = CurrentNhanVienId;
+        int currentNvId = CurrentNhanVienId > 0 ? CurrentNhanVienId : 1;
         var nv = await _context.NhanViens.FindAsync(currentNvId);
 
         var vm = new NhapHangFormVM
@@ -272,13 +272,18 @@ public class NhapHangController : BaseKhoController
             return BadRequest(new { success = false, message = "Phiếu nhập phải có ít nhất 1 mặt hàng." });
         }
 
+        if (!req.MaDonViCapHang.HasValue || req.MaDonViCapHang.Value <= 0)
+        {
+            return BadRequest(new { success = false, message = "Vui lòng chọn nhà cung cấp cho phiếu nhập." });
+        }
+
         if (req.Lines.Any(l => l.SoLuong <= 0))
         {
             return BadRequest(new { success = false, message = "Số lượng hàng nhập phải lớn hơn 0." });
         }
 
         int whId = req.MaKho.HasValue && req.MaKho.Value > 0 ? req.MaKho.Value : GetCurrentWarehouseId();
-        int currentNvId = CurrentNhanVienId;
+        int currentNvId = CurrentNhanVienId > 0 ? CurrentNhanVienId : 1;
         bool isHoanThanh = string.Equals(req.ActionType, "HOAN_THANH", StringComparison.OrdinalIgnoreCase);
 
         using var trans = await _context.Database.BeginTransactionAsync();
@@ -308,7 +313,7 @@ public class NhapHangController : BaseKhoController
             else
             {
                 phieu = new PhieuNhap();
-                phieu.LoaiPhieuNhap = "NHAP_KHO";
+                phieu.LoaiPhieuNhap = "THONG_THUONG";
                 _context.PhieuNhaps.Add(phieu);
             }
 
@@ -333,13 +338,13 @@ public class NhapHangController : BaseKhoController
             decimal canTraNcc = Math.Max(0, tongTienHang - giamGiaPhieu);
 
             phieu.MaPhieu = maPhieu;
-            phieu.LoaiPhieuNhap = "NHAP_KHO";
+            phieu.LoaiPhieuNhap = "THONG_THUONG";
             phieu.MaKho = whId;
             phieu.NgayLap = req.NgayLap.HasValue 
                 ? (req.NgayLap.Value.Kind == DateTimeKind.Utc ? req.NgayLap.Value.ToLocalTime() : req.NgayLap.Value) 
                 : DateTime.Now;
             phieu.MaNvlap = req.MaNvlap.HasValue && req.MaNvlap.Value > 0 ? req.MaNvlap.Value : currentNvId;
-            phieu.MaDonViCapHang = req.MaDonViCapHang > 0 ? req.MaDonViCapHang : null;
+            phieu.MaDonViCapHang = req.MaDonViCapHang!.Value;
             phieu.SoHoaDon = string.IsNullOrWhiteSpace(req.SoHoaDon) ? null : req.SoHoaDon.Trim();
             phieu.MaDatHangNhap = string.IsNullOrWhiteSpace(req.MaDatHangNhap) ? null : req.MaDatHangNhap.Trim();
             phieu.GhiChu = string.IsNullOrWhiteSpace(req.GhiChu) ? null : req.GhiChu.Trim();
@@ -361,7 +366,17 @@ public class NhapHangController : BaseKhoController
             await _context.SaveChangesAsync();
 
             // Lưu các dòng chi tiết
-            foreach (var l in req.Lines)
+            var groupedLines = req.Lines
+                .GroupBy(l => l.MaHang)
+                .Select(g => new
+                {
+                    MaHang = g.Key,
+                    SoLuong = g.Sum(x => x.SoLuong),
+                    DonGiaNhap = g.Last().DonGiaNhap,
+                    GiamGia = g.Sum(x => x.GiamGia)
+                });
+
+            foreach (var l in groupedLines)
             {
                 decimal thanhTienLine = (l.SoLuong * l.DonGiaNhap) - l.GiamGia;
                 var ct = new ChiTietPhieuNhap
@@ -399,7 +414,8 @@ public class NhapHangController : BaseKhoController
         {
             await trans.RollbackAsync();
             _logger.LogError(ex, "Lỗi khi lưu phiếu nhập hàng");
-            return StatusCode(500, new { success = false, message = "Đã xảy ra lỗi khi lưu phiếu nhập: " + ex.Message });
+            string detailedMsg = ex.InnerException?.InnerException?.Message ?? ex.InnerException?.Message ?? ex.Message;
+            return StatusCode(500, new { success = false, message = "Đã xảy ra lỗi khi lưu phiếu nhập: " + detailedMsg });
         }
     }
 
@@ -464,7 +480,8 @@ public class NhapHangController : BaseKhoController
         {
             await trans.RollbackAsync();
             _logger.LogError(ex, "Lỗi khi hủy phiếu nhập hàng");
-            return StatusCode(500, new { success = false, message = "Lỗi khi hủy phiếu nhập: " + ex.Message });
+            string detailedMsg = ex.InnerException?.InnerException?.Message ?? ex.InnerException?.Message ?? ex.Message;
+            return StatusCode(500, new { success = false, message = "Lỗi khi hủy phiếu nhập: " + detailedMsg });
         }
     }
 

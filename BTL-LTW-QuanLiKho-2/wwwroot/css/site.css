@@ -1,4 +1,4 @@
-/* ===== wwwroot/css/site.css =====
+﻿/* ===== wwwroot/css/site.css =====
    Giao diện KiotViet chuẩn từ prototype-kiemkho.html */
 :root {
   --brand: #0a66e8;        /* xanh thanh menu */
@@ -2905,6 +2905,22 @@ tr.product-detail-row > td {
   flex-shrink: 0;
   font-size: 14px;
   text-transform: uppercase;
+  overflow: hidden;
+}
+.kk-autocomplete-item .kk-item-thumb.has-image {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+.kk-autocomplete-item .kk-item-thumb.no-image {
+  background: transparent;
+  border: 1px dashed #cbd5e1;
+}
+.kk-autocomplete-item .kk-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 5px;
 }
 .kk-autocomplete-item .kk-item-info {
   flex: 1;

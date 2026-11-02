@@ -2,24 +2,21 @@
    CSS CHO BÁO CÁO THẺ KHO (THE-KHO.CSS) - CHUẨN GIAO DIỆN KIOTVIET
    ========================================================================== */
 
-/* 1. KHỐI CHỌN MẶT HÀNG TRÊN SIDEBAR (CHUẨN LEGO F3) */
+/* 1. KHỐI CHỌN MẶT HÀNG TRÊN SIDEBAR (CHUẨN LEGO F3 BUNG RỘNG THOẢI MÁI) */
 .tk-autocomplete-dropdown {
-    position: absolute !important;
-    top: calc(100% + 4px) !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
+    position: fixed !important;
+    width: 520px !important;
+    min-width: 480px !important;
+    max-width: 600px !important;
     background: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 8px !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
-    max-height: 220px !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    max-height: 380px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    z-index: 150 !important;
-    padding: 3px 0 !important;
+    z-index: 1080 !important;
+    padding: 4px 0 !important;
     display: none;
     box-sizing: border-box !important;
 }
@@ -28,59 +25,120 @@
     display: block !important;
 }
 
-/* Tinh chỉnh item autocomplete khi hiển thị trên sidebar */
+/* Item autocomplete hiển thị rộng rãi, rõ ràng, không bị co dúm */
 .tk-autocomplete-dropdown .kk-autocomplete-item {
-    padding: 6px 8px !important;
-    gap: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding: 9px 14px !important;
     border-bottom: 1px solid #f1f5f9 !important;
     cursor: pointer !important;
+    transition: background-color 0.15s ease !important;
+    background: #ffffff !important;
+}
+
+.tk-autocomplete-dropdown .kk-autocomplete-item:hover,
+.tk-autocomplete-dropdown .kk-autocomplete-item.active {
+    background-color: #eff6ff !important;
 }
 
 .tk-autocomplete-dropdown .kk-autocomplete-item:last-child {
     border-bottom: none !important;
 }
 
+.tk-autocomplete-dropdown .kk-item-main {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
 .tk-autocomplete-dropdown .kk-item-thumb {
-    width: 24px !important;
-    height: 24px !important;
-    font-size: 11px !important;
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 14px !important;
     font-weight: 700 !important;
-    border-radius: 4px !important;
+    border-radius: 6px !important;
+    background: #e0f2fe !important;
+    color: #0284c7 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     flex-shrink: 0 !important;
+    text-transform: uppercase !important;
+    overflow: hidden !important;
+}
+
+.tk-autocomplete-dropdown .kk-item-thumb.has-image {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+.tk-autocomplete-dropdown .kk-item-thumb.no-image {
+    background: transparent !important;
+    border: 1px dashed #cbd5e1 !important;
+}
+
+.tk-autocomplete-dropdown .kk-thumb-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+    border-radius: 5px !important;
+}
+
+.tk-autocomplete-dropdown .kk-item-info {
+    flex: 1 !important;
+    min-width: 0 !important;
 }
 
 .tk-autocomplete-dropdown .kk-item-name {
-    font-size: 12px !important;
-    line-height: 1.25 !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    line-height: 1.35 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
 }
 
 .tk-autocomplete-dropdown .kk-item-code {
-    font-size: 10.5px !important;
+    font-size: 12px !important;
     color: #64748b !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+    margin-top: 2px !important;
 }
 
 .tk-autocomplete-dropdown .kk-item-meta {
-    font-size: 11px !important;
-    line-height: 1.3 !important;
-    padding-left: 4px !important;
+    font-size: 12.5px !important;
+    line-height: 1.45 !important;
+    padding-left: 12px !important;
     text-align: right !important;
     flex-shrink: 0 !important;
     white-space: nowrap !important;
 }
 
+.tk-autocomplete-dropdown .kk-item-stock {
+    color: #64748b !important;
+}
+
 .tk-autocomplete-dropdown .kk-item-stock strong {
     color: #0070f4 !important;
+    font-weight: 600 !important;
+}
+
+.tk-autocomplete-dropdown .kk-item-price {
+    color: #475569 !important;
 }
 
 .tk-autocomplete-dropdown .kk-item-price b {
     color: #1e293b !important;
-    font-size: 11px !important;
+    font-weight: 600 !important;
+    font-size: 12.5px !important;
 }
 
 /* Nút xóa mặt hàng đã chọn trong ô tìm kiếm F3 */

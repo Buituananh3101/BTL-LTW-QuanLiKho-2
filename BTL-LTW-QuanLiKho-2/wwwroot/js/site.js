@@ -196,7 +196,7 @@ window.KiotPrompt = (function () {
         const delBtn = document.getElementById('kiotPromptDelete');
 
         if (titleEl) titleEl.textContent = opt.title;
-        if (labelEl) labelEl.textContent = opt.label;
+        if (labelEl) labelEl.innerHTML = (opt.label || 'Tên') + ' <span class="text-danger">*</span>';
         if (inputEl) {
             inputEl.value = opt.value || '';
             inputEl.placeholder = opt.placeholder || '';

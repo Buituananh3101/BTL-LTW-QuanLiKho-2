@@ -145,7 +145,7 @@
 
   function openPrompt(title, label, defaultVal, cb) {
     $('#pTitle').textContent = title;
-    $('#pLabel').textContent = label;
+    $('#pLabel').innerHTML = label + ' <span style="color:var(--hh-danger)">*</span>';
     promptLabel = label;
     $('#pInput').value = defaultVal || '';
     $('#pField').classList.remove('invalid');
@@ -193,7 +193,7 @@
     const err = $('#editItemErr');
 
     if (titleEl) titleEl.textContent = isVitri ? 'Sửa vị trí' : 'Sửa thuộc tính';
-    if (labelEl) labelEl.textContent = isVitri ? 'Vị trí' : 'Tên thuộc tính';
+    if (labelEl) labelEl.innerHTML = (isVitri ? 'Vị trí' : 'Tên thuộc tính') + ' <span style="color:var(--hh-danger)">*</span>';
     if (saveBtn) saveBtn.textContent = isVitri ? 'Lưu' : 'Xong';
 
     if (inp) inp.value = editItemOldVal;
@@ -1596,21 +1596,28 @@
   window.openDeleteProductModal = function (id, name) {
     if (!id) return;
     const hiddenId = $('#delProdId');
-    const nameEl = $('#delProdName');
     const normalBox = $('#delProdNormalBox');
     const blockedBox = $('#delProdBlockedBox');
-    const blockedMsg = $('#delProdBlockedMsg');
     const btnDel = $('#btnConfirmDeleteProd');
     const btnNgung = $('#btnSwitchNgungBan');
+    const btnCancel = $('#btnCancelDeleteProd');
     const titleText = $('#delProdHeaderText');
-    const titleEl = $('#delProdTitle');
+    const headerIconWrap = $('#delProdHeaderIconWrap');
+    const headerIcon = $('#delProdHeaderIcon');
+    const itemName = $('#delProdItemName');
+    const itemCode = $('#delProdItemCode');
+    const statusBadge = $('#delProdStatusBadge');
+    const guideWrap = $('#delProdGuideWrap');
+    const guideText = $('#delProdGuideText');
 
     if (hiddenId) hiddenId.value = id;
-    if (nameEl) nameEl.textContent = name || ('Mã #' + id);
+    if (itemName) itemName.textContent = name || ('Mã #' + id);
+    if (itemCode) itemCode.textContent = '#' + id;
 
     // Trạng thái ban đầu: chờ nạp kết quả kiểm tra
     if (normalBox) normalBox.style.display = 'block';
     if (blockedBox) blockedBox.style.display = 'none';
+    if (guideWrap) guideWrap.style.display = 'none';
     if (btnDel) {
       btnDel.style.display = 'none';
       btnDel.disabled = true;
@@ -1619,8 +1626,7 @@
       btnNgung.style.display = 'none';
       btnNgung.disabled = true;
     }
-    if (titleText) titleText.textContent = 'Đang kiểm tra giao dịch...';
-    if (titleEl) titleEl.style.color = '#111827';
+    if (titleText) titleText.textContent = 'Đang kiểm tra...';
 
     show($('#hhDeleteProductOv'));
 
@@ -1630,17 +1636,40 @@
       type: 'GET',
       success: function (res) {
         if (!res || !res.success) {
-          renderNormalMode();
+          renderNormalMode(name, '#' + id);
           return;
+        }
+
+        const displayName = res.tenHang || name || ('Mã #' + id);
+        const displayCode = res.maHangNoiBo || ('#' + id);
+        if (itemName) itemName.textContent = displayName;
+        if (itemCode) itemCode.textContent = displayCode;
+
+        if (statusBadge) {
+          if (res.isNgungBan) {
+            statusBadge.textContent = 'Ngừng kinh doanh';
+            statusBadge.style.background = '#f1f5f9';
+            statusBadge.style.color = '#475569';
+          } else {
+            statusBadge.textContent = 'Đang kinh doanh';
+            statusBadge.style.background = '#ecfdf5';
+            statusBadge.style.color = '#059669';
+          }
         }
 
         if (res.hasTransaction) {
           // ĐÃ CÓ GIAO DỊCH: CHỈ CHO KHÓA, CẤM XÓA TUYỆT ĐỐI
-          if (titleText) titleText.textContent = res.isNgungBan ? 'Hàng hóa đã ngừng kinh doanh' : 'Không thể xóa hàng hóa';
-          if (titleEl) titleEl.style.color = '#111827';
+          if (titleText) titleText.textContent = 'Không thể xóa hàng hóa';
+          if (headerIconWrap) {
+            headerIconWrap.style.background = '#fef3c7';
+            headerIconWrap.style.color = '#d97706';
+          }
+          if (headerIcon) {
+            headerIcon.className = 'bi bi-shield-lock';
+          }
           if (normalBox) normalBox.style.display = 'none';
           if (blockedBox) blockedBox.style.display = 'block';
-          if (blockedMsg) blockedMsg.textContent = res.message;
+          if (guideWrap) guideWrap.style.display = 'block';
 
           // Nút xóa BỊ ẨN HOÀN TOÀN
           if (btnDel) {
@@ -1648,35 +1677,46 @@
             btnDel.disabled = true;
           }
 
-          // Nút Khóa / Ngừng bán
-          if (btnNgung) {
-            if (res.isNgungBan) {
-              btnNgung.style.display = 'none';
-            } else {
+          if (res.isNgungBan) {
+            if (btnNgung) btnNgung.style.display = 'none';
+            if (btnCancel) btnCancel.textContent = 'Đóng';
+            if (guideText) guideText.innerHTML = '<i class="bi bi-info-circle-fill text-secondary me-1"></i> Mặt hàng này đã ở trạng thái <strong>Ngừng kinh doanh</strong> và được lưu trữ an toàn trong sổ sách kế toán.';
+          } else {
+            if (btnNgung) {
               btnNgung.style.display = 'inline-flex';
               btnNgung.disabled = false;
-              btnNgung.innerHTML = '<i class="bi bi-lock me-1"></i> Khóa hàng (Ngừng kinh doanh)';
+              btnNgung.innerHTML = '<i class="bi bi-lock-fill me-1"></i> Khóa hàng (Ngừng kinh doanh)';
             }
+            if (btnCancel) btnCancel.textContent = 'Bỏ qua';
+            if (guideText) guideText.innerHTML = '<i class="bi bi-lightbulb-fill text-warning me-1"></i> Để ẩn mặt hàng khỏi danh mục bán hàng và tránh phát sinh mới, vui lòng chọn <strong>Khóa hàng (Ngừng kinh doanh)</strong>.';
           }
         } else {
           // CHƯA CÓ GIAO DỊCH: CHO PHÉP XÓA
-          renderNormalMode();
+          renderNormalMode(displayName, displayCode);
         }
       },
       error: function () {
-        renderNormalMode();
+        renderNormalMode(name, '#' + id);
       }
     });
 
-    function renderNormalMode() {
+    function renderNormalMode(displayName, displayCode) {
       if (titleText) titleText.textContent = 'Xóa hàng hóa';
-      if (titleEl) titleEl.style.color = '#111827';
+      if (headerIconWrap) {
+        headerIconWrap.style.background = '#fee2e2';
+        headerIconWrap.style.color = '#dc2626';
+      }
+      if (headerIcon) {
+        headerIcon.className = 'bi bi-trash3';
+      }
       if (normalBox) normalBox.style.display = 'block';
       if (blockedBox) blockedBox.style.display = 'none';
+      if (guideWrap) guideWrap.style.display = 'none';
+      if (btnCancel) btnCancel.textContent = 'Bỏ qua';
       if (btnDel) {
         btnDel.style.display = 'inline-flex';
         btnDel.disabled = false;
-        btnDel.textContent = 'Đồng ý xóa';
+        btnDel.innerHTML = '<i class="bi bi-trash3-fill me-1"></i> Đồng ý xóa';
       }
       if (btnNgung) btnNgung.style.display = 'none';
     }
@@ -1725,10 +1765,22 @@
 
         if (xhr.responseJSON?.hasTransaction) {
           if (titleText) titleText.textContent = 'Không thể xóa hàng hóa';
-          if (titleEl) titleEl.style.color = '#111827';
+          const headerIconWrap = $('#delProdHeaderIconWrap');
+          const headerIcon = $('#delProdHeaderIcon');
+          const guideWrap = $('#delProdGuideWrap');
+          const btnCancel = $('#btnCancelDeleteProd');
+
+          if (headerIconWrap) {
+            headerIconWrap.style.background = '#fef3c7';
+            headerIconWrap.style.color = '#d97706';
+          }
+          if (headerIcon) {
+            headerIcon.className = 'bi bi-shield-lock';
+          }
           if (normalBox) normalBox.style.display = 'none';
           if (blockedBox) blockedBox.style.display = 'block';
-          if (blockedMsg) blockedMsg.textContent = msg;
+          if (guideWrap) guideWrap.style.display = 'block';
+          if (btnCancel) btnCancel.textContent = 'Bỏ qua';
 
           // ẨN HOÀN TOÀN nút xóa
           btn.style.display = 'none';
@@ -1737,7 +1789,7 @@
           if (btnNgung) {
             btnNgung.style.display = 'inline-flex';
             btnNgung.disabled = false;
-            btnNgung.innerHTML = '<i class="bi bi-lock me-1"></i> Khóa hàng (Ngừng kinh doanh)';
+            btnNgung.innerHTML = '<i class="bi bi-lock-fill me-1"></i> Khóa hàng (Ngừng kinh doanh)';
           }
         } else {
           alert('Lỗi: ' + msg);

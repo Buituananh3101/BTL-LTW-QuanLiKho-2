@@ -282,8 +282,16 @@
   font-weight: 500;
   color: #374151;
   display: flex;
-  justify-content: space-between;
   align-items: baseline;
+  gap: 4px;
+}
+.hh-f label .hh-link,
+.hh-f label button,
+.hh-f label a,
+.hh-f .hh-lb .hh-link,
+.hh-f .hh-lb button,
+.hh-f .hh-lb a {
+  margin-left: auto;
 }
 .hh-f input[type=text],
 .hh-f input[type=number],

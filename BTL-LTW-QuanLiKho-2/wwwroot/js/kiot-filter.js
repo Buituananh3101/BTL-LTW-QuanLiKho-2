@@ -1569,6 +1569,22 @@ window.KiotFilter = (function ($) {
                 const unitText = tenDvt ? ` · ${escapeHtml(tenDvt)}` : '';
                 const isActive = idx === activeIndex ? ' active' : '';
 
+                const hasImage = !!(item.hasImage || item.HasImage || (item.hinhAnh && item.hinhAnh.length > 0) || (item.HinhAnh && item.HinhAnh.length > 0));
+                const imgUrl = item.hinhAnh || item.HinhAnh || (hasImage ? `/HangHoa/GetImage/${maHang}` : '');
+
+                let thumbHtml = '';
+                let thumbClass = 'kk-item-thumb';
+
+                if (hasImage && imgUrl) {
+                    thumbClass += ' has-image';
+                    thumbHtml = `<img src="${imgUrl}" alt="${escapeHtml(tenHang)}" class="kk-thumb-img" onerror="this.onerror=null;this.parentElement.innerHTML='';this.parentElement.className='kk-item-thumb no-image';" />`;
+                } else if (opt.emptyThumbWhenNoImage) {
+                    thumbClass += ' no-image';
+                    thumbHtml = '';
+                } else {
+                    thumbHtml = firstChar;
+                }
+
                 const html = `
                     <div class="kk-autocomplete-item${isActive}" 
                          data-index="${idx}"
@@ -1580,7 +1596,7 @@ window.KiotFilter = (function ($) {
                          data-stock="${tonKho}" 
                          data-cost="${gia}">
                         <div class="kk-item-main">
-                            <div class="kk-item-thumb">${firstChar}</div>
+                            <div class="${thumbClass}">${thumbHtml}</div>
                             <div class="kk-item-info">
                                 <div class="kk-item-name" title="${escapeHtml(tenHang)}">${escapeHtml(tenHang)}</div>
                                 <div class="kk-item-code">${escapeHtml(maHangNoiBo)}${unitText}</div>
