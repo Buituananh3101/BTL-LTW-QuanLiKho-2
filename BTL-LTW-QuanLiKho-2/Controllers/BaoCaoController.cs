@@ -97,7 +97,7 @@ public class BaoCaoController : BaseKhoController
 
         var vm = await BuildTonKhoIndexVMAsync(filter);
         var items = vm.PagedData.Items;
-        var selectedKhos = vm.DanhSachKho.Where(k => vm.SelectedKhoIds.Contains(k.MaKho)).ToList();
+        var selectedKhos = (vm.SelectedKhoIds != null && vm.SelectedKhoIds.Count > 0) ? vm.DanhSachKho.Where(k => vm.SelectedKhoIds.Contains(k.MaKho)).ToList() : vm.DanhSachKho;
 
         using var workbook = new XLWorkbook();
         var ws = workbook.Worksheets.Add("TonKhoTheoKho");
@@ -324,6 +324,20 @@ public class BaoCaoController : BaseKhoController
             filter.MaKho = CurrentWarehouseId;
         }
 
+        // Nếu truy cập lần đầu và chưa chọn mặt hàng, mặc định nạp mặt hàng đang kinh doanh đầu tiên
+        if (!filter.MaHang.HasValue || filter.MaHang.Value <= 0)
+        {
+            var firstHang = await _context.HangHoas.AsNoTracking()
+                .Where(h => h.TrangThai == "DANG_BAN" || h.TrangThai == "DANG_KINH_DOANH")
+                .OrderBy(h => h.MaHang)
+                .FirstOrDefaultAsync();
+
+            if (firstHang != null)
+            {
+                filter.MaHang = firstHang.MaHang;
+            }
+        }
+
         var vm = await _theKhoService.LayBaoCaoTheKhoAsync(filter, CurrentWarehouseId, IsQuanLy);
         return View(vm);
     }
@@ -342,7 +356,7 @@ public class BaoCaoController : BaseKhoController
         }
 
         var vm = await _theKhoService.LayBaoCaoTheKhoAsync(filter, CurrentWarehouseId, IsQuanLy);
-        return PartialView("_TheKhoTable", vm);
+        return PartialView("_TheKhoContent", vm);
     }
 
     /// <summary>
@@ -487,9 +501,10 @@ public class BaoCaoController : BaseKhoController
 
         // 1. Xác định danh sách kho được chọn
         List<int> selectedKhoIds;
-        if (filter.SelectedKhoIds != null && filter.SelectedKhoIds.Count > 0)
+        bool hasFilterKho = filter.SelectedKhoIds != null && filter.SelectedKhoIds.Count > 0;
+        if (hasFilterKho)
         {
-            selectedKhoIds = filter.SelectedKhoIds.Where(id => allowedKhoIds.Contains(id)).ToList();
+            selectedKhoIds = filter.SelectedKhoIds!.Where(id => allowedKhoIds.Contains(id)).ToList();
             if (selectedKhoIds.Count == 0) selectedKhoIds = allowedKhoIds;
         }
         else
@@ -507,11 +522,12 @@ public class BaoCaoController : BaseKhoController
         // Lọc trạng thái kinh doanh
         if (filter.SelectedTrangThais != null && filter.SelectedTrangThais.Count > 0)
         {
-            queryHangHoa = queryHangHoa.Where(h => filter.SelectedTrangThais.Contains(h.TrangThai));
+            queryHangHoa = queryHangHoa.Where(h => filter.SelectedTrangThais.Contains(h.TrangThai) || (filter.SelectedTrangThais.Contains("DANG_KINH_DOANH") && h.TrangThai == "DANG_BAN") || (filter.SelectedTrangThais.Contains("NGUNG_KINH_DOANH") && h.TrangThai == "NGUNG_BAN"));
         }
         else if (!string.IsNullOrWhiteSpace(filter.TrangThaiHang) && filter.TrangThaiHang != "ALL")
         {
-            queryHangHoa = queryHangHoa.Where(h => h.TrangThai == filter.TrangThaiHang);
+            string targetSt = (filter.TrangThaiHang == "DANG_BAN" || filter.TrangThaiHang == "DANG_KINH_DOANH") ? "DANG_BAN" : (filter.TrangThaiHang == "NGUNG_BAN" || filter.TrangThaiHang == "NGUNG_KINH_DOANH") ? "NGUNG_BAN" : filter.TrangThaiHang;
+            queryHangHoa = queryHangHoa.Where(h => h.TrangThai == targetSt);
         }
 
         // Lọc nhóm hàng (hỗ trợ cả SelectedNhomIds và MaNhom)
@@ -677,7 +693,7 @@ public class BaoCaoController : BaseKhoController
             PagedData = pagedResult,
             Summary = summary,
             DanhSachKho = allowedKhos,
-            SelectedKhoIds = selectedKhoIds,
+            SelectedKhoIds = hasFilterKho ? filter.SelectedKhoIds!.Where(id => allowedKhoIds.Contains(id)).ToList() : new List<int>(),
             DanhSachNhomHang = nhomHangs,
             Filter = filter
         };

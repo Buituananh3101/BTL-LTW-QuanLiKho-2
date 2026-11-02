@@ -423,6 +423,11 @@ body {
   display: flex;
   flex-direction: column;
 }
+#content > div,
+.kiot-table-wrapper,
+#tableWrapper,
+#tableContainer,
+#theKhoTableContainer,
 #productTableContainer {
   flex: 1;
   min-height: 0;
@@ -516,10 +521,10 @@ body {
   border-left: 3px solid #0070f3 !important;
   border-right: 3px solid #0070f3 !important;
 }
-.tbl thead th {
+.tbl > thead > tr > th {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 30;
   background: var(--brand-soft);
   font-weight: 600;
   font-size: 13px;
@@ -529,6 +534,24 @@ body {
   white-space: nowrap;
   color: #1e3a8a;
   border-bottom: 1px solid var(--border);
+}
+
+/* Header các bảng lồng bên trong dòng chi tiết mở rộng không được sticky để tránh đè lên thead chính */
+.product-detail-row thead th,
+.tonkho-detail-row thead th,
+.product-detail-panel thead th,
+.thekho-table thead th,
+.tonkho-table thead th {
+  position: static !important;
+  top: auto !important;
+  z-index: 1 !important;
+}
+
+tr.kiot-detail-row,
+tr.product-detail-row,
+tr.tonkho-detail-row {
+  position: relative;
+  z-index: 1;
 }
 
 /* Sortable column headers (KiotViet style - 3-state sort) */
@@ -856,10 +879,14 @@ body {
   display: flex;
   align-items: center;
 }
-.kiot-filter-box .f-block + .f-block {
+.kiot-filter-box .f-block + .f-block,
+.kiot-filter-box .f-block ~ .f-block {
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid #f3f4f6;
+}
+#btnToggleAllKho {
+  display: none;
 }
 .kiot-filter-box .form-control,
 .kiot-filter-box .form-select {

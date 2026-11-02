@@ -28,7 +28,7 @@ public class BaoCaoTonKhoFilterParams : BaseFilterParams
     /// <summary>
     /// Trạng thái kinh doanh của hàng hóa: DANG_KINH_DOANH, NGUNG_KINH_DOANH, ALL
     /// </summary>
-    public string TrangThaiHang { get; set; } = "DANG_KINH_DOANH";
+    public string TrangThaiHang { get; set; } = "DANG_BAN";
 
     /// <summary>
     /// Danh sách trạng thái hàng hóa được chọn từ checkbox filter

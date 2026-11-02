@@ -1,0 +1,110 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.KhachHang.KhachHangIndexVM
+@{
+    ViewData["Title"] = "Khách hàng";
+}
+
+<link rel="stylesheet" href="~/css/hang-hoa-form.css" asp-append-version="true" />
+
+<div class="kiot-container position-relative" id="kiotContainer" 
+     data-sort-by="@Model.SortBy" 
+     data-sort-dir="@Model.SortDir"
+     data-is-starred="@(Model.Filter.DaDanhDau ? "true" : "false")">
+
+    <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + BỘ LỌC KHÁCH HÀNG -->
+    <partial name="_KhachHangFilterSidebar" model="Model" />
+
+    <!-- Backdrop che mờ khi mở bộ lọc trên mobile -->
+    <div class="kiot-sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Nút thu gọn / mở rộng sidebar (F4) -->
+    <button type="button" class="kiot-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
+        <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
+    </button>
+
+    <!-- 2. CỘT BÊN PHẢI: TOOLBAR + BẢNG DỮ LIỆU KHÁCH HÀNG -->
+    <main class="kiot-main-col">
+        <!-- Toolbar trên cùng: Thanh tìm kiếm thẳng hàng với bảng -->
+        <div class="kiot-toolbar-row">
+            <!-- Tiêu đề + Nút phễu bộ lọc trên mobile -->
+            <div class="kiot-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
+                <span class="kiot-mobile-title fw-bold fs-6 text-dark">Khách hàng</span>
+                <button type="button" class="btn btn-sm btn-outline-primary kiot-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+
+            <div class="kiot-search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã, tên, số điện thoại khách hàng (F3)" value="@Model.Filter.Q" autocomplete="off" />
+            </div>
+
+            <div class="kiot-actions-group">
+                <!-- Nút + Khách hàng -->
+                <button type="button" class="btn btn-primary kiot-btn-create d-inline-flex align-items-center" id="btnOpenCreateKhModal" title="Thêm mới khách hàng">
+                    <i class="bi bi-plus-lg me-1"></i><span>Khách hàng</span>
+                </button>
+
+                <!-- Nút Xuất file Excel -->
+                <button type="button" class="btn btn-outline-secondary d-none d-md-inline-flex align-items-center" id="btnExportExcel" title="Xuất dữ liệu ra Excel">
+                    <i class="bi bi-file-earmark-arrow-up me-1"></i><span>Xuất file</span>
+                </button>
+
+                <!-- Dropdown Tùy chọn hiển thị cột (Chuẩn 2 cột chuyên nghiệp) -->
+                <div class="dropdown">
+                    <button class="btn btn-tool" type="button" id="btnColsDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Tùy chọn hiển thị cột">
+                        <i class="bi bi-view-list"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end shadow p-3" id="colMenu" style="min-width: 420px;">
+                        <h6 class="dropdown-header px-0 pt-0 text-dark fw-bold mb-2">Hiển thị cột</h6>
+                        <div class="row g-3">
+                            <div class="col-6 d-flex flex-column gap-2 small">
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ma" checked> Mã khách hàng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ten" checked> Tên khách hàng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="sdt" checked> Điện thoại</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="diachi" checked> Địa chỉ</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="khuvuc"> Khu vực</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="phuongxa"> Phường/Xã</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="nhomkh" checked> Nhóm khách hàng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="loaikh"> Loại khách hàng</label>
+                            </div>
+                            <div class="col-6 d-flex flex-column gap-2 small">
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="mst"> Mã số thuế</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="ngaysinh"> Ngày sinh</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="gioitinh"> Giới tính</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="email"> Email</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tongban" checked> Tổng bán</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="tongbantrutrahang"> Tổng bán trừ trả hàng</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="no" checked> Nợ hiện tại</label>
+                                <label class="form-check-label"><input type="checkbox" class="form-check-input me-1" data-c="st" checked> Trạng thái</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tải lại bảng -->
+                <button type="button" class="btn btn-tool d-none d-sm-inline-flex" title="Tải lại bảng" id="btnReloadTable">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+                <!-- Hướng dẫn sử dụng F1 -->
+                <button type="button" class="btn btn-tool d-none d-sm-inline-flex" title="Hướng dẫn sử dụng (F1)" id="btnHelp">
+                    <i class="bi bi-question-circle"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách khách hàng (Partial View AJAX) -->
+        <section id="content">
+            <div id="khachHangTableContainer">
+                <partial name="_KhachHangTable" model="Model.PagedData" />
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Modal Tạo mới / Cập nhật Khách hàng -->
+<partial name="_KhachHangModal" />
+
+@section Scripts {
+    <script src="~/js/kiot-filter.js" asp-append-version="true"></script>
+    <script src="~/js/khach-hang-index.js" asp-append-version="true"></script>
+}

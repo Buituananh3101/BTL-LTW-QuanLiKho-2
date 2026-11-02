@@ -44,5 +44,6 @@
 - **2026-10-19 (Phiên 176)** – Đổi tên đề tài thành "Xây dựng ứng dụng Web quản lý kho hàng nội bộ đa chi nhánh" – Phản ánh chuẩn xác hàm lượng kỹ thuật (Web Application), bản chất WMS/ERP nội bộ doanh nghiệp và khoanh vùng phạm vi học thuật khi bảo vệ đồ án.
 - **2026-10-19 (Phiên 181)** – Cập nhật Giảng viên hướng dẫn & Lớp học phần – GVHD: thầy Lại Mạnh Dũng; Lớp học phần: Nhóm 3 -- Lớp N05 -- K65 trên toàn bộ trang bìa và lời nói đầu.
 - **2026-10-19 (Phiên 182)** – Tinh gọn Mục 3.2 Báo cáo LaTeX: Gỡ bỏ 3.2.4 (Lego UI) và 3.2.5 (Stacking Context) – Tập trung Mục 3.2 vào các cơ chế kiến trúc phần mềm cốt lõi (Cookie Authentication, BaseKhoController, ACID Transaction); tự động kéo phân hệ 3.3 lên liền mạch, giữ tổng 76 trang A4 chuẩn mực, 0 Overfull hbox.
+- **2026-11-02 (Phiên 191)** – Hoàn thiện Tính toàn vẹn Số liệu và Đồng bộ AJAX Thẻ kho – Action `FilterTheKho` trả về `_TheKhoContent` đảm bảo Banner và 4 KPI summary không bị xóa mất khi lọc AJAX; tính `TonLuyKe` và KPI trên toàn bộ biến động trước khi lọc theo loại chứng từ để bảo toàn tính đúng đắn kế toán kho; cho phép hủy chọn mặt hàng; đồng bộ bộ lọc `TuKhoa` vào xuất Excel.
 
 

@@ -1,0 +1,310 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.KhachHang.KhachHangItemVM
+@using System.Globalization
+@{
+    var viCulture = CultureInfo.GetCultureInfo("vi-VN");
+}
+
+<div class="product-detail-panel">
+    <!-- Thanh Tabs Header -->
+    <div class="product-detail-tabs">
+        <button type="button" class="product-detail-tab-btn active" data-tab="info">Thông tin</button>
+        <button type="button" class="product-detail-tab-btn" data-tab="donban">Lịch sử mua hàng (@Model.LichSuDonBans.Count)</button>
+        <button type="button" class="product-detail-tab-btn" data-tab="congno">Nợ cần thu</button>
+    </div>
+
+    <!-- Nội dung Tabs -->
+    <div class="product-detail-tab-content kiot-detail-fixed-wrap p-3">
+        <!-- ================= TAB 1: THÔNG TIN ================= -->
+        <div class="tab-pane-content tab-info">
+            <div class="d-flex gap-4 align-items-start mb-3">
+                <div class="product-detail-img-box rounded-circle overflow-hidden d-flex align-items-center justify-content-center bg-light border" style="width: 72px; height: 72px; flex: none;">
+                    @if (!string.IsNullOrWhiteSpace(Model.HinhAnh))
+                    {
+                        <img src="@Model.HinhAnh" alt="@Model.TenKh" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='/images/avatar-default.png';" />
+                    }
+                    else
+                    {
+                        <i class="bi bi-person-fill text-secondary fs-1"></i>
+                    }
+                </div>
+                <div class="flex-grow-1" style="min-width: 0;">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h4 class="product-detail-title mb-0">@Model.TenKh</h4>
+                        @if (Model.TrangThai == "HOAT_DONG")
+                        {
+                            <span class="badge bg-light text-success border border-success-subtle">Đang hoạt động</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-light text-secondary border">Ngừng giao dịch</span>
+                        }
+                    </div>
+                    <div class="text-muted small">
+                        Mã khách hàng: <span class="text-dark fw-semibold">@Model.MaKhHienThi</span> &bull; 
+                        Nhóm: <span class="text-primary fw-semibold">@(!string.IsNullOrEmpty(Model.TenNhomKhachHang) && Model.TenNhomKhachHang != "---" ? Model.TenNhomKhachHang : "Chưa phân nhóm")</span> &bull;
+                        Loại: <span class="text-dark">@Model.TenLoaiKhachHang</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lưới 4 cột thuộc tính -->
+            <div class="row g-3 mb-3 product-attr-grid">
+                <div class="col-md-3">
+                    <div class="attr-item">
+                        <div class="attr-label">Điện thoại chính</div>
+                        <div class="attr-value">@(string.IsNullOrWhiteSpace(Model.DienThoai) ? "---" : Model.DienThoai)</div>
+                    </div>
+                    <div class="attr-item">
+                        <div class="attr-label">Điện thoại 2</div>
+                        <div class="attr-value text-muted">@(string.IsNullOrWhiteSpace(Model.DienThoai2) ? "---" : Model.DienThoai2)</div>
+                    </div>
+                    <div class="attr-item">
+                        <div class="attr-label">Giới tính</div>
+                        <div class="attr-value">@(string.IsNullOrWhiteSpace(Model.GioiTinh) ? "---" : Model.GioiTinh)</div>
+                    </div>
+                    <div class="attr-item">
+                        <div class="attr-label">Ngày sinh</div>
+                        <div class="attr-value">@(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("dd/MM/yyyy") : "---")</div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="attr-item">
+                        <div class="attr-label">Email</div>
+                        <div class="attr-value text-truncate" title="@Model.Email">@(string.IsNullOrWhiteSpace(Model.Email) ? "---" : Model.Email)</div>
+                    </div>
+                    <div class="attr-item">
+                        <div class="attr-label">Facebook</div>
+                        <div class="attr-value text-truncate" title="@Model.Facebook">
+                            @if (!string.IsNullOrWhiteSpace(Model.Facebook))
+                            {
+                                <a href="@(Model.Facebook.StartsWith("http") ? Model.Facebook : "https://" + Model.Facebook)" target="_blank" class="text-decoration-none">
+                                    <i class="bi bi-facebook me-1 text-primary"></i>@Model.Facebook
+                                </a>
+                            }
+                            else
+                            {
+                                <span>---</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="attr-item">
+                        <div class="attr-label">Khu vực (Tỉnh/Thành)</div>
+                        <div class="attr-value">@(string.IsNullOrWhiteSpace(Model.KhuVuc) ? "---" : Model.KhuVuc)</div>
+                    </div>
+                    <div class="attr-item">
+                        <div class="attr-label">Phường/Xã</div>
+                        <div class="attr-value">@(string.IsNullOrWhiteSpace(Model.PhuongXa) ? "---" : Model.PhuongXa)</div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="attr-item">
+                        <div class="attr-label">Địa chỉ chi tiết</div>
+                        <div class="attr-value" title="@Model.DiaChi">@(string.IsNullOrWhiteSpace(Model.DiaChi) ? "---" : Model.DiaChi)</div>
+                    </div>
+                    <div class="attr-item">
+                        <div class="attr-label">Tổng bán</div>
+                        <div class="attr-value text-dark fw-semibold">@Model.TongBan.ToString("N0", viCulture) đ</div>
+                    </div>
+                    <div class="attr-item">
+                        <div class="attr-label">Tổng bán trừ trả hàng</div>
+                        <div class="attr-value text-muted">@Model.TongBanTruTraHang.ToString("N0", viCulture) đ</div>
+                    </div>
+                    <div class="attr-item">
+                        <div class="attr-label">Nợ hiện tại</div>
+                        <div class="attr-value @(Model.NoHienTai > 0 ? "text-danger fw-bold" : "text-success")">
+                            @Model.NoHienTai.ToString("N0", viCulture) đ
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="attr-item">
+                        <div class="attr-label">Ngày tạo</div>
+                        <div class="attr-value">@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</div>
+                    </div>
+                    <div class="attr-item">
+                        <div class="attr-label">Người tạo</div>
+                        <div class="attr-value text-muted">@Model.NguoiTao</div>
+                    </div>
+                    <div class="attr-item">
+                        <div class="attr-label">Ghi chú nội bộ</div>
+                        <div class="attr-value text-muted small" style="white-space: pre-wrap;">@(string.IsNullOrWhiteSpace(Model.GhiChu) ? "Không có ghi chú." : Model.GhiChu)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khối Thông tin xuất hóa đơn (VAT Invoice) -->
+            <div class="supplier-box mb-3 p-3 rounded-2 bg-light border">
+                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                    <div class="fw-semibold text-dark small">
+                        <i class="bi bi-receipt me-1 text-primary"></i> Thông tin xuất hóa đơn (VAT Invoice)
+                    </div>
+                    <span class="badge @(Model.XhdLoaiKhachHang == "DOANH_NGHIEP" ? "bg-primary" : "bg-info text-dark")">
+                        @(Model.XhdLoaiKhachHang == "DOANH_NGHIEP" ? "Doanh nghiệp" : "Cá nhân / Hộ kinh doanh")
+                    </span>
+                </div>
+                <div class="row g-2 small">
+                    <div class="col-md-3">
+                        <div class="text-muted">Mã số thuế:</div>
+                        <div class="fw-semibold text-dark">@(string.IsNullOrWhiteSpace(Model.MaSoThue) ? "Chưa đăng ký" : Model.MaSoThue)</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-muted">Tên đơn vị / Công ty:</div>
+                        <div class="text-dark">@(string.IsNullOrWhiteSpace(Model.XhdTenDonVi) ? "---" : Model.XhdTenDonVi)</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-muted">Địa chỉ xuất HĐ:</div>
+                        <div class="text-dark">@(string.IsNullOrWhiteSpace(Model.XhdDiaChi) ? "---" : Model.XhdDiaChi)</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-muted">Người mua / Đại diện:</div>
+                        <div class="text-dark">@(string.IsNullOrWhiteSpace(Model.TenNguoiMua) ? "---" : Model.TenNguoiMua)</div>
+                    </div>
+
+                    @if (Model.XhdLoaiKhachHang == "DOANH_NGHIEP")
+                    {
+                        <div class="col-md-3">
+                            <div class="text-muted">Mã ĐVQHNS:</div>
+                            <div class="text-dark">@(string.IsNullOrWhiteSpace(Model.MaDvqhns) ? "---" : Model.MaDvqhns)</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-md-3">
+                            <div class="text-muted">Số CCCD/CMND:</div>
+                            <div class="text-dark">@(string.IsNullOrWhiteSpace(Model.SoCccd) ? "---" : Model.SoCccd)</div>
+                        </div>
+                    }
+
+                    <div class="col-md-3">
+                        <div class="text-muted">Ngân hàng:</div>
+                        <div class="text-dark">@(string.IsNullOrWhiteSpace(Model.TenNganHang) ? "---" : Model.TenNganHang)</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-muted">Số tài khoản:</div>
+                        <div class="text-dark">@(string.IsNullOrWhiteSpace(Model.SoTaiKhoanNganHang) ? "---" : Model.SoTaiKhoanNganHang)</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-muted">Email nhận HĐ:</div>
+                        <div class="text-dark">@(string.IsNullOrWhiteSpace(Model.XhdEmail) ? "---" : Model.XhdEmail)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thanh nút thao tác cuối dòng chi tiết -->
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top product-detail-footer">
+                <div class="d-flex gap-2 product-detail-footer-left">
+                    <button type="button" class="btn btn-outline-danger btn-sm btn-delete-kh" data-id="@Model.MaKh" data-name="@Model.TenKh">
+                        <i class="bi bi-trash me-1"></i> Xóa
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm btn-toggle-status-kh" data-id="@Model.MaKh" data-status="@Model.TrangThai" data-name="@Model.TenKh">
+                        <i class="bi @(Model.TrangThai == "HOAT_DONG" ? "bi-slash-circle" : "bi-check-circle") me-1"></i>
+                        <span>@(Model.TrangThai == "HOAT_DONG" ? "Ngừng giao dịch" : "Kích hoạt lại")</span>
+                    </button>
+                </div>
+                <div class="d-flex gap-2 product-detail-footer-right">
+                    <button type="button" class="btn btn-primary btn-sm btn-edit-kh" data-id="@Model.MaKh">
+                        <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: LỊCH SỬ MUA HÀNG ================= -->
+        <div class="tab-pane-content tab-donban" style="display: none;">
+            @if (Model.LichSuDonBans == null || !Model.LichSuDonBans.Any())
+            {
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-receipt fs-2 d-block mb-1 text-secondary"></i>
+                    Khách hàng chưa có lịch sử mua hàng nào.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered align-middle mb-0">
+                        <thead class="table-light small">
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Ngày bán</th>
+                                <th>Kho xuất</th>
+                                <th>Người lập</th>
+                                <th class="text-end">Tổng tiền</th>
+                                <th class="text-end">Đã thu</th>
+                                <th class="text-end">Còn nợ</th>
+                                <th class="text-center">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody class="small">
+                            @foreach (var db in Model.LichSuDonBans)
+                            {
+                                <tr>
+                                    <td><span class="text-primary fw-medium">@db.MaDonBanHienThi</span></td>
+                                    <td>@db.NgayLap.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@db.TenKho</td>
+                                    <td>@db.NguoiLap</td>
+                                    <td class="text-end fw-semibold">@db.TongTien.ToString("N0", viCulture)</td>
+                                    <td class="text-end text-success">@db.DaThu.ToString("N0", viCulture)</td>
+                                    <td class="text-end @(db.ConNo > 0 ? "text-danger fw-bold" : "text-muted")">
+                                        @db.ConNo.ToString("N0", viCulture)
+                                    </td>
+                                    <td class="text-center">
+                                        @if (db.TrangThai == "DA_XAC_NHAN" || db.TrangThai == "HOAN_THANH")
+                                        {
+                                            <span class="badge bg-light text-success border">Hoàn thành</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-warning border">Tạm tính</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <!-- ================= TAB 3: NỢ CẦN THU ================= -->
+        <div class="tab-pane-content tab-congno" style="display: none;">
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-2 border">
+                        <div class="text-muted small">Tổng tiền đã mua:</div>
+                        <div class="fs-5 fw-bold text-dark">@Model.TongBan.ToString("N0", viCulture) đ</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-2 border">
+                        <div class="text-muted small">Tổng tiền đã thanh toán:</div>
+                        <div class="fs-5 fw-bold text-success">@Model.DaThu.ToString("N0", viCulture) đ</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-2 border">
+                        <div class="text-muted small">Nợ hiện tại:</div>
+                        <div class="fs-5 fw-bold @(Model.NoHienTai > 0 ? "text-danger" : "text-success")">
+                            @Model.NoHienTai.ToString("N0", viCulture) đ
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.NoHienTai > 0)
+            {
+                <div class="alert alert-warning py-2 small mb-0">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Khách hàng đang có dư nợ <strong>@Model.NoHienTai.ToString("N0", viCulture) đ</strong> cần thu hồi.
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-success py-2 small mb-0">
+                    <i class="bi bi-check-circle-fill me-1"></i> Khách hàng không có nợ tồn đọng.
+                </div>
+            }
+        </div>
+    </div>
+</div>

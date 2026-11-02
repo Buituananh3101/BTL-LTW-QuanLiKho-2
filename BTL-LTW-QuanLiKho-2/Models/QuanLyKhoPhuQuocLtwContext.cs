@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -36,6 +36,8 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
     public virtual DbSet<HinhAnhHangHoa> HinhAnhHangHoas { get; set; }
 
     public virtual DbSet<KhachHang> KhachHangs { get; set; }
+
+    public virtual DbSet<NhomKhachHang> NhomKhachHangs { get; set; }
 
     public virtual DbSet<Kho> Khos { get; set; }
 
@@ -380,6 +382,14 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
                 .HasConstraintName("FK_HinhAnhHangHoa_HangHoa");
         });
 
+        modelBuilder.Entity<NhomKhachHang>(entity =>
+        {
+            entity.HasKey(e => e.MaNhomKhachHang);
+            entity.ToTable("NhomKhachHang");
+            entity.Property(e => e.TenNhom).HasMaxLength(100);
+            entity.Property(e => e.GhiChu).HasMaxLength(255);
+        });
+
         modelBuilder.Entity<KhachHang>(entity =>
         {
             entity.HasKey(e => e.MaKh).HasName("PK__KhachHan__2725CF1E7CAF039A");
@@ -387,21 +397,73 @@ public partial class QuanLyKhoPhuQuocLtwContext : DbContext
             entity.ToTable("KhachHang");
 
             entity.Property(e => e.MaKh).HasColumnName("MaKH");
-            entity.Property(e => e.DiaChi).HasMaxLength(255);
+            entity.Property(e => e.MaKhHienThi).HasMaxLength(30);
+            entity.Property(e => e.TenKh)
+                .HasMaxLength(150)
+                .HasColumnName("TenKH");
             entity.Property(e => e.DienThoai)
                 .HasMaxLength(15)
                 .IsUnicode(false);
+            entity.Property(e => e.DienThoai2)
+                .HasMaxLength(15)
+                .IsUnicode(false);
+            entity.Property(e => e.GioiTinh).HasMaxLength(10);
+            entity.Property(e => e.Email).HasMaxLength(150);
+            entity.Property(e => e.Facebook).HasMaxLength(255);
+            entity.Property(e => e.HinhAnh).HasMaxLength(500);
+            entity.Property(e => e.DiaChi).HasMaxLength(255);
+            entity.Property(e => e.KhuVuc).HasMaxLength(100);
+            entity.Property(e => e.PhuongXa).HasMaxLength(100);
+            entity.Property(e => e.GhiChu).HasMaxLength(1000);
+            entity.Property(e => e.NgayTao)
+                .HasDefaultValueSql("GETDATE()")
+                .HasColumnType("datetime");
+            entity.Property(e => e.NguoiTao).HasMaxLength(100);
+            entity.Property(e => e.DaDanhDau).HasDefaultValue(false);
             entity.Property(e => e.LoaiKhachHang)
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasDefaultValue("LE", "DF_KhachHang_Loai");
-            entity.Property(e => e.TenKh)
-                .HasMaxLength(150)
-                .HasColumnName("TenKH");
             entity.Property(e => e.TrangThai)
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasDefaultValue("HOAT_DONG", "DF_KhachHang_TrangThai");
+
+            // Xuáº¥t hĂ³a Ä‘Æ¡n
+            entity.Property(e => e.XhdLoaiKhachHang)
+                .HasMaxLength(30)
+                .HasDefaultValue("CA_NHAN");
+            entity.Property(e => e.MaSoThue)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.XhdTenDonVi).HasMaxLength(255);
+            entity.Property(e => e.SoCccd)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.TenNguoiMua).HasMaxLength(150);
+            entity.Property(e => e.XhdDiaChi).HasMaxLength(255);
+            entity.Property(e => e.XhdKhuVuc).HasMaxLength(100);
+            entity.Property(e => e.XhdPhuongXa).HasMaxLength(100);
+            entity.Property(e => e.XhdEmail).HasMaxLength(150);
+            entity.Property(e => e.SoHoChieu)
+                .HasMaxLength(30)
+                .IsUnicode(false);
+            entity.Property(e => e.MaDvqhns)
+                .HasMaxLength(30)
+                .IsUnicode(false);
+            entity.Property(e => e.XhdSoDienThoai)
+                .HasMaxLength(15)
+                .IsUnicode(false);
+            entity.Property(e => e.TenNganHang).HasMaxLength(150);
+            entity.Property(e => e.SoTaiKhoanNganHang)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.MaNhomKhachHangNavigation)
+                .WithMany(p => p.KhachHangs)
+                .HasForeignKey(d => d.MaNhomKhachHang)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_KhachHang_NhomKhachHang");
         });
 
         modelBuilder.Entity<Kho>(entity =>

@@ -1,4 +1,4 @@
-﻿@model BTL_LTW_QuanLiKho_2.ViewModels.BaoCaoTonKhoIndexVM
+@model BTL_LTW_QuanLiKho_2.ViewModels.BaoCaoTonKhoIndexVM
 @using BTL_LTW_QuanLiKho_2.ViewModels.Common
 
 <!-- CỘT BÊN TRÁI: TIÊU ĐỀ "BÁO CÁO TỒN KHO" + CÁC BỘ LỌC LEGO ĐỒNG BỘ 100% HÀNG HÓA -->
@@ -15,11 +15,12 @@
 
     <div class="kiot-filter-box">
         <!-- 1. Chi nhánh kho (Lego Multi-Select Dropdown) -->
-        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("Kho", "kho", "Chi nhánh kho", "Tất cả chi nhánh", true, "dotKho") {
-            HeaderActionText = "Tất cả",
+        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("Kho", "kho", "Chi nhánh kho", "Tất cả các kho", true, "dotKho") {
+            HeaderActionText = "Bỏ chọn",
             HeaderActionId = "btnToggleAllKho",
-            Items = Model.DanhSachKho.Select(k => new KiotMultiSelectItemVM(k.MaKho.ToString(), k.TenKho)).ToList()
+            Items = Model.DanhSachKho.Select(k => new KiotMultiSelectItemVM(k.MaKho.ToString(), k.TenKho, Model.SelectedKhoIds != null && Model.SelectedKhoIds.Contains(k.MaKho))).ToList()
         }' />
+
 
         <!-- 2. Nhóm hàng (Lego Multi-Select Dropdown giống Danh sách Hàng hóa) -->
         <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NhomHang", "nhom", "Nhóm hàng", "Chọn nhóm hàng", true, "dotNhomHang") {
@@ -73,8 +74,8 @@
 
         <!-- 4. Hàng hóa (Lego Checkbox Status Filter chuẩn chuyên nghiệp) -->
         <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Hàng hóa", "dotTrangThaiHang", new List<KiotStatusOptionVM> {
-            new("DANG_KINH_DOANH", "Đang kinh doanh", true),
-            new("NGUNG_KINH_DOANH", "Ngừng kinh doanh")
+            new("DANG_BAN", "Đang kinh doanh", true),
+            new("NGUNG_BAN", "Ngừng kinh doanh")
         })' />
     </div>
 </aside>

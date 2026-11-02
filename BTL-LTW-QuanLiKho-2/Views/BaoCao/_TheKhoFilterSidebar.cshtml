@@ -1,4 +1,4 @@
-﻿@model BTL_LTW_QuanLiKho_2.ViewModels.TheKhoIndexVM
+@model BTL_LTW_QuanLiKho_2.ViewModels.TheKhoIndexVM
 @using BTL_LTW_QuanLiKho_2.ViewModels.Common
 
 <!-- CỘT BÊN TRÁI: TIÊU ĐỀ "THẺ KHO" + CÁC KHỐI BỘ LỌC chuyên nghiệp (MODULAR LEGO) -->
@@ -94,7 +94,7 @@
         </div>
 
         <!-- 3. THỜI GIAN (Lego _KiotDateFilter) -->
-        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("thekho_date", "Thời gian", false)' />
+        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("thekho_date", "Thời gian", false) { DefaultText = "Tháng này" }' />
 
         <!-- 4. LOẠI CHỨNG TỪ (Lego _KiotStatusFilter) -->
         <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Loại giao dịch", "dotLoaiGd", new() {

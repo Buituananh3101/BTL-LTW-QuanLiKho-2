@@ -1,4 +1,4 @@
-﻿@model BTL_LTW_QuanLiKho_2.ViewModels.TheKhoIndexVM
+@model BTL_LTW_QuanLiKho_2.ViewModels.TheKhoIndexVM
 @{
     ViewData["Title"] = "Báo cáo Thẻ kho";
 }
@@ -41,10 +41,10 @@
             </div>
 
             <!-- Ô tìm kiếm giao dịch trên bảng thẻ kho -->
-            <div class="kiot-search-box flex-grow-1" style="max-width: 420px;">
+            <div class="kiot-search-box">
                 <i class="bi bi-search"></i>
                 <input type="text" id="keywordSearch" class="form-control"
-                       placeholder="Tìm theo mã chứng từ, đối tác, ghi chú..."
+                       placeholder="Theo mã chứng từ, đối tác, ghi chú (F3)"
                        value="@Model.Filter.TuKhoa" autocomplete="off" />
             </div>
 

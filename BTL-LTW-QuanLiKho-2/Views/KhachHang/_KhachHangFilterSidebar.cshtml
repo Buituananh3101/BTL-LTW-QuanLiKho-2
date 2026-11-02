@@ -1,0 +1,86 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.KhachHang.KhachHangIndexVM
+@using BTL_LTW_QuanLiKho_2.ViewModels.Common
+
+<!-- CỘT BÊN TRÁI: TIÊU ĐỀ "KHÁCH HÀNG" + BỘ LỌC MODULAR LEGO (THEO CHUẨN KIOTVIET) -->
+<aside class="kiot-sidebar-col" id="sidebarFilterCol">
+    <!-- Header cho sidebar khi mở ở chế độ mobile -->
+    <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+        <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc khách hàng</div>
+        <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
+    </div>
+
+    <div class="kiot-sidebar-title d-none d-lg-flex">
+        Khách hàng
+    </div>
+
+    <div class="kiot-filter-box">
+        <!-- 1. Nhóm khách hàng (Lego Multi-Select có nút + Tạo mới và icon Sửa ✎) -->
+        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NhomKhachHang", "nhom", "Nhóm khách hàng", "Chọn nhóm khách hàng", true) {
+            HeaderActionText = "Tạo mới",
+            HeaderActionId = "btnOpenQuickGroupModal",
+            AllowEdit = true,
+            Items = Model.NhomKhachHangs.Select(g => new KiotMultiSelectItemVM(g.MaNhomKhachHang.ToString(), g.TenNhom)).ToList()
+        }' />
+
+        <!-- 2. Ngày tạo (Lego KiotDateFilter) -->
+        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("tgt", "Ngày tạo", false)' />
+
+        <!-- 3. Người tạo -->
+        <div class="f-block position-relative">
+            <h6>Người tạo</h6>
+            <select class="form-select filter-change" id="filterNguoiTao">
+                <option value="ALL">Tất cả người tạo</option>
+                @foreach (var nv in Model.NhanViens)
+                {
+                    <option value="@nv">@nv</option>
+                }
+            </select>
+        </div>
+
+        <!-- 4. Loại khách hàng (Segmented Buttons pill: Tất cả / Cá nhân / Công ty - Chuẩn Ảnh KiotViet) -->
+        <div class="f-block">
+            <h6>Loại khách hàng</h6>
+            <div class="kiot-segmented-group" id="groupLoaiKhachHang">
+                <button type="button" class="btn-segmented active" data-val="ALL">Tất cả</button>
+                <button type="button" class="btn-segmented" data-val="CA_NHAN">Cá nhân</button>
+                <button type="button" class="btn-segmented" data-val="CONG_TY">Công ty</button>
+            </div>
+            <input type="hidden" id="filterLoaiKhachHangSegment" value="ALL" />
+        </div>
+
+        <!-- 5. Giới tính (Segmented Buttons pill: Tất cả / Nam / Nữ - Chuẩn Ảnh KiotViet) -->
+        <div class="f-block">
+            <h6>Giới tính</h6>
+            <div class="kiot-segmented-group" id="groupGioiTinh">
+                <button type="button" class="btn-segmented active" data-val="ALL">Tất cả</button>
+                <button type="button" class="btn-segmented" data-val="Nam">Nam</button>
+                <button type="button" class="btn-segmented" data-val="Nu">Nữ</button>
+            </div>
+            <input type="hidden" id="filterGioiTinh" value="ALL" />
+        </div>
+
+        <!-- 6. Sinh nhật (Lego KiotDateFilter) -->
+        <div class="f-block position-relative">
+            <h6>Sinh nhật</h6>
+            <div class="position-relative">
+                <select class="form-select filter-change" id="filterSinhNhat">
+                    <option value="ALL">Toàn thời gian</option>
+                    <option value="THANG_NAY">Sinh nhật trong tháng này</option>
+                    <option value="HOM_NAY">Sinh nhật hôm nay</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 7. Tổng bán (Lego Value Filter Từ - Đến) -->
+        <partial name="_KiotValueFilter" model='new KiotValueFilterVM("TongBan", "Tổng bán") { FromPlaceholder = "Nhập số tiền...", ToPlaceholder = "Nhập số tiền..." }' />
+
+        <!-- 8. Nợ hiện tại (Lego Value Filter Từ - Đến) -->
+        <partial name="_KiotValueFilter" model='new KiotValueFilterVM("No", "Nợ hiện tại") { FromPlaceholder = "Nhập số tiền...", ToPlaceholder = "Nhập số tiền..." }' />
+
+        <!-- 9. Trạng thái (Lego Status Filter Checkbox) -->
+        <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("TrangThai", "Trạng thái", new List<KiotStatusOptionVM> {
+            new("HOAT_DONG", "Đang hoạt động", true),
+            new("NGUNG_GIAO_DICH", "Ngừng giao dịch", false)
+        })' />
+    </div>
+</aside>

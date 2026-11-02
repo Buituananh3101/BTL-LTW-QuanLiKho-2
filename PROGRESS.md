@@ -1,23 +1,216 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-10-31 – Chuẩn Hóa Bảng Phân Công Tiến Độ WBS: Loại Bỏ Hoàn Toàn Tham Chiếu KiotViet (Phiên 189)
+Cập nhật lần cuối: 2026-11-02 – Triển Khai Nâng Cấp Toàn Diện Phân Hệ Khách Hàng Chuẩn 4 Ảnh KiotViet & Danh Mục Hàng Hóa (Phiên 201)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất 100% việc chuẩn hóa Bảng phân công tiến độ WBS (88 đầu việc) và loại bỏ hoàn toàn các nhắc đến "KiotViet" / "Kiot":
-  + Rà soát và thay thế toàn bộ 23 điểm nhắc đến KiotViet/Kiot trong file CSV `docs/ke-hoach-tien-do-WBS-chi-tiet.csv` và Markdown `docs/ke-hoach-tien-do-WBS-chi-tiet.md`.
-  + Chuẩn hóa tên giai đoạn: `GĐ 3: Nâng cấp CSDL v2 & Giao diện chuẩn` (thay vì `UI KiotViet`).
-  + Chuẩn hóa mô tả công việc: Layout chuẩn chuyên nghiệp, hệ thống CSS token, module Toast & Modal xác nhận, bộ lọc thời gian dùng chung, bố cục giao diện quản trị kho thực tế.
-  + Đồng bộ dữ liệu sang file Artifact hệ thống và kiểm tra 0 lỗi biên dịch `dotnet build /t:Compile`.
+- Đã hoàn tất nâng cấp toàn diện phân hệ Quản lý Khách hàng (`/KhachHang`) đáp ứng 100% 4 ảnh KiotViet thực tế và đồng bộ 100% với khuôn mẫu Danh mục Hàng hóa (`HangHoa`):
+  + **1. CSDL & Models**:
+    * Tạo bảng `NhomKhachHang (MaNhomKhachHang INT IDENTITY PK, TenNhom, GhiChu)` kèm dữ liệu mẫu ban đầu (Khách VIP, Khách sỉ, Khách lẻ, Nhà hàng - Khách sạn, Đối tác dự án).
+    * Mở rộng bảng `KhachHang` bổ sung 25 trường mới bằng `ALTER TABLE ADD` an toàn dữ liệu 100%: `MaKhHienThi`, `DienThoai2`, `NgaySinh`, `GioiTinh`, `Email`, `Facebook`, `HinhAnh`, `KhuVuc`, `PhuongXa`, `MaNhomKhachHang`, `GhiChu`, `NgayTao`, `NguoiTao`, `DaDanhDau`, `XhdLoaiKhachHang`, `MaSoThue`, `XhdTenDonVi`, `SoCccd`, `TenNguoiMua`, `XhdDiaChi`, `XhdKhuVuc`, `XhdPhuongXa`, `XhdEmail`, `SoHoChieu`, `MaDvqhns`, `XhdSoDienThoai`, `TenNganHang`, `SoTaiKhoanNganHang`.
+    * Cập nhật `NhomKhachHang.cs`, `KhachHang.cs` và `QuanLyKhoPhuQuocLtwContext.cs`.
+  + **2. ViewModels (`ViewModels/KhachHang/`)**:
+    * `KhachHangFormVM.cs`: Đầy đủ 25 trường, hỗ trợ upload ảnh đại diện avatar tròn <= 2MB.
+    * `KhachHangItemVM.cs`: Nạp sẵn dữ liệu 25 trường hiển thị bảng và drawer chi tiết.
+    * `KhachHangFilterParams.cs`: Tiêu chí lọc đa năng (`NhomKhachHangs`, `LoaiKhachHangSegment`, `GioiTinh`, `TgTaoFilter`, `SinhNhatFilter`, `NguoiTao`, `DaDanhDau`, `TongBanTu/Den`, `NoTu/Den`).
+    * `KhachHangIndexVM.cs`: Nạp dữ liệu nhóm KH, người tạo, tỉnh thành, ngân hàng.
+  + **3. Controller (`KhachHangController.cs`)**:
+    * CRUD bọc Transaction, tự động sinh mã `KH00001` hoặc validate mã tự nhập, upload avatar vào `/uploads/khachhang/`.
+    * Thêm API tạo/sửa nhóm nhanh `CreateNhom`, `UpdateNhom`, `DeleteNhom`.
+    * Đánh dấu sao ⭐ `ToggleFavorite`.
+    * Chặn xóa khách hàng đã có đơn bán `DonBan`, bảo vệ toàn vẹn lịch sử hóa đơn.
+    * Xuất ClosedXML Excel 15 cột thông tin chi tiết.
+  + **4. Giao diện (Views & JS)**:
+    * `_KhachHangModal.cshtml`: Modal `.hh-modal` rộng 900px, top grid kèm avatar tròn tải ảnh <= 2MB, 3 Accordion: Địa chỉ, Nhóm/Ghi chú, và Thông tin xuất hóa đơn có radio switch Cá nhân ⇋ Doanh nghiệp tự động đổi trường bắt buộc và placeholder, nút Tra cứu MST.
+    * `_KhachHangFilterSidebar.cshtml`: Nhóm KH có link `+ Tạo mới` và icon ✎ sửa nhóm, Segmented pill buttons cho Loại KH (`[Tất cả] [Cá nhân] [Công ty]`) và Giới tính (`[Tất cả] [Nam] [Nữ]`), bộ lọc ngày tạo, sinh nhật, doanh số và nợ.
+    * `_KhachHangTable.cshtml`: Sắp xếp 3 trạng thái, cột sao ⭐, font chữ phẳng regular 13px, pre-rendered drawer 0ms, tùy chọn 15 cột `#colMenu`.
+    * `_KhachHangDetail.cshtml`: 3 Tab (Thông tin, Lịch sử mua hàng, Nợ cần thu), khối Thông tin xuất hóa đơn dạng `.supplier-box`.
+    * `khach-hang-index.js`: Xử lý preview avatar, radio switch hóa đơn, modal con tạo nhóm nhanh, lưu form multipart.
+  + **5. Kiểm tra**: JavaScript `node -c` hợp lệ 100%, biên dịch `dotnet build -t:Compile` đạt **0 Errors**.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
-2. Chuẩn bị slide thuyết trình hoặc báo cáo bảo vệ đồ án.
+1. Kiểm tra trải nghiệm thực tế trên trình duyệt tại URL `http://localhost:7087/KhachHang`.
+2. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
 
 ---
+
+
+- **Chuẩn Hóa Bộ Lọc Chi Nhánh Kho Dropdown Multi-Select Giống Nhóm Hàng (Phiên 201)**:
+  - **Nhu cầu**: Người dùng phản ánh ô Chi nhánh kho trong Báo cáo Tồn kho mặc định bị điền sẵn tất cả các tag chip `[Kho trung tâm x] [Kho An Thới x]...` là chưa hợp lý; mong muốn mới vào hiển thị placeholder "Tất cả các kho" (không có tag chip), khi cần mới mở dropdown tích chọn từng kho giống bộ lọc Nhóm hàng.
+  - **Nguyên nhân**: `BaoCaoController.cs` khi `filter.SelectedKhoIds` rỗng đã gán toàn bộ ID kho được phép vào `BaoCaoTonKhoIndexVM.SelectedKhoIds`, khiến View và JS hiểu là người dùng đang chọn tất cả các tag cụ thể.
+  - **Giải pháp**:
+    1. **BaoCaoController.cs**: Giữ nguyên logic truy vấn tổng hợp tồn kho toàn bộ các kho được phép truy cập khi bộ lọc rỗng, nhưng trả về `SelectedKhoIds = new List<int>()` cho ViewModel để giao diện giữ trạng thái mặc định; trong `ExportTonKho` cũng fallback lấy toàn bộ kho khi `SelectedKhoIds` rỗng.
+    2. **_TonKhoTable.cshtml**: Cập nhật `selectedKhos` fallback về `Model.DanhSachKho` khi `Model.SelectedKhoIds` rỗng, đảm bảo bảng Pivot luôn hiển thị đầy đủ các cột kho được phép xem.
+    3. **_TonKhoFilterSidebar.cshtml**: Cập nhật placeholder thành `"Tất cả các kho"`, gán nút action `"Bỏ chọn"` (ẩn khi danh sách chọn rỗng).
+    4. **Khoảng cách giữa các khối lọc (Spacing/Divider)**:
+       - Nguyên nhân: Thẻ `<style>` đặt tạm giữa partial Chi nhánh kho và Nhóm hàng đã ngắt đoạn CSS selector `.kiot-filter-box .f-block + .f-block`, làm mất đường kẻ viền và khoảng cách đệm 14px / 12px.
+       - Khắc phục: Chuyển cấu hình `#btnToggleAllKho { display: none; }` vào file tập trung `site.css`, đồng thời bổ sung selector `.kiot-filter-box .f-block ~ .f-block` để luôn đảm bảo có margin/padding/border ngăn cách hoàn hảo giữa tất cả các khối bộ lọc.
+    5. **bao-cao-ton-kho.js**: Đồng bộ dropdown Multi-Select cho kho giống hệt Nhóm hàng. Khi chưa chọn kho cụ thể: hiển thị placeholder "Tất cả các kho", ẩn nút "Bỏ chọn", dot tắt; khi tích chọn kho cụ thể: sinh tag chip xanh, bật sáng dot, hiện nút "Bỏ chọn". Click "Bỏ chọn" sẽ xóa toàn bộ tag chip và nạp lại bảng toàn bộ kho.
+    5. **Khắc phục lỗi compile nền**: Sửa lỗi Razor `@model.` trong `_KhachHangDetail.cshtml` và constructor `KiotValueFilterVM` trong `_KhachHangFilterSidebar.cshtml`.
+  - **Kiểm tra**: `node -c` hợp lệ, `dotnet build -t:Compile` thành công **0 Errors**.
+
+---
+
+- **Đồng Bộ Hóa 100% Thanh Tìm Kiếm Toolbar (.kiot-search-box) Toàn Hệ Thống (Phiên 200)**:
+  - **Nhu cầu**: Người dùng gửi ảnh thanh tìm kiếm toolbar (`[🔍 Theo mã, tên hàng (F3) ]`) và yêu cầu kiểm tra, đồng bộ hóa thanh tìm kiếm trên tất cả các chức năng.
+  - **Kết quả Audit & Chuẩn hóa**:
+    + Toàn bộ 12 màn hình danh sách (`HangHoa`, `KhachHang`, `Kho`, `NguoiDung`, `NhaCungCap`, `NhapHang`, `ChuyenKho`, `PhieuKiemKe`, `XuatHuy`, `TraHangNhap`, `TonKho`, `TheKho`) cùng 5 form chứng từ (`Create`/`Edit`) đều đã thống nhất 100%.
+    + **BaoCao/TonKho.cshtml**: Gỡ bỏ inline style `max-width: 400px;` và class `flex-grow-1`, đưa về `.kiot-search-box` chuẩn (chiều rộng tối đa 450px, chiều cao 30px, bo góc 6px, padding-left 30px).
+    + **BaoCao/TheKho.cshtml**: Gỡ bỏ `max-width: 420px;`, chuẩn hóa placeholder theo cú pháp `"Theo mã chứng từ, đối tác, ghi chú (F3)"`.
+    + **wwwroot/js/the-kho-index.js**: Bổ sung sự kiện phím tắt F3 (`e.key === 'F3'`) tự động focus và bôi đen ô `#keywordSearch`.
+    + **TraHangNhap/Index.cshtml**: Chuẩn hóa container `.kiot-search-box`, định vị nút tìm kiếm nâng cao `#btnAdvSearch` góc phải (`position: absolute; right: 8px; top: 50%; transform: translateY(-50%)`) và thêm `padding-right: 32px` cho input để ô tìm kiếm đạt chuẩn 450px như Hàng hóa.
+  - **Kiểm tra**:
+    + `node -c wwwroot/js/the-kho-index.js`: Hợp lệ 100%.
+    + `dotnet build -t:Compile`: Biên dịch đạt **0 Errors**.
+
+---
+
+- **Khắc Phục Triệt Để Hiện Tượng Giật Lag Khi Mở Chi Tiết Dòng Khách Hàng (Phiên 198)**:
+  - **Nhu cầu**: Người dùng phản ánh: "khi ấn vào 1 dòng để hiện thị chi tiết khách hàng thì nó bị giật lag, kiểm tra và sửa".
+  - **Nguyên nhân**: Gọi AJAX động và thay thế DOM giữa chừng khi đang chạy animation slideDown, làm kích thước khung nhảy đột ngột từ 70px lên 450px.
+  - **Giải pháp**:
+    1. KhachHangItemVM.cs: Bổ sung LichSuDonBans.
+    2. KhachHangController.cs: Nạp trước LichSuDonBans cho các dòng của trang hiện tại.
+    3. _KhachHangTable.cshtml: Render sẵn partial _KhachHangDetail trong div.product-detail-panel-wrap của từng dòng.
+    4. khach-hang-index.js: Loại bỏ lệnh AJAX khi click dòng, áp dụng .stop(true, true).slideDown(150) mượt mà như Danh sách Hàng hóa.
+  - **Kiểm tra**: 
+ode -c hợp lệ 100%, dotnet build -t:Compile đạt **0 Errors**.
+
+---
+- **Chuẩn Hóa Giao Diện & Typography Font Chữ Danh Sách Khách Hàng (Phiên 197)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "sửa lại giao diện, font chữ dựa trên chức năng danh sách hàng hóa".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Views/KhachHang/_KhachHangTable.cshtml**:
+       - Mã khách hàng: Bỏ badge màu, chuyển sang <span class="text-break">@item.MaKhHienThi</span>.
+       - Tên khách hàng: Chuẩn hóa font regular 13px qua <td class="cell-product-name"><div class="product-name-text">.
+       - Loại khách hàng: Chuyển thành văn bản phẳng thường, bỏ badge viền.
+       - Cột số (Tổng bán, Nợ): Dùng class .num text-dark, gỡ bỏ w-medium/w-bold lạm dụng.
+       - Dòng summary: Dùng font thường .num text-dark.
+       - Chuẩn hóa ID bảng #productTable, khóa cứng width và min-width từng cột.
+    2. **Views/KhachHang/_KhachHangDetail.cshtml**:
+       - Đồng bộ sang các class chuyên nghiệp của Hàng hóa: .product-detail-panel, .product-detail-tabs, .product-detail-tab-btn, .product-attr-grid, .attr-item, .attr-label, .attr-value.
+    3. **Views/KhachHang/Index.cshtml & wwwroot/js/khach-hang-index.js**:
+       - Gỡ bỏ CSS thừa 
+ha-cung-cap.css, đồng bộ selector bảng #productTable.
+    4. **Kiểm tra**: 
+ode -c hợp lệ 100%, dotnet build -t:Compile đạt **0 Errors**.
+
+---
+- **Xây Dựng Toàn Diện Phân Hệ Quản Lý Danh Mục Khách Hàng (Phiên 196)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "hiện tại phần khách hàng chưa làm, tôi muốn bạn làm phần khách hàng. hãy dựa trên giao diện danh sách hàng hóa và lên kế hoạch để làm chức năng danh sách hàng hóa" -> "triển khai".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **ViewModels (ViewModels/KhachHang/)**: KhachHangFilterParams.cs, KhachHangItemVM.cs, KhachHangIndexVM.cs, KhachHangFormVM.cs, KhachHangDetailVM.cs.
+    2. **Controller (Controllers/KhachHangController.cs)**: CRUD bọc Transaction, tự động sinh mã KH00001, chặn xóa cứng nếu có đơn bán, tính nợ & tổng bán động, xuất Excel ClosedXML, ghi vết NhatKyThaoTac.
+    3. **Views & Partials (Views/KhachHang/)**: Index.cshtml, _KhachHangFilterSidebar.cshtml, _KhachHangTable.cshtml, _KhachHangDetail.cshtml, _KhachHangModal.cshtml.
+    4. **JavaScript (wwwroot/js/khach-hang-index.js)**: Debounce 300ms, phím tắt F3/F4, phân trang AJAX, sort 3 trạng thái, drawer chi tiết, window.KiotConfirm.
+    5. **Menu Navigation**: Cập nhật link /KhachHang trong _MainMenu.cshtml và _Header.cshtml.
+    6. **Tài liệu & Kiểm tra**: Tạo docs/specs/khach-hang.md (6.731 bytes), 
+ode -c hợp lệ, dotnet build -t:Compile 0 Errors.
+
+---
+- **Chuẩn Hóa Typography & Font Chữ Báo Cáo Tồn Kho Đồng Bộ Danh Sách Hàng Hóa (Phiên 195)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "sửa lại font chữ giống danh sách hàng hóa, viết thường ko in đậm".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`Views/BaoCao/_TonKhoTable.cshtml`**:
+       - Mã hàng: Gỡ bỏ `fw-semibold text-primary font-monospace`, thay bằng `<span class="text-break">@item.MaHangNoiBo</span>`.
+       - Tên hàng: Gỡ bỏ `fw-bold text-dark`, dùng `<td class="cell-product-name"><div class="product-name-text">@item.TenHang</div>`.
+       - ĐVT: Gỡ bỏ `<span class="badge bg-light text-secondary border">`, thay bằng văn bản trơn `<td class="text-center text-muted">`.
+       - Nhóm hàng: Gỡ bỏ `text-secondary small`, đưa về text chuẩn.
+       - Giá vốn & Giá trị tồn: Gỡ bỏ `fw-semibold`, dùng class `.num`.
+       - Tồn chi nhánh: Dùng class `.num position-relative`, gỡ bỏ `fw-bold` ở số tồn.
+       - Cột Tổng tồn: Gỡ bỏ `bg-light fw-bold text-primary`, định dạng văn bản thường với class `.num`.
+       - Summary row: Gỡ bỏ in đậm `fw-bold` rải rác trên các cột tổng, đồng bộ dòng summary của `_HangHoaTable.cshtml`.
+       - Subrow (Tab Chi nhánh & Tab Thông tin): Gỡ bỏ in đậm không cần thiết ở tên kho, mã hàng, tên hàng, ĐVT và đơn giá.
+    2. **`wwwroot/js/bao-cao-ton-kho.js`**:
+       - Tab Thẻ kho nhanh: Gỡ bỏ `fw-semibold font-monospace` ở mã chứng từ, gỡ bỏ `fw-bold` ở số lượng nhập/xuất/tồn cuối.
+    3. **Kiểm tra**:
+       - `node -c wwwroot/js/bao-cao-ton-kho.js`: Hợp lệ cú pháp.
+       - `dotnet build -t:Compile`: Biên dịch hoàn tất với **0 Errors**.
+
+---
+
+- **Tinh Gọn Header & Menu: Gỡ Bỏ Nút Bán Hàng, Góp Ý & Cài Đặt (Phiên 194)**:
+  - **Nhu cầu**: Người dùng gửi ảnh chụp màn hình topbar & menu (media_1793584585853_86184198.png) và yêu cầu: "bỏ nút bán hàng, góp ý cài đặt đi".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Views/Shared/_MainMenu.cshtml**: Gỡ bỏ thẻ <button class="btn-sell" onclick="alert('Màn hình Bán hàng / POS');"><i class="bi bi-cart3"></i>Bán hàng</button>.
+    2. **Views/Shared/_Header.cshtml**: Gỡ bỏ 2 liên kết thừa ở .topbar-right:
+       - <a href="#" title="Góp ý" class="d-none d-lg-flex"><i class="bi bi-pencil-square"></i>Góp ý</a>
+       - <a href="#" title="Cài đặt" class="d-none d-lg-flex"><i class="bi bi-gear-fill fs-6"></i></a>
+    3. Kiểm tra biên dịch: dotnet build -t:Compile đạt **0 Errors**, 4 Warnings (bảo mật NuGet đã biết).
+
+- **Khắc Phục Triệt Để 5 Lỗi Phân Hệ Báo Cáo Thẻ Kho (Phiên 193)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "kien tra chuc năng thẻ kho trong dự án có lõi j ko" và "triển khai".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **BaoCaoController.cs**:
+       - `TheKho`: Tự động nạp mặt hàng đang kinh doanh đầu tiên khi người dùng truy cập trang lần đầu từ Menu.
+       - `FilterTheKho`: Chuyển trả về `PartialView("_TheKhoContent", vm)` để nạp đồng bộ Banner + KPI Summary + Bảng dữ liệu trong container `#theKhoMainContent`.
+    2. **TheKhoService.cs**:
+       - Bỏ auto-select trong `LayBaoCaoTheKhoAsync` khi `MaHang <= 0`, trả về `TongHop = null` để hiển thị màn hình hướng dẫn chọn hàng khi người dùng bỏ chọn.
+       - Tính `runningTon` và KPI tổng hợp kỳ trên toàn bộ biến động trước khi lọc `LoaiChungTu`, bảo đảm số dư tồn lũy kế của mỗi dòng phản ánh đúng thực tế lịch sử.
+       - Áp dụng bộ lọc `TuKhoa` và `LoaiChungTu` vào phương thức `XuatExcelTheKhoAsync`.
+       - Null-check phòng vệ cho `p.MaKhoNguonNavigation` và `p.MaKhoDichNavigation`.
+    3. **_TheKhoFilterSidebar.cshtml**:
+       - Cập nhật nhãn mặc định component Lego `_KiotDateFilter` thành `DefaultText = "Tháng này"`, đồng bộ với `THIS_MONTH`.
+    4. **docs/specs/the-kho.md & docs/quyet-dinh.md**: Đồng bộ tài liệu kỹ thuật và quyết định kiến trúc.
+    5. **Kiểm tra**: `dotnet build -t:Compile` đạt **0 Errors**.
+
+---
+
+- **Tinh Gọn Menu Báo Cáo: Gỡ Bỏ Nhập - Xuất - Tồn & Hàng Dưới Định Mức (Phiên 192)**:
+  - **Nhu cầu**: Người dùng gửi ảnh chụp màn hình menu Báo cáo (media_1793583854577_b40d2e1f.png) và yêu cầu: "trong mục này bỏ phần hàng dưới định mức và nhập xuất tốn đi".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Views/Shared/_MainMenu.cshtml**: Loại bỏ 2 thẻ liên kết <a href="#" onclick="alert('Tính năng đang phát triển'); return false;"> của mục "Nhập - Xuất - Tồn" và "Hàng dưới định mức" trong khối Báo cáo Kho.
+    2. Menu Báo cáo sau khi tinh gọn chỉ hiển thị 2 báo cáo cốt lõi của hệ thống:
+       - **Tồn kho theo kho**: Điều hướng tới BaoCaoController.TonKho.
+       - **Thẻ kho**: Điều hướng tới BaoCaoController.TheKho.
+    3. Kiểm tra đồng bộ với Drawer menu trong Views/Shared/_Header.cshtml (đã chuẩn hóa từ trước).
+    4. Kiểm tra biên dịch hệ thống: dotnet build -t:Compile đạt **0 Errors**, 4 Warnings (bảo mật NuGet đã biết).
+
+- **Đồng Bộ Toàn Diện Giao Diện Báo Cáo Tồn Kho Theo Chuẩn Danh Sách Hàng Hóa (Phiên 191)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "trong bao cao ton, sua lai giao dien dua tren chú năng danh sacsch hàng hóa".
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`Views/BaoCao/TonKho.cshtml`**:
+       - Loại bỏ khối `#summaryCardsRow` 4 thẻ KPI to.
+       - Bổ sung nút Tùy chọn hiển thị cột `#btnColsDropdown` kèm menu `#colMenu` (STT, Mã hàng, Tên hàng, ĐVT, Nhóm hàng, Giá vốn, Giá trị tồn, Tồn chi nhánh, Tổng tồn).
+       - Bổ sung nút Tải lại bảng `#btnReloadTable` (`bi-arrow-clockwise`).
+       - Loại bỏ partial Drawer `_TonKhoDetailDrawer.cshtml`.
+    2. **`Views/BaoCao/_TonKhoTable.cshtml`**:
+       - Bọc bảng vào `.kiot-table-scroll-body`, đặt `id="tableTonKho"`.
+       - Đưa dòng tổng hợp `<tr class="summary-row">` lên đầu bảng `<tbody>`, đồng bộ cuộn mượt mà với dữ liệu.
+       - Xây dựng dòng chi tiết mở rộng `<tr class="product-detail-row tonkho-detail-row">` ngay dưới mỗi sản phẩm với 3 tabs chuyên nghiệp.
+    3. **`wwwroot/js/bao-cao-ton-kho.js`**:
+       - Quản lý ẩn/hiện cột qua `localStorage` và tự động cập nhật `colspan` cho dòng chi tiết.
+       - Xử lý click dòng hàng hóa mở/đóng dòng chi tiết inline dạng accordion (slideDown/slideUp, xoay icon chevron, active tab).
+       - Tích hợp nạp AJAX Thẻ kho nhanh cho Tab 3.
+    4. **Kiểm tra**:
+       - `node -c wwwroot/js/bao-cao-ton-kho.js`: Hợp lệ 100%.
+       - `dotnet build -t:Compile`: Biên dịch hoàn tất với 0 Errors.
+
+---
+
+
+- **Khắc Phục Lỗi Rỗng Dữ Liệu Báo Cáo Tồn Kho Do Lệch Trạng Thái Hàng Hóa (Phiên 190)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "kiem tra chua nang bao cao ton hien tại dang loi, len ke hoach sua neu sai".
+  - **Nguyên nhân cốt lõi**:
+    + Trong CSDL SQL Server (`HangHoa`), ràng buộc toàn vẹn `CK_HangHoa_TrangThai` quy định trạng thái hàng hóa là `'DANG_BAN'` hoặc `'NGUNG_BAN'`.
+    + Tuy nhiên, bộ lọc Checkbox `_TonKhoFilterSidebar.cshtml`, ViewModel `BaoCaoTonKhoFilterParams` và JavaScript `bao-cao-ton-kho.js` lại mặc định gửi giá trị `'DANG_KINH_DOANH'`.
+    + Khi EF Core thực thi truy vấn: `queryHangHoa = queryHangHoa.Where(h => h.TrangThai == "DANG_KINH_DOANH")` trả về rỗng (0 bản ghi), khiến bảng Pivot không có dữ liệu và 4 thẻ KPI summary đều về 0.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`ViewModels/BaoCao/BaoCaoTonKhoFilterParams.cs`**: Đổi mặc định `TrangThaiHang` từ `"DANG_KINH_DOANH"` thành `"DANG_BAN"`.
+    2. **`Views/BaoCao/_TonKhoFilterSidebar.cshtml`**: Sửa value option của Lego Status Filter từ `DANG_KINH_DOANH` / `NGUNG_KINH_DOANH` thành `DANG_BAN` / `NGUNG_BAN`.
+    3. **`Views/BaoCao/TonKho.cshtml`**: Sửa `data-trang-thai-hang` mặc định sang `"DANG_BAN"`.
+    4. **`wwwroot/js/bao-cao-ton-kho.js`**: Cập nhật mảng trạng thái khởi tạo `selectedTrangThais = ['DANG_BAN']` và logic kiểm tra trạng thái mặc định.
+    5. **`Controllers/BaoCaoController.cs`**: Bổ sung mapping phòng vệ hai chiều (hỗ trợ cả `DANG_BAN` lẫn `DANG_KINH_DOANH`) trong `BuildTonKhoIndexVMAsync`.
+    6. **`Services/TheKhoService.cs`**: Cập nhật tìm kiếm mặt hàng đầu tiên hỗ trợ cả `DANG_BAN` và `DANG_KINH_DOANH`.
+  - **Kiểm tra**:
+    - `node -c wwwroot/js/bao-cao-ton-kho.js`: Hợp lệ cú pháp.
+    - `dotnet build -t:Compile`: Biên dịch thành công với 0 Errors.
+
+---
+
 
 - **Chuẩn Hóa Bảng Phân Công Tiến Độ WBS: Loại Bỏ Hoàn Toàn Tham Chiếu KiotViet (Phiên 189)**:
   - **Nhu cầu**: Người dùng yêu cầu: "sửa phân công ko nhắc j đến kiot viet".

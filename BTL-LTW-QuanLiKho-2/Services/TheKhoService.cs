@@ -38,20 +38,6 @@ public class TheKhoService : ITheKhoService
             filter.MaKho = userKhoId ?? 1;
         }
 
-        // 3. Nếu chưa chọn mặt hàng, mặc định lấy mặt hàng đang kinh doanh đầu tiên
-        if (!filter.MaHang.HasValue || filter.MaHang.Value <= 0)
-        {
-            var firstHang = await _context.HangHoas.AsNoTracking()
-                .Where(h => h.TrangThai == "DANG_KINH_DOANH")
-                .OrderBy(h => h.MaHang)
-                .FirstOrDefaultAsync();
-
-            if (firstHang != null)
-            {
-                filter.MaHang = firstHang.MaHang;
-            }
-        }
-
         var result = new TheKhoIndexVM
         {
             Filter = filter
@@ -98,7 +84,7 @@ public class TheKhoService : ITheKhoService
 
         decimal tonDauKy = await qTonDau.SumAsync(x => (decimal?)(x.SoLuongTang - x.SoLuongGiam)) ?? 0m;
 
-        // 6. Truy vấn các giao dịch biến động trong kỳ
+        // 6. Truy vấn các giao dịch biến động trong kỳ (toàn bộ các loại giao dịch để tính đúng lũy kế và KPI)
         var qTrongKy = _context.VwBienDongKhos.AsNoTracking()
             .Where(x => x.MaHang == maHang && x.NgayGiaoDich >= tuNgay && x.NgayGiaoDich <= denNgay);
 
@@ -107,22 +93,22 @@ public class TheKhoService : ITheKhoService
             qTrongKy = qTrongKy.Where(x => x.MaKho == filter.MaKho.Value);
         }
 
-        if (filter.LoaiChungTu != null && filter.LoaiChungTu.Any())
-        {
-            qTrongKy = qTrongKy.Where(x => filter.LoaiChungTu.Contains(x.LoaiChungTu));
-        }
-
         var rawList = await qTrongKy.OrderBy(x => x.NgayGiaoDich).ThenBy(x => x.MaChungTu).ToListAsync();
 
-        // 7. Nạp chi tiết bổ sung (Đối tác, Đơn giá, Mã hiển thị, Ghi chú) từ các bảng chứng từ
+        // 7. Nạp chi tiết bổ sung (Đối tác, Đơn giá, Mã hiển thị, Ghi chú) và tính tồn lũy kế chính xác cho từng dòng
         var allDong = await BoSungThongTinChungTuAsync(rawList, maHang, tonDauKy);
 
-        // 8. Lọc theo từ khóa tìm kiếm nếu có
+        // 8. Lọc hiển thị theo Loại giao dịch và Từ khóa tìm kiếm nếu có
         var filteredDong = allDong;
+        if (filter.LoaiChungTu != null && filter.LoaiChungTu.Any())
+        {
+            filteredDong = filteredDong.Where(x => filter.LoaiChungTu.Contains(x.LoaiChungTu)).ToList();
+        }
+
         if (!string.IsNullOrWhiteSpace(filter.TuKhoa))
         {
             var kw = filter.TuKhoa.Trim().ToLower();
-            filteredDong = allDong.Where(d =>
+            filteredDong = filteredDong.Where(d =>
                 d.MaChungTuHienThi.ToLower().Contains(kw) ||
                 d.DoiTac.ToLower().Contains(kw) ||
                 (d.GhiChu != null && d.GhiChu.ToLower().Contains(kw)) ||
@@ -130,7 +116,7 @@ public class TheKhoService : ITheKhoService
             ).ToList();
         }
 
-        // 9. Thống kê KPI tổng hợp
+        // 9. Thống kê KPI tổng hợp toàn kỳ (chuẩn kế toán kho)
         decimal tongNhapKy = allDong.Sum(x => x.SoLuongTang);
         decimal tongXuatKy = allDong.Sum(x => x.SoLuongGiam);
         decimal tonCuoiKy = tonDauKy + tongNhapKy - tongXuatKy;
@@ -195,13 +181,25 @@ public class TheKhoService : ITheKhoService
             qTrongKy = qTrongKy.Where(x => x.MaKho == filter.MaKho.Value);
         }
 
-        if (filter.LoaiChungTu != null && filter.LoaiChungTu.Any())
-        {
-            qTrongKy = qTrongKy.Where(x => filter.LoaiChungTu.Contains(x.LoaiChungTu));
-        }
-
         var rawList = await qTrongKy.OrderBy(x => x.NgayGiaoDich).ThenBy(x => x.MaChungTu).ToListAsync();
         var allDong = await BoSungThongTinChungTuAsync(rawList, maHang, vm.TongHop.TonDauKy);
+
+        var filteredDong = allDong;
+        if (filter.LoaiChungTu != null && filter.LoaiChungTu.Any())
+        {
+            filteredDong = filteredDong.Where(x => filter.LoaiChungTu.Contains(x.LoaiChungTu)).ToList();
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.TuKhoa))
+        {
+            var kw = filter.TuKhoa.Trim().ToLower();
+            filteredDong = filteredDong.Where(d =>
+                d.MaChungTuHienThi.ToLower().Contains(kw) ||
+                d.DoiTac.ToLower().Contains(kw) ||
+                (d.GhiChu != null && d.GhiChu.ToLower().Contains(kw)) ||
+                d.TenLoaiChungTu.ToLower().Contains(kw)
+            ).ToList();
+        }
 
         // Tạo dòng đầu kỳ và các dòng giao dịch
         var exportList = new List<TheKhoDongVM>
@@ -218,7 +216,7 @@ public class TheKhoService : ITheKhoService
                 TonLuyKe = vm.TongHop.TonDauKy
             }
         };
-        exportList.AddRange(allDong);
+        exportList.AddRange(filteredDong);
 
         return ExcelHelper.Export<TheKhoDongVM>($"TheKho_{vm.TongHop.MaHangNoiBo}", exportList, builder =>
         {
@@ -319,8 +317,8 @@ public class TheKhoService : ITheKhoService
                 .Select(p => new {
                     p.MaPhieuChuyen,
                     MaHienThi = !string.IsNullOrEmpty(p.MaPhieu) ? p.MaPhieu : MaChungTuHelper.FormatMaChuyenKho(p.MaPhieuChuyen),
-                    KhoNguon = p.MaKhoNguonNavigation.TenKho,
-                    KhoDich = p.MaKhoDichNavigation.TenKho,
+                    KhoNguon = p.MaKhoNguonNavigation != null ? p.MaKhoNguonNavigation.TenKho : "Kho nguồn",
+                    KhoDich = p.MaKhoDichNavigation != null ? p.MaKhoDichNavigation.TenKho : "Kho đích",
                     p.GhiChu,
                     DonGia = p.ChiTietPhieuChuyenKhos.Where(c => c.MaHang == maHang).Select(c => c.DonGiaChuyen).FirstOrDefault(),
                     Url = $"/ChuyenKho/Index?search={p.MaPhieuChuyen}"

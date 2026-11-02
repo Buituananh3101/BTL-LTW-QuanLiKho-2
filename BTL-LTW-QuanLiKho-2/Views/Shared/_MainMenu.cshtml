@@ -1,4 +1,4 @@
-@{
+﻿@{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
     var action = ViewContext.RouteData.Values["action"]?.ToString();
 }
@@ -49,11 +49,11 @@
       </div>
     </li>
 
-    <li>
-      <a href="#" onclick="return false;">Khách hàng</a>
+    <li class="@(controller == "KhachHang" ? "active" : "")">
+      <a href="/KhachHang">Khách hàng</a>
       <div class="mega">
         <div class="mega-col">
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Khách hàng</a>
+          <a href="/KhachHang">Khách hàng</a>
         </div>
       </div>
     </li>
@@ -64,8 +64,6 @@
         <div class="mega-col">
           <div class="mega-title">Kho</div>
           <a asp-controller="BaoCao" asp-action="TonKho">Tồn kho theo kho</a>
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Nhập - Xuất - Tồn</a>
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Hàng dưới định mức</a>
           <a asp-controller="BaoCao" asp-action="TheKho">Thẻ kho</a>
         </div>
       </div>
@@ -85,5 +83,4 @@
       </div>
     </li>
   </ul>
-  <button class="btn-sell" onclick="alert('Màn hình Bán hàng / POS');"><i class="bi bi-cart3"></i>Bán hàng</button>
 </nav>

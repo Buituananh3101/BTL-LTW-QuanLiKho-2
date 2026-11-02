@@ -18,12 +18,10 @@
 
   <div class="topbar-right">
     <a href="#" title="Hỗ trợ" class="d-none d-lg-flex"><i class="bi bi-chat-left-text"></i>Hỗ trợ</a>
-    <a href="#" title="Góp ý" class="d-none d-lg-flex"><i class="bi bi-pencil-square"></i>Góp ý</a>
     <a href="#" class="bell d-none d-lg-flex" title="Thông báo">
       <i class="bi bi-bell-fill fs-6"></i>
       <span class="dot">2</span>
     </a>
-    <a href="#" title="Cài đặt" class="d-none d-lg-flex"><i class="bi bi-gear-fill fs-6"></i></a>
     @if (User.Identity?.IsAuthenticated == true)
     {
       <div class="dropdown">
@@ -105,7 +103,7 @@
         <i class="bi bi-arrow-down-left-square text-secondary"></i>
         <span>Nhập hàng</span>
       </a>
-      <a href="#" onclick="alert('Tính năng đang phát triển'); return false;" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 ps-4">
+      <a href="/KhachHang" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 ps-4">
         <i class="bi bi-people text-secondary"></i>
         <span>Khách hàng</span>
       </a>

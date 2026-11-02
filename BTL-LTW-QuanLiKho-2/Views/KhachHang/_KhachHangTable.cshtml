@@ -1,0 +1,298 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.PagedResult<BTL_LTW_QuanLiKho_2.ViewModels.KhachHang.KhachHangItemVM>
+@using System.Globalization
+@{
+    var viCulture = CultureInfo.GetCultureInfo("vi-VN");
+    string currentSortBy = (ViewBag.SortBy as string ?? "makh").ToLowerInvariant();
+    string currentSortDir = (ViewBag.SortDir as string ?? "desc").ToLowerInvariant();
+    bool daDanhDauFilter = ViewBag.DaDanhDauFilter is true;
+}
+
+<div class="kiot-table-scroll-body">
+    <table class="tbl" id="productTable" style="table-layout: fixed; width: max-content; min-width: 100%;">
+        <thead>
+            <tr>
+                <th style="width: 36px; min-width: 36px;" class="text-center th-checkbox">
+                    <input class="form-check-input" type="checkbox" id="selectAllRows" />
+                </th>
+                <th style="width: 36px; min-width: 36px; cursor: pointer;" class="text-center th-star" onclick="toggleStarHeaderFilter(event)">
+                    <span class="star-btn star-header-filter @(daDanhDauFilter ? "starred" : "")" id="starHeaderFilter" title="@(daDanhDauFilter ? "Bỏ lọc sao (Hiển thị tất cả)" : "Lọc danh sách khách hàng được đánh dấu sao")">
+                        <i class="bi @(daDanhDauFilter ? "bi-star-fill" : "bi-star")"></i>
+                    </span>
+                </th>
+                <th style="width: 120px; min-width: 120px;" class="sortable-th @(currentSortBy == "makh" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="ma" data-sort="makh" title="Nhấn để sắp xếp theo Mã khách hàng">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Mã KH</span>
+                            @if (currentSortBy == "makh" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "makh" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 220px; min-width: 220px;" class="col-product-name sortable-th @(currentSortBy == "tenkh" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="ten" data-sort="tenkh" title="Nhấn để sắp xếp theo Tên khách hàng">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Tên khách hàng</span>
+                            @if (currentSortBy == "tenkh" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "tenkh" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 120px; min-width: 120px;" class="sortable-th @(currentSortBy == "dienthoai" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="sdt" data-sort="dienthoai" title="Nhấn để sắp xếp theo Điện thoại">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Điện thoại</span>
+                            @if (currentSortBy == "dienthoai" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "dienthoai" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 220px; min-width: 220px;" class="sortable-th @(currentSortBy == "diachi" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="diachi" data-sort="diachi" title="Nhấn để sắp xếp theo Địa chỉ">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Địa chỉ</span>
+                            @if (currentSortBy == "diachi" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "diachi" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 130px; min-width: 130px;" class="sortable-th @(currentSortBy == "khuvuc" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="khuvuc" data-sort="khuvuc" title="Nhấn để sắp xếp theo Khu vực">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Khu vực</span>
+                            @if (currentSortBy == "khuvuc" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "khuvuc" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 130px; min-width: 130px;" class="sortable-th @(currentSortBy == "phuongxa" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="phuongxa" data-sort="phuongxa" title="Nhấn để sắp xếp theo Phường/Xã">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Phường/Xã</span>
+                            @if (currentSortBy == "phuongxa" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "phuongxa" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 150px; min-width: 150px;" class="sortable-th @(currentSortBy == "nhomkh" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="nhomkh" data-sort="nhomkh" title="Nhấn để sắp xếp theo Nhóm khách hàng">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Nhóm KH</span>
+                            @if (currentSortBy == "nhomkh" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "nhomkh" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 140px; min-width: 140px;" class="sortable-th @(currentSortBy == "loaikh" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="loaikh" data-sort="loaikh" title="Nhấn để sắp xếp theo Loại khách hàng">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Loại KH</span>
+                            @if (currentSortBy == "loaikh" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "loaikh" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 120px; min-width: 120px;" class="sortable-th @(currentSortBy == "mst" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="mst" data-sort="mst" title="Nhấn để sắp xếp theo Mã số thuế">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Mã số thuế</span>
+                            @if (currentSortBy == "mst" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "mst" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 110px; min-width: 110px;" class="sortable-th @(currentSortBy == "ngaysinh" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="ngaysinh" data-sort="ngaysinh" title="Nhấn để sắp xếp theo Ngày sinh">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Ngày sinh</span>
+                            @if (currentSortBy == "ngaysinh" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "ngaysinh" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 80px; min-width: 80px;" class="text-center sortable-th @(currentSortBy == "gioitinh" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="gioitinh" data-sort="gioitinh" title="Nhấn để sắp xếp theo Giới tính">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Giới tính</span>
+                            @if (currentSortBy == "gioitinh" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "gioitinh" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 170px; min-width: 170px;" class="sortable-th @(currentSortBy == "email" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="email" data-sort="email" title="Nhấn để sắp xếp theo Email">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Email</span>
+                            @if (currentSortBy == "email" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "email" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 130px; min-width: 130px;" class="num sortable-th @(currentSortBy == "tongban" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="tongban" data-sort="tongban" title="Nhấn để sắp xếp theo Tổng bán">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Tổng bán</span>
+                            @if (currentSortBy == "tongban" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "tongban" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 160px; min-width: 160px;" class="num sortable-th @(currentSortBy == "tongbantrutrahang" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="tongbantrutrahang" data-sort="tongbantrutrahang" title="Nhấn để sắp xếp theo Tổng bán trừ trả hàng">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Tổng bán trừ trả hàng</span>
+                            @if (currentSortBy == "tongbantrutrahang" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "tongbantrutrahang" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 120px; min-width: 120px;" class="num sortable-th @(currentSortBy == "no" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="no" data-sort="no" title="Nhấn để sắp xếp theo Nợ hiện tại">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Nợ hiện tại</span>
+                            @if (currentSortBy == "no" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "no" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+                <th style="width: 120px; min-width: 120px;" class="text-center sortable-th @(currentSortBy == "trangthai" ? (currentSortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="st" data-sort="trangthai" title="Nhấn để sắp xếp theo Trạng thái">
+                    <div class="th-content">
+                        <span class="th-title-wrap">
+                            <span class="th-text">Trạng thái</span>
+                            @if (currentSortBy == "trangthai" && currentSortDir == "asc") { <span class="sort-icon"><i class="bi bi-arrow-up"></i></span> }
+                            else if (currentSortBy == "trangthai" && currentSortDir == "desc") { <span class="sort-icon"><i class="bi bi-arrow-down"></i></span> }
+                        </span>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Items == null || !Model.Items.Any())
+            {
+                <tr class="empty-row">
+                    <td colspan="18" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                        Không tìm thấy khách hàng nào phù hợp với bộ lọc.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Model.Items)
+                {
+                    <tr class="product-row" data-id="@item.MaKh" title="Nhấn để xem chi tiết khách hàng">
+                        <td class="text-center cell-checkbox" onclick="event.stopPropagation();">
+                            <input type="checkbox" class="form-check-input row-select" value="@item.MaKh" />
+                        </td>
+                        <td class="text-center cell-star" style="cursor: pointer;" onclick="toggleFavoriteKhachHang(event, @item.MaKh, this)">
+                            <span class="star-btn @(item.DaDanhDau ? "starred" : "")" data-id="@item.MaKh" title="@(item.DaDanhDau ? "Bỏ đánh dấu sao" : "Đánh dấu sao")">
+                                <i class="bi @(item.DaDanhDau ? "bi-star-fill" : "bi-star")"></i>
+                            </span>
+                        </td>
+                        <td data-col="ma">
+                            <span class="text-break">@item.MaKhHienThi</span>
+                        </td>
+                        <td data-col="ten" class="cell-product-name">
+                            <div class="product-name-text">@item.TenKh</div>
+                        </td>
+                        <td data-col="sdt">
+                            @(string.IsNullOrWhiteSpace(item.DienThoai) ? "---" : item.DienThoai)
+                        </td>
+                        <td data-col="diachi">
+                            <span class="text-truncate d-inline-block" style="max-width: 210px;" title="@item.DiaChi">
+                                @(string.IsNullOrWhiteSpace(item.DiaChi) ? "---" : item.DiaChi)
+                            </span>
+                        </td>
+                        <td data-col="khuvuc">
+                            @(string.IsNullOrWhiteSpace(item.KhuVuc) ? "---" : item.KhuVuc)
+                        </td>
+                        <td data-col="phuongxa">
+                            @(string.IsNullOrWhiteSpace(item.PhuongXa) ? "---" : item.PhuongXa)
+                        </td>
+                        <td data-col="nhomkh">
+                            @(string.IsNullOrWhiteSpace(item.TenNhomKhachHang) ? "---" : item.TenNhomKhachHang)
+                        </td>
+                        <td data-col="loaikh">
+                            @item.TenLoaiKhachHang
+                        </td>
+                        <td data-col="mst">
+                            @(string.IsNullOrWhiteSpace(item.MaSoThue) ? "---" : item.MaSoThue)
+                        </td>
+                        <td data-col="ngaysinh">
+                            @(item.NgaySinh.HasValue ? item.NgaySinh.Value.ToString("dd/MM/yyyy") : "---")
+                        </td>
+                        <td data-col="gioitinh" class="text-center">
+                            @(string.IsNullOrWhiteSpace(item.GioiTinh) ? "---" : item.GioiTinh)
+                        </td>
+                        <td data-col="email">
+                            @(string.IsNullOrWhiteSpace(item.Email) ? "---" : item.Email)
+                        </td>
+                        <td data-col="tongban" class="num text-dark">
+                            @item.TongBan.ToString("N0", viCulture)
+                        </td>
+                        <td data-col="tongbantrutrahang" class="num text-muted">
+                            @item.TongBanTruTraHang.ToString("N0", viCulture)
+                        </td>
+                        <td data-col="no" class="num text-dark">
+                            @item.NoHienTai.ToString("N0", viCulture)
+                        </td>
+                        <td data-col="st" class="text-center">
+                            @if (item.TrangThai == "HOAT_DONG")
+                            {
+                                <span class="badge bg-light text-success border border-success-subtle">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-secondary border">Ngừng giao dịch</span>
+                            }
+                        </td>
+                    </tr>
+
+                    <!-- Khung chi tiết Inline Drawer (Pre-rendered mở tức thời 0ms) -->
+                    <tr class="product-detail-row" id="detail-@item.MaKh" style="display: none;">
+                        <td colspan="18" class="p-0">
+                            <div class="product-detail-panel-wrap" style="display: none;">
+                                <partial name="_KhachHangDetail" model="item" />
+                            </div>
+                        </td>
+                    </tr>
+                }
+
+                <!-- Dòng tổng cộng Summary cuối bảng -->
+                <tr class="summary-row fw-bold bg-light">
+                    <td></td>
+                    <td></td>
+                    <td data-col="ma">Tổng cộng:</td>
+                    <td data-col="ten">@Model.TotalItems khách hàng</td>
+                    <td data-col="sdt"></td>
+                    <td data-col="diachi"></td>
+                    <td data-col="khuvuc"></td>
+                    <td data-col="phuongxa"></td>
+                    <td data-col="nhomkh"></td>
+                    <td data-col="loaikh"></td>
+                    <td data-col="mst"></td>
+                    <td data-col="ngaysinh"></td>
+                    <td data-col="gioitinh"></td>
+                    <td data-col="email"></td>
+                    <td data-col="tongban" class="num text-dark">
+                        @Model.Items.Sum(x => x.TongBan).ToString("N0", viCulture)
+                    </td>
+                    <td data-col="tongbantrutrahang" class="num text-muted">
+                        @Model.Items.Sum(x => x.TongBanTruTraHang).ToString("N0", viCulture)
+                    </td>
+                    <td data-col="no" class="num text-dark">
+                        @Model.Items.Sum(x => x.NoHienTai).ToString("N0", viCulture)
+                    </td>
+                    <td data-col="st"></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Phân trang Lego dùng chung -->
+@if (Model != null && Model.TotalItems > 0)
+{
+    <div class="kiot-pagination-wrap px-3 py-2 bg-white border-top">
+        <partial name="_Pagination" model="Model" />
+    </div>
+}

@@ -1,0 +1,375 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.KhachHang.KhachHangIndexVM
+@{
+    var nganHangs = ViewBag.DanhSachNganHang as List<string> ?? new List<string>();
+    var tinhThanhs = ViewBag.DanhSachTinhThanh as List<string> ?? new List<string>();
+}
+
+<!-- ========================================================================
+     MODAL CHÍNH: TẠO & CẬP NHẬT KHÁCH HÀNG (CHUẨN KHUÔN MẪU HÀNG HÓA & 4 ẢNH THỰC TẾ)
+     Hỗ trợ Avatar tròn <= 2MB, Accordion Địa chỉ, Nhóm/Ghi chú, và Thông tin Xuất Hóa Đơn
+     ======================================================================== -->
+
+<!-- Sprite icon SVG dùng cho modal -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v7M14 10v7"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></symbol>
+</svg>
+
+<div class="hh-ov" id="khachHangModalOv">
+  <div class="hh-modal main" role="dialog" aria-modal="true" aria-labelledby="khModalTitle" style="max-width: 900px;">
+    <!-- Header Modal -->
+    <div class="hh-m-head">
+      <h2 id="khModalTitle">Tạo khách hàng</h2>
+      <button type="button" class="hh-x" data-close="khachHangModalOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+    </div>
+
+    <!-- Body Modal -->
+    <div class="hh-m-body" id="khModalBody">
+      <form id="khForm" onsubmit="return false;" enctype="multipart/form-data">
+        <input type="hidden" id="formMaKh" value="0" />
+        <input type="hidden" id="formHinhAnh" value="" />
+        <input type="file" id="formAvatarFileInput" accept="image/*" style="display: none;" />
+
+        <!-- ---- PHẦN 1: THÔNG TIN CƠ BẢN VÀ AVATAR (TOP GRID) ---- -->
+        <div class="hh-top-grid mb-3" style="position: relative; z-index: 30;">
+          <!-- Cột trái: Thông tin liên hệ cơ bản -->
+          <div class="hh-fields">
+            <div class="hh-f hh-span2" id="khFldTen">
+              <label for="formTenKh">Tên khách hàng <span style="color:var(--hh-danger)">*</span></label>
+              <input type="text" id="formTenKh" placeholder="Bắt buộc" autocomplete="off" />
+              <span class="hh-err">Vui lòng nhập tên khách hàng.</span>
+            </div>
+
+            <div class="hh-f">
+              <label for="formMaKhCustom">Mã khách hàng</label>
+              <input type="text" id="formMaKhCustom" placeholder="Tự động" autocomplete="off" />
+            </div>
+
+            <div class="hh-f">
+              <label for="formDienThoai">Điện thoại 1</label>
+              <input type="text" id="formDienThoai" placeholder="Nhập số điện thoại chính" autocomplete="off" />
+            </div>
+
+            <div class="hh-f">
+              <label for="formDienThoai2">Điện thoại 2</label>
+              <input type="text" id="formDienThoai2" placeholder="Số điện thoại phụ" autocomplete="off" />
+            </div>
+
+            <div class="hh-f">
+              <label for="formNgaySinh">Sinh nhật</label>
+              <input type="date" id="formNgaySinh" autocomplete="off" />
+            </div>
+
+            <div class="hh-f">
+              <label for="formGioiTinh">Giới tính</label>
+              <select id="formGioiTinh" class="form-select">
+                <option value="">Chọn giới tính</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+                <option value="Khác">Khác</option>
+              </select>
+            </div>
+
+            <div class="hh-f">
+              <label for="formEmail">Email</label>
+              <input type="email" id="formEmail" placeholder="email@gmail.com" autocomplete="off" />
+            </div>
+
+            <div class="hh-f">
+              <label for="formFacebook">Facebook</label>
+              <input type="text" id="formFacebook" placeholder="facebook.com/username" autocomplete="off" />
+            </div>
+          </div>
+
+          <!-- Cột phải: Khung tròn Tải ảnh đại diện (Ảnh <= 2MB) -->
+          <div class="hh-avatar-col d-flex flex-column align-items-center justify-content-center text-center p-3" style="width: 170px; flex: none;">
+            <div class="hh-avatar-circle position-relative rounded-circle overflow-hidden d-flex flex-column align-items-center justify-content-center border" 
+                 id="avatarPreviewBox" 
+                 style="width: 120px; height: 120px; border: 2px dashed #cbd5e1 !important; background: #f8fafc; cursor: pointer;"
+                 title="Nhấn để chọn ảnh đại diện">
+              <img id="avatarPreviewImg" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;" />
+              <div id="avatarPlaceholder" class="d-flex flex-column align-items-center text-muted">
+                <svg style="width: 24px; height: 24px; stroke: #64748b; margin-bottom: 4px;"><use href="#i-camera"/></svg>
+                <span class="small fw-semibold text-primary" style="font-size: 12px;">Thêm ảnh</span>
+              </div>
+            </div>
+            <div class="text-muted text-center mt-2" style="font-size: 11.5px; line-height: 1.3;">
+              Ảnh không được vượt quá 2MB
+            </div>
+            <button type="button" class="btn btn-sm btn-link text-danger mt-1 p-0 text-decoration-none" id="btnRemoveAvatar" style="display: none; font-size: 11.5px;">
+              Xóa ảnh
+            </button>
+          </div>
+        </div>
+
+        <!-- ---- PHẦN 2: ACCORDION ĐỊA CHỈ ---- -->
+        <section class="hh-sec open">
+          <div class="hh-sec-h">
+            <div>
+              <h3>Địa chỉ</h3>
+            </div>
+            <svg class="hh-chev"><use href="#i-chev"/></svg>
+          </div>
+          <div class="hh-sec-b">
+            <div class="hh-fields">
+              <div class="hh-f hh-span2">
+                <label for="formDiaChi">Địa chỉ</label>
+                <input type="text" id="formDiaChi" placeholder="Nhập địa chỉ" autocomplete="off" />
+              </div>
+
+              <div class="hh-f">
+                <label for="formKhuVuc">Khu vực</label>
+                <select id="formKhuVuc" class="form-select">
+                  <option value="">Chọn Tỉnh/Thành phố</option>
+                  @foreach (var tt in tinhThanhs)
+                  {
+                    <option value="@tt">@tt</option>
+                  }
+                </select>
+              </div>
+
+              <div class="hh-f">
+                <label for="formPhuongXa">Phường/Xã</label>
+                <input type="text" id="formPhuongXa" placeholder="Chọn Phường/Xã" autocomplete="off" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---- PHẦN 3: ACCORDION NHÓM KHÁCH HÀNG, GHI CHÚ ---- -->
+        <section class="hh-sec open">
+          <div class="hh-sec-h">
+            <div>
+              <h3>Nhóm khách hàng, ghi chú</h3>
+            </div>
+            <svg class="hh-chev"><use href="#i-chev"/></svg>
+          </div>
+          <div class="hh-sec-b">
+            <div class="hh-fields">
+              <div class="hh-f hh-span2" id="khFldNhom">
+                <label for="formMaNhomKhachHang">
+                  Nhóm khách hàng 
+                  <button type="button" class="hh-link" id="btnQuickCreateNhomKhModal">+ Tạo mới</button>
+                </label>
+                <select id="formMaNhomKhachHang" class="form-select">
+                  <option value="">Chọn nhóm khách hàng</option>
+                  @if (Model.NhomKhachHangs != null)
+                  {
+                    @foreach (var n in Model.NhomKhachHangs)
+                    {
+                      <option value="@n.MaNhomKhachHang">@n.TenNhom</option>
+                    }
+                  }
+                </select>
+              </div>
+
+              <div class="hh-f hh-span2">
+                <label for="formGhiChu">Ghi chú</label>
+                <textarea id="formGhiChu" rows="2" class="form-control" placeholder="Nhập ghi chú" style="resize: vertical;"></textarea>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---- PHẦN 4: ACCORDION THÔNG TIN XUẤT HÓA ĐƠN ---- -->
+        <section class="hh-sec open">
+          <div class="hh-sec-h">
+            <div>
+              <h3>Thông tin xuất hóa đơn</h3>
+            </div>
+            <svg class="hh-chev"><use href="#i-chev"/></svg>
+          </div>
+          <div class="hh-sec-b">
+            <!-- Radio switch lựa chọn đối tượng hóa đơn -->
+            <div class="d-flex align-items-center gap-4 mb-3 p-2 bg-light rounded border">
+              <span class="text-dark fw-semibold small">Loại khách hàng:</span>
+              <label class="form-check-label d-flex align-items-center gap-1 small" style="cursor: pointer;">
+                <input type="radio" name="xhdLoaiSwitch" id="radioXhdCaNhan" value="CA_NHAN" class="form-check-input" checked />
+                <span>Cá nhân / Hộ kinh doanh</span>
+              </label>
+              <label class="form-check-label d-flex align-items-center gap-1 small" style="cursor: pointer;">
+                <input type="radio" name="xhdLoaiSwitch" id="radioXhdDoanhNghiep" value="DOANH_NGHIEP" class="form-check-input" />
+                <span>Doanh nghiệp</span>
+              </label>
+            </div>
+
+            <div class="hh-fields">
+              <!-- Hàng 1: MST + Tên đơn vị / Tên công ty -->
+              <div class="hh-f" id="fldXhdMst">
+                <label for="formMaSoThue">
+                  <span>Mã số thuế</span> <span id="lblMstRequired" class="text-danger" style="display: none;">*</span>
+                </label>
+                <div class="hh-input-btn-wrap">
+                  <input type="text" id="formMaSoThue" placeholder="Nhập mã số thuế" autocomplete="off" />
+                  <button type="button" class="btn-tra-cuu-mst" id="btnTraCuuMst" title="Tra cứu mã số thuế">
+                    Tra cứu MST
+                  </button>
+                </div>
+                <span class="hh-err" id="errMst">Vui lòng nhập mã số thuế doanh nghiệp.</span>
+              </div>
+
+              <div class="hh-f" id="fldXhdTenDonVi">
+                <label for="formXhdTenDonVi" id="lblXhdTenDonVi">Tên đơn vị</label>
+                <input type="text" id="formXhdTenDonVi" placeholder="Nhập tên đơn vị" autocomplete="off" />
+              </div>
+
+              <!-- Hàng 2: CCCD (nếu Cá nhân) HOẶC Tên công ty/Mã ĐVQHNS (nếu Doanh nghiệp) -->
+              <div class="hh-f" id="boxXhdCccd">
+                <label for="formSoCccd">Số CCCD/CMND</label>
+                <input type="text" id="formSoCccd" placeholder="Nhập số CCCD/CMND" autocomplete="off" />
+              </div>
+
+              <div class="hh-f">
+                <label for="formTenNguoiMua">Tên người mua</label>
+                <input type="text" id="formTenNguoiMua" placeholder="Nhập tên người mua" autocomplete="off" />
+              </div>
+
+              <div class="hh-f" id="boxXhdDvqhns" style="display: none;">
+                <label for="formMaDvqhns">
+                  <span>Mã ĐVQHNS</span>
+                  <span class="text-muted" title="Mã đơn vị có quan hệ với ngân sách" style="cursor: help;"><svg style="width:14px;height:14px;vertical-align:text-top;"><use href="#i-info"/></svg></span>
+                </label>
+                <input type="text" id="formMaDvqhns" placeholder="Nhập mã đơn vị" autocomplete="off" />
+              </div>
+
+              <div class="hh-f hh-span2" id="fldXhdDiaChi">
+                <label for="formXhdDiaChi">
+                  <span>Địa chỉ xuất HĐ</span> <span id="lblDiaChiRequired" class="text-danger" style="display: none;">*</span>
+                </label>
+                <input type="text" id="formXhdDiaChi" placeholder="Nhập địa chỉ" autocomplete="off" />
+                <span class="hh-err" id="errDiaChiXhd">Vui lòng nhập địa chỉ công ty.</span>
+              </div>
+
+              <div class="hh-f">
+                <label for="formXhdKhuVuc">Tỉnh/Thành phố</label>
+                <select id="formXhdKhuVuc" class="form-select">
+                  <option value="">Tìm Tỉnh/Thành phố</option>
+                  @foreach (var tt in tinhThanhs)
+                  {
+                    <option value="@tt">@tt</option>
+                  }
+                </select>
+              </div>
+
+              <div class="hh-f">
+                <label for="formXhdPhuongXa">Phường/Xã</label>
+                <input type="text" id="formXhdPhuongXa" placeholder="Tìm Phường/Xã" autocomplete="off" />
+              </div>
+
+              <div class="hh-f">
+                <label for="formXhdEmail">Email</label>
+                <input type="email" id="formXhdEmail" placeholder="email@gmail.com" autocomplete="off" />
+              </div>
+
+              <div class="hh-f" id="boxXhdHoChieu">
+                <label for="formSoHoChieu">Số hộ chiếu</label>
+                <input type="text" id="formSoHoChieu" placeholder="Nhập số hộ chiếu" autocomplete="off" />
+              </div>
+
+              <div class="hh-f">
+                <label for="formXhdSoDienThoai">Số điện thoại</label>
+                <input type="text" id="formXhdSoDienThoai" placeholder="Nhập số điện thoại" autocomplete="off" />
+              </div>
+
+              <div class="hh-f">
+                <label for="formTenNganHang">Ngân hàng</label>
+                <select id="formTenNganHang" class="form-select">
+                  <option value="">Chọn ngân hàng</option>
+                  @foreach (var nh in nganHangs)
+                  {
+                    <option value="@nh">@nh</option>
+                  }
+                </select>
+              </div>
+
+              <div class="hh-f hh-span2">
+                <label for="formSoTaiKhoanNganHang">Số tài khoản ngân hàng</label>
+                <input type="text" id="formSoTaiKhoanNganHang" placeholder="Nhập số tài khoản ngân hàng" autocomplete="off" />
+              </div>
+            </div>
+          </div>
+        </section>
+      </form>
+    </div>
+
+    <!-- Footer Modal -->
+    <div class="hh-m-foot">
+      <label class="hh-cb">
+        <input type="checkbox" id="formTrangThaiCheck" checked />
+        <span>Đang hoạt động</span>
+      </label>
+      <span class="sp"></span>
+      <button type="button" class="hh-btn" data-close="khachHangModalOv">Bỏ qua</button>
+      <button type="button" class="hh-btn primary" id="btnSaveKhachHang">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL CON: TẠO NHANH NHÓM KHÁCH HÀNG ===== -->
+<div class="hh-ov" id="hhPromptNhomKhOv">
+  <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="pTitle" style="max-width: 480px;">
+    <div class="hh-m-head">
+      <h2 id="pTitle">Tạo mới nhóm khách hàng</h2>
+      <button type="button" class="hh-x" data-close="hhPromptNhomKhOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div class="hh-m-body">
+      <div class="hh-f mb-3" id="pNhomField">
+        <label for="pTenNhomInput">Tên nhóm khách hàng <span class="text-danger">*</span></label>
+        <input type="text" id="pTenNhomInput" placeholder="Ví dụ: Khách VIP, Đại lý..." autocomplete="off" />
+        <span class="hh-err" id="pErr">Vui lòng nhập tên nhóm khách hàng.</span>
+      </div>
+      <div class="hh-f">
+        <label for="pGhiChuInput">Ghi chú</label>
+        <textarea id="pGhiChuInput" rows="2" class="form-control" placeholder="Ghi chú thêm..."></textarea>
+      </div>
+    </div>
+    <div class="hh-m-foot">
+      <span class="sp"></span>
+      <button type="button" class="hh-btn" data-close="hhPromptNhomKhOv">Bỏ qua</button>
+      <button type="button" class="hh-btn primary" id="btnSaveQuickNhomKh">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL CON: SỬA / XÓA NHÓM KHÁCH HÀNG ===== -->
+<div class="hh-ov" id="hhEditNhomKhOv">
+  <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="editNhomTitle" style="max-width: 480px;">
+    <div class="hh-m-head">
+      <h2 id="editNhomTitle">Sửa nhóm khách hàng</h2>
+      <button type="button" class="hh-x" data-close="hhEditNhomKhOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div class="hh-m-body">
+      <input type="hidden" id="editNhomId" value="0" />
+      <div class="hh-f mb-3" id="editNhomField">
+        <label for="editNhomInput">Tên nhóm khách hàng <span class="text-danger">*</span></label>
+        <input type="text" id="editNhomInput" autocomplete="off" />
+        <span class="hh-err" id="editNhomErr">Vui lòng nhập tên nhóm khách hàng.</span>
+      </div>
+      <div class="hh-f">
+        <label for="editNhomGhiChu">Ghi chú</label>
+        <textarea id="editNhomGhiChu" rows="2" class="form-control" placeholder="Ghi chú thêm..."></textarea>
+      </div>
+    </div>
+    <div class="hh-m-foot" style="display: flex; justify-content: space-between; align-items: center;">
+      <button type="button" class="hh-btn-del" id="btnEditNhomDelete" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 13.5px; display: inline-flex; align-items: center; gap: 4px;">
+        <svg style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;"><use href="#i-trash"/></svg>
+        <span>Xóa</span>
+      </button>
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="hh-btn" data-close="hhEditNhomKhOv">Bỏ qua</button>
+        <button type="button" class="hh-btn primary" id="btnEditNhomSave">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>

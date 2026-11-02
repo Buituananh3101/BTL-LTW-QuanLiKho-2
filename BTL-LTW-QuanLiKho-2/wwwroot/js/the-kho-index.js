@@ -1,4 +1,4 @@
-﻿/**
+/**
  * the-kho-index.js - Quản lý tương tác màn hình Báo cáo Thẻ kho
  * Chuẩn hóa 100% theo khuôn mẫu Lego hệ thống
  */
@@ -101,6 +101,9 @@
     $(document).on('keydown', function (e) {
         if (e.key === 'Escape') {
             $('#tkProductSuggestDropdown').removeClass('show').hide();
+        } else if (e.key === 'F3' || e.keyCode === 114) {
+            e.preventDefault();
+            $('#keywordSearch').trigger('focus').select();
         }
     });
 
