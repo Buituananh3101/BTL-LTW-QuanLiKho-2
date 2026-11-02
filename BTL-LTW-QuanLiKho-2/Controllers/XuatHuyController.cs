@@ -736,16 +736,40 @@ public class XuatHuyController : BaseKhoController
         }
 
         var products = await query.Take(25).ToListAsync();
+        var productIds = products.Select(h => h.MaHang).ToList();
 
-        var result = products.Select(h => new
+        var setWithImage = new HashSet<int>();
+        if (productIds.Any())
         {
-            maHang = h.MaHang,
-            maHangNoiBo = h.MaHangNoiBo,
-            tenHang = h.TenHang,
-            tenDvt = h.MaDvtNavigation?.TenDvt ?? "",
-            tenNhom = h.MaNhomNavigation?.TenNhom ?? "",
-            giaVon = h.GiaVon > 0 ? h.GiaVon : h.GiaBanThamKhao,
-            tonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0
+            var imgIds = await _context.HinhAnhHangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang))
+                .Select(x => x.MaHang)
+                .Distinct()
+                .ToListAsync();
+
+            var legacyImgIds = await _context.HangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang) && x.HinhAnh != null)
+                .Select(x => x.MaHang)
+                .ToListAsync();
+
+            setWithImage = new HashSet<int>(imgIds.Concat(legacyImgIds));
+        }
+
+        var result = products.Select(h =>
+        {
+            bool hasImg = setWithImage.Contains(h.MaHang);
+            return new
+            {
+                maHang = h.MaHang,
+                maHangNoiBo = h.MaHangNoiBo,
+                tenHang = h.TenHang,
+                tenDvt = h.MaDvtNavigation?.TenDvt ?? "",
+                tenNhom = h.MaNhomNavigation?.TenNhom ?? "",
+                giaVon = h.GiaVon > 0 ? h.GiaVon : h.GiaBanThamKhao,
+                tonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0,
+                hasImage = hasImg,
+                hinhAnh = hasImg ? $"/HangHoa/GetImage/{h.MaHang}" : null
+            };
         }).ToList();
 
         return Json(result);

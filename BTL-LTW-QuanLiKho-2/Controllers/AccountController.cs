@@ -25,7 +25,7 @@ public class AccountController : Controller
     {
         if (User.Identity?.IsAuthenticated == true)
         {
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "HangHoa");
         }
 
         ViewBag.ReturnUrl = returnUrl;
@@ -126,7 +126,7 @@ public class AccountController : Controller
             return Redirect(model.ReturnUrl);
         }
 
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "HangHoa");
     }
 
     [HttpGet]

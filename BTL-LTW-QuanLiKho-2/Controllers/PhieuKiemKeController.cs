@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BTL_LTW_QuanLiKho_2.Models;
@@ -818,16 +818,40 @@ public class PhieuKiemKeController : BaseKhoController
         }
 
         var products = await query.Take(20).ToListAsync();
+        var productIds = products.Select(h => h.MaHang).ToList();
 
-        var result = products.Select(h => new ProductSearchItemVM
+        var setWithImage = new HashSet<int>();
+        if (productIds.Any())
         {
-            MaHang = h.MaHang,
-            MaHangNoiBo = h.MaHangNoiBo,
-            TenHang = h.TenHang,
-            TenDvt = h.MaDvtNavigation?.TenDvt ?? "",
-            TenNhom = h.MaNhomNavigation?.TenNhom ?? "",
-            Gia = h.GiaVon > 0 ? h.GiaVon : h.GiaBanThamKhao,
-            TonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0
+            var imgIds = await _context.HinhAnhHangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang))
+                .Select(x => x.MaHang)
+                .Distinct()
+                .ToListAsync();
+
+            var legacyImgIds = await _context.HangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang) && x.HinhAnh != null)
+                .Select(x => x.MaHang)
+                .ToListAsync();
+
+            setWithImage = new HashSet<int>(imgIds.Concat(legacyImgIds));
+        }
+
+        var result = products.Select(h =>
+        {
+            bool hasImg = setWithImage.Contains(h.MaHang);
+            return new ProductSearchItemVM
+            {
+                MaHang = h.MaHang,
+                MaHangNoiBo = h.MaHangNoiBo,
+                TenHang = h.TenHang,
+                TenDvt = h.MaDvtNavigation?.TenDvt ?? "",
+                TenNhom = h.MaNhomNavigation?.TenNhom ?? "",
+                Gia = h.GiaVon > 0 ? h.GiaVon : h.GiaBanThamKhao,
+                TonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0,
+                HasImage = hasImg,
+                HinhAnh = hasImg ? $"/HangHoa/GetImage/{h.MaHang}" : null
+            };
         }).ToList();
 
         return Json(result);

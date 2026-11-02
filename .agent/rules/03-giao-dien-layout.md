@@ -10,7 +10,7 @@
 - `WarehouseSwitcherViewComponent`: Nạp kho theo phân quyền, đổi kho qua `POST /Account/SwitchWarehouse?warehouseId=X`.
 
 ## 3. Mega-Menu ngang (`_MainMenu.cshtml`)
-- Menu: **Tổng quan**, **Hàng hóa**, **Mua hàng**, **Đơn hàng**, **Khách hàng**, **Báo cáo**, **Thiết lập**, **Bán hàng**.
+- Menu: **Hàng hóa**, **Mua hàng**, **Khách hàng**, **Báo cáo**, **Thiết lập**.
 
 ## 4. Quy ước View & Scripts
 - **Partial View**: Tách HTML dùng chung (`_Header`, `_Pagination`, partial table...).

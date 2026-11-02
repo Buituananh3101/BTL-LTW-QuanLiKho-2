@@ -157,6 +157,8 @@ public class ProductSearchItemVM
     public string TenNhom { get; set; } = "";
     public decimal Gia { get; set; }
     public decimal TonKho { get; set; }
+    public bool HasImage { get; set; }
+    public string? HinhAnh { get; set; }
 }
 
 public class SaveStockTakeRequest

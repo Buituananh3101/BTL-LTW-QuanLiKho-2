@@ -1,19 +1,63 @@
-﻿# Tiến độ dự án
+# Tiến độ dự án
 
-Cập nhật lần cuối: 2026-11-02 – Rà Soát & Đồng Bộ Dấu * Đỏ Cho Toàn Bộ Các Trường Bắt Buộc Nhập Trên Toàn Hệ Thống (Phiên 215)
+Cập nhật lần cuối: 2026-11-02 – Lược Bỏ Phân Hệ Tổng Quan & Xóa Khỏi Menu Điều Hướng (Phiên 217)
 
 ---
 
 ## Đang làm
-- Sẵn sàng kiểm thử trải nghiệm giao diện toàn bộ hệ thống form modal: Mọi trường bắt buộc nhập đều hiển thị dấu * màu đỏ nằm ngay sát bên phải chữ nhãn.
+- Sẵn sàng kiểm thử trải nghiệm: Menu trên cùng trực quan bắt đầu bằng menu Hàng hóa, hệ thống tự động đưa người dùng vào Danh sách hàng hóa (`/HangHoa`) sau đăng nhập.
   + Kiểm tra biên dịch hệ thống `dotnet build -t:Compile` đạt **0 Errors**.
-  + Kiểm tra cú pháp JavaScript `hang-hoa-form.js` đạt chuẩn **0 Errors**.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế trên trình duyệt giao diện Quản lý Hàng hóa và Quản lý Kho (`http://localhost:7087/HangHoa`).
+1. Kiểm tra trải nghiệm thực tế trên trình duyệt giao diện Danh sách Hàng hóa (`http://localhost:7087/HangHoa`).
 2. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
+
+---
+
+- **Lược Bỏ Phân Hệ Tổng Quan & Xóa Khỏi Menu Điều Hướng (Phiên 217)**:
+  - **Nhu cầu**: Người dùng yêu cầu: *"thôi bạn hãy giúp tôi bỏ phần tổng quan này đi, xóa nó trên top menu luon"*.
+  - **Kết quả thực hiện**:
+    1. **Xóa khỏi Top Menu & Mobile Drawer**:
+       - Xóa mục *Tổng quan* khỏi thanh menu ngang chính (`_MainMenu.cshtml`). Menu giờ bắt đầu trực tiếp từ *Hàng hóa*.
+       - Xóa mục *Tổng quan* khỏi ngăn kéo menu trên thiết bị di động / màn hình thu nhỏ (`_Header.cshtml`).
+    2. **Điều hướng mặc định về Danh sách Hàng hóa (`/HangHoa`)**:
+       - Cập nhật `HomeController.cs`: Action `Index` chuyển hướng tự động `RedirectToAction("Index", "HangHoa")`.
+       - Cập nhật `AccountController.cs`: Sau khi đăng nhập thành công (hoặc khi đã đăng nhập mà vào lại trang Login) tự động chuyển hướng về `HangHoa/Index`.
+       - Cập nhật `AccessDenied.cshtml`: Nút "Về Trang chủ" chuyển hướng về `HangHoa/Index`.
+    3. **Dọn dẹp mã nguồn & tài nguyên thừa**:
+       - Xóa toàn bộ file ViewModels: `BTL-LTW-QuanLiKho-2/ViewModels/TongQuan/`.
+       - Xóa style & script: `wwwroot/css/tong-quan.css` và `wwwroot/js/tong-quan.js`.
+       - Xóa tài liệu đặc tả: `docs/specs/tong-quan.md`.
+       - Tinh gọn `Views/Home/Index.cshtml`.
+       - Cập nhật luật giao diện: `.agent/rules/03-giao-dien-layout.md`.
+  - **Kiểm tra**:
+    + `dotnet build BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2.csproj -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
+
+---
+
+- **Đồng Bộ Chuyển Màu Trạng Thái Đang Xử Lý / Trung Gian Sang Xanh Dương Chuẩn Mực (Phiên 216)**:
+  - **Nhu cầu**: Người dùng yêu cầu: *"tôi muốn 🟠 Vàng / Cam (warning): Trạng thái Đang xử lý / Trung gian (Đang chuyển, Dưới định mức, Chờ duyệt). thành màu xanh dương giống 1, bạn hãy lên kế hoạch sửa màu"*.
+  - **Giải pháp & Kết quả triển khai**:
+    1. **Chuyển kho (`ChuyenKhoViewModels.cs` & `_ChuyenKhoTable.cshtml`)**:
+       - Trạng thái `Đang chuyển` (`DA_XUAT`): Chuyển từ `badge bg-warning-subtle text-warning` sang `badge bg-primary-subtle text-primary border border-primary-subtle`.
+       - Ngăn chi tiết (Drawer): Sửa đồng bộ badge `Phiếu tạm` đang bị nhầm thành warning sang `bg-primary-subtle text-primary`.
+    2. **Báo cáo Tồn kho (`_TonKhoTable.cshtml` & `_TonKhoFilterSidebar.cshtml`)**:
+       - Trạng thái `Dưới định mức`: Chuyển từ `bg-warning-subtle text-warning-emphasis` sang `bg-primary-subtle text-primary border border-primary-subtle`.
+       - Mũi tên cảnh báo `▼` (cột số lượng): Chuyển từ `bg-warning text-dark` sang `bg-primary text-white`.
+       - Sidebar bộ lọc Tình trạng tồn: Chuyển nhãn `Dưới định mức tối thiểu` sang `text-primary fw-semibold`.
+    3. **Trả hàng nhập (`TraHangNhapViewModels.cs` & `_TraHangNhapForm.cshtml`)**:
+       - `Phiếu tạm` (`NHAP` / `PHIEU_TAM`): Sửa từ `bg-warning-subtle text-warning` sang `badge bg-primary-subtle text-primary border border-primary-subtle`.
+       - Form trả hàng: Binding trực tiếp `@Model.BadgeClass`.
+    4. **Tổng quan Dashboard (`HomeController.cs`)**:
+       - Dòng thời gian `NhatKyThaoTac`: Chuyển huy hiệu `phieuchuyenkho` sang `bg-primary-subtle text-primary border border-primary-subtle`.
+    5. **Tài liệu quy chuẩn**:
+       - Cập nhật bảng quy ước trạng thái chứng từ trong `.agent/rules/02-nghiep-vu-kho.md`.
+  - **Kiểm tra**:
+    - `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+
+---
 
 - **Rà Soát & Đồng Bộ Dấu * Đỏ Cho Toàn Bộ Các Trường Bắt Buộc Nhập Trên Toàn Hệ Thống (Phiên 215)**:
   - **Nhu cầu**: Người dùng yêu cầu: *"bạn hãy kiểm tra lại toàn bộ form nhập, trường nào bắt buộc nhập thì phải có dấu * đỏ như vậy"*.

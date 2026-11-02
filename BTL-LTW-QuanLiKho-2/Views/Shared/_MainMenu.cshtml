@@ -5,10 +5,6 @@
 
 <nav class="mainnav d-none d-lg-flex">
   <ul>
-    <li class="@(controller == "Home" ? "active" : "")">
-      <a asp-controller="Home" asp-action="Index">Tổng quan</a>
-    </li>
-
     <li class="@(controller == "HangHoa" || controller == "PhieuKiemKe" || controller == "XuatHuy" || controller == "ChuyenKho" ? "active" : "")">
       <a href="javascript:void(0)" onclick="return false;">Hàng hóa</a>
       <div class="mega">
@@ -39,7 +35,6 @@
         </div>
       </div>
     </li>
-
 
     <li class="@(controller == "KhachHang" ? "active" : "")">
       <a href="/KhachHang">Khách hàng</a>

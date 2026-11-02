@@ -568,24 +568,49 @@ public class ChuyenKhoController : BaseKhoController
         }
 
         var products = await query.Take(20).ToListAsync();
+        var productIds = products.Select(p => p.MaHang).ToList();
+
+        var setWithImage = new HashSet<int>();
+        if (productIds.Any())
+        {
+            var imgIds = await _context.HinhAnhHangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang))
+                .Select(x => x.MaHang)
+                .Distinct()
+                .ToListAsync();
+
+            var legacyImgIds = await _context.HangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang) && x.HinhAnh != null)
+                .Select(x => x.MaHang)
+                .ToListAsync();
+
+            setWithImage = new HashSet<int>(imgIds.Concat(legacyImgIds));
+        }
+
         var tonKhoDict = await _tonKhoService.LayTonKhoTheoKhoAsync(wh);
 
-        var result = products.Select(p => new
+        var result = products.Select(p =>
         {
-            id = p.MaHang,
-            code = p.MaHangNoiBo,
-            name = p.TenHang,
-            unit = p.MaDvtNavigation?.TenDvt ?? "",
-            cost = p.GiaVon,
-            stock = tonKhoDict.TryGetValue(p.MaHang, out var ton) ? ton : 0m,
-            // Thêm các trường cho tương thích với component f3-product-search.js
-            maHang = p.MaHang,
-            maHangNoiBo = p.MaHangNoiBo,
-            tenHang = p.TenHang,
-            tenDvt = p.MaDvtNavigation?.TenDvt ?? "",
-            tenNhom = p.MaNhomNavigation?.TenNhom ?? "",
-            gia = p.GiaVon,
-            tonKho = tonKhoDict.TryGetValue(p.MaHang, out var ton2) ? ton2 : 0m
+            bool hasImg = setWithImage.Contains(p.MaHang);
+            return new
+            {
+                id = p.MaHang,
+                code = p.MaHangNoiBo,
+                name = p.TenHang,
+                unit = p.MaDvtNavigation?.TenDvt ?? "",
+                cost = p.GiaVon,
+                stock = tonKhoDict.TryGetValue(p.MaHang, out var ton) ? ton : 0m,
+                // Thêm các trường cho tương thích với component f3-product-search.js
+                maHang = p.MaHang,
+                maHangNoiBo = p.MaHangNoiBo,
+                tenHang = p.TenHang,
+                tenDvt = p.MaDvtNavigation?.TenDvt ?? "",
+                tenNhom = p.MaNhomNavigation?.TenNhom ?? "",
+                gia = p.GiaVon,
+                tonKho = tonKhoDict.TryGetValue(p.MaHang, out var ton2) ? ton2 : 0m,
+                hasImage = hasImg,
+                hinhAnh = hasImg ? $"/HangHoa/GetImage/{p.MaHang}" : null
+            };
         }).ToList();
 
         return Json(result);

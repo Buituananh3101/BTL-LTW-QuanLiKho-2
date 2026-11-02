@@ -1,14 +1,17 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using BTL_LTW_QuanLiKho_2.Models;
 
 namespace BTL_LTW_QuanLiKho_2.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
+    [HttpGet]
     public IActionResult Index()
     {
-        return View();
+        return RedirectToAction("Index", "HangHoa");
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

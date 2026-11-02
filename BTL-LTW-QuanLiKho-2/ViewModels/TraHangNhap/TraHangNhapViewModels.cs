@@ -24,7 +24,7 @@ public class TraHangNhapListItemVM
 
     public string BadgeClass => TrangThai switch
     {
-        "PHIEU_TAM" or "NHAP" => "badge bg-warning-subtle text-warning border border-warning-subtle",
+        "PHIEU_TAM" or "NHAP" => "badge bg-primary-subtle text-primary border border-primary-subtle",
         "DA_TRA_HANG" or "HOAN_THANH" or "DA_XAC_NHAN" => "badge bg-success-subtle text-success border border-success-subtle",
         _ => "badge bg-secondary-subtle text-secondary border border-secondary-subtle"
     };
@@ -145,6 +145,13 @@ public class TraHangNhapFormVM
         "DA_TRA_HANG" or "HOAN_THANH" or "DA_XAC_NHAN" => "Đã trả hàng",
         "DA_HUY" or "HUY" => "Đã hủy",
         _ => TrangThai
+    };
+
+    public string BadgeClass => TrangThai switch
+    {
+        "PHIEU_TAM" or "NHAP" => "badge bg-primary-subtle text-primary border border-primary-subtle",
+        "DA_TRA_HANG" or "HOAN_THANH" or "DA_XAC_NHAN" => "badge bg-success-subtle text-success border border-success-subtle",
+        _ => "badge bg-secondary-subtle text-secondary border border-secondary-subtle"
     };
 
     public bool IsReadOnly { get; set; } = false;

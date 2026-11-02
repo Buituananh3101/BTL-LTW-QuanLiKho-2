@@ -181,7 +181,7 @@
 
                                 @if (isUnderMin)
                                 {
-                                    <span class="badge rounded-pill bg-warning text-dark ms-1" title="Dưới định mức tối thiểu (@dm.Item1)" style="font-size: 9px; padding: 1px 4px;">▼</span>
+                                    <span class="badge rounded-pill bg-primary text-white ms-1" title="Dưới định mức tối thiểu (@dm.Item1)" style="font-size: 9px; padding: 1px 4px;">▼</span>
                                 }
                                 else if (isOverMax)
                                 {
@@ -249,7 +249,7 @@
                                                             string badgeCls = "bg-success-subtle text-success border border-success-subtle";
                                                             if (slK < 0) { stLabel = "Tồn âm"; badgeCls = "bg-danger-subtle text-danger border border-danger-subtle"; }
                                                             else if (slK == 0) { stLabel = "Hết hàng"; badgeCls = "bg-secondary-subtle text-secondary border border-secondary-subtle"; }
-                                                            else if (minK > 0 && slK < minK) { stLabel = "Dưới định mức"; badgeCls = "bg-warning-subtle text-warning-emphasis border border-warning-subtle"; }
+                                                            else if (minK > 0 && slK < minK) { stLabel = "Dưới định mức"; badgeCls = "bg-primary-subtle text-primary border border-primary-subtle"; }
                                                             else if (maxK.HasValue && slK > maxK.Value) { stLabel = "Vượt định mức"; badgeCls = "bg-info-subtle text-info border border-info-subtle"; }
 
                                                             <tr>
