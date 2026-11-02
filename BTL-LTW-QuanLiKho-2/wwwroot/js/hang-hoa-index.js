@@ -1,4 +1,4 @@
-﻿/**
+/**
  * hang-hoa-index.js – Quản lý tương tác trang Danh sách hàng hóa chuyên nghiệp
  * Bao gồm: Sidebar Drawer, Dual Calendar, Multi-select Tags, Sắp xếp cột 3 trạng thái, AJAX Paging, Star.
  */
@@ -748,13 +748,13 @@ $(document).ready(function () {
                     let html = '';
                     res.data.forEach(function (d) {
                         const codeHtml = d.urlChiTiet
-                            ? `<a href="${d.urlChiTiet}" class="text-primary text-decoration-none fw-semibold">${escapeHtml(d.maChungTuHienThi)}</a>`
-                            : `<span class="fw-semibold text-dark">${escapeHtml(d.maChungTuHienThi)}</span>`;
+                            ? `<a href="${d.urlChiTiet}" class="text-primary text-decoration-none">${escapeHtml(d.maChungTuHienThi)}</a>`
+                            : `<span class="text-dark">${escapeHtml(d.maChungTuHienThi)}</span>`;
 
                         const timeStr = d.ngayGiaoDich ? new Date(d.ngayGiaoDich).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
-                        const tang = d.soLuongTang > 0 ? `<span class="text-success fw-bold">+${d.soLuongTang.toLocaleString('vi-VN')}</span>` : '-';
-                        const giam = d.soLuongGiam > 0 ? `<span class="text-danger fw-bold">-${d.soLuongGiam.toLocaleString('vi-VN')}</span>` : '-';
-                        const ton = `<span class="fw-bold">${d.tonLuyKe.toLocaleString('vi-VN')}</span>`;
+                        const tang = d.soLuongTang > 0 ? `<span class="text-success">+${d.soLuongTang.toLocaleString('vi-VN')}</span>` : '-';
+                        const giam = d.soLuongGiam > 0 ? `<span class="text-danger">-${d.soLuongGiam.toLocaleString('vi-VN')}</span>` : '-';
+                        const ton = `<span class="text-dark">${d.tonLuyKe.toLocaleString('vi-VN')}</span>`;
                         const giaStr = d.donGia > 0 ? d.donGia.toLocaleString('vi-VN') + ' ₫' : '-';
 
                         // Chuẩn hóa badge class loại giao dịch đồng bộ chuyên nghiệp

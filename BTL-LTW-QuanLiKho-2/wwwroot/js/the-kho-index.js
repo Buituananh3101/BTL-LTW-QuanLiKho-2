@@ -76,7 +76,10 @@
 
     // Bôi đen toàn bộ chữ khi click vào ô tìm kiếm để người dùng dễ gõ tìm mặt hàng khác
     $('#tkSearchProductInput').on('focus', function () {
-        $(this).select();
+        const inp = this;
+        setTimeout(function () {
+            inp.select();
+        }, 50);
     });
 
     // Ẩn/hiện nút (x) theo nội dung gõ vào
@@ -91,10 +94,17 @@
     // Khi người dùng click ra ngoài mà chưa chọn hàng mới, phục hồi lại tên mặt hàng đang theo dõi
     $('#tkSearchProductInput').on('blur', function () {
         setTimeout(function () {
-            if (!$('#tkProductSuggestDropdown').is(':visible') && selectedMaHang > 0 && currentProductText) {
-                if ($('#tkSearchProductInput').val().trim() !== currentProductText) {
-                    $('#tkSearchProductInput').val(currentProductText);
-                    $('#btnRemoveSelectedProduct').removeClass('d-none');
+            if (!$('#tkProductSuggestDropdown').is(':visible')) {
+                if (selectedMaHang > 0 && currentProductText) {
+                    if ($('#tkSearchProductInput').val().trim() !== currentProductText) {
+                        $('#tkSearchProductInput').val(currentProductText);
+                        $('#btnRemoveSelectedProduct').removeClass('d-none');
+                    }
+                } else if (!selectedMaHang) {
+                    if ($('#tkSearchProductInput').val().trim().length > 0) {
+                        $('#tkSearchProductInput').val('');
+                        $('#btnRemoveSelectedProduct').addClass('d-none');
+                    }
                 }
             }
         }, 200);
@@ -123,7 +133,7 @@
             $('#tkProductSuggestDropdown').removeClass('show').hide();
         } else if (e.key === 'F3' || e.keyCode === 114) {
             e.preventDefault();
-            $('#tkSearchProductInput').trigger('focus').select();
+            $('#tkSearchProductInput').trigger('focus');
         }
     });
 

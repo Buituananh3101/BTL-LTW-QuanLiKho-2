@@ -64,13 +64,13 @@ Số liệu Thẻ kho được truy vấn từ View CSDL **`vw_BienDongKho`** (h
 
 ### 4.1. Màn hình Báo cáo Thẻ kho (`/BaoCao/TheKho`)
 1. **Sidebar bộ lọc bên trái**:
-   - Khối tìm kiếm hàng hóa Autocomplete F3: Gõ từ khóa tìm kiếm theo tên hoặc mã, hỗ trợ phím điều hướng Up/Down/Enter để chọn; khi chọn xong tên mặt hàng hiển thị trực tiếp trong ô tìm kiếm kèm nút xóa nhanh `(x)` nội dòng (`#btnRemoveSelectedProduct`) để bỏ chọn hoặc đổi mặt hàng (tối ưu không gian sidebar, không lặp thông tin với Banner chính).
+   - Khối tìm kiếm hàng hóa Autocomplete F3: Placeholder "Tìm theo tên hoặc mã hàng...", hỗ trợ phím tắt F3 toàn cục để nhảy ngay vào ô tìm kiếm và bôi đen toàn bộ chữ (đã gỡ bỏ huy hiệu [F3] trên tiêu đề để đồng bộ kiểu dáng tiêu đề phẳng gọn gàng); khi chọn xong tên mặt hàng hiển thị trực tiếp trong ô tìm kiếm kèm nút xóa nhanh `(x)` nội dòng (`#btnRemoveSelectedProduct`) để bỏ chọn hoặc đổi mặt hàng.
    - Dropdown chi nhánh kho: Thủ kho cố định kho làm việc; Quản lý được chọn "Tất cả chi nhánh kho".
    - Bộ lọc thời gian: Lego `_KiotDateFilter` (Hôm nay, Hôm qua, 7 ngày qua, Tháng này, Tháng trước, Tùy chọn dải ngày).
    - Bộ lọc loại giao dịch: Checkbox Lego `_KiotStatusFilter` kèm chấm chỉ báo `filter-dot` (`#dotLoaiGd`).
    - Phím tắt F4 thu gọn / mở rộng sidebar; hỗ trợ nút phễu mở bộ lọc trên mobile.
 2. **Cột hiển thị chính bên phải**:
-   - Toolbar: Ô tìm kiếm nhanh giao dịch, nút **"Xuất file"** Excel ClosedXML, nút **"In thẻ kho"**, nút tải lại bảng.
+   - Toolbar: Ô tìm kiếm nhanh giao dịch (`#keywordSearch`, placeholder "Theo mã chứng từ, đối tác, ghi chú"), nút **"Xuất file"** Excel ClosedXML, nút **"In thẻ kho"**, nút tải lại bảng.
    - Banner hàng hóa: Tên hàng, mã hàng nội bộ, ĐVT, nhóm hàng, vị trí, giá vốn, giá bán, kho, dải ngày.
    - 4 Thẻ KPI: Tồn đầu kỳ, Tổng nhập trong kỳ (+), Tổng xuất trong kỳ (-), Tồn cuối kỳ.
    - Bảng biến động Thẻ kho:

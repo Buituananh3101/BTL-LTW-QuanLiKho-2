@@ -426,17 +426,99 @@
         loadTable();
     });
 
-    // Người tạo & Sinh nhật
-    $('#filterNguoiTao').on('change', function () {
-        state.nguoiTao = $(this).val();
+    // Single-select Người tạo (Custom Lego chuẩn Hàng hóa)
+    $('#boxNguoiTao').on('click', function (e) {
+        e.stopPropagation();
+        const box = $(this);
+        const dropdown = $('#dropdownNguoiTao');
+
+        $('.kiot-ms-dropdown, .kiot-ss-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
+        $('.kiot-multiselect-box, .kiot-single-select-box').not(box).removeClass('open');
+        $('.quick-date-popup, .dual-calendar-popup').hide();
+
+        const willShow = !dropdown.hasClass('show');
+        if (willShow) {
+            if (window.KiotFilter && typeof window.KiotFilter.checkSidebarDropdownDirection === 'function') {
+                window.KiotFilter.checkSidebarDropdownDirection(box[0], dropdown[0]);
+            }
+            dropdown.addClass('show');
+            box.addClass('open');
+        } else {
+            dropdown.removeClass('show drop-up').css('max-height', '');
+            box.removeClass('open');
+        }
+    });
+
+    $('#dropdownNguoiTao').on('click', '.kiot-ss-item', function (e) {
+        e.stopPropagation();
+        const val = String($(this).data('val'));
+        const text = $(this).find('span').text().trim();
+
+        $('#textNguoiTao').text(text);
+        $('#dropdownNguoiTao .kiot-ss-item').removeClass('selected');
+        $(this).addClass('selected');
+
+        $('#dotNguoiTao').toggle(val !== 'ALL');
+        $('#dropdownNguoiTao').removeClass('show drop-up').css('max-height', '');
+        $('#boxNguoiTao').removeClass('open');
+
+        $('#filterNguoiTao').val(val);
+        state.nguoiTao = val;
         state.page = 1;
         loadTable();
     });
 
-    $('#filterSinhNhat').on('change', function () {
-        state.sinhNhatFilter = $(this).val();
+    // Single-select Sinh nhật (Custom Lego chuẩn Hàng hóa)
+    $('#boxSinhNhat').on('click', function (e) {
+        e.stopPropagation();
+        const box = $(this);
+        const dropdown = $('#dropdownSinhNhat');
+
+        $('.kiot-ms-dropdown, .kiot-ss-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
+        $('.kiot-multiselect-box, .kiot-single-select-box').not(box).removeClass('open');
+        $('.quick-date-popup, .dual-calendar-popup').hide();
+
+        const willShow = !dropdown.hasClass('show');
+        if (willShow) {
+            if (window.KiotFilter && typeof window.KiotFilter.checkSidebarDropdownDirection === 'function') {
+                window.KiotFilter.checkSidebarDropdownDirection(box[0], dropdown[0]);
+            }
+            dropdown.addClass('show');
+            box.addClass('open');
+        } else {
+            dropdown.removeClass('show drop-up').css('max-height', '');
+            box.removeClass('open');
+        }
+    });
+
+    $('#dropdownSinhNhat').on('click', '.kiot-ss-item', function (e) {
+        e.stopPropagation();
+        const val = String($(this).data('val'));
+        const text = $(this).find('span').text().trim();
+
+        $('#textSinhNhat').text(text);
+        $('#dropdownSinhNhat .kiot-ss-item').removeClass('selected');
+        $(this).addClass('selected');
+
+        $('#dotSinhNhat').toggle(val !== 'ALL');
+        $('#dropdownSinhNhat').removeClass('show drop-up').css('max-height', '');
+        $('#boxSinhNhat').removeClass('open');
+
+        $('#filterSinhNhat').val(val);
+        state.sinhNhatFilter = val;
         state.page = 1;
         loadTable();
+    });
+
+    // Cuộn sidebar tự động điều chỉnh hướng mở của dropdown
+    $('.kiot-filter-box').on('scroll', function () {
+        const openDropdown = $('.kiot-ms-dropdown.show, .kiot-ss-dropdown.show');
+        if (openDropdown.length) {
+            const box = openDropdown.siblings('.kiot-multiselect-box, .kiot-single-select-box');
+            if (box.length && window.KiotFilter && typeof window.KiotFilter.checkSidebarDropdownDirection === 'function') {
+                window.KiotFilter.checkSidebarDropdownDirection(box[0], openDropdown[0]);
+            }
+        }
     });
 
     // Bộ lọc Trạng thái (Lego Status Checkboxes)
@@ -555,11 +637,11 @@
             });
         });
 
-        // Đóng dropdown khi click ra ngoài document
+        // Đóng các dropdown khi click ra ngoài document
         $(document).on('click', function (e) {
-            if (!$(e.target).closest('#boxNhomKhachHang, #dropdownNhomKhachHang').length) {
-                dropdown.removeClass('show drop-up').css('max-height', '');
-                box.removeClass('open');
+            if (!$(e.target).closest('.kiot-multiselect-box, .kiot-single-select-box, .kiot-ms-dropdown, .kiot-ss-dropdown').length) {
+                $('.kiot-ms-dropdown, .kiot-ss-dropdown').removeClass('show drop-up').css('max-height', '');
+                $('.kiot-multiselect-box, .kiot-single-select-box').removeClass('open');
             }
         });
 
@@ -662,9 +744,34 @@
         updateXhdView($(this).val());
     });
 
-    // Xử lý Avatar upload preview
-    $('#avatarPreviewBox').on('click', function () {
-        $('#formAvatarFileInput').click();
+    // Quản lý ảnh đại diện chuẩn Hàng hóa (Render động, không xung đột class)
+    function renderAvatarBox(src) {
+        const $box = $('#avatarPreviewBox');
+        if (src) {
+            $box.addClass('has-img').html(`
+                <img src="${src}" alt="Ảnh đại diện" style="width: 100%; height: 100%; object-fit: cover; border-radius: 11px;">
+                <button type="button" class="hh-main-x" id="btnRemoveAvatar" title="Xóa ảnh" aria-label="Xóa ảnh">×</button>
+                <div class="hh-main-change-hint">Bấm để đổi ảnh</div>
+            `);
+        } else {
+            $box.removeClass('has-img').html(`
+                <svg class="hh-ic" style="width: 44px; height: 44px; stroke: #94a3b8; stroke-width: 1.5; margin-bottom: 6px;"><use href="#i-img"/></svg>
+                <span class="fw-semibold text-primary" style="font-size: 13.5px;">Thêm ảnh</span>
+                <small style="font-size: 11.5px; color: #9ca3af; margin-top: 4px;">Ảnh không quá 2MB</small>
+            `);
+        }
+    }
+
+    $('#avatarPreviewBox').on('click', function (e) {
+        if ($(e.target).closest('#btnRemoveAvatar').length) {
+            e.preventDefault();
+            e.stopPropagation();
+            $('#formAvatarFileInput').val('');
+            $('#formHinhAnh').val('');
+            renderAvatarBox('');
+            return;
+        }
+        $('#formAvatarFileInput').trigger('click');
     });
 
     $('#formAvatarFileInput').on('change', function () {
@@ -679,19 +786,9 @@
 
         const reader = new FileReader();
         reader.onload = function (e) {
-            $('#avatarPreviewImg').attr('src', e.target.result).show();
-            $('#avatarPlaceholder').hide();
-            $('#btnRemoveAvatar').show();
+            renderAvatarBox(e.target.result);
         };
         reader.readAsDataURL(file);
-    });
-
-    $('#btnRemoveAvatar').on('click', function () {
-        $('#formAvatarFileInput').val('');
-        $('#formHinhAnh').val('');
-        $('#avatarPreviewImg').attr('src', '').hide();
-        $('#avatarPlaceholder').show();
-        $(this).hide();
     });
 
     // Nút Tra cứu MST nhanh
@@ -728,9 +825,7 @@
         $('#formMaKh').val('0');
         $('#formHinhAnh').val('');
         $('#formAvatarFileInput').val('');
-        $('#avatarPreviewImg').attr('src', '').hide();
-        $('#avatarPlaceholder').show();
-        $('#btnRemoveAvatar').hide();
+        renderAvatarBox('');
         $('#formTrangThaiCheck').prop('checked', true);
         $('#radioXhdCaNhan').prop('checked', true);
         updateXhdView('CA_NHAN');
@@ -779,15 +874,7 @@
                 $('#formTrangThaiCheck').prop('checked', d.trangThai === 'HOAT_DONG');
 
                 // Avatar preview
-                if (d.hinhAnh) {
-                    $('#avatarPreviewImg').attr('src', d.hinhAnh).show();
-                    $('#avatarPlaceholder').hide();
-                    $('#btnRemoveAvatar').show();
-                } else {
-                    $('#avatarPreviewImg').attr('src', '').hide();
-                    $('#avatarPlaceholder').show();
-                    $('#btnRemoveAvatar').hide();
-                }
+                renderAvatarBox(d.hinhAnh || '');
 
                 // Xuất HĐ
                 const xhdType = d.xhdLoaiKhachHang === 'DOANH_NGHIEP' ? 'DOANH_NGHIEP' : 'CA_NHAN';

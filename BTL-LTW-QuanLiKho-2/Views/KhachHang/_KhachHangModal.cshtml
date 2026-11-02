@@ -17,7 +17,7 @@
   <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v7M14 10v7"/></symbol>
   <symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></symbol>
   <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
-  <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></symbol>
+  <symbol id="i-img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M3 17l5-5 4 4 3-3 6 6"/></symbol>
 </svg>
 
 <div class="hh-ov" id="khachHangModalOv">
@@ -37,8 +37,8 @@
         <input type="hidden" id="formHinhAnh" value="" />
         <input type="file" id="formAvatarFileInput" accept="image/*" style="display: none;" />
 
-        <!-- ---- PHẦN 1: THÔNG TIN CƠ BẢN VÀ AVATAR (TOP GRID) ---- -->
-        <div class="hh-top-grid mb-3" style="position: relative; z-index: 30;">
+        <!-- ---- PHẦN 1: THÔNG TIN CƠ BẢN VÀ ẢNH (TOP GRID) ---- -->
+        <div class="hh-top-grid mb-3" style="position: relative; z-index: 30; grid-template-columns: 1fr 200px; gap: 24px;">
           <!-- Cột trái: Thông tin liên hệ cơ bản -->
           <div class="hh-fields">
             <div class="hh-f hh-span2" id="khFldTen">
@@ -82,30 +82,20 @@
               <input type="email" id="formEmail" placeholder="email@gmail.com" autocomplete="off" />
             </div>
 
-            <div class="hh-f">
+            <div class="hh-f hh-span2">
               <label for="formFacebook">Facebook</label>
               <input type="text" id="formFacebook" placeholder="facebook.com/username" autocomplete="off" />
             </div>
           </div>
 
-          <!-- Cột phải: Khung tròn Tải ảnh đại diện (Ảnh <= 2MB) -->
-          <div class="hh-avatar-col d-flex flex-column align-items-center justify-content-center text-center p-3" style="width: 170px; flex: none;">
-            <div class="hh-avatar-circle position-relative rounded-circle overflow-hidden d-flex flex-column align-items-center justify-content-center border" 
-                 id="avatarPreviewBox" 
-                 style="width: 120px; height: 120px; border: 2px dashed #cbd5e1 !important; background: #f8fafc; cursor: pointer;"
-                 title="Nhấn để chọn ảnh đại diện">
-              <img id="avatarPreviewImg" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;" />
-              <div id="avatarPlaceholder" class="d-flex flex-column align-items-center text-muted">
-                <svg style="width: 24px; height: 24px; stroke: #64748b; margin-bottom: 4px;"><use href="#i-camera"/></svg>
-                <span class="small fw-semibold text-primary" style="font-size: 12px;">Thêm ảnh</span>
-              </div>
+          <!-- Cột phải: Quản lý ảnh đại diện chuẩn Hàng hóa (Căn dịch xuống dưới cân đối với lưới trường bên trái) -->
+          <div class="hh-imgs" style="justify-content: flex-end; align-items: flex-start;">
+            <div class="hh-img-main position-relative" id="avatarPreviewBox" title="Bấm để chọn ảnh từ máy tính" style="width: 200px; height: 200px; border-radius: 12px; cursor: pointer; margin-top: 26px;">
+              <!-- Nội dung khung ảnh được quản lý qua hàm renderAvatarBox() chuẩn Hàng hóa -->
+              <svg class="hh-ic" style="width: 44px; height: 44px; stroke: #94a3b8; stroke-width: 1.5; margin-bottom: 6px;"><use href="#i-img"/></svg>
+              <span class="fw-semibold text-primary" style="font-size: 13.5px;">Thêm ảnh</span>
+              <small style="font-size: 11.5px; color: #9ca3af; margin-top: 4px;">Ảnh không quá 2MB</small>
             </div>
-            <div class="text-muted text-center mt-2" style="font-size: 11.5px; line-height: 1.3;">
-              Ảnh không được vượt quá 2MB
-            </div>
-            <button type="button" class="btn btn-sm btn-link text-danger mt-1 p-0 text-decoration-none" id="btnRemoveAvatar" style="display: none; font-size: 11.5px;">
-              Xóa ảnh
-            </button>
           </div>
         </div>
 

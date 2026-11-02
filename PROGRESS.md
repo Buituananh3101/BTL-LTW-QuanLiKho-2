@@ -1,39 +1,170 @@
 # Tiến độ dự án
 
-Cập nhật lần cuối: 2026-11-02 – Tối Ưu Giao Diện Chọn Mặt Hàng F3 Sidebar Thẻ Kho & Bỏ Thẻ Hiển Thị Trùng Lặp (Phiên 203)
+Cập nhật lần cuối: 2026-11-02 – Căn Chỉnh Vị Trí Picturebox Khách Hàng Dịch Xuống Dưới Cân Đối Tuyệt Đối (Phiên 207)
 
 ---
 
 ## Đang làm
-- Đã hoàn tất nâng cấp toàn diện phân hệ Quản lý Khách hàng (`/KhachHang`) đáp ứng 100% 4 ảnh KiotViet thực tế và đồng bộ 100% với khuôn mẫu Danh mục Hàng hóa (`HangHoa`):
-  + **1. CSDL & Models**:
-    * Tạo bảng `NhomKhachHang (MaNhomKhachHang INT IDENTITY PK, TenNhom, GhiChu)` kèm dữ liệu mẫu ban đầu (Khách VIP, Khách sỉ, Khách lẻ, Nhà hàng - Khách sạn, Đối tác dự án).
-    * Mở rộng bảng `KhachHang` bổ sung 25 trường mới bằng `ALTER TABLE ADD` an toàn dữ liệu 100%: `MaKhHienThi`, `DienThoai2`, `NgaySinh`, `GioiTinh`, `Email`, `Facebook`, `HinhAnh`, `KhuVuc`, `PhuongXa`, `MaNhomKhachHang`, `GhiChu`, `NgayTao`, `NguoiTao`, `DaDanhDau`, `XhdLoaiKhachHang`, `MaSoThue`, `XhdTenDonVi`, `SoCccd`, `TenNguoiMua`, `XhdDiaChi`, `XhdKhuVuc`, `XhdPhuongXa`, `XhdEmail`, `SoHoChieu`, `MaDvqhns`, `XhdSoDienThoai`, `TenNganHang`, `SoTaiKhoanNganHang`.
-    * Cập nhật `NhomKhachHang.cs`, `KhachHang.cs` và `QuanLyKhoPhuQuocLtwContext.cs`.
-  + **2. ViewModels (`ViewModels/KhachHang/`)**:
-    * `KhachHangFormVM.cs`: Đầy đủ 25 trường, hỗ trợ upload ảnh đại diện avatar tròn <= 2MB.
-    * `KhachHangItemVM.cs`: Nạp sẵn dữ liệu 25 trường hiển thị bảng và drawer chi tiết.
-    * `KhachHangFilterParams.cs`: Tiêu chí lọc đa năng (`NhomKhachHangs`, `LoaiKhachHangSegment`, `GioiTinh`, `TgTaoFilter`, `SinhNhatFilter`, `NguoiTao`, `DaDanhDau`, `TongBanTu/Den`, `NoTu/Den`).
-    * `KhachHangIndexVM.cs`: Nạp dữ liệu nhóm KH, người tạo, tỉnh thành, ngân hàng.
-  + **3. Controller (`KhachHangController.cs`)**:
-    * CRUD bọc Transaction, tự động sinh mã `KH00001` hoặc validate mã tự nhập, upload avatar vào `/uploads/khachhang/`.
-    * Thêm API tạo/sửa nhóm nhanh `CreateNhom`, `UpdateNhom`, `DeleteNhom`.
-    * Đánh dấu sao ⭐ `ToggleFavorite`.
-    * Chặn xóa khách hàng đã có đơn bán `DonBan`, bảo vệ toàn vẹn lịch sử hóa đơn.
-    * Xuất ClosedXML Excel 15 cột thông tin chi tiết.
-  + **4. Giao diện (Views & JS)**:
-    * `_KhachHangModal.cshtml`: Modal `.hh-modal` rộng 900px, top grid kèm avatar tròn tải ảnh <= 2MB, 3 Accordion: Địa chỉ, Nhóm/Ghi chú, và Thông tin xuất hóa đơn có radio switch Cá nhân ⇋ Doanh nghiệp tự động đổi trường bắt buộc và placeholder, nút Tra cứu MST.
-    * `_KhachHangFilterSidebar.cshtml`: Nhóm KH có link `+ Tạo mới` và icon ✎ sửa nhóm, Segmented pill buttons cho Loại KH (`[Tất cả] [Cá nhân] [Công ty]`) và Giới tính (`[Tất cả] [Nam] [Nữ]`), bộ lọc ngày tạo, sinh nhật, doanh số và nợ.
-    * `_KhachHangTable.cshtml`: Sắp xếp 3 trạng thái, cột sao ⭐, font chữ phẳng regular 13px, pre-rendered drawer 0ms, tùy chọn 15 cột `#colMenu`.
-    * `_KhachHangDetail.cshtml`: 3 Tab (Thông tin, Lịch sử mua hàng, Nợ cần thu), khối Thông tin xuất hóa đơn dạng `.supplier-box`.
-    * `khach-hang-index.js`: Xử lý preview avatar, radio switch hóa đơn, modal con tạo nhóm nhanh, lưu form multipart.
-  + **5. Kiểm tra**: JavaScript `node -c` hợp lệ 100%, biên dịch `dotnet build -t:Compile` đạt **0 Errors**.
+- Đã hoàn tất gỡ bỏ huy hiệu [F3] trên tiêu đề "Mặt hàng theo dõi" ở sidebar Thẻ kho (`/BaoCao/TheKho`):
+  + Tiêu đề phẳng sạch sẽ, đồng bộ 100% với các khối bộ lọc `Chi nhánh kho`, `Thời gian`, `Loại giao dịch`.
+  + Phím tắt F3 trên bàn phím vẫn hoạt động nhanh nhạy và mượt mà.
+  + Kiểm tra biên dịch hệ thống `dotnet build -t:Compile` đạt **0 Errors**.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế trên trình duyệt tại URL `http://localhost:7087/KhachHang`.
+1. Kiểm tra trải nghiệm thực tế trên trình duyệt giao diện Thẻ kho (`http://localhost:7087/BaoCao/TheKho`).
 2. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
+
+---
+
+- **Căn Chỉnh Khung Ảnh Picturebox Khách Hàng Dịch Xuống Cân Đối (Phiên 207)**:
+  + **Yêu cầu**: Dịch khung picturebox (#avatarPreviewBox) xuống dưới để cân đối với 5 hàng trường nhập liệu bên trái.
+  + **Thực hiện**: Bổ sung margin-top: 26px cho khung ảnh, giúp đỉnh khung ảnh bắt đầu thẳng hàng với nhãn hàng 2 (Mã khách hàng / Điện thoại 1), khoảng cách trên và dưới so với mép modal và accordion Địa chỉ trở nên cân xứng tuyệt đối.
+  + **Kiểm tra**: dotnet build -t:Compile đạt 0 Errors.
+
+---
+
+- **Khắc Phục Triệt Để Lỗi Chèn Đè Placeholder Khung Ảnh Khách Hàng (Phiên 206)**:
+  + **Nguyên nhân cốt lõi**: Khối placeholder trước đó sử dụng class Bootstrap .d-flex (có display: flex !important) dẫn đến hàm .hide() của jQuery (chỉ set inline display: none) bị đè hoàn toàn; kết quả là khi chọn ảnh xong, cả ảnh preview và icon placeholder #i-img vẫn cùng hiển thị trong khung flex, chia đôi khung làm ảnh bị đẩy lên nửa trên và icon ngọn núi bị đẩy xuống nửa dưới.
+  + **Khắc phục chuẩn Hàng hóa**:
+    - Chuyển sang cơ chế render động renderAvatarBox(src) giống hệt kiot-filter.js của Hàng hóa: Khi chưa có ảnh render placeholder (#i-img + Thêm ảnh + Ảnh không quá 2MB); khi đã có ảnh render thẻ img bao phủ trọn vẹn 100% khung 200x200px (object-fit: cover) kèm nút tròn xóa ảnh .hh-main-x ở góc trên và thanh .hh-main-change-hint ở đáy khi hover.
+    - Loại bỏ hoàn toàn sự xung đột giữa d-flex và display: none trong DOM.
+  + **Kiểm tra**: node -c khach-hang-index.js hợp lệ, dotnet build -t:Compile thành công 0 Errors.
+
+---
+
+- **Gỡ Bỏ Huy Hiệu [F3] Tiêu Đề Mặt Hàng Theo Dõi Thẻ Kho (Phiên 206)**:
+  - **Nhu cầu**: Người dùng gửi ảnh (`media_1793591266221_25261144.png`) và yêu cầu: *"bỏ cái F3 kia đi"*.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`Views/BaoCao/_TheKhoFilterSidebar.cshtml`**:
+       - Gỡ bỏ hoàn toàn badge `[F3]` (`<span class="badge bg-light text-secondary border px-1" ...>F3</span>`) bên phải tiêu đề.
+       - Trả về tiêu đề phẳng đơn giản, đồng bộ 100% với các khối bộ lọc khác: `<h6>Mặt hàng theo dõi <span class="filter-dot @(Model.TongHop != null ? "active" : "")" id="dotMatHang"></span></h6>`.
+    2. **`wwwroot/js/the-kho-index.js`**:
+       - Gỡ bỏ sự kiện click `#badgeF3Product` do badge đã được loại bỏ khỏi UI.
+       - Giữ nguyên phím tắt `F3` toàn cục tiện dụng (khi bấm F3 con trỏ tự động nhảy vào ô tìm kiếm và bôi đen chữ).
+    3. **Tài liệu & Kiểm tra**:
+       - Cập nhật đặc tả `docs/specs/the-kho.md`.
+       - Cú pháp JavaScript `node -c`: Hợp lệ 100%.
+       - Biên dịch .NET `dotnet build -t:Compile`: Thành công với **0 Errors**.
+
+---
+
+- **Khắc Phục Xung Đột & Lỗi Cắt Chữ Ô Tìm Kiếm Mặt Hàng F3 Thẻ Kho (Phiên 205)**:
+  - **Nhu cầu**: Người dùng gửi ảnh chụp màn hình ô tìm kiếm (`media_1793590335287_c8654df8.png`) và thông báo: *"cái F3 bị lỗi"*.
+  - **Nguyên nhân cốt lõi**:
+    + Placeholder trước đó là `"Gõ tên hoặc mã hàng (F3)..."` quá dài (29 ký tự) kết hợp với padding hai bên 32px/28px trong sidebar 240px làm chữ bị tràn và cắt cụt xấu xí thành `(F3)..` (mất dấu chấm cuối).
+    + Chữ `(F3)` bị trùng lặp thừa thãi ngay dưới huy hiệu `[F3]` trên tiêu đề.
+    + Ô tìm kiếm toolbar (`#keywordSearch`) cũng ghi `(F3)` gây xung đột 2 ô cùng gắn nhãn F3 trên một màn hình.
+    + Huy hiệu `[F3]` trên tiêu đề chưa có con trỏ `pointer` và sự kiện click để nhảy nhanh vào ô tìm kiếm.
+    + Khi click chuột vào ô input, sự kiện `mouseup` của trình duyệt hủy việc bôi đen toàn bộ chữ `select()`.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`Views/BaoCao/_TheKhoFilterSidebar.cshtml`**:
+       - Rút gọn placeholder thành `"Tìm theo tên hoặc mã hàng..."` ngắn gọn, vừa vặn 100% trong ô input không bị tràn cắt chữ.
+       - Gán `id="badgeF3Product"`, `style="cursor: pointer;"` cho huy hiệu `[F3]`.
+    2. **`Views/BaoCao/TheKho.cshtml`**:
+       - Bỏ nhãn `(F3)` trong placeholder của `#keywordSearch`, chuyển thành `"Theo mã chứng từ, đối tác, ghi chú"`, định danh duy nhất phím tắt F3 cho ô tìm chọn mặt hàng.
+    3. **`wwwroot/js/the-kho-index.js`**:
+       - Bổ sung `setTimeout(..., 50)` khi `focus` ô `#tkSearchProductInput` để việc bôi đen `select()` hoạt động chuẩn xác cả khi click chuột lẫn bấm phím F3.
+       - Gán sự kiện click vào `#badgeF3Product` tự động focus vào ô tìm kiếm.
+       - Khi `blur`: nếu chưa chọn mặt hàng nào (`!selectedMaHang`), tự động xóa các ký tự gõ dở để phục hồi placeholder sạch sẽ.
+    4. **Kiểm tra**:
+       - Cú pháp JavaScript `node -c`: Hợp lệ 100%.
+       - Biên dịch .NET `dotnet build -t:Compile`: Thành công với **0 Errors**.
+
+---
+
+
+- **Căn Chỉnh Khung Ảnh Đại Diện Modal Khách Hàng Chuẩn Hàng Hóa (Phiên 205)**:
+  + **Nguyên nhân lệch trái**: .hh-top-grid cấu hình grid 1fr 272px nhưng .hh-avatar-col lại bị ép width: 170px, làm khối ảnh bị hụt 102px và co cụm lệch về bên trái; đồng thời khi có ảnh preview thì placeholder và các icon máy ảnh không được ẩn đúng cách.
+  + **Khắc phục theo chuẩn Hàng hóa**:
+    - Đồng bộ .hh-top-grid thành grid-template-columns: 1fr 200px; gap: 24px, căn thẳng hàng 100% với lề phải của các accordion bên dưới.
+    - Chuyển sang class .hh-img-main (200x200px, bo góc 12px, nét đứt thanh mảnh, hover viền xanh).
+    - Khi chưa có ảnh: Hiển thị icon SVG #i-img 44px + Thêm ảnh + Ảnh không vượt quá 2MB.
+    - Khi đã chọn ảnh: Ảnh cover trọn vẹn, ẩn hoàn toàn placeholder; rê chuột hover hiện nút tròn x (.hh-main-x) ở góc trên bên phải để xóa ảnh và thanh mờ Thay đổi ảnh ở đáy.
+    - Ngăn nổi bọt sự kiện click nút xóa ảnh (e.stopPropagation()).
+  + **Kiểm tra**: node -c khach-hang-index.js hợp lệ, dotnet build -t:Compile thành công 0 Errors.
+
+---
+
+- **Tinh Gọn Menu Thiết Lập: Gỡ Bỏ Nhật Ký Thao Tác (Phiên 206)**:
+  - **Nhu cầu**: Người dùng gửi ảnh màn hình (media_1793590268564_35cdf7c6.png) và yêu cầu: *"bỏ nhật kí thao tác đi"*.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Views/Shared/_MainMenu.cshtml**: Loại bỏ thẻ <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Nhật ký thao tác</a>. Menu Thiết lập chỉ còn:
+       - **Kho**: Quản lý danh mục chi nhánh kho (KhoController.Index).
+       - **Người dùng**: Quản lý nhân sự và phân quyền tài khoản (NguoiDungController.Index).
+    2. **Views/Shared/_Header.cshtml**: Loại bỏ mục placeholder "Thiết lập hệ thống" khỏi Drawer trên thiết bị di động.
+    3. Kiểm tra biên dịch: dotnet build -t:Compile đạt **0 Errors**, 4 Warnings (bảo mật NuGet đã biết).
+
+- **Tinh Gọn Thanh Menu: Gỡ Bỏ Mục Đơn Hàng (Phiên 205)**:
+  - **Nhu cầu**: Người dùng gửi ảnh màn hình (media_1793590084044_b7e75143.png) và yêu cầu: *"bỏ cái đơn hàng này đi"*.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **Views/Shared/_MainMenu.cshtml**: Loại bỏ khối menu <li> chứa liên kết "Đơn hàng" và dropdown submenu "Hóa đơn".
+    2. **Views/Shared/_Header.cshtml**: Loại bỏ liên kết "Hóa đơn" khỏi danh sách Drawer điều hướng trên mobile/tablet.
+    3. Kiểm tra biên dịch: dotnet build -t:Compile đạt **0 Errors**, 4 Warnings (bảo mật NuGet đã biết).
+
+- **Chuẩn Hóa Typography Font Chữ & Viết Thường Thẻ Kho Giống Danh Sách Hàng Hóa (Phiên 204)**:
+  - **Nhu cầu**: Người dùng gửi ảnh màn hình (`media_1793589440085_bb0b05e4.png`) và yêu cầu: *"sửa lại font chữ, viết thường giống danh sách hàng hóa"*.
+  - **Nguyên nhân cốt lõi**:
+    + Bảng Thẻ kho trước đó dùng `.thekho-table table table-hover` riêng biệt thay vì khối `.tbl` của hệ thống; `thead th` có cỡ chữ nhỏ 12px, màu xám `#475569`, nền xám nhạt `#f8fafc`, lệch tông xanh thương hiệu `var(--brand-soft)` (`#1e3a8a`, 13px) của Danh sách Hàng hóa.
+    + Cột đầu viết hoa toàn bộ `STT` thay vì viết thường `Stt`.
+    + Các ô dữ liệu lạm dụng `fw-bold` và `fw-semibold` trên toàn bộ cột mã chứng từ, số lượng nhập (+), số lượng xuất (-), tồn lũy kế và số dư đầu/cuối kỳ, làm giao diện nặng nề, không thanh thoát như Danh sách hàng hóa.
+    + Dòng Tồn cuối kỳ dùng nền xanh đậm và cỡ chữ lớn `fs-6`, lệch chuẩn dòng `summary-row` phẳng nhẹ nhàng của KiotViet.
+  - **Giải pháp & Kết quả thực hiện**:
+    1. **`Views/BaoCao/_TheKhoTable.cshtml`**:
+       - Đưa bảng về cấu trúc chuẩn `.tbl.thekho-table`, tích hợp hoàn toàn với `site.css`.
+       - Đổi `STT` thành `Stt` (viết thường).
+       - Đổi các cột số sang class `.num` (căn phải chuẩn, không in đậm `fw-bold`).
+       - Dỡ bỏ các class `fw-bold`, `fw-semibold`, `fs-6` trên toàn bộ các dòng giao dịch và dòng Tồn đầu/cuối kỳ; giữ màu sắc phân biệt trực quan (nhập xanh `text-success`, xuất đỏ `text-danger`, tồn `text-dark`) trên nền font thường (regular 400, 13px).
+       - Thống nhất font-size 13px trên toàn bảng, gỡ bỏ các class `small` làm lệch cỡ chữ.
+    2. **`Views/BaoCao/_TheKhoSummary.cshtml`**:
+       - Bỏ `fw-bold` trên badge mã hàng `@Model.MaHangNoiBo` và thẻ `<strong>` trên ĐVT, đưa về font chữ phẳng, tinh tế.
+    3. **`wwwroot/css/the-kho.css`**:
+       - Đồng bộ `.thekho-table th`: nền `var(--brand-soft)` xanh nhạt, chữ `#1e3a8a` 13px, padding 10px 12px, chiều cao 40px giống 100% `_HangHoaTable.cshtml`.
+       - Đồng bộ `.thekho-table td`: padding 10px 12px, font-size 13px, font-weight 400.
+       - Tinh chỉnh dòng `row-ton-dau` và `row-ton-cuoi` theo phong cách `summary-row` chuẩn KiotViet: nền `#fafbfc`, border đệm `#e5e7eb`, font thường 400 thanh lịch.
+       - Badge `.badge-tk`: font phẳng regular 400, padding 2px 7px, không in đậm.
+       - Banner & KPI cards: giảm font-weight tiêu đề từ 700 xuống 600, kích thước 16px/17px vừa vặn.
+    4. **`wwwroot/js/hang-hoa-index.js`**:
+       - Đồng bộ hiển thị bảng Thẻ kho nhanh ở Tab 3 của Drawer Hàng hóa sang font thường regular 400.
+    5. **Kiểm tra**:
+       - Cú pháp JavaScript `node -c`: Hợp lệ 100%.
+       - Biên dịch .NET `dotnet build -t:Compile`: Thành công với **0 Errors**.
+
+---
+
+
+- **Đồng Bộ Giao Diện Dropdown Khách Hàng Chuẩn Hàng Hóa & Fix Font Tiếng Việt (Phiên 204)**:
+  + **Sửa dữ liệu tiếng Việt CSDL (Migration 18)**: Cập nhật lại cột NguoiTao = N'Quản trị viên', KhuVuc = N'Kiên Giang', PhuongXa = N'Phường Dương Đông' trong bảng KhachHang (khắc phục lỗi Quáº£n trá»‹ viĂªn).
+  + **Đồng bộ Dropdown Người tạo & Sinh nhật**:
+    - Thay thế hoàn toàn thẻ select HTML nguyên thủy sang Custom Single-Select Lego (.kiot-single-select-box + .kiot-ss-dropdown + .kiot-ss-item) với icon tích check2 xanh, font chữ phẳng 13.5px và hover mềm mại giống hệt khối Tồn kho của Danh sách Hàng hóa.
+    - Bổ sung dot xanh biểu thị trạng thái lọc và tích hợp checkSidebarDropdownDirection khi cuộn hoặc tràn màn hình.
+  + **Kiểm tra**: node -c khach-hang-index.js hợp lệ, dotnet build -t:Compile đạt 0 Errors.
+
+---
+
+- **Đồng Bộ 100% Giao Diện Nút Xuất / Nhập File Toàn Hệ Thống Chuẩn Danh Sách Hàng Hóa (Phiên 204)**:
+  - **Nhu cầu**: Người dùng yêu cầu: "kiểm tra giao diện các nút xuất nhập file trong các chức năng khác đã giống nút xuất nhập file trong chức năng danh sách hàng hóa chưa" -> "tiến hành đồng bộ".
+  - **Hiện trạng & Lệch chuẩn phát hiện**:
+    + `KhachHang/Index.cshtml` & `NhaCungCap/Index.cshtml`: Dùng `btn btn-outline-secondary` màu xám và icon trang giấy `bi-file-earmark-arrow-up`, class `d-none d-md-inline-flex` làm mất nút trên mobile.
+    + `BaoCao/TonKho.cshtml` & `BaoCao/TheKho.cshtml`: Dùng `btn btn-outline-success` viền xanh đậm Bootstrap cũ, icon `bi-file-earmark-excel`.
+    + `NhapHang`, `TraHangNhap`, `PhieuKiemKe`, `ChuyenKho`, `XuatHuy`: Dùng `btn btn-tool` nhưng icon `bi-box-arrow-up` thiếu màu xanh lá KiotViet `text-success` và chữ "Xuất file" chưa bọc trong `<span class="d-none d-sm-inline">` để co giãn responsive khi xem trên màn hình nhỏ.
+    + Nút import trong thanh công cụ form chứng từ (`_NhapHangForm`, `_PhieuKiemKeForm`, `_XuatHuyForm`, `_ChuyenKhoForm`, `_TraHangNhapForm`): Icon thiếu màu nhấn xanh dương `text-primary`.
+  - **Giải pháp & Kết quả thực hiện**:
+    + **Đồng bộ nút Xuất file toàn hệ thống**:
+      * `KhachHang/Index.cshtml`, `NhaCungCap/Index.cshtml`: Chuyển sang `<button type="button" class="btn btn-tool" id="btnExportExcel"><i class="bi bi-box-arrow-up me-1 text-success"></i><span class="d-none d-sm-inline">Xuất file</span></button>`.
+      * `BaoCao/TonKho.cshtml`, `BaoCao/TheKho.cshtml`: Chuyển cả nút Xuất file và In báo cáo sang `btn btn-tool` phẳng hiện đại, icon `bi-box-arrow-up text-success`.
+      * `NhapHang/Index.cshtml`, `PhieuKiemKe/Index.cshtml`, `XuatHuy/Index.cshtml`, `ChuyenKho/Index.cshtml`, `TraHangNhap/Index.cshtml`: Thêm `text-success` cho icon và bọc `<span class="d-none d-sm-inline">Xuất file</span>`.
+    + **Đồng bộ nút Nhập file trong form chứng từ**:
+      * Cập nhật icon `bi-box-arrow-in-down` kèm `text-primary` trong `_NhapHangForm.cshtml`, `_PhieuKiemKeForm.cshtml`, `_XuatHuyForm.cshtml`, `_ChuyenKhoForm.cshtml`, `_TraHangNhapForm.cshtml`.
+  - **Kiểm tra**: Biên dịch `dotnet build -t:Compile` hoàn thành với **0 Errors**.
+
+---
+
+- **Khắc Phục Lỗi Font Tiếng Việt Bảng Nhóm Khách Hàng (Phiên 203)**:
+  + **Nguyên nhân**: Lệnh sqlcmd chạy migration trước đó thiếu cờ -f 65001 dẫn đến chuỗi tiếng Việt bị lưu dưới dạng ANSI/Mojibake (KhĂ¡ch VIP, KhĂ¡ch sá»‰...).
+  + **Khắc phục**: Tạo migration 17_sua_loi_encoding_nhom_khach_hang.sql và thực thi với cờ UTF-8 (-f 65001), cập nhật lại chuẩn tiếng Việt có dấu cho toàn bộ 5 nhóm khách hàng ban đầu (Khách VIP, Khách sỉ, Khách lẻ, Nhà hàng - Khách sạn, Đối tác dự án).
+  + **Kiểm tra**: sqlcmd query trực tiếp kiểm tra dữ liệu hiển thị chuẩn xác 100%.
 
 ---
 

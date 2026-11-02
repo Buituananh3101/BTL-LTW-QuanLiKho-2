@@ -14,8 +14,8 @@
             <div class="title-area">
                 <h2>@Model.TenHang</h2>
                 <div class="badge-list">
-                    <span class="meta-badge text-primary fw-bold">@Model.MaHangNoiBo</span>
-                    <span class="meta-badge">ĐVT: <strong>@Model.TenDvt</strong></span>
+                    <span class="meta-badge text-primary">@Model.MaHangNoiBo</span>
+                    <span class="meta-badge">ĐVT: @Model.TenDvt</span>
                     @if (!string.IsNullOrEmpty(Model.TenNhomHang))
                     {
                         <span class="meta-badge">Nhóm: @Model.TenNhomHang</span>
@@ -31,7 +31,7 @@
         </div>
 
         <div class="text-end text-muted small d-none d-md-block">
-            <div><i class="bi bi-geo-alt me-1 text-primary"></i><strong>@Model.TenKho</strong></div>
+            <div><i class="bi bi-geo-alt me-1 text-primary"></i>@Model.TenKho</div>
             <div class="mt-1" style="font-size: 11px;">
                 <i class="bi bi-calendar3 me-1"></i>@Model.TuNgay.ToString("dd/MM/yyyy") - @Model.DenNgay.ToString("dd/MM/yyyy")
             </div>

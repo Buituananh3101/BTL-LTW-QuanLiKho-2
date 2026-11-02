@@ -25,10 +25,29 @@
         <!-- 2. Ngày tạo (Lego KiotDateFilter) -->
         <partial name="_KiotDateFilter" model='new KiotDateFilterVM("tgt", "Ngày tạo", false)' />
 
-        <!-- 3. Người tạo -->
+        <!-- 3. Người tạo (Custom Single-Select Lego chuẩn Hàng hóa) -->
         <div class="f-block position-relative">
-            <h6>Người tạo</h6>
-            <select class="form-select filter-change" id="filterNguoiTao">
+            <h6>Người tạo <span class="filter-dot" id="dotNguoiTao"></span></h6>
+            <div class="position-relative">
+                <div class="kiot-single-select-box" id="boxNguoiTao">
+                    <span id="textNguoiTao">Tất cả người tạo</span>
+                    <i class="bi bi-chevron-down kiot-select-chevron"></i>
+                </div>
+                <div class="kiot-ss-dropdown shadow" id="dropdownNguoiTao">
+                    <div class="kiot-ss-item selected" data-val="ALL">
+                        <span>Tất cả người tạo</span>
+                        <i class="bi bi-check2 check-icon"></i>
+                    </div>
+                    @foreach (var nv in Model.NhanViens)
+                    {
+                        <div class="kiot-ss-item" data-val="@nv">
+                            <span>@nv</span>
+                            <i class="bi bi-check2 check-icon"></i>
+                        </div>
+                    }
+                </div>
+            </div>
+            <select class="form-select filter-change d-none" id="filterNguoiTao">
                 <option value="ALL">Tất cả người tạo</option>
                 @foreach (var nv in Model.NhanViens)
                 {
@@ -59,16 +78,34 @@
             <input type="hidden" id="filterGioiTinh" value="ALL" />
         </div>
 
-        <!-- 6. Sinh nhật (Lego KiotDateFilter) -->
+        <!-- 6. Sinh nhật (Custom Single-Select Lego chuẩn Hàng hóa) -->
         <div class="f-block position-relative">
-            <h6>Sinh nhật</h6>
+            <h6>Sinh nhật <span class="filter-dot" id="dotSinhNhat"></span></h6>
             <div class="position-relative">
-                <select class="form-select filter-change" id="filterSinhNhat">
-                    <option value="ALL">Toàn thời gian</option>
-                    <option value="THANG_NAY">Sinh nhật trong tháng này</option>
-                    <option value="HOM_NAY">Sinh nhật hôm nay</option>
-                </select>
+                <div class="kiot-single-select-box" id="boxSinhNhat">
+                    <span id="textSinhNhat">Toàn thời gian</span>
+                    <i class="bi bi-chevron-down kiot-select-chevron"></i>
+                </div>
+                <div class="kiot-ss-dropdown shadow" id="dropdownSinhNhat">
+                    <div class="kiot-ss-item selected" data-val="ALL">
+                        <span>Toàn thời gian</span>
+                        <i class="bi bi-check2 check-icon"></i>
+                    </div>
+                    <div class="kiot-ss-item" data-val="THANG_NAY">
+                        <span>Sinh nhật trong tháng này</span>
+                        <i class="bi bi-check2 check-icon"></i>
+                    </div>
+                    <div class="kiot-ss-item" data-val="HOM_NAY">
+                        <span>Sinh nhật hôm nay</span>
+                        <i class="bi bi-check2 check-icon"></i>
+                    </div>
+                </div>
             </div>
+            <select class="form-select filter-change d-none" id="filterSinhNhat">
+                <option value="ALL">Toàn thời gian</option>
+                <option value="THANG_NAY">Sinh nhật trong tháng này</option>
+                <option value="HOM_NAY">Sinh nhật hôm nay</option>
+            </select>
         </div>
 
         <!-- 7. Tổng bán (Lego Value Filter Từ - Đến) -->
