@@ -1,4 +1,4 @@
-using BTL_LTW_QuanLiKho_2.ViewModels;
+﻿using BTL_LTW_QuanLiKho_2.ViewModels;
 using BTL_LTW_QuanLiKho_2.ViewModels.HangHoa;
 using Microsoft.AspNetCore.Http;
 
@@ -11,7 +11,7 @@ namespace BTL_LTW_QuanLiKho_2.Services;
 public interface IHangHoaExcelService
 {
     /// <summary>
-    /// Tạo file Excel mẫu chuẩn KiotViet để người dùng tải về nhập liệu
+    /// Tạo file Excel mẫu chuẩn KhoPro để người dùng tải về nhập liệu
     /// </summary>
     byte[] GenerateTemplate();
 

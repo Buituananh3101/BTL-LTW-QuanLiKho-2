@@ -1,9 +1,9 @@
 namespace BTL_LTW_QuanLiKho_2.ViewModels.Common;
 
 /// <summary>
-/// KiotValueFilterVM – ViewModel cho component Bộ lọc Khoảng giá trị (Từ - Tới) chuẩn KiotViet
+/// ValueFilterVM – ViewModel cho component Bộ lọc Khoảng giá trị (Từ - Tới) chuẩn
 /// </summary>
-public class KiotValueFilterVM
+public class ValueFilterVM
 {
     public string Id { get; set; } = "";
     public string? Title { get; set; }
@@ -18,9 +18,9 @@ public class KiotValueFilterVM
     public decimal? FromValue { get; set; }
     public decimal? ToValue { get; set; }
 
-    public KiotValueFilterVM() { }
+    public ValueFilterVM() { }
 
-    public KiotValueFilterVM(string id, string? title = null, string? subTitle = "Giá trị")
+    public ValueFilterVM(string id, string? title = null, string? subTitle = "Giá trị")
     {
         Id = id;
         Title = title;

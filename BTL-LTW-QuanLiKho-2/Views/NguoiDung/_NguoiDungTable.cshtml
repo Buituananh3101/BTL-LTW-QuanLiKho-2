@@ -1,10 +1,10 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.PagedResult<BTL_LTW_QuanLiKho_2.ViewModels.NguoiDung.NguoiDungItemVM>
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.PagedResult<BTL_LTW_QuanLiKho_2.ViewModels.NguoiDung.NguoiDungItemVM>
 @{
     var sortBy = (ViewBag.SortBy as string)?.ToLower() ?? "";
     var sortDir = (ViewBag.SortDir as string)?.ToLower() ?? "";
 }
 
-<div class="kiot-table-scroll-body" style="overflow-x: hidden;">
+<div class="kp-table-scroll-body" style="overflow-x: hidden;">
     <table class="tbl" id="userTable" style="width: 100% !important; min-width: 0 !important; table-layout: fixed !important;">
         <thead>
             <tr>

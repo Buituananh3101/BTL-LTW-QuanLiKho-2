@@ -712,7 +712,7 @@ public class ChuyenKhoController : BaseKhoController
             ws.Cell(1, i + 1).Value = headers[i];
         }
 
-        ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
+        ExcelHelper.ApplyHeaderStyle(ws.Range(1, 1, 1, headers.Length));
         ws.Row(1).Height = 26;
 
         // Dữ liệu mẫu

@@ -1,20 +1,20 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.TheKhoIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.TheKhoIndexVM
 @using BTL_LTW_QuanLiKho_2.ViewModels.Common
 
 <!-- CỘT BÊN TRÁI: TIÊU ĐỀ "THẺ KHO" + CÁC KHỐI BỘ LỌC chuyên nghiệp (MODULAR LEGO) -->
-<aside class="kiot-sidebar-col" id="sidebarFilterCol">
+<aside class="kp-sidebar-col" id="sidebarFilterCol">
     <!-- Header cho sidebar khi mở ở mobile/zoom -->
-    <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+    <div class="kp-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
         <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc Thẻ kho</div>
         <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
     </div>
 
     <!-- Tiêu đề sidebar Desktop -->
-    <div class="kiot-sidebar-title d-none d-lg-flex">
+    <div class="kp-sidebar-title d-none d-lg-flex">
         Thẻ kho
     </div>
 
-    <div class="kiot-filter-box" id="side">
+    <div class="kp-filter-box" id="side">
         <!-- 1. KHỐI CHỌN MẶT HÀNG THEO DÕI THẺ KHO (F3 LEGO) -->
         <div class="f-block position-relative">
             <h6>Mặt hàng theo dõi <span class="filter-dot @(Model.TongHop != null ? "active" : "")" id="dotMatHang"></span></h6>
@@ -42,7 +42,7 @@
         <div class="f-block position-relative">
             <h6>Chi nhánh kho <span class="filter-dot @(Model.Filter.MaKho.HasValue && Model.Filter.MaKho.Value > 0 ? "active" : "")" id="dotKho"></span></h6>
             <div class="position-relative">
-                <div class="kiot-single-select-box" id="boxKho">
+                <div class="kp-single-select-box" id="boxKho">
                     <span id="textKho">
                         @{
                             var selKho = Model.DanhSachKho.FirstOrDefault(k => k.Selected)
@@ -52,13 +52,13 @@
                         }
                         @(selKho?.Text ?? "Tất cả chi nhánh kho")
                     </span>
-                    <i class="bi bi-chevron-down kiot-select-chevron"></i>
+                    <i class="bi bi-chevron-down kp-select-chevron"></i>
                 </div>
-                <div class="kiot-ss-dropdown shadow" id="dropdownKho">
+                <div class="kp-ss-dropdown shadow" id="dropdownKho">
                     @foreach (var kho in Model.DanhSachKho)
                     {
                         var isSel = (kho == selKho) || (kho.Value == (Model.Filter.MaKho?.ToString() ?? ""));
-                        <div class="kiot-ss-item @(isSel ? "selected" : "")" data-val="@kho.Value">
+                        <div class="kp-ss-item @(isSel ? "selected" : "")" data-val="@kho.Value">
                             <span>@kho.Text</span>
                             <i class="bi bi-check2 check-icon"></i>
                         </div>
@@ -69,11 +69,11 @@
             <input type="hidden" id="selectKhoLuuTru" name="MaKho" value="@(selKho?.Value ?? "")" />
         </div>
 
-        <!-- 3. THỜI GIAN (Lego _KiotDateFilter) -->
-        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("thekho_date", "Thời gian", false) { DefaultText = "Tháng này" }' />
+        <!-- 3. THỜI GIAN (Lego _DateFilter) -->
+        <partial name="_DateFilter" model='new DateFilterVM("thekho_date", "Thời gian", false) { DefaultText = "Tháng này" }' />
 
-        <!-- 4. LOẠI CHỨNG TỪ (Lego _KiotStatusFilter) -->
-        <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Loại giao dịch", "dotLoaiGd", new() {
+        <!-- 4. LOẠI CHỨNG TỪ (Lego _StatusFilter) -->
+        <partial name="_StatusFilter" model='new StatusFilterVM("Loại giao dịch", "dotLoaiGd", new() {
             new("PHIEU_NHAP", "Nhập hàng", Model.Filter.LoaiChungTu.Contains("PHIEU_NHAP")),
             new("XUAT_BAN", "Bán hàng", Model.Filter.LoaiChungTu.Contains("XUAT_BAN")),
             new("XUAT_HUY", "Xuất hủy", Model.Filter.LoaiChungTu.Contains("XUAT_HUY")),

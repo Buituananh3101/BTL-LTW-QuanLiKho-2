@@ -1,11 +1,11 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.KhachHang.KhachHangIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.KhachHang.KhachHangIndexVM
 @{
     ViewData["Title"] = "Khách hàng";
 }
 
 <link rel="stylesheet" href="~/css/hang-hoa-form.css" asp-append-version="true" />
 
-<div class="kiot-container position-relative" id="kiotContainer" 
+<div class="kp-container position-relative" id="kpContainer" 
      data-sort-by="@Model.SortBy" 
      data-sort-dir="@Model.SortDir"
      data-is-starred="@(Model.Filter.DaDanhDau ? "true" : "false")">
@@ -14,33 +14,33 @@
     <partial name="_KhachHangFilterSidebar" model="Model" />
 
     <!-- Backdrop che mờ khi mở bộ lọc trên mobile -->
-    <div class="kiot-sidebar-backdrop" id="sidebarBackdrop"></div>
+    <div class="kp-sidebar-backdrop" id="sidebarBackdrop"></div>
 
     <!-- Nút thu gọn / mở rộng sidebar (F4) -->
-    <button type="button" class="kiot-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
+    <button type="button" class="kp-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
         <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
     </button>
 
     <!-- 2. CỘT BÊN PHẢI: TOOLBAR + BẢNG DỮ LIỆU KHÁCH HÀNG -->
-    <main class="kiot-main-col">
+    <main class="kp-main-col">
         <!-- Toolbar trên cùng: Thanh tìm kiếm thẳng hàng với bảng -->
-        <div class="kiot-toolbar-row">
+        <div class="kp-toolbar-row">
             <!-- Tiêu đề + Nút phễu bộ lọc trên mobile -->
-            <div class="kiot-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
-                <span class="kiot-mobile-title fw-bold fs-6 text-dark">Khách hàng</span>
-                <button type="button" class="btn btn-sm btn-outline-primary kiot-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc">
+            <div class="kp-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
+                <span class="kp-mobile-title fw-bold fs-6 text-dark">Khách hàng</span>
+                <button type="button" class="btn btn-sm btn-outline-primary kp-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc">
                     <i class="bi bi-funnel"></i>
                 </button>
             </div>
 
-            <div class="kiot-search-box">
+            <div class="kp-search-box">
                 <i class="bi bi-search"></i>
                 <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã, tên, số điện thoại khách hàng (F3)" value="@Model.Filter.Q" autocomplete="off" />
             </div>
 
-            <div class="kiot-actions-group">
+            <div class="kp-actions-group">
                 <!-- Nút + Khách hàng -->
-                <button type="button" class="btn btn-primary kiot-btn-create d-inline-flex align-items-center" id="btnOpenCreateKhModal" title="Thêm mới khách hàng">
+                <button type="button" class="btn btn-primary kp-btn-create d-inline-flex align-items-center" id="btnOpenCreateKhModal" title="Thêm mới khách hàng">
                     <i class="bi bi-plus-lg me-1"></i><span>Khách hàng</span>
                 </button>
 
@@ -106,6 +106,6 @@
 <partial name="_KhachHangModal" />
 
 @section Scripts {
-    <script src="~/js/kiot-filter.js" asp-append-version="true"></script>
+    <script src="~/js/app-filter.js" asp-append-version="true"></script>
     <script src="~/js/khach-hang-index.js" asp-append-version="true"></script>
 }

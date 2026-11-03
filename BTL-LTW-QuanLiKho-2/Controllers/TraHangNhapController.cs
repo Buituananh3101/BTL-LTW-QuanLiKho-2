@@ -621,7 +621,7 @@ public class TraHangNhapController : BaseKhoController
             ws.Cell(1, i + 1).Value = headers[i];
         }
 
-        ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
+        ExcelHelper.ApplyHeaderStyle(ws.Range(1, 1, 1, headers.Length));
         ws.Row(1).Height = 26;
 
         // Dữ liệu mẫu
@@ -760,7 +760,7 @@ public class TraHangNhapController : BaseKhoController
         }
     }
 
-    // 14. Xuất file Excel danh sách hoặc chi tiết phiếu trả hàng nhập (Chuẩn KiotViet ClosedXML)
+    // 14. Xuất file Excel danh sách hoặc chi tiết phiếu trả hàng nhập (Chuẩn KhoPro ClosedXML)
     [HttpGet]
     public async Task<IActionResult> ExportExcel(string? type, TraHangNhapFilterVM filter, int? id = null)
     {

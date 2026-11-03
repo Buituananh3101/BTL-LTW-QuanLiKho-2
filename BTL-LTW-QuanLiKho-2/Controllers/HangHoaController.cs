@@ -1213,7 +1213,7 @@ public class HangHoaController : BaseKhoController
     }
 
     // ========================================================================
-    // PHÂN HỆ XUẤT & NHẬP FILE EXCEL (.XLSX) CHUẨN KIOTVIET (CLOSEDXML)
+    // PHÂN HỆ XUẤT & NHẬP FILE EXCEL (.XLSX) CHUẨN KHOPRO (CLOSEDXML)
     // ========================================================================
 
     /// <summary>

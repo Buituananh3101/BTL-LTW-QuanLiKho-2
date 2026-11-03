@@ -23,7 +23,7 @@
         return (Number(n) || 0).toLocaleString('vi-VN');
     }
 
-    // ===== CHỌN NGÀY GIỜ LẬP PHIẾU (LEGO KIOTDATETIMEPICKER) =====
+    // ===== CHỌN NGÀY GIỜ LẬP PHIẾU (LEGO KHOPRODATETIMEPICKER) =====
     function formatLocalIso(d) {
         if (!d || isNaN(d.getTime())) return null;
         const p2 = n => String(n).padStart(2, '0');
@@ -31,8 +31,8 @@
     }
 
     let createdDate = new Date();
-    const dtPicker = (window.KiotFilter && typeof KiotFilter.initDateTimePicker === 'function')
-        ? KiotFilter.initDateTimePicker({
+    const dtPicker = (window.AppFilter && typeof AppFilter.initDateTimePicker === 'function')
+        ? AppFilter.initDateTimePicker({
             inputSelector: '#fDate',
             popupSelector: '#dtPop',
             onChange: function (d) {
@@ -42,9 +42,9 @@
         : null;
     if (dtPicker) createdDate = dtPicker.getDate();
 
-    // ===== QUẢN LÝ LƯỚI DÒNG HÀNG HÓA (LEGO KIOTDOCGRID) =====
-    const docGrid = (window.KiotFilter && typeof KiotFilter.initDocGrid === 'function')
-        ? KiotFilter.initDocGrid({
+    // ===== QUẢN LÝ LƯỚI DÒNG HÀNG HÓA (LEGO KHOPRODOCGRID) =====
+    const docGrid = (window.AppFilter && typeof AppFilter.initDocGrid === 'function')
+        ? AppFilter.initDocGrid({
             tableBodySelector: '#itemsTableBody',
             emptyBoxSelector: '#emptyLineBox',
             tableScrollSelector: '#tableScrollWrap',
@@ -131,8 +131,8 @@
             const isOver = newQty > stock;
             $qtyInput.toggleClass('over', isOver);
             $existing.find('.hint-over').toggle(isOver);
-            if (window.KiotToast && !customQty) {
-                KiotToast.success(`Đã tăng số lượng ${name} thành ${newQty}`);
+            if (window.AppToast && !customQty) {
+                AppToast.success(`Đã tăng số lượng ${name} thành ${newQty}`);
             }
         } else {
             const isOver = qty > stock;
@@ -161,9 +161,9 @@
         checkEmptyState();
     }
 
-    // 1. Tìm kiếm Autocomplete hàng hóa (F3) dùng Lego KiotFilter.initProductSearch
-    if (window.KiotFilter && typeof KiotFilter.initProductSearch === 'function') {
-        KiotFilter.initProductSearch({
+    // 1. Tìm kiếm Autocomplete hàng hóa (F3) dùng Lego AppFilter.initProductSearch
+    if (window.AppFilter && typeof AppFilter.initProductSearch === 'function') {
+        AppFilter.initProductSearch({
             inputSelector: '#productSearchInput',
             dropdownSelector: '#autocompleteDropdown',
             apiUrl: urls.searchProducts,
@@ -334,7 +334,7 @@
             data: JSON.stringify(payload),
             success: function (res) {
                 if (res && res.success) {
-                    if (window.KiotToast) KiotToast.success(res.message);
+                    if (window.AppToast) AppToast.success(res.message);
                     setTimeout(function () {
                         window.location.href = urls.index;
                     }, 500);
@@ -356,8 +356,8 @@
     });
 
     $('#btnSendTransfer').on('click', function () {
-        if (window.KiotConfirm && typeof KiotConfirm.show === 'function') {
-            KiotConfirm.show({
+        if (window.AppConfirm && typeof AppConfirm.show === 'function') {
+            AppConfirm.show({
                 title: 'Xác nhận chuyển hàng',
                 message: 'Tồn kho tại kho gửi sẽ <b>giảm ngay lập tức</b>. Phiếu chuyển sẽ chuyển sang trạng thái <b>Đang chuyển</b>. Bạn có chắc chắn muốn chuyển?',
                 confirmText: 'Chuyển hàng',
@@ -399,7 +399,7 @@
         formData.append('file', file);
         formData.append('warehouseId', currentWhId);
 
-        if (window.KiotToast) KiotToast.info('Đang đối soát dữ liệu file với hệ thống...');
+        if (window.AppToast) AppToast.info('Đang đối soát dữ liệu file với hệ thống...');
 
         $.ajax({
             url: urls.importUrl,
@@ -414,18 +414,18 @@
                         addProduct(item, item.qty || item.soLuong);
                         importedCount++;
                     });
-                    if (window.KiotToast) {
-                        KiotToast.success(`Đã nạp thành công ${importedCount} mặt hàng từ file!`);
+                    if (window.AppToast) {
+                        AppToast.success(`Đã nạp thành công ${importedCount} mặt hàng từ file!`);
                     }
                 } else {
-                    if (window.KiotToast) {
-                        KiotToast.warning(res?.message || 'Không tìm thấy mặt hàng nào phù hợp trong file.');
+                    if (window.AppToast) {
+                        AppToast.warning(res?.message || 'Không tìm thấy mặt hàng nào phù hợp trong file.');
                     }
                 }
             },
             error: function (xhr) {
                 const msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Lỗi khi nhập file dữ liệu.';
-                if (window.KiotToast) KiotToast.error(msg);
+                if (window.AppToast) AppToast.error(msg);
             },
             complete: function () {
                 $('#excelFileInput').val('');

@@ -1,17 +1,17 @@
-/**
+﻿/**
  * site.js – Thư viện tiện ích JavaScript dùng chung toàn hệ thống KhoPro
  */
 
-window.KiotToast = (function () {
+window.AppToast = (function () {
     'use strict';
     let toastTimer = null;
 
     function getOrCreateToastElement() {
-        let el = document.getElementById('kiotGlobalToast');
+        let el = document.getElementById('khoproGlobalToast');
         if (!el) {
             el = document.createElement('div');
-            el.id = 'kiotGlobalToast';
-            el.className = 'kiot-toast';
+            el.id = 'khoproGlobalToast';
+            el.className = 'kp-toast';
             document.body.appendChild(el);
         }
         return el;
@@ -25,7 +25,7 @@ window.KiotToast = (function () {
         const el = getOrCreateToastElement();
         clearTimeout(toastTimer);
 
-        el.className = `kiot-toast show ${type}`;
+        el.className = `kp-toast show ${type}`;
         let iconHtml = '';
         if (type === 'success') {
             iconHtml = '<i class="bi bi-check-circle-fill text-success fs-6"></i>';
@@ -55,16 +55,16 @@ window.KiotToast = (function () {
 
 // Bí danh tương thích ngược cho toàn bộ các hàm gọi cũ trong dự án
 window.showToast = function (msg, type) {
-    window.KiotToast.show(msg, type || 'success');
+    window.AppToast.show(msg, type || 'success');
 };
 window.toast = function (msg, type) {
-    window.KiotToast.show(msg, type || 'info');
+    window.AppToast.show(msg, type || 'info');
 };
 
 // ========================================================================
-// 2. KiotNumber – Tự động định dạng số hàng nghìn (1,000,000), tự select khi focus
+// 2. AppNumber – Tự động định dạng số hàng nghìn (1,000,000), tự select khi focus
 // ========================================================================
-window.KiotNumber = (function () {
+window.AppNumber = (function () {
     'use strict';
 
     function get(el) {
@@ -80,7 +80,7 @@ window.KiotNumber = (function () {
         return isNaN(num) ? '0' : num.toLocaleString('en-US');
     }
 
-    // Lắng nghe sự kiện toàn cục cho mọi ô có class .kiot-num hoặc .hh-num hoặc .money
+    // Lắng nghe sự kiện toàn cục cho mọi ô có class .kp-num hoặc .hh-num hoặc .money
     document.addEventListener('input', function (e) {
         const el = e.target;
         if (!el || !el.classList) return;
@@ -89,7 +89,7 @@ window.KiotNumber = (function () {
             el.value = d ? Number(d).toLocaleString('en-US') : '';
             return;
         }
-        if (!el.classList.contains('kiot-num') && !el.classList.contains('hh-num')) return;
+        if (!el.classList.contains('kp-num') && !el.classList.contains('hh-num')) return;
         if (el.dataset.decimal === 'true' || el.id === 'formTrongLuong') {
             el.value = el.value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1') || '';
             return;
@@ -100,14 +100,14 @@ window.KiotNumber = (function () {
 
     document.addEventListener('focusin', function (e) {
         const el = e.target;
-        if (el && el.classList && (el.classList.contains('kiot-num') || el.classList.contains('hh-num') || el.classList.contains('money'))) {
+        if (el && el.classList && (el.classList.contains('kp-num') || el.classList.contains('hh-num') || el.classList.contains('money'))) {
             el.select();
         }
     });
 
     document.addEventListener('focusout', function (e) {
         const el = e.target;
-        if (el && el.classList && (el.classList.contains('kiot-num') || el.classList.contains('hh-num')) && el.value.trim() === '') {
+        if (el && el.classList && (el.classList.contains('kp-num') || el.classList.contains('hh-num')) && el.value.trim() === '') {
             const defVal = el.dataset.default || (el.id === 'formTonCaoNhat' ? '999,999,999' : '0');
             el.value = defVal;
         }
@@ -120,20 +120,20 @@ window.KiotNumber = (function () {
 })();
 
 // ========================================================================
-// 3. KiotCollapsible – Tự động gập mở khối Accordion (.kiot-sec / .hh-sec)
+// 3. AppCollapsible – Tự động gập mở khối Accordion (.kp-sec / .hh-sec)
 // ========================================================================
 document.addEventListener('click', function (e) {
     // Không toggle nếu click vào button, link, form controls bên trong header
     if (e.target.closest('button, a, input, select, textarea, label, .form-check')) {
         return;
     }
-    const header = e.target.closest('.kiot-sec-h, .hh-sec-h');
+    const header = e.target.closest('.kp-sec-h, .hh-sec-h');
     if (header) {
         // Ngăn chặn double-toggle trong cùng một sự kiện click
-        if (e._kiotCollapsibleHandled) return;
-        e._kiotCollapsibleHandled = true;
+        if (e._khoproCollapsibleHandled) return;
+        e._khoproCollapsibleHandled = true;
 
-        const sec = header.closest('.kiot-sec, .hh-sec');
+        const sec = header.closest('.kp-sec, .hh-sec');
         if (sec) {
             sec.classList.toggle('open');
         }
@@ -141,36 +141,36 @@ document.addEventListener('click', function (e) {
 });
 
 // ========================================================================
-// 4. KiotSplitButton – Tự động mở / đóng menu nút lưu đa năng (.kiot-split / .hh-split)
+// 4. AppSplitButton – Tự động mở / đóng menu nút lưu đa năng (.kp-split / .hh-split)
 // ========================================================================
 document.addEventListener('click', function (e) {
-    const caret = e.target.closest('.kiot-split .caret, .hh-split .caret, #btnCaret');
+    const caret = e.target.closest('.kp-split .caret, .hh-split .caret, #btnCaret');
     if (caret) {
         e.preventDefault();
         e.stopPropagation();
-        const parent = caret.closest('.kiot-split, .hh-split') || caret.parentElement;
-        const menu = parent ? parent.querySelector('.kiot-menu, .hh-menu, #hhSplitMenu') : null;
+        const parent = caret.closest('.kp-split, .hh-split') || caret.parentElement;
+        const menu = parent ? parent.querySelector('.kp-menu, .hh-menu, #hhSplitMenu') : null;
         if (menu) {
             menu.classList.toggle('show');
         }
         return;
     }
 
-    if (!e.target.closest('.kiot-split, .hh-split')) {
-        document.querySelectorAll('.kiot-split .kiot-menu, .hh-split .hh-menu, #hhSplitMenu').forEach(m => m.classList.remove('show'));
+    if (!e.target.closest('.kp-split, .hh-split')) {
+        document.querySelectorAll('.kp-split .kp-menu, .hh-split .hh-menu, #hhSplitMenu').forEach(m => m.classList.remove('show'));
     }
 });
 
 // ========================================================================
-// 5. KiotPrompt – Modal con dùng chung toàn hệ thống (Tạo mới nhanh / Sửa ✎ / Xóa)
+// 5. AppPrompt – Modal con dùng chung toàn hệ thống (Tạo mới nhanh / Sửa ✎ / Xóa)
 // ========================================================================
-window.KiotPrompt = (function () {
+window.AppPrompt = (function () {
     'use strict';
     let currentSaveCallback = null;
     let currentDeleteCallback = null;
 
     function getOverlay() {
-        return document.getElementById('kiotPromptOv');
+        return document.getElementById('kpPromptOv');
     }
 
     function open(options) {
@@ -189,11 +189,11 @@ window.KiotPrompt = (function () {
         currentSaveCallback = opt.onSave;
         currentDeleteCallback = opt.onDelete;
 
-        const titleEl = document.getElementById('kiotPromptTitle');
-        const labelEl = document.getElementById('kiotPromptLabel');
-        const inputEl = document.getElementById('kiotPromptInput');
-        const errEl = document.getElementById('kiotPromptErr');
-        const delBtn = document.getElementById('kiotPromptDelete');
+        const titleEl = document.getElementById('kpPromptTitle');
+        const labelEl = document.getElementById('kpPromptLabel');
+        const inputEl = document.getElementById('kpPromptInput');
+        const errEl = document.getElementById('kpPromptErr');
+        const delBtn = document.getElementById('kpPromptDelete');
 
         if (titleEl) titleEl.textContent = opt.title;
         if (labelEl) labelEl.innerHTML = (opt.label || 'Tên') + ' <span class="text-danger">*</span>';
@@ -223,8 +223,8 @@ window.KiotPrompt = (function () {
     }
 
     function handleSave() {
-        const inputEl = document.getElementById('kiotPromptInput');
-        const errEl = document.getElementById('kiotPromptErr');
+        const inputEl = document.getElementById('kpPromptInput');
+        const errEl = document.getElementById('kpPromptErr');
         const val = inputEl ? inputEl.value.trim() : '';
 
         if (!val) {
@@ -246,8 +246,8 @@ window.KiotPrompt = (function () {
 
     function handleDelete() {
         close();
-        if (window.KiotConfirm) {
-            window.KiotConfirm.show({
+        if (window.AppConfirm) {
+            window.AppConfirm.show({
                 title: 'Xác nhận xóa',
                 message: 'Bạn có chắc chắn muốn xóa mục này? Thao tác này không thể hoàn tác.',
                 onConfirm: function () {
@@ -265,11 +265,11 @@ window.KiotPrompt = (function () {
 
     // Sự kiện toàn cục cho modal prompt
     document.addEventListener('click', function (e) {
-        if (e.target.closest('#kiotPromptCancel, #kiotPromptClose') || e.target.id === 'kiotPromptOv') {
+        if (e.target.closest('#kpPromptCancel, #kpPromptClose') || e.target.id === 'kpPromptOv') {
             close();
-        } else if (e.target.closest('#kiotPromptSave')) {
+        } else if (e.target.closest('#kpPromptSave')) {
             handleSave();
-        } else if (e.target.closest('#kiotPromptDelete')) {
+        } else if (e.target.closest('#kpPromptDelete')) {
             handleDelete();
         }
     });
@@ -279,7 +279,7 @@ window.KiotPrompt = (function () {
         if (ov && ov.classList.contains('show')) {
             if (e.key === 'Escape') {
                 close();
-            } else if (e.key === 'Enter' && e.target.id === 'kiotPromptInput') {
+            } else if (e.key === 'Enter' && e.target.id === 'kpPromptInput') {
                 e.preventDefault();
                 handleSave();
             }
@@ -293,14 +293,14 @@ window.KiotPrompt = (function () {
 })();
 
 // ========================================================================
-// 6. KiotConfirm – Modal xác nhận xóa / thông báo dùng chung (chuẩn chuyên nghiệp, CENTER)
+// 6. AppConfirm – Modal xác nhận xóa / thông báo dùng chung (chuẩn chuyên nghiệp, CENTER)
 // ========================================================================
-window.KiotConfirm = (function () {
+window.AppConfirm = (function () {
     'use strict';
     let okCallback = null;
 
     function getOverlay() {
-        return document.getElementById('kiotConfirmOv');
+        return document.getElementById('kpConfirmOv');
     }
 
     function show(options) {
@@ -326,12 +326,12 @@ window.KiotConfirm = (function () {
 
         okCallback = opt.onConfirm;
 
-        const titleEl = document.getElementById('kiotConfirmTitleText');
-        const iconEl = document.getElementById('kiotConfirmIcon');
-        const titleWrap = document.getElementById('kiotConfirmTitle');
-        const bodyEl = document.getElementById('kiotConfirmMsg');
-        const cancelBtn = document.getElementById('kiotConfirmCancel');
-        const okBtn = document.getElementById('kiotConfirmOk');
+        const titleEl = document.getElementById('kpConfirmTitleText');
+        const iconEl = document.getElementById('kpConfirmIcon');
+        const titleWrap = document.getElementById('kpConfirmTitle');
+        const bodyEl = document.getElementById('kpConfirmMsg');
+        const cancelBtn = document.getElementById('kpConfirmCancel');
+        const okBtn = document.getElementById('kpConfirmOk');
 
         if (titleEl) titleEl.textContent = opt.title;
         if (iconEl) {
@@ -365,9 +365,9 @@ window.KiotConfirm = (function () {
     }
 
     document.addEventListener('click', function (e) {
-        if (e.target.closest('#kiotConfirmCancel, #kiotConfirmClose') || e.target.id === 'kiotConfirmOv') {
+        if (e.target.closest('#kpConfirmCancel, #kpConfirmClose') || e.target.id === 'kpConfirmOv') {
             close();
-        } else if (e.target.closest('#kiotConfirmOk')) {
+        } else if (e.target.closest('#kpConfirmOk')) {
             const cb = okCallback;
             close();
             if (cb) cb();
@@ -401,9 +401,9 @@ window.KiotConfirm = (function () {
 })();
 
 // ========================================================================
-// 7. KiotHelp – Hộp thoại Hướng dẫn sử dụng toàn hệ thống (chuẩn chuyên nghiệp)
+// 7. AppHelp – Hộp thoại Hướng dẫn sử dụng toàn hệ thống (chuẩn chuyên nghiệp)
 // ========================================================================
-window.KiotHelp = (function () {
+window.AppHelp = (function () {
     'use strict';
 
     const HELP_MAP = {
@@ -555,7 +555,7 @@ window.KiotHelp = (function () {
             steps: [
                 { title: '1. Thêm kho mới', desc: 'Bấm "+ Thêm kho", nhập Tên kho, Địa chỉ, Ghi chú và chọn nhân viên phụ trách.' },
                 { title: '2. Chuyển đổi kho làm việc', desc: 'Bấm vào menu chọn kho ở góc trên bên trái header để chuyển đổi chi nhánh đang thao tác.' },
-                { title: '3. Đổi trạng thái kho', desc: 'Có thể tạm Ngừng hoạt động hoặc Kích hoạt lại kho qua modal xác nhận KiotConfirm.' }
+                { title: '3. Đổi trạng thái kho', desc: 'Có thể tạm Ngừng hoạt động hoặc Kích hoạt lại kho qua modal xác nhận AppConfirm.' }
             ],
             tip: '<i class="bi bi-lightbulb-fill text-warning me-1"></i><strong>Quy tắc an toàn:</strong> Hệ thống luôn bảo vệ ít nhất 1 chi nhánh kho đang hoạt động, không cho phép ngừng hoạt động toàn bộ kho.'
         },
@@ -594,7 +594,7 @@ window.KiotHelp = (function () {
     };
 
     function getOverlay() {
-        return document.getElementById('kiotHelpOv');
+        return document.getElementById('kpHelpOv');
     }
 
     function detectScreenKey() {
@@ -619,12 +619,12 @@ window.KiotHelp = (function () {
         const ov = getOverlay();
         if (!ov) return;
 
-        const titleEl = document.getElementById('kiotHelpTitle');
-        const badgeEl = document.getElementById('kiotHelpScreenBadge');
-        const subtitleEl = document.getElementById('kiotHelpSubtitle');
-        const shortcutsEl = document.getElementById('kiotHelpShortcuts');
-        const stepsEl = document.getElementById('kiotHelpSteps');
-        const tipsEl = document.getElementById('kiotHelpTips');
+        const titleEl = document.getElementById('kpHelpTitle');
+        const badgeEl = document.getElementById('kpHelpScreenBadge');
+        const subtitleEl = document.getElementById('kpHelpSubtitle');
+        const shortcutsEl = document.getElementById('kpHelpShortcuts');
+        const stepsEl = document.getElementById('kpHelpSteps');
+        const tipsEl = document.getElementById('kpHelpTips');
 
         if (titleEl) titleEl.textContent = info.title;
         if (badgeEl) badgeEl.textContent = info.badge || 'Trợ giúp';
@@ -632,13 +632,13 @@ window.KiotHelp = (function () {
 
         if (shortcutsEl) {
             shortcutsEl.innerHTML = (info.shortcuts || []).map(function (s) {
-                return '<div class="kiot-shortcut-item"><kbd class="kiot-kbd">' + s.key + '</kbd><span>' + s.desc + '</span></div>';
+                return '<div class="kp-shortcut-item"><kbd class="kp-kbd">' + s.key + '</kbd><span>' + s.desc + '</span></div>';
             }).join('');
         }
 
         if (stepsEl) {
             stepsEl.innerHTML = (info.steps || []).map(function (s, idx) {
-                return '<div class="kiot-help-step-item"><div class="kiot-help-step-num">' + (idx + 1) + '</div><div class="kiot-help-step-content"><div class="kiot-help-step-title">' + s.title + '</div><div class="kiot-help-step-desc">' + s.desc + '</div></div></div>';
+                return '<div class="kp-help-step-item"><div class="kp-help-step-num">' + (idx + 1) + '</div><div class="kp-help-step-content"><div class="kp-help-step-title">' + s.title + '</div><div class="kp-help-step-desc">' + s.desc + '</div></div></div>';
             }).join('');
         }
 
@@ -655,7 +655,7 @@ window.KiotHelp = (function () {
     }
 
     document.addEventListener('click', function (e) {
-        if (e.target.closest('#kiotHelpClose, #kiotHelpOk') || e.target.id === 'kiotHelpOv') {
+        if (e.target.closest('#kpHelpClose, #kpHelpOk') || e.target.id === 'kpHelpOv') {
             close();
         } else if (e.target.closest('#btnHelp, .btn-help, #btnHeaderHelp, a[title="Hỗ trợ"]')) {
             e.preventDefault();

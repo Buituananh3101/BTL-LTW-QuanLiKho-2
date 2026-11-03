@@ -666,7 +666,7 @@ public class NhapHangController : BaseKhoController
             ws.Cell(1, i + 1).Value = headers[i];
         }
 
-        ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
+        ExcelHelper.ApplyHeaderStyle(ws.Range(1, 1, 1, headers.Length));
         ws.Row(1).Height = 26;
 
         // Dữ liệu mẫu
@@ -794,7 +794,7 @@ public class NhapHangController : BaseKhoController
 
         bool isDetail = string.Equals(type, "detail", StringComparison.OrdinalIgnoreCase);
 
-        // Mặc định xuất file Excel (.xlsx) chuẩn KiotViet bằng ClosedXML qua Lego ExcelHelper
+        // Mặc định xuất file Excel (.xlsx) chuẩn KhoPro bằng ClosedXML qua Lego ExcelHelper
         if (isDetail)
         {
             var detailRows = new List<(int Stt, NhapHangListItemVM Item, NhapHangLineVM? Line)>();

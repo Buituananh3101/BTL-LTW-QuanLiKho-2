@@ -1,4 +1,4 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.NhapHang.NhapHangIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.NhapHang.NhapHangIndexVM
 @{
     ViewData["Title"] = "Nhập hàng";
 }
@@ -6,7 +6,7 @@
 <link href="~/css/kiem-kho.css" rel="stylesheet" asp-append-version="true" />
 <link href="~/css/nhap-hang.css" rel="stylesheet" asp-append-version="true" />
 
-<div class="kiot-container position-relative" id="kiotContainer"
+<div class="kp-container position-relative" id="kpContainer"
      data-filter-url="@Url.Action("Filter", "NhapHang")"
      data-toggle-star-url="@Url.Action("ToggleFavorite", "NhapHang")"
      data-cancel-url="@Url.Action("Cancel", "NhapHang")"
@@ -20,33 +20,33 @@
     <partial name="_NhapHangFilterSidebar" model="Model" />
 
     <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
-    <div class="kiot-sidebar-backdrop" id="sidebarBackdrop"></div>
+    <div class="kp-sidebar-backdrop" id="sidebarBackdrop"></div>
 
     <!-- Nút tròn thu gọn / mở rộng ở ranh giới giữa sidebar và bảng (Phím tắt F4) -->
-    <button type="button" class="kiot-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
+    <button type="button" class="kp-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
         <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
     </button>
 
     <!-- 2. CỘT BÊN PHẢI: THANH TÌM KIẾM + TOOLBAR + BẢNG PHIẾU NHẬP HÀNG -->
-    <main class="kiot-main-col">
+    <main class="kp-main-col">
         <!-- Toolbar trên cùng: Thanh tìm kiếm thẳng hàng với bảng bên dưới -->
-        <div class="kiot-toolbar-row">
+        <div class="kp-toolbar-row">
             <!-- Tiêu đề + Nút phễu bộ lọc trên mobile -->
-            <div class="kiot-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
-                <span class="kiot-mobile-title fw-bold fs-6 text-dark">Nhập hàng</span>
-                <button type="button" class="btn btn-sm btn-outline-primary kiot-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc">
+            <div class="kp-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
+                <span class="kp-mobile-title fw-bold fs-6 text-dark">Nhập hàng</span>
+                <button type="button" class="btn btn-sm btn-outline-primary kp-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc">
                     <i class="bi bi-funnel"></i>
                 </button>
             </div>
 
             <!-- Ô tìm kiếm theo mã phiếu nhập (F3) -->
-            <div class="kiot-search-box">
+            <div class="kp-search-box">
                 <i class="bi bi-search"></i>
                 <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã phiếu nhập (F3)" value="@Model.Filter.Q" autocomplete="off" />
             </div>
 
             <!-- Nhóm nút hành động chuyên nghiệp -->
-            <div class="kiot-actions-group">
+            <div class="kp-actions-group">
                 <!-- Nút + Nhập hàng -->
                 <a href="@Url.Action("Create", "NhapHang")" class="btn btn-primary d-inline-flex align-items-center" id="btnNew" title="Lập phiếu nhập hàng mới" style="background-color: #0070f4; border-color: #0070f4;">
                     <i class="bi bi-plus-lg me-1"></i><span>Nhập hàng</span>
@@ -122,7 +122,7 @@
 
         <!-- Bảng danh sách phiếu nhập hàng (Partial View AJAX) -->
         <section id="content">
-            <div id="tableContainer" class="kiot-table-wrapper">
+            <div id="tableContainer" class="kp-table-wrapper">
                 <partial name="_NhapHangTable" model="Model" />
             </div>
         </section>
@@ -132,6 +132,6 @@
 
 
 @section Scripts {
-    <script src="~/js/kiot-filter.js" asp-append-version="true"></script>
+    <script src="~/js/app-filter.js" asp-append-version="true"></script>
     <script src="~/js/nhap-hang-index.js" asp-append-version="true"></script>
 }

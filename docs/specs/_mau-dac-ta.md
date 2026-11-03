@@ -41,16 +41,16 @@
    - Chế độ chỉ đọc, có nút In phiếu và nút Hủy phiếu (nếu được phép).
 
 ### 3.1. Danh mục Khối Lego BẮT BUỘC tái sử dụng (Luật 10 AGENTS.md & 03-giao-dien-layout.md):
-- [ ] **Bộ lọc Ngày tháng**: `<partial name="_KiotDateFilter" ... />` + `KiotFilter.initDateFilter` + `DateRangeHelper.Resolve`.
-- [ ] **Bộ lọc Dropdown chọn nhiều**: `<partial name="_KiotMultiSelectFilter" ... />` + `KiotFilter.renderTagPills`.
-- [ ] **Bộ lọc Trạng thái checkbox**: `<partial name="_KiotStatusFilter" ... />`.
+- [ ] **Bộ lọc Ngày tháng**: `<partial name="_DateFilter" ... />` + `AppFilter.initDateFilter` + `DateRangeHelper.Resolve`.
+- [ ] **Bộ lọc Dropdown chọn nhiều**: `<partial name="_MultiSelectFilter" ... />` + `AppFilter.renderTagPills`.
+- [ ] **Bộ lọc Trạng thái checkbox**: `<partial name="_StatusFilter" ... />`.
 - [ ] **Phân trang AJAX**: `<partial name="_Pagination" model="Model.PagedData" />` + `BaseFilterParams`.
-- [ ] **Combobox vừa gõ vừa chọn có icon bút chì ✎**: `KiotFilter.initCombobox`.
-- [ ] **Modal con tạo nhanh / sửa ✎ / xóa tại chỗ**: `KiotPrompt.open({ ... })`.
-- [ ] **Ô nhập số tự format hàng nghìn**: class `.kiot-num` + `KiotNumber.get()`.
-- [ ] **Khối gập mở Accordion**: class `.kiot-sec`, `.kiot-sec-h`, `.kiot-chev`.
-- [ ] **Nút lưu đa năng Split Button**: class `.kiot-split`, `.caret`, `.kiot-menu`.
-- [ ] **Thông báo Toast**: `KiotToast.success()`, `KiotToast.error()`, `KiotToast.info()`.
+- [ ] **Combobox vừa gõ vừa chọn có icon bút chì ✎**: `AppFilter.initCombobox`.
+- [ ] **Modal con tạo nhanh / sửa ✎ / xóa tại chỗ**: `AppPrompt.open({ ... })`.
+- [ ] **Ô nhập số tự format hàng nghìn**: class `.kp-num` + `AppNumber.get()`.
+- [ ] **Khối gập mở Accordion**: class `.kp-sec`, `.kp-sec-h`, `.kp-chev`.
+- [ ] **Nút lưu đa năng Split Button**: class `.kp-split`, `.caret`, `.kp-menu`.
+- [ ] **Thông báo Toast**: `AppToast.success()`, `AppToast.error()`, `AppToast.info()`.
 
 ---
 

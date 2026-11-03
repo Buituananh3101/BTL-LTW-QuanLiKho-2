@@ -21,7 +21,7 @@
 - [`UpdateXuatHuyNoteRequest`](../../BTL-LTW-QuanLiKho-2/ViewModels/XuatHuy/XuatHuyViewModels.cs): DTO cập nhật nhanh ghi chú inline.
 
 ### 1.3. Cấu trúc View & Script:
-- `Views/XuatHuy/Index.cshtml`: Layout `.kiot-container`, `.kiot-main-col`, toolbar hệ thống, phím tắt F4.
+- `Views/XuatHuy/Index.cshtml`: Layout `.kp-container`, `.kp-main-col`, toolbar hệ thống, phím tắt F4.
 - `Views/XuatHuy/_XuatHuyFilterSidebar.cshtml`: Sidebar lọc thời gian (Tháng này), trạng thái, người tạo, người xuất hủy.
 - `Views/XuatHuy/_XuatHuyTable.cshtml`: Bảng chứng từ, sao bookmark, accordion `tr.dtl`, `_Pagination.cshtml`.
 - `Views/XuatHuy/Create.cshtml`, `Edit.cshtml`, `Details.cshtml`: Màn hình tạo, sửa và xem chi tiết (read-only).
@@ -35,26 +35,26 @@
 ## 2. Luồng màn hình & Tương tác
 
 ### 2.1. Màn hình Danh sách (`Index`)
-- **Toolbar (`.kiot-toolbar-row`)**: Ô tìm kiếm `#keywordSearch` ("Theo mã xuất hủy (F3)"), nút `+ Xuất hủy`, nút `Xuất file` (Danh sách / Chi tiết), `Tùy chọn hiển thị cột` (9 cột dữ liệu), nút tải lại.
-- **Sidebar (`.kiot-sidebar-col`)**:
+- **Toolbar (`.kp-toolbar-row`)**: Ô tìm kiếm `#keywordSearch` ("Theo mã xuất hủy (F3)"), nút `+ Xuất hủy`, nút `Xuất file` (Danh sách / Chi tiết), `Tùy chọn hiển thị cột` (9 cột dữ liệu), nút tải lại.
+- **Sidebar (`.kp-sidebar-col`)**:
   - Tiêu đề "Xuất hủy", nút tròn F4 thu gọn/mở rộng sidebar.
   - Trạng thái: Checkbox `Phiếu tạm` (`NHAP`), `Hoàn thành` (`DA_XAC_NHAN`), `Đã hủy` (`HUY`).
   - Thời gian: Mặc định `Tháng này` (`THANG_NAY`), hỗ trợ Dual Calendar tùy chỉnh ngày.
-  - Người tạo / Người xuất hủy: Multi-select dropdown (`_KiotMultiSelectFilter.cshtml`).
+  - Người tạo / Người xuất hủy: Multi-select dropdown (`_MultiSelectFilter.cshtml`).
 - **Đánh dấu Sao Bookmark**: Header lọc sao (`DaDanhDau`); click sao dòng lưu trực tiếp qua AJAX `ToggleFavorite`.
 - **Cấu trúc Bảng (`_XuatHuyTable`)**:
   - Dòng tổng hợp `summary-row` cuộn tự nhiên cùng bảng, hiển thị `TongGiaTriHuy.Sum()`.
   - Checkbox `#selectAllRows` và `.row-select` từng dòng; Sao bookmark header và từng dòng.
   - Các cột: Mã xuất hủy, Tổng giá trị hủy, Thời gian, Thời gian tạo, Chi nhánh, Người xuất hủy, Người tạo, Ghi chú, Trạng thái.
-- **Bung mở chi tiết (`tr.product-detail-row` qua LEGO `KiotFilter.initRowDetail`)**:
+- **Bung mở chi tiết (`tr.product-detail-row` qua LEGO `AppFilter.initRowDetail`)**:
   - Trượt slideDown/slideUp mượt mà 150ms bọc trong `.product-detail-panel-wrap`.
-  - **Khung nội dung chi tiết cố định 992px** (`.xh-detail-fixed-wrap.kiot-detail-fixed-wrap`) chuẩn Nhà cung cấp, không bị kéo dãn trên màn hình rộng nhiều cột.
+  - **Khung nội dung chi tiết cố định 992px** (`.xh-detail-fixed-wrap.kp-detail-fixed-wrap`) chuẩn Nhà cung cấp, không bị kéo dãn trên màn hình rộng nhiều cột.
   - Viền xanh `#0070f3` khép kín hình chữ nhật 4 cạnh liền mạch (`tr.product-row.selected > td` và `tr.product-detail-row > td`), tự động gán `.last-visible-col` cho ô cuối cùng.
-  - Tự động đồng bộ `colspan` với số cột hiển thị qua LEGO `KiotFilter.initColumnToggle`.
+  - Tự động đồng bộ `colspan` với số cột hiển thị qua LEGO `AppFilter.initColumnToggle`.
   - Header chi tiết: Mã phiếu, badge trạng thái, người tạo, người xuất hủy, ngày xuất hủy, chi nhánh.
   - Bảng dòng hàng (`dtl-tbl`): 5 cột `Mã hàng`, `Tên hàng`, `SL hủy`, `Giá vốn`, `Giá trị hủy` kèm ô lọc inline.
   - Khối dưới: Textarea ghi chú (placeholder "Chưa có") và tổng kết `Tổng số lượng hủy`, `Tổng giá trị hủy`.
-  - Hàng nút hành động: Trái (`Hủy` qua modal `KiotConfirm`, `Sao chép`, `Xuất file`), Phải (`Lưu` ghi chú AJAX, `In`, `Mở phiếu`).
+  - Hàng nút hành động: Trái (`Hủy` qua modal `AppConfirm`, `Sao chép`, `Xuất file`), Phải (`Lưu` ghi chú AJAX, `In`, `Mở phiếu`).
 
 ### 2.2. Màn hình Lập / Sửa / Chi tiết (`Create` / `Edit` / `Details`)
 - Tự điều hướng: Vào `Edit/{id}` với phiếu đã hoàn thành/hủy tự chuyển tiếp sang `Details/{id}`.

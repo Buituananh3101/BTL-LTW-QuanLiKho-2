@@ -1,4 +1,4 @@
-/* chuyen-kho.css - Định kiểu cho phân hệ Chuyển kho chuẩn KiotViet & Hàng hóa */
+﻿/* chuyen-kho.css - Định kiểu cho phân hệ Chuyển kho chuẩn KhoPro & Hàng hóa */
 
 /* 1. Container bảng dữ liệu chuyển kho khớp #productTableContainer của Hàng hóa */
 #tableContainer {
@@ -229,7 +229,7 @@
 }
 
 .kk-detail-fixed-wrap,
-.kiot-detail-fixed-wrap {
+.kp-detail-fixed-wrap {
     width: 992px;
     max-width: 100%;
     box-sizing: border-box;
@@ -237,7 +237,7 @@
 
 @media (max-width: 1040px) {
     .kk-detail-fixed-wrap,
-    .kiot-detail-fixed-wrap {
+    .kp-detail-fixed-wrap {
         width: 100%;
     }
 }
@@ -349,7 +349,7 @@
     margin: 0 !important;
 }
 
-/* 7. Khối lộ trình & Dropdown chọn kho nhận chuẩn KiotViet */
+/* 7. Khối lộ trình & Dropdown chọn kho nhận chuẩn KhoPro */
 .routebox {
     background: #f8fafc;
     border: 1px solid #e2e8f0;

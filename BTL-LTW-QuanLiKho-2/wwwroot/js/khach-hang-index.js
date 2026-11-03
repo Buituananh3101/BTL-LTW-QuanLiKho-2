@@ -1,6 +1,6 @@
-/**
+﻿/**
  * khach-hang-index.js - Quản lý tương tác màn hình Danh sách Khách hàng
- * Đồng bộ 100% với khuôn mẫu Danh sách Hàng hóa và 4 ảnh KiotViet thực tế
+ * Đồng bộ 100% với khuôn mẫu Danh sách Hàng hóa và 4 ảnh KhoPro thực tế
  */
 
 (function ($) {
@@ -23,9 +23,9 @@
         tongBanDen: null,
         noTu: null,
         noDen: null,
-        daDanhDau: $('#kiotContainer').data('is-starred') === true,
-        sortBy: $('#kiotContainer').data('sort-by') || 'makh',
-        sortDir: $('#kiotContainer').data('sort-dir') || 'desc',
+        daDanhDau: $('#kpContainer').data('is-starred') === true,
+        sortBy: $('#kpContainer').data('sort-by') || 'makh',
+        sortDir: $('#kpContainer').data('sort-dir') || 'desc',
         page: 1,
         pageSize: 15,
         expandedId: null
@@ -115,7 +115,7 @@
             },
             error: function () {
                 $('#khachHangTableContainer').removeClass('table-loading');
-                if (window.KiotToast) KiotToast.error('Không thể tải dữ liệu khách hàng.');
+                if (window.AppToast) AppToast.error('Không thể tải dữ liệu khách hàng.');
             }
         });
     }
@@ -123,7 +123,7 @@
     /* ==========================================================================
        3. TÙY CHỌN ẨN / HIỆN CỘT (LƯU LOCALSTORAGE V2)
        ========================================================================== */
-    const STORAGE_KEY_COLS = 'kiot_khach_hang_cols_v2';
+    const STORAGE_KEY_COLS = 'kp_khach_hang_cols_v2';
 
     function initColumnToggle() {
         let saved = null;
@@ -275,16 +275,16 @@
                     } else {
                         $btn.removeClass('starred').find('i').removeClass('bi-star-fill').addClass('bi-star');
                     }
-                    if (window.KiotToast) KiotToast.success(res.isStarred ? 'Đã đánh dấu sao khách hàng.' : 'Đã bỏ đánh dấu sao.');
+                    if (window.AppToast) AppToast.success(res.isStarred ? 'Đã đánh dấu sao khách hàng.' : 'Đã bỏ đánh dấu sao.');
                 }
             }
         });
     };
 
     /* ==========================================================================
-       6.1. SIDEBAR CO-GIÃN & RESPONSIVE MOBILE (CHUẨN KIOTVIET)
+       6.1. SIDEBAR CO-GIÃN & RESPONSIVE MOBILE (CHUẨN KHOPRO)
        ========================================================================== */
-    const container = $('#kiotContainer');
+    const container = $('#kpContainer');
 
     function toggleSidebar(forceState) {
         const isCollapsed = container.hasClass('sidebar-collapsed');
@@ -294,16 +294,16 @@
             container.addClass('sidebar-collapsed');
             $('#sidebarToggleIcon').removeClass('bi-chevron-left').addClass('bi-chevron-right');
             $('#btnToggleSidebar').attr('title', 'Mở rộng bộ lọc (F4)');
-            localStorage.setItem('kiot_sidebar_state', 'collapsed');
+            localStorage.setItem('kp_sidebar_state', 'collapsed');
         } else {
             container.removeClass('sidebar-collapsed');
             $('#sidebarToggleIcon').removeClass('bi-chevron-right').addClass('bi-chevron-left');
             $('#btnToggleSidebar').attr('title', 'Thu gọn bộ lọc (F4)');
-            localStorage.setItem('kiot_sidebar_state', 'expanded');
+            localStorage.setItem('kp_sidebar_state', 'expanded');
         }
     }
 
-    if (localStorage.getItem('kiot_sidebar_state') === 'collapsed') {
+    if (localStorage.getItem('kp_sidebar_state') === 'collapsed') {
         toggleSidebar(true);
     }
 
@@ -340,9 +340,9 @@
     $('#btnMobileFilter').on('click', openMobileSidebar);
     $('#btnCloseSidebarMobile, #sidebarBackdrop').on('click', closeMobileSidebar);
 
-    // Khởi tạo bộ lọc ngày tạo KiotDateFilter
-    if (window.KiotFilter && typeof window.KiotFilter.initDateFilter === 'function') {
-        window.KiotFilter.initDateFilter('tgt', function (from, to, text, val) {
+    // Khởi tạo bộ lọc ngày tạo KhoProDateFilter
+    if (window.AppFilter && typeof window.AppFilter.initDateFilter === 'function') {
+        window.AppFilter.initDateFilter('tgt', function (from, to, text, val) {
             state.tgTaoFilter = val || 'ALL';
             state.tgTaoTu = from || null;
             state.tgTaoDen = to || null;
@@ -354,7 +354,7 @@
     /* ==========================================================================
        6.2. PHÂN TRANG AJAX & TÌM KIẾM
        ========================================================================== */
-    $(document).on('click', '.kiot-pagination-wrap .pagination .page-link', function (e) {
+    $(document).on('click', '.kp-pagination-wrap .pagination .page-link', function (e) {
         e.preventDefault();
         const page = parseInt($(this).data('page'));
         if (!page || isNaN(page) || page === state.page) return;
@@ -432,14 +432,14 @@
         const box = $(this);
         const dropdown = $('#dropdownNguoiTao');
 
-        $('.kiot-ms-dropdown, .kiot-ss-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
-        $('.kiot-multiselect-box, .kiot-single-select-box').not(box).removeClass('open');
+        $('.kp-ms-dropdown, .kp-ss-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
+        $('.kp-multiselect-box, .kp-single-select-box').not(box).removeClass('open');
         $('.quick-date-popup, .dual-calendar-popup').hide();
 
         const willShow = !dropdown.hasClass('show');
         if (willShow) {
-            if (window.KiotFilter && typeof window.KiotFilter.checkSidebarDropdownDirection === 'function') {
-                window.KiotFilter.checkSidebarDropdownDirection(box[0], dropdown[0]);
+            if (window.AppFilter && typeof window.AppFilter.checkSidebarDropdownDirection === 'function') {
+                window.AppFilter.checkSidebarDropdownDirection(box[0], dropdown[0]);
             }
             dropdown.addClass('show');
             box.addClass('open');
@@ -449,13 +449,13 @@
         }
     });
 
-    $('#dropdownNguoiTao').on('click', '.kiot-ss-item', function (e) {
+    $('#dropdownNguoiTao').on('click', '.kp-ss-item', function (e) {
         e.stopPropagation();
         const val = String($(this).data('val'));
         const text = $(this).find('span').text().trim();
 
         $('#textNguoiTao').text(text);
-        $('#dropdownNguoiTao .kiot-ss-item').removeClass('selected');
+        $('#dropdownNguoiTao .kp-ss-item').removeClass('selected');
         $(this).addClass('selected');
 
         $('#dotNguoiTao').toggle(val !== 'ALL');
@@ -474,14 +474,14 @@
         const box = $(this);
         const dropdown = $('#dropdownSinhNhat');
 
-        $('.kiot-ms-dropdown, .kiot-ss-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
-        $('.kiot-multiselect-box, .kiot-single-select-box').not(box).removeClass('open');
+        $('.kp-ms-dropdown, .kp-ss-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
+        $('.kp-multiselect-box, .kp-single-select-box').not(box).removeClass('open');
         $('.quick-date-popup, .dual-calendar-popup').hide();
 
         const willShow = !dropdown.hasClass('show');
         if (willShow) {
-            if (window.KiotFilter && typeof window.KiotFilter.checkSidebarDropdownDirection === 'function') {
-                window.KiotFilter.checkSidebarDropdownDirection(box[0], dropdown[0]);
+            if (window.AppFilter && typeof window.AppFilter.checkSidebarDropdownDirection === 'function') {
+                window.AppFilter.checkSidebarDropdownDirection(box[0], dropdown[0]);
             }
             dropdown.addClass('show');
             box.addClass('open');
@@ -491,13 +491,13 @@
         }
     });
 
-    $('#dropdownSinhNhat').on('click', '.kiot-ss-item', function (e) {
+    $('#dropdownSinhNhat').on('click', '.kp-ss-item', function (e) {
         e.stopPropagation();
         const val = String($(this).data('val'));
         const text = $(this).find('span').text().trim();
 
         $('#textSinhNhat').text(text);
-        $('#dropdownSinhNhat .kiot-ss-item').removeClass('selected');
+        $('#dropdownSinhNhat .kp-ss-item').removeClass('selected');
         $(this).addClass('selected');
 
         $('#dotSinhNhat').toggle(val !== 'ALL');
@@ -511,12 +511,12 @@
     });
 
     // Cuộn sidebar tự động điều chỉnh hướng mở của dropdown
-    $('.kiot-filter-box').on('scroll', function () {
-        const openDropdown = $('.kiot-ms-dropdown.show, .kiot-ss-dropdown.show');
+    $('.kp-filter-box').on('scroll', function () {
+        const openDropdown = $('.kp-ms-dropdown.show, .kp-ss-dropdown.show');
         if (openDropdown.length) {
-            const box = openDropdown.siblings('.kiot-multiselect-box, .kiot-single-select-box');
-            if (box.length && window.KiotFilter && typeof window.KiotFilter.checkSidebarDropdownDirection === 'function') {
-                window.KiotFilter.checkSidebarDropdownDirection(box[0], openDropdown[0]);
+            const box = openDropdown.siblings('.kp-multiselect-box, .kp-single-select-box');
+            if (box.length && window.AppFilter && typeof window.AppFilter.checkSidebarDropdownDirection === 'function') {
+                window.AppFilter.checkSidebarDropdownDirection(box[0], openDropdown[0]);
             }
         }
     });
@@ -531,7 +531,7 @@
         loadTable();
     });
 
-    // Bộ lọc Nhóm khách hàng (Lego Multi-Select với Tags Dropdown chuẩn KiotViet)
+    // Bộ lọc Nhóm khách hàng (Lego Multi-Select với Tags Dropdown chuẩn KhoPro)
     let selectedNhomKhachHang = [];
 
     function renderNhomBox() {
@@ -541,15 +541,15 @@
 
         dot.css('display', selectedNhomKhachHang.length > 0 ? 'inline-block' : 'none');
 
-        dropdown.find('.kiot-ms-item').each(function () {
+        dropdown.find('.kp-ms-item').each(function () {
             const val = String($(this).data('val'));
             const isSel = selectedNhomKhachHang.some(x => String(x.val) === val);
             $(this).toggleClass('selected', isSel);
             $(this).find('input[type="checkbox"]').prop('checked', isSel);
         });
 
-        if (window.KiotFilter && typeof window.KiotFilter.renderTagPills === 'function') {
-            window.KiotFilter.renderTagPills(box, selectedNhomKhachHang, 'Chọn nhóm khách hàng', 2);
+        if (window.AppFilter && typeof window.AppFilter.renderTagPills === 'function') {
+            window.AppFilter.renderTagPills(box, selectedNhomKhachHang, 'Chọn nhóm khách hàng', 2);
         }
     }
 
@@ -562,18 +562,18 @@
             if ($(e.target).closest('.tag-remove').length) return;
             e.stopPropagation();
 
-            $('.kiot-ms-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
-            $('.kiot-multiselect-box').not(box).removeClass('open');
+            $('.kp-ms-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
+            $('.kp-multiselect-box').not(box).removeClass('open');
             $('.quick-date-popup, .dual-calendar-popup').hide();
 
             const willShow = !dropdown.hasClass('show');
             if (willShow) {
-                if (window.KiotFilter && typeof window.KiotFilter.checkSidebarDropdownDirection === 'function') {
-                    window.KiotFilter.checkSidebarDropdownDirection(box[0], dropdown[0]);
+                if (window.AppFilter && typeof window.AppFilter.checkSidebarDropdownDirection === 'function') {
+                    window.AppFilter.checkSidebarDropdownDirection(box[0], dropdown[0]);
                 }
                 dropdown.addClass('show');
                 box.addClass('open');
-                dropdown.find('.kiot-ms-search input').focus();
+                dropdown.find('.kp-ms-search input').focus();
             } else {
                 dropdown.removeClass('show drop-up').css('max-height', '');
                 box.removeClass('open');
@@ -583,7 +583,7 @@
         // Xóa tag từ pill viên thuốc trực tiếp trên box
         box.on('click', '.tag-remove', function (e) {
             e.stopPropagation();
-            const val = String($(this).closest('.kiot-pill-tag').data('val'));
+            const val = String($(this).closest('.kp-pill-tag').data('val'));
             selectedNhomKhachHang = selectedNhomKhachHang.filter(x => String(x.val) !== val);
             state.nhomKhachHangs = selectedNhomKhachHang.map(x => parseInt(x.val)).filter(n => !isNaN(n));
             renderNhomBox();
@@ -592,23 +592,23 @@
         });
 
         // Click vào ô +N nhóm khác
-        box.on('click', '.kiot-pill-more', function (e) {
+        box.on('click', '.kp-pill-more', function (e) {
             e.stopPropagation();
-            if (window.KiotFilter && typeof window.KiotFilter.checkSidebarDropdownDirection === 'function') {
-                window.KiotFilter.checkSidebarDropdownDirection(box[0], dropdown[0]);
+            if (window.AppFilter && typeof window.AppFilter.checkSidebarDropdownDirection === 'function') {
+                window.AppFilter.checkSidebarDropdownDirection(box[0], dropdown[0]);
             }
             dropdown.addClass('show');
             box.addClass('open');
         });
 
         // Click chọn / bỏ chọn item trong dropdown
-        dropdown.on('click', '.kiot-ms-item', function (e) {
-            if ($(e.target).closest('.kiot-item-edit-btn, .hh-item-edit-btn').length) {
+        dropdown.on('click', '.kp-ms-item', function (e) {
+            if ($(e.target).closest('.kp-item-edit-btn, .hh-item-edit-btn').length) {
                 return;
             }
             e.stopPropagation();
             const val = String($(this).data('val'));
-            const name = $(this).data('name') || $(this).find('.kiot-ms-text').text().trim();
+            const name = $(this).data('name') || $(this).find('.kp-ms-text').text().trim();
             const idx = selectedNhomKhachHang.findIndex(x => String(x.val) === val);
 
             if (idx >= 0) {
@@ -624,10 +624,10 @@
         });
 
         // Tìm kiếm con bên trong dropdown nhóm
-        dropdown.find('.kiot-ms-search input').on('input', function (e) {
+        dropdown.find('.kp-ms-search input').on('input', function (e) {
             e.stopPropagation();
             const term = $(this).val().trim().toLowerCase();
-            dropdown.find('.kiot-ms-item').each(function () {
+            dropdown.find('.kp-ms-item').each(function () {
                 const text = ($(this).data('name') || $(this).text()).toLowerCase();
                 if (!term || text.includes(term)) {
                     $(this).show();
@@ -639,16 +639,16 @@
 
         // Đóng các dropdown khi click ra ngoài document
         $(document).on('click', function (e) {
-            if (!$(e.target).closest('.kiot-multiselect-box, .kiot-single-select-box, .kiot-ms-dropdown, .kiot-ss-dropdown').length) {
-                $('.kiot-ms-dropdown, .kiot-ss-dropdown').removeClass('show drop-up').css('max-height', '');
-                $('.kiot-multiselect-box, .kiot-single-select-box').removeClass('open');
+            if (!$(e.target).closest('.kp-multiselect-box, .kp-single-select-box, .kp-ms-dropdown, .kp-ss-dropdown').length) {
+                $('.kp-ms-dropdown, .kp-ss-dropdown').removeClass('show drop-up').css('max-height', '');
+                $('.kp-multiselect-box, .kp-single-select-box').removeClass('open');
             }
         });
 
         // Quét các checkbox được render có sẵn
-        dropdown.find('.kiot-ms-item.selected').each(function () {
+        dropdown.find('.kp-ms-item.selected').each(function () {
             const val = String($(this).data('val'));
-            const name = $(this).data('name') || $(this).find('.kiot-ms-text').text().trim();
+            const name = $(this).data('name') || $(this).find('.kp-ms-text').text().trim();
             if (!selectedNhomKhachHang.some(x => String(x.val) === val)) {
                 selectedNhomKhachHang.push({ val: val, name: name });
             }
@@ -662,9 +662,9 @@
         const $box = $(`#${containerId}`);
         if (!$box.length) return;
 
-        $box.find('.kiot-vf-btn-apply').on('click', function () {
-            const tuStr = $box.find('.kiot-vf-from').val().replace(/\D/g, '');
-            const denStr = $box.find('.kiot-vf-to').val().replace(/\D/g, '');
+        $box.find('.kp-vf-btn-apply').on('click', function () {
+            const tuStr = $box.find('.kp-vf-from').val().replace(/\D/g, '');
+            const denStr = $box.find('.kp-vf-to').val().replace(/\D/g, '');
             const tu = tuStr ? parseFloat(tuStr) : null;
             const den = denStr ? parseFloat(denStr) : null;
             onApply(tu, den);
@@ -672,8 +672,8 @@
             loadTable();
         });
 
-        $box.find('.kiot-vf-clear').on('click', function () {
-            $box.find('.kiot-vf-from, .kiot-vf-to').val('');
+        $box.find('.kp-vf-clear').on('click', function () {
+            $box.find('.kp-vf-from, .kp-vf-to').val('');
             onApply(null, null);
             state.page = 1;
             loadTable();
@@ -774,7 +774,7 @@
         if (!file) return;
 
         if (file.size > 2 * 1024 * 1024) {
-            if (window.KiotToast) KiotToast.error('Ảnh đại diện không được vượt quá 2MB.');
+            if (window.AppToast) AppToast.error('Ảnh đại diện không được vượt quá 2MB.');
             $(this).val('');
             return;
         }
@@ -790,7 +790,7 @@
     $('#btnTraCuuMst').on('click', function () {
         const mst = ($('#formMaSoThue').val() || '').trim();
         if (!mst) {
-            if (window.KiotToast) KiotToast.warning('Vui lòng nhập mã số thuế trước khi tra cứu.');
+            if (window.AppToast) AppToast.warning('Vui lòng nhập mã số thuế trước khi tra cứu.');
             $('#formMaSoThue').focus();
             return;
         }
@@ -801,7 +801,7 @@
         // Giả lập tra cứu hoặc gọi API VietQR/Tổng cục thuế
         setTimeout(function () {
             $btn.prop('disabled', false).text('Tra cứu MST');
-            if (window.KiotToast) KiotToast.success(`Đã tìm thấy thông tin MST: ${mst}`);
+            if (window.AppToast) AppToast.success(`Đã tìm thấy thông tin MST: ${mst}`);
             if (!$('#formXhdTenDonVi').val()) {
                 $('#formXhdTenDonVi').val('CÔNG TY CỔ PHẦN ĐỐI TÁC PHÚ QUỐC');
             }
@@ -845,7 +845,7 @@
             type: 'GET',
             success: function (res) {
                 if (!res.success) {
-                    if (window.KiotToast) KiotToast.error(res.message);
+                    if (window.AppToast) AppToast.error(res.message);
                     return;
                 }
 
@@ -899,7 +899,7 @@
                 setTimeout(() => $('#formTenKh').focus(), 100);
             },
             error: function () {
-                if (window.KiotToast) KiotToast.error('Không thể tải thông tin khách hàng.');
+                if (window.AppToast) AppToast.error('Không thể tải thông tin khách hàng.');
             }
         });
     });
@@ -933,7 +933,7 @@
         }
 
         if (hasError) {
-            if (window.KiotToast) KiotToast.warning('Vui lòng điền đầy đủ các thông tin bắt buộc (*).');
+            if (window.AppToast) AppToast.warning('Vui lòng điền đầy đủ các thông tin bắt buộc (*).');
             return;
         }
 
@@ -990,21 +990,21 @@
             success: function (res) {
                 $btn.prop('disabled', false).text('Lưu');
                 if (res.success) {
-                    if (window.KiotToast) KiotToast.success(res.message);
+                    if (window.AppToast) AppToast.success(res.message);
                     closeModal();
                     loadTable();
                 } else {
-                    if (window.KiotToast) KiotToast.error(res.message);
+                    if (window.AppToast) AppToast.error(res.message);
                 }
             },
             error: function (xhr) {
                 $btn.prop('disabled', false).text('Lưu');
-                if (window.KiotToast) KiotToast.error('Đã xảy ra lỗi khi lưu khách hàng.');
+                if (window.AppToast) AppToast.error('Đã xảy ra lỗi khi lưu khách hàng.');
             }
         });
     });
 
-    // Xóa Khách hàng (Bảo vệ dữ liệu đơn bán bằng KiotConfirm)
+    // Xóa Khách hàng (Bảo vệ dữ liệu đơn bán bằng AppConfirm)
     $(document).on('click', '.btn-delete-kh', function (e) {
         e.stopPropagation();
         const id = $(this).data('id');
@@ -1017,11 +1017,11 @@
                 type: 'POST',
                 success: function (res) {
                     if (res.success) {
-                        if (window.KiotToast) KiotToast.success(res.message);
+                        if (window.AppToast) AppToast.success(res.message);
                         loadTable();
                     } else if (res.hasTransaction) {
-                        if (window.KiotConfirm) {
-                            KiotConfirm.show({
+                        if (window.AppConfirm) {
+                            AppConfirm.show({
                                 title: 'Không thể xóa khách hàng',
                                 message: res.message,
                                 isWarning: true,
@@ -1032,17 +1032,17 @@
                             alert(res.message.replace(/<[^>]+>/g, ''));
                         }
                     } else {
-                        if (window.KiotToast) KiotToast.error(res.message);
+                        if (window.AppToast) AppToast.error(res.message);
                     }
                 },
                 error: function () {
-                    if (window.KiotToast) KiotToast.error('Lỗi khi xóa khách hàng.');
+                    if (window.AppToast) AppToast.error('Lỗi khi xóa khách hàng.');
                 }
             });
         };
 
-        if (window.KiotConfirm) {
-            KiotConfirm.show({
+        if (window.AppConfirm) {
+            AppConfirm.show({
                 title: 'Xóa khách hàng',
                 message: `Bạn có chắc chắn muốn xóa khách hàng <strong>${name}</strong>? Thao tác này không thể hoàn tác.`,
                 confirmText: 'Đồng ý xóa',
@@ -1074,20 +1074,20 @@
                 type: 'POST',
                 success: function (res) {
                     if (res.success) {
-                        if (window.KiotToast) KiotToast.success(res.message);
+                        if (window.AppToast) AppToast.success(res.message);
                         loadTable();
                     } else {
-                        if (window.KiotToast) KiotToast.error(res.message);
+                        if (window.AppToast) AppToast.error(res.message);
                     }
                 },
                 error: function () {
-                    if (window.KiotToast) KiotToast.error('Lỗi khi cập nhật trạng thái.');
+                    if (window.AppToast) AppToast.error('Lỗi khi cập nhật trạng thái.');
                 }
             });
         };
 
-        if (window.KiotConfirm) {
-            KiotConfirm.show({
+        if (window.AppConfirm) {
+            AppConfirm.show({
                 title: actionTitle,
                 message: actionMsg,
                 confirmText: 'Xác nhận',
@@ -1138,15 +1138,15 @@
             success: function (res) {
                 $btn.prop('disabled', false);
                 if (res.success) {
-                    if (window.KiotToast) KiotToast.success(res.message);
+                    if (window.AppToast) AppToast.success(res.message);
                     $('#hhPromptNhomKhOv').removeClass('show');
 
                     // 1. Thêm HTML vào dropdown sidebar để chọn ngay
                     const newItemHtml = `
-                        <div class="kiot-ms-item" data-val="${res.id}" data-name="${res.name}">
+                        <div class="kp-ms-item" data-val="${res.id}" data-name="${res.name}">
                             <input type="checkbox" class="form-check-input" />
-                            <span class="kiot-ms-text">${res.name}</span>
-                            <button type="button" class="kiot-item-edit-btn hh-item-edit-btn" data-id="${res.id}" data-name="${res.name}" data-type="nhomkhachhang" title="Sửa nhóm khách hàng" aria-label="Sửa ${res.name}">
+                            <span class="kp-ms-text">${res.name}</span>
+                            <button type="button" class="kp-item-edit-btn hh-item-edit-btn" data-id="${res.id}" data-name="${res.name}" data-type="nhomkhachhang" title="Sửa nhóm khách hàng" aria-label="Sửa ${res.name}">
                                 <i class="bi bi-pencil" style="font-size:12px;pointer-events:none;"></i>
                             </button>
                         </div>`;
@@ -1162,12 +1162,12 @@
                     renderNhomBox();
                     loadTable();
                 } else {
-                    if (window.KiotToast) KiotToast.error(res.message);
+                    if (window.AppToast) AppToast.error(res.message);
                 }
             },
             error: function () {
                 $btn.prop('disabled', false);
-                if (window.KiotToast) KiotToast.error('Không thể tạo nhóm khách hàng.');
+                if (window.AppToast) AppToast.error('Không thể tạo nhóm khách hàng.');
             }
         });
     });
@@ -1176,13 +1176,13 @@
        9.1. MODAL CON: SỬA / XÓA NHÓM KHÁCH HÀNG (ICON BÚT CHÌ ✎)
        ========================================================================== */
     // Mở modal sửa nhóm từ icon bút chì
-    $(document).on('click', '#dropdownNhomKhachHang .kiot-item-edit-btn, #dropdownNhomKhachHang .hh-item-edit-btn', function (e) {
+    $(document).on('click', '#dropdownNhomKhachHang .kp-item-edit-btn, #dropdownNhomKhachHang .hh-item-edit-btn', function (e) {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
 
-        const id = $(this).data('id') || $(this).closest('.kiot-ms-item').data('val');
-        const name = $(this).data('name') || $(this).closest('.kiot-ms-item').find('.kiot-ms-text').text().trim();
+        const id = $(this).data('id') || $(this).closest('.kp-ms-item').data('val');
+        const name = $(this).data('name') || $(this).closest('.kp-ms-item').find('.kp-ms-text').text().trim();
 
         $('#editNhomId').val(id);
         $('#editNhomInput').val(name);
@@ -1227,14 +1227,14 @@
             success: function (res) {
                 $btn.prop('disabled', false);
                 if (res.success) {
-                    if (window.KiotToast) KiotToast.success(res.message);
+                    if (window.AppToast) AppToast.success(res.message);
                     $('#hhEditNhomKhOv').removeClass('show');
 
                     // 1. Cập nhật trong dropdown sidebar
-                    const $item = $(`#dropdownNhomKhachHang .kiot-ms-item[data-val="${id}"]`);
+                    const $item = $(`#dropdownNhomKhachHang .kp-ms-item[data-val="${id}"]`);
                     $item.data('name', res.name).attr('data-name', res.name);
-                    $item.find('.kiot-ms-text').text(res.name);
-                    $item.find('.kiot-item-edit-btn').data('name', res.name).attr('data-name', res.name);
+                    $item.find('.kp-ms-text').text(res.name);
+                    $item.find('.kp-item-edit-btn').data('name', res.name).attr('data-name', res.name);
 
                     // 2. Cập nhật trong select modal khách hàng
                     $(`#formMaNhomKhachHang option[value="${id}"]`).text(res.name);
@@ -1247,12 +1247,12 @@
                     renderNhomBox();
                     loadTable();
                 } else {
-                    if (window.KiotToast) KiotToast.error(res.message);
+                    if (window.AppToast) AppToast.error(res.message);
                 }
             },
             error: function () {
                 $btn.prop('disabled', false);
-                if (window.KiotToast) KiotToast.error('Không thể cập nhật nhóm khách hàng.');
+                if (window.AppToast) AppToast.error('Không thể cập nhật nhóm khách hàng.');
             }
         });
     });
@@ -1268,11 +1268,11 @@
                 type: 'POST',
                 success: function (res) {
                     if (res.success) {
-                        if (window.KiotToast) KiotToast.success(res.message);
+                        if (window.AppToast) AppToast.success(res.message);
                         $('#hhEditNhomKhOv').removeClass('show');
 
                         // 1. Xóa khỏi dropdown sidebar
-                        $(`#dropdownNhomKhachHang .kiot-ms-item[data-val="${id}"]`).remove();
+                        $(`#dropdownNhomKhachHang .kp-ms-item[data-val="${id}"]`).remove();
 
                         // 2. Xóa khỏi select trong modal khách hàng
                         $(`#formMaNhomKhachHang option[value="${id}"]`).remove();
@@ -1284,17 +1284,17 @@
                         state.page = 1;
                         loadTable();
                     } else {
-                        if (window.KiotToast) KiotToast.error(res.message);
+                        if (window.AppToast) AppToast.error(res.message);
                     }
                 },
                 error: function () {
-                    if (window.KiotToast) KiotToast.error('Lỗi khi xóa nhóm khách hàng.');
+                    if (window.AppToast) AppToast.error('Lỗi khi xóa nhóm khách hàng.');
                 }
             });
         };
 
-        if (window.KiotConfirm) {
-            KiotConfirm.show({
+        if (window.AppConfirm) {
+            AppConfirm.show({
                 title: 'Xóa nhóm khách hàng',
                 message: `Bạn có chắc chắn muốn xóa nhóm khách hàng <strong>${name}</strong>? Các khách hàng thuộc nhóm này sẽ không còn thuộc nhóm nào.`,
                 confirmText: 'Đồng ý xóa',

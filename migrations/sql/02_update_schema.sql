@@ -1,4 +1,4 @@
--- =========================================================================================
+﻿-- =========================================================================================
 -- FILE CẬP NHẬT CƠ SỞ DỮ LIỆU: docs/database_update.sql
 -- Dự án: Quản lý kho hàng nhiều kho (QuanLyKhoPhuQuocLTW)
 -- Ngày thực hiện: 2026-10-13
@@ -249,7 +249,7 @@ GO
 
 -- -----------------------------------------------------------------------------------------
 -- 5. BẢNG HANGHOA: Bổ sung cột DaDanhDau (Đánh dấu sao / Sản phẩm yêu thích)
--- Lý do: Hỗ trợ chức năng đánh dấu sao và lọc danh sách hàng hóa được đánh dấu sao KiotViet
+-- Lý do: Hỗ trợ chức năng đánh dấu sao và lọc danh sách hàng hóa được đánh dấu sao KhoPro
 -- -----------------------------------------------------------------------------------------
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'HangHoa') AND name = N'DaDanhDau')
 BEGIN

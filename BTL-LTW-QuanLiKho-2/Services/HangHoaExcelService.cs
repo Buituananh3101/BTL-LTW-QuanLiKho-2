@@ -1,4 +1,4 @@
-using ClosedXML.Excel;
+﻿using ClosedXML.Excel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using BTL_LTW_QuanLiKho_2.Models;
@@ -21,7 +21,7 @@ public class HangHoaExcelService : IHangHoaExcelService
     }
 
     /// <summary>
-    /// Tạo file Excel mẫu chuẩn KiotViet để người dùng tải về nhập liệu
+    /// Tạo file Excel mẫu chuẩn KhoPro để người dùng tải về nhập liệu
     /// </summary>
     public byte[] GenerateTemplate()
     {
@@ -54,7 +54,7 @@ public class HangHoaExcelService : IHangHoaExcelService
             var cell = ws.Cell(1, i + 1);
             cell.Value = columns[i].Item1;
         }
-        ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, columns.Length));
+        ExcelHelper.ApplyHeaderStyle(ws.Range(1, 1, 1, columns.Length));
         ws.Row(1).Height = 28;
 
         // Row 2: Chú thích / Hướng dẫn

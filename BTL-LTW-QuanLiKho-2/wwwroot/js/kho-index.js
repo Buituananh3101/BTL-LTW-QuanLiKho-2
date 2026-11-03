@@ -12,9 +12,9 @@
     let currentSortDir = '';
 
     // 2. Khởi tạo Sidebar thu gọn (F4)
-    if (window.KiotFilter && typeof KiotFilter.initSidebar === 'function') {
-        KiotFilter.initSidebar({
-            storageKey: 'kiot_kho_sidebar'
+    if (window.AppFilter && typeof AppFilter.initSidebar === 'function') {
+        AppFilter.initSidebar({
+            storageKey: 'kp_kho_sidebar'
         });
     }
 
@@ -124,7 +124,7 @@
             },
             error: function () {
                 $('#khoTableContainer').css('opacity', '1');
-                if (window.KiotToast) KiotToast.error('Không thể tải dữ liệu chi nhánh kho.');
+                if (window.AppToast) AppToast.error('Không thể tải dữ liệu chi nhánh kho.');
             }
         });
     }
@@ -153,7 +153,7 @@
     });
 
     // 8.2. Tìm kiếm F3 (Debounce 350ms)
-    $('#keywordSearch').on('input', KiotFilter.debounce(function () {
+    $('#keywordSearch').on('input', AppFilter.debounce(function () {
         loadTable(1);
     }, 350));
 
@@ -167,12 +167,12 @@
     // 8.3. Nút tải lại bảng
     $('#btnReloadTable').on('click', function () {
         loadTable(1);
-        if (window.KiotToast) KiotToast.info('Đã làm mới dữ liệu.');
+        if (window.AppToast) AppToast.info('Đã làm mới dữ liệu.');
     });
 
     // 8.4. Phân trang AJAX
-    if (window.KiotFilter && KiotFilter.bindPagination) {
-        KiotFilter.bindPagination('#khoTableContainer', function (page) {
+    if (window.AppFilter && AppFilter.bindPagination) {
+        AppFilter.bindPagination('#khoTableContainer', function (page) {
             loadTable(page);
         });
     } else {
@@ -379,7 +379,7 @@
             type: 'GET',
             success: function (res) {
                 if (!res.success) {
-                    if (window.KiotToast) KiotToast.error(res.message);
+                    if (window.AppToast) AppToast.error(res.message);
                     return;
                 }
                 const d = res.data;
@@ -409,7 +409,7 @@
                 setTimeout(() => $('#khoTenKho').focus(), 150);
             },
             error: function () {
-                if (window.KiotToast) KiotToast.error('Không thể lấy thông tin chi nhánh kho.');
+                if (window.AppToast) AppToast.error('Không thể lấy thông tin chi nhánh kho.');
             }
         });
     });
@@ -462,7 +462,7 @@
                 $('#btnSaveKhoAndNew, #btnSaveKhoCopy, #btnKhoCaret').prop('disabled', false);
 
                 if (res.success) {
-                    if (window.KiotToast) KiotToast.success(res.message);
+                    if (window.AppToast) AppToast.success(res.message);
                     loadTable(maKho === 0 ? 1 : currentPage);
 
                     if (actionType === 'again') {
@@ -539,20 +539,20 @@
                 type: 'POST',
                 success: function (res) {
                     if (res.success) {
-                        if (window.KiotToast) KiotToast.success(res.message);
+                        if (window.AppToast) AppToast.success(res.message);
                         loadTable(currentPage);
                     } else {
-                        if (window.KiotToast) KiotToast.error(res.message);
+                        if (window.AppToast) AppToast.error(res.message);
                     }
                 },
                 error: function (xhr) {
-                    if (window.KiotToast) KiotToast.error(xhr.responseJSON?.message || 'Không thể thực hiện thao tác.');
+                    if (window.AppToast) AppToast.error(xhr.responseJSON?.message || 'Không thể thực hiện thao tác.');
                 }
             });
         };
 
-        if (window.KiotConfirm && typeof window.KiotConfirm.show === 'function') {
-            window.KiotConfirm.show({
+        if (window.AppConfirm && typeof window.AppConfirm.show === 'function') {
+            window.AppConfirm.show({
                 title: actionTitle,
                 icon: isDisabling ? 'bi-lock-fill' : 'bi-unlock-fill',
                 iconColor: isDisabling ? '#dc2626' : '#0d6efd',
@@ -581,17 +581,17 @@
                 type: 'POST',
                 success: function (res) {
                     if (res.success) {
-                        if (window.KiotToast) KiotToast.success(res.message);
+                        if (window.AppToast) AppToast.success(res.message);
                         loadTable(currentPage);
                     } else if (res.hasTransaction) {
                         if (res.isLocked) {
-                            if (window.KiotToast) {
-                                KiotToast.warning(`Chi nhánh kho <b>${safeName}</b> đã phát sinh chứng từ và hiện đang ở trạng thái <b>Ngừng hoạt động</b>, không thể xóa vĩnh viễn.`);
+                            if (window.AppToast) {
+                                AppToast.warning(`Chi nhánh kho <b>${safeName}</b> đã phát sinh chứng từ và hiện đang ở trạng thái <b>Ngừng hoạt động</b>, không thể xóa vĩnh viễn.`);
                             }
                         } else {
                             setTimeout(function () {
-                                if (window.KiotConfirm && typeof window.KiotConfirm.show === 'function') {
-                                    window.KiotConfirm.show({
+                                if (window.AppConfirm && typeof window.AppConfirm.show === 'function') {
+                                    window.AppConfirm.show({
                                         title: 'Không thể xóa chi nhánh kho',
                                         icon: 'bi-shield-exclamation',
                                         iconColor: '#f59e0b',
@@ -604,22 +604,22 @@
                                         }
                                     });
                                 } else {
-                                    if (window.KiotToast) KiotToast.warning(res.message);
+                                    if (window.AppToast) AppToast.warning(res.message);
                                 }
                             }, 200);
                         }
                     } else {
-                        if (window.KiotToast) KiotToast.error(res.message);
+                        if (window.AppToast) AppToast.error(res.message);
                     }
                 },
                 error: function (xhr) {
-                    if (window.KiotToast) KiotToast.error(xhr.responseJSON?.message || 'Không thể thực hiện thao tác xóa.');
+                    if (window.AppToast) AppToast.error(xhr.responseJSON?.message || 'Không thể thực hiện thao tác xóa.');
                 }
             });
         };
 
-        if (window.KiotConfirm && typeof window.KiotConfirm.show === 'function') {
-            window.KiotConfirm.show({
+        if (window.AppConfirm && typeof window.AppConfirm.show === 'function') {
+            window.AppConfirm.show({
                 title: 'Xóa chi nhánh kho',
                 icon: 'bi-trash3-fill',
                 iconColor: '#dc2626',

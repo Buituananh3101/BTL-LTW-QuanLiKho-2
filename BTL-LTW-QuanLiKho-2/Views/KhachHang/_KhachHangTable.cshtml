@@ -1,4 +1,4 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.PagedResult<BTL_LTW_QuanLiKho_2.ViewModels.KhachHang.KhachHangItemVM>
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.PagedResult<BTL_LTW_QuanLiKho_2.ViewModels.KhachHang.KhachHangItemVM>
 @using System.Globalization
 @{
     var viCulture = CultureInfo.GetCultureInfo("vi-VN");
@@ -7,7 +7,7 @@
     bool daDanhDauFilter = ViewBag.DaDanhDauFilter is true;
 }
 
-<div class="kiot-table-scroll-body">
+<div class="kp-table-scroll-body">
     <table class="tbl" id="productTable" style="table-layout: fixed; width: max-content; min-width: 100%;">
         <thead>
             <tr>
@@ -292,7 +292,7 @@
 <!-- Phân trang Lego dùng chung -->
 @if (Model != null && Model.TotalItems > 0)
 {
-    <div class="kiot-pagination-wrap px-3 py-2 bg-white border-top">
+    <div class="kp-pagination-wrap px-3 py-2 bg-white border-top">
         <partial name="_Pagination" model="Model" />
     </div>
 }

@@ -1,9 +1,9 @@
-/**
- * kiot-filter.js – Bộ thư viện JavaScript giao diện chuẩn chuyên nghiệp dùng chung
+﻿/**
+ * app-filter.js – Bộ thư viện JavaScript giao diện chuẩn chuyên nghiệp dùng chung
  * Phục vụ các màn hình Danh mục & Chứng từ: Hàng hóa, Kiểm kho, Nhập kho, Khách hàng, NCC...
  */
 
-window.KiotFilter = (function ($) {
+window.AppFilter = (function ($) {
     'use strict';
 
     // 1. Debounce chống spam request khi người dùng gõ tìm kiếm
@@ -34,14 +34,14 @@ window.KiotFilter = (function ($) {
     // 3. Quản lý trạng thái Thu gọn / Mở rộng Sidebar bên trái (Phím tắt F4 & Mobile Drawer)
     function initSidebar(options) {
         const opt = $.extend({
-            containerSelector: '#kiotContainer',
+            containerSelector: '#kpContainer',
             btnToggleSelector: '#btnToggleSidebar',
             iconSelector: '#sidebarToggleIcon',
             mobileBtnSelector: '#btnMobileFilter',
             mobileCloseSelector: '#btnCloseSidebarMobile',
             backdropSelector: '#sidebarBackdrop',
             sidebarColSelector: '#sidebarFilterCol',
-            storageKey: 'kiot_sidebar_state'
+            storageKey: 'kp_sidebar_state'
         }, options);
 
         const container = $(opt.containerSelector);
@@ -130,14 +130,14 @@ window.KiotFilter = (function ($) {
 
         box.on('click', function (e) {
             e.stopPropagation();
-            $('.kiot-ss-dropdown, .kiot-ms-dropdown, .quick-date-popup, .dual-calendar-popup').not(dropdown).removeClass('show');
+            $('.kp-ss-dropdown, .kp-ms-dropdown, .quick-date-popup, .dual-calendar-popup').not(dropdown).removeClass('show');
             autoFlipDirection(box, dropdown);
             dropdown.toggleClass('show');
         });
 
-        dropdown.find('.kiot-ss-item').on('click', function (e) {
+        dropdown.find('.kp-ss-item').on('click', function (e) {
             e.stopPropagation();
-            dropdown.find('.kiot-ss-item').removeClass('selected');
+            dropdown.find('.kp-ss-item').removeClass('selected');
             $(this).addClass('selected');
 
             const val = $(this).data('val');
@@ -161,11 +161,11 @@ window.KiotFilter = (function ($) {
     function initMultiSelect(boxSelector, dropdownSelector, placeholder, onChangeCallback) {
         const box = $(boxSelector);
         const dropdown = $(dropdownSelector);
-        const searchInput = dropdown.find('.kiot-ms-search input');
+        const searchInput = dropdown.find('.kp-ms-search input');
 
         box.on('click', function (e) {
             e.stopPropagation();
-            $('.kiot-ss-dropdown, .kiot-ms-dropdown, .quick-date-popup, .dual-calendar-popup').not(dropdown).removeClass('show');
+            $('.kp-ss-dropdown, .kp-ms-dropdown, .quick-date-popup, .dual-calendar-popup').not(dropdown).removeClass('show');
             autoFlipDirection(box, dropdown);
             dropdown.toggleClass('show');
             if (dropdown.hasClass('show')) {
@@ -175,25 +175,25 @@ window.KiotFilter = (function ($) {
 
         searchInput.on('input', function () {
             const kw = $(this).val().toLowerCase().trim();
-            dropdown.find('.kiot-ms-item').each(function () {
+            dropdown.find('.kp-ms-item').each(function () {
                 const name = ($(this).data('name') || $(this).text()).toLowerCase();
                 $(this).toggle(name.includes(kw));
             });
         });
 
-        dropdown.on('click', '.kiot-item-edit-btn, .hh-item-edit-btn', function (e) {
+        dropdown.on('click', '.kp-item-edit-btn, .hh-item-edit-btn', function (e) {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            const id = $(this).data('id') || $(this).closest('.kiot-ms-item').data('val');
-            const oldName = $(this).data('name') || $(this).closest('.kiot-ms-item').find('.kiot-ms-text, span').first().text().trim();
+            const id = $(this).data('id') || $(this).closest('.kp-ms-item').data('val');
+            const oldName = $(this).data('name') || $(this).closest('.kp-ms-item').find('.kp-ms-text, span').first().text().trim();
             if (typeof window.handleEditNhomHang === 'function') {
                 window.handleEditNhomHang(id, oldName);
             }
         });
 
-        dropdown.on('click', '.kiot-ms-item', function (e) {
-            if ($(e.target).closest('.kiot-item-edit-btn, .hh-item-edit-btn').length) {
+        dropdown.on('click', '.kp-ms-item', function (e) {
+            if ($(e.target).closest('.kp-item-edit-btn, .hh-item-edit-btn').length) {
                 return;
             }
             e.stopPropagation();
@@ -208,21 +208,21 @@ window.KiotFilter = (function ($) {
         });
 
         function getSelectedValues() {
-            return dropdown.find('.kiot-ms-item input:checked').map(function () {
-                return $(this).closest('.kiot-ms-item').data('val');
+            return dropdown.find('.kp-ms-item input:checked').map(function () {
+                return $(this).closest('.kp-ms-item').data('val');
             }).get();
         }
 
         function getSelectedNames() {
-            return dropdown.find('.kiot-ms-item input:checked').map(function () {
-                return $(this).closest('.kiot-ms-item').data('name');
+            return dropdown.find('.kp-ms-item input:checked').map(function () {
+                return $(this).closest('.kp-ms-item').data('name');
             }).get();
         }
 
         function updatePlaceholder() {
             const names = getSelectedNames();
             if (names.length === 0) {
-                box.html(`<span class="kiot-ms-placeholder">${placeholder}</span>`);
+                box.html(`<span class="kp-ms-placeholder">${placeholder}</span>`);
             } else if (names.length <= 2) {
                 box.text(names.join(', '));
             } else {
@@ -505,9 +505,9 @@ window.KiotFilter = (function ($) {
         });
 
         // Tự đóng khi click ra ngoài
-        const docDateEvent = `click.kiotDateFilter_${target}`;
+        const docDateEvent = `click.khoproDateFilter_${target}`;
         $(document).off(docDateEvent).on(docDateEvent, function (e) {
-            if (!$(e.target).closest(`.kiot-date-filter-block[data-date-target="${target}"], ${quickPopupSelector}, ${calPopupSelector}`).length) {
+            if (!$(e.target).closest(`.kp-date-filter-block[data-date-target="${target}"], ${quickPopupSelector}, ${calPopupSelector}`).length) {
                 $(quickPopupSelector).hide();
                 $(calPopupSelector).hide();
             }
@@ -528,7 +528,7 @@ window.KiotFilter = (function ($) {
         }
 
         const menu = $(opt.menuSelector);
-        const currentStorageKey = opt.storageKey || 'kiot_column_visibility';
+        const currentStorageKey = opt.storageKey || 'kp_column_visibility';
         const defaultCols = opt.defaultCols || {};
 
         if (!menu.length) {
@@ -574,7 +574,7 @@ window.KiotFilter = (function ($) {
 
             // 1. Cập nhật colspan chính xác theo số cột hiển thị để không sinh cột ma
             const actualVisibleCols = currentTable.find('thead tr:first-child th:visible').length || (visibleCount + (opt.extraColsCount || 0));
-            currentTable.find('tr.product-detail-row > td, tr.kiot-detail-row > td, tr.dtl > td, tr.detail-row > td, tr.empty-row > td, tr:has(.empty) > td').attr('colspan', actualVisibleCols);
+            currentTable.find('tr.product-detail-row > td, tr.kp-detail-row > td, tr.dtl > td, tr.detail-row > td, tr.empty-row > td, tr:has(.empty) > td').attr('colspan', actualVisibleCols);
 
             // 2. Gắn class last-visible-col cho ô hiển thị cuối cùng của mỗi dòng để khép kín hình chữ nhật
             currentTable.find('.last-visible-col').removeClass('last-visible-col');
@@ -600,7 +600,7 @@ window.KiotFilter = (function ($) {
 
         applyVisibility();
 
-        menu.off('change.kiotCol', 'input[data-c], input[type="checkbox"]').on('change.kiotCol', 'input[data-c], input[type="checkbox"]', function () {
+        menu.off('change.khoproCol', 'input[data-c], input[type="checkbox"]').on('change.khoproCol', 'input[data-c], input[type="checkbox"]', function () {
             applyVisibility();
             saveState();
         });
@@ -631,8 +631,8 @@ window.KiotFilter = (function ($) {
                         btn.toggleClass('starred on', !!isFav);
                         btn.find('i').toggleClass('bi-star-fill text-warning', !!isFav).toggleClass('bi-star text-muted', !isFav);
 
-                        if (window.KiotToast) {
-                            window.KiotToast.success(isFav ? 'Đã thêm vào mục yêu thích.' : 'Đã bỏ đánh dấu sao.');
+                        if (window.AppToast) {
+                            window.AppToast.success(isFav ? 'Đã thêm vào mục yêu thích.' : 'Đã bỏ đánh dấu sao.');
                         }
 
                         if (typeof callback === 'function') {
@@ -641,8 +641,8 @@ window.KiotFilter = (function ($) {
                     }
                 },
                 error: function () {
-                    if (window.KiotToast) {
-                        window.KiotToast.error('Không thể cập nhật đánh dấu sao.');
+                    if (window.AppToast) {
+                        window.AppToast.error('Không thể cập nhật đánh dấu sao.');
                     }
                 }
             });
@@ -678,7 +678,7 @@ window.KiotFilter = (function ($) {
         if (!$box.length || !$dd.length) return;
 
         const boxRect = $box[0].getBoundingClientRect();
-        const filterBox = $box.closest('.kiot-filter-box');
+        const filterBox = $box.closest('.kp-filter-box');
 
         let containerBottom = window.innerHeight;
         let containerTop = 0;
@@ -704,14 +704,14 @@ window.KiotFilter = (function ($) {
         }
     }
 
-    // 14. Render danh sách Tag Chips trong ô Multi-select (.kiot-pill-tag & .kiot-pill-more)
+    // 14. Render danh sách Tag Chips trong ô Multi-select (.kp-pill-tag & .kp-pill-more)
     function renderTagPills(boxElement, selectedItems, placeholder, maxVisible) {
         const box = $(boxElement);
         if (!box.length) return;
         maxVisible = maxVisible || 3;
 
         if (!selectedItems || selectedItems.length === 0) {
-            box.html(`<span class="kiot-ms-placeholder">${escapeHtml(placeholder)}</span>`);
+            box.html(`<span class="kp-ms-placeholder">${escapeHtml(placeholder)}</span>`);
             return;
         }
 
@@ -720,7 +720,7 @@ window.KiotFilter = (function ($) {
         for (let i = 0; i < visibleCount; i++) {
             const item = selectedItems[i];
             html += `
-                <span class="kiot-pill-tag" data-val="${escapeHtml(item.val)}">
+                <span class="kp-pill-tag" data-val="${escapeHtml(item.val)}">
                     <span class="tag-text">${escapeHtml(item.name)}</span>
                     <span class="tag-remove" title="Bỏ chọn">&times;</span>
                 </span>
@@ -730,20 +730,20 @@ window.KiotFilter = (function ($) {
         if (selectedItems.length > maxVisible) {
             const remaining = selectedItems.length - maxVisible;
             const otherNames = selectedItems.slice(maxVisible).map(x => x.name).join(', ');
-            html += `<span class="kiot-pill-more" title="${escapeHtml(otherNames)}">+${remaining} khác</span>`;
+            html += `<span class="kp-pill-more" title="${escapeHtml(otherNames)}">+${remaining} khác</span>`;
         }
 
         box.html(html);
     }
 
-    // 15. KiotCombobox – Dropdown vừa gõ vừa chọn kèm icon Bút chì ✎ sửa/xóa trực tiếp (chuẩn chuyên nghiệp)
+    // 15. KhoProCombobox – Dropdown vừa gõ vừa chọn kèm icon Bút chì ✎ sửa/xóa trực tiếp (chuẩn chuyên nghiệp)
     function initCombobox(options) {
         const opt = $.extend({
-            wrapSelector: '',        // Container .kiot-combobox-wrap hoặc selector
-            boxSelector: '',         // Box chứa input .kiot-combobox-box
+            wrapSelector: '',        // Container .kp-combobox-wrap hoặc selector
+            boxSelector: '',         // Box chứa input .kp-combobox-box
             inputSelector: '',       // Ô input gõ tìm/nhập
-            dropdownSelector: '',    // Dropdown list .kiot-combobox-dropdown
-            listSelector: '',        // Khối chứa items .kiot-combobox-list
+            dropdownSelector: '',    // Dropdown list .kp-combobox-dropdown
+            listSelector: '',        // Khối chứa items .kp-combobox-list
             tagsSelector: '',        // Khối hiển thị tags đã chọn (nếu multi)
             hiddenInputSelector: '', // Ô hidden lưu value gửi form
             items: [],               // Mảng các chuỗi hoặc { val, text }
@@ -757,11 +757,11 @@ window.KiotFilter = (function ($) {
         }, options);
 
         const $wrap = $(opt.wrapSelector);
-        const $box = opt.boxSelector ? $(opt.boxSelector) : $wrap.find('.kiot-combobox-box, .hh-multiselect-box');
+        const $box = opt.boxSelector ? $(opt.boxSelector) : $wrap.find('.kp-combobox-box, .hh-multiselect-box');
         const $input = opt.inputSelector ? $(opt.inputSelector) : $wrap.find('input[type="text"]');
-        const $dropdown = opt.dropdownSelector ? $(opt.dropdownSelector) : $wrap.find('.kiot-combobox-dropdown, .hh-multiselect-dropdown');
-        const $list = opt.listSelector ? $(opt.listSelector) : $dropdown.find('.kiot-combobox-list, .hh-multiselect-list, .hh-cs-list');
-        const $tags = opt.tagsSelector ? $(opt.tagsSelector) : $box.find('.kiot-combobox-tags, .hh-multiselect-tags');
+        const $dropdown = opt.dropdownSelector ? $(opt.dropdownSelector) : $wrap.find('.kp-combobox-dropdown, .hh-multiselect-dropdown');
+        const $list = opt.listSelector ? $(opt.listSelector) : $dropdown.find('.kp-combobox-list, .hh-multiselect-list, .hh-cs-list');
+        const $tags = opt.tagsSelector ? $(opt.tagsSelector) : $box.find('.kp-combobox-tags, .hh-multiselect-tags');
         const $hidden = opt.hiddenInputSelector ? $(opt.hiddenInputSelector) : $wrap.find('input[type="hidden"]');
 
         let selected = [];
@@ -786,13 +786,13 @@ window.KiotFilter = (function ($) {
                 const level = (typeof item === 'object' && item.level) ? Number(item.level) : 0;
                 const isSel = selected.includes(val);
                 const indentStyle = level > 0 ? `style="padding-left: ${12 + level * 16}px;"` : '';
-                const treePrefix = level > 0 ? `<span class="kiot-tree-branch text-muted me-1" style="font-family:monospace;font-size:12px;">└─</span>` : '';
+                const treePrefix = level > 0 ? `<span class="kp-tree-branch text-muted me-1" style="font-family:monospace;font-size:12px;">└─</span>` : '';
 
                 html += `
-                    <div class="kiot-combobox-item hh-multiselect-item ${isSel ? 'selected' : ''}" data-val="${escapeHtml(val)}" ${indentStyle}>
-                        <span class="kiot-combobox-text hh-multiselect-text">${treePrefix}${escapeHtml(text)}</span>
+                    <div class="kp-combobox-item hh-multiselect-item ${isSel ? 'selected' : ''}" data-val="${escapeHtml(val)}" ${indentStyle}>
+                        <span class="kp-combobox-text hh-multiselect-text">${treePrefix}${escapeHtml(text)}</span>
                         ${opt.allowEdit ? `
-                        <button type="button" class="kiot-item-edit-btn hh-item-edit-btn" data-val="${escapeHtml(val)}" title="Sửa">
+                        <button type="button" class="kp-item-edit-btn hh-item-edit-btn" data-val="${escapeHtml(val)}" title="Sửa">
                             <i class="bi bi-pencil" style="font-size:12px;pointer-events:none;"></i>
                         </button>` : ''}
                         ${isSel ? '<i class="bi bi-check-lg text-primary ms-2"></i>' : ''}
@@ -832,13 +832,13 @@ window.KiotFilter = (function ($) {
         // Click item hoặc nút edit
         $list.on('click', function (e) {
             e.stopPropagation();
-            const editBtn = e.target.closest('.kiot-item-edit-btn, .hh-item-edit-btn');
+            const editBtn = e.target.closest('.kp-item-edit-btn, .hh-item-edit-btn');
             if (editBtn) {
                 const val = editBtn.dataset.val;
                 if (opt.onEditItem) {
                     opt.onEditItem(val, e);
-                } else if (window.KiotPrompt) {
-                    window.KiotPrompt.open({
+                } else if (window.AppPrompt) {
+                    window.AppPrompt.open({
                         title: 'Sửa mục',
                         label: 'Tên',
                         value: val,
@@ -864,7 +864,7 @@ window.KiotFilter = (function ($) {
                 return;
             }
 
-            const item = e.target.closest('.kiot-combobox-item, .hh-multiselect-item');
+            const item = e.target.closest('.kp-combobox-item, .hh-multiselect-item');
             if (item) {
                 const val = item.dataset.val;
                 const idx = selected.indexOf(val);
@@ -882,10 +882,10 @@ window.KiotFilter = (function ($) {
 
         // Click ra ngoài -> đóng (ngoại trừ khi đang thao tác trong modal prompt / confirm / edit modal)
         $(document).on('click', function (e) {
-            if ($(e.target).closest('#kiotPromptOv, #kiotConfirmOv, #hhEditItemOv, #hhPromptOv, .kiot-prompt-ov, .kiot-confirm-ov, .modal-box').length > 0) {
+            if ($(e.target).closest('#kpPromptOv, #kpConfirmOv, #hhEditItemOv, #hhPromptOv, .kp-prompt-ov, .kp-confirm-ov, .modal-box').length > 0) {
                 return;
             }
-            if ($('#kiotPromptOv.show, #kiotConfirmOv.show, #hhEditItemOv.show, #hhPromptOv.show, .kiot-prompt-ov.show, .kiot-confirm-ov.show').length > 0) {
+            if ($('#kpPromptOv.show, #kpConfirmOv.show, #hhEditItemOv.show, #hhPromptOv.show, .kp-prompt-ov.show, .kp-confirm-ov.show').length > 0) {
                 return;
             }
             if (!$wrap.is(e.target) && $wrap.has(e.target).length === 0) {
@@ -902,7 +902,7 @@ window.KiotFilter = (function ($) {
         };
     }
 
-    // 16. Khởi tạo bộ lọc Khoảng giá trị (Từ - Tới) chuẩn chuyên nghiệp (.fromto / _KiotValueFilter)
+    // 16. Khởi tạo bộ lọc Khoảng giá trị (Từ - Tới) chuẩn chuyên nghiệp (.fromto / _KhoProValueFilter)
     function initValueFilter(id, onChangeCallback) {
         const fromInput = $(`#filter${id}Tu`);
         const toInput = $(`#filter${id}Den`);
@@ -929,7 +929,7 @@ window.KiotFilter = (function ($) {
         fromInput.add(toInput).on('input', updateHandler);
     }
 
-    // 17. Khởi tạo bộ lọc Trạng thái dạng Pills chuẩn chuyên nghiệp (.pills / .pill / _KiotStatusFilter)
+    // 17. Khởi tạo bộ lọc Trạng thái dạng Pills chuẩn chuyên nghiệp (.pills / .pill / _KhoProStatusFilter)
     function initStatusFilter(containerSelector, onSelectCallback) {
         const container = $(containerSelector);
         if (!container.length) return;
@@ -950,12 +950,12 @@ window.KiotFilter = (function ($) {
     function initRowDetail(options) {
         const opt = $.extend({
             tableSelector: '',                                  // Selector bảng hoặc container (e.g. '#supplierTable')
-            rowSelector: '.product-row, .tbl-row, .kiot-row',  // Dòng dữ liệu chính
+            rowSelector: '.product-row, .tbl-row, .kp-row',  // Dòng dữ liệu chính
             detailRowSelector: null,                           // Selector / Hàm lấy dòng chi tiết. Mặc định '#detail-{id}' hoặc '#dtl-{id}'
-            wrapSelector: '.product-detail-panel-wrap, .kiot-detail-panel-wrap', // Khung bọc có hiệu ứng slideDown
-            tabBtnSelector: '.product-detail-tab-btn, .kiot-detail-tab-btn, .detail-tab-btn',
-            tabPaneSelector: '.tab-pane-content, .tab-pane, .kiot-tab-pane',
-            excludeClickSelector: 'input, button, a, label, .cell-checkbox, .cell-star, .star-btn, .w-chk, .kiot-item-edit-btn',
+            wrapSelector: '.product-detail-panel-wrap, .kp-detail-panel-wrap', // Khung bọc có hiệu ứng slideDown
+            tabBtnSelector: '.product-detail-tab-btn, .kp-detail-tab-btn, .detail-tab-btn',
+            tabPaneSelector: '.tab-pane-content, .tab-pane, .kp-tab-pane',
+            excludeClickSelector: 'input, button, a, label, .cell-checkbox, .cell-star, .star-btn, .w-chk, .kp-item-edit-btn',
             slideDuration: 150,
             fadeDuration: 120,
             autoCenter: false,                                 // Mặc định không tự động cuộn (giữ nguyên vị trí cuộn của người dùng)
@@ -966,7 +966,7 @@ window.KiotFilter = (function ($) {
 
         function scrollToCenter($row, $detailRow) {
             if (!$row || !$row.length || !$detailRow || !$detailRow.length) return;
-            const $scrollContainer = $detailRow.closest('.kiot-table-scroll-body');
+            const $scrollContainer = $detailRow.closest('.kp-table-scroll-body');
             if (!$scrollContainer.length) return;
 
             const containerHeight = $scrollContainer.innerHeight();
@@ -1014,9 +1014,9 @@ window.KiotFilter = (function ($) {
             }
             const $byDetail = $(`#detail-${id}, #dtl-${id}`);
             if ($byDetail.length) return $byDetail;
-            const $next = $row.next('tr.product-detail-row, tr.kiot-detail-row, tr.dtl');
+            const $next = $row.next('tr.product-detail-row, tr.kp-detail-row, tr.dtl');
             if ($next.length) return $next;
-            return $(`tr.product-detail-row[data-id="${id}"], tr.kiot-detail-row[data-id="${id}"]`);
+            return $(`tr.product-detail-row[data-id="${id}"], tr.kp-detail-row[data-id="${id}"]`);
         }
 
         function toggleRow(id, forceOpen) {
@@ -1034,8 +1034,8 @@ window.KiotFilter = (function ($) {
 
             // Đóng ngay lập tức các dòng chi tiết khác đang mở (tránh 2 hiệu ứng slide đồng thời làm rung giật bảng)
             const allDetailRows = opt.tableSelector
-                ? $tableEl.find('tr.product-detail-row, tr.kiot-detail-row, tr.dtl')
-                : $('tr.product-detail-row, tr.kiot-detail-row, tr.dtl');
+                ? $tableEl.find('tr.product-detail-row, tr.kp-detail-row, tr.dtl')
+                : $('tr.product-detail-row, tr.kp-detail-row, tr.dtl');
             allDetailRows.not($detailRow).each(function () {
                 const $other = $(this);
                 $other.find(opt.wrapSelector).stop(true, true).hide();
@@ -1084,7 +1084,7 @@ window.KiotFilter = (function ($) {
         const clickSelector = opt.tableSelector
             ? opt.rowSelector.split(',').map(s => `${opt.tableSelector} ${s.trim()}`).join(', ')
             : opt.rowSelector;
-        $(document).off('click.kiotRowDetail', clickSelector).on('click.kiotRowDetail', clickSelector, function (e) {
+        $(document).off('click.khoproRowDetail', clickSelector).on('click.khoproRowDetail', clickSelector, function (e) {
             if ($(e.target).closest(opt.excludeClickSelector).length) return;
             const id = $(this).data('id');
             if (id !== undefined && id !== null) {
@@ -1094,11 +1094,11 @@ window.KiotFilter = (function ($) {
 
         // Lắng nghe click chuyển tab trong Detail Panel
         const tabClickSelector = opt.tableSelector ? `${opt.tableSelector} ${opt.tabBtnSelector}` : opt.tabBtnSelector;
-        $(document).off('click.kiotRowTab', tabClickSelector).on('click.kiotRowTab', tabClickSelector, function (e) {
+        $(document).off('click.khoproRowTab', tabClickSelector).on('click.khoproRowTab', tabClickSelector, function (e) {
             e.stopPropagation();
             const $btn = $(this);
             const tabName = $btn.data('tab');
-            const $panel = $btn.closest('.product-detail-panel, .kiot-detail-panel, .ncc-detail-panel');
+            const $panel = $btn.closest('.product-detail-panel, .kp-detail-panel, .ncc-detail-panel');
             const $detailRow = $btn.closest('tr');
             let id = $detailRow.attr('id') ? $detailRow.attr('id').replace(/^(detail-|dtl-)/, '') : $detailRow.data('id');
             if (!id) {
@@ -1129,10 +1129,10 @@ window.KiotFilter = (function ($) {
     function initEntityActions(options) {
         const opt = $.extend({
             containerSelector: document,
-            editSelector: '.btn-edit-product, .btn-edit-ncc, .kiot-btn-edit',
-            deleteSelector: '.btn-delete-product, .btn-delete-ncc, .kiot-btn-delete',
-            statusSelector: '.btn-toggle-status-ncc, .btn-toggle-status, .kiot-btn-status',
-            copySelector: '.btn-copy-product, .kiot-btn-copy',
+            editSelector: '.btn-edit-product, .btn-edit-ncc, .kp-btn-edit',
+            deleteSelector: '.btn-delete-product, .btn-delete-ncc, .kp-btn-delete',
+            statusSelector: '.btn-toggle-status-ncc, .btn-toggle-status, .kp-btn-status',
+            copySelector: '.btn-copy-product, .kp-btn-copy',
             onEdit: null,
             onDelete: null,
             onToggleStatus: null,
@@ -1142,7 +1142,7 @@ window.KiotFilter = (function ($) {
         const $c = $(opt.containerSelector);
 
         // Edit
-        $c.off('click.kiotActionEdit', opt.editSelector).on('click.kiotActionEdit', opt.editSelector, function (e) {
+        $c.off('click.khoproActionEdit', opt.editSelector).on('click.khoproActionEdit', opt.editSelector, function (e) {
             e.preventDefault();
             const $btn = $(this);
             const id = $btn.data('id') || $btn.closest('[data-id]').data('id');
@@ -1152,7 +1152,7 @@ window.KiotFilter = (function ($) {
         });
 
         // Delete
-        $c.off('click.kiotActionDelete', opt.deleteSelector).on('click.kiotActionDelete', opt.deleteSelector, function (e) {
+        $c.off('click.khoproActionDelete', opt.deleteSelector).on('click.khoproActionDelete', opt.deleteSelector, function (e) {
             e.preventDefault();
             e.stopPropagation();
             const $btn = $(this);
@@ -1174,7 +1174,7 @@ window.KiotFilter = (function ($) {
         });
 
         // Toggle Status
-        $c.off('click.kiotActionStatus', opt.statusSelector).on('click.kiotActionStatus', opt.statusSelector, function (e) {
+        $c.off('click.khoproActionStatus', opt.statusSelector).on('click.khoproActionStatus', opt.statusSelector, function (e) {
             e.preventDefault();
             const $btn = $(this);
             const id = $btn.data('id') || $btn.closest('[data-id]').data('id');
@@ -1197,7 +1197,7 @@ window.KiotFilter = (function ($) {
 
         // Copy
         if (opt.copySelector) {
-            $c.off('click.kiotActionCopy', opt.copySelector).on('click.kiotActionCopy', opt.copySelector, function (e) {
+            $c.off('click.khoproActionCopy', opt.copySelector).on('click.khoproActionCopy', opt.copySelector, function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 const $btn = $(this);
@@ -1347,7 +1347,7 @@ window.KiotFilter = (function ($) {
             $inp.val(dFull(currentDate));
         });
 
-        $pop.off('click.kiotDtPop').on('click.kiotDtPop', function (e) {
+        $pop.off('click.khoproDtPop').on('click.khoproDtPop', function (e) {
             e.stopPropagation();
             const $n = $(e.target).closest('[data-dn]');
             const $d = $(e.target).closest('button.d');
@@ -1384,7 +1384,7 @@ window.KiotFilter = (function ($) {
             }
         });
 
-        const docEventNamespace = `click.kiotDtPop_${opt.popupSelector.replace(/[^a-zA-Z0-9_-]/g, '')}`;
+        const docEventNamespace = `click.khoproDtPop_${opt.popupSelector.replace(/[^a-zA-Z0-9_-]/g, '')}`;
         $(document).off(docEventNamespace).on(docEventNamespace, function (e) {
             if (!$(e.target).closest(`${opt.inputSelector}, ${opt.popupSelector}`).length) {
                 closePopup();
@@ -1473,7 +1473,7 @@ window.KiotFilter = (function ($) {
         }
 
         // Phím F3 toàn cục focus ô tìm kiếm
-        const f3EventName = 'keydown.kiotF3_' + opt.inputSelector.replace(/[^a-zA-Z0-9_-]/g, '');
+        const f3EventName = 'keydown.khoproF3_' + opt.inputSelector.replace(/[^a-zA-Z0-9_-]/g, '');
         $(document).off(f3EventName).on(f3EventName, function (e) {
             if (e.key === 'F3' || e.keyCode === 114) {
                 e.preventDefault();
@@ -1482,7 +1482,7 @@ window.KiotFilter = (function ($) {
         });
 
         // Gõ phím tìm kiếm debounce
-        $inp.off('input.kiotF3').on('input.kiotF3', function () {
+        $inp.off('input.khoproF3').on('input.khoproF3', function () {
             const q = $(this).val().trim();
             clearTimeout(searchTimeout);
 
@@ -1512,7 +1512,7 @@ window.KiotFilter = (function ($) {
         });
 
         // Phím điều hướng Up, Down, Enter, Escape
-        $inp.off('keydown.kiotF3Nav').on('keydown.kiotF3Nav', function (e) {
+        $inp.off('keydown.khoproF3Nav').on('keydown.khoproF3Nav', function (e) {
             const isVisible = $dropdown.is(':visible') || $dropdown.hasClass('show');
             if (!isVisible || !currentItems.length) {
                 if (e.key === 'Escape') {
@@ -1539,7 +1539,7 @@ window.KiotFilter = (function ($) {
         });
 
         // Focus lại nếu có text
-        $inp.off('focus.kiotF3').on('focus.kiotF3', function () {
+        $inp.off('focus.khoproF3').on('focus.khoproF3', function () {
             if ($(this).val().trim().length > 0 && currentItems.length > 0) {
                 $dropdown.addClass('show').show();
             }
@@ -1614,12 +1614,12 @@ window.KiotFilter = (function ($) {
             $dropdown.addClass('show').show();
         }
 
-        $dropdown.off('mouseenter.kiotF3').on('mouseenter.kiotF3', '.kk-autocomplete-item', function () {
+        $dropdown.off('mouseenter.khoproF3').on('mouseenter.khoproF3', '.kk-autocomplete-item', function () {
             const idx = parseInt($(this).data('index'), 10);
             if (!isNaN(idx)) setActiveIndex(idx, false);
         });
 
-        $dropdown.off('click.kiotF3').on('click.kiotF3', '.kk-autocomplete-item', function (e) {
+        $dropdown.off('click.khoproF3').on('click.khoproF3', '.kk-autocomplete-item', function (e) {
             e.stopPropagation();
             const idx = parseInt($(this).data('index'), 10);
             if (!isNaN(idx) && currentItems[idx]) {
@@ -1638,7 +1638,7 @@ window.KiotFilter = (function ($) {
             }
         });
 
-        const docClickEvent = 'click.kiotF3_' + opt.inputSelector.replace(/[^a-zA-Z0-9_-]/g, '');
+        const docClickEvent = 'click.khoproF3_' + opt.inputSelector.replace(/[^a-zA-Z0-9_-]/g, '');
         $(document).off(docClickEvent).on(docClickEvent, function (e) {
             if (!$(e.target).closest($inp).length && !$(e.target).closest($dropdown).length) {
                 $dropdown.removeClass('show').hide();
@@ -1693,7 +1693,7 @@ window.KiotFilter = (function ($) {
             }
         }
 
-        $tbody.off('click.kiotDocDel').on('click.kiotDocDel', opt.btnRemoveSelector, function (e) {
+        $tbody.off('click.khoproDocDel').on('click.khoproDocDel', opt.btnRemoveSelector, function (e) {
             e.preventDefault();
             e.stopPropagation();
             const $row = $(this).closest(opt.rowSelector);
@@ -1707,8 +1707,8 @@ window.KiotFilter = (function ($) {
                 }
             }
 
-            if (opt.confirmDelete && window.KiotConfirm) {
-                KiotConfirm.show({
+            if (opt.confirmDelete && window.AppConfirm) {
+                AppConfirm.show({
                     title: opt.confirmTitle,
                     message: opt.confirmMessage,
                     confirmText: 'Xóa',
@@ -1720,7 +1720,7 @@ window.KiotFilter = (function ($) {
             }
         });
 
-        $tbody.off('input.kiotDocQty change.kiotDocQty').on('input.kiotDocQty change.kiotDocQty', opt.qtyInputSelector, function () {
+        $tbody.off('input.khoproDocQty change.khoproDocQty').on('input.khoproDocQty change.khoproDocQty', opt.qtyInputSelector, function () {
             if (typeof opt.onRecalc === 'function') {
                 opt.onRecalc($tbody.find(opt.rowSelector).length);
             }
@@ -1736,7 +1736,7 @@ window.KiotFilter = (function ($) {
         };
     }
 
-    // 21. KiotImageUploader – Quản lý tải ảnh (1 ảnh chính + 4 ảnh phụ, nén Canvas, kéo-thả, paste Ctrl+V)
+    // 21. KhoProImageUploader – Quản lý tải ảnh (1 ảnh chính + 4 ảnh phụ, nén Canvas, kéo-thả, paste Ctrl+V)
     function initImageUploader(options) {
         const opt = $.extend({
             mainBoxSelector: '#hhImgMain',
@@ -1750,17 +1750,17 @@ window.KiotFilter = (function ($) {
             maxFileSizeMB: 15,
             initialImages: [],
             onToast: function (msg, type) {
-                if (window.KiotToast) {
-                    if (type === 'error') KiotToast.error(msg);
-                    else if (type === 'warning') KiotToast.warning(msg);
-                    else KiotToast.info(msg);
+                if (window.AppToast) {
+                    if (type === 'error') AppToast.error(msg);
+                    else if (type === 'warning') AppToast.warning(msg);
+                    else AppToast.info(msg);
                 } else if (typeof showToast === 'function') {
                     showToast(msg);
                 }
             },
             onConfirm: function (msg, title, cb) {
-                if (window.KiotConfirm) {
-                    window.KiotConfirm.show({
+                if (window.AppConfirm) {
+                    window.AppConfirm.show({
                         title: title || 'Xác nhận xóa',
                         message: msg,
                         confirmText: 'Xóa',
@@ -1895,7 +1895,7 @@ window.KiotFilter = (function ($) {
         }
 
         // Click vùng ảnh chính
-        $mainBox.off('click.kiotImg').on('click.kiotImg', function (e) {
+        $mainBox.off('click.khoproImg').on('click.khoproImg', function (e) {
             if ($(e.target).closest('#btnRemoveMainImg').length) {
                 e.stopPropagation();
                 if (imgs.length > 0) {
@@ -1918,7 +1918,7 @@ window.KiotFilter = (function ($) {
         });
 
         // Click thumbs
-        $thumbsBox.off('click.kiotImg').on('click.kiotImg', function (e) {
+        $thumbsBox.off('click.khoproImg').on('click.khoproImg', function (e) {
             const delBtn = e.target.closest('[data-del-sub]');
             if (delBtn) {
                 e.stopPropagation();
@@ -1955,7 +1955,7 @@ window.KiotFilter = (function ($) {
         });
 
         // Input file change (thêm ảnh)
-        $fileInput.off('change.kiotImg').on('change.kiotImg', async function (e) {
+        $fileInput.off('change.khoproImg').on('change.khoproImg', async function (e) {
             const files = [...(e.target.files || [])];
             if (!files.length) return;
 
@@ -1981,7 +1981,7 @@ window.KiotFilter = (function ($) {
 
         // Input file change (thay ảnh chính)
         if ($fileReplaceMain.length) {
-            $fileReplaceMain.off('change.kiotImg').on('change.kiotImg', async function (e) {
+            $fileReplaceMain.off('change.khoproImg').on('change.khoproImg', async function (e) {
                 const file = e.target.files && e.target.files[0];
                 if (!file) return;
 
@@ -2006,18 +2006,18 @@ window.KiotFilter = (function ($) {
         }
 
         // Kéo thả ảnh vào mainBox
-        $mainBox.off('dragenter.kiotImg dragover.kiotImg dragleave.kiotImg drop.kiotImg');
-        $mainBox.on('dragenter.kiotImg dragover.kiotImg', function (e) {
+        $mainBox.off('dragenter.khoproImg dragover.khoproImg dragleave.khoproImg drop.khoproImg');
+        $mainBox.on('dragenter.khoproImg dragover.khoproImg', function (e) {
             e.preventDefault();
             e.stopPropagation();
             $mainBox.addClass('drag-over');
         });
-        $mainBox.on('dragleave.kiotImg drop.kiotImg', function (e) {
+        $mainBox.on('dragleave.khoproImg drop.khoproImg', function (e) {
             e.preventDefault();
             e.stopPropagation();
             $mainBox.removeClass('drag-over');
         });
-        $mainBox.on('drop.kiotImg', async function (e) {
+        $mainBox.on('drop.khoproImg', async function (e) {
             const dt = e.originalEvent?.dataTransfer;
             const files = [...(dt?.files || [])].filter(f => f.type && f.type.startsWith('image/'));
             if (!files.length) return;
@@ -2041,8 +2041,8 @@ window.KiotFilter = (function ($) {
         });
 
         // Dán ảnh từ Clipboard Ctrl + V
-        $(window).off('paste.kiotImgUploader');
-        $(window).on('paste.kiotImgUploader', async function (e) {
+        $(window).off('paste.khoproImgUploader');
+        $(window).on('paste.khoproImgUploader', async function (e) {
             if ($modal.length && ($modal.hasClass('hidden') || $modal.css('display') === 'none' || !$modal.is(':visible'))) {
                 return;
             }
@@ -2103,12 +2103,12 @@ window.KiotFilter = (function ($) {
         };
     }
 
-    // 22. KiotListPage – Bộ máy điều khiển trang danh sách chuẩn chuyên nghiệp (Boilerplate Engine)
+    // 22. KhoProListPage – Bộ máy điều khiển trang danh sách chuẩn chuyên nghiệp (Boilerplate Engine)
     function createListPage(options) {
         const opt = $.extend({
-            containerSelector: '#kiotContainer',
+            containerSelector: '#kpContainer',
             filterUrl: '',
-            tableSelector: '#mainTable, .kiot-table, .tbl',
+            tableSelector: '#mainTable, .kp-table, .tbl',
             tableWrapperSelector: '#tableContainer, #tableWrapper',
             searchInputSelector: '#keywordSearch, #filterSearch, #topSearch, input[name="Q"]',
             storageKeyCols: '',
@@ -2172,7 +2172,7 @@ window.KiotFilter = (function ($) {
                     tableSelector: opt.tableSelector,
                     rowSelector: 'tr.product-row, tr.tbl-row',
                     detailRowSelector: '#dtl-{id}',
-                    wrapSelector: '.product-detail-panel-wrap, .kiot-detail-panel-wrap',
+                    wrapSelector: '.product-detail-panel-wrap, .kp-detail-panel-wrap',
                     tabBtnSelector: '.product-detail-tab-btn, .dp-tab',
                     tabPaneSelector: '.tab-pane-content, .tab-pane, .dp-pane',
                     excludeClickSelector: 'input, button, a, label, .w-chk, .w-star, .cell-star, .star-btn, .cell-checkbox, .row-select',
@@ -2259,8 +2259,8 @@ window.KiotFilter = (function ($) {
                 },
                 error: function () {
                     if ($wrap.length) $wrap.css('opacity', '1');
-                    if (window.KiotToast) {
-                        KiotToast.error('Không thể tải dữ liệu bảng.');
+                    if (window.AppToast) {
+                        AppToast.error('Không thể tải dữ liệu bảng.');
                     }
                 }
             });
@@ -2282,7 +2282,7 @@ window.KiotFilter = (function ($) {
         // Ô tìm kiếm (Debounce + Enter)
         const $searchInput = $(opt.searchInputSelector);
         if ($searchInput.length) {
-            $searchInput.off('input.kiotList').on('input.kiotList', function () {
+            $searchInput.off('input.khoproList').on('input.khoproList', function () {
                 clearTimeout(searchTimer);
                 F.q = $(this).val();
                 searchTimer = setTimeout(() => {
@@ -2291,7 +2291,7 @@ window.KiotFilter = (function ($) {
                 }, 350);
             });
 
-            $searchInput.off('keydown.kiotList').on('keydown.kiotList', function (e) {
+            $searchInput.off('keydown.khoproList').on('keydown.khoproList', function (e) {
                 if (e.key === 'Enter') {
                     clearTimeout(searchTimer);
                     F.q = $(this).val();
@@ -2302,7 +2302,7 @@ window.KiotFilter = (function ($) {
         }
 
         // Phân trang AJAX
-        $(document).off('click.kiotListPageAjax', '.page-ajax').on('click.kiotListPageAjax', '.page-ajax', function (e) {
+        $(document).off('click.khoproListPageAjax', '.page-ajax').on('click.khoproListPageAjax', '.page-ajax', function (e) {
             e.preventDefault();
             const p = parseInt($(this).data('page'));
             if (p && p > 0 && p !== F.page) {
@@ -2313,7 +2313,7 @@ window.KiotFilter = (function ($) {
         });
 
         // Sắp xếp cột 3 trạng thái (Không sort -> ASC -> DESC -> Không sort)
-        $(document).off('click.kiotListSort', `${opt.tableSelector} thead th.sortable-th`).on('click.kiotListSort', `${opt.tableSelector} thead th.sortable-th`, function (e) {
+        $(document).off('click.khoproListSort', `${opt.tableSelector} thead th.sortable-th`).on('click.khoproListSort', `${opt.tableSelector} thead th.sortable-th`, function (e) {
             e.preventDefault();
             const col = $(this).data('col');
             if (!col) return;
@@ -2337,7 +2337,7 @@ window.KiotFilter = (function ($) {
         });
 
         // Đánh dấu sao trên Header
-        $(document).off('click.kiotListStarHeader', '#starHeaderFilter').on('click.kiotListStarHeader', '#starHeaderFilter', function (e) {
+        $(document).off('click.khoproListStarHeader', '#starHeaderFilter').on('click.khoproListStarHeader', '#starHeaderFilter', function (e) {
             e.preventDefault();
             e.stopPropagation();
             F.starred = !F.starred;
@@ -2347,7 +2347,7 @@ window.KiotFilter = (function ($) {
 
         // Đánh dấu sao trên dòng bảng
         if (toggleStarUrl) {
-            $(document).off('click.kiotListStarRow', '.star-btn:not(#starHeaderFilter)').on('click.kiotListStarRow', '.star-btn:not(#starHeaderFilter)', function (e) {
+            $(document).off('click.khoproListStarRow', '.star-btn:not(#starHeaderFilter)').on('click.khoproListStarRow', '.star-btn:not(#starHeaderFilter)', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 const $btn = $(this);
@@ -2380,7 +2380,7 @@ window.KiotFilter = (function ($) {
         }
 
         // Phím tắt toàn cục: F3 focus tìm kiếm & F4 gập mở sidebar
-        $(document).off('keydown.kiotListHotkeys').on('keydown.kiotListHotkeys', function (e) {
+        $(document).off('keydown.khoproListHotkeys').on('keydown.khoproListHotkeys', function (e) {
             if (e.key === 'F3') {
                 e.preventDefault();
                 const $inp = $(opt.searchInputSelector);
@@ -2465,7 +2465,7 @@ window.KiotFilter = (function ($) {
 })(jQuery);
 
 // Global alias cho backwards compatibility
-if (typeof window !== 'undefined' && window.KiotFilter) {
-    window.initF3ProductSearch = window.KiotFilter.initProductSearch;
+if (typeof window !== 'undefined' && window.AppFilter) {
+    window.initF3ProductSearch = window.AppFilter.initProductSearch;
 }
 

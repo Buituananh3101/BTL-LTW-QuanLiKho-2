@@ -1,4 +1,4 @@
-/**
+﻿/**
  * bao-cao-ton-kho.js - Quản lý tương tác Báo cáo Tồn kho theo kho (Pivot Kho)
  * Chuẩn hóa 100% theo khuôn mẫu Danh sách Hàng hóa (Inline Subrow, Summary Row, Column Toggle)
  */
@@ -31,9 +31,9 @@
     const nhomNames = {};
 
     // 2. Khởi tạo Sidebar chuyên nghiệp F4 & Hotkeys
-    if (window.KiotFilter && typeof KiotFilter.initSidebar === 'function') {
-        KiotFilter.initSidebar({
-            storageKey: 'kiot_sidebar_baocao_tonkho'
+    if (window.AppFilter && typeof AppFilter.initSidebar === 'function') {
+        AppFilter.initSidebar({
+            storageKey: 'kp_sidebar_baocao_tonkho'
         });
     }
 
@@ -48,8 +48,8 @@
     });
 
     function closeAllDropdowns() {
-        $('.kiot-ms-dropdown, .kiot-ss-dropdown').removeClass('show drop-up').css('max-height', '');
-        $('.kiot-multiselect-box, .kiot-single-select-box').removeClass('open is-active');
+        $('.kp-ms-dropdown, .kp-ss-dropdown').removeClass('show drop-up').css('max-height', '');
+        $('.kp-multiselect-box, .kp-single-select-box').removeClass('open is-active');
     }
 
     // 3. Tùy chọn ẩn / hiện cột chuẩn Danh sách Hàng hóa
@@ -57,7 +57,7 @@
         $('#colMenu input[data-c]').each(function () {
             const colKey = $(this).data('c');
             const isVisible = $(this).is(':checked');
-            localStorage.setItem('kiot_tonkho_col_' + colKey, isVisible ? '1' : '0');
+            localStorage.setItem('kp_tonkho_col_' + colKey, isVisible ? '1' : '0');
 
             if (colKey === 'khos') {
                 $(`th[data-col^="kho_"], td[data-col^="kho_"]`).toggle(isVisible);
@@ -74,7 +74,7 @@
     function initColumnToggle() {
         $('#colMenu input[data-c]').each(function () {
             const colKey = $(this).data('c');
-            const saved = localStorage.getItem('kiot_tonkho_col_' + colKey);
+            const saved = localStorage.getItem('kp_tonkho_col_' + colKey);
             if (saved !== null) {
                 $(this).prop('checked', saved === '1');
             }
@@ -121,8 +121,8 @@
             },
             error: function () {
                 $wrap.css('opacity', '1');
-                if (window.KiotToast) {
-                    KiotToast.error('Không thể tải dữ liệu báo cáo tồn kho.');
+                if (window.AppToast) {
+                    AppToast.error('Không thể tải dữ liệu báo cáo tồn kho.');
                 }
             }
         });
@@ -154,9 +154,9 @@
         if (!$box.length || !$dropdown.length) return;
 
         // Cache tên item từ data-val và data-name
-        $dropdown.find('.kiot-ms-item').each(function () {
+        $dropdown.find('.kp-ms-item').each(function () {
             const val = parseInt($(this).data('val'), 10);
-            const name = $(this).data('name') || $(this).find('.kiot-ms-text').text().trim() || $(this).text().trim();
+            const name = $(this).data('name') || $(this).find('.kp-ms-text').text().trim() || $(this).text().trim();
             if (!isNaN(val) && name) namesMap[val] = name;
         });
 
@@ -164,7 +164,7 @@
 
         function renderBox() {
             // Đồng bộ checkbox và class selected
-            $dropdown.find('.kiot-ms-item').each(function () {
+            $dropdown.find('.kp-ms-item').each(function () {
                 const val = parseInt($(this).data('val'), 10);
                 const isSel = selectedArray.includes(val);
                 $(this).toggleClass('selected', isSel);
@@ -182,18 +182,18 @@
                 name: namesMap[id] || ('#' + id)
             }));
 
-            if (window.KiotFilter && typeof window.KiotFilter.renderTagPills === 'function') {
-                window.KiotFilter.renderTagPills($box, selectedItems, placeholder, 2);
+            if (window.AppFilter && typeof window.AppFilter.renderTagPills === 'function') {
+                window.AppFilter.renderTagPills($box, selectedItems, placeholder, 2);
             } else {
                 if (selectedItems.length === 0 || (boxId === '#boxKho' && selectedItems.length === totalCount)) {
-                    $box.html(`<span class="kiot-ms-placeholder">${placeholder}</span>`);
+                    $box.html(`<span class="kp-ms-placeholder">${placeholder}</span>`);
                 } else {
                     let html = '';
                     selectedItems.slice(0, 2).forEach(it => {
-                        html += `<span class="kiot-pill-tag" data-val="${it.val}">${it.name} <span class="tag-remove">&times;</span></span>`;
+                        html += `<span class="kp-pill-tag" data-val="${it.val}">${it.name} <span class="tag-remove">&times;</span></span>`;
                     });
                     if (selectedItems.length > 2) {
-                        html += `<span class="kiot-pill-more">+${selectedItems.length - 2}</span>`;
+                        html += `<span class="kp-pill-more">+${selectedItems.length - 2}</span>`;
                     }
                     $box.html(html);
                 }
@@ -208,10 +208,10 @@
 
         // Click $box để mở/đóng
         $box.on('click', function (e) {
-            const $tagRemove = $(e.target).closest('.tag-remove, .kiot-tag-close');
+            const $tagRemove = $(e.target).closest('.tag-remove, .kp-tag-close');
             if ($tagRemove.length) {
                 e.stopPropagation();
-                const $pill = $tagRemove.closest('.kiot-pill-tag').length ? $tagRemove.closest('.kiot-pill-tag') : $tagRemove;
+                const $pill = $tagRemove.closest('.kp-pill-tag').length ? $tagRemove.closest('.kp-pill-tag') : $tagRemove;
                 const val = parseInt($pill.data('val'), 10);
                 const idx = selectedArray.indexOf(val);
                 if (idx !== -1) {
@@ -230,21 +230,21 @@
                 $dropdown.addClass('show');
                 $box.addClass('open is-active');
 
-                if (window.KiotFilter && typeof window.KiotFilter.checkSidebarDropdownDirection === 'function') {
-                    window.KiotFilter.checkSidebarDropdownDirection($box[0], $dropdown[0]);
+                if (window.AppFilter && typeof window.AppFilter.checkSidebarDropdownDirection === 'function') {
+                    window.AppFilter.checkSidebarDropdownDirection($box[0], $dropdown[0]);
                 }
 
-                const $searchInput = $dropdown.find('.kiot-ms-search input, input[type="text"]');
+                const $searchInput = $dropdown.find('.kp-ms-search input, input[type="text"]');
                 if ($searchInput.length) {
                     $searchInput.val('');
-                    $dropdown.find('.kiot-ms-item').show();
+                    $dropdown.find('.kp-ms-item').show();
                     setTimeout(() => $searchInput.trigger('focus'), 50);
                 }
             }
         });
 
         // Click từng item trong dropdown
-        $dropdown.on('click', '.kiot-ms-item', function (e) {
+        $dropdown.on('click', '.kp-ms-item', function (e) {
             e.stopPropagation();
             const val = parseInt($(this).data('val'), 10);
             if (isNaN(val)) return;
@@ -261,15 +261,15 @@
         });
 
         // Tìm kiếm nội bộ
-        $dropdown.on('click', '.kiot-ms-search input, input[type="text"]', function (e) {
+        $dropdown.on('click', '.kp-ms-search input, input[type="text"]', function (e) {
             e.stopPropagation();
         });
 
-        $dropdown.on('input', '.kiot-ms-search input, input[type="text"]', function (e) {
+        $dropdown.on('input', '.kp-ms-search input, input[type="text"]', function (e) {
             e.stopPropagation();
             const term = $(this).val().trim().toLowerCase();
-            $dropdown.find('.kiot-ms-item').each(function () {
-                const text = ($(this).data('name') || $(this).find('.kiot-ms-text').text() || $(this).text() || '').trim().toLowerCase();
+            $dropdown.find('.kp-ms-item').each(function () {
+                const text = ($(this).data('name') || $(this).find('.kp-ms-text').text() || $(this).text() || '').trim().toLowerCase();
                 $(this).toggle(!term || text.includes(term));
             });
         });
@@ -312,18 +312,18 @@
             if (willShow) {
                 $dropdown.addClass('show');
                 $box.addClass('open is-active');
-                if (window.KiotFilter && typeof window.KiotFilter.checkSidebarDropdownDirection === 'function') {
-                    window.KiotFilter.checkSidebarDropdownDirection($box[0], $dropdown[0]);
+                if (window.AppFilter && typeof window.AppFilter.checkSidebarDropdownDirection === 'function') {
+                    window.AppFilter.checkSidebarDropdownDirection($box[0], $dropdown[0]);
                 }
             }
         });
 
-        $dropdown.on('click', '.kiot-ss-item', function (e) {
+        $dropdown.on('click', '.kp-ss-item', function (e) {
             e.stopPropagation();
             const val = $(this).data('val');
             const label = $(this).find('span').text().trim();
 
-            $dropdown.find('.kiot-ss-item').removeClass('selected');
+            $dropdown.find('.kp-ss-item').removeClass('selected');
             $(this).addClass('selected');
             $text.text(label);
 
@@ -337,7 +337,7 @@
 
     setupSingleSelectTon();
 
-    // 8. Khởi tạo Checkbox Status Filter: Hàng hóa (chuẩn Lego _KiotStatusFilter)
+    // 8. Khởi tạo Checkbox Status Filter: Hàng hóa (chuẩn Lego _KhoProStatusFilter)
     $(document).on('change', '#sidebarFilterCol input[data-s]', function () {
         selectedTrangThais = $('#sidebarFilterCol input[data-s]:checked').map(function () {
             return $(this).data('s');
@@ -379,7 +379,7 @@
         const p = parseInt($(this).data('page'));
         if (p && p !== currentPage) {
             loadTable(p);
-            $('.kiot-table-scroll-body').scrollTop(0);
+            $('.kp-table-scroll-body').scrollTop(0);
         }
     });
 
@@ -521,7 +521,7 @@
 
     // 14. BẮT BUỘC: Đóng các dropdown khi click ra ngoài document
     $(document).on('click', function (e) {
-        if (!$(e.target).closest('.kiot-multiselect-box, .kiot-single-select-box, .kiot-ms-dropdown, .kiot-ss-dropdown, #colMenu, #btnColsDropdown').length) {
+        if (!$(e.target).closest('.kp-multiselect-box, .kp-single-select-box, .kp-ms-dropdown, .kp-ss-dropdown, #colMenu, #btnColsDropdown').length) {
             closeAllDropdowns();
         }
     });

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * the-kho-index.js - Quản lý tương tác màn hình Báo cáo Thẻ kho
  * Chuẩn hóa 100% theo khuôn mẫu Lego hệ thống
  */
@@ -18,15 +18,15 @@
     let currentProductText = $('#tkSearchProductInput').val().trim();
 
     // 2. Khởi tạo Sidebar thu gọn (F4)
-    if (window.KiotFilter && typeof KiotFilter.initSidebar === 'function') {
-        KiotFilter.initSidebar({
-            storageKey: 'kiot_thekho_sidebar'
+    if (window.AppFilter && typeof AppFilter.initSidebar === 'function') {
+        AppFilter.initSidebar({
+            storageKey: 'kp_thekho_sidebar'
         });
     }
 
-    // 3. Khởi tạo Bộ lọc Thời gian Lego (_KiotDateFilter)
-    if (window.KiotFilter && typeof KiotFilter.initDateFilter === 'function') {
-        KiotFilter.initDateFilter('thekho_date', function (from, to, text, val) {
+    // 3. Khởi tạo Bộ lọc Thời gian Lego (_KhoProDateFilter)
+    if (window.AppFilter && typeof AppFilter.initDateFilter === 'function') {
+        AppFilter.initDateFilter('thekho_date', function (from, to, text, val) {
             customTuNgay = from ? formatDateParam(from) : '';
             customDenNgay = to ? formatDateParam(to) : '';
             dateRange = val || 'CUSTOM';
@@ -35,8 +35,8 @@
     }
 
     // 4. Khởi tạo Tìm kiếm Mặt hàng Autocomplete F3 Lego (initProductSearch)
-    if (window.KiotFilter && typeof KiotFilter.initProductSearch === 'function') {
-        KiotFilter.initProductSearch({
+    if (window.AppFilter && typeof AppFilter.initProductSearch === 'function') {
+        AppFilter.initProductSearch({
             inputSelector: '#tkSearchProductInput',
             dropdownSelector: '#tkProductSuggestDropdown',
             apiUrl: '/BaoCao/SearchHangHoa',
@@ -176,7 +176,7 @@
             updateSuggestDropdownPosition();
         }
     });
-    $('#side, .kiot-filter-box').on('scroll', function () {
+    $('#side, .kp-filter-box').on('scroll', function () {
         if ($('#tkProductSuggestDropdown').hasClass('show') || $('#tkProductSuggestDropdown').is(':visible')) {
             updateSuggestDropdownPosition();
         }
@@ -223,7 +223,7 @@
         loadData(1);
     });
 
-    // 5. Khởi tạo Dropdown Single-Select Chi nhánh kho Lego (KiotFilter.initSingleSelect)
+    // 5. Khởi tạo Dropdown Single-Select Chi nhánh kho Lego (AppFilter.initSingleSelect)
     function updateKhoDot(val) {
         const khoId = parseInt(val, 10) || 0;
         const $dot = $('#dotKho');
@@ -234,18 +234,18 @@
         }
     }
 
-    if (window.KiotFilter && typeof KiotFilter.initSingleSelect === 'function') {
-        KiotFilter.initSingleSelect('#boxKho', '#dropdownKho', function (val, text) {
+    if (window.AppFilter && typeof AppFilter.initSingleSelect === 'function') {
+        AppFilter.initSingleSelect('#boxKho', '#dropdownKho', function (val, text) {
             $('#selectKhoLuuTru').val(val);
             selectedMaKho = parseInt(val, 10) || 0;
             updateKhoDot(val);
             loadData(1);
         });
     } else {
-        $('#dropdownKho .kiot-ss-item').on('click', function () {
+        $('#dropdownKho .kp-ss-item').on('click', function () {
             const val = $(this).data('val');
             const text = $(this).find('span').text().trim();
-            $('#dropdownKho .kiot-ss-item').removeClass('selected');
+            $('#dropdownKho .kp-ss-item').removeClass('selected');
             $(this).addClass('selected');
             $('#textKho').text(text);
             $('#selectKhoLuuTru').val(val);
@@ -256,7 +256,7 @@
         });
     }
 
-    // 6. Sự kiện lọc theo loại giao dịch (checkbox Lego _KiotStatusFilter)
+    // 6. Sự kiện lọc theo loại giao dịch (checkbox Lego _KhoProStatusFilter)
     $(document).on('change', 'input[data-s]', function () {
         updateStatusDot();
         loadData(1);
@@ -363,8 +363,8 @@
             },
             error: function () {
                 $content.css('opacity', '1');
-                if (window.KiotToast && typeof KiotToast.error === 'function') {
-                    KiotToast.error('Không thể tải dữ liệu Thẻ kho. Vui lòng thử lại.');
+                if (window.AppToast && typeof AppToast.error === 'function') {
+                    AppToast.error('Không thể tải dữ liệu Thẻ kho. Vui lòng thử lại.');
                 } else {
                     alert('Không thể tải dữ liệu Thẻ kho.');
                 }

@@ -1,6 +1,6 @@
 ﻿# Đặc tả Chức năng: Trả hàng nhập (Purchase Returns)
 
-> **Mục tiêu**: Quản lý trả hàng cho NCC chuẩn chuyên nghiệp & prototype `prototype-trahangnhap.html`, đồng bộ khuôn mẫu Nhập hàng (`NhapHang`). Tái sử dụng khối LEGO: `KiotFilter`, `KiotToast`, `f3-product-search`, `_KiotDateFilter`, `_KiotPromptModal`...
+> **Mục tiêu**: Quản lý trả hàng cho NCC chuẩn chuyên nghiệp & prototype `prototype-trahangnhap.html`, đồng bộ khuôn mẫu Nhập hàng (`NhapHang`). Tái sử dụng khối LEGO: `AppFilter`, `AppToast`, `f3-product-search`, `_DateFilter`, `_PromptModal`...
 
 ---
 
@@ -55,7 +55,7 @@
 ## 2. Luồng Nghiệp vụ & Giao diện (Chuẩn thực tế & Prototype)
 
 ### 2.1. Danh sách (`Index`)
-- **Cột lọc trái (Leftmenu)**: Thời gian (`_KiotDateFilter`), Trạng thái (Phiếu tạm, Đã trả hàng, Đã hủy), MultiSelect dropdowns tag pills kèm tìm kiếm nội bộ (Người tạo, Người trả, NCC). Nút tròn F4 thò thụt có hover buffer chống flicker (khi thu gọn luôn bám sát lề trái 8px). Phím tắt F4 bật/tắt bộ lọc, F3 tìm kiếm nhanh, hỗ trợ mở/đóng trên mobile.
+- **Cột lọc trái (Leftmenu)**: Thời gian (`_DateFilter`), Trạng thái (Phiếu tạm, Đã trả hàng, Đã hủy), MultiSelect dropdowns tag pills kèm tìm kiếm nội bộ (Người tạo, Người trả, NCC). Nút tròn F4 thò thụt có hover buffer chống flicker (khi thu gọn luôn bám sát lề trái 8px). Phím tắt F4 bật/tắt bộ lọc, F3 tìm kiếm nhanh, hỗ trợ mở/đóng trên mobile.
 - **Topbar**: Tìm mã phiếu (F3), tìm nâng cao (NCC, hàng hóa), nút "+ Trả hàng nhập", "Xuất file", "Tùy chọn cột".
 - **Bảng dữ liệu**:
   - Cuộn 2 chiều độc lập, hàng tổng hợp cố định dưới header.

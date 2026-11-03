@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 
 namespace BTL_LTW_QuanLiKho_2.Helpers;
 
 /// <summary>
-/// DateRangeHelper – Tiện ích tính toán dải ngày (FromDate, ToDate) chuẩn KiotViet dùng chung toàn hệ thống.
+/// DateRangeHelper – Tiện ích tính toán dải ngày (FromDate, ToDate) chuẩn KhoPro dùng chung toàn hệ thống.
 /// Hỗ trợ cả các bộ lọc danh mục và bộ lọc chứng từ (Hàng hóa, Kiểm kho, Nhập kho, Xuất kho, Báo cáo...).
 /// </summary>
 public static class DateRangeHelper

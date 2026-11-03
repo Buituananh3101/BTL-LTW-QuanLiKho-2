@@ -1,4 +1,4 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.NhapHang.NhapHangFormVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.NhapHang.NhapHangFormVM
 @using System.Globalization
 @{
     var viCulture = CultureInfo.GetCultureInfo("vi-VN");
@@ -131,7 +131,7 @@
                                         <td class="text-end">
                                             @if (!Model.IsReadOnly)
                                             {
-                                                <input type="text" class="qty line-price kiot-num" value="@line.DonGiaNhap.ToString("N0", viCulture)" style="width: 100px;" />
+                                                <input type="text" class="qty line-price kp-num" value="@line.DonGiaNhap.ToString("N0", viCulture)" style="width: 100px;" />
                                             }
                                             else
                                             {
@@ -141,7 +141,7 @@
                                         <td class="text-end col-giamgia">
                                             @if (!Model.IsReadOnly)
                                             {
-                                                <input type="text" class="qty line-discount kiot-num" value="@line.GiamGia.ToString("N0", viCulture)" style="width: 90px;" />
+                                                <input type="text" class="qty line-discount kp-num" value="@line.GiamGia.ToString("N0", viCulture)" style="width: 90px;" />
                                             }
                                             else
                                             {
@@ -289,7 +289,7 @@
                 <div class="pr">
                     <span class="l text-muted">Giảm giá</span>
                     <div class="v">
-                        <input type="text" id="orderDiscountInput" class="inp kiot-num" 
+                        <input type="text" id="orderDiscountInput" class="inp kp-num" 
                                value="@Model.GiamGia.ToString("N0", viCulture)" 
                                @(Model.IsReadOnly ? "disabled" : "") style="max-width:140px;height:32px;">
                     </div>

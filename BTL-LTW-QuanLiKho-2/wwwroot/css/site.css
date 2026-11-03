@@ -1,5 +1,5 @@
 ﻿/* ===== wwwroot/css/site.css =====
-   Giao diện KiotViet chuẩn từ prototype-kiemkho.html */
+   Giao diện KhoPro chuẩn từ prototype-kiemkho.html */
 :root {
   --brand: #0a66e8;        /* xanh thanh menu */
   --brand-dark: #0b57c4;   /* mục menu đang chọn */
@@ -424,7 +424,7 @@ body {
   flex-direction: column;
 }
 #content > div,
-.kiot-table-wrapper,
+.kp-table-wrapper,
 #tableWrapper,
 #tableContainer,
 #theKhoTableContainer,
@@ -438,7 +438,7 @@ body {
   width: 100%;
   position: relative;
 }
-.kiot-table-scroll-body {
+.kp-table-scroll-body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -447,7 +447,7 @@ body {
   width: 100%;
   scrollbar-gutter: stable;
 }
-.kiot-table-pagination {
+.kp-table-pagination {
   flex-shrink: 0;
   display: flex;
   justify-content: space-between;
@@ -472,7 +472,7 @@ body {
   border-collapse: separate !important;
   border-spacing: 0 !important;
 }
-#userTableContainer .kiot-table-scroll-body {
+#userTableContainer .kp-table-scroll-body {
   overflow-x: hidden !important;
 }
 #userTable th,
@@ -500,7 +500,7 @@ body {
   border-collapse: separate !important;
   border-spacing: 0 !important;
 }
-#khoTableContainer .kiot-table-scroll-body {
+#khoTableContainer .kp-table-scroll-body {
   overflow-x: hidden !important;
   width: 100% !important;
 }
@@ -735,7 +735,7 @@ body {
   line-height: 1.2;
 }
 
-/* Bảng Hàng hóa giữ độ rộng cột cố định chuẩn KiotViet & Kiểm kho, không co rút khi thêm cột */
+/* Bảng Hàng hóa giữ độ rộng cột cố định chuẩn KhoPro & Kiểm kho, không co rút khi thêm cột */
 #productTable {
   width: max-content !important;
   min-width: 760px !important;
@@ -790,14 +790,14 @@ body {
   z-index: 1 !important;
 }
 
-tr.kiot-detail-row,
+tr.kp-detail-row,
 tr.product-detail-row,
 tr.tonkho-detail-row {
   position: relative;
   z-index: 1;
 }
 
-/* Sortable column headers (KiotViet style - 3-state sort) */
+/* Sortable column headers (KhoPro style - 3-state sort) */
 .sortable-th {
   cursor: pointer;
   user-select: none;
@@ -913,7 +913,7 @@ tr.tonkho-detail-row {
 .tbl tbody tr:hover {
   background: #f8fafc;
 }
-/* Dòng tổng hợp (Summary row) chuẩn phong cách KiotViet - cuộn tự nhiên cùng bảng */
+/* Dòng tổng hợp (Summary row) chuẩn phong cách KhoPro - cuộn tự nhiên cùng bảng */
 .tbl tr.summary-row,
 .tbl thead tr.summary-row,
 .tbl tbody tr.summary-row {
@@ -939,7 +939,7 @@ tr.tonkho-detail-row {
   text-align: right;
 }
 
-/* Star bookmark button (KiotViet style) */
+/* Star bookmark button (KhoPro style) */
 .star-btn {
   display: inline-flex;
   align-items: center;
@@ -1024,8 +1024,8 @@ tr.tonkho-detail-row {
   display: block;
 }
 
-/* KiotViet layout aligned directly above the goods list */
-.kiot-container {
+/* KhoPro layout aligned directly above the goods list */
+.kp-container {
   flex: 1;
   min-height: 0;
   height: 100%;
@@ -1037,7 +1037,7 @@ tr.tonkho-detail-row {
   overflow: hidden;
   transition: gap 0.4s cubic-bezier(0.25, 1, 0.35, 1);
 }
-.kiot-sidebar-col {
+.kp-sidebar-col {
   width: 250px;
   flex: 0 0 250px;
   height: 100%;
@@ -1048,7 +1048,7 @@ tr.tonkho-detail-row {
   overflow: hidden;
   transition: width 0.4s cubic-bezier(0.25, 1, 0.35, 1), opacity 0.35s cubic-bezier(0.25, 1, 0.35, 1), margin 0.4s cubic-bezier(0.25, 1, 0.35, 1);
 }
-.kiot-sidebar-title {
+.kp-sidebar-title {
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 12px;
@@ -1059,7 +1059,7 @@ tr.tonkho-detail-row {
   align-items: center;
   white-space: nowrap;
 }
-.kiot-filter-box {
+.kp-filter-box {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -1073,48 +1073,48 @@ tr.tonkho-detail-row {
   scrollbar-color: transparent transparent;
   transition: scrollbar-color 0.2s ease;
 }
-.kiot-sidebar-col:hover .kiot-filter-box,
-.kiot-filter-box:hover {
+.kp-sidebar-col:hover .kp-filter-box,
+.kp-filter-box:hover {
   scrollbar-color: #cbd5e1 transparent;
 }
 /* Thanh cuộn left menu chỉ hiện khi trỏ chuột vào leftmenu (WebKit) */
-.kiot-filter-box::-webkit-scrollbar {
+.kp-filter-box::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-.kiot-filter-box::-webkit-scrollbar-track {
+.kp-filter-box::-webkit-scrollbar-track {
   background: transparent;
 }
-.kiot-filter-box::-webkit-scrollbar-thumb {
+.kp-filter-box::-webkit-scrollbar-thumb {
   background: transparent;
   border-radius: 4px;
   transition: background 0.2s ease;
 }
-.kiot-sidebar-col:hover .kiot-filter-box::-webkit-scrollbar-thumb,
-.kiot-filter-box:hover::-webkit-scrollbar-thumb {
+.kp-sidebar-col:hover .kp-filter-box::-webkit-scrollbar-thumb,
+.kp-filter-box:hover::-webkit-scrollbar-thumb {
   background: #cbd5e1;
 }
-.kiot-sidebar-col:hover .kiot-filter-box::-webkit-scrollbar-thumb:hover,
-.kiot-filter-box:hover::-webkit-scrollbar-thumb:hover {
+.kp-sidebar-col:hover .kp-filter-box::-webkit-scrollbar-thumb:hover,
+.kp-filter-box:hover::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
 /* Thanh cuộn cho bảng hàng hóa */
-.kiot-table-scroll-body::-webkit-scrollbar {
+.kp-table-scroll-body::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-.kiot-table-scroll-body::-webkit-scrollbar-track {
+.kp-table-scroll-body::-webkit-scrollbar-track {
   background: transparent;
 }
-.kiot-table-scroll-body::-webkit-scrollbar-thumb {
+.kp-table-scroll-body::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 4px;
 }
-.kiot-table-scroll-body::-webkit-scrollbar-thumb:hover {
+.kp-table-scroll-body::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
-.kiot-filter-box h6 {
+.kp-filter-box h6 {
   font-weight: 700;
   font-size: 13px;
   margin: 0 0 8px;
@@ -1122,8 +1122,8 @@ tr.tonkho-detail-row {
   display: flex;
   align-items: center;
 }
-.kiot-filter-box .f-block + .f-block,
-.kiot-filter-box .f-block ~ .f-block {
+.kp-filter-box .f-block + .f-block,
+.kp-filter-box .f-block ~ .f-block {
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid #f3f4f6;
@@ -1131,14 +1131,14 @@ tr.tonkho-detail-row {
 #btnToggleAllKho {
   display: none;
 }
-.kiot-filter-box .form-control,
-.kiot-filter-box .form-select {
+.kp-filter-box .form-control,
+.kp-filter-box .form-select {
   border-color: var(--border);
   border-radius: 6px;
   height: 34px;
   font-size: 13px;
 }
-.kiot-main-col {
+.kp-main-col {
   flex: 1;
   min-width: 0;
   height: 100%;
@@ -1148,7 +1148,7 @@ tr.tonkho-detail-row {
   overflow: hidden;
   transition: padding-left 0.4s cubic-bezier(0.25, 1, 0.35, 1);
 }
-.kiot-toolbar-row {
+.kp-toolbar-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1157,12 +1157,12 @@ tr.tonkho-detail-row {
   height: 30px;
   flex-shrink: 0;
 }
-.kiot-search-box {
+.kp-search-box {
   flex: 0 1 450px;
   max-width: 450px;
   position: relative;
 }
-.kiot-search-box input {
+.kp-search-box input {
   padding-left: 30px;
   padding-right: 12px;
   height: 30px;
@@ -1172,12 +1172,12 @@ tr.tonkho-detail-row {
   width: 100%;
   background: #fff;
 }
-.kiot-search-box input:focus {
+.kp-search-box input:focus {
   border-color: var(--brand);
   outline: none;
   box-shadow: 0 0 0 2px rgba(10, 102, 232, 0.15);
 }
-.kiot-search-box .bi-search {
+.kp-search-box .bi-search {
   position: absolute;
   left: 9px;
   top: 50%;
@@ -1186,13 +1186,13 @@ tr.tonkho-detail-row {
   font-size: 12.5px;
   pointer-events: none;
 }
-.kiot-actions-group {
+.kp-actions-group {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-left: auto;
 }
-.kiot-actions-group .btn {
+.kp-actions-group .btn {
   height: 30px;
   padding: 2px 10px;
   font-size: 12px;
@@ -1259,21 +1259,21 @@ tr.tonkho-detail-row {
   background: var(--brand-dark);
 }
 
-/* ---------- Modal Tạo hàng hóa (KiotViet Style) ---------- */
-.modal-kiot .modal-header {
+/* ---------- Modal Tạo hàng hóa (KhoPro Style) ---------- */
+.modal-khopro .modal-header {
   border-bottom: 1px solid #e5e7eb;
   padding: 14px 20px;
 }
-.modal-kiot .modal-title {
+.modal-khopro .modal-title {
   font-size: 18px;
   font-weight: 700;
   color: #111827;
 }
-.modal-kiot .modal-body {
+.modal-khopro .modal-body {
   padding: 20px;
   background: #f9fafb;
 }
-.modal-kiot .modal-footer {
+.modal-khopro .modal-footer {
   border-top: 1px solid #e5e7eb;
   padding: 12px 20px;
   background: #fff;
@@ -1295,8 +1295,8 @@ tr.tonkho-detail-row {
   justify-content: space-between;
 }
 
-/* Sidebar toggle button (round button on vertical boundary - KiotViet style) */
-.kiot-sidebar-toggle-btn {
+/* Sidebar toggle button (round button on vertical boundary - KhoPro style) */
+.kp-sidebar-toggle-btn {
   position: absolute;
   top: 240px;
   left: 256px;
@@ -1321,33 +1321,33 @@ tr.tonkho-detail-row {
 }
 
 /* Nút chỉ hiện lên khi trỏ chuột vào leftmenu hoặc vào nút */
-.kiot-sidebar-col:hover ~ .kiot-sidebar-toggle-btn,
-.kiot-sidebar-toggle-btn:hover,
-.kiot-sidebar-toggle-btn.btn-visible {
+.kp-sidebar-col:hover ~ .kp-sidebar-toggle-btn,
+.kp-sidebar-toggle-btn:hover,
+.kp-sidebar-toggle-btn.btn-visible {
   opacity: 1;
   pointer-events: auto;
 }
 
-.kiot-sidebar-toggle-btn:hover {
+.kp-sidebar-toggle-btn:hover {
   background: #eff6ff;
   transform: scale(1.12);
   box-shadow: 0 4px 12px rgba(10, 102, 232, 0.4);
 }
-.kiot-sidebar-toggle-btn:active {
+.kp-sidebar-toggle-btn:active {
   transform: scale(0.95);
 }
 
 /* Đang chuyển động hoặc đã thu gọn: khóa tràn nội dung để không bị giật chữ */
-.kiot-container.sidebar-animating .kiot-sidebar-col,
-.kiot-container.sidebar-collapsed .kiot-sidebar-col {
+.kp-container.sidebar-animating .kp-sidebar-col,
+.kp-container.sidebar-collapsed .kp-sidebar-col {
   overflow: hidden !important;
 }
 
 /* Khi thu gọn (Kéo vào) */
-.kiot-container.sidebar-collapsed {
+.kp-container.sidebar-collapsed {
   gap: 0;
 }
-.kiot-container.sidebar-collapsed .kiot-sidebar-col {
+.kp-container.sidebar-collapsed .kp-sidebar-col {
   width: 0 !important;
   min-width: 0 !important;
   max-width: 0 !important;
@@ -1359,13 +1359,13 @@ tr.tonkho-detail-row {
   pointer-events: none !important;
 }
 /* Khi thụt vào (collapsed): Nút LUÔN HIỆN kể cả khi không trỏ chuột */
-.kiot-container.sidebar-collapsed .kiot-sidebar-toggle-btn {
+.kp-container.sidebar-collapsed .kp-sidebar-toggle-btn {
   left: 8px;
   opacity: 1 !important;
   pointer-events: auto !important;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
 }
-.kiot-container.sidebar-collapsed .kiot-main-col {
+.kp-container.sidebar-collapsed .kp-main-col {
   padding-left: 28px;
 }
 /* Quick Date Picker popup (3 columns like Screenshot 3) */
@@ -1510,7 +1510,7 @@ tr.tonkho-detail-row {
 }
 
 /* Interactive Dropdown Lists for Suppliers, Types, Locations (Screenshots 1 & 4) */
-.kiot-suggest-dropdown {
+.kp-suggest-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
@@ -1525,14 +1525,14 @@ tr.tonkho-detail-row {
   display: none;
   margin-top: 4px;
 }
-.kiot-suggest-item {
+.kp-suggest-item {
   padding: 8px 12px;
   font-size: 13px;
   color: #374151;
   cursor: pointer;
   border-bottom: 1px solid #f9fafb;
 }
-.kiot-suggest-item:hover, .kiot-suggest-item.active {
+.kp-suggest-item:hover, .kp-suggest-item.active {
   background: #f0f7ff;
   color: var(--brand);
   font-weight: 500;
@@ -1558,7 +1558,7 @@ tr.tonkho-detail-row {
   color: #ef4444;
 }
 
-/* Green/blue dot for active filter (as in KiotViet) */
+/* Green/blue dot for active filter (as in KhoPro) */
 .filter-dot {
   display: none;
   width: 7px;
@@ -1601,7 +1601,7 @@ tr.tonkho-detail-row {
 }
 
 /* ==========================================================================
-   KIOTVIET PRODUCT ROW EXPANSION & DETAIL TABS
+   KHOPRO PRODUCT ROW EXPANSION & DETAIL TABS
    ========================================================================== */
 tr.product-row {
   cursor: pointer;
@@ -1611,26 +1611,26 @@ tr.product-row:hover > td {
   background-color: #f8fafc;
 }
 /* Dòng sản phẩm / dữ liệu được chọn: Đóng khung thành hình chữ nhật khép kín với dòng chi tiết */
-tr.kiot-row.selected > td,
+tr.kp-row.selected > td,
 tr.product-row.selected > td {
   background-color: #ffffff !important;
   border-top: 2px solid #0070f3 !important; /* Cạnh trên hình chữ nhật */
   border-bottom: 1px solid #f1f5f9 !important; /* Phân cách nhẹ với bảng chi tiết bên trong */
   border-right: none !important;
 }
-tr.kiot-row.selected > td:first-child,
+tr.kp-row.selected > td:first-child,
 tr.product-row.selected > td:first-child {
   border-left: 3px solid #0070f3 !important; /* Cạnh trái hình chữ nhật */
 }
-tr.kiot-row.selected > td.last-visible-col,
-tr.kiot-row.selected > td:last-child,
+tr.kp-row.selected > td.last-visible-col,
+tr.kp-row.selected > td:last-child,
 tr.product-row.selected > td.last-visible-col,
 tr.product-row.selected > td:last-child {
   border-right: 3px solid #0070f3 !important; /* Cạnh phải hình chữ nhật */
 }
 
 /* Dòng chi tiết mở rộng: Cạnh 2 bên và cạnh đáy khép kín hình chữ nhật */
-tr.kiot-detail-row > td,
+tr.kp-detail-row > td,
 tr.product-detail-row > td {
   background-color: #ffffff !important;
   padding: 0 !important;
@@ -1640,14 +1640,14 @@ tr.product-detail-row > td {
   border-right: 3px solid #0070f3 !important; /* Cạnh phải hình chữ nhật */
 }
 
-.kiot-detail-panel-wrap,
+.kp-detail-panel-wrap,
 .product-detail-panel-wrap {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
 }
 
-.kiot-detail-panel,
+.kp-detail-panel,
 .product-detail-panel,
 .ncc-detail-panel {
   background-color: #ffffff;
@@ -1659,7 +1659,7 @@ tr.product-detail-row > td {
 }
 
 /* Tabs Bar */
-.kiot-detail-tabs,
+.kp-detail-tabs,
 .product-detail-tabs,
 .ncc-detail-tabs {
   display: flex;
@@ -1670,7 +1670,7 @@ tr.product-detail-row > td {
   width: 100%;
   box-sizing: border-box;
 }
-.kiot-detail-tab-btn,
+.kp-detail-tab-btn,
 .product-detail-tab-btn,
 .ncc-detail-tab-btn,
 .dp-tab {
@@ -1687,13 +1687,13 @@ tr.product-detail-row > td {
   transition: all 0.15s ease-in-out;
   outline: none !important;
 }
-.kiot-detail-tab-btn:hover,
+.kp-detail-tab-btn:hover,
 .product-detail-tab-btn:hover,
 .ncc-detail-tab-btn:hover,
 .dp-tab:hover {
   color: #0070f3 !important;
 }
-.kiot-detail-tab-btn.active,
+.kp-detail-tab-btn.active,
 .product-detail-tab-btn.active,
 .ncc-detail-tab-btn.active,
 .dp-tab.active {
@@ -1703,14 +1703,14 @@ tr.product-detail-row > td {
 }
 
 /* Tab Panes */
-.kiot-detail-tab-content,
+.kp-detail-tab-content,
 .product-detail-tab-content,
 .ncc-detail-content {
   padding: 20px 24px;
 }
 
-/* Khung chi tiết cố định 992px chuẩn KiotViet không bị kéo giãn khi hiển thị nhiều cột */
-.kiot-detail-fixed-wrap,
+/* Khung chi tiết cố định 992px chuẩn KhoPro không bị kéo giãn khi hiển thị nhiều cột */
+.kp-detail-fixed-wrap,
 .ncc-detail-fixed-wrap,
 .xh-detail-fixed-wrap,
 .kk-detail-fixed-wrap,
@@ -1721,7 +1721,7 @@ tr.product-detail-row > td {
   box-sizing: border-box;
 }
 
-.kiot-attr-grid,
+.kp-attr-grid,
 .ncc-attr-grid {
   display: flex;
   gap: 16px;
@@ -1730,7 +1730,7 @@ tr.product-detail-row > td {
   box-sizing: border-box;
 }
 
-.kiot-attr-col,
+.kp-attr-col,
 .ncc-attr-col {
   width: 320px;
   min-width: 320px;
@@ -1770,7 +1770,7 @@ tr.product-detail-row > td {
   line-height: 1.4;
 }
 
-.kiot-detail-footer,
+.kp-detail-footer,
 .product-detail-footer,
 .ncc-detail-footer {
   display: flex;
@@ -1781,7 +1781,7 @@ tr.product-detail-row > td {
   width: 100%;
   box-sizing: border-box;
 }
-.kiot-detail-footer-left,
+.kp-detail-footer-left,
 .product-detail-footer-left {
   display: flex;
   gap: 8px;
@@ -1789,7 +1789,7 @@ tr.product-detail-row > td {
   position: sticky;
   left: 24px;
 }
-.kiot-detail-footer-right,
+.kp-detail-footer-right,
 .product-detail-footer-right {
   display: flex;
   gap: 8px;
@@ -1799,9 +1799,9 @@ tr.product-detail-row > td {
   margin-left: auto;
 }
 
-.kiot-detail-fixed-wrap .kiot-detail-footer,
-.kiot-detail-fixed-wrap .product-detail-footer,
-.ncc-detail-fixed-wrap .kiot-detail-footer,
+.kp-detail-fixed-wrap .kp-detail-footer,
+.kp-detail-fixed-wrap .product-detail-footer,
+.ncc-detail-fixed-wrap .kp-detail-footer,
 .ncc-detail-fixed-wrap .product-detail-footer,
 .ncc-detail-fixed-wrap .ncc-detail-footer,
 .nh-detail-fixed-wrap .product-detail-footer,
@@ -1809,12 +1809,12 @@ tr.product-detail-row > td {
   width: 992px;
   max-width: 100%;
 }
-.kiot-detail-fixed-wrap .kiot-detail-footer-left,
-.kiot-detail-fixed-wrap .kiot-detail-footer-right,
-.kiot-detail-fixed-wrap .product-detail-footer-left,
-.kiot-detail-fixed-wrap .product-detail-footer-right,
-.ncc-detail-fixed-wrap .kiot-detail-footer-left,
-.ncc-detail-fixed-wrap .kiot-detail-footer-right,
+.kp-detail-fixed-wrap .kp-detail-footer-left,
+.kp-detail-fixed-wrap .kp-detail-footer-right,
+.kp-detail-fixed-wrap .product-detail-footer-left,
+.kp-detail-fixed-wrap .product-detail-footer-right,
+.ncc-detail-fixed-wrap .kp-detail-footer-left,
+.ncc-detail-fixed-wrap .kp-detail-footer-right,
 .ncc-detail-fixed-wrap .product-detail-footer-left,
 .ncc-detail-fixed-wrap .product-detail-footer-right,
 .nh-detail-fixed-wrap .product-detail-footer-left,
@@ -1825,19 +1825,19 @@ tr.product-detail-row > td {
 }
 
 @media (max-width: 1040px) {
-  .kiot-attr-grid, .ncc-attr-grid, .nh-attr-grid, .receipt-attr-grid {
+  .kp-attr-grid, .ncc-attr-grid, .nh-attr-grid, .receipt-attr-grid {
     flex-wrap: wrap;
     width: 100%;
   }
-  .kiot-attr-col, .ncc-attr-col, .nh-attr-col, .receipt-attr-col {
+  .kp-attr-col, .ncc-attr-col, .nh-attr-col, .receipt-attr-col {
     width: 100%;
     min-width: 100%;
   }
-  .kiot-detail-fixed-wrap,
-  .kiot-detail-fixed-wrap .kiot-detail-footer,
-  .kiot-detail-fixed-wrap .product-detail-footer,
+  .kp-detail-fixed-wrap,
+  .kp-detail-fixed-wrap .kp-detail-footer,
+  .kp-detail-fixed-wrap .product-detail-footer,
   .ncc-detail-fixed-wrap,
-  .ncc-detail-fixed-wrap .kiot-detail-footer,
+  .ncc-detail-fixed-wrap .kp-detail-footer,
   .ncc-detail-fixed-wrap .product-detail-footer,
   .ncc-detail-fixed-wrap .ncc-detail-footer,
   .nh-detail-fixed-wrap,
@@ -1848,7 +1848,7 @@ tr.product-detail-row > td {
   }
 }
 
-.badge-kiot-tag {
+.badge-kp-tag {
   display: inline-block;
   font-size: 11.5px;
   padding: 3px 10px;
@@ -1857,12 +1857,12 @@ tr.product-detail-row > td {
   color: #475569;
   font-weight: 500;
 }
-.badge-kiot-warning {
+.badge-kp-warning {
   background-color: #fef3c7;
   color: #b45309;
 }
 
-/* Thẻ thuộc tính hàng hóa mini chuẩn KiotViet */
+/* Thẻ thuộc tính hàng hóa mini chuẩn KhoPro */
 .product-detail-attrs {
   display: flex;
   flex-wrap: wrap;
@@ -1870,7 +1870,7 @@ tr.product-detail-row > td {
   align-items: center;
 }
 
-.kiot-attr-chip {
+.kp-attr-chip {
   display: inline-flex;
   align-items: center;
   border: 1px solid #d1d5db;
@@ -1883,11 +1883,11 @@ tr.product-detail-row > td {
   transition: border-color 0.15s ease;
 }
 
-.kiot-attr-chip:hover {
+.kp-attr-chip:hover {
   border-color: #93c5fd;
 }
 
-.kiot-attr-chip .chip-label {
+.kp-attr-chip .chip-label {
   background: #f1f5f9;
   color: #475569;
   font-weight: 500;
@@ -1896,7 +1896,7 @@ tr.product-detail-row > td {
   white-space: nowrap;
 }
 
-.kiot-attr-chip .chip-value {
+.kp-attr-chip .chip-value {
   background: #ffffff;
   color: #0070f4;
   font-weight: 600;
@@ -1958,7 +1958,7 @@ tr.product-detail-row > td {
   border-bottom: 2px solid #e2e8f0;
 }
 
-/* Badges phân loại giao dịch Thẻ kho chuẩn KiotViet */
+/* Badges phân loại giao dịch Thẻ kho chuẩn KhoPro */
 .badge-tk {
   display: inline-flex;
   align-items: center;
@@ -2015,8 +2015,8 @@ tr.product-detail-row > td {
   border: 1px solid #fbcfe8 !important;
 }
 
-/* Multi-select filter box (KiotViet style) */
-.kiot-multiselect-box {
+/* Multi-select filter box (KhoPro style) */
+.kp-multiselect-box {
   border: 1px solid var(--border);
   border-radius: 8px;
   min-height: 40px;
@@ -2030,15 +2030,15 @@ tr.product-detail-row > td {
   position: relative;
   transition: border-color .15s, box-shadow .15s;
 }
-.kiot-multiselect-box:hover {
+.kp-multiselect-box:hover {
   border-color: #9ca3af;
 }
-.kiot-multiselect-box.is-active,
-.kiot-multiselect-box.open {
+.kp-multiselect-box.is-active,
+.kp-multiselect-box.open {
   border-color: var(--blue, #0070f4);
   box-shadow: 0 0 0 3px rgba(0, 112, 244, 0.12);
 }
-.kiot-ms-placeholder {
+.kp-ms-placeholder {
   color: #9ca3af;
   font-size: 13px;
   user-select: none;
@@ -2047,7 +2047,7 @@ tr.product-detail-row > td {
 }
 
 /* Tag Pill */
-.kiot-pill-tag {
+.kp-pill-tag {
   background-color: #0070f4;
   color: #ffffff;
   border-radius: 4px;
@@ -2061,12 +2061,12 @@ tr.product-detail-row > td {
   user-select: none;
   max-width: 100%;
 }
-.kiot-pill-tag .tag-text {
+.kp-pill-tag .tag-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.kiot-pill-tag .tag-remove {
+.kp-pill-tag .tag-remove {
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -2078,12 +2078,12 @@ tr.product-detail-row > td {
   transition: opacity .15s;
   padding: 0 1px;
 }
-.kiot-pill-tag .tag-remove:hover {
+.kp-pill-tag .tag-remove:hover {
   opacity: 1;
 }
 
 /* +N khác Badge */
-.kiot-pill-more {
+.kp-pill-more {
   background-color: #e0f2fe;
   color: #0070f4;
   border-radius: 4px;
@@ -2097,12 +2097,12 @@ tr.product-detail-row > td {
   cursor: pointer;
   transition: background .15s;
 }
-.kiot-pill-more:hover {
+.kp-pill-more:hover {
   background-color: #bae6fd;
 }
 
 /* Dropdown list */
-.kiot-ms-dropdown {
+.kp-ms-dropdown {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
@@ -2118,19 +2118,19 @@ tr.product-detail-row > td {
   overflow-x: hidden;
   padding: 0 0 4px 0;
 }
-.kiot-ms-dropdown:not(:has(.kiot-ms-search)) {
+.kp-ms-dropdown:not(:has(.kp-ms-search)) {
   padding-top: 4px;
 }
-.kiot-ms-dropdown.show {
+.kp-ms-dropdown.show {
   display: block;
 }
 /* Drop-up: Khi dropdown ở sidebar nằm quá thấp sẽ hiển thị ngược lên */
-.kiot-ms-dropdown.drop-up {
+.kp-ms-dropdown.drop-up {
   top: auto !important;
   bottom: calc(100% + 4px) !important;
   box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.12) !important;
 }
-.kiot-ms-search {
+.kp-ms-search {
   padding: 6px 8px;
   border-bottom: 1px solid #f3f4f6;
   position: sticky;
@@ -2140,7 +2140,7 @@ tr.product-detail-row > td {
   border-top-left-radius: 7px;
   border-top-right-radius: 7px;
 }
-.kiot-ms-search::before {
+.kp-ms-search::before {
   content: "";
   position: absolute;
   top: -10px;
@@ -2150,7 +2150,7 @@ tr.product-detail-row > td {
   background: #ffffff;
   pointer-events: none;
 }
-.kiot-ms-search input {
+.kp-ms-search input {
   width: 100%;
   height: 30px;
   border: 1px solid var(--border);
@@ -2159,10 +2159,10 @@ tr.product-detail-row > td {
   font-size: 12px;
   outline: none;
 }
-.kiot-ms-search input:focus {
+.kp-ms-search input:focus {
   border-color: #0070f4;
 }
-.kiot-ms-item {
+.kp-ms-item {
   padding: 7px 12px;
   font-size: 13px;
   cursor: pointer;
@@ -2172,16 +2172,16 @@ tr.product-detail-row > td {
   transition: none !important;
   user-select: none;
 }
-.kiot-ms-item:hover {
+.kp-ms-item:hover {
   background-color: #f3f4f6;
   transition: none !important;
 }
-.kiot-ms-item.selected {
+.kp-ms-item.selected {
   background-color: #eff6ff;
   color: #0070f4;
   font-weight: 600;
 }
-.kiot-ms-item input[type="checkbox"] {
+.kp-ms-item input[type="checkbox"] {
   width: 15px;
   height: 15px;
   margin: 0;
@@ -2190,21 +2190,21 @@ tr.product-detail-row > td {
   pointer-events: none;
   flex-shrink: 0;
 }
-.kiot-ms-item span,
-.kiot-ms-item .kiot-ms-text {
+.kp-ms-item span,
+.kp-ms-item .kp-ms-text {
   flex: 1 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.kiot-ms-item .kiot-item-edit-btn {
+.kp-ms-item .kp-item-edit-btn {
   margin-left: auto;
   margin-right: -4px;
   flex-shrink: 0;
 }
 
-/* Single-select filter box (KiotViet style - Tiêu chí tồn) */
-.kiot-single-select-box {
+/* Single-select filter box (KhoPro style - Tiêu chí tồn) */
+.kp-single-select-box {
   border: 1px solid var(--border);
   border-radius: 8px;
   height: 38px;
@@ -2219,25 +2219,25 @@ tr.product-detail-row > td {
   user-select: none;
   transition: border-color .15s, box-shadow .15s;
 }
-.kiot-single-select-box:hover {
+.kp-single-select-box:hover {
   border-color: #9ca3af;
 }
-.kiot-single-select-box.is-active,
-.kiot-single-select-box.open {
+.kp-single-select-box.is-active,
+.kp-single-select-box.open {
   border-color: var(--blue, #0070f4);
   box-shadow: 0 0 0 3px rgba(0, 112, 244, 0.12);
 }
-.kiot-select-chevron {
+.kp-select-chevron {
   font-size: 12px;
   color: #6b7280;
   transition: transform .2s ease;
   pointer-events: none;
 }
-.kiot-single-select-box.open .kiot-select-chevron {
+.kp-single-select-box.open .kp-select-chevron {
   transform: rotate(180deg);
   color: var(--blue, #0070f4);
 }
-.kiot-ss-dropdown {
+.kp-ss-dropdown {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
@@ -2253,15 +2253,15 @@ tr.product-detail-row > td {
   overflow-x: hidden;
   padding: 4px 0;
 }
-.kiot-ss-dropdown.show {
+.kp-ss-dropdown.show {
   display: block;
 }
-.kiot-ss-dropdown.drop-up {
+.kp-ss-dropdown.drop-up {
   top: auto !important;
   bottom: calc(100% + 4px) !important;
   box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.12) !important;
 }
-.kiot-ss-item {
+.kp-ss-item {
   padding: 8px 12px;
   font-size: 13.5px;
   cursor: pointer;
@@ -2272,24 +2272,24 @@ tr.product-detail-row > td {
   user-select: none;
   color: #374151;
 }
-.kiot-ss-item:hover {
+.kp-ss-item:hover {
   background-color: #f3f4f6;
   color: #111827;
   transition: none !important;
 }
-.kiot-ss-item.selected {
+.kp-ss-item.selected {
   background-color: #eff6ff;
   color: #0070f4;
   font-weight: 600;
 }
-.kiot-ss-item .check-icon {
+.kp-ss-item .check-icon {
   display: none;
   font-size: 16px;
   font-weight: 700;
   color: #0070f4;
   transition: none !important;
 }
-.kiot-ss-item.selected .check-icon {
+.kp-ss-item.selected .check-icon {
   display: inline-block;
 }
 
@@ -2298,7 +2298,7 @@ tr.product-detail-row > td {
    ========================================================================== */
 
 /* Nút phễu lọc mobile */
-.kiot-btn-funnel {
+.kp-btn-funnel {
   width: 32px;
   height: 30px;
   display: inline-flex;
@@ -2311,12 +2311,12 @@ tr.product-detail-row > td {
   padding: 0;
   transition: all 0.15s ease;
 }
-.kiot-btn-funnel:hover,
-.kiot-btn-funnel.has-filter {
+.kp-btn-funnel:hover,
+.kp-btn-funnel.has-filter {
   background: #0a66e8;
   color: #fff;
 }
-.kiot-mobile-title {
+.kp-mobile-title {
   font-size: 16px;
   font-weight: 700;
   white-space: nowrap;
@@ -2324,17 +2324,17 @@ tr.product-detail-row > td {
 }
 
 /* Offcanvas mobile drawer */
-.kiot-mobile-nav {
+.kp-mobile-nav {
   z-index: 1070;
 }
-.kiot-mobile-nav-list .list-group-item {
+.kp-mobile-nav-list .list-group-item {
   border-left: none;
   border-right: none;
   font-size: 13.5px;
   color: #374151;
   transition: background 0.15s ease;
 }
-.kiot-mobile-nav-list .list-group-item:hover {
+.kp-mobile-nav-list .list-group-item:hover {
   background: #f3f7ff;
   color: var(--brand);
 }
@@ -2356,16 +2356,16 @@ tr.product-detail-row > td {
   }
 
   /* 2. Layout Container */
-  .kiot-container {
+  .kp-container {
     padding: 8px 10px 10px;
     gap: 0;
   }
-  .kiot-sidebar-toggle-btn {
+  .kp-sidebar-toggle-btn {
     display: none !important;
   }
 
   /* 3. Cột Sidebar bộ lọc chuyển sang dạng Offcanvas Drawer */
-  .kiot-sidebar-col {
+  .kp-sidebar-col {
     position: fixed;
     top: 0;
     left: 0;
@@ -2382,10 +2382,10 @@ tr.product-detail-row > td {
     margin: 0 !important;
     overflow: hidden;
   }
-  .kiot-sidebar-col.show-mobile {
+  .kp-sidebar-col.show-mobile {
     transform: translateX(0);
   }
-  .kiot-sidebar-backdrop {
+  .kp-sidebar-backdrop {
     position: fixed;
     top: 0;
     left: 0;
@@ -2396,34 +2396,34 @@ tr.product-detail-row > td {
     display: none;
     backdrop-filter: blur(1px);
   }
-  .kiot-sidebar-backdrop.show {
+  .kp-sidebar-backdrop.show {
     display: block;
   }
-  .kiot-filter-box {
+  .kp-filter-box {
     border: none;
     padding: 0;
     min-width: 0;
   }
 
   /* 4. Toolbar trên cùng: Hàng hóa + Phễu + Tìm kiếm + Nhóm nút */
-  .kiot-toolbar-row {
+  .kp-toolbar-row {
     gap: 8px;
     height: auto;
     margin-bottom: 8px;
   }
-  .kiot-mobile-title-wrap {
+  .kp-mobile-title-wrap {
     flex-shrink: 0;
   }
-  .kiot-search-box {
+  .kp-search-box {
     flex: 1 1 auto;
     max-width: none;
     min-width: 100px;
   }
-  .kiot-actions-group {
+  .kp-actions-group {
     gap: 5px;
     flex-shrink: 0;
   }
-  .kiot-actions-group .btn {
+  .kp-actions-group .btn {
     padding: 2px 8px;
     height: 30px;
   }
@@ -2431,26 +2431,26 @@ tr.product-detail-row > td {
 
 /* Màn hình điện thoại nhỏ (< 576px) */
 @media (max-width: 575.98px) {
-  .kiot-mobile-title {
+  .kp-mobile-title {
     font-size: 15px !important;
   }
-  .kiot-search-box input {
+  .kp-search-box input {
     font-size: 12px;
     padding-left: 26px;
     padding-right: 10px;
   }
-  .kiot-search-box .bi-search {
+  .kp-search-box .bi-search {
     left: 7px;
   }
 }
 
 /* Widescreen / Zoom out (>= 1400px) */
 @media (min-width: 1400px) {
-  .kiot-container {
+  .kp-container {
     max-width: 100%;
     width: 100%;
   }
-  .kiot-main-col {
+  .kp-main-col {
     width: 100%;
   }
   .tbl {
@@ -2459,20 +2459,20 @@ tr.product-detail-row > td {
 }
 
 /* ========================================================================
-   KIOTVIET ATTRIBUTE ROW & DROPDOWN COMPONENT (Image Match)
+   KHOPRO ATTRIBUTE ROW & DROPDOWN COMPONENT (Image Match)
    ======================================================================== */
-.kiot-attr-row {
+.kp-attr-row {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
 }
 
-.kiot-attr-dropdown .dropdown-toggle::after {
+.kp-attr-dropdown .dropdown-toggle::after {
   display: none !important;
 }
 
-.kiot-attr-btn {
+.kp-attr-btn {
   background-color: #ffffff !important;
   border: 1px solid #ced4da !important;
   border-radius: 6px !important;
@@ -2483,23 +2483,23 @@ tr.product-detail-row > td {
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-.kiot-attr-btn:focus,
-.kiot-attr-btn:active,
-.kiot-attr-dropdown.show .kiot-attr-btn {
+.kp-attr-btn:focus,
+.kp-attr-btn:active,
+.kp-attr-dropdown.show .kp-attr-btn {
   border-color: #0d6efd !important;
   box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.18) !important;
 }
 
-.kiot-attr-dropdown.show .kiot-attr-chevron {
+.kp-attr-dropdown.show .kp-attr-chevron {
   transform: rotate(180deg);
 }
 
-.kiot-attr-chevron {
+.kp-attr-chevron {
   transition: transform 0.2s ease;
   font-size: 11px;
 }
 
-.kiot-attr-menu {
+.kp-attr-menu {
   border: 1px solid #dee2e6 !important;
   border-radius: 6px !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
@@ -2508,7 +2508,7 @@ tr.product-detail-row > td {
   min-width: 220px !important;
 }
 
-.kiot-attr-item {
+.kp-attr-item {
   font-size: 13.5px;
   color: #212529 !important;
   padding: 8px 16px !important;
@@ -2519,31 +2519,31 @@ tr.product-detail-row > td {
   align-items: center !important;
 }
 
-.kiot-attr-item:hover {
+.kp-attr-item:hover {
   background-color: #f0f7ff !important;
   color: #0d6efd !important;
   transition: none !important;
 }
 
-.kiot-attr-item.active {
+.kp-attr-item.active {
   background-color: #f0f7ff !important;
   color: #0d6efd !important;
   font-weight: 600;
 }
 
-.kiot-attr-val-input {
+.kp-attr-val-input {
   border: 1px solid #ced4da !important;
   border-radius: 6px !important;
   font-size: 13.5px !important;
   height: 38px !important;
 }
 
-.kiot-attr-val-input:focus {
+.kp-attr-val-input:focus {
   border-color: #86b7fe !important;
   box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.18) !important;
 }
 
-.kiot-btn-remove-attr {
+.kp-btn-remove-attr {
   background: #ffffff !important;
   border: 1px solid #ced4da !important;
   border-radius: 6px !important;
@@ -2556,17 +2556,17 @@ tr.product-detail-row > td {
   transition: all 0.15s ease;
 }
 
-.kiot-btn-remove-attr:hover {
+.kp-btn-remove-attr:hover {
   background-color: #fee2e2 !important;
   border-color: #fca5a5 !important;
 }
 
-.kiot-btn-remove-attr:hover i {
+.kp-btn-remove-attr:hover i {
   color: #dc2626 !important;
 }
 
-/* Toast Notification dùng chung toàn hệ thống (Chuẩn KiotViet: viên bo tròn tối màu, không viền kẻ dọc) */
-.kiot-toast {
+/* Toast Notification dùng chung toàn hệ thống (Chuẩn KhoPro: viên bo tròn tối màu, không viền kẻ dọc) */
+.kp-toast {
   position: fixed;
   left: 50%;
   bottom: 28px;
@@ -2590,32 +2590,32 @@ tr.product-detail-row > td {
   max-width: 90vw;
   box-sizing: border-box;
 }
-.kiot-toast.show {
+.kp-toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
-.kiot-toast.success,
-.kiot-toast.error,
-.kiot-toast.warning,
-.kiot-toast.info {
+.kp-toast.success,
+.kp-toast.error,
+.kp-toast.warning,
+.kp-toast.info {
   background: #111827;
   border: none !important;
   border-left: none !important;
 }
 
 /* ========================================================================
-   KIOTVIET UNIVERSAL FORM COMPONENTS: Collapsible, Numbers, Split, Combobox, Prompt
+   KHOPRO UNIVERSAL FORM COMPONENTS: Collapsible, Numbers, Split, Combobox, Prompt
    ======================================================================== */
 
-/* 1. Khối Accordion gập mở (.kiot-sec) */
-.kiot-sec {
+/* 1. Khối Accordion gập mở (.kp-sec) */
+.kp-sec {
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   margin-bottom: 14px;
   transition: border-color .15s ease;
 }
-.kiot-sec-h {
+.kp-sec-h {
   padding: 12px 16px;
   cursor: pointer;
   display: flex;
@@ -2625,54 +2625,54 @@ tr.product-detail-row > td {
   background: #f9fafb;
   border-radius: 8px;
 }
-.kiot-sec.open .kiot-sec-h {
+.kp-sec.open .kp-sec-h {
   border-bottom: 1px solid #e5e7eb;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
-.kiot-sec-h h3 {
+.kp-sec-h h3 {
   font-size: 14.5px;
   font-weight: 600;
   color: #1f2937;
   margin: 0;
 }
-.kiot-sec-h p {
+.kp-sec-h p {
   font-size: 12px;
   color: #6b7280;
   margin: 2px 0 0;
 }
-.kiot-sec-h .kiot-chev,
-.kiot-sec-h .hh-chev {
+.kp-sec-h .kp-chev,
+.kp-sec-h .hh-chev {
   width: 18px;
   height: 18px;
   color: #6b7280;
   transition: transform .2s ease;
   flex-shrink: 0;
 }
-.kiot-sec.open .kiot-sec-h .kiot-chev,
-.kiot-sec.open .kiot-sec-h .hh-chev {
+.kp-sec.open .kp-sec-h .kp-chev,
+.kp-sec.open .kp-sec-h .hh-chev {
   transform: rotate(180deg);
 }
-.kiot-sec-b {
+.kp-sec-b {
   padding: 16px;
   display: none;
 }
-.kiot-sec.open .kiot-sec-b {
+.kp-sec.open .kp-sec-b {
   display: block;
 }
 
-/* 2. Ô nhập số định dạng hàng nghìn (.kiot-num) */
-.kiot-num {
+/* 2. Ô nhập số định dạng hàng nghìn (.kp-num) */
+.kp-num {
   text-align: right;
   font-variant-numeric: tabular-nums;
   font-weight: 500;
 }
-.kiot-num:focus {
+.kp-num:focus {
   border-color: #0070f4;
   box-shadow: 0 0 0 3px rgba(0, 112, 244, 0.12);
 }
 
-/* 2.1. Khối nhập khoảng giá trị Từ - Tới chuẩn KiotViet (.fromto) */
+/* 2.1. Khối nhập khoảng giá trị Từ - Tới chuẩn KhoPro (.fromto) */
 .sub {
   font-size: 12.5px;
   color: #64748b;
@@ -2725,7 +2725,7 @@ tr.product-detail-row > td {
   font-weight: 400;
 }
 
-/* 2.2. Khối nút viên thuốc Trạng thái chuẩn KiotViet (.pills & .pill) */
+/* 2.2. Khối nút viên thuốc Trạng thái chuẩn KhoPro (.pills & .pill) */
 .pills {
   display: flex;
   flex-wrap: wrap;
@@ -2760,17 +2760,17 @@ tr.product-detail-row > td {
   box-shadow: 0 1px 3px rgba(0, 112, 244, 0.3);
 }
 
-/* 3. Nút lưu đa năng Split Button (.kiot-split) */
-.kiot-split {
+/* 3. Nút lưu đa năng Split Button (.kp-split) */
+.kp-split {
   display: inline-flex;
   position: relative;
 }
-.kiot-split .btn-main {
+.kp-split .btn-main {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
   border-right: 1px solid rgba(255, 255, 255, 0.2);
 }
-.kiot-split .caret {
+.kp-split .caret {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   padding: 0 8px;
@@ -2778,7 +2778,7 @@ tr.product-detail-row > td {
   align-items: center;
   justify-content: center;
 }
-.kiot-split .kiot-menu {
+.kp-split .kp-menu {
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
@@ -2791,11 +2791,11 @@ tr.product-detail-row > td {
   z-index: 1050;
   padding: 4px 0;
 }
-.kiot-split .kiot-menu.show {
+.kp-split .kp-menu.show {
   display: block;
 }
-.kiot-split .kiot-menu button,
-.kiot-split .kiot-menu a {
+.kp-split .kp-menu button,
+.kp-split .kp-menu a {
   display: block;
   width: 100%;
   text-align: left;
@@ -2807,18 +2807,18 @@ tr.product-detail-row > td {
   cursor: pointer;
   text-decoration: none;
 }
-.kiot-split .kiot-menu button:hover,
-.kiot-split .kiot-menu a:hover {
+.kp-split .kp-menu button:hover,
+.kp-split .kp-menu a:hover {
   background: #eff6ff;
   color: #0070f4;
 }
 
-/* 4. Dropdown Combobox có nút Bút chì ✎ Sửa trực tiếp (.kiot-combobox-wrap) */
-.kiot-combobox-wrap {
+/* 4. Dropdown Combobox có nút Bút chì ✎ Sửa trực tiếp (.kp-combobox-wrap) */
+.kp-combobox-wrap {
   position: relative;
   width: 100%;
 }
-.kiot-combobox-box {
+.kp-combobox-box {
   border: 1px solid #d1d5db;
   border-radius: 6px;
   min-height: 38px;
@@ -2831,12 +2831,12 @@ tr.product-detail-row > td {
   gap: 4px;
   transition: border-color .15s, box-shadow .15s;
 }
-.kiot-combobox-box:focus-within,
-.kiot-combobox-wrap.open .kiot-combobox-box {
+.kp-combobox-box:focus-within,
+.kp-combobox-wrap.open .kp-combobox-box {
   border-color: #0070f4;
   box-shadow: 0 0 0 3px rgba(0, 112, 244, 0.12);
 }
-.kiot-combobox-input {
+.kp-combobox-input {
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
@@ -2846,7 +2846,7 @@ tr.product-detail-row > td {
   min-width: 60px;
   background: transparent;
 }
-.kiot-combobox-dropdown {
+.kp-combobox-dropdown {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
@@ -2861,10 +2861,10 @@ tr.product-detail-row > td {
   overflow-y: auto;
   padding: 4px 0;
 }
-.kiot-combobox-wrap.open .kiot-combobox-dropdown {
+.kp-combobox-wrap.open .kp-combobox-dropdown {
   display: block;
 }
-.kiot-combobox-item {
+.kp-combobox-item {
   padding: 8px 12px;
   font-size: 13.5px;
   cursor: pointer;
@@ -2874,17 +2874,17 @@ tr.product-detail-row > td {
   user-select: none;
   color: #374151;
 }
-.kiot-combobox-item:hover {
+.kp-combobox-item:hover {
   background-color: #eff6ff;
   color: #0070f4;
 }
-.kiot-combobox-item.selected {
+.kp-combobox-item.selected {
   background-color: #eff6ff;
   color: #0070f4;
   font-weight: 600;
 }
 /* Icon cây bút chì ✎ sửa item trực tiếp */
-.kiot-item-edit-btn {
+.kp-item-edit-btn {
   display: none;
   align-items: center;
   justify-content: center;
@@ -2899,19 +2899,19 @@ tr.product-detail-row > td {
   margin-left: auto;
   margin-right: 4px;
 }
-.kiot-item-edit-btn:hover {
+.kp-item-edit-btn:hover {
   background: #e2e8f0 !important;
   color: #1e293b !important;
 }
-.kiot-combobox-item:hover .kiot-item-edit-btn,
+.kp-combobox-item:hover .kp-item-edit-btn,
 .hh-multiselect-item:hover .hh-item-edit-btn,
 .hh-cs-item:hover .hh-item-edit-btn,
-.kiot-ms-item:hover .kiot-item-edit-btn {
+.kp-ms-item:hover .kp-item-edit-btn {
   display: inline-flex;
 }
 
-/* 5. Prompt Modal dùng chung toàn hệ thống (.kiot-prompt-ov) */
-.kiot-prompt-ov {
+/* 5. Prompt Modal dùng chung toàn hệ thống (.kp-prompt-ov) */
+.kp-prompt-ov {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0);
@@ -2931,7 +2931,7 @@ tr.product-detail-row > td {
               backdrop-filter 0.2s ease-in,
               -webkit-backdrop-filter 0.2s ease-in;
 }
-.kiot-prompt-ov.show {
+.kp-prompt-ov.show {
   opacity: 1 !important;
   visibility: visible !important;
   pointer-events: auto !important;
@@ -2944,7 +2944,7 @@ tr.product-detail-row > td {
               backdrop-filter 0.22s ease-out,
               -webkit-backdrop-filter 0.22s ease-out;
 }
-.kiot-prompt-modal {
+.kp-prompt-modal {
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
@@ -2955,28 +2955,28 @@ tr.product-detail-row > td {
   opacity: 0;
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease-in;
 }
-.kiot-prompt-ov.show .kiot-prompt-modal {
+.kp-prompt-ov.show .kp-prompt-modal {
   transform: scale(1) translateY(0);
   opacity: 1;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-out;
 }
-.kiot-prompt-head {
+.kp-prompt-head {
   padding: 14px 18px;
   border-bottom: 1px solid #f1f5f9;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.kiot-prompt-head h3 {
+.kp-prompt-head h3 {
   font-size: 16px;
   font-weight: 700;
   margin: 0;
   color: #1e293b;
 }
-.kiot-prompt-body {
+.kp-prompt-body {
   padding: 18px;
 }
-.kiot-prompt-foot {
+.kp-prompt-foot {
   padding: 12px 18px;
   background: #f8fafc;
   border-top: 1px solid #f1f5f9;
@@ -2985,8 +2985,8 @@ tr.product-detail-row > td {
   justify-content: space-between;
 }
 
-/* 6. Confirm Modal dùng chung toàn hệ thống (.kiot-confirm-ov - Hiển thị CENTER) */
-.kiot-confirm-ov {
+/* 6. Confirm Modal dùng chung toàn hệ thống (.kp-confirm-ov - Hiển thị CENTER) */
+.kp-confirm-ov {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0);
@@ -3006,7 +3006,7 @@ tr.product-detail-row > td {
               backdrop-filter 0.2s ease-in,
               -webkit-backdrop-filter 0.2s ease-in;
 }
-.kiot-confirm-ov.show {
+.kp-confirm-ov.show {
   opacity: 1 !important;
   visibility: visible !important;
   pointer-events: auto !important;
@@ -3019,7 +3019,7 @@ tr.product-detail-row > td {
               backdrop-filter 0.22s ease-out,
               -webkit-backdrop-filter 0.22s ease-out;
 }
-.kiot-confirm-modal {
+.kp-confirm-modal {
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.04);
@@ -3030,25 +3030,25 @@ tr.product-detail-row > td {
   opacity: 0;
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease-in;
 }
-.kiot-confirm-ov.show .kiot-confirm-modal {
+.kp-confirm-ov.show .kp-confirm-modal {
   transform: scale(1) translateY(0);
   opacity: 1;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-out;
 }
-.kiot-confirm-head {
+.kp-confirm-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
   border-bottom: 1px solid #e5e7eb;
 }
-.kiot-confirm-body {
+.kp-confirm-body {
   padding: 20px 24px;
   color: #374151;
   font-size: 14.5px;
   line-height: 1.55;
 }
-.kiot-confirm-foot {
+.kp-confirm-foot {
   background: #f9fafb;
   border-top: 1px solid #e5e7eb;
   padding: 12px 24px;
@@ -3056,7 +3056,7 @@ tr.product-detail-row > td {
   justify-content: flex-end;
   gap: 10px;
 }
-.kiot-confirm-foot .btn {
+.kp-confirm-foot .btn {
   height: 36px;
   padding: 0 16px;
   font-size: 13.5px;
@@ -3066,29 +3066,29 @@ tr.product-detail-row > td {
   align-items: center;
   justify-content: center;
 }
-.kiot-confirm-foot .btn-danger {
+.kp-confirm-foot .btn-danger {
   background-color: #dc2626 !important;
   border-color: #dc2626 !important;
   color: #ffffff !important;
   font-weight: 600;
 }
-.kiot-confirm-foot .btn-danger:hover {
+.kp-confirm-foot .btn-danger:hover {
   background-color: #b91c1c !important;
   border-color: #b91c1c !important;
 }
-.kiot-confirm-foot .btn-outline-secondary {
+.kp-confirm-foot .btn-outline-secondary {
   border-color: #d1d5db !important;
   color: #374151 !important;
   background-color: #ffffff !important;
 }
-.kiot-confirm-foot .btn-outline-secondary:hover {
+.kp-confirm-foot .btn-outline-secondary:hover {
   background-color: #f3f4f6 !important;
   color: #111827 !important;
 }
 
 /* ===== COMPONENT LEGO: F3 PRODUCT SEARCH AUTOCOMPLETE ===== */
 .nh-autocomplete-dropdown,
-.kiot-autocomplete-dropdown {
+.kp-autocomplete-dropdown {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
@@ -3105,7 +3105,7 @@ tr.product-detail-row > td {
   display: none;
 }
 .nh-autocomplete-dropdown.show,
-.kiot-autocomplete-dropdown.show {
+.kp-autocomplete-dropdown.show {
   display: block !important;
 }
 
@@ -3210,7 +3210,7 @@ tr.product-detail-row > td {
   font-weight: 600;
 }
 
-/* 7. DateTimePicker Popup Chuẩn KiotViet (.dtpop) dùng chung cho các Form Chứng từ */
+/* 7. DateTimePicker Popup Chuẩn KhoPro (.dtpop) dùng chung cho các Form Chứng từ */
 .relw { position: relative; }
 .dtpop {
   display: none;
@@ -3308,9 +3308,9 @@ tr.product-detail-row > td {
 .dtpop .cal-g button.d.sel { background: #0070f3 !important; color: #ffffff !important; font-weight: 600; }
 
 /* ========================================================================
-   7. KiotHelp Modal - Modal Trợ giúp toàn hệ thống chuẩn KiotViet
+   7. KhoProHelp Modal - Modal Trợ giúp toàn hệ thống chuẩn KhoPro
    ======================================================================== */
-.kiot-help-ov {
+.kp-help-ov {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0);
@@ -3327,7 +3327,7 @@ tr.product-detail-row > td {
   transition: opacity 0.22s ease-out, visibility 0s linear 0.22s, background-color 0.22s ease-out, backdrop-filter 0.22s ease-out;
 }
 
-.kiot-help-ov.show {
+.kp-help-ov.show {
   opacity: 1 !important;
   visibility: visible !important;
   pointer-events: auto !important;
@@ -3337,7 +3337,7 @@ tr.product-detail-row > td {
   transition: opacity 0.22s ease-out, visibility 0s linear 0s, background-color 0.22s ease-out, backdrop-filter 0.22s ease-out;
 }
 
-.kiot-help-modal {
+.kp-help-modal {
   width: 100%;
   max-width: 660px;
   max-height: 90vh;
@@ -3352,12 +3352,12 @@ tr.product-detail-row > td {
   transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease-out;
 }
 
-.kiot-help-ov.show .kiot-help-modal {
+.kp-help-ov.show .kp-help-modal {
   transform: scale(1) translateY(0);
   opacity: 1;
 }
 
-.kiot-help-head {
+.kp-help-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3366,7 +3366,7 @@ tr.product-detail-row > td {
   background: #f8fafc;
 }
 
-.kiot-help-icon-wrap {
+.kp-help-icon-wrap {
   width: 38px;
   height: 38px;
   border-radius: 8px;
@@ -3378,13 +3378,13 @@ tr.product-detail-row > td {
   font-size: 20px;
 }
 
-.kiot-help-body {
+.kp-help-body {
   padding: 18px 22px;
   overflow-y: auto;
   max-height: calc(90vh - 135px);
 }
 
-.kiot-help-sec-title {
+.kp-help-sec-title {
   font-size: 13.5px;
   font-weight: 700;
   color: #1e293b;
@@ -3393,13 +3393,13 @@ tr.product-detail-row > td {
   align-items: center;
 }
 
-.kiot-help-shortcuts-grid {
+.kp-help-shortcuts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 8px;
 }
 
-.kiot-shortcut-item {
+.kp-shortcut-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -3410,7 +3410,7 @@ tr.product-detail-row > td {
   font-size: 12.5px;
 }
 
-.kiot-kbd {
+.kp-kbd {
   display: inline-block;
   padding: 2px 7px;
   font-size: 11.5px;
@@ -3424,17 +3424,17 @@ tr.product-detail-row > td {
   flex-shrink: 0;
 }
 
-.kiot-help-step-item {
+.kp-help-step-item {
   display: flex;
   gap: 12px;
   margin-bottom: 12px;
 }
 
-.kiot-help-step-item:last-child {
+.kp-help-step-item:last-child {
   margin-bottom: 0;
 }
 
-.kiot-help-step-num {
+.kp-help-step-num {
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -3449,24 +3449,24 @@ tr.product-detail-row > td {
   margin-top: 1px;
 }
 
-.kiot-help-step-content {
+.kp-help-step-content {
   flex-grow: 1;
 }
 
-.kiot-help-step-title {
+.kp-help-step-title {
   font-size: 13px;
   font-weight: 600;
   color: #0f172a;
   margin-bottom: 2px;
 }
 
-.kiot-help-step-desc {
+.kp-help-step-desc {
   font-size: 12px;
   color: #475569;
   line-height: 1.45;
 }
 
-.kiot-help-foot {
+.kp-help-foot {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -3492,19 +3492,19 @@ tr.product-detail-row > td {
     header,
     nav,
     .navbar,
-    .kiot-sidebar-col,
+    .kp-sidebar-col,
     .filter-sidebar,
-    .kiot-toolbar-row,
-    .kiot-actions-group,
-    .kiot-search-box,
-    .kiot-btn-toggle-sidebar,
+    .kp-toolbar-row,
+    .kp-actions-group,
+    .kp-search-box,
+    .kp-btn-toggle-sidebar,
     #btnToggleSidebar,
     .pagination-container,
     .pagination,
     .pager,
     .btn,
     .btn-tool,
-    .kiot-help-modal,
+    .kp-help-modal,
     footer,
     .no-print {
         display: none !important;
@@ -3519,10 +3519,10 @@ tr.product-detail-row > td {
     }
 
     main,
-    .kiot-main-col,
+    .kp-main-col,
     .container-fluid,
     .container,
-    .kiot-layout-wrapper {
+    .kp-layout-wrapper {
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important;
@@ -3532,7 +3532,7 @@ tr.product-detail-row > td {
         border: none !important;
     }
 
-    table, .table, .kiot-table {
+    table, .table, .kp-table {
         width: 100% !important;
         border-collapse: collapse !important;
         background: #fff !important;
@@ -3540,7 +3540,7 @@ tr.product-detail-row > td {
 
     table th, table td,
     .table th, .table td,
-    .kiot-table th, .kiot-table td {
+    .kp-table th, .kp-table td {
         border: 1px solid #333 !important;
         color: #000 !important;
         padding: 4px 6px !important;
@@ -3549,15 +3549,15 @@ tr.product-detail-row > td {
 
     table thead th,
     .table thead th,
-    .kiot-table thead th {
+    .kp-table thead th {
         background-color: #f1f5f9 !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         font-weight: bold !important;
     }
 
-    .kiot-kpi-row,
-    .kiot-summary-cards,
+    .kp-kpi-row,
+    .kp-summary-cards,
     .summary-card {
         box-shadow: none !important;
         border: 1px solid #ccc !important;

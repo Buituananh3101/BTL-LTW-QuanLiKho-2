@@ -70,11 +70,11 @@
    - Hiển thị khi click vào dòng sản phẩm: Mở rộng dòng phụ dạng accordion ngay bên dưới gồm 3 tab: (1) Tồn kho chi nhánh & Định mức; (2) Thông tin hàng hóa; (3) Thẻ kho gần đây (nạp qua `/BaoCao/GetTheKhoQuick`).
 
 ### 4.1. Khối Lego tái sử dụng (Luật 10 AGENTS.md):
-- [x] Multi-select Dropdown Kho: `_KiotMultiSelectFilter.cshtml` (mặc định "Tất cả các kho", chọn kho cụ thể thì sinh tag chip lọc và hiện nút "Bỏ chọn").
-- [x] Phân trang AJAX: `_Pagination.cshtml` + `KiotFilter.createListPage`.
-- [x] Multi-select Dropdown Nhóm hàng: `_KiotMultiSelectFilter.cshtml` (mặc định "Chọn nhóm hàng").
-- [x] Status Filter Checkbox: `_KiotStatusFilter.cshtml`.
-- [x] Format số tiền & số lượng: class `.kiot-num` + format tiền tệ `#,##0`.
+- [x] Multi-select Dropdown Kho: `_MultiSelectFilter.cshtml` (mặc định "Tất cả các kho", chọn kho cụ thể thì sinh tag chip lọc và hiện nút "Bỏ chọn").
+- [x] Phân trang AJAX: `_Pagination.cshtml` + `AppFilter.createListPage`.
+- [x] Multi-select Dropdown Nhóm hàng: `_MultiSelectFilter.cshtml` (mặc định "Chọn nhóm hàng").
+- [x] Status Filter Checkbox: `_StatusFilter.cshtml`.
+- [x] Format số tiền & số lượng: class `.kp-num` + format tiền tệ `#,##0`.
 - [x] Xuất Excel ClosedXML: `ExcelHelper.ExportToExcel`.
 - [x] Hotkeys toàn cục: F3 (Tìm kiếm), F4 (Sidebar).
 

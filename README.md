@@ -1,4 +1,4 @@
-# 📦 KhoPro – Hệ Thống Quản Lý Kho Hàng Nội Bộ Đa Chi Nhánh
+﻿# 📦 KhoPro – Hệ Thống Quản Lý Kho Hàng Nội Bộ Đa Chi Nhánh
 
 > **Bài tập lớn môn Lập trình Web** – Xây dựng hệ thống quản trị kho hàng nội bộ chuyên nghiệp, chuẩn hóa theo mô hình thực tế cho chuỗi cung ứng và phân phối hàng hóa đa chi nhánh.
 
@@ -239,11 +239,11 @@ BTL-LTW-QuanLiKho-2/
 2. **Tính toàn vẹn dữ liệu qua Transaction**: Mọi thao tác lưu chứng từ kèm chi tiết, chuyển kho 2 bước, cân bằng kho đều được bọc trong `BeginTransactionAsync()`.
 3. **Nguyên tắc bất biến của chứng từ**: Chứng từ đã hoàn thành (`DA_XAC_NHAN`, `DA_NHAN`, `DA_DIEU_CHINH`) bị khóa tuyệt đối, không cho phép sửa/xóa nhằm đảm bảo tính minh bạch kế toán kho.
 4. **Hệ thống Lego UI tái sử dụng**:
-   - Bộ lọc thời gian nhanh `_KiotDateFilter` (Hôm nay, Hôm qua, Tuần này, Tháng này, Tùy chỉnh).
-   - Combobox tìm kiếm và thêm nhanh đối tác `KiotFilter.initCombobox`.
+   - Bộ lọc thời gian nhanh `_DateFilter` (Hôm nay, Hôm qua, Tuần này, Tháng này, Tùy chỉnh).
+   - Combobox tìm kiếm và thêm nhanh đối tác `AppFilter.initCombobox`.
    - Phân trang phân đoạn `_Pagination` hỗ trợ nạp dữ liệu động qua AJAX.
-   - Hộp thoại xác nhận tương tác thay thế native alert `KiotPrompt`.
-   - Thông báo Toast góc màn hình `KiotToast`.
+   - Hộp thoại xác nhận tương tác thay thế native alert `AppPrompt`.
+   - Thông báo Toast góc màn hình `AppToast`.
 5. **Kiến trúc Z-Index 6 tầng**: Ngăn chặn triệt để tình trạng dropdown in-page đè lên Header hoặc Modal bị giam cầm trong Stacking Context cục bộ.
 
 ---

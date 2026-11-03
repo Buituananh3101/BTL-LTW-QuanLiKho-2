@@ -17,39 +17,39 @@
      data-is-starred="@(Model.DaDanhDauFilter ? "true" : "false")"
      style="display:none;"></div>
 
-<div class="kiot-container position-relative" id="kiotContainer">
+<div class="kp-container position-relative" id="kpContainer">
     <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + 7 BỘ LỌC chuyên nghiệp (PARTIAL VIEW) -->
     <partial name="_HangHoaFilterSidebar" model="Model" />
 
     <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
-    <div class="kiot-sidebar-backdrop" id="sidebarBackdrop"></div>
+    <div class="kp-sidebar-backdrop" id="sidebarBackdrop"></div>
 
     <!-- Nút tròn thu gọn / mở rộng ở ranh giới giữa sidebar và bảng (Phím tắt F4) -->
-    <button type="button" class="kiot-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
+    <button type="button" class="kp-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
         <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
     </button>
 
     <!-- 2. CỘT BÊN PHẢI: THANH TÌM KIẾM + TOOLBAR + BẢNG HÀNG HÓA -->
-    <main class="kiot-main-col">
+    <main class="kp-main-col">
         <!-- Toolbar trên cùng: Thanh tìm kiếm thẳng hàng với bảng bên dưới -->
-        <div class="kiot-toolbar-row">
+        <div class="kp-toolbar-row">
             <!-- Tiêu đề + Nút phễu bộ lọc trên mobile / zoom in -->
-            <div class="kiot-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
-                <span class="kiot-mobile-title fw-bold fs-6 text-dark">Hàng hóa</span>
-                <button type="button" class="btn btn-sm btn-outline-primary kiot-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc hàng hóa">
+            <div class="kp-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
+                <span class="kp-mobile-title fw-bold fs-6 text-dark">Hàng hóa</span>
+                <button type="button" class="btn btn-sm btn-outline-primary kp-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc hàng hóa">
                     <i class="bi bi-funnel"></i>
                 </button>
             </div>
 
-            <div class="kiot-search-box">
+            <div class="kp-search-box">
                 <i class="bi bi-search"></i>
                 <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã, tên hàng (F3)" value="@Model.Q" autocomplete="off" />
             </div>
 
-            <div class="kiot-actions-group">
+            <div class="kp-actions-group">
                 <!-- Dropdown + Tạo mới hàng hóa -->
                 <div class="dropdown">
-                    <button class="btn btn-primary dropdown-toggle kiot-btn-create d-inline-flex align-items-center" type="button" id="btnDropdownCreate" data-bs-toggle="dropdown" aria-expanded="false" title="Thêm mới">
+                    <button class="btn btn-primary dropdown-toggle kp-btn-create d-inline-flex align-items-center" type="button" id="btnDropdownCreate" data-bs-toggle="dropdown" aria-expanded="false" title="Thêm mới">
                         <i class="bi bi-plus-lg me-1"></i><span class="d-none d-md-inline">Tạo mới</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="btnDropdownCreate">
@@ -141,7 +141,7 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/kiot-filter.js" asp-append-version="true"></script>
+    <script src="~/js/app-filter.js" asp-append-version="true"></script>
     <script src="~/js/hang-hoa-index.js" asp-append-version="true"></script>
     <script src="~/js/hang-hoa-form.js" asp-append-version="true"></script>
     <script src="~/js/hang-hoa-excel.js" asp-append-version="true"></script>

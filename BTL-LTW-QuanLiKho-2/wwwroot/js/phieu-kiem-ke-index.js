@@ -1,6 +1,6 @@
-/**
+﻿/**
  * phieu-kiem-ke-index.js - Quản lý tương tác màn hình danh sách phiếu kiểm kho
- * Tái cấu trúc chuẩn hóa qua KiotFilter.createListPage (Lego Engine)
+ * Tái cấu trúc chuẩn hóa qua AppFilter.createListPage (Lego Engine)
  */
 (function () {
     'use strict';
@@ -8,17 +8,17 @@
     const $ = (s, r = document) => r.querySelector(s);
     const $$ = (s, r = document) => [...r.querySelectorAll(s)];
     const $jq = window.jQuery;
-    const app = $('#kiotContainer') || $('#kkIndexApp');
+    const app = $('#kpContainer') || $('#kkIndexApp');
     if (!app) return;
 
     const noteUrl = app.dataset.noteUrl || '/PhieuKiemKe/UpdateNote';
     const cancelUrl = app.dataset.cancelUrl || '/PhieuKiemKe/Cancel';
     const exportUrl = app.dataset.exportUrl || '/PhieuKiemKe/Export';
 
-    // Khởi tạo trang qua KiotFilter.createListPage
-    const listPage = (window.KiotFilter && typeof KiotFilter.createListPage === 'function')
-        ? KiotFilter.createListPage({
-            containerSelector: '#kiotContainer, #kkIndexApp',
+    // Khởi tạo trang qua AppFilter.createListPage
+    const listPage = (window.AppFilter && typeof AppFilter.createListPage === 'function')
+        ? AppFilter.createListPage({
+            containerSelector: '#kpContainer, #kkIndexApp',
             tableSelector: '#stockTakeTable',
             tableWrapperSelector: '#tableWrapper',
             searchInputSelector: '#keywordSearch, #q',
@@ -36,7 +36,7 @@
                 tableSelector: '#stockTakeTable',
                 rowSelector: 'tr.product-row, tr.tbl-row',
                 detailRowSelector: '#dtl-{id}',
-                wrapSelector: '.product-detail-panel-wrap, .kiot-detail-panel-wrap',
+                wrapSelector: '.product-detail-panel-wrap, .kp-detail-panel-wrap',
                 tabBtnSelector: '.dp-tab',
                 tabPaneSelector: '.dp-pane'
             },
@@ -97,7 +97,7 @@
         const dot = $('#dotUser');
         if (dot) dot.style.display = selectedIds.length > 0 ? 'inline-block' : 'none';
 
-        $$('.kiot-ms-item', dropdown).forEach(item => {
+        $$('.kp-ms-item', dropdown).forEach(item => {
             const val = parseInt(item.dataset.val);
             const isSel = selectedIds.includes(val);
             item.classList.toggle('selected', isSel);
@@ -109,8 +109,8 @@
             val: id,
             name: F.creatorNames[id] || ('NV ' + id)
         }));
-        if (window.KiotFilter && typeof KiotFilter.renderTagPills === 'function') {
-            KiotFilter.renderTagPills(box, selectedItems, 'Chọn người tạo', 3);
+        if (window.AppFilter && typeof AppFilter.renderTagPills === 'function') {
+            AppFilter.renderTagPills(box, selectedItems, 'Chọn người tạo', 3);
         }
     }
 
@@ -121,16 +121,16 @@
         const status = btn.dataset.status || '';
 
         if (status === 'DA_DIEU_CHINH') {
-            if (window.KiotConfirm) {
-                window.KiotConfirm.alert(`Phiếu kiểm <strong>${code}</strong> đã cân bằng kho, không được phép hủy theo quy định.`, 'Cảnh báo');
+            if (window.AppConfirm) {
+                window.AppConfirm.alert(`Phiếu kiểm <strong>${code}</strong> đã cân bằng kho, không được phép hủy theo quy định.`, 'Cảnh báo');
             } else {
                 alert(`Phiếu kiểm ${code} đã cân bằng kho, không được phép hủy theo quy định.`);
             }
             return;
         }
         if (status === 'HUY') {
-            if (window.KiotConfirm) {
-                window.KiotConfirm.alert(`Phiếu kiểm <strong>${code}</strong> đã được hủy trước đó.`, 'Thông báo');
+            if (window.AppConfirm) {
+                window.AppConfirm.alert(`Phiếu kiểm <strong>${code}</strong> đã được hủy trước đó.`, 'Thông báo');
             } else {
                 alert(`Phiếu kiểm ${code} đã được hủy trước đó.`);
             }
@@ -142,19 +142,19 @@
             .then(r => r.json())
             .then(res => {
                 if (res.success) {
-                    if (window.KiotToast) KiotToast.success(res.message || 'Đã hủy phiếu kiểm thành công.');
+                    if (window.AppToast) AppToast.success(res.message || 'Đã hủy phiếu kiểm thành công.');
                     loadTable();
                 } else {
-                    if (window.KiotToast) KiotToast.error(res.message || 'Không thể hủy phiếu.');
+                    if (window.AppToast) AppToast.error(res.message || 'Không thể hủy phiếu.');
                 }
             })
             .catch(() => {
-                if (window.KiotToast) KiotToast.error('Lỗi kết nối máy chủ.');
+                if (window.AppToast) AppToast.error('Lỗi kết nối máy chủ.');
             });
         };
 
-        if (window.KiotConfirm) {
-            window.KiotConfirm.show({
+        if (window.AppConfirm) {
+            window.AppConfirm.show({
                 title: 'Hủy phiếu kiểm kho',
                 message: `Bạn có chắc chắn muốn hủy phiếu kiểm <strong style="color: #111827;">${code}</strong>? Thao tác này không thể hoàn tác.<br><span class="text-muted small">Phiếu tạm sau khi hủy sẽ không thể mở lại. Tồn kho không bị ảnh hưởng.</span>`,
                 confirmText: 'Đồng ý hủy',
@@ -166,8 +166,8 @@
     }
 
     function initEntityActions() {
-        if (window.KiotFilter && typeof KiotFilter.initEntityActions === 'function') {
-            KiotFilter.initEntityActions({
+        if (window.AppFilter && typeof AppFilter.initEntityActions === 'function') {
+            AppFilter.initEntityActions({
                 containerSelector: '#tableWrapper',
                 deleteSelector: '.btn-cancel-doc',
                 onDelete: function (id, name, btn) {
@@ -207,8 +207,8 @@
                 p.append('DateFilterType', F.preset || 'ALL');
             } else {
                 p.append('DateFilterType', 'CUSTOM');
-                if (F.fromDate) p.append('FromDate', typeof F.fromDate === 'string' ? F.fromDate : KiotFilter.formatDateISO(F.fromDate));
-                if (F.toDate) p.append('ToDate', typeof F.toDate === 'string' ? F.toDate : KiotFilter.formatDateISO(F.toDate));
+                if (F.fromDate) p.append('FromDate', typeof F.fromDate === 'string' ? F.fromDate : AppFilter.formatDateISO(F.fromDate));
+                if (F.toDate) p.append('ToDate', typeof F.toDate === 'string' ? F.toDate : AppFilter.formatDateISO(F.toDate));
             }
             (F.statuses || []).forEach(s => p.append('Statuses', s));
             (F.creatorIds || []).forEach(id => p.append('CreatorIds', id));
@@ -218,7 +218,7 @@
                 p.append('SortDir', F.sortDir || 'asc');
             }
             window.location.href = `${exportUrl}?${p.toString()}`;
-            if (window.KiotToast) KiotToast.info('Đang xuất file dữ liệu...');
+            if (window.AppToast) AppToast.info('Đang xuất file dữ liệu...');
         }
 
         // Checkbox trạng thái
@@ -239,7 +239,7 @@
         const dropdownNguoiTao = $('#dropdownNguoiTao');
 
         if (boxNguoiTao && dropdownNguoiTao) {
-            $$('.kiot-ms-item', dropdownNguoiTao).forEach(item => {
+            $$('.kp-ms-item', dropdownNguoiTao).forEach(item => {
                 const val = parseInt(item.dataset.val);
                 const name = item.dataset.name || item.querySelector('span')?.textContent.trim();
                 if (val && name) F.creatorNames[val] = name;
@@ -249,22 +249,22 @@
                 if (e.target.closest('.tag-remove')) return;
                 e.stopPropagation();
 
-                $$('.kiot-ms-dropdown').forEach(d => {
+                $$('.kp-ms-dropdown').forEach(d => {
                     if (d !== dropdownNguoiTao) d.classList.remove('show', 'drop-up');
                 });
                 $$('.quick-date-popup, .dual-calendar-popup').forEach(p => p.style.display = 'none');
 
                 const willShow = !dropdownNguoiTao.classList.contains('show');
                 if (willShow) {
-                    if (window.KiotFilter && typeof KiotFilter.checkSidebarDropdownDirection === 'function') {
-                        KiotFilter.checkSidebarDropdownDirection(boxNguoiTao, dropdownNguoiTao);
+                    if (window.AppFilter && typeof AppFilter.checkSidebarDropdownDirection === 'function') {
+                        AppFilter.checkSidebarDropdownDirection(boxNguoiTao, dropdownNguoiTao);
                     }
                     dropdownNguoiTao.classList.add('show');
                     boxNguoiTao.classList.add('open');
                     const searchInput = $('input', dropdownNguoiTao);
                     if (searchInput) {
                         searchInput.value = '';
-                        $$('.kiot-ms-item', dropdownNguoiTao).forEach(it => it.style.display = '');
+                        $$('.kp-ms-item', dropdownNguoiTao).forEach(it => it.style.display = '');
                         searchInput.focus();
                     }
                 } else {
@@ -278,7 +278,7 @@
                 const tagRemove = e.target.closest('.tag-remove');
                 if (!tagRemove) return;
                 e.stopPropagation();
-                const pill = tagRemove.closest('.kiot-pill-tag');
+                const pill = tagRemove.closest('.kp-pill-tag');
                 if (!pill) return;
                 const id = parseInt(pill.dataset.val);
                 F.creatorIds = (F.creatorIds || []).filter(x => x !== id);
@@ -287,7 +287,7 @@
 
             // Chọn/bỏ chọn item người tạo
             dropdownNguoiTao.addEventListener('click', e => {
-                const item = e.target.closest('.kiot-ms-item');
+                const item = e.target.closest('.kp-ms-item');
                 if (!item) return;
                 e.stopPropagation();
                 const id = parseInt(item.dataset.val);
@@ -305,11 +305,11 @@
             });
 
             // Tìm kiếm người tạo
-            const searchInput = $('.kiot-ms-search input', dropdownNguoiTao);
+            const searchInput = $('.kp-ms-search input', dropdownNguoiTao);
             if (searchInput) {
                 searchInput.addEventListener('input', e => {
                     const term = e.target.value.trim().toLowerCase();
-                    $$('.kiot-ms-item', dropdownNguoiTao).forEach(item => {
+                    $$('.kp-ms-item', dropdownNguoiTao).forEach(item => {
                         const name = (item.dataset.name || item.textContent || '').toLowerCase();
                         item.style.display = (!term || name.includes(term)) ? '' : 'none';
                     });
@@ -387,7 +387,7 @@
                 btn.disabled = false;
                 btn.innerHTML = origHtml;
                 if (res.success) {
-                    if (window.KiotToast) KiotToast.success(res.message || 'Đã lưu ghi chú.');
+                    if (window.AppToast) AppToast.success(res.message || 'Đã lưu ghi chú.');
                     const noteCell = $(`tr.tbl-row[data-id="${id}"] [data-col="ghi"], tr[data-id="${id}"] [data-col="ghi"]`);
                     if (noteCell) {
                         const trimmed = note.trim();
@@ -395,13 +395,13 @@
                         noteCell.title = trimmed;
                     }
                 } else {
-                    if (window.KiotToast) KiotToast.error(res.message || 'Lỗi khi lưu ghi chú.');
+                    if (window.AppToast) AppToast.error(res.message || 'Lỗi khi lưu ghi chú.');
                 }
             })
             .catch(() => {
                 btn.disabled = false;
                 btn.innerHTML = origHtml;
-                if (window.KiotToast) KiotToast.error('Lỗi kết nối khi lưu ghi chú.');
+                if (window.AppToast) AppToast.error('Lỗi kết nối khi lưu ghi chú.');
             });
         });
     }

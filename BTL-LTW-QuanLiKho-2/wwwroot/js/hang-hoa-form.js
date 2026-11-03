@@ -34,8 +34,8 @@
 
   let toastTimer;
   function showToast(msg, type) {
-    if (window.KiotToast) {
-      window.KiotToast.show(msg, type || 'success');
+    if (window.AppToast) {
+      window.AppToast.show(msg, type || 'success');
       return;
     }
     const t = $('#hhToast');
@@ -124,9 +124,9 @@
     };
   });
 
-  /* ---------- Quản lý 5 ảnh sản phẩm (Đóng gói KiotFilter.initImageUploader) ---------- */
-  const imgUploader = (window.KiotFilter && typeof KiotFilter.initImageUploader === 'function')
-    ? KiotFilter.initImageUploader({
+  /* ---------- Quản lý 5 ảnh sản phẩm (Đóng gói AppFilter.initImageUploader) ---------- */
+  const imgUploader = (window.AppFilter && typeof AppFilter.initImageUploader === 'function')
+    ? AppFilter.initImageUploader({
         mainBoxSelector: '#hhImgMain',
         thumbsBoxSelector: '#hhThumbs',
         fileInputSelector: '#hhImgFile',
@@ -277,7 +277,7 @@
       openLocationDropdown();
 
       // Đồng bộ nếu có item ở menu lọc cột trái
-      const sideItem = $(`#dropdownViTri .kiot-ms-item[data-val="${CSS.escape ? CSS.escape(editItemOldVal) : editItemOldVal}"]`);
+      const sideItem = $(`#dropdownViTri .kp-ms-item[data-val="${CSS.escape ? CSS.escape(editItemOldVal) : editItemOldVal}"]`);
       if (sideItem) {
         sideItem.dataset.val = newVal;
         sideItem.dataset.name = newVal;
@@ -323,7 +323,7 @@
         openLocationDropdown();
 
         // Đồng bộ nếu có item ở menu lọc cột trái
-        const sideItem = $(`#dropdownViTri .kiot-ms-item[data-val="${CSS.escape ? CSS.escape(editItemOldVal) : editItemOldVal}"]`);
+        const sideItem = $(`#dropdownViTri .kp-ms-item[data-val="${CSS.escape ? CSS.escape(editItemOldVal) : editItemOldVal}"]`);
         if (sideItem) sideItem.remove();
 
         hide($('#hhEditItemOv'));
@@ -341,8 +341,8 @@
       }
     };
 
-    if (window.KiotConfirm) {
-      window.KiotConfirm.show({
+    if (window.AppConfirm) {
+      window.AppConfirm.show({
         title: `Xóa ${itemLabel}`,
         message: `Bạn có chắc chắn muốn xóa ${itemLabel} <strong style="color: #111827;">${editItemOldVal}</strong> không? Thao tác này không thể hoàn tác.`,
         onConfirm: doDelete
@@ -385,12 +385,12 @@
           $('#hhFldNhom').classList.remove('invalid');
 
           const $sidebar = jQuery('#dropdownNhomHang');
-          if ($sidebar.length && !$sidebar.find(`.kiot-ms-item[data-val="${res.maNhom}"]`).length) {
+          if ($sidebar.length && !$sidebar.find(`.kp-ms-item[data-val="${res.maNhom}"]`).length) {
             $sidebar.append(`
-              <div class="kiot-ms-item" data-val="${res.maNhom}" data-name="${res.tenNhom}">
+              <div class="kp-ms-item" data-val="${res.maNhom}" data-name="${res.tenNhom}">
                 <input type="checkbox" class="form-check-input" />
-                <span class="kiot-ms-text">${res.tenNhom}</span>
-                <button type="button" class="kiot-item-edit-btn hh-item-edit-btn" data-id="${res.maNhom}" data-name="${res.tenNhom}" data-type="nhomhang" title="Sửa nhóm hàng" aria-label="Sửa ${res.tenNhom}">
+                <span class="kp-ms-text">${res.tenNhom}</span>
+                <button type="button" class="kp-item-edit-btn hh-item-edit-btn" data-id="${res.maNhom}" data-name="${res.tenNhom}" data-type="nhomhang" title="Sửa nhóm hàng" aria-label="Sửa ${res.tenNhom}">
                   <i class="bi bi-pencil" style="font-size:12px;pointer-events:none;"></i>
                 </button>
               </div>
@@ -632,7 +632,7 @@
     });
 
     list.addEventListener('click', e => {
-      const editBtn = e.target.closest('.hh-item-edit-btn, .kiot-item-edit-btn');
+      const editBtn = e.target.closest('.hh-item-edit-btn, .kp-item-edit-btn');
       if (editBtn) {
         e.stopPropagation();
         const id = editBtn.dataset.id || editBtn.closest('[data-val]')?.dataset.val;
@@ -667,7 +667,7 @@
         if (level > 0) {
           it.style.paddingLeft = (12 + level * 16) + 'px';
         }
-        const treePrefix = level > 0 ? `<span class="kiot-tree-branch text-muted me-1" style="font-family:monospace;font-size:12px;">└─</span>` : '';
+        const treePrefix = level > 0 ? `<span class="kp-tree-branch text-muted me-1" style="font-family:monospace;font-size:12px;">└─</span>` : '';
         const editBtnHtml = isNhom ? `
           <button type="button" class="hh-item-edit-btn" data-type="nhom" data-id="${opt.value}" data-val="${esc(opt.textContent.trim())}" title="Sửa nhóm hàng" aria-label="Sửa nhóm hàng ${esc(opt.textContent.trim())}">
             <svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>
@@ -742,7 +742,7 @@
   ];
 
   // Tự động nạp thêm vị trí từ danh sách vị trí đã nạp trong DB nếu có
-  $$('#dropdownViTri .kiot-ms-item').forEach(el => {
+  $$('#dropdownViTri .kp-ms-item').forEach(el => {
     const v = el.dataset.val?.trim();
     if (v && !availableLocations.some(a => ci(a, v))) {
       availableLocations.push(v);
@@ -920,11 +920,11 @@
   // Đóng dropdown khi click ra ngoài (ngoại trừ khi đang thao tác trong modal sửa/prompt/confirm)
   document.addEventListener('click', e => {
     // 1. Không đóng dropdown nếu click xảy ra bên trong modal con (Sửa vị trí/thuộc tính, Prompt, Confirm, Delete, Pick...)
-    if (e.target.closest('#hhEditItemOv, #hhPromptOv, #kiotPromptOv, #kiotConfirmOv, #hhDeleteProductOv, #hhPickOv, .kiot-prompt-ov, .kiot-confirm-ov, .modal-box')) {
+    if (e.target.closest('#hhEditItemOv, #hhPromptOv, #kpPromptOv, #kpConfirmOv, #hhDeleteProductOv, #hhPickOv, .kp-prompt-ov, .kp-confirm-ov, .modal-box')) {
       return;
     }
     // 2. Không đóng dropdown nếu đang có bất kỳ modal con nào đang hiển thị
-    if (document.querySelector('#hhEditItemOv.show, #hhPromptOv.show, #kiotPromptOv.show, #kiotConfirmOv.show, #hhDeleteProductOv.show, #hhPickOv.show, .kiot-prompt-ov.show, .kiot-confirm-ov.show')) {
+    if (document.querySelector('#hhEditItemOv.show, #hhPromptOv.show, #kpPromptOv.show, #kpConfirmOv.show, #hhDeleteProductOv.show, #hhPickOv.show, .kp-prompt-ov.show, .kp-confirm-ov.show')) {
       return;
     }
 
@@ -1203,8 +1203,8 @@
         r.remove();
         refreshAttrDropdowns();
       };
-      if (window.KiotConfirm) {
-        window.KiotConfirm.show({
+      if (window.AppConfirm) {
+        window.AppConfirm.show({
           title: 'Xóa dòng thuộc tính',
           message: msg,
           onConfirm: doRemove

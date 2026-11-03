@@ -1,10 +1,10 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.ChuyenKho.ChuyenKhoIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.ChuyenKho.ChuyenKhoIndexVM
 @using System.Globalization
 @{
     var viCulture = CultureInfo.GetCultureInfo("vi-VN");
 }
 
-<div class="kiot-table-scroll-body">
+<div class="kp-table-scroll-body">
     <table class="tbl" id="transferTable" style="width: max-content; min-width: 760px;">
         <thead>
             <tr>
@@ -201,7 +201,7 @@
                             <div class="product-detail-panel-wrap" style="display: none;">
                                 <div class="product-detail-panel dp" data-d="@item.MaPhieuChuyen">
                                     <div class="dp-tabs"><button type="button" class="dp-tab active" data-tab="info">Thông tin</button></div>
-                                    <div class="kk-detail-fixed-wrap kiot-detail-fixed-wrap">
+                                    <div class="kk-detail-fixed-wrap kp-detail-fixed-wrap">
                                         <h2 class="d-flex align-items-center gap-2">
                                             <span class="fw-bold" style="font-size: 18px; color: #1e293b;">@item.MaPhieuHienThi</span>
                                             @if (item.TrangThai == "DA_NHAN")

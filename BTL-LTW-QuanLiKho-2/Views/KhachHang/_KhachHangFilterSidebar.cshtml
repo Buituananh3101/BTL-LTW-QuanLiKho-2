@@ -1,46 +1,46 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.KhachHang.KhachHangIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.KhachHang.KhachHangIndexVM
 @using BTL_LTW_QuanLiKho_2.ViewModels.Common
 
-<!-- CỘT BÊN TRÁI: TIÊU ĐỀ "KHÁCH HÀNG" + BỘ LỌC MODULAR LEGO (THEO CHUẨN KIOTVIET) -->
-<aside class="kiot-sidebar-col" id="sidebarFilterCol">
+<!-- CỘT BÊN TRÁI: TIÊU ĐỀ "KHÁCH HÀNG" + BỘ LỌC MODULAR LEGO (THEO CHUẨN KHOPRO) -->
+<aside class="kp-sidebar-col" id="sidebarFilterCol">
     <!-- Header cho sidebar khi mở ở chế độ mobile -->
-    <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+    <div class="kp-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
         <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc khách hàng</div>
         <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
     </div>
 
-    <div class="kiot-sidebar-title d-none d-lg-flex">
+    <div class="kp-sidebar-title d-none d-lg-flex">
         Khách hàng
     </div>
 
-    <div class="kiot-filter-box">
+    <div class="kp-filter-box">
         <!-- 1. Nhóm khách hàng (Lego Multi-Select có nút + Tạo mới và icon Sửa ✎) -->
-        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NhomKhachHang", "nhom", "Nhóm khách hàng", "Chọn nhóm khách hàng", true) {
+        <partial name="_MultiSelectFilter" model='new MultiSelectVM("NhomKhachHang", "nhom", "Nhóm khách hàng", "Chọn nhóm khách hàng", true) {
             HeaderActionText = "Tạo mới",
             HeaderActionId = "btnOpenQuickGroupModal",
             AllowEdit = true,
-            Items = Model.NhomKhachHangs.Select(g => new KiotMultiSelectItemVM(g.MaNhomKhachHang.ToString(), g.TenNhom)).ToList()
+            Items = Model.NhomKhachHangs.Select(g => new MultiSelectItemVM(g.MaNhomKhachHang.ToString(), g.TenNhom)).ToList()
         }' />
 
-        <!-- 2. Ngày tạo (Lego KiotDateFilter) -->
-        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("tgt", "Ngày tạo", false)' />
+        <!-- 2. Ngày tạo (Lego KhoProDateFilter) -->
+        <partial name="_DateFilter" model='new DateFilterVM("tgt", "Ngày tạo", false)' />
 
         <!-- 3. Người tạo (Custom Single-Select Lego chuẩn Hàng hóa) -->
         <div class="f-block position-relative">
             <h6>Người tạo <span class="filter-dot" id="dotNguoiTao"></span></h6>
             <div class="position-relative">
-                <div class="kiot-single-select-box" id="boxNguoiTao">
+                <div class="kp-single-select-box" id="boxNguoiTao">
                     <span id="textNguoiTao">Tất cả người tạo</span>
-                    <i class="bi bi-chevron-down kiot-select-chevron"></i>
+                    <i class="bi bi-chevron-down kp-select-chevron"></i>
                 </div>
-                <div class="kiot-ss-dropdown shadow" id="dropdownNguoiTao">
-                    <div class="kiot-ss-item selected" data-val="ALL">
+                <div class="kp-ss-dropdown shadow" id="dropdownNguoiTao">
+                    <div class="kp-ss-item selected" data-val="ALL">
                         <span>Tất cả người tạo</span>
                         <i class="bi bi-check2 check-icon"></i>
                     </div>
                     @foreach (var nv in Model.NhanViens)
                     {
-                        <div class="kiot-ss-item" data-val="@nv">
+                        <div class="kp-ss-item" data-val="@nv">
                             <span>@nv</span>
                             <i class="bi bi-check2 check-icon"></i>
                         </div>
@@ -56,10 +56,10 @@
             </select>
         </div>
 
-        <!-- 4. Loại khách hàng (Segmented Buttons pill: Tất cả / Cá nhân / Công ty - Chuẩn Ảnh KiotViet) -->
+        <!-- 4. Loại khách hàng (Segmented Buttons pill: Tất cả / Cá nhân / Công ty - Chuẩn Ảnh KhoPro) -->
         <div class="f-block">
             <h6>Loại khách hàng</h6>
-            <div class="kiot-segmented-group" id="groupLoaiKhachHang">
+            <div class="kp-segmented-group" id="groupLoaiKhachHang">
                 <button type="button" class="btn-segmented active" data-val="ALL">Tất cả</button>
                 <button type="button" class="btn-segmented" data-val="CA_NHAN">Cá nhân</button>
                 <button type="button" class="btn-segmented" data-val="CONG_TY">Công ty</button>
@@ -67,10 +67,10 @@
             <input type="hidden" id="filterLoaiKhachHangSegment" value="ALL" />
         </div>
 
-        <!-- 5. Giới tính (Segmented Buttons pill: Tất cả / Nam / Nữ - Chuẩn Ảnh KiotViet) -->
+        <!-- 5. Giới tính (Segmented Buttons pill: Tất cả / Nam / Nữ - Chuẩn Ảnh KhoPro) -->
         <div class="f-block">
             <h6>Giới tính</h6>
-            <div class="kiot-segmented-group" id="groupGioiTinh">
+            <div class="kp-segmented-group" id="groupGioiTinh">
                 <button type="button" class="btn-segmented active" data-val="ALL">Tất cả</button>
                 <button type="button" class="btn-segmented" data-val="Nam">Nam</button>
                 <button type="button" class="btn-segmented" data-val="Nu">Nữ</button>
@@ -82,20 +82,20 @@
         <div class="f-block position-relative">
             <h6>Sinh nhật <span class="filter-dot" id="dotSinhNhat"></span></h6>
             <div class="position-relative">
-                <div class="kiot-single-select-box" id="boxSinhNhat">
+                <div class="kp-single-select-box" id="boxSinhNhat">
                     <span id="textSinhNhat">Toàn thời gian</span>
-                    <i class="bi bi-chevron-down kiot-select-chevron"></i>
+                    <i class="bi bi-chevron-down kp-select-chevron"></i>
                 </div>
-                <div class="kiot-ss-dropdown shadow" id="dropdownSinhNhat">
-                    <div class="kiot-ss-item selected" data-val="ALL">
+                <div class="kp-ss-dropdown shadow" id="dropdownSinhNhat">
+                    <div class="kp-ss-item selected" data-val="ALL">
                         <span>Toàn thời gian</span>
                         <i class="bi bi-check2 check-icon"></i>
                     </div>
-                    <div class="kiot-ss-item" data-val="THANG_NAY">
+                    <div class="kp-ss-item" data-val="THANG_NAY">
                         <span>Sinh nhật trong tháng này</span>
                         <i class="bi bi-check2 check-icon"></i>
                     </div>
-                    <div class="kiot-ss-item" data-val="HOM_NAY">
+                    <div class="kp-ss-item" data-val="HOM_NAY">
                         <span>Sinh nhật hôm nay</span>
                         <i class="bi bi-check2 check-icon"></i>
                     </div>
@@ -109,13 +109,13 @@
         </div>
 
         <!-- 7. Tổng bán (Lego Value Filter Từ - Đến) -->
-        <partial name="_KiotValueFilter" model='new KiotValueFilterVM("TongBan", "Tổng bán") { FromPlaceholder = "Nhập số tiền...", ToPlaceholder = "Nhập số tiền..." }' />
+        <partial name="_ValueFilter" model='new ValueFilterVM("TongBan", "Tổng bán") { FromPlaceholder = "Nhập số tiền...", ToPlaceholder = "Nhập số tiền..." }' />
 
         <!-- 8. Nợ hiện tại (Lego Value Filter Từ - Đến) -->
-        <partial name="_KiotValueFilter" model='new KiotValueFilterVM("No", "Nợ hiện tại") { FromPlaceholder = "Nhập số tiền...", ToPlaceholder = "Nhập số tiền..." }' />
+        <partial name="_ValueFilter" model='new ValueFilterVM("No", "Nợ hiện tại") { FromPlaceholder = "Nhập số tiền...", ToPlaceholder = "Nhập số tiền..." }' />
 
         <!-- 9. Trạng thái (Lego Status Filter Checkbox) -->
-        <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("TrangThai", "Trạng thái", new List<KiotStatusOptionVM> {
+        <partial name="_StatusFilter" model='new StatusFilterVM("TrangThai", "Trạng thái", new List<StatusOptionVM> {
             new("HOAT_DONG", "Đang hoạt động", true),
             new("NGUNG_GIAO_DICH", "Ngừng giao dịch", false)
         })' />

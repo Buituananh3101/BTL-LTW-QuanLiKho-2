@@ -1,4 +1,4 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.Common.KiotDateFilterVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.Common.DateFilterVM
 @{
     var tgt = Model?.Target ?? "date";
     var tgtCap = char.ToUpper(tgt[0]) + (tgt.Length > 1 ? tgt.Substring(1) : "");
@@ -7,7 +7,7 @@
     var isFuture = Model?.ShowFutureOptions ?? false;
 }
 
-<div class="f-block position-relative kiot-date-filter-block" data-date-target="@tgt">
+<div class="f-block position-relative kp-date-filter-block" data-date-target="@tgt">
     <h6>@title <span class="filter-dot" id="dot@(tgtCap)"></span></h6>
 
     <!-- 1. Lựa chọn chọn nhanh / Toàn thời gian -->

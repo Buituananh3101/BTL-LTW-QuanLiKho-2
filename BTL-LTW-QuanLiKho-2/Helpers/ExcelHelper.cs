@@ -1,4 +1,4 @@
-using ClosedXML.Excel;
+﻿using ClosedXML.Excel;
 using System.Globalization;
 using System.Text;
 
@@ -144,9 +144,9 @@ public static class ExcelHelper
     }
 
     /// <summary>
-    /// Áp dụng định dạng Header chuẩn KiotViet: Màu nền xanh đậm `#0066cc`, chữ trắng, in đậm, căn giữa.
+    /// Áp dụng định dạng Header chuẩn KhoPro: Màu nền xanh đậm `#0066cc`, chữ trắng, in đậm, căn giữa.
     /// </summary>
-    public static void ApplyKiotVietHeaderStyle(IXLRange range)
+    public static void ApplyHeaderStyle(IXLRange range)
     {
         range.Style.Font.Bold = true;
         range.Style.Font.FontColor = XLColor.White;
@@ -169,8 +169,8 @@ public static class ExcelHelper
     }
 
     /// <summary>
-    /// Xuất danh sách dữ liệu ra mảng byte file Excel chuẩn KiotViet với ClosedXML.
-    /// Tự động áp dụng Header xanh KiotViet, kẻ viền bảng, căn lề, format số/ngày và tự động co giãn độ rộng cột.
+    /// Xuất danh sách dữ liệu ra mảng byte file Excel chuẩn KhoPro với ClosedXML.
+    /// Tự động áp dụng Header xanh KhoPro, kẻ viền bảng, căn lề, format số/ngày và tự động co giãn độ rộng cột.
     /// </summary>
     public static byte[] ExportToExcel<T>(
         string sheetName,
@@ -186,7 +186,7 @@ public static class ExcelHelper
         {
             ws.Cell(1, i + 1).Value = colList[i].Header;
         }
-        ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, colList.Count));
+        ApplyHeaderStyle(ws.Range(1, 1, 1, colList.Count));
         ws.Row(1).Height = 28;
 
         // 2. Dữ liệu các dòng

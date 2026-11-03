@@ -1,5 +1,5 @@
-/**
- * Module In Tem Mã Vạch Hàng Hóa Chuẩn KiotViet & Máy In Nhiệt
+﻿/**
+ * Module In Tem Mã Vạch Hàng Hóa Chuẩn KhoPro & Máy In Nhiệt
  * Mã vạch Code 128 thuần JavaScript (Zero External Dependency)
  */
 (function (window, document, $) {

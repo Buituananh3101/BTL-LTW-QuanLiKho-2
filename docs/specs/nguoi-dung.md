@@ -1,4 +1,4 @@
-# Đặc tả Chức năng: Quản lý Người dùng & Phân quyền Kho
+﻿# Đặc tả Chức năng: Quản lý Người dùng & Phân quyền Kho
 
 > **Mô-đun**: Thiết lập hệ thống ➜ Người dùng & Phân quyền  
 > **Tài liệu tham chiếu**: [`.agent/rules/04-xac-thuc-phan-quyen.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/.agent/rules/04-xac-thuc-phan-quyen.md) | [`AGENTS.md`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/AGENTS.md)
@@ -41,7 +41,7 @@
 
 ### 3.1. Màn hình Danh sách (`Index.cshtml`)
 - **Topbar**: Nút `F3` tìm kiếm nhanh, nút `+ Người dùng` (`#btnOpenCreateUser`), nút `F4` mở/đóng sidebar lọc.
-- **Sidebar lọc trái (`_NguoiDungFilterSidebar.cshtml`)**: Lọc theo từ khóa, Vai trò (`_KiotMultiSelectFilter`), Kho phụ trách (`_KiotMultiSelectFilter`), Trạng thái (`_KiotStatusFilter`).
+- **Sidebar lọc trái (`_NguoiDungFilterSidebar.cshtml`)**: Lọc theo từ khóa, Vai trò (`_MultiSelectFilter`), Kho phụ trách (`_MultiSelectFilter`), Trạng thái (`_StatusFilter`).
 - **Bảng dữ liệu AJAX (`_NguoiDungTable.cshtml`)**:
   - Sắp xếp 3 trạng thái (`sortable-th`): Tên đăng nhập, Tên nhân viên, Vai trò, Trạng thái.
   - Co giãn 100% không cuộn ngang (`table-layout: fixed`, `overflow-x: hidden`). Cột Kho làm việc tự động co giãn theo không gian còn lại.
@@ -49,7 +49,7 @@
 
 ### 3.2. Modal Thêm/Sửa người dùng (`_NguoiDungModal.cshtml`)
 - Header: Tiêu đề, nút đóng `X`. Căn giữa viewport tuyệt đối (`display: flex; align-items: center; justify-content: center; margin: auto;`) cho cả Modal Thêm/Sửa `#userModalOv` và Modal Đổi mật khẩu `#pwdModalOv`.
-- Body: Thông tin tài khoản & nhân sự (Tên đăng nhập, Mật khẩu, Họ tên, SĐT, Email), trường Vai trò người dùng sử dụng Custom Single-Select chuẩn Danh sách hàng hóa (`.hh-cs-wrap`, `.hh-cs-box`, `.hh-cs-dropdown`, icon checkmark xanh), Accordion Địa chỉ và Accordion Phân quyền kho sử dụng Dropdown Multi-Select chuẩn Lego Danh sách hàng hóa (`.kiot-multiselect-box`, `.kiot-ms-dropdown`, tìm kiếm chi nhánh con, tag pills có nút xóa nhanh & huy hiệu số lượng).
+- Body: Thông tin tài khoản & nhân sự (Tên đăng nhập, Mật khẩu, Họ tên, SĐT, Email), trường Vai trò người dùng sử dụng Custom Single-Select chuẩn Danh sách hàng hóa (`.hh-cs-wrap`, `.hh-cs-box`, `.hh-cs-dropdown`, icon checkmark xanh), Accordion Địa chỉ và Accordion Phân quyền kho sử dụng Dropdown Multi-Select chuẩn Lego Danh sách hàng hóa (`.kp-multiselect-box`, `.kp-ms-dropdown`, tìm kiếm chi nhánh con, tag pills có nút xóa nhanh & huy hiệu số lượng).
 - Footer: Checkbox Trạng thái "Đang hoạt động", nút Bỏ qua và nút Lưu người dùng.
 
 ### 3.3. Modal Đổi mật khẩu nhanh (`_DoiMatKhauModal.cshtml`)
@@ -71,11 +71,11 @@
 
 ## 5. Danh mục Khối Lego tái sử dụng (Luật 10 AGENTS.md)
 
-- [x] **Modal Thao tác & Xác nhận**: `_NguoiDungModal.cshtml` chuẩn khuôn mẫu Hàng hóa + `KiotConfirm` (`window.KiotConfirm.show()`) khi Xóa / Khóa tài khoản.
-- [x] **Bộ lọc Dropdown chọn nhiều**: `_KiotMultiSelectFilter.cshtml` cho vai trò và kho.
-- [x] **Bộ lọc Trạng thái checkbox**: `_KiotStatusFilter.cshtml` cho trạng thái.
+- [x] **Modal Thao tác & Xác nhận**: `_NguoiDungModal.cshtml` chuẩn khuôn mẫu Hàng hóa + `AppConfirm` (`window.AppConfirm.show()`) khi Xóa / Khóa tài khoản.
+- [x] **Bộ lọc Dropdown chọn nhiều**: `_MultiSelectFilter.cshtml` cho vai trò và kho.
+- [x] **Bộ lọc Trạng thái checkbox**: `_StatusFilter.cshtml` cho trạng thái.
 - [x] **Phân trang AJAX**: `_Pagination.cshtml` + `BaseFilterParams`.
-- [x] **Thông báo Toast**: `KiotToast.success()`, `KiotToast.error()`.
+- [x] **Thông báo Toast**: `AppToast.success()`, `AppToast.error()`.
 
 ---
 

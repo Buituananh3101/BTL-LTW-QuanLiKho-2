@@ -1,5 +1,5 @@
-/* ==========================================================================
-   CSS CHO BÁO CÁO THẺ KHO (THE-KHO.CSS) - CHUẨN GIAO DIỆN KIOTVIET
+﻿/* ==========================================================================
+   CSS CHO BÁO CÁO THẺ KHO (THE-KHO.CSS) - CHUẨN GIAO DIỆN KHOPRO
    ========================================================================== */
 
 /* 1. KHỐI CHỌN MẶT HÀNG TRÊN SIDEBAR (CHUẨN LEGO F3 BUNG RỘNG THOẢI MÁI) */
@@ -303,7 +303,7 @@
     flex-direction: column;
 }
 
-.thekho-table-wrap .kiot-table-scroll-body {
+.thekho-table-wrap .kp-table-scroll-body {
     overflow-x: auto !important;
     overflow-y: auto !important;
     flex: 1;
@@ -362,7 +362,7 @@
     padding: 10px 12px;
 }
 
-/* Dòng tồn cuối kỳ - phong cách summary chuẩn KiotViet */
+/* Dòng tồn cuối kỳ - phong cách summary chuẩn KhoPro */
 .thekho-table tr.row-ton-cuoi {
     background-color: #fafbfc;
 }

@@ -13,7 +13,7 @@
 - **ViewModel**: `ViewModels/HangHoa/` (`HangHoaForm.cs`, `HangHoaFilterParams.cs`, `ExportHangHoaRequest.cs`, `ImportHangHoaResult.cs`).
 - **View & Partial**: `Views/HangHoa/Index.cshtml`, `_HangHoaFilterSidebar.cshtml`, `_HangHoaExcelActions.cshtml`, `_HangHoaTable.cshtml` (+ `_Pagination.cshtml`).
 - **Modal Modun**: `_HangHoaModal.cshtml`, `_HangHoaExportModal.cshtml`, `_HangHoaImportModal.cshtml`, `_HangHoaBarcodeModal.cshtml`.
-- **Styles & Scripts**: `kiot-filter.js`, `hang-hoa-index.js`, `hang-hoa-form.js`, `hang-hoa-excel.js`, `hang-hoa-barcode.js`, `hang-hoa-barcode.css`.
+- **Styles & Scripts**: `app-filter.js`, `hang-hoa-index.js`, `hang-hoa-form.js`, `hang-hoa-excel.js`, `hang-hoa-barcode.js`, `hang-hoa-barcode.css`.
 - **DbContext & Entity**: `QuanLyKhoPhuQuocLtwContext`, Entity (`HangHoa`, `HinhAnhHangHoa`, `NhomHang`, `DonViTinh`, `NguongTonKho`, `VwTonKhoHienTai`).
 
 ### 1.2. Bảng CSDL tham gia:
@@ -49,12 +49,12 @@
 3. **Dự kiến hết hàng**: Hôm nay, 3 ngày tới, 7 ngày tới, Trong tháng, > 30 ngày.
 4. **Nhà cung cấp**: Multi-select tag dropdown theo NCC đã từng nhập.
 5. **Loại hàng**: Hàng hóa / Dịch vụ / Combo đóng gói.
-6. **Vị trí**: Dropdown đa chọn kèm ô tìm kiếm nhanh `.kiot-ms-search`.
+6. **Vị trí**: Dropdown đa chọn kèm ô tìm kiếm nhanh `.kp-ms-search`.
 7. **Thời gian tạo**: Hôm nay, Hôm qua, 7 ngày, 30 ngày hoặc tùy chọn ngày (Dual Calendar).
 
 ### 3.2. Sắp xếp 3 trạng thái & Ẩn hiện cột:
 - **Sắp xếp 3 trạng thái**: Click header: Lần 1 ASC (`bi-arrow-up`) ➜ Lần 2 DESC (`bi-arrow-down`) ➜ Lần 3 Default. Cột căn trái dùng inline-flex chống tràn viền, cột số dùng padding-right 22px cố định icon.
-- **Tùy chọn hiển thị cột**: Nút `#btnColsDropdown` (`bi-view-list`), menu `#colMenu` 2 cột chuẩn chuyên nghiệp. Quản lý qua `KiotFilter.initColumnToggle` lưu `kiot_hang_hoa_cols_v1`. Quản lý 13 cột dữ liệu (`img`, `mahang`, `tenhang`, `nhomhang`, `dvt`, `giaban`, `giavon`, `tonkho`, `khachdat`, `vitri`, `ngaytao`, `dukienhethang`, `trangthai`) + 2 cột cố định. Tự động đồng bộ `colspan` và class `.last-visible-col`. Bảng `#productTable` áp dụng chuẩn `width: max-content; min-width: 760px; table-layout: fixed;` (chuẩn Kiểm tồn & Nhà cung cấp), khóa cố định `width`/`min-width` từng cột chống co rút khi thêm cột. Khung chi tiết `.kiot-detail-fixed-wrap` cố định 992px.
+- **Tùy chọn hiển thị cột**: Nút `#btnColsDropdown` (`bi-view-list`), menu `#colMenu` 2 cột chuẩn chuyên nghiệp. Quản lý qua `AppFilter.initColumnToggle` lưu `kp_hang_hoa_cols_v1`. Quản lý 13 cột dữ liệu (`img`, `mahang`, `tenhang`, `nhomhang`, `dvt`, `giaban`, `giavon`, `tonkho`, `khachdat`, `vitri`, `ngaytao`, `dukienhethang`, `trangthai`) + 2 cột cố định. Tự động đồng bộ `colspan` và class `.last-visible-col`. Bảng `#productTable` áp dụng chuẩn `width: max-content; min-width: 760px; table-layout: fixed;` (chuẩn Kiểm tồn & Nhà cung cấp), khóa cố định `width`/`min-width` từng cột chống co rút khi thêm cột. Khung chi tiết `.kp-detail-fixed-wrap` cố định 992px.
 
 ---
 

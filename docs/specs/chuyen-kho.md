@@ -57,17 +57,17 @@
 - **Sidebar lọc bên trái**:
   - Hướng chuyển (Radio: Tất cả, Chuyển đi từ kho này, Chuyển đến kho này).
   - Trạng thái (Checkbox Lego: Phiếu tạm, Đang chuyển, Đã nhận, Đã hủy).
-  - Thời gian (`_KiotDateFilter` + `KiotFilter.initDateFilter`).
+  - Thời gian (`_DateFilter` + `AppFilter.initDateFilter`).
 - **Topbar**: Tiêu đề "Chuyển hàng", ô tìm kiếm mã phiếu F3, nút "+ Chuyển hàng", "Xuất file", nút tùy chọn hiển thị cột (`#btnColsDropdown` + `#colMenu`).
 - **Bảng dữ liệu Master-Detail chuẩn Kiểm tồn & hệ thống (`PhieuKiemKe`)**:
-  - Dòng cha + Dòng chi tiết viền chữ nhật `#0070f3` (`KiotFilter.initRowDetail`).
+  - Dòng cha + Dòng chi tiết viền chữ nhật `#0070f3` (`AppFilter.initRowDetail`).
   - Dòng tổng hợp `tr.summary-row` ngay dưới thead hiển thị tổng SL chuyển, tổng SL nhận, tổng Giá trị chuyển.
   - Drawer chi tiết chuẩn Kiểm tồn (`PhieuKiemKe`):
     - Tab bar `.dp-tabs`, tiêu đề mã phiếu in đậm `18px`, badge trạng thái pill chuẩn mực.
     - Hàng thông tin tóm tắt `.meta` (Kho gửi, Kho nhận, Người tạo/chuyển/nhận, Ngày tạo/chuyển/nhận).
     - Bảng danh sách hàng hóa `.dtl-tbl` với header `#f8fafc`, hàng tìm kiếm nhanh `tr.fin`.
     - Khối ghi chú và tóm tắt số liệu `.dp-bottom`, hàng nút hành động `.dp-actions`.
-  - Tùy chọn ẩn/hiển thị 11 cột lưu `localStorage` (`KiotFilter.initColumnToggle`).
+  - Tùy chọn ẩn/hiển thị 11 cột lưu `localStorage` (`AppFilter.initColumnToggle`).
   - Sắp xếp cột 3 trạng thái click-to-sort (ASC -> DESC -> Bỏ sắp xếp) trên 11 cột dữ liệu.
   - Phân trang AJAX (`_Pagination.cshtml`).
 

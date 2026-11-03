@@ -1,5 +1,5 @@
 ﻿/* ==========================================================================
-   CSS FORM Táº O & Cáº¬P NHáº¬T HĂ€NG HĂ“A CHUáº¨N KIOTVIET (PROTOTYPE MATCH)
+   CSS FORM Táº O & Cáº¬P NHáº¬T HĂ€NG HĂ“A CHUáº¨N KHOPRO (PROTOTYPE MATCH)
    Há»— trá»£ 5 áº£nh, Ä‘á»‹nh má»©c tá»“n Min/Max, vá»‹ trĂ­, trá»ng lÆ°á»£ng, thuá»™c tĂ­nh Ä‘á»™ng, tab mĂ´ táº£
    ========================================================================== */
 
@@ -615,7 +615,7 @@
   border-left: 0;
 }
 
-/* ===== Multi-select Tag Dropdown (Vá»‹ trĂ­) chuáº©n hĂ¬nh áº£nh KiotViet ===== */
+/* ===== Multi-select Tag Dropdown (Vá»‹ trĂ­) chuáº©n hĂ¬nh áº£nh KhoPro ===== */
 .hh-multiselect-wrap {
   position: relative;
   width: 100%;
@@ -916,7 +916,7 @@
 .hh-cs-item.selected .hh-check-icon {
   display: block;
 }
-/* NĂºt bĂºt chĂ¬ sá»­a item khi hover trong dropdown Vá»‹ trĂ­ vĂ  Thuá»™c tĂ­nh (Chuáº©n KiotViet) */
+/* NĂºt bĂºt chĂ¬ sá»­a item khi hover trong dropdown Vá»‹ trĂ­ vĂ  Thuá»™c tĂ­nh (Chuáº©n KhoPro) */
 .hh-item-edit-btn {
   display: none;
   align-items: center;
@@ -1504,16 +1504,16 @@
 
 
 /* ==========================================================================
-   CSS Bá»” TRá»¢ CHO PHĂ‚N Há»† KHĂCH HĂ€NG (CHUáº¨N 4 áº¢NH KIOTVIET)
+   CSS Bá»” TRá»¢ CHO PHĂ‚N Há»† KHĂCH HĂ€NG (CHUáº¨N 4 áº¢NH KHOPRO)
    ========================================================================== */
-.kiot-segmented-group {
+.kp-segmented-group {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 4px;
 }
 
-.kiot-segmented-group .btn-segmented {
+.kp-segmented-group .btn-segmented {
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
   color: #475569;
@@ -1526,12 +1526,12 @@
   outline: none;
 }
 
-.kiot-segmented-group .btn-segmented:hover {
+.kp-segmented-group .btn-segmented:hover {
   background: #e2e8f0;
   color: #1e293b;
 }
 
-.kiot-segmented-group .btn-segmented.active {
+.kp-segmented-group .btn-segmented.active {
   background: #0066cc;
   border-color: #0066cc;
   color: #ffffff;

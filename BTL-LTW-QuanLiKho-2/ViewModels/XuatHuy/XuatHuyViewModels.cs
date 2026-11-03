@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using BTL_LTW_QuanLiKho_2.Services;
 
 namespace BTL_LTW_QuanLiKho_2.ViewModels;
@@ -55,7 +55,7 @@ public class XuatHuyLineVM
 public class XuatHuyFilterVM
 {
     public string? Q { get; set; }
-    public string DateFilterType { get; set; } = "THANG_NAY"; // THANG_NAY là mặc định chuẩn KiotViet
+    public string DateFilterType { get; set; } = "THANG_NAY"; // THANG_NAY là mặc định chuẩn KhoPro
     public DateTime? FromDate { get; set; }
     public DateTime? ToDate { get; set; }
     public List<string> Statuses { get; set; } = new() { "NHAP", "DA_XAC_NHAN" };

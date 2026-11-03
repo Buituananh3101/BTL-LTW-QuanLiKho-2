@@ -1,4 +1,4 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.XuatHuyIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.XuatHuyIndexVM
 @{
     ViewData["Title"] = "Xuất hủy";
 }
@@ -6,7 +6,7 @@
 <link href="~/css/kiem-kho.css" rel="stylesheet" asp-append-version="true" />
 <link href="~/css/xuat-huy.css" rel="stylesheet" asp-append-version="true" />
 
-<div class="kiot-container position-relative" id="kiotContainer"
+<div class="kp-container position-relative" id="kpContainer"
      data-filter-url="@Url.Action("Filter", "XuatHuy")"
      data-cancel-url="@Url.Action("Cancel", "XuatHuy")"
      data-note-url="@Url.Action("UpdateNote", "XuatHuy")"
@@ -21,33 +21,33 @@
     <partial name="_XuatHuyFilterSidebar" model="Model" />
 
     <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
-    <div class="kiot-sidebar-backdrop" id="sidebarBackdrop"></div>
+    <div class="kp-sidebar-backdrop" id="sidebarBackdrop"></div>
 
     <!-- Nút tròn thu gọn / mở rộng ở ranh giới giữa sidebar và bảng (Phím tắt F4) -->
-    <button type="button" class="kiot-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
+    <button type="button" class="kp-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
         <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
     </button>
 
     <!-- 2. CỘT BÊN PHẢI: THANH TÌM KIẾM + TOOLBAR + BẢNG XUẤT HỦY -->
-    <main class="kiot-main-col">
+    <main class="kp-main-col">
         <!-- Toolbar trên cùng: Thanh tìm kiếm thẳng hàng với bảng bên dưới -->
-        <div class="kiot-toolbar-row">
+        <div class="kp-toolbar-row">
             <!-- Tiêu đề + Nút phễu bộ lọc trên mobile / zoom in -->
-            <div class="kiot-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
-                <span class="kiot-mobile-title fw-bold fs-6 text-dark">Xuất hủy</span>
-                <button type="button" class="btn btn-sm btn-outline-primary kiot-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc xuất hủy">
+            <div class="kp-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
+                <span class="kp-mobile-title fw-bold fs-6 text-dark">Xuất hủy</span>
+                <button type="button" class="btn btn-sm btn-outline-primary kp-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc xuất hủy">
                     <i class="bi bi-funnel"></i>
                 </button>
             </div>
 
             <!-- Ô tìm kiếm theo mã xuất hủy (F3) -->
-            <div class="kiot-search-box">
+            <div class="kp-search-box">
                 <i class="bi bi-search"></i>
                 <input type="text" id="keywordSearch" class="form-control" placeholder="Theo mã xuất hủy (F3)" value="@Model.Filter.Q" autocomplete="off" />
             </div>
 
             <!-- Nhóm nút hành động chuyên nghiệp -->
-            <div class="kiot-actions-group">
+            <div class="kp-actions-group">
                 <!-- Nút + Xuất hủy -->
                 <a href="@Url.Action("Create", "XuatHuy")" class="btn btn-primary d-inline-flex align-items-center" id="btnNew" title="Lập phiếu xuất hủy mới">
                     <i class="bi bi-plus-lg me-1"></i><span>Xuất hủy</span>
@@ -107,29 +107,29 @@
 
         <!-- Bảng danh sách phiếu xuất hủy (Load AJAX qua Partial View) -->
         <section id="content">
-            <div id="tableWrapper" class="kiot-table-wrapper">
+            <div id="tableWrapper" class="kp-table-wrapper">
                 <partial name="_XuatHuyTable" model="Model" />
             </div>
         </section>
     </main>
 </div>
 
-<!-- Modal xác nhận xóa / hủy chứng từ dùng chung KiotConfirm -->
-<div class="kiot-confirm-ov" id="kiotConfirmOv">
-    <div class="kiot-confirm-modal">
-        <div class="kiot-confirm-header">
-            <h5 class="kiot-confirm-title" id="kiotConfirmTitle">Xác nhận</h5>
-            <button type="button" class="btn-close" id="kiotConfirmCloseBtn" aria-label="Close"></button>
+<!-- Modal xác nhận xóa / hủy chứng từ dùng chung AppConfirm -->
+<div class="kp-confirm-ov" id="kpConfirmOv">
+    <div class="kp-confirm-modal">
+        <div class="kp-confirm-header">
+            <h5 class="kp-confirm-title" id="kpConfirmTitle">Xác nhận</h5>
+            <button type="button" class="btn-close" id="kpConfirmCloseBtn" aria-label="Close"></button>
         </div>
-        <div class="kiot-confirm-body" id="kiotConfirmMsg">Bạn có chắc chắn muốn thực hiện thao tác này?</div>
-        <div class="kiot-confirm-footer">
-            <button type="button" class="btn btn-secondary kiot-btn-cancel" id="kiotConfirmCancelBtn">Bỏ qua</button>
-            <button type="button" class="btn btn-danger kiot-btn-ok" id="kiotConfirmOkBtn">Đồng ý</button>
+        <div class="kp-confirm-body" id="kpConfirmMsg">Bạn có chắc chắn muốn thực hiện thao tác này?</div>
+        <div class="kp-confirm-footer">
+            <button type="button" class="btn btn-secondary kp-btn-cancel" id="kpConfirmCancelBtn">Bỏ qua</button>
+            <button type="button" class="btn btn-danger kp-btn-ok" id="kpConfirmOkBtn">Đồng ý</button>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <script src="~/js/kiot-filter.js" asp-append-version="true"></script>
+    <script src="~/js/app-filter.js" asp-append-version="true"></script>
     <script src="~/js/xuat-huy-index.js" asp-append-version="true"></script>
 }

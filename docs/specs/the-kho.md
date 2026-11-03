@@ -1,6 +1,6 @@
-# Đặc tả Chức năng: Báo cáo Thẻ kho (Stock Card Report)
+﻿# Đặc tả Chức năng: Báo cáo Thẻ kho (Stock Card Report)
 
-> **Mục tiêu**: Cung cấp cho Thủ kho và Quản lý báo cáo theo dõi chi tiết lịch sử xuất - nhập - tồn của từng mặt hàng tại một chi nhánh kho hoặc toàn hệ thống theo trình tự thời gian chuẩn chuyên nghiệp. Tái sử dụng 100% các khối LEGO: `KiotFilter`, `ExcelHelper`, `_KiotDateFilter`, `_KiotStatusFilter`, `_Pagination`.
+> **Mục tiêu**: Cung cấp cho Thủ kho và Quản lý báo cáo theo dõi chi tiết lịch sử xuất - nhập - tồn của từng mặt hàng tại một chi nhánh kho hoặc toàn hệ thống theo trình tự thời gian chuẩn chuyên nghiệp. Tái sử dụng 100% các khối LEGO: `AppFilter`, `ExcelHelper`, `_DateFilter`, `_StatusFilter`, `_Pagination`.
 
 ---
 
@@ -47,7 +47,7 @@ Số liệu Thẻ kho được truy vấn từ View CSDL **`vw_BienDongKho`** (h
 | `Services/TheKhoService.cs` | Tính toán Tồn đầu, Tồn lũy kế, nạp chi tiết đối tác, xuất Excel ClosedXML |
 | `Controllers/BaoCaoController.cs` | Kế thừa `BaseKhoController`, cung cấp action `TheKho`, `FilterTheKho`, `ExportTheKho`, `GetTheKhoQuick`, `SearchHangHoa` |
 | `Views/BaoCao/TheKho.cshtml` | View chính 2 cột hệ thống, Toolbar, Container AJAX đồng bộ |
-| `Views/BaoCao/_TheKhoFilterSidebar.cshtml` | Sidebar Lego: Autocomplete F3 chọn hàng, Dropdown kho, `_KiotDateFilter`, `_KiotStatusFilter` |
+| `Views/BaoCao/_TheKhoFilterSidebar.cshtml` | Sidebar Lego: Autocomplete F3 chọn hàng, Dropdown kho, `_DateFilter`, `_StatusFilter` |
 | `Views/BaoCao/_TheKhoSummary.cshtml` | Banner chi tiết hàng hóa và 4 thẻ KPI Thẻ kho |
 | `Views/BaoCao/_TheKhoTable.cshtml` | Bảng dòng biến động kèm dòng Tồn đầu kỳ, Tồn cuối kỳ, `_Pagination` |
 | `Views/BaoCao/_TheKhoContent.cshtml` | Wrapper nạp đồng bộ KPI Summary và Bảng dữ liệu qua 1 request AJAX |
@@ -66,8 +66,8 @@ Số liệu Thẻ kho được truy vấn từ View CSDL **`vw_BienDongKho`** (h
 1. **Sidebar bộ lọc bên trái**:
    - Khối tìm kiếm hàng hóa Autocomplete F3: Placeholder "Tìm theo tên hoặc mã hàng...", hỗ trợ phím tắt F3 toàn cục để nhảy ngay vào ô tìm kiếm và bôi đen toàn bộ chữ (đã gỡ bỏ huy hiệu [F3] trên tiêu đề để đồng bộ kiểu dáng tiêu đề phẳng gọn gàng); khi chọn xong tên mặt hàng hiển thị trực tiếp trong ô tìm kiếm kèm nút xóa nhanh `(x)` nội dòng (`#btnRemoveSelectedProduct`) để bỏ chọn hoặc đổi mặt hàng.
    - Dropdown chi nhánh kho: Thủ kho cố định kho làm việc; Quản lý được chọn "Tất cả chi nhánh kho".
-   - Bộ lọc thời gian: Lego `_KiotDateFilter` (Hôm nay, Hôm qua, 7 ngày qua, Tháng này, Tháng trước, Tùy chọn dải ngày).
-   - Bộ lọc loại giao dịch: Checkbox Lego `_KiotStatusFilter` kèm chấm chỉ báo `filter-dot` (`#dotLoaiGd`).
+   - Bộ lọc thời gian: Lego `_DateFilter` (Hôm nay, Hôm qua, 7 ngày qua, Tháng này, Tháng trước, Tùy chọn dải ngày).
+   - Bộ lọc loại giao dịch: Checkbox Lego `_StatusFilter` kèm chấm chỉ báo `filter-dot` (`#dotLoaiGd`).
    - Phím tắt F4 thu gọn / mở rộng sidebar; hỗ trợ nút phễu mở bộ lọc trên mobile.
 2. **Cột hiển thị chính bên phải**:
    - Toolbar: Ô tìm kiếm nhanh giao dịch (`#keywordSearch`, placeholder "Theo mã chứng từ, đối tác, ghi chú"), nút **"Xuất file"** Excel ClosedXML, nút **"In thẻ kho"**, nút tải lại bảng.

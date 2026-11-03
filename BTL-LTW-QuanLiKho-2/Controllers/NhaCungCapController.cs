@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -592,7 +592,7 @@ public class NhaCungCapController : BaseKhoController
         return query.Skip(skip).Take(take);
     }
 
-    // 12. Xuất file Excel danh sách Nhà cung cấp (Chuẩn KiotViet ClosedXML)
+    // 12. Xuất file Excel danh sách Nhà cung cấp (Chuẩn KhoPro ClosedXML)
     [HttpGet]
     public async Task<IActionResult> Export(NhaCungCapFilterParams filter)
     {

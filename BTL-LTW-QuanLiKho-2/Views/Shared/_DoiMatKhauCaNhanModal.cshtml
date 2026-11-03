@@ -1,4 +1,4 @@
-<!-- ========================================================================
+﻿<!-- ========================================================================
      MODAL ĐỔI MẬT KHẨU CÁ NHÂN TOÀN HỆ THỐNG (CHUẨN FORM DANH SÁCH HÀNG HÓA)
      Cấu trúc .hh-ov, .hh-modal, .hh-m-head, .hh-m-body, .hh-f, .hh-m-foot
      ======================================================================== -->
@@ -240,8 +240,8 @@
                 if (data.success) {
                     closeDoiMatKhauModal();
 
-                    if (window.KiotToast && typeof window.KiotToast.success === 'function') {
-                        window.KiotToast.success(data.message || 'Đổi mật khẩu thành công!');
+                    if (window.AppToast && typeof window.AppToast.success === 'function') {
+                        window.AppToast.success(data.message || 'Đổi mật khẩu thành công!');
                     } else {
                         alert(data.message || 'Đổi mật khẩu thành công!');
                     }

@@ -1,4 +1,4 @@
-# Sổ Quyết định Kỹ thuật & Nghiệp vụ (Architecture & Business Decisions)
+﻿# Sổ Quyết định Kỹ thuật & Nghiệp vụ (Architecture & Business Decisions)
 
 > **Mục đích**: Ghi lại mọi quyết định quan trọng đã được thống nhất để các phiên làm việc tiếp theo không hỏi lại hoặc làm mâu thuẫn với các quyết định trước. Mỗi dòng ghi theo định dạng: `[Ngày] – [Quyết định] – [Lý do]`.
 
@@ -26,25 +26,26 @@
 - **2026-10-13 (Phiên 10)** – Xây dựng 4 Trụ cột Foundation – `BaseKhoController`, `INhatKyThaoTacService`, `MaChungTuHelper`, modular `ViewModels/`, `f3-product-search.js`.
 - **2026-10-13 (Phiên 11)** – Kiểm toán & tối ưu kiến trúc – Chuẩn hóa `ClaimsPrincipalExtensions`, bọc Transaction, sửa liên kết và đồng bộ 100% rules.
 - **2026-10-14 (Phiên 13)** – Bổ sung Vị trí, Trọng lượng, Định mức Min-Max chuẩn thực tế – Cột `ThuocTinh` lưu JSON array; `TonCaoNhat` lưu tại `NguongTonKho`.
-- **2026-10-15 (Phiên 16)** – Chuẩn hóa Kiến trúc Danh mục CRUD & Tách Excel Service – Khung tái sử dụng `BaseFilterParams`, `PagedResult<T>`, `_Pagination.cshtml`, `kiot-filter.js`.
-- **2026-10-16 (Phiên 44)** – Đóng gói các mảnh ghép Lego độc lập (Lego Framework) – `DateRangeHelper`, `_KiotDateFilter.cshtml`, `KiotToast`, `initColumnToggle`, `bindStarToggle`.
-- **2026-10-16 (Phiên 45)** – Đóng gói Khối Form & Combobox Sửa Trực Tiếp (Lego Form Components) – `KiotNumber`, `KiotCollapsible`, `KiotSplitButton`, `KiotPrompt` (`_KiotPromptModal.cshtml`), `initCombobox`.
-- **2026-10-16 (Phiên 75)** – Đóng gói Master-Detail Accordion & Cột Bảng – Đóng gói `KiotFilter.initRowDetail`, `KiotFilter.initEntityActions` và nâng cấp `KiotFilter.initColumnToggle`. Chuẩn hóa CSS `.kiot-detail-*`.
+- **2026-10-15 (Phiên 16)** – Chuẩn hóa Kiến trúc Danh mục CRUD & Tách Excel Service – Khung tái sử dụng `BaseFilterParams`, `PagedResult<T>`, `_Pagination.cshtml`, `app-filter.js`.
+- **2026-10-16 (Phiên 44)** – Đóng gói các mảnh ghép Lego độc lập (Lego Framework) – `DateRangeHelper`, `_DateFilter.cshtml`, `AppToast`, `initColumnToggle`, `bindStarToggle`.
+- **2026-10-16 (Phiên 45)** – Đóng gói Khối Form & Combobox Sửa Trực Tiếp (Lego Form Components) – `AppNumber`, `AppCollapsible`, `AppSplitButton`, `AppPrompt` (`_PromptModal.cshtml`), `initCombobox`.
+- **2026-10-16 (Phiên 75)** – Đóng gói Master-Detail Accordion & Cột Bảng – Đóng gói `AppFilter.initRowDetail`, `AppFilter.initEntityActions` và nâng cấp `AppFilter.initColumnToggle`. Chuẩn hóa CSS `.kp-detail-*`.
 - **2026-10-18 (Phiên 119)** – Phân hệ Trả hàng nhập (Purchase Returns) – Bảng `PhieuTraHangNhap` & `ChiTietPhieuTraHangNhap` (`THN{id:D6}`); tích hợp `vw_BienDongKho`; chặn tồn âm qua `ITonKhoService`.
-- **2026-10-18 (Phiên 136)** – Đóng gói Lego DateTimePicker & ClosedXML Excel Engine – Đóng gói `KiotFilter.initDateTimePicker` và `ExcelHelper.Export<T>` (Header xanh chuẩn mực, kẻ viền bảng, định dạng số/tiền/ngày).
-- **2026-10-18 (Phiên 137)** – Nạp toàn cục `kiot-filter.js` trong `_Layout.cshtml` & chống tắt nhầm popup do DOM rerender – Nạp trước Scripts; chặn nổi bọt sự kiện `e.stopPropagation()` khi rerender lịch.
-- **2026-10-18 (Phiên 138)** – Đóng gói Lego F3 Product Search & DocGrid Engine – Đóng gói `KiotFilter.initProductSearch` & `KiotFilter.initDocGrid`, hợp nhất 5 form chứng từ, xóa bỏ file tìm kiếm lẻ.
-- **2026-10-18 (Phiên 139)** – Đóng gói Lego ImageUploader & Combobox Tree – Đóng gói `KiotFilter.initImageUploader` (5 ảnh, nén Canvas nền trắng, drag-drop, paste Ctrl+V); `KiotFilter.initCombobox` hiển thị cây phân cấp.
-- **2026-10-18 (Phiên 140)** – Đóng gói Boilerplate Danh Sách (`KiotListPage`) – `KiotFilter.createListPage` (state tập trung, AJAX `loadTable`, phân trang, sort 3 trạng thái, drawer chi tiết, hotkeys F3/F4).
+- **2026-10-18 (Phiên 136)** – Đóng gói Lego DateTimePicker & ClosedXML Excel Engine – Đóng gói `AppFilter.initDateTimePicker` và `ExcelHelper.Export<T>` (Header xanh chuẩn mực, kẻ viền bảng, định dạng số/tiền/ngày).
+- **2026-10-18 (Phiên 137)** – Nạp toàn cục `app-filter.js` trong `_Layout.cshtml` & chống tắt nhầm popup do DOM rerender – Nạp trước Scripts; chặn nổi bọt sự kiện `e.stopPropagation()` khi rerender lịch.
+- **2026-10-18 (Phiên 138)** – Đóng gói Lego F3 Product Search & DocGrid Engine – Đóng gói `AppFilter.initProductSearch` & `AppFilter.initDocGrid`, hợp nhất 5 form chứng từ, xóa bỏ file tìm kiếm lẻ.
+- **2026-10-18 (Phiên 139)** – Đóng gói Lego ImageUploader & Combobox Tree – Đóng gói `AppFilter.initImageUploader` (5 ảnh, nén Canvas nền trắng, drag-drop, paste Ctrl+V); `AppFilter.initCombobox` hiển thị cây phân cấp.
+- **2026-10-18 (Phiên 140)** – Đóng gói Boilerplate Danh Sách (`KhoProListPage`) – `AppFilter.createListPage` (state tập trung, AJAX `loadTable`, phân trang, sort 3 trạng thái, drawer chi tiết, hotkeys F3/F4).
 - **2026-10-18 (Phiên 143)** – Chuẩn hóa Xuất Nhập File Excel/CSV – Bỏ vòng lặp AJAX client-side, thay bằng API `ImportExcel` server-side (ClosedXML) hỗ trợ `.xlsx` và `.csv` cho Chuyển kho & Trả hàng nhập.
 - **2026-10-19 (Phiên 149)** – Phân hệ Quản lý Chi nhánh Kho (`/Kho`) – CRUD chi nhánh kho qua `KhoController`; đồng bộ phân quyền nhân sự `TaiKhoanKho`; bảo vệ kho hoạt động duy nhất; kích hoạt menu `Thiết lập ➜ Kho`.
 - **2026-10-19 (Phiên 151)** – Báo cáo Tồn kho theo kho (`/BaoCao/TonKho`) dạng Pivot Kho – Tính toán động từ `vw_TonKhoHienTai`; bảng Pivot sinh động cột theo kho; 4 thẻ Summary KPI; drawer chi tiết định mức; xuất Excel ClosedXML; lọc AJAX multi-select kho, nhóm hàng, tình trạng tồn.
-- **2026-10-19 (Phiên 155)** – Báo cáo Thẻ kho (`/BaoCao/TheKho`) chuyên nghiệp – Tính toán động Tồn đầu kỳ, Tồn lũy kế và Tồn cuối kỳ từ `vw_BienDongKho`; 4 thẻ KPI Summary; tích hợp Autocomplete F3 chọn hàng, Lego `_KiotDateFilter`, `_KiotStatusFilter`, xuất Excel ClosedXML; nạp động Tab Thẻ kho trong Drawer Hàng hóa.
+- **2026-10-19 (Phiên 155)** – Báo cáo Thẻ kho (`/BaoCao/TheKho`) chuyên nghiệp – Tính toán động Tồn đầu kỳ, Tồn lũy kế và Tồn cuối kỳ từ `vw_BienDongKho`; 4 thẻ KPI Summary; tích hợp Autocomplete F3 chọn hàng, Lego `_DateFilter`, `_StatusFilter`, xuất Excel ClosedXML; nạp động Tab Thẻ kho trong Drawer Hàng hóa.
 - **2026-10-19 (Phiên 161)** – Chuẩn hóa Hệ thống Z-Index Đa Tầng Toàn Hệ Thống – Loại bỏ `z-index: 1` trên `.app-main-body` tránh tạo stacking context giam cầm modal/overlay; chuẩn hóa dropdowns/autocompletes/popovers trong trang ở Layer 2 (150–500), Header/Mega Menu ở Layer 3 (1020), Modals/Drawers ở Layer 4 (1050–1065), Confirmation Prompts ở Layer 5 (1090–1095) và Toasts ở Layer 6 (9999).
 - **2026-10-19 (Phiên 176)** – Đổi tên đề tài thành "Xây dựng ứng dụng Web quản lý kho hàng nội bộ đa chi nhánh" – Phản ánh chuẩn xác hàm lượng kỹ thuật (Web Application), bản chất WMS/ERP nội bộ doanh nghiệp và khoanh vùng phạm vi học thuật khi bảo vệ đồ án.
 - **2026-10-19 (Phiên 181)** – Cập nhật Giảng viên hướng dẫn & Lớp học phần – GVHD: thầy Lại Mạnh Dũng; Lớp học phần: Nhóm 3 -- Lớp N05 -- K65 trên toàn bộ trang bìa và lời nói đầu.
 - **2026-10-19 (Phiên 182)** – Tinh gọn Mục 3.2 Báo cáo LaTeX: Gỡ bỏ 3.2.4 (Lego UI) và 3.2.5 (Stacking Context) – Tập trung Mục 3.2 vào các cơ chế kiến trúc phần mềm cốt lõi (Cookie Authentication, BaseKhoController, ACID Transaction); tự động kéo phân hệ 3.3 lên liền mạch, giữ tổng 76 trang A4 chuẩn mực, 0 Overfull hbox.
 - **2026-11-02 (Phiên 191)** – Hoàn thiện Tính toàn vẹn Số liệu và Đồng bộ AJAX Thẻ kho – Action `FilterTheKho` trả về `_TheKhoContent` đảm bảo Banner và 4 KPI summary không bị xóa mất khi lọc AJAX; tính `TonLuyKe` và KPI trên toàn bộ biến động trước khi lọc theo loại chứng từ để bảo toàn tính đúng đắn kế toán kho; cho phép hủy chọn mặt hàng; đồng bộ bộ lọc `TuKhoa` vào xuất Excel.
 - **2026-11-02 (Phiên 217)** – Lược bỏ mục Tổng quan Dashboard và đưa Danh sách Hàng hóa làm màn hình khởi đầu trung tâm – Xóa nút Tổng quan khỏi Top Menu (_MainMenu) và Mobile Drawer (_Header); HomeController và AccountController tự động điều hướng về /HangHoa.
+- **2026-11-03 (Phiên 232)** – Chuẩn hóa bộ nhận diện & Loại bỏ 100% từ khóa thương hiệu cũ – Chuyển toàn bộ tiền tố CSS sang `.kp-`, thư viện sang `app-filter.js`, đối tượng JS sang `App*`, ViewModels & Partials sang `DateFilter`/`MultiSelect`/`Status`/`Value` chuẩn thương hiệu hệ thống KhoPro.
 
 

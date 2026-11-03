@@ -1,4 +1,4 @@
-# Đặc tả Chức năng: Quản lý Chi nhánh Kho
+﻿# Đặc tả Chức năng: Quản lý Chi nhánh Kho
 
 > **Mô-đun**: Thiết lập hệ thống ➜ Quản lý Kho  
 > **Tài liệu tham chiếu**: [`.agent/rules/02-nghiep-vu-kho.md`](../../.agent/rules/02-nghiep-vu-kho.md) | [`.agent/rules/04-xac-thuc-phan-quyen.md`](../../.agent/rules/04-xac-thuc-phan-quyen.md) | [`AGENTS.md`](../../AGENTS.md)
@@ -13,7 +13,7 @@
   - Xem danh sách kho kèm tìm kiếm theo từ khóa (Mã, Tên, Địa chỉ, Ghi chú), lọc Trạng thái (Đang hoạt động / Ngừng hoạt động).
   - Thêm mới kho: Nhập Tên kho (*chống trùng tên*), Địa chỉ, Mô tả và phân công nhân sự phụ trách (`TaiKhoanKho`).
   - Chỉnh sửa kho: Cập nhật thông tin và đồng bộ danh sách nhân sự phụ trách.
-  - Ngừng hoạt động (Khóa kho) / Kích hoạt lại kho: Xác nhận bằng modal Lego `KiotConfirm` (`#kiotConfirmOv`), chặn ngừng hoạt động nếu là kho duy nhất hoặc kho đang làm việc trong phiên hiện tại.
+  - Ngừng hoạt động (Khóa kho) / Kích hoạt lại kho: Xác nhận bằng modal Lego `AppConfirm` (`#kpConfirmOv`), chặn ngừng hoạt động nếu là kho duy nhất hoặc kho đang làm việc trong phiên hiện tại.
   - Xóa chi nhánh kho an toàn (Luật 5 & 8):
     * Kho chưa phát sinh chứng từ (lỡ tạo nhầm / kho mới thử nghiệm): Cho phép xóa vĩnh viễn khỏi CSDL, tự dọn dẹp `TaiKhoanKho`, `NguongTonKho` và ghi nhật ký kiểm toán `INhatKyThaoTacService`.
     * Kho đã phát sinh chứng từ (nhập, xuất, chuyển, kiểm, trả hàng, đơn bán): Chặn xóa tuyệt đối để bảo toàn lịch sử dữ liệu, hỗ trợ chuyển nhanh sang trạng thái Ngừng hoạt động (Khóa kho) qua modal Lego.
@@ -41,7 +41,7 @@
 
 ### 3.1. Màn hình Danh sách (`Index.cshtml`)
 - **Topbar**: Nút tìm kiếm F3, nút `+ Kho` (`#btnOpenCreateKhoModal`), nút F4 gập mở sidebar, nút làm mới `#btnReloadTable`.
-- **Sidebar lọc trái (`_KhoFilterSidebar.cshtml`)**: Lọc Trạng thái qua Lego `_KiotStatusFilter.cshtml`.
+- **Sidebar lọc trái (`_KhoFilterSidebar.cshtml`)**: Lọc Trạng thái qua Lego `_StatusFilter.cshtml`.
 - **Bảng dữ liệu AJAX (`_KhoTable.cshtml`)**:
   - Bảng co giãn 100% khớp chiều ngang màn hình (`width: 100%`, `table-layout: fixed`), không bị tràn thanh cuộn ngang.
   - Sắp xếp 3 trạng thái (`sortable-th`): Mã kho, Tên kho, Địa chỉ, Nhân sự, Trạng thái.
@@ -69,7 +69,7 @@
 4. **Tự động phân quyền Quản lý**: Kho mới tạo tự động gán quyền truy cập cho tất cả tài khoản Quản lý trong `TaiKhoanKho`.
 5. **Giao dịch toàn vẹn (Luật 7)**: Bọc lưu kho, xóa kho và gán tài khoản trong `BeginTransactionAsync()`.
 6. **Kiểm toán (Audit Log)**: Ghi nhật ký đầy đủ qua `INhatKyThaoTacService` cho mọi thao tác (Tạo mới, Cập nhật, Khóa, Kích hoạt, Xóa).
-7. **Modal xác nhận Lego**: Dùng `window.KiotConfirm.show(...)` khi Ngừng hoạt động / Kích hoạt / Xóa kho, không dùng `confirm()` mặc định của trình duyệt.
+7. **Modal xác nhận Lego**: Dùng `window.AppConfirm.show(...)` khi Ngừng hoạt động / Kích hoạt / Xóa kho, không dùng `confirm()` mặc định của trình duyệt.
 8. **Quy tắc Xóa & Chuyển khóa kho**:
    - Nếu chưa có chứng từ: Xóa triệt để khỏi `Kho`, dọn sạch `TaiKhoanKho` và `NguongTonKho`.
    - Nếu đã có chứng từ: Chặn xóa, cho phép chuyển sang `NGUNG_HOAT_DONG` (Khóa kho) để dừng phân bổ giao dịch mới mà vẫn giữ trọn vẹn số liệu sổ sách.
@@ -78,11 +78,11 @@
 
 ## 5. Danh mục Khối Lego tái sử dụng (Luật 10 AGENTS.md)
 
-- [x] **Modal Thao tác & Xác nhận**: `_KhoModal.cshtml` chuẩn Form Hàng hóa + `KiotConfirm` (`#kiotConfirmOv`).
-- [x] **Bộ lọc Trạng thái checkbox**: `_KiotStatusFilter.cshtml` cho trạng thái kho.
+- [x] **Modal Thao tác & Xác nhận**: `_KhoModal.cshtml` chuẩn Form Hàng hóa + `AppConfirm` (`#kpConfirmOv`).
+- [x] **Bộ lọc Trạng thái checkbox**: `_StatusFilter.cshtml` cho trạng thái kho.
 - [x] **Phân trang AJAX**: `_Pagination.cshtml` + `BaseFilterParams`.
-- [x] **Thông báo Toast**: `KiotToast.success()`, `KiotToast.error()`, `KiotToast.info()`, `KiotToast.warning()`.
-- [x] **Sidebar thu gọn**: `KiotFilter.initSidebar` (Phím tắt F4).
+- [x] **Thông báo Toast**: `AppToast.success()`, `AppToast.error()`, `AppToast.info()`, `AppToast.warning()`.
+- [x] **Sidebar thu gọn**: `AppFilter.initSidebar` (Phím tắt F4).
 
 ---
 
@@ -97,6 +97,6 @@
 | Sửa thông tin kho | Cập nhật địa chỉ, thêm nhân sự | Cập nhật thành công, đồng bộ `TaiKhoanKho` |
 | Khóa/Xóa kho đang chọn trong phiên | Bấm nút khóa hoặc xóa kho đang có badge "Đang chọn" | Chặn thao tác và cảnh báo cần chuyển sang kho khác trước khi thực hiện |
 | Ngừng hoạt động kho duy nhất | Hệ thống chỉ còn 1 kho hoạt động | Chặn thao tác và cảnh báo hệ thống cần ít nhất 1 kho hoạt động |
-| Ngừng hoạt động kho khi có nhiều kho | Bấm nút khóa tại kho phụ | Hiện modal KiotConfirm, đổi trạng thái sang "Ngừng hoạt động" |
-| Xóa kho tạo nhầm (chưa có chứng từ) | Tạo kho test mới rồi bấm nút thùng rác 🗑️ | Hiện modal KiotConfirm, xóa thành công kho và dữ liệu liên quan |
+| Ngừng hoạt động kho khi có nhiều kho | Bấm nút khóa tại kho phụ | Hiện modal AppConfirm, đổi trạng thái sang "Ngừng hoạt động" |
+| Xóa kho tạo nhầm (chưa có chứng từ) | Tạo kho test mới rồi bấm nút thùng rác 🗑️ | Hiện modal AppConfirm, xóa thành công kho và dữ liệu liên quan |
 | Xóa kho đã phát sinh chứng từ | Bấm nút thùng rác 🗑️ tại kho đã có phiếu nhập/xuất/chuyển/kiểm | Chặn xóa, hiện modal thông báo và hỏi có muốn chuyển sang Ngừng hoạt động (Khóa kho) |

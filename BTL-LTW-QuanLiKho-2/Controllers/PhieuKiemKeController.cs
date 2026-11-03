@@ -1065,7 +1065,7 @@ public class PhieuKiemKeController : BaseKhoController
             }
         }
 
-        // Mặc định xuất file Excel (.xlsx) chuẩn KiotViet bằng ClosedXML qua Lego ExcelHelper
+        // Mặc định xuất file Excel (.xlsx) chuẩn KhoPro bằng ClosedXML qua Lego ExcelHelper
         if (isDetail)
         {
             var detailRows = new List<(int Stt, PhieuKiemKeListItemVM Item, PhieuKiemKeLineVM? Line)>();

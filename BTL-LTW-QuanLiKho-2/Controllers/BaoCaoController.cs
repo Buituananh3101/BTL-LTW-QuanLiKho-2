@@ -43,7 +43,7 @@ public class BaoCaoController : BaseKhoController
         return RedirectToAction(nameof(TonKho), filter);
     }
 
-    #region 1. BÁO CÁO TỒN KHO THEO KHO (PIVOT KHO KIOTVIET)
+    #region 1. BÁO CÁO TỒN KHO THEO KHO (PIVOT KHO KHOPRO)
 
     /// <summary>
     /// Màn hình chính Báo cáo Tồn kho theo kho (/BaoCao/TonKho)
@@ -79,7 +79,7 @@ public class BaoCaoController : BaseKhoController
     }
 
     /// <summary>
-    /// Xuất Báo cáo Tồn kho ra file Excel chuẩn ClosedXML (Header xanh KiotViet, format số lượng, tiền tệ)
+    /// Xuất Báo cáo Tồn kho ra file Excel chuẩn ClosedXML (Header xanh KhoPro, format số lượng, tiền tệ)
     /// </summary>
     [HttpGet]
     public async Task<IActionResult> ExportExcel([FromQuery] BaoCaoTonKhoFilterParams filter)
@@ -139,7 +139,7 @@ public class BaoCaoController : BaseKhoController
         }
 
         var headerRange = ws.Range(headerRow, 1, headerRow, headers.Count);
-        ExcelHelper.ApplyKiotVietHeaderStyle(headerRange);
+        ExcelHelper.ApplyHeaderStyle(headerRange);
         ws.Row(headerRow).Height = 26;
 
         // 3. Đổ dữ liệu các dòng

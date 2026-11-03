@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -23,10 +23,10 @@
     </main>
 
     <!-- Modal con dùng chung toàn hệ thống (Tạo mới nhanh / Sửa ✎ / Xóa) -->
-    <partial name="_KiotPromptModal" />
+    <partial name="_PromptModal" />
 
     <!-- Modal Hướng dẫn sử dụng & Trợ giúp dùng chung toàn hệ thống -->
-    <partial name="_KiotHelpModal" />
+    <partial name="_HelpModal" />
 
     <!-- Modal Đổi mật khẩu cá nhân dùng chung toàn hệ thống -->
     @if (User.Identity?.IsAuthenticated == true)
@@ -42,7 +42,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/kiot-filter.js" asp-append-version="true"></script>
+    <script src="~/js/app-filter.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

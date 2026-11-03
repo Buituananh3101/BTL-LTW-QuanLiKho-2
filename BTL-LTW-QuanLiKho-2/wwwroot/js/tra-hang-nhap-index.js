@@ -1,13 +1,13 @@
-/**
+﻿/**
  * tra-hang-nhap-index.js
  * Quản lý danh sách Phiếu Trả Hàng Nhập (chuẩn chuyên nghiệp & Prototype)
- * Tái sử dụng đồng bộ 100% khối LEGO KiotFilter & KiotToast
+ * Tái sử dụng đồng bộ 100% khối LEGO AppFilter & AppToast
  */
 
 $(function () {
     'use strict';
 
-    const $container = $('#kiotContainer');
+    const $container = $('#kpContainer');
     if (!$container.length) return;
 
     const filterUrl = $container.data('filter-url') || '/TraHangNhap/Filter';
@@ -43,7 +43,7 @@ $(function () {
     };
 
     // Đọc trạng thái ban đầu từ DOM
-    $('.kiot-status-filter-block input[data-s]:checked').each(function () {
+    $('.kp-status-filter-block input[data-s]:checked').each(function () {
         const s = $(this).data('s');
         if (!F.statuses.includes(s)) F.statuses.push(s);
     });
@@ -79,7 +79,7 @@ $(function () {
             $dot.toggleClass('on', selectedIds.length > 0);
         }
 
-        $dropdown.find('.kiot-ms-item').each(function () {
+        $dropdown.find('.kp-ms-item').each(function () {
             const val = parseInt($(this).data('val'), 10);
             const isSel = selectedIds.includes(val);
             $(this).toggleClass('selected', isSel);
@@ -91,18 +91,18 @@ $(function () {
             name: namesMap[id] || ('#' + id)
         }));
 
-        if (window.KiotFilter && typeof window.KiotFilter.renderTagPills === 'function') {
-            window.KiotFilter.renderTagPills($box, selectedItems, placeholder, 2);
+        if (window.AppFilter && typeof window.AppFilter.renderTagPills === 'function') {
+            window.AppFilter.renderTagPills($box, selectedItems, placeholder, 2);
         } else {
             if (selectedItems.length === 0) {
-                $box.html(`<span class="kiot-ms-placeholder">${placeholder}</span>`);
+                $box.html(`<span class="kp-ms-placeholder">${placeholder}</span>`);
             } else {
                 let html = '';
                 selectedItems.slice(0, 2).forEach(it => {
-                    html += `<span class="kiot-pill-tag" data-val="${it.val}">${it.name} <span class="tag-remove">&times;</span></span>`;
+                    html += `<span class="kp-pill-tag" data-val="${it.val}">${it.name} <span class="tag-remove">&times;</span></span>`;
                 });
                 if (selectedItems.length > 2) {
-                    html += `<span class="kiot-pill-more">+${selectedItems.length - 2}</span>`;
+                    html += `<span class="kp-pill-more">+${selectedItems.length - 2}</span>`;
                 }
                 $box.html(html);
             }
@@ -127,18 +127,18 @@ $(function () {
         if (!$box.length || !$dropdown.length) return;
 
         // Cache trước tên từ các mục trong dropdown HTML
-        $dropdown.find('.kiot-ms-item').each(function () {
+        $dropdown.find('.kp-ms-item').each(function () {
             const val = parseInt($(this).data('val'), 10);
-            const name = $(this).data('name') || $(this).find('.kiot-ms-text').text().trim() || $(this).find('span').text().trim();
+            const name = $(this).data('name') || $(this).find('.kp-ms-text').text().trim() || $(this).find('span').text().trim();
             if (!isNaN(val) && name) namesMap[val] = name;
         });
 
         // 1. Click vào box để mở / đóng dropdown
         $box.on('click', function (e) {
-            const $tagRemove = $(e.target).closest('.tag-remove, .kiot-tag-close');
+            const $tagRemove = $(e.target).closest('.tag-remove, .kp-tag-close');
             if ($tagRemove.length) {
                 e.stopPropagation();
-                const $pill = $tagRemove.closest('.kiot-pill-tag').length ? $tagRemove.closest('.kiot-pill-tag') : $tagRemove;
+                const $pill = $tagRemove.closest('.kp-pill-tag').length ? $tagRemove.closest('.kp-pill-tag') : $tagRemove;
                 const val = parseInt($pill.data('val'), 10);
                 const idx = selectedIds.indexOf(val);
                 if (idx !== -1) {
@@ -153,21 +153,21 @@ $(function () {
 
             e.stopPropagation();
 
-            $('.kiot-ms-dropdown').not($dropdown).removeClass('show drop-up').css('max-height', '');
-            $('.kiot-multiselect-box').not($box).removeClass('open');
+            $('.kp-ms-dropdown').not($dropdown).removeClass('show drop-up').css('max-height', '');
+            $('.kp-multiselect-box').not($box).removeClass('open');
             $('.quick-date-popup, .dual-calendar-popup').hide();
 
             const willShow = !$dropdown.hasClass('show');
             if (willShow) {
-                if (window.KiotFilter && typeof window.KiotFilter.checkSidebarDropdownDirection === 'function') {
-                    window.KiotFilter.checkSidebarDropdownDirection($box[0], $dropdown[0]);
+                if (window.AppFilter && typeof window.AppFilter.checkSidebarDropdownDirection === 'function') {
+                    window.AppFilter.checkSidebarDropdownDirection($box[0], $dropdown[0]);
                 }
                 $dropdown.addClass('show');
                 $box.addClass('open');
                 const $searchInput = $dropdown.find('input[type="text"]');
                 if ($searchInput.length) {
                     $searchInput.val('');
-                    $dropdown.find('.kiot-ms-item').show();
+                    $dropdown.find('.kp-ms-item').show();
                     $searchInput.focus();
                 }
             } else {
@@ -177,15 +177,15 @@ $(function () {
         });
 
         // 2. Click chọn / bỏ chọn mục trong dropdown
-        $dropdown.on('click', '.kiot-ms-item', function (e) {
-            if ($(e.target).closest('.kiot-item-edit-btn, .hh-item-edit-btn').length) {
+        $dropdown.on('click', '.kp-ms-item', function (e) {
+            if ($(e.target).closest('.kp-item-edit-btn, .hh-item-edit-btn').length) {
                 return;
             }
             e.stopPropagation();
             const val = parseInt($(this).data('val'), 10);
             if (isNaN(val)) return;
 
-            const name = $(this).data('name') || $(this).find('.kiot-ms-text').text().trim() || $(this).find('span').text().trim();
+            const name = $(this).data('name') || $(this).find('.kp-ms-text').text().trim() || $(this).find('span').text().trim();
             const idx = selectedIds.indexOf(val);
             if (idx >= 0) {
                 selectedIds.splice(idx, 1);
@@ -201,15 +201,15 @@ $(function () {
         });
 
         // 3. Tìm kiếm nội bộ trong dropdown
-        $dropdown.on('click', '.kiot-ms-search input, input[type="text"]', function (e) {
+        $dropdown.on('click', '.kp-ms-search input, input[type="text"]', function (e) {
             e.stopPropagation();
         });
 
-        $dropdown.on('input', '.kiot-ms-search input, input[type="text"]', function (e) {
+        $dropdown.on('input', '.kp-ms-search input, input[type="text"]', function (e) {
             e.stopPropagation();
             const term = $(this).val().trim().toLowerCase();
-            $dropdown.find('.kiot-ms-item').each(function () {
-                const text = ($(this).data('name') || $(this).find('.kiot-ms-text').text() || $(this).text() || '').trim().toLowerCase();
+            $dropdown.find('.kp-ms-item').each(function () {
+                const text = ($(this).data('name') || $(this).find('.kp-ms-text').text() || $(this).text() || '').trim().toLowerCase();
                 $(this).toggle(!term || text.includes(term));
             });
         });
@@ -238,7 +238,7 @@ $(function () {
             $(this).toggleClass('active', F.mode === 'preset' && $(this).data('val') === F.preset);
         });
 
-        $('.kiot-status-filter-block input[data-s]').each(function () {
+        $('.kp-status-filter-block input[data-s]').each(function () {
             $(this).prop('checked', F.statuses.includes($(this).data('s')));
         });
 
@@ -294,8 +294,8 @@ $(function () {
             },
             error: function (xhr) {
                 $wrapper.removeClass('opacity-50 pointer-events-none');
-                if (window.KiotToast) {
-                    KiotToast.error('Không thể nạp dữ liệu: ' + (xhr.responseJSON?.message || xhr.statusText));
+                if (window.AppToast) {
+                    AppToast.error('Không thể nạp dữ liệu: ' + (xhr.responseJSON?.message || xhr.statusText));
                 } else {
                     alert('Lỗi tải danh sách: ' + xhr.statusText);
                 }
@@ -304,16 +304,16 @@ $(function () {
     }
 
     /* ===== 3. KHỞI TẠO BỘ LỌC CỘT & PHÂN TRANG LEGO ===== */
-    if (window.KiotFilter) {
-        colToggler = KiotFilter.initColumnToggle({
-            storageKey: 'kiot_cols_tra_hang_nhap',
+    if (window.AppFilter) {
+        colToggler = AppFilter.initColumnToggle({
+            storageKey: 'kp_cols_tra_hang_nhap',
             defaultCols: DEFAULT_COLS,
             menuSelector: '#colMenu',
             tableSelector: '#receiptTable'
         });
 
-        if (typeof KiotFilter.initDateFilter === 'function') {
-            KiotFilter.initDateFilter('date', function (from, to, text, val) {
+        if (typeof AppFilter.initDateFilter === 'function') {
+            AppFilter.initDateFilter('date', function (from, to, text, val) {
                 if (val === 'CUSTOM') {
                     F.mode = 'custom';
                     F.preset = 'CUSTOM';
@@ -331,23 +331,23 @@ $(function () {
             });
         }
 
-        if (typeof KiotFilter.initSidebar === 'function') {
-            KiotFilter.initSidebar({
-                containerSelector: '#kiotContainer',
+        if (typeof AppFilter.initSidebar === 'function') {
+            AppFilter.initSidebar({
+                containerSelector: '#kpContainer',
                 btnToggleSelector: '#btnToggleSidebar',
                 iconSelector: '#sidebarToggleIcon',
                 mobileBtnSelector: '#btnMobileFilter',
                 mobileCloseSelector: '#btnCloseSidebarMobile',
                 backdropSelector: '#sidebarBackdrop',
                 sidebarColSelector: '#sidebarFilterCol',
-                storageKey: 'kiot_sidebar_tra_hang_nhap'
+                storageKey: 'kp_sidebar_tra_hang_nhap'
             });
         }
     }
 
     /* ===== 4. LẮNG NGHE SỰ KIỆN TRÊN SIDEBAR ===== */
     // Trạng thái checkbox
-    $(document).on('change', '.kiot-status-filter-block input[data-s]', function () {
+    $(document).on('change', '.kp-status-filter-block input[data-s]', function () {
         const val = $(this).data('s');
         if (this.checked) {
             if (!F.statuses.includes(val)) F.statuses.push(val);
@@ -365,16 +365,16 @@ $(function () {
     setupMultiSelectDropdown('#boxNhaCungCap', '#dropdownNhaCungCap', F.nccIds, F.nccNames, renderNccMultiSelect);
 
     // Đọc các giá trị pre-selected nếu có
-    $('#dropdownNguoiTao .kiot-ms-item.selected, #dropdownNguoiTao .kiot-ms-item input:checked').each(function () {
-        const val = parseInt($(this).closest('.kiot-ms-item').data('val'), 10);
+    $('#dropdownNguoiTao .kp-ms-item.selected, #dropdownNguoiTao .kp-ms-item input:checked').each(function () {
+        const val = parseInt($(this).closest('.kp-ms-item').data('val'), 10);
         if (!isNaN(val) && !F.creatorIds.includes(val)) F.creatorIds.push(val);
     });
-    $('#dropdownNguoiTra .kiot-ms-item.selected, #dropdownNguoiTra .kiot-ms-item input:checked').each(function () {
-        const val = parseInt($(this).closest('.kiot-ms-item').data('val'), 10);
+    $('#dropdownNguoiTra .kp-ms-item.selected, #dropdownNguoiTra .kp-ms-item input:checked').each(function () {
+        const val = parseInt($(this).closest('.kp-ms-item').data('val'), 10);
         if (!isNaN(val) && !F.payerIds.includes(val)) F.payerIds.push(val);
     });
-    $('#dropdownNhaCungCap .kiot-ms-item.selected, #dropdownNhaCungCap .kiot-ms-item input:checked').each(function () {
-        const val = parseInt($(this).closest('.kiot-ms-item').data('val'), 10);
+    $('#dropdownNhaCungCap .kp-ms-item.selected, #dropdownNhaCungCap .kp-ms-item input:checked').each(function () {
+        const val = parseInt($(this).closest('.kp-ms-item').data('val'), 10);
         if (!isNaN(val) && !F.nccIds.includes(val)) F.nccIds.push(val);
     });
 
@@ -401,9 +401,9 @@ $(function () {
     });
 
     $(document).on('click', function (e) {
-        if (!$(e.target).closest('.kiot-multiselect-box, .kiot-ms-dropdown').length) {
-            $('.kiot-ms-dropdown').removeClass('show drop-up').css('max-height', '');
-            $('.kiot-multiselect-box').removeClass('open');
+        if (!$(e.target).closest('.kp-multiselect-box, .kp-ms-dropdown').length) {
+            $('.kp-ms-dropdown').removeClass('show drop-up').css('max-height', '');
+            $('.kp-multiselect-box').removeClass('open');
         }
         if (!$(e.target).closest('#advbox, #btnAdvSearch').length) {
             $('#advbox').hide();
@@ -431,7 +431,7 @@ $(function () {
     // Tải lại bảng
     $('#btnReloadTable').on('click', function () {
         fetchTable();
-        if (window.KiotToast) KiotToast.info('Đã làm mới dữ liệu.');
+        if (window.AppToast) AppToast.info('Đã làm mới dữ liệu.');
     });
 
     // Xuất Excel
@@ -487,7 +487,7 @@ $(function () {
         }
     });
 
-    $(document).on('change', '#tableContainer select.kiot-page-size-select', function () {
+    $(document).on('change', '#tableContainer select.kp-page-size-select', function () {
         F.size = parseInt($(this).val(), 10) || 15;
         F.page = 1;
         fetchTable();
@@ -514,8 +514,8 @@ $(function () {
     let returnRowDetailHandler = null;
 
     function initRowDetail() {
-        if (window.KiotFilter && typeof window.KiotFilter.initRowDetail === 'function') {
-            returnRowDetailHandler = window.KiotFilter.initRowDetail({
+        if (window.AppFilter && typeof window.AppFilter.initRowDetail === 'function') {
+            returnRowDetailHandler = window.AppFilter.initRowDetail({
                 tableSelector: '#receiptTable',
                 rowSelector: 'tr.product-row, tr.tbl-row',
                 detailRowSelector: '#detail-row-{id}',
@@ -579,7 +579,7 @@ $(function () {
             }),
             success: function (res) {
                 $btn.prop('disabled', false).html(originalHtml);
-                if (window.KiotToast) KiotToast.success(res.message || 'Đã lưu thông tin phiếu.');
+                if (window.AppToast) AppToast.success(res.message || 'Đã lưu thông tin phiếu.');
                 
                 // Cập nhật DOM trên dòng bảng cha mà không reload bảng (không sập drawer)
                 const $parentRow = $(`tr.tbl-row[data-id="${id}"], tr[data-id="${id}"]`);
@@ -597,7 +597,7 @@ $(function () {
             error: function (xhr) {
                 $btn.prop('disabled', false).html(originalHtml);
                 const msg = xhr.responseJSON?.message || 'Lỗi khi lưu thông tin.';
-                if (window.KiotToast) KiotToast.error(msg);
+                if (window.AppToast) AppToast.error(msg);
                 else alert(msg);
             }
         });
@@ -623,13 +623,13 @@ $(function () {
             type: 'POST',
             headers: { 'RequestVerificationToken': token },
             success: function (res) {
-                if (window.KiotToast) KiotToast.success(res.message || 'Đã hủy phiếu.');
+                if (window.AppToast) AppToast.success(res.message || 'Đã hủy phiếu.');
                 F.openId = null;
                 fetchTable();
             },
             error: function (xhr) {
                 const err = xhr.responseJSON?.message || 'Không thể hủy phiếu.';
-                if (window.KiotToast) KiotToast.error(err);
+                if (window.AppToast) AppToast.error(err);
                 else alert(err);
             }
         });
