@@ -1,11 +1,11 @@
-# Tiến độ dự án
+﻿# Tiến độ dự án
 
-Cập nhật lần cuối: 2026-11-03 – Chuẩn Hóa Toàn Diện & Loại Bỏ 100% Từ Khóa thương hiệu cũ Sang Thương Hiệu Chuẩn KhoPro (Phiên 232)
+Cập nhật lần cuối: 2026-11-03 – Hoàn thiện nút Sửa & Xóa Đơn vị tính trực tiếp từ dropdown form Hàng hóa (Phiên 234)
 
 ---
 
 ## Đang làm
-- Hệ thống Toàn diện: Đã loại bỏ triệt để 100% từ khóa thương hiệu cũ khỏi toàn bộ hệ thống (`kiểm tra từ khóa thương hiệu cũ` đạt đúng 0 kết quả). Đổi toàn bộ sang bộ tiền tố nhận diện chuẩn `kp-`, thư viện `app-filter.js`, ViewModels `DateFilterVM`, `MultiSelectVM`, `StatusFilterVM`, `ValueFilterVM`, Partials `_DateFilter`, `_MultiSelectFilter`, `_StatusFilter`, `_ValueFilter`, `_PromptModal`, `_HelpModal`, đối tượng JS `AppFilter`, `AppToast`, `AppPrompt`, `AppConfirm`, `AppHelp`, `AppNumber`, `AppCollapsible`, `AppSplitButton` và Helper `ExcelHelper.ApplyHeaderStyle`.
+- Hàng hóa (Product Catalog): Đã bổ sung đầy đủ nút Sửa ✎ và Xóa Đơn vị tính trực tiếp từ dropdown form Tạo/Sửa hàng hóa (tương tự như Nhóm hàng), sử dụng khối Lego chuẩn `AppPrompt`, kiểm tra trùng tên và ràng buộc sản phẩm.
   + Kiểm tra biên dịch hệ thống `dotnet build -t:Compile` đạt **0 Errors**.
 
 ---
@@ -13,6 +13,57 @@ Cập nhật lần cuối: 2026-11-03 – Chuẩn Hóa Toàn Diện & Loại B�
 ## Việc kế tiếp
 1. Kiểm tra trải nghiệm thực tế trên trình duyệt tại `http://localhost:7087` trên các màn hình Danh mục & Chứng từ.
 2. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
+
+---
+
+- **Hoàn thiện nút Sửa & Xóa Đơn vị tính trực tiếp từ dropdown form Hàng hóa (Phiên 234)**:
+  - **Nhu cầu**: Người dùng yêu cầu bổ sung nút Sửa Đơn vị tính trong form Tạo/Sửa hàng hóa tương tự nhóm hàng.
+  - **Giải pháp & Kết quả triển khai**:
+    1. **View**: Bổ sung nút `.hh-item-edit-btn` vào từng dòng ĐVT trong `#listMaDvt` của `_HangHoaModal.cshtml`. Hover vào dòng tự động hiện icon bút chì ✎ và ẩn tick chọn theo CSS quy chuẩn.
+    2. **Frontend JS**:
+       - `hang-hoa-form.js`: Nhận diện `type === 'dvt'` khi click nút sửa để gọi `window.handleEditDonViTinh(id, val)`; tự động sinh nút sửa trong `syncOptions()` cho dropdown ĐVT.
+       - `hang-hoa-index.js`: Xây dựng hàm toàn cục `window.handleEditDonViTinh(id, oldName)` dùng khối Lego `AppPrompt` hỗ trợ Sửa tên và Xóa, tự động cập nhật DOM `#listMaDvt`, `<select id="formMaDvt">`, `#inputMaDvt`, reload dữ liệu bảng và cảnh báo qua `AppConfirm` nếu có sản phẩm đang sử dụng.
+    3. **Backend Controller & ViewModels**:
+       - `ViewModels/HangHoa/QuickDvtRequest.cs`: Thêm `UpdateDvtRequest` (`MaDvt`, `TenDvt`) và `DeleteDvtRequest` (`MaDvt`).
+       - `Controllers/HangHoaController.cs`: Triển khai 2 action POST `UpdateDvtQuick` và `DeleteDvtQuick` với kiểm tra trùng tên và chặn xóa khi còn hàng hóa liên kết.
+    4. **Kiểm tra**:
+       - `dotnet build -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
+       - Cú pháp JS `hang-hoa-form.js` và `hang-hoa-index.js` đạt 100% không lỗi (`node -c`).
+
+---
+- **Tinh Gọn Cấu Trúc: Tách Modular ViewModels Xuất Hủy & Dọn Dẹp File JS Cũ (Phiên 233)**:
+  - **Nhu cầu**: Người dùng yêu cầu: *"thực hiện File JS cũ: wwwroot/js/components/f3-product-search.js (đã được đóng gói vào thư viện dùng chung app-filter.js từ lâu). Module Xuất Hủy: Hiện tại ViewModels/XuatHuy/XuatHuyViewModels.cs đang gom các class vào một file duy nhất, có thể tách thành XuatHuyFilterVM.cs, XuatHuyFormVM.cs, XuatHuyListItemVM.cs để đồng bộ 100% với 9 phân hệ còn lại."*
+  - **Giải pháp & Kết quả triển khai**:
+    1. **Tách Modular ViewModels Xuất Hủy**:
+       - `XuatHuyFilterVM.cs`: Chứa `XuatHuyFilterVM` và `XuatHuyIndexVM`.
+       - `XuatHuyListItemVM.cs`: Chứa `XuatHuyListItemVM` và `XuatHuyLineVM`.
+       - `XuatHuyFormVM.cs`: Chứa `XuatHuyFormVM`, `SaveXuatHuyRequest`, `SaveXuatHuyLineRequest`, `UpdateXuatHuyNoteRequest`.
+       - Xóa bỏ file gộp cũ `ViewModels/XuatHuy/XuatHuyViewModels.cs`.
+    2. **Dọn dẹp File JS cũ**:
+       - Xóa bỏ file `wwwroot/js/components/f3-product-search.js` và thư mục `components/` không còn sử dụng.
+       - Cập nhật tài liệu `.agent/rules/01-phong-cach-code.md`, `docs/specs/nhap-hang.md`, `docs/specs/tra-hang-nhap.md` chuyển sang tham chiếu `AppFilter.initProductSearch`.
+    3. **Kiểm tra**:
+       - `dotnet build -t:Compile`: Biên dịch hoàn tất thành công với **0 Errors**.
+       - Tất cả file luật và đặc tả đều đảm bảo < 8.000 ký tự.
+
+---
+
+---
+
+- **Tinh Gọn Cấu Trúc: Tách Modular ViewModels Xuất Hủy & Dọn Dẹp File JS Cũ (Phiên 233)**:
+  - **Nhu cầu**: Người dùng yêu cầu tách ViewModels/XuatHuy/XuatHuyViewModels.cs thành XuatHuyFilterVM.cs, XuatHuyFormVM.cs, XuatHuyListItemVM.cs và xóa file JS cũ 3-product-search.js.
+  - **Giải pháp & Kết quả triển khai**:
+    1. **Tách Modular ViewModels Xuất Hủy**:
+       - XuatHuyFilterVM.cs: Chứa XuatHuyFilterVM và XuatHuyIndexVM.
+       - XuatHuyListItemVM.cs: Chứa XuatHuyListItemVM và XuatHuyLineVM.
+       - XuatHuyFormVM.cs: Chứa XuatHuyFormVM, SaveXuatHuyRequest, SaveXuatHuyLineRequest, UpdateXuatHuyNoteRequest.
+       - Xóa bỏ file gộp cũ ViewModels/XuatHuy/XuatHuyViewModels.cs.
+    2. **Dọn dẹp File JS cũ**:
+       - Xóa bỏ file wwwroot/js/components/f3-product-search.js và thư mục components/ không còn sử dụng.
+       - Cập nhật tài liệu .agent/rules/01-phong-cach-code.md, docs/specs/nhap-hang.md, docs/specs/tra-hang-nhap.md chuyển sang tham chiếu AppFilter.initProductSearch.
+    3. **Kiểm tra**:
+       - dotnet build -t:Compile: Biên dịch hoàn tất thành công với **0 Errors**.
+       - Tất cả file luật và đặc tả đều đảm bảo < 8.000 ký tự.
 
 ---
 

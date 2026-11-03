@@ -457,7 +457,14 @@ public class HangHoaController : BaseKhoController
 
         return allItems;
     }
-
+    /*
+    Lấy kho làm việc: int whId = GetCurrentWarehouseId(); (Ví dụ: Kho 1).
+    Lấy hàng hóa: Đọc bảng HangHoas (tất cả các mặt hàng đang hoạt động).
+    Lấy tồn kho thực tế: Đọc Database View _context.VwTonKhoHienTais lọc theo MaKho == whId (dòng 265).
+    Cắt 15 món đầu tiên: Dùng lệnh LINQ .Skip(0).Take(15) để lấy đúng 15 sản phẩm của Trang 1.
+    Lấy danh mục lọc: Đọc danh sách Nhóm hàng (NhomHangs), Nhà cung cấp (DonViCapHangs) để chuẩn bị sẵn dữ liệu cho cột lọc bên trái.
+    Đóng tất cả vào một gói dữ liệu lớn là HangHoaIndexVM.
+     */
     private async Task<HangHoaIndexVM> BuildIndexVM(HangHoaFilterParams f)
     {
         return await BuildIndexVM(
@@ -623,6 +630,47 @@ public class HangHoaController : BaseKhoController
         _context.DonViTinhs.Add(dvt);
         await _context.SaveChangesAsync();
         return Json(new { success = true, maDvt = dvt.MaDvt, tenDvt = dvt.TenDvt });
+    }
+
+    // Cập nhật tên đơn vị tính trực tiếp từ dropdown
+    [HttpPost]
+    public async Task<IActionResult> UpdateDvtQuick([FromBody] UpdateDvtRequest req)
+    {
+        if (req == null || req.MaDvt <= 0) return BadRequest(new { message = "Mã đơn vị tính không hợp lệ." });
+        if (string.IsNullOrWhiteSpace(req.TenDvt)) return BadRequest(new { message = "Vui lòng nhập tên đơn vị tính." });
+
+        string trimmedName = req.TenDvt.Trim();
+        var dvt = await _context.DonViTinhs.FindAsync(req.MaDvt);
+        if (dvt == null) return NotFound(new { message = "Không tìm thấy đơn vị tính." });
+
+        // Kiểm tra trùng tên với đơn vị tính khác
+        bool isDuplicate = await _context.DonViTinhs.AnyAsync(d => d.MaDvt != req.MaDvt && d.TenDvt.ToLower() == trimmedName.ToLower());
+        if (isDuplicate) return BadRequest(new { message = $"Tên đơn vị tính \"{trimmedName}\" đã tồn tại trên hệ thống." });
+
+        dvt.TenDvt = trimmedName;
+        await _context.SaveChangesAsync();
+        return Json(new { success = true, maDvt = dvt.MaDvt, tenDvt = dvt.TenDvt });
+    }
+
+    // Xóa đơn vị tính trực tiếp từ dropdown
+    [HttpPost]
+    public async Task<IActionResult> DeleteDvtQuick([FromBody] DeleteDvtRequest req)
+    {
+        if (req == null || req.MaDvt <= 0) return BadRequest(new { message = "Mã đơn vị tính không hợp lệ." });
+
+        var dvt = await _context.DonViTinhs.FindAsync(req.MaDvt);
+        if (dvt == null) return NotFound(new { message = "Không tìm thấy đơn vị tính." });
+
+        // Kiểm tra ràng buộc xem có hàng hóa nào đang sử dụng đơn vị tính này không
+        bool hasProducts = await _context.HangHoas.AnyAsync(h => h.MaDvt == req.MaDvt);
+        if (hasProducts)
+        {
+            return BadRequest(new { message = $"Không thể xóa đơn vị tính \"{dvt.TenDvt}\" vì đang có sản phẩm sử dụng đơn vị tính này." });
+        }
+
+        _context.DonViTinhs.Remove(dvt);
+        await _context.SaveChangesAsync();
+        return Json(new { success = true, message = $"Đã xóa đơn vị tính \"{dvt.TenDvt}\" thành công." });
     }
 
     // Lấy thông tin 1 hàng hóa qua JSON cho Modal Sửa

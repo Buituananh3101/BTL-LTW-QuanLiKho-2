@@ -36,8 +36,10 @@
 | **Lưu Sửa hàng** | Sửa form, "Cập nhật" | JS gom form ➜ AJAX `POST /HangHoa/Edit?id=X` | `Edit(id, form)` validate & cập nhật | Lưu CSDL ➜ JSON `{success:true}` |
 | **Xóa hàng** | Click Xóa ➜ Xác nhận | Pre-check `GET /HangHoa/CheckCanDelete/{id}`. Chưa GD: hiện nút Xóa. Đã có: ẩn nút Xóa, chỉ hiện nút Khóa | `Delete(id)` check 6 bảng GD, bọc Trans | Chưa GD: Xóa. Đã có GD: Chặn xóa vĩnh viễn, chỉ cho khóa |
 | **Xuất file Excel** | Bấm "Xuất file" ➜ Chọn cột ➜ Bấm Xuất | Mở `#hhExportModalOv` ➜ `POST /HangHoa/ExportExcel` | ClosedXML xuất đúng cột chọn | Trả file `.xlsx` |
-| **Nhập file Excel** | Kéo thả file ➜ Thực hiện nhập | Mở `#hhImportModalOv` ➜ `POST /HangHoa/ImportExcel` | Validate, parse 16 trường, xử lý trùng mã | Commit Trans ➜ reload bảng |
+| **Nhập file Excel** | Kéo thả file ➜ Thực hiện nhập | Mở `#hhImportModalOv` ➜ `POST /HangHoa/ImportExcel` | Validate, parse 16 trường, xử lý trùng mã | Commit Trans ➜ reload bảng |
+
 | **In tem mã** | Bấm "In tem mã" trên dòng chi tiết | Mở modal `#hhBarcodeModalOv`, live preview mã vạch SVG Code 128 | Client-side thuần JS (zero-dependency) | In qua `window.print()` khổ 35x22, 50x30, A4 |
+| **Sửa/Xóa nhanh ĐVT & Nhóm** | Hover item trong dropdown ĐVT/Nhóm ➜ Click icon ✎ | Mở Lego `AppPrompt` cho phép sửa tên hoặc xóa | `UpdateDvtQuick`, `DeleteDvtQuick`, `UpdateGroupQuick`, `DeleteGroupQuick` kiểm tra trùng tên & ràng buộc dữ liệu | Trả JSON, cập nhật DOM tức thì và reload bảng |
 
 ---
 

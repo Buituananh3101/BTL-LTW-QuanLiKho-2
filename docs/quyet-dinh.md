@@ -49,3 +49,4 @@
 - **2026-11-03 (Phiên 232)** – Chuẩn hóa bộ nhận diện & Loại bỏ 100% từ khóa thương hiệu cũ – Chuyển toàn bộ tiền tố CSS sang `.kp-`, thư viện sang `app-filter.js`, đối tượng JS sang `App*`, ViewModels & Partials sang `DateFilter`/`MultiSelect`/`Status`/`Value` chuẩn thương hiệu hệ thống KhoPro.
 
 
+- **2026-11-03 (Phiên 233)** – Tinh gọn cấu trúc: Tách modular ViewModels Xuất Hủy & Dọn dẹp JS cũ – Tách XuatHuyViewModels.cs thành 3 file chuyên biệt (XuatHuyFilterVM, XuatHuyFormVM, XuatHuyListItemVM) đồng bộ 100% với 9 phân hệ; xóa bỏ hoàn toàn tàn dư f3-product-search.js.

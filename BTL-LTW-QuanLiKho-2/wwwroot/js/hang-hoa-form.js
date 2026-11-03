@@ -637,8 +637,15 @@
         e.stopPropagation();
         const id = editBtn.dataset.id || editBtn.closest('[data-val]')?.dataset.val;
         const val = editBtn.dataset.val || editBtn.closest('[data-val]')?.querySelector('span')?.textContent?.trim();
-        if (typeof window.handleEditNhomHang === 'function') {
-          window.handleEditNhomHang(id, val);
+        const type = editBtn.dataset.type || (editBtn.closest('#listMaDvt') ? 'dvt' : 'nhom');
+        if (type === 'dvt' || editBtn.closest('#listMaDvt')) {
+          if (typeof window.handleEditDonViTinh === 'function') {
+            window.handleEditDonViTinh(id, val);
+          }
+        } else {
+          if (typeof window.handleEditNhomHang === 'function') {
+            window.handleEditNhomHang(id, val);
+          }
         }
         return;
       }
@@ -657,6 +664,7 @@
     function syncOptions() {
       list.innerHTML = '';
       const isNhom = (wrap && wrap.id && wrap.id.includes('Nhom')) || (list && list.id && list.id.includes('Nhom'));
+      const isDvt = (wrap && wrap.id && wrap.id.includes('Dvt')) || (list && list.id && list.id.includes('Dvt'));
       Array.from(select.options).forEach(opt => {
         if (opt.value === '') return;
         const isSel = (String(select.value) === String(opt.value));
@@ -668,11 +676,20 @@
           it.style.paddingLeft = (12 + level * 16) + 'px';
         }
         const treePrefix = level > 0 ? `<span class="kp-tree-branch text-muted me-1" style="font-family:monospace;font-size:12px;">└─</span>` : '';
-        const editBtnHtml = isNhom ? `
-          <button type="button" class="hh-item-edit-btn" data-type="nhom" data-id="${opt.value}" data-val="${esc(opt.textContent.trim())}" title="Sửa nhóm hàng" aria-label="Sửa nhóm hàng ${esc(opt.textContent.trim())}">
-            <svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>
-          </button>
-        ` : '';
+        let editBtnHtml = '';
+        if (isNhom) {
+          editBtnHtml = `
+            <button type="button" class="hh-item-edit-btn" data-type="nhom" data-id="${opt.value}" data-val="${esc(opt.textContent.trim())}" title="Sửa nhóm hàng" aria-label="Sửa nhóm hàng ${esc(opt.textContent.trim())}">
+              <svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>
+            </button>
+          `;
+        } else if (isDvt) {
+          editBtnHtml = `
+            <button type="button" class="hh-item-edit-btn" data-type="dvt" data-id="${opt.value}" data-val="${esc(opt.textContent.trim())}" title="Sửa đơn vị tính" aria-label="Sửa đơn vị tính ${esc(opt.textContent.trim())}">
+              <svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>
+            </button>
+          `;
+        }
         it.innerHTML = `
           <span>${treePrefix}${esc(opt.textContent.trim())}</span>
           ${editBtnHtml}

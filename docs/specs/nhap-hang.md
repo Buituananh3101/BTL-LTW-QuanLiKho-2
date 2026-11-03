@@ -1,6 +1,6 @@
 ﻿# Đặc tả Chức năng: Nhập hàng (Goods Receipt)
 
-> **Mục tiêu**: Quản lý chứng từ Nhập hàng từ Nhà cung cấp chuẩn giao diện & nghiệp vụ hệ thống, đồng bộ 100% với khuôn mẫu Kiểm kho (`_PhieuKiemKeForm.cshtml` & `_PhieuKiemKeTable.cshtml`). Tái sử dụng trọn vẹn các khối LEGO đã đóng gói (`AppFilter`, `AppToast`, `f3-product-search`, `_DateFilter`...).
+> **Mục tiêu**: Quản lý chứng từ Nhập hàng từ Nhà cung cấp chuẩn giao diện & nghiệp vụ hệ thống, đồng bộ 100% với khuôn mẫu Kiểm kho (`_PhieuKiemKeForm.cshtml` & `_PhieuKiemKeTable.cshtml`). Tái sử dụng trọn vẹn các khối LEGO đã đóng gói (`AppFilter`, `AppToast`, `_DateFilter`...).
 
 ---
 
@@ -32,7 +32,7 @@
 - **Styles & Scripts**:
   - `wwwroot/css/kiem-kho.css` & `wwwroot/css/nhap-hang.css`: Đồng bộ layout khung nhìn, bảng lưới và panel.
   - `wwwroot/js/nhap-hang-index.js`: Lọc AJAX, sao, Excel, LEGO `AppFilter.initColumnToggle` & `initRowDetail`.
-  - `wwwroot/js/nhap-hang-form.js`: LEGO `f3-product-search`, modal NCC đầy đủ, import Excel, phím tắt F3/F4/F9/F10, widget Nhập gần đây.
+  - `wwwroot/js/nhap-hang-form.js`: LEGO `AppFilter.initProductSearch`, modal NCC đầy đủ, import Excel, phím tắt F3/F4/F9/F10, widget Nhập gần đây.
 
 ---
 
@@ -47,12 +47,12 @@
   - Tiêu đề: "Nhập hàng", ô tìm kiếm "Theo mã phiếu nhập (F3)".
   - Nút: `+ Nhập hàng` (`/NhapHang/Create`), `Xuất file ▾`, `Tùy chọn hiển thị cột` (dropdown 20 cột), `Tải lại`, `Trợ giúp`.
 - **Bảng dữ liệu (`_NhapHangTable` - Chuẩn Kiểm kho)**:
-  - Bọc trong `<section id="content">` và `#tableContainer.kp-table-wrapper` đảm bảo `.kp-table-scroll-body` có chiều cao flex cố định, cuộn 2 chiều độc lập (dọc và ngang) mượt mà khi mở drawer chi tiết.
-  - Sắp xếp cột 3 trạng thái (Tăng -> Giảm -> Bình thường) chuẩn chuyên nghiệp: Click 1 sắp xếp Tăng dần (ASC), Click 2 Giảm dần (DESC), Click 3 quay về Bình thường (hủy sắp xếp, trở về mặc định theo thời gian giảm dần).
+  - Bọc trong `<section id="content">` và `#tableContainer.kp-table-wrapper` đảm bảo `.kp-table-scroll-body` có chiều cao flex cố định, cuộn 2 chiều độc lập mượt mà khi mở drawer chi tiết.
+  - Sắp xếp cột 3 trạng thái (Tăng -> Giảm -> Bình thường): Click 1 sắp xếp Tăng dần (ASC), Click 2 Giảm dần (DESC), Click 3 quay về Bình thường, quay về mặc định.
   - Bảng cuộn ngang `min-width: 1750px`, viền chữ nhật `#0070f3` khép kín (`2px` trên/dưới, `3px` hai bên) khi mở dòng.
   - Dữ liệu bắt đầu ngay sau `<thead>`, mã phiếu hiển thị dạng text đen chuẩn mực.
   - Badges trạng thái dùng Bootstrap subtle chuẩn: `bg-success-subtle text-success`, `bg-primary-subtle text-primary`, `bg-secondary-subtle text-secondary`.
-  - Drawer chi tiết cố định 992px (`.kk-detail-fixed-wrap`), tab `Thông tin`, bảng con `.dtl-tbl` lọc nhanh `.fin`, `.dp-bottom` (`.dp-note` & `.sums`), `.dp-actions` (Hủy, Sao chép, Xuất file, Lưu, In, Mở phiếu/Xem chi tiết). Mở/đóng tại chỗ theo vị trí cuộn tự nhiên của người dùng, không tự động dịch chuyển màn hình.
+  - Drawer chi tiết cố định 992px (`.kk-detail-fixed-wrap`), tab `Thông tin`, bảng con `.dtl-tbl` lọc nhanh `.fin`, `.dp-bottom` (`.dp-note` & `.sums`), `.dp-actions` (Hủy, Sao chép, Xuất file, Lưu, In, Mở phiếu/Xem chi tiết). Mở/đóng tại chỗ theo vị trí cuộn tự nhiên.
 
 ### 2.2. Màn hình Lập / Sửa Phiếu Nhập Hàng (`_NhapHangForm`)
 - **Bố cục khung nhìn**: Vừa khít viewport (`height: 100%; overflow: hidden;`), bảng cuộn kèm sticky header; footer tổng mặt hàng, tổng số lượng và nút F9/F10 ghim đáy.
@@ -77,7 +77,7 @@
 ---
 
 ## 3. Khối Lego & Quy tắc Nghiệp vụ
-- **Lego**: `_DateFilter.cshtml`, `_Pagination.cshtml`, `AppFilter` (ColumnToggle, RowDetail, EntityActions), `f3-product-search.js`, `AppToast`, `.kp-num`.
+- **Lego**: `_DateFilter.cshtml`, `_Pagination.cshtml`, `AppFilter` (ColumnToggle, RowDetail, EntityActions, ProductSearch), `AppToast`, `.kp-num`.
 - **Mã phiếu nhập**: Tiền tố `PN` + 6 chữ số (`PN000001`), hỗ trợ nhập mã tùy biến nếu không trùng.
 - **Biến động kho & Công nợ**: Tự động tăng tồn kho qua `vw_TonKhoHienTai` và tăng công nợ NCC khi phiếu `DA_XAC_NHAN`.
 - **Quy tắc bất biến**: Phiếu đã hoàn thành (`DA_XAC_NHAN`) **tuyệt đối không được sửa hay xóa**. Phiếu tạm (`NHAP`) được phép sửa/xóa.

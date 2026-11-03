@@ -1,6 +1,6 @@
-﻿# Đặc tả Chức năng: Trả hàng nhập (Purchase Returns)
+# Đặc tả Chức năng: Trả hàng nhập (Purchase Returns)
 
-> **Mục tiêu**: Quản lý trả hàng cho NCC chuẩn chuyên nghiệp & prototype `prototype-trahangnhap.html`, đồng bộ khuôn mẫu Nhập hàng (`NhapHang`). Tái sử dụng khối LEGO: `AppFilter`, `AppToast`, `f3-product-search`, `_DateFilter`, `_PromptModal`...
+> **Mục tiêu**: Quản lý trả hàng cho NCC chuẩn chuyên nghiệp & prototype `prototype-trahangnhap.html`, đồng bộ khuôn mẫu Nhập hàng (`NhapHang`). Tái sử dụng khối LEGO: `AppFilter`, `AppToast`, `_DateFilter`, `_PromptModal`...
 
 ---
 

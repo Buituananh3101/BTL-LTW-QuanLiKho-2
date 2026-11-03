@@ -579,10 +579,157 @@ $(document).ready(function () {
         }
     };
 
-    // Bắt sự kiện click nút bút chì Sửa nhóm hàng từ dropdown sidebar & modal form
+    // 4.2. Xử lý Sửa & Xóa Đơn vị tính dùng chung qua AppPrompt
+    window.handleEditDonViTinh = function (id, oldName) {
+        if (!id) return;
+        oldName = (oldName || '').trim();
+
+        if (window.AppPrompt) {
+            window.AppPrompt.open({
+                title: 'Sửa đơn vị tính',
+                label: 'Tên đơn vị tính',
+                value: oldName,
+                showDelete: true,
+                onSave: function (newName) {
+                    const errEl = document.getElementById('kpPromptErr');
+                    const inputEl = document.getElementById('kpPromptInput');
+
+                    if (!newName || newName.trim() === '') {
+                        if (errEl) {
+                            errEl.textContent = 'Vui lòng nhập tên đơn vị tính.';
+                            errEl.style.display = 'block';
+                        }
+                        if (inputEl) inputEl.classList.add('is-invalid');
+                        return false;
+                    }
+                    if (newName.trim().toLowerCase() === oldName.toLowerCase()) {
+                        window.AppPrompt.close();
+                        setTimeout(() => {
+                            $('#dropdownMaDvt').show();
+                            $('#wrapMaDvt').addClass('open');
+                        }, 50);
+                        return false;
+                    }
+
+                    $.ajax({
+                        url: '/HangHoa/UpdateDvtQuick',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ maDvt: parseInt(id), tenDvt: newName.trim() }),
+                        success: function (res) {
+                            if (res.success) {
+                                // 1. Cập nhật trong modal tạo/sửa hàng hóa
+                                const $formItem = $(`#listMaDvt .hh-cs-item[data-val="${id}"]`);
+                                if ($formItem.length) {
+                                    $formItem.find('span').first().text(res.tenDvt);
+                                    $formItem.find('.hh-item-edit-btn').attr('data-val', res.tenDvt);
+                                }
+                                $(`#formMaDvt option[value="${id}"]`).text(res.tenDvt);
+                                if ($('#formMaDvt').val() == id) {
+                                    $('#inputMaDvt').val(res.tenDvt);
+                                }
+
+                                // 2. Tải lại bảng để đồng bộ dữ liệu
+                                currentPage = 1;
+                                loadTable();
+
+                                window.AppPrompt.close();
+
+                                // Đảm bảo dropdown ĐVT giữ nguyên trạng thái mở
+                                setTimeout(() => {
+                                    $('#dropdownMaDvt').show();
+                                    $('#wrapMaDvt').addClass('open');
+                                }, 50);
+
+                                if (typeof showToast === 'function') {
+                                    showToast('Đã cập nhật đơn vị tính: ' + res.tenDvt);
+                                }
+                            }
+                        },
+                        error: function (xhr) {
+                            if (errEl) {
+                                errEl.textContent = xhr.responseJSON?.message || 'Không thể cập nhật đơn vị tính.';
+                                errEl.style.display = 'block';
+                            }
+                            if (inputEl) inputEl.classList.add('is-invalid');
+                        }
+                    });
+                    return false;
+                },
+                onDelete: function () {
+                    $.ajax({
+                        url: '/HangHoa/DeleteDvtQuick',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ maDvt: parseInt(id) }),
+                        success: function (res) {
+                            if (res.success) {
+                                // 1. Xóa khỏi modal tạo/sửa hàng hóa
+                                $(`#listMaDvt .hh-cs-item[data-val="${id}"]`).remove();
+                                $(`#formMaDvt option[value="${id}"]`).remove();
+                                if ($('#formMaDvt').val() == id) {
+                                    $('#formMaDvt').val('');
+                                    $('#inputMaDvt').val('');
+                                }
+
+                                // 2. Tải lại bảng để đồng bộ dữ liệu
+                                currentPage = 1;
+                                loadTable();
+
+                                // Giữ dropdown mở để người dùng quan sát kết quả
+                                setTimeout(() => {
+                                    $('#dropdownMaDvt').show();
+                                    $('#wrapMaDvt').addClass('open');
+                                }, 50);
+
+                                if (typeof showToast === 'function') {
+                                    showToast(res.message || 'Đã xóa đơn vị tính.');
+                                }
+                            }
+                        },
+                        error: function (xhr) {
+                            const msg = xhr.responseJSON?.message || 'Không thể xóa đơn vị tính vì đang có sản phẩm sử dụng.';
+                            if (window.AppConfirm) {
+                                window.AppConfirm.show({
+                                    title: 'Không thể xóa đơn vị tính',
+                                    icon: 'bi-exclamation-triangle',
+                                    iconColor: '#eab308',
+                                    message: msg,
+                                    isAlert: true,
+                                    confirmText: 'Đã hiểu',
+                                    confirmClass: 'btn btn-primary'
+                                });
+                            } else if (typeof showToast === 'function') {
+                                showToast(msg, 'error');
+                            } else {
+                                alert(msg);
+                            }
+
+                            setTimeout(() => {
+                                $('#dropdownMaDvt').show();
+                                $('#wrapMaDvt').addClass('open');
+                            }, 50);
+                        }
+                    });
+                }
+            });
+        }
+    };
+
+    // Bắt sự kiện click nút bút chì Sửa nhóm hàng & Sửa đơn vị tính
     $(document).on('click', '.kp-item-edit-btn, .hh-item-edit-btn', function (e) {
         const type = $(this).data('type');
-        if (type === 'nhomhang' || type === 'nhom' || $(this).closest('#dropdownNhomHang, #listMaNhom').length) {
+        if (type === 'dvt' || $(this).closest('#listMaDvt').length) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            const id = $(this).data('id') || $(this).closest('[data-val]').data('val');
+            const oldName = $(this).data('val') || $(this).closest('.hh-cs-item').find('span').first().text().trim();
+            if (typeof window.handleEditDonViTinh === 'function') {
+                window.handleEditDonViTinh(id, oldName);
+            }
+        } else if (type === 'nhomhang' || type === 'nhom' || $(this).closest('#dropdownNhomHang, #listMaNhom').length) {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
@@ -595,8 +742,19 @@ $(document).ready(function () {
 
     $(document).on('click', '#kpPromptCancel, #kpPromptClose', function () {
         setTimeout(() => {
-            $('#dropdownNhomHang').addClass('show');
-            $('#boxNhomHang').addClass('open');
+            if ($('#modalCreateProduct').is(':visible')) {
+                if ($('#dropdownMaDvt').is(':visible')) {
+                    $('#dropdownMaDvt').show();
+                    $('#wrapMaDvt').addClass('open');
+                }
+                if ($('#dropdownMaNhom').is(':visible')) {
+                    $('#dropdownMaNhom').show();
+                    $('#wrapMaNhom').addClass('open');
+                }
+            } else {
+                $('#dropdownNhomHang').addClass('show');
+                $('#boxNhomHang').addClass('open');
+            }
         }, 50);
     });
 
