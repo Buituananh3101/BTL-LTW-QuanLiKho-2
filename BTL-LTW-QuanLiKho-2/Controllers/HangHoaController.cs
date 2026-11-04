@@ -1134,7 +1134,29 @@ public class HangHoaController : BaseKhoController
         item.TrangThai = "NGUNG_BAN";
         await _context.SaveChangesAsync();
 
-        return Json(new { success = true, message = $"Đã chuyển hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) sang trạng thái 'Ngừng bán'." });
+        return Json(new { success = true, message = $"Đã chuyển hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) sang trạng thái 'Ngừng kinh doanh'." });
+    }
+
+    // Chuyển đổi trạng thái Đang kinh doanh <-> Ngừng kinh doanh (chuẩn như Nhà Cung Cấp)
+    [HttpPost]
+    public async Task<IActionResult> ToggleStatus(int id)
+    {
+        var item = await _context.HangHoas.FindAsync(id);
+        if (item == null) return NotFound(new { message = "Không tìm thấy hàng hóa." });
+
+        bool wasNgungBan = (item.TrangThai == "NGUNG_BAN" || item.TrangThai == "NGUNG_KINH_DOANH");
+        if (wasNgungBan)
+        {
+            item.TrangThai = "DANG_BAN";
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, isNgungBan = false, message = $"Đã cho phép hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) kinh doanh trở lại." });
+        }
+        else
+        {
+            item.TrangThai = "NGUNG_BAN";
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, isNgungBan = true, message = $"Đã chuyển hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) sang trạng thái 'Ngừng kinh doanh'." });
+        }
     }
 
     private static string DetectImageMime(byte[]? data)

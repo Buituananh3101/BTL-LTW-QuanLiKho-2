@@ -411,83 +411,69 @@
   </div>
 </div>
 
-<!-- ===== MODAL CON 4: XÁC NHẬN XÓA / KHÓA HÀNG HÓA (Chuẩn thiết kế chuyên nghiệp) ===== -->
+<!-- ========================================================================
+     MODAL CON 4: XÁC NHẬN XÓA HÀNG HÓA (RÀNG BUỘC CHỨNG TỪ - CHUẨN NHÀ CUNG CẤP)
+     ======================================================================== -->
 <div class="hh-ov" id="hhDeleteProductOv">
-  <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="delProdTitle" style="max-width: 480px; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.25);">
-    <div class="hh-m-head" style="border-bottom: 1px solid #e5e7eb; padding: 16px 20px 14px; background: #ffffff;">
-      <h2 id="delProdTitle" style="color: #111827; display: flex; align-items: center; gap: 10px; margin: 0; font-size: 17px; font-weight: 700;">
-        <span id="delProdHeaderIconWrap" class="d-inline-flex align-items-center justify-content-center" style="width: 28px; height: 28px; border-radius: 6px; background: #fee2e2; color: #dc2626; flex-shrink: 0;">
-          <i class="bi bi-trash3" id="delProdHeaderIcon" style="font-size: 15px;"></i>
-        </span>
-        <span id="delProdHeaderText">Xóa hàng hóa</span>
+  <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="delProdTitle" style="max-width: 480px;">
+    <div class="hh-m-head" style="border-bottom: 1px solid var(--hh-line-l); padding-bottom: 12px;">
+      <h2 id="delProdTitle" style="color: #dc2626; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 18px;">
+        <svg style="width:20px;height:20px;stroke:#dc2626;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><use href="#i-trash"/></svg>
+        <span>Xóa hàng hóa</span>
       </h2>
-      <button type="button" class="hh-x" data-close="hhDeleteProductOv" aria-label="Đóng" style="top: 12px; right: 12px;">
+      <button type="button" class="hh-x" data-close="hhDeleteProductOv" aria-label="Đóng">
         <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
       </button>
     </div>
-    
-    <div class="hh-m-body" style="padding: 20px; font-size: 14px; line-height: 1.5; color: #111827; background: #ffffff;">
+    <div class="hh-m-body" style="padding: 20px 24px; font-size: 14.5px; line-height: 1.5;">
       <input type="hidden" id="delProdId" value="0" />
-
-      <!-- Chế độ 1: Xác nhận xóa (khi hàng CHƯA có giao dịch) -->
-      <div id="delProdNormalBox">
-        <div class="d-flex align-items-start gap-3 mb-3">
-          <div style="width: 42px; height: 42px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px;">
-            <i class="bi bi-exclamation-triangle"></i>
-          </div>
-          <div>
-            <div style="font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 2px;">Xác nhận xóa mặt hàng?</div>
-            <div style="font-size: 13px; color: #4b5563; line-height: 1.45;">
-              Mặt hàng này chưa phát sinh giao dịch nào. Thao tác xóa sẽ loại bỏ dữ liệu vĩnh viễn và không thể hoàn tác.
-            </div>
-          </div>
-        </div>
+      <div id="delProdConfirmMsg" style="color: #374151; word-break: break-word; overflow-wrap: anywhere;">
+        Bạn có chắc chắn muốn xóa hàng hóa <strong id="delProdName" style="color: #111827;"></strong>? Thao tác này không thể hoàn tác.
       </div>
 
-      <!-- Chế độ 2: ĐÃ có giao dịch -> Chặn xóa, hướng dẫn khóa -->
-      <div id="delProdBlockedBox" style="display: none;">
-        <div class="d-flex align-items-start gap-3 mb-3">
-          <div style="width: 42px; height: 42px; border-radius: 50%; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px;">
-            <i class="bi bi-shield-lock"></i>
+      <!-- Cảnh báo khi đã phát sinh phiếu nhập / chứng từ -->
+      <div id="delProdErrorBox" style="display: none; margin-top: 14px; padding: 12px 14px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #991b1b; font-size: 13.5px; line-height: 1.5;">
+        <div style="display: flex; gap: 8px; align-items: flex-start;">
+          <svg style="width:18px;height:18px;flex:none;stroke:#dc2626;fill:none;stroke-width:2;margin-top:2px;"><use href="#i-info"/></svg>
+          <div style="flex: 1; min-width: 0;">
+            <div id="delProdErrorMsg" style="font-weight: 500; margin-bottom: 8px; word-break: break-word; overflow-wrap: anywhere;"></div>
+            <button type="button" class="hh-btn" id="btnSwitchNgungBanInDelModal" style="background:#fff;border-color:#fca5a5;color:#b91c1c;height:32px;font-size:13px;padding:0 12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;">
+              <i class="bi bi-slash-circle"></i> Chuyển sang "Ngừng kinh doanh" ngay
+            </button>
           </div>
-          <div>
-            <div style="font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 2px;">Mặt hàng đã phát sinh giao dịch</div>
-            <div style="font-size: 13px; color: #4b5563; line-height: 1.45;">
-              Không thể xóa vĩnh viễn nhằm bảo toàn lịch sử hóa đơn, chứng từ và số liệu sổ sách kế toán.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Thẻ tóm tắt thông tin hàng hóa dùng chung cho cả 2 chế độ -->
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
-        <div class="d-flex justify-content-between align-items-center mb-1">
-          <span style="font-size: 11.5px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;">Thông tin mặt hàng</span>
-          <span id="delProdStatusBadge" style="font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: #ecfdf5; color: #059669;">Đang kinh doanh</span>
-        </div>
-        <div id="delProdItemName" style="font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 2px;">-</div>
-        <div style="font-size: 13px; color: #64748b;">
-          Mã hàng: <span id="delProdItemCode" style="color: #0f172a; font-weight: 600;">-</span>
-        </div>
-      </div>
-
-      <!-- Dòng gợi ý giải pháp (chỉ hiển thị khi đã có giao dịch) -->
-      <div id="delProdGuideWrap" style="display: none; font-size: 12.5px; color: #334155; background: #f1f5f9; border-radius: 6px; padding: 10px 12px; line-height: 1.45;">
-        <div id="delProdGuideText">
-          <i class="bi bi-lightbulb-fill text-warning me-1"></i>
-          Để ẩn mặt hàng khỏi danh mục bán hàng và tránh phát sinh mới, vui lòng chọn <strong>Khóa hàng (Ngừng kinh doanh)</strong>.
         </div>
       </div>
     </div>
+    <div class="hh-m-foot" style="background: #f9fafb; border-top: 1px solid var(--hh-line-l); padding: 12px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+      <button type="button" class="hh-btn" id="btnCancelDeleteProd" data-close="hhDeleteProductOv">Bỏ qua</button>
+      <button type="button" class="hh-btn danger" id="btnConfirmDeleteProd">Đồng ý xóa</button>
+    </div>
+  </div>
+</div>
 
-    <div class="hh-m-foot" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 12px 20px; display: flex; justify-content: flex-end; gap: 8px;">
-      <button type="button" class="btn btn-outline-secondary" id="btnCancelDeleteProd" data-close="hhDeleteProductOv" style="height: 36px; padding: 0 16px; font-weight: 500; font-size: 13.5px; border-radius: 6px;">Bỏ qua</button>
-      <button type="button" class="btn btn-primary" id="btnSwitchNgungBan" style="display: none; height: 36px; padding: 0 16px; font-weight: 600; font-size: 13.5px; border-radius: 6px;">
-        <i class="bi bi-lock-fill me-1"></i> Khóa hàng (Ngừng kinh doanh)
+<!-- ========================================================================
+     MODAL CON 5: XÁC NHẬN CHUYỂN TRẠNG THÁI (NGỪNG KINH DOANH / KÍCH HOẠT LẠI)
+     ======================================================================== -->
+<div class="hh-ov" id="hhStatusConfirmOv">
+  <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="statusProdTitle" style="max-width: 480px;">
+    <div class="hh-m-head" style="border-bottom: 1px solid var(--hh-line-l); padding-bottom: 12px;">
+      <h2 id="statusProdTitle" style="color: #d97706; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 18px;">
+        <i class="bi bi-slash-circle" id="statusProdIcon" style="font-size: 20px;"></i>
+        <span id="statusProdTitleText">Ngừng kinh doanh hàng hóa</span>
+      </h2>
+      <button type="button" class="hh-x" data-close="hhStatusConfirmOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
       </button>
-      <button type="button" class="btn btn-danger" id="btnConfirmDeleteProd" style="height: 36px; padding: 0 16px; font-weight: 600; font-size: 13.5px; border-radius: 6px;">
-        <i class="bi bi-trash3-fill me-1"></i> Đồng ý xóa
-      </button>
+    </div>
+    <div class="hh-m-body" style="padding: 20px 24px; font-size: 14.5px; line-height: 1.5;">
+      <input type="hidden" id="statusProdId" value="0" />
+      <div id="statusProdConfirmMsg" style="color: #374151; word-break: break-word; overflow-wrap: anywhere;">
+        Bạn có chắc chắn muốn chuyển hàng hóa <strong id="statusProdName" style="color: #111827;"></strong> sang trạng thái <strong id="statusProdTargetText" style="color: #d97706;">Ngừng kinh doanh</strong>?
+      </div>
+    </div>
+    <div class="hh-m-foot" style="background: #f9fafb; border-top: 1px solid var(--hh-line-l); padding: 12px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+      <button type="button" class="hh-btn" data-close="hhStatusConfirmOv">Bỏ qua</button>
+      <button type="button" class="hh-btn" id="btnConfirmStatusProd" style="background: #d97706; color: #fff; border: 1px solid #d97706; font-weight: 500;">Đồng ý</button>
     </div>
   </div>
 </div>

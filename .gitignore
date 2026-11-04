@@ -366,4 +366,4 @@ FodyWeavers.xsd
 scratch/
 docs/latex/verify_pages/
 *.synctex*
-*.bak
+*.bakdocs/latex/figures_backup/

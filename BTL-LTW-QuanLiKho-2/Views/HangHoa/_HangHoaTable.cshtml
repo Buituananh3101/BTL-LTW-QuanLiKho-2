@@ -328,6 +328,10 @@
                                                 <button type="button" class="btn btn-outline-secondary btn-sm btn-delete-product" data-id="@item.MaHang" data-name="@item.TenHang">
                                                     <i class="bi bi-trash me-1"></i> Xóa
                                                 </button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm btn-toggle-status-product" data-id="@item.MaHang" data-status="@item.TrangThai" data-name="@item.TenHang">
+                                                    <i class="bi @(item.TrangThai == "DANG_BAN" ? "bi-slash-circle" : "bi-check2-circle") me-1"></i>
+                                                    <span>@(item.TrangThai == "DANG_BAN" ? "Ngừng kinh doanh" : "Cho kinh doanh lại")</span>
+                                                </button>
                                                 <button type="button" class="btn btn-outline-secondary btn-sm btn-copy-product" data-id="@item.MaHang">
                                                     <i class="bi bi-copy me-1"></i> Sao chép
                                                 </button>

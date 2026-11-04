@@ -1609,136 +1609,58 @@
     });
   };
 
-  /* ---------- Xóa hàng hóa & Chuyển trạng thái Ngừng bán (chuẩn chuyên nghiệp) ---------- */
+  /* ---------- Xóa hàng hóa & Chuyển trạng thái (chuẩn Nhà Cung Cấp) ---------- */
   window.openDeleteProductModal = function (id, name) {
     if (!id) return;
     const hiddenId = $('#delProdId');
-    const normalBox = $('#delProdNormalBox');
-    const blockedBox = $('#delProdBlockedBox');
+    const nameEl = $('#delProdName');
+    const errorBox = $('#delProdErrorBox');
+    const errorMsg = $('#delProdErrorMsg');
     const btnDel = $('#btnConfirmDeleteProd');
-    const btnNgung = $('#btnSwitchNgungBan');
+    const btnSwitch = $('#btnSwitchNgungBanInDelModal');
     const btnCancel = $('#btnCancelDeleteProd');
-    const titleText = $('#delProdHeaderText');
-    const headerIconWrap = $('#delProdHeaderIconWrap');
-    const headerIcon = $('#delProdHeaderIcon');
-    const itemName = $('#delProdItemName');
-    const itemCode = $('#delProdItemCode');
-    const statusBadge = $('#delProdStatusBadge');
-    const guideWrap = $('#delProdGuideWrap');
-    const guideText = $('#delProdGuideText');
 
     if (hiddenId) hiddenId.value = id;
-    if (itemName) itemName.textContent = name || ('Mã #' + id);
-    if (itemCode) itemCode.textContent = '#' + id;
+    if (nameEl) nameEl.textContent = name || ('Mã #' + id);
 
-    // Trạng thái ban đầu: chờ nạp kết quả kiểm tra
-    if (normalBox) normalBox.style.display = 'block';
-    if (blockedBox) blockedBox.style.display = 'none';
-    if (guideWrap) guideWrap.style.display = 'none';
+    // Trạng thái ban đầu chuẩn Nhà Cung Cấp
+    if (errorBox) errorBox.style.display = 'none';
     if (btnDel) {
-      btnDel.style.display = 'none';
-      btnDel.disabled = true;
+      btnDel.style.display = 'inline-flex';
+      btnDel.disabled = false;
+      btnDel.textContent = 'Đồng ý xóa';
     }
-    if (btnNgung) {
-      btnNgung.style.display = 'none';
-      btnNgung.disabled = true;
-    }
-    if (titleText) titleText.textContent = 'Đang kiểm tra...';
+    if (btnCancel) btnCancel.textContent = 'Bỏ qua';
 
     show($('#hhDeleteProductOv'));
 
-    // Pre-check trước khi hiển thị hành động xóa
+    // Pre-check ràng buộc giao dịch / chứng từ
     jQuery.ajax({
       url: '/HangHoa/CheckCanDelete/' + id,
       type: 'GET',
       success: function (res) {
-        if (!res || !res.success) {
-          renderNormalMode(name, '#' + id);
-          return;
-        }
-
+        if (!res || !res.success) return;
         const displayName = res.tenHang || name || ('Mã #' + id);
-        const displayCode = res.maHangNoiBo || ('#' + id);
-        if (itemName) itemName.textContent = displayName;
-        if (itemCode) itemCode.textContent = displayCode;
-
-        if (statusBadge) {
-          if (res.isNgungBan) {
-            statusBadge.textContent = 'Ngừng kinh doanh';
-            statusBadge.style.background = '#f1f5f9';
-            statusBadge.style.color = '#475569';
-          } else {
-            statusBadge.textContent = 'Đang kinh doanh';
-            statusBadge.style.background = '#ecfdf5';
-            statusBadge.style.color = '#059669';
-          }
-        }
+        if (nameEl) nameEl.textContent = displayName;
 
         if (res.hasTransaction) {
-          // ĐÃ CÓ GIAO DỊCH: CHỈ CHO KHÓA, CẤM XÓA TUYỆT ĐỐI
-          if (titleText) titleText.textContent = 'Không thể xóa hàng hóa';
-          if (headerIconWrap) {
-            headerIconWrap.style.background = '#fef3c7';
-            headerIconWrap.style.color = '#d97706';
+          // Đã phát sinh giao dịch -> Chặn xóa và hiển thị nút chuyển Ngừng kinh doanh
+          if (errorMsg) errorMsg.textContent = res.message || 'Mặt hàng đã phát sinh giao dịch/chứng từ, không thể xóa để bảo toàn dữ liệu sổ sách kế toán.';
+          if (errorBox) errorBox.style.display = 'block';
+          if (btnDel) btnDel.style.display = 'none';
+          if (btnSwitch) {
+            btnSwitch.style.display = res.isNgungBan ? 'none' : 'inline-flex';
           }
-          if (headerIcon) {
-            headerIcon.className = 'bi bi-shield-lock';
-          }
-          if (normalBox) normalBox.style.display = 'none';
-          if (blockedBox) blockedBox.style.display = 'block';
-          if (guideWrap) guideWrap.style.display = 'block';
-
-          // Nút xóa BỊ ẨN HOÀN TOÀN
-          if (btnDel) {
-            btnDel.style.display = 'none';
-            btnDel.disabled = true;
-          }
-
-          if (res.isNgungBan) {
-            if (btnNgung) btnNgung.style.display = 'none';
-            if (btnCancel) btnCancel.textContent = 'Đóng';
-            if (guideText) guideText.innerHTML = '<i class="bi bi-info-circle-fill text-secondary me-1"></i> Mặt hàng này đã ở trạng thái <strong>Ngừng kinh doanh</strong> và được lưu trữ an toàn trong sổ sách kế toán.';
-          } else {
-            if (btnNgung) {
-              btnNgung.style.display = 'inline-flex';
-              btnNgung.disabled = false;
-              btnNgung.innerHTML = '<i class="bi bi-lock-fill me-1"></i> Khóa hàng (Ngừng kinh doanh)';
-            }
-            if (btnCancel) btnCancel.textContent = 'Bỏ qua';
-            if (guideText) guideText.innerHTML = '<i class="bi bi-lightbulb-fill text-warning me-1"></i> Để ẩn mặt hàng khỏi danh mục bán hàng và tránh phát sinh mới, vui lòng chọn <strong>Khóa hàng (Ngừng kinh doanh)</strong>.';
-          }
+          if (btnCancel) btnCancel.textContent = res.isNgungBan ? 'Đóng' : 'Bỏ qua';
         } else {
-          // CHƯA CÓ GIAO DỊCH: CHO PHÉP XÓA
-          renderNormalMode(displayName, displayCode);
+          if (errorBox) errorBox.style.display = 'none';
+          if (btnDel) btnDel.style.display = 'inline-flex';
         }
-      },
-      error: function () {
-        renderNormalMode(name, '#' + id);
       }
     });
-
-    function renderNormalMode(displayName, displayCode) {
-      if (titleText) titleText.textContent = 'Xóa hàng hóa';
-      if (headerIconWrap) {
-        headerIconWrap.style.background = '#fee2e2';
-        headerIconWrap.style.color = '#dc2626';
-      }
-      if (headerIcon) {
-        headerIcon.className = 'bi bi-trash3';
-      }
-      if (normalBox) normalBox.style.display = 'block';
-      if (blockedBox) blockedBox.style.display = 'none';
-      if (guideWrap) guideWrap.style.display = 'none';
-      if (btnCancel) btnCancel.textContent = 'Bỏ qua';
-      if (btnDel) {
-        btnDel.style.display = 'inline-flex';
-        btnDel.disabled = false;
-        btnDel.innerHTML = '<i class="bi bi-trash3-fill me-1"></i> Đồng ý xóa';
-      }
-      if (btnNgung) btnNgung.style.display = 'none';
-    }
   };
 
+  // Nút xóa trong modal Sửa
   $('#btnDeleteProductInModal')?.addEventListener('click', () => {
     const id = parseInt($('#formMaHang').value) || 0;
     const name = $('#formTenHang').value.trim();
@@ -1747,6 +1669,7 @@
     }
   });
 
+  // Xác nhận xóa trong modal #hhDeleteProductOv
   $('#btnConfirmDeleteProd')?.addEventListener('click', () => {
     const id = parseInt($('#delProdId').value) || 0;
     if (id <= 0) return;
@@ -1764,7 +1687,11 @@
         btn.textContent = origText;
         hide($('#hhDeleteProductOv'));
         hide($('#hangHoaModalOv'));
-        showToast(res.message || 'Đã xóa hàng hóa thành công.');
+        if (window.AppToast) {
+          window.AppToast.success(res.message || 'Đã xóa hàng hóa thành công.');
+        } else {
+          showToast(res.message || 'Đã xóa hàng hóa thành công.');
+        }
         if (typeof window.loadTable === 'function') {
           window.loadTable();
         }
@@ -1772,75 +1699,137 @@
       error: function (xhr) {
         btn.disabled = false;
         btn.textContent = origText;
-        const msg = xhr.responseJSON?.message || 'Không thể xóa hàng hóa do lỗi hệ thống.';
-        const normalBox = $('#delProdNormalBox');
-        const blockedBox = $('#delProdBlockedBox');
-        const blockedMsg = $('#delProdBlockedMsg');
-        const btnNgung = $('#btnSwitchNgungBan');
-        const titleText = $('#delProdHeaderText');
-        const titleEl = $('#delProdTitle');
-
-        if (xhr.responseJSON?.hasTransaction) {
-          if (titleText) titleText.textContent = 'Không thể xóa hàng hóa';
-          const headerIconWrap = $('#delProdHeaderIconWrap');
-          const headerIcon = $('#delProdHeaderIcon');
-          const guideWrap = $('#delProdGuideWrap');
-          const btnCancel = $('#btnCancelDeleteProd');
-
-          if (headerIconWrap) {
-            headerIconWrap.style.background = '#fef3c7';
-            headerIconWrap.style.color = '#d97706';
-          }
-          if (headerIcon) {
-            headerIcon.className = 'bi bi-shield-lock';
-          }
-          if (normalBox) normalBox.style.display = 'none';
-          if (blockedBox) blockedBox.style.display = 'block';
-          if (guideWrap) guideWrap.style.display = 'block';
-          if (btnCancel) btnCancel.textContent = 'Bỏ qua';
-
-          // ẨN HOÀN TOÀN nút xóa
+        const res = xhr.responseJSON;
+        if (res && res.hasTransaction) {
+          // Đã phát sinh giao dịch -> Chặn xóa và hiển thị cảnh báo
+          const errorBox = $('#delProdErrorBox');
+          const errorMsg = $('#delProdErrorMsg');
+          const btnSwitch = $('#btnSwitchNgungBanInDelModal');
+          if (errorMsg) errorMsg.textContent = res.message || 'Mặt hàng đã phát sinh giao dịch/chứng từ, không thể xóa để bảo toàn lịch sử sổ sách kế toán.';
+          if (errorBox) errorBox.style.display = 'block';
           btn.style.display = 'none';
-          btn.disabled = true;
-
-          if (btnNgung) {
-            btnNgung.style.display = 'inline-flex';
-            btnNgung.disabled = false;
-            btnNgung.innerHTML = '<i class="bi bi-lock-fill me-1"></i> Khóa hàng (Ngừng kinh doanh)';
-          }
+          if (btnSwitch) btnSwitch.style.display = 'inline-flex';
         } else {
-          alert('Lỗi: ' + msg);
+          hide($('#hhDeleteProductOv'));
+          if (window.AppToast) {
+            window.AppToast.error(res?.message || 'Không thể xóa hàng hóa.');
+          } else {
+            showToast(res?.message || 'Không thể xóa hàng hóa.', 'error');
+          }
         }
       }
     });
   });
 
-  $('#btnSwitchNgungBan')?.addEventListener('click', () => {
+  // Chuyển sang Ngừng kinh doanh ngay từ modal xóa (chuẩn Nhà Cung Cấp)
+  $('#btnSwitchNgungBanInDelModal')?.addEventListener('click', () => {
     const id = parseInt($('#delProdId').value) || 0;
     if (id <= 0) return;
 
-    const btn = $('#btnSwitchNgungBan');
-    const origHtml = btn.innerHTML;
+    const btn = $('#btnSwitchNgungBanInDelModal');
     btn.disabled = true;
-    btn.textContent = 'Đang khóa hàng...';
 
     jQuery.ajax({
       url: '/HangHoa/NgungBan/' + id,
       type: 'POST',
       success: function (res) {
         btn.disabled = false;
-        btn.innerHTML = origHtml;
         hide($('#hhDeleteProductOv'));
         hide($('#hangHoaModalOv'));
-        showToast(res.message || 'Đã chuyển hàng hóa sang Ngừng kinh doanh.');
+        if (window.AppToast) {
+          window.AppToast.success(res.message || 'Đã chuyển hàng hóa sang Ngừng kinh doanh.');
+        } else {
+          showToast(res.message || 'Đã chuyển hàng hóa sang Ngừng kinh doanh.');
+        }
         if (typeof window.loadTable === 'function') {
           window.loadTable();
         }
       },
       error: function (xhr) {
         btn.disabled = false;
-        btn.innerHTML = origHtml;
-        alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể cập nhật trạng thái.'));
+        if (window.AppToast) {
+          window.AppToast.error(xhr.responseJSON?.message || 'Không thể cập nhật trạng thái.');
+        } else {
+          showToast(xhr.responseJSON?.message || 'Không thể cập nhật trạng thái.', 'error');
+        }
+      }
+    });
+  });
+
+  // Mở modal xác nhận đổi trạng thái Khóa / Mở khóa hàng hóa (chuẩn Nhà Cung Cấp)
+  window.openStatusConfirmProductModal = function (id, name, currentStatus) {
+    if (!id) return;
+    const isCurrentlyActive = (currentStatus === 'DANG_BAN');
+    const hiddenId = $('#statusProdId');
+    const titleEl = $('#statusProdTitle');
+    const titleText = $('#statusProdTitleText');
+    const iconEl = $('#statusProdIcon');
+    const msgEl = $('#statusProdConfirmMsg');
+    const btnConfirm = $('#btnConfirmStatusProd');
+
+    if (hiddenId) hiddenId.value = id;
+    const displayName = name || ('hàng hóa #' + id);
+
+    if (isCurrentlyActive) {
+      // Xác nhận Ngừng kinh doanh
+      if (titleEl) titleEl.style.color = '#d97706';
+      if (titleText) titleText.textContent = 'Ngừng kinh doanh hàng hóa';
+      if (iconEl) iconEl.className = 'bi bi-slash-circle text-warning';
+      if (msgEl) msgEl.innerHTML = `Bạn có chắc chắn muốn chuyển hàng hóa <strong style="color: #111827; word-break: break-word;">${esc(displayName)}</strong> sang trạng thái <strong style="color: #d97706;">Ngừng kinh doanh</strong>?`;
+      if (btnConfirm) {
+        btnConfirm.style.background = '#d97706';
+        btnConfirm.style.borderColor = '#d97706';
+        btnConfirm.style.color = '#fff';
+        btnConfirm.textContent = 'Đồng ý';
+      }
+    } else {
+      // Xác nhận Kích hoạt lại
+      if (titleEl) titleEl.style.color = '#0070F0';
+      if (titleText) titleText.textContent = 'Kích hoạt lại hàng hóa';
+      if (iconEl) iconEl.className = 'bi bi-check2-circle text-primary';
+      if (msgEl) msgEl.innerHTML = `Bạn có chắc chắn muốn cho hàng hóa <strong style="color: #111827; word-break: break-word;">${esc(displayName)}</strong> <strong style="color: #0070F0;">kinh doanh trở lại</strong>?`;
+      if (btnConfirm) {
+        btnConfirm.style.background = '#0070F0';
+        btnConfirm.style.borderColor = '#0070F0';
+        btnConfirm.style.color = '#fff';
+        btnConfirm.textContent = 'Đồng ý';
+      }
+    }
+    show($('#hhStatusConfirmOv'));
+  };
+
+  // Xác nhận đổi trạng thái trong modal #hhStatusConfirmOv
+  $('#btnConfirmStatusProd')?.addEventListener('click', () => {
+    const id = parseInt($('#statusProdId').value) || 0;
+    if (!id) return;
+    const btn = $('#btnConfirmStatusProd');
+    btn.disabled = true;
+
+    jQuery.ajax({
+      url: '/HangHoa/ToggleStatus?id=' + id,
+      type: 'POST',
+      success: function (res) {
+        btn.disabled = false;
+        hide($('#hhStatusConfirmOv'));
+        if (res.success) {
+          if (window.AppToast) {
+            window.AppToast.success(res.message);
+          } else {
+            showToast(res.message);
+          }
+          if (typeof window.loadTable === 'function') {
+            window.loadTable();
+          }
+        }
+      },
+      error: function (xhr) {
+        btn.disabled = false;
+        hide($('#hhStatusConfirmOv'));
+        if (window.AppToast) {
+          window.AppToast.error(xhr.responseJSON?.message || 'Không thể đổi trạng thái hàng hóa.');
+        } else {
+          showToast(xhr.responseJSON?.message || 'Không thể đổi trạng thái hàng hóa.', 'error');
+        }
       }
     });
   });

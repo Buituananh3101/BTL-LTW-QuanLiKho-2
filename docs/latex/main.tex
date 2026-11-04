@@ -329,30 +329,34 @@ Hệ thống xác định 3 nhóm tác nhân chính tham gia vận hành:
 \centering
 \small
 \renewcommand{\arraystretch}{1.25}
-\begin{tabularx}{\textwidth}{|p{3cm}|p{4cm}|Y|}
+\begin{tabularx}{\textwidth}{|p{2.6cm}|p{3.8cm}|Y|}
 \hline
 \rowcolor{tableheader}
 Mã yêu cầu & Tên chức năng & Mô tả chi tiết \\
 \hline
-REQ-F01 & Xác thực \& Chọn kho & Đăng nhập bằng tên đăng nhập/mật khẩu, ghi nhớ phiên làm việc và chọn chi nhánh kho công tác \\
+REQ-F01 & Xác thực \& Chọn kho & Đăng nhập tài khoản, ghi nhớ phiên làm việc Cookie, tự chọn chi nhánh kho làm việc và hỗ trợ đổi mật khẩu cá nhân \\
 \hline
-REQ-F02 & Quản lý Hàng hóa & Thêm mới, chỉnh sửa, khóa kinh doanh, phân loại nhóm hàng, thiết lập định mức tồn tối thiểu \\
+REQ-F02 & Quản lý Hàng hóa & Thêm mới, chỉnh sửa, khóa kinh doanh, phân loại nhóm hàng, quản lý đơn vị tính, thiết lập định mức tồn an toàn và chặn xóa khi có giao dịch \\
 \hline
-REQ-F03 & Quản lý Nhập hàng & Lập phiếu nhập từ nhà cung cấp, quét mã vạch, tự động cập nhật giá vốn và tăng tồn kho \\
+REQ-F03 & In tem Mã vạch & Cấu hình và tạo mã vạch chuẩn Code128, hỗ trợ in tem đa kích thước (A4 3x10 tem, tem nhiệt 72x22mm, 50x30mm, 75x50mm) \\
 \hline
-REQ-F04 & Quản lý Trả hàng & Lập phiếu xuất trả hàng cho nhà cung cấp, giảm trừ tồn kho và giảm công nợ \\
+REQ-F04 & Quản lý Nhập hàng & Lập phiếu nhập từ nhà cung cấp, quét mã vạch, tự động cập nhật giá vốn bình quân gia quyền và tăng tồn kho \\
 \hline
-REQ-F05 & Quản lý Xuất hủy & Lập phiếu xuất hủy hàng hỏng, hàng hết date; ghi nhận lý do và trừ tồn kho \\
+REQ-F05 & Quản lý Trả hàng & Lập phiếu xuất trả hàng cho nhà cung cấp, giảm trừ tồn kho chi nhánh, ghi nhận công nợ và hỗ trợ in phiếu chuẩn \\
 \hline
-REQ-F06 & Chuyển kho nội bộ & Lập phiếu chuyển hàng giữa 2 kho, kiểm tra tồn kho nguồn, cập nhật tồn kho 2 đầu an toàn \\
+REQ-F06 & Quản lý Xuất hủy & Lập phiếu xuất hủy hàng hỏng, hàng hết hạn sử dụng; ghi nhận lý do, trừ tồn kho và in chứng từ hủy \\
 \hline
-REQ-F07 & Kiểm kê \& Cân bằng & Lập phiếu kiểm đếm thực tế, tính chênh lệch thừa/thiếu, tự động sinh phiếu điều chỉnh kho \\
+REQ-F07 & Chuyển kho nội bộ & Lập phiếu chuyển hàng giữa các chi nhánh, kiểm tra tồn khả dụng nguồn, bảo toàn tổng tồn toàn chuỗi và in phiếu chuyển \\
 \hline
-REQ-F08 & Báo cáo Tồn kho & Xem ma trận tồn kho dạng Pivot giữa các chi nhánh, lọc theo nhóm hàng, xuất file Excel \\
+REQ-F08 & Kiểm kê \& Cân bằng & Lập phiếu kiểm đếm thực tế, tính chênh lệch thừa/thiếu, tự động sinh phiếu điều chỉnh kho qua Transaction và khóa bất biến \\
 \hline
-REQ-F09 & Báo cáo Thẻ kho & Truy vết lịch sử xuất nhập tồn lũy kế từng mặt hàng theo dải thời gian \\
+REQ-F09 & Quản lý Khách hàng & Quản lý danh mục Khách hàng, phân loại Nhóm khách hàng, tích điểm, quản lý thông tin xuất hóa đơn VAT (MST/CCCD) và xuất Excel \\
 \hline
-REQ-F10 & Quản lý Hệ thống & Quản lý danh mục Chi nhánh kho, Phân quyền tài khoản người dùng và xem nhật ký thao tác \\
+REQ-F10 & Báo cáo Tồn kho & Xem ma trận tồn kho dạng Pivot đa chi nhánh theo thời gian thực, lọc theo nhóm hàng và xuất file Excel \\
+\hline
+REQ-F11 & Báo cáo Thẻ kho & Truy vết lịch sử xuất nhập tồn lũy kế từng mặt hàng theo dòng thời gian từ Database View biến động kho \\
+\hline
+REQ-F12 & Quản trị Hệ thống & Quản lý danh mục Chi nhánh kho, phân quyền người dùng theo kho, quản trị nhà cung cấp và kiểm soát an toàn dữ liệu \\
 \hline
 \end{tabularx}
 \caption{Bảng đặc tả yêu cầu chức năng của hệ thống}
@@ -363,18 +367,22 @@ REQ-F10 & Quản lý Hệ thống & Quản lý danh mục Chi nhánh kho, Phân 
 \begin{table}[H]
 \centering
 \small
-\setlength{\tabcolsep}{4.5pt}
-\renewcommand{\arraystretch}{1.2}
-\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5.4cm}|Z|Z|Z|}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{5.2cm}|Z|Z|Z|}
 \hline
 \rowcolor{tableheader}
 \textbf{Phân hệ / Chức năng} & \textbf{Quản trị viên (Admin)} & \textbf{Thủ kho} & \textbf{Nhân viên kho} \\
 \hline
 Đăng nhập \& Chọn chi nhánh kho & Tất cả chi nhánh & Kho được phân & Kho được phân \\
 \hline
+Đổi mật khẩu cá nhân & Toàn quyền & Toàn quyền & Toàn quyền \\
+\hline
 Quản lý Hàng hóa, Nhóm hàng & Toàn quyền & Xem \& Thêm mới & Chỉ xem danh sách \\
 \hline
 Xem Giá vốn hàng hóa & Cho phép & Cho phép & \textbf{Bị ẩn giá vốn} \\
+\hline
+Cấu hình \& In tem Mã vạch & Cho phép & Cho phép & Cho phép \\
 \hline
 Lập \& Hoàn tất Phiếu Nhập hàng & Toàn quyền & Toàn quyền & Không có quyền \\
 \hline
@@ -384,13 +392,19 @@ Lập \& Hoàn tất Phiếu Xuất hủy & Toàn quyền & Toàn quyền & Khô
 \hline
 Lập \& Hoàn tất Phiếu Chuyển kho & Toàn quyền & Toàn quyền & Không có quyền \\
 \hline
+In ấn Chứng từ kho (\_PrintLayout) & Cho phép & Cho phép & Không có quyền \\
+\hline
 Lập Phiếu Kiểm kê thực tế & Toàn quyền & Toàn quyền & \textbf{Được lập} \newline \textbf{phiếu kiểm} \\
 \hline
 Duyệt Cân bằng kho (Khóa phiếu) & Toàn quyền & Toàn quyền & Không có quyền \\
 \hline
+Quản lý Khách hàng \& Xuất HĐ VAT & Toàn quyền & Xem \& Thêm mới & Xem danh sách \\
+\hline
 Xem Báo cáo Tồn kho \& Thẻ kho & Xem tất cả \newline chi nhánh & Kho phụ trách & Chỉ xem \newline tồn hiện tại \\
 \hline
 Quản lý Chi nhánh \& Người dùng & Toàn quyền & Không truy cập & Không truy cập \\
+\hline
+Xóa dữ liệu (Kiểm soát an toàn) & \textbf{Chặn xóa} khi \newline đã có giao dịch & Không có quyền & Không có quyền \\
 \hline
 \end{tabularx}
 \caption{Ma trận phân quyền chức năng chi tiết theo vai trò}
@@ -430,7 +444,7 @@ Hệ thống đặt ra các tiêu chuẩn khắt khe về mặt trải nghiệm:
 
 \subsection{Xác định Tác nhân (Actors) và Ma trận Phân quyền Chức năng}
 
-Trong hệ thống Quản lý kho hàng Phú Quốc (\texttt{QuanLyKhoPhuQuocLTW}), các tác nhân (Actors) được xác định dựa trên vai trò nghiệp vụ thực tế và cơ chế phân quyền kiểm soát truy cập dựa trên vai trò (Role-Based Access Control -- RBAC) kết hợp phân quyền theo chi nhánh kho làm việc:
+Trong hệ sinh thái Quản lý kho hàng nội bộ đa chi nhánh (\texttt{KhoPro}), các tác nhân (Actors) được xác định dựa trên vai trò nghiệp vụ thực tế và cơ chế phân quyền kiểm soát truy cập dựa trên vai trò (Role-Based Access Control -- RBAC) kết hợp phân quyền theo chi nhánh kho làm việc:
 
 \begin{enumerate}[leftmargin=1.5cm]
     \item \textbf{Quản trị viên (Admin):} Tác nhân có quyền hạn cao nhất trong hệ thống. Quản trị viên chịu trách nhiệm quản lý tài khoản người dùng, phân quyền truy cập chi nhánh cho từng nhân sự, thiết lập danh mục chi nhánh kho, cấu hình hệ thống, theo dõi toàn diện báo cáo tồn kho đa kho và tra cứu nhật ký thao tác kiểm toán (Audit Log).
@@ -1044,7 +1058,8 @@ Quy ước ký hiệu: Tên bảng ( \underline{Khóa chính PK}, Thuộc tính 
 \begin{enumerate}[leftmargin=*, resume, label={\textbf{\arabic*./}}]
     \item \textbf{NhomNhaCungCap} (\underline{MaNhomNcc}, TenNhomNcc, MoTa)
     \item \textbf{DonViCapHang} (\underline{MaNcc}, MaNccNoiBo, TenNcc, MaSoThue, SoDienThoai, Email, DiaChi, \textit{MaNhomNcc*}, NoCanTraHienTai, TongTienMua, TrangThai, DaDanhDau, NgayTao)
-    \item \textbf{KhachHang} (\underline{MaKh}, MaKhNoiBo, TenKh, SoDienThoai, DiaChi, DiemTichLuy, TrangThai)
+    \item \textbf{NhomKhachHang} (\underline{MaNhomKhachHang}, TenNhom, GhiChu)
+    \item \textbf{KhachHang} (\underline{MaKh}, MaKhNoiBo, MaKhHienThi, TenKh, DienThoai, DienThoai2, NgaySinh, GioiTinh, Email, Facebook, HinhAnh, DiaChi, KhuVuc, PhuongXa, \textit{MaNhomKhachHang*}, DiemTichLuy, GhiChu, XhdLoaiKhachHang, MaSoThue, XhdTenDonVi, SoCccd, TenNguoiMua, XhdDiaChi, XhdKhuVuc, TrangThai, DaDanhDau, NgayTao, NguoiTao)
 \end{enumerate}
 
 \textbf{d) Nhóm 4: Giao dịch chứng từ nhập, xuất, chuyển, kiểm, trả hàng}
@@ -1179,6 +1194,8 @@ FK\_CTPKK\_PhieuKiem & ChiTiet\-PhieuKiem & MaPhieuKiem & PhieuKiemKe & MaPhieuK
 \hline
 FK\_DieuChinh\_PhieuKiem & PhieuDieuChinh & MaPhieuKiem & PhieuKiemKe & MaPhieuKiem & NO ACTION \\
 \hline
+FK\_KhachHang\_NhomKh & KhachHang & MaNhom\-KhachHang & Nhom\-KhachHang & MaNhom\-KhachHang & SET NULL \\
+\hline
 FK\_DonBan\_KhachHang & DonBan & MaKh & KhachHang & MaKh & NO ACTION \\
 \hline
 FK\_CTDB\_DonBan & ChiTietDonBan & MaDonBan & DonBan & MaDonBan & CASCADE \\
@@ -1189,7 +1206,7 @@ FK\_CTDB\_DonBan & ChiTietDonBan & MaDonBan & DonBan & MaDonBan & CASCADE \\
 \end{table}
 
 \subsubsection{Đánh giá chuẩn hóa cơ sở dữ liệu (3NF / BCNF)}
-Cơ sở dữ liệu \texttt{QuanLyKhoPhuQuocLTW} được thiết kế tuân thủ nghiêm ngặt lý thuyết chuẩn hóa quan hệ nhằm triệt tiêu dư thừa dữ liệu và chống dị thường (Anomalies):
+Cơ sở dữ liệu \texttt{QuanLyKhoPhuQuocLTW} (bao gồm 23 bảng thực thể nghiệp vụ và 2 Database Views thời gian thực) được thiết kế tuân thủ nghiêm ngặt lý thuyết chuẩn hóa quan hệ nhằm triệt tiêu dư thừa dữ liệu và chống dị thường (Anomalies):
 \begin{enumerate}
     \item \textbf{Dạng chuẩn 1 (1NF):} Toàn bộ các thuộc tính trong các quan hệ đều là thuộc tính nguyên tố (Atomic values), không chứa tập giá trị lặp. Các thuộc tính đa trị (như danh sách ảnh sản phẩm) được tách ra quan hệ riêng \texttt{HinhAnhHangHoa}; định mức tồn kho phân tán theo chi nhánh được tách thành \texttt{NguongTonKho}.
     \item \textbf{Dạng chuẩn 2 (2NF):} Đạt 1NF và mọi thuộc tính không khóa đều phụ thuộc hàm đầy đủ vào khóa chính. Đối với bảng có khóa chính hỗn hợp như \texttt{TaiKhoan\_Kho(MaTaiKhoan, MaKho)}, thuộc tính \texttt{NgayPhanQuyen} phụ thuộc hàm vào toàn bộ cặp khóa chính, không phụ thuộc vào một phần khóa.
@@ -1362,6 +1379,43 @@ DonGiaVon & DECIMAL(18,2) & & No & Cột trong ChiTiet: Giá vốn tính chênh 
 \label{tab:dict_kiemkho}
 \end{table}
 
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|c|c|Y|}
+\hline
+\rowcolor{tableheader}
+\textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{Khóa} & \textbf{Null} & \textbf{Mô tả / Ràng buộc} \\
+\hline
+MaKh & INT IDENTITY(1,1) & PK & No & Khóa chính tự tăng của khách hàng \\
+\hline
+MaKhHienThi & NVARCHAR(30) & Unique & Yes & Mã đối tác hiển thị (VD: KH0001, KH0002) \\
+\hline
+TenKh & NVARCHAR(150) & & No & Tên khách hàng / Đơn vị giao dịch \\
+\hline
+DienThoai & VARCHAR(15) & Index & Yes & Số điện thoại liên hệ chính \\
+\hline
+MaNhomKhachHang & INT & FK & Yes & Tham chiếu bảng \texttt{NhomKhachHang} \\
+\hline
+DiemTichLuy & INT & & No & Điểm thưởng tích lũy (mặc định 0) \\
+\hline
+XhdLoaiKhachHang & NVARCHAR(30) & & Yes & Loại xuất HĐ: CA\_NHAN / CONG\_TY \\
+\hline
+MaSoThue & VARCHAR(20) & & Yes & Mã số thuế phục vụ xuất hóa đơn đỏ VAT \\
+\hline
+XhdTenDonVi & NVARCHAR(255) & & Yes & Tên công ty/đơn vị nhận hóa đơn VAT \\
+\hline
+SoCccd & VARCHAR(20) & & Yes & Số CCCD khách hàng cá nhân \\
+\hline
+TrangThai & NVARCHAR(50) & & No & Trạng thái hoạt động (DANG\_GIAO\_DICH / KHOA) \\
+\hline
+\end{tabularx}
+\caption{Từ điển dữ liệu bảng KhachHang \& NhomKhachHang}
+\label{tab:dict_khachhang}
+\end{table}
+
 \subsection{Giải thuật Database View 2 tầng tính toán tồn kho động}
 Để loại bỏ hoàn toàn nguy cơ sai lệch tồn kho (Race Condition, Lost Updates) và đảm bảo tính toàn vẹn chứng từ theo chuẩn ERP, hệ thống áp dụng nguyên tắc kiến trúc: \textbf{Tuyệt đối không lưu cột số lượng tồn kho tĩnh trên bảng vật lý}. Toàn bộ số lượng tồn kho sổ sách được tính toán theo thời gian thực thông qua hệ thống Database View 2 tầng:
 
@@ -1396,14 +1450,31 @@ Hệ thống được tổ chức theo mô hình kiến trúc MVC 3 tầng phân
 
 \subsection{Sơ đồ cấu trúc điều hướng trang (Sitemap)}
 Luồng điều hướng người dùng được thiết kế khoa học:
-Đăng nhập $\rightarrow$ Chọn chi nhánh kho $\rightarrow$ Dashboard tổng quan $\rightarrow$ Phân hệ Hàng hóa $\rightarrow$ Phân hệ Giao dịch (Nhập/Trả/Xuất/Chuyển/Kiểm) $\rightarrow$ Phân hệ Báo cáo (Tồn kho Pivot/Thẻ kho) $\rightarrow$ Thiết lập hệ thống (Kho/Người dùng).
+Đăng nhập $\rightarrow$ Chọn chi nhánh kho $\rightarrow$ Danh mục Hàng hóa (Trung tâm điều phối) $\rightarrow$ Đối tác (Nhà cung cấp / Khách hàng) $\rightarrow$ Giao dịch Chứng từ (Nhập / Trả hàng / Xuất hủy / Chuyển kho / Kiểm kê) $\rightarrow$ Báo cáo Chuyên sâu (Tồn kho Pivot / Thẻ kho) $\rightarrow$ Thiết lập hệ thống (Chi nhánh Kho / Người dùng \& Phân quyền).
 
-\subsection{Thiết kế khung giao diện Wireframe hệ thống}
-Giao diện ứng dụng tuân thủ chuẩn mực thiết kế 2 cột trực quan:
+\subsection{Thiết kế khung giao diện Wireframe và Chuẩn hóa Hệ thống UI KhoPro}
+Giao diện ứng dụng tuân thủ nghiêm ngặt chuẩn mực thiết kế quản trị kho chuyên nghiệp với triết lý tối giản, trực quan và tốc độ cao:
 \begin{itemize}
-    \item \textbf{Thanh điều hướng cố định (Top Navbar):} Cao 42px, nền màu chủ đạo, chứa Logo, Menu điều hướng đa cấp, Dropdown chọn nhanh chi nhánh kho làm việc hiện hành và Thông tin tài khoản đăng nhập.
-    \item \textbf{Sidebar Bộ lọc (Cột trái):} Chiều rộng 260px, gồm ô tìm kiếm nhanh F3, bộ lọc dải ngày \texttt{\_DateFilter}, bộ lọc đa chọn kho \texttt{\_MultiSelectFilter}, cây danh mục nhóm hàng và nút F4 thu gọn để mở rộng tối đa không gian làm việc.
-    \item \textbf{Vùng làm việc chính (Cột phải):} Thanh công cụ chứa các nút tác vụ (+ Thêm mới, Xuất Excel, F1 Trợ giúp) và bảng dữ liệu hiển thị dạng bảng có hỗ trợ cuộn ngang và phân trang AJAX \texttt{\_Pagination}.
+    \item \textbf{Cấu trúc 2 cột linh hoạt (Responsive Split Layout):}
+    \begin{itemize}
+        \item \textbf{Thanh điều hướng cố định (Top Navbar - 42px):} Chiều cao tối ưu 42px, nền màu xanh thương hiệu, chứa Logo KhoPro, Menu điều hướng đa cấp, Dropdown chuyển đổi chi nhánh kho làm việc tức thời (\texttt{WarehouseSwitcherViewComponent}), Phím tắt F1 Trợ giúp, Avatar và Menu Đổi mật khẩu cá nhân / Đăng xuất an toàn. Lược bỏ triệt để các nút thừa nhằm giữ không gian làm việc thanh lịch.
+        \item \textbf{Sidebar Bộ lọc chuyên sâu (Cột trái - 260px):} Ô tìm kiếm F3, bộ lọc dải ngày thông minh \texttt{\_DateFilter}, bộ lọc đa chọn kho/nhóm đối tượng \texttt{\_MultiSelectFilter}, cây phân cấp danh mục và nút F4 thu gọn/mở rộng sidebar để tối đa hóa không gian bảng số liệu.
+        \item \textbf{Vùng làm việc trung tâm (Content Workspace):} Chứa thanh công cụ tác vụ đồng bộ 100\% (Ô tìm kiếm \texttt{.kp-search-box}, cụm nút Thêm mới, Xuất/Nhập Excel \texttt{.kp-btn-outline}, In ấn) và bảng dữ liệu hiển thị phân trang AJAX \texttt{\_Pagination}.
+    \end{itemize}
+    \item \textbf{Chuẩn hóa Form Modal \& Hộp thoại Tương tác:}
+    \begin{itemize}
+        \item Căn giữa tuyệt đối viewport (\texttt{align-items: center; justify-content: center}), triệt tiêu hoàn toàn hiện tượng modal bị kéo lệch lên mép trên màn hình.
+        \item Form Kho và Người dùng được mở rộng chiều dài và chiều cao tối ưu (min-height 680px), tích hợp khung soạn thảo Rich Text Editor cho phần mô tả/ghi chú.
+        \item Dropdown Custom Select chuyên nghiệp (\texttt{.hh-cs-wrap}, \texttt{.hh-cs-dropdown}): Thay thế thẻ select mặc định của trình duyệt, hiển thị icon checkmark xanh khi được chọn và tự động đóng thông minh khi bấm phím Escape.
+        \item Khối Lego \texttt{AppPrompt} / \texttt{AppConfirm}: Hỗ trợ Sửa và Xóa nhanh Đơn vị tính (ĐVT) hoặc Nhóm hàng trực tiếp từ dropdown form Hàng hóa mà không cần mở trang cấu hình riêng.
+    \end{itemize}
+    \item \textbf{Chuẩn hóa Bảng dữ liệu \& Chi tiết dòng (Table \& Drawer View):}
+    \begin{itemize}
+        \item Bảng dữ liệu áp dụng \texttt{table-layout: fixed}, \texttt{white-space: nowrap}, tiêu đề bảng cố định (Sticky Header) và thanh cuộn ngang mượt mà, khắc phục triệt để hiện tượng tràn bảng hoặc nút tác vụ bị cắt mép.
+        \item Drawer chi tiết dòng mở rộng (Expandable Row Drawer): Cho phép thủ kho xem nhanh lịch sử giao dịch, công nợ đối tác, quy cách hàng hóa ngay tại bảng mà không cần tải lại trang.
+        \item Đồng bộ hóa màu sắc trạng thái: Trạng thái hoàn thành/hoạt động sử dụng xanh lá (\texttt{badge-success}), trạng thái đang xử lý/phiếu tạm chuyển sang xanh dương dịu mắt (\texttt{badge-info}), trạng thái hủy/khóa dùng màu xám/đỏ.
+        \item Định mức tồn kho: Sử dụng biểu tượng mũi tên cơ bản không màu tinh tế thay thế cho các icon tam giác màu gây rối mắt.
+    \end{itemize}
 \end{itemize}
 
 \cleardoublepage
@@ -1484,6 +1555,44 @@ catch (Exception)
     throw;
 }
 \end{lstlisting}
+
+\subsection{Kiến trúc Khối Lego Giao diện \& Thư viện Tương tác Frontend (app-filter.js)}
+Nhằm triệt tiêu hoàn toàn sự trùng lặp mã nguồn và đảm bảo trải nghiệm người dùng nhất quán chuẩn mực, hệ sinh thái giao diện được module hóa thành các Khối Lego độc lập và tái sử dụng 100\%:
+\begin{itemize}
+    \item \textbf{Khối Lego Partial Views:} \texttt{\_DateFilter.cshtml} (bộ lọc dải ngày linh hoạt), \texttt{\_MultiSelectFilter.cshtml} (dropdown đa chọn chi nhánh và nhóm đối tượng), \texttt{\_StatusFilter.cshtml} (lọc trạng thái danh mục), \texttt{\_Pagination.cshtml} (thanh phân trang AJAX), \texttt{\_PromptModal.cshtml} (hộp thoại nhập liệu nhanh tại chỗ), \texttt{\_HelpModal.cshtml} (phím tắt F1 trợ giúp) và \texttt{\_PrintLayout.cshtml} (layout in chuẩn kế toán).
+    \item \textbf{Thư viện JavaScript toàn cục (\texttt{app-filter.js}):} Cung cấp các dịch vụ tiện ích hướng đối tượng:
+    \begin{itemize}
+        \item \texttt{AppFilter}: Quản lý tập trung trạng thái bộ lọc, tự động serialize tham số truy vấn và gửi request AJAX cập nhật bảng dữ liệu không giật trang.
+        \item \texttt{AppPrompt} / \texttt{AppConfirm}: Hộp thoại xác nhận và nhập liệu nhanh bất đồng bộ (Promise-based), loại bỏ hoàn toàn các hàm popup \texttt{alert()} / \texttt{confirm()} mặc định của trình duyệt.
+        \item \texttt{AppToast}: Hiển thị thông báo Toast trang nhã góc màn hình với hiệu ứng tự động biến mất sau 3 giây.
+        \item \texttt{AppNumber}: Tự động định dạng số lượng và giá trị tiền tệ thời gian thực với phân tách dấu chấm hàng nghìn.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Cơ chế Kiểm soát Toàn vẹn Dữ liệu \& Chặn Xóa An toàn (Data Integrity Enforcement)}
+Trong bài toán quản trị kho chuỗi, việc tùy tiện xóa danh mục hoặc người dùng khi đã phát sinh chứng từ trong quá khứ sẽ dẫn đến nguy cơ mồ côi dữ liệu (Orphan Records) và phá vỡ vết kiểm toán (Audit Trail). Hệ thống cài đặt bộ quy tắc kiểm soát an toàn nghiêm ngặt tại tầng Controller:
+\begin{lstlisting}[language={[Sharp]C}, caption={Cơ chế chặn xóa và ép buộc khóa trạng thái khi đã phát sinh chứng từ}]
+// Kiem tra rang buoc giao dich truoc khi cho phep xoa Hang hoa
+bool daCoGiaoDich = await _context.ChiTietPhieuNhaps.AnyAsync(x => x.MaHang == id)
+    || await _context.ChiTietPhieuXuats.AnyAsync(x => x.MaHang == id)
+    || await _context.ChiTietPhieuChuyenKhos.AnyAsync(x => x.MaHang == id)
+    || await _context.ChiTietPhieuKiemKes.AnyAsync(x => x.MaHang == id);
+
+if (daCoGiaoDich)
+{
+    return Json(new { success = false, message = "Mặt hàng đã phát sinh giao dịch kho! Để bảo toàn số liệu kiểm toán, hệ thống chỉ cho phép chuyển sang trạng thái Ngừng kinh doanh." });
+}
+\end{lstlisting}
+Đồng thời, hệ thống triển khai tính năng Sửa và Xóa Đơn vị tính (ĐVT) hoặc Nhóm hàng trực tiếp tại dropdown form Hàng hóa thông qua khối Lego \texttt{AppPrompt}, tự động kiểm tra trùng tên và kiểm tra ràng buộc số lượng mặt hàng đang liên kết trước khi thực thi.
+
+\subsection{Tái cấu trúc Modular ViewModels Backend}
+Nhằm tuân thủ nguyên lý Phân tách Trách nhiệm (Single Responsibility Principle) và kiến trúc Clean Code, các phân hệ chức năng phức tạp (như Xuất Hủy, Khách Hàng, Hàng Hóa) đều được tái cấu trúc từ các file ViewModel cồng kềnh thành các tệp tin chuyên biệt:
+\begin{itemize}
+    \item \texttt{*FilterVM.cs}: Đóng gói tham số tìm kiếm, dải ngày, trạng thái, phân trang phục vụ binding request GET/AJAX.
+    \item \texttt{*ListItemVM.cs}: Chứa cấu trúc dữ liệu hiển thị gọn nhẹ cho từng dòng bảng dữ liệu (Table View).
+    \item \texttt{*FormVM.cs}: Chứa Data Annotations xác thực dữ liệu đầu vào cho các thao tác Thêm mới / Cập nhật chứng từ.
+    \item \texttt{*DetailVM.cs}: Phục vụ nạp dữ liệu chi tiết chuyên sâu khi người dùng mở Drawer hoặc xem lịch sử giao dịch.
+\end{itemize}
 
 
 \section{Mô tả kết quả đạt được qua các phân hệ}
@@ -1579,6 +1688,31 @@ Công cụ truy vết lịch sử xuất nhập tồn chuyên sâu của từng 
 \caption{Báo cáo Thẻ kho chi tiết biến động xuất nhập tồn lũy kế từng mặt hàng}
 \label{fig:res_thekho}
 \end{figure}
+
+\subsection{Phân hệ Quản lý Danh mục Khách hàng \& Bộ thông tin Xuất hóa đơn VAT}
+Phân hệ Khách hàng được xây dựng chuyên sâu nhằm phục vụ công tác theo dõi công nợ, phân loại đối tác chuỗi và hỗ trợ phát hành hóa đơn tài chính:
+\begin{itemize}
+    \item \textbf{Phân nhóm đối tác linh hoạt:} Quản lý đa dạng theo các nhóm thực tế: Khách VIP, Khách sỉ, Khách lẻ tiêu dùng, Đối tác Nhà hàng -- Khách sạn, Nhà thầu dự án.
+    \item \textbf{Quản lý công nợ \& Tích lũy điểm:} Tự động cập nhật tổng chi tiêu, nợ cần thu hiện tại và tích lũy điểm thưởng theo doanh số đơn hàng.
+    \item \textbf{Bộ thông tin xuất hóa đơn đỏ (VAT Invoice):} Hỗ trợ phân định rõ ràng giữa khách hàng Cá nhân (Số CCCD, Họ tên người mua) và Doanh nghiệp (Mã số thuế doanh nghiệp, Tên công ty pháp nhân, Địa chỉ xuất hóa đơn).
+    \item \textbf{Chi tiết dòng mở rộng (Drawer Expandable Row):} Cho phép xem nhanh thông tin liên hệ, dải công nợ và lịch sử mua hàng ngay tại bảng danh sách mà không cần chuyển trang.
+    \item \textbf{Xuất dữ liệu Excel:} Tích hợp xuất danh sách đối tác ra file Excel định dạng chuẩn ClosedXML.
+\end{itemize}
+
+\subsection{Hệ thống In ấn Chứng từ Kho Kế toán \& In tem Mã vạch Nhiệt}
+Hệ thống cung cấp giải pháp in ấn chuyên nghiệp đáp ứng hoàn hảo yêu cầu thực tế tại mặt bằng kho và quầy giao dịch:
+\begin{itemize}
+    \item \textbf{Khung in chứng từ kế toán (\texttt{\_PrintLayout.cshtml}):} Áp dụng cho toàn bộ 5 phân hệ chứng từ giao dịch kho: \textbf{Phiếu Nhập hàng, Phiếu Chuyển kho, Phiếu Xuất hủy, Phiếu Trả hàng nhập và Phiếu Kiểm kê kho}. Biểu mẫu in được tối ưu hóa CSS \texttt{@media print}, tự động ẩn toàn bộ header, sidebar và nút bấm web; hiển thị quốc hiệu, tiêu đề phiếu trang trọng, mã vạch chứng từ quét nhanh Code128, bảng chi tiết quy cách hàng hóa chuẩn kế toán và khung chữ ký 4 bên xác thực (Người lập, Thủ kho xuất, Thủ kho nhận/Giao hàng, Kế toán).
+    \item \textbf{Phân hệ In tem mã vạch hàng hóa nhiệt (\texttt{\_HangHoaBarcodeModal.cshtml}):} Tích hợp thư viện sinh mã vạch Code128 trực tiếp trên trình duyệt, cho phép thủ kho tùy chỉnh số lượng tem cần in cho từng sản phẩm và hỗ trợ linh hoạt 4 khổ in phổ biến trên thị trường: Khổ A4 tiêu chuẩn (3 cột $\times$ 10 hàng = 30 tem/trang), Tem nhiệt $72 \times 22$\,mm, Tem nhiệt $50 \times 30$\,mm và Tem nhiệt $75 \times 50$\,mm.
+\end{itemize}
+
+\subsection{Tính năng Đổi mật khẩu cá nhân \& Quản trị Phân quyền Chi nhánh}
+Nhằm bảo vệ an toàn danh tính của nhân sự trong chuỗi, hệ thống xây dựng tính năng đổi mật khẩu cá nhân trực tiếp trên thanh Topbar:
+\begin{itemize}
+    \item Modal đổi mật khẩu kế thừa khối Lego hệ thống, yêu cầu nhập mật khẩu hiện tại, mật khẩu mới và xác nhận mật khẩu.
+    \item Backend Controller kiểm tra thuật toán băm mật khẩu, ngăn chặn thay đổi mật khẩu tùy tiện và tự động gia hạn phiên làm việc an toàn.
+    \item Quản lý Người dùng hỗ trợ phân quyền chi nhánh làm việc theo mô hình Multi-Select, cho phép mỗi nhân sự phụ trách một hoặc nhiều kho cụ thể trong chuỗi.
+\end{itemize}
 
 \cleardoublepage
 
@@ -1717,12 +1851,84 @@ Công tác kiểm thử đóng vai trò quyết định nhằm đảm bảo tín
 \label{tab:tc5}
 \end{table}
 
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{|p{3.8cm}|Y|}
+\hline
+\rowcolor{tableheader}
+\multicolumn{2}{|c|}{\textbf{Kịch bản TC-06: Quản lý Khách hàng \& Ràng buộc Xuất hóa đơn đỏ VAT}} \\
+\hline
+\textbf{Đầu vào \& Ràng buộc} & Mở form Thêm mới khách hàng, chọn Nhóm 'Khách VIP', chọn loại HĐ 'Doanh nghiệp', nhập Mã số thuế '0100109106', Tên công ty và địa chỉ; nhấn 'Lưu'. \\
+\hline
+\textbf{Đầu ra dự kiến} & Lưu thành công vào bảng \texttt{KhachHang}, tự động gán mã nội bộ (VD: KH0005). Drawer chi tiết hiển thị đầy đủ thông tin xuất HĐ VAT, công nợ 0đ và điểm thưởng. \\
+\hline
+\textbf{Đầu ra thực tế} & Khách hàng tạo thành công, bảng nạp AJAX ngay lập tức, mở drawer hiển thị chuẩn xác thông tin cá nhân và pháp nhân. \\
+\hline
+\textbf{Kết quả đánh giá} & \textbf{[PASS]} \\
+\hline
+\textbf{Đề xuất \& Xử lý} & Áp dụng Data Annotations kiểm tra định dạng MST/CCCD và chặn trùng số điện thoại liên hệ. \\
+\hline
+\end{tabularx}
+\caption{Kịch bản kiểm thử TC-06: Quản lý Khách hàng và Thông tin xuất HĐ VAT}
+\label{tab:tc6}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{|p{3.8cm}|Y|}
+\hline
+\rowcolor{tableheader}
+\multicolumn{2}{|c|}{\textbf{Kịch bản TC-07: In ấn Chứng từ Kho kế toán (\_PrintLayout) \& In tem Mã vạch}} \\
+\hline
+\textbf{Đầu vào \& Ràng buộc} & 1. Nhấn nút 'In phiếu' tại chi tiết Phiếu chuyển kho PCK0001. 2. Tại màn hình Hàng hóa, chọn 3 sản phẩm và mở modal In mã vạch, chọn khổ tem nhiệt 50x30mm và bấm 'In tem'. \\
+\hline
+\textbf{Đầu ra dự kiến} & 1. Mở cửa sổ in chuyên dụng với layout \texttt{\_PrintLayout}, hiển thị đầy đủ Quốc hiệu, mã vạch chứng từ, bảng chi tiết và 4 ô chữ ký. 2. Trình duyệt xuất đúng số lượng tem mã vạch Code128 theo kích thước $50\times 30$\,mm chuẩn máy in nhiệt. \\
+\hline
+\textbf{Đầu ra thực tế} & Giao diện in sạch sẽ, ẩn toàn bộ header/sidebar web, bản in thực tế trên máy in nhiệt rõ nét và đọc barcode thành công 100\%. \\
+\hline
+\textbf{Kết quả đánh giá} & \textbf{[PASS]} \\
+\hline
+\textbf{Đề xuất \& Xử lý} & Tối ưu hóa CSS \texttt{@media print} đảm bảo không bị ngắt trang giữa dòng và vừa khít khổ giấy in. \\
+\hline
+\end{tabularx}
+\caption{Kịch bản kiểm thử TC-07: In ấn chứng từ kho chuẩn và In tem mã vạch nhiệt}
+\label{tab:tc7}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{|p{3.8cm}|Y|}
+\hline
+\rowcolor{tableheader}
+\multicolumn{2}{|c|}{\textbf{Kịch bản TC-08: Kiểm soát Toàn vẹn Dữ liệu -- Chặn xóa khi đã có giao dịch}} \\
+\hline
+\textbf{Đầu vào \& Ràng buộc} & Tại danh mục Hàng hóa, nhấn icon Thùng rác để xóa sản phẩm 'Bình Gas Petrolimex 12kg' (đã có phiếu nhập và tồn kho tại Chi nhánh Trung tâm). \\
+\hline
+\textbf{Đầu ra dự kiến} & Hệ thống từ chối xóa, hiển thị hộp thoại \texttt{AppConfirm} cảnh báo mặt hàng đã phát sinh giao dịch và gợi ý chuyển sang trạng thái 'Ngừng kinh doanh'. \\
+\hline
+\textbf{Đầu ra thực tế} & Backend trả về mã lỗi nghiệp vụ, giao diện hiển thị cảnh báo đỏ thân thiện, dữ liệu hàng hóa và các chứng từ liên quan được bảo toàn tuyệt đối. \\
+\hline
+\textbf{Kết quả đánh giá} & \textbf{[PASS]} \\
+\hline
+\textbf{Đề xuất \& Xử lý} & Tuân thủ Luật cốt lõi toàn vẹn dữ liệu: Nghiêm cấm xóa vật lý các bản ghi đã liên kết với giao dịch biến động kho. \\
+\hline
+\end{tabularx}
+\caption{Kịch bản kiểm thử TC-08: Ràng buộc an toàn dữ liệu và chặn xóa}
+\label{tab:tc8}
+\end{table}
+
 \section{Báo cáo kết quả kiểm thử và quá trình khắc phục lỗi}
-Nhóm đã thực hiện tổng cộng 38 kịch bản kiểm thử chức năng và giao diện:
+Nhóm đã thực hiện tổng cộng 45 kịch bản kiểm thử chức năng, giao diện và an toàn dữ liệu:
 \begin{itemize}
-    \item Tỷ lệ kiểm thử thành công lần đầu: 32/38 (84.2\%).
-    \item Số lượng sự cố kỹ thuật phát sinh và đã xử lý dứt điểm: 6 lỗi (bao gồm lỗi z-index Stacking Context, lỗi Token AntiForgery trên AJAX, lỗi EF Core Navigation Tracking).
-    \item Tỷ lệ hoàn thành sau khi hoàn thiện khắc phục: 38/38 (100\% PASS).
+    \item Tỷ lệ kiểm thử thành công lần đầu: 39/45 (86.7\%).
+    \item Số lượng sự cố kỹ thuật phát sinh và đã xử lý dứt điểm: 6 lỗi (bao gồm lỗi z-index Stacking Context, lỗi Token AntiForgery trên AJAX, lỗi EF Core Navigation Tracking, lỗi tràn bảng kho).
+    \item Tỷ lệ hoàn thành sau khi hoàn thiện khắc phục: 45/45 (100\% PASS).
 \end{itemize}
 
 \cleardoublepage
@@ -1733,12 +1939,13 @@ Nhóm đã thực hiện tổng cộng 38 kịch bản kiểm thử chức năng
 \chapter{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}
 
 \section{Kết quả đạt được}
-Sau quá trình nghiên cứu, phân tích nghiệp vụ và lập trình triển khai nghiêm túc qua 162 phiên làm việc liên tục, nhóm sinh viên đã hoàn thành xuất sắc toàn bộ các mục tiêu đặt ra cho bài tập lớn học phần Lập trình Web:
+Sau quá trình nghiên cứu, phân tích nghiệp vụ và lập trình triển khai nghiêm túc qua 234 phiên làm việc liên tục, nhóm sinh viên đã hoàn thành xuất sắc toàn bộ các mục tiêu đặt ra cho bài tập lớn học phần Lập trình Web:
 \begin{enumerate}
-    \item \textbf{Về mặt sản phẩm:} Xây dựng thành công ứng dụng web Quản lý kho hàng nội bộ đa chi nhánh hoàn chỉnh, đáp ứng chuẩn mực và tinh tế giao diện cũng như quy trình nghiệp vụ của các hệ thống quản trị kho hàng chuyên nghiệp thực tế.
-    \item \textbf{Về mặt kiến trúc CSDL:} Làm chủ hoàn toàn công nghệ ASP.NET Core MVC trên nền tảng mới nhất .NET 10, kết hợp Entity Framework Core 10. Giải quyết triệt để bài toán đồng bộ tồn kho bằng giải thuật tính toán động qua Database View (\texttt{vw\_TonKhoHienTai}, \texttt{vw\_BienDongKho}).
-    \item \textbf{Về mặt giao diện \& Trải nghiệm (UI/UX):} Xây dựng thành công hệ sinh thái Khối Lego UI dùng chung (\texttt{\_Pagination}, \texttt{\_DateFilter}, \texttt{\_MultiSelectFilter}, \texttt{ToastNotification}, \texttt{ModalConfirm}, \texttt{ModalHelp}), giúp mã nguồn cực kỳ gọn gàng và mang lại trải nghiệm mượt mà với tương tác AJAX không tải lại trang.
-    \item \textbf{Về mặt an toàn \& Toàn vẹn dữ liệu:} Đảm bảo an toàn tuyệt đối cho số liệu doanh nghiệp thông qua cơ chế phân quyền 3 lớp người dùng chặt chẽ, bảo vệ bằng giao dịch CSDL (Transaction) và khóa bất biến các chứng từ kiểm kê/điều chỉnh đã cân bằng.
+    \item \textbf{Về mặt sản phẩm:} Xây dựng thành công ứng dụng web Quản lý kho hàng nội bộ đa chi nhánh hoàn chỉnh gồm 10 phân hệ chức năng chuyên nghiệp: Hàng hóa \& Mã vạch, Khách hàng \& Xuất HĐ VAT, Nhà cung cấp, Chi nhánh Kho, Nhập hàng, Trả hàng nhập, Điều chuyển kho, Xuất hủy, Kiểm kê \& Cân bằng kho, Báo cáo Tồn kho Pivot \& Thẻ kho lũy kế.
+    \item \textbf{Về mặt kiến trúc CSDL:} Làm chủ hoàn toàn công nghệ ASP.NET Core MVC trên nền tảng mới nhất .NET 10, kết hợp Entity Framework Core 10 với cấu trúc CSDL 23 bảng thực thể nghiệp vụ chuẩn 3NF và 2 Database Views thời gian thực.
+    \item \textbf{Về mặt giao diện \& Trải nghiệm (UI/UX):} Xây dựng thành công hệ sinh thái Khối Lego UI KhoPro dùng chung (\texttt{\_Pagination}, \texttt{\_DateFilter}, \texttt{\_MultiSelectFilter}, \texttt{\_StatusFilter}, \texttt{\_PromptModal}, \texttt{\_PrintLayout}), kết hợp thư viện \texttt{app-filter.js} mang lại trải nghiệm mượt mà với tương tác AJAX không giật trang.
+    \item \textbf{Về mặt an toàn \& Toàn vẹn dữ liệu:} Đảm bảo an toàn tuyệt đối cho số liệu doanh nghiệp thông qua cơ chế phân quyền 3 lớp người dùng chặt chẽ, bảo vệ bằng giao dịch CSDL (Transaction), khóa bất biến các chứng từ đã cân bằng và cơ chế chặn xóa an toàn khi đã có giao dịch.
+    \item \textbf{Về tính năng mở rộng thực tế:} Triển khai thành công hệ thống In ấn chứng từ kho kế toán đạt chuẩn và hệ thống sinh / in tem nhãn mã vạch nhiệt Code128 đa kích thước.
 \end{enumerate}
 
 \section{Bài học rút ra}
@@ -1750,7 +1957,7 @@ Sau quá trình nghiên cứu, phân tích nghiệp vụ và lập trình triể
 
 \section{Đề xuất phương hướng phát triển}
 \begin{enumerate}
-    \item \textbf{Tích hợp Máy quét Barcode/QR Code:} Tích hợp thư viện quét mã vạch trực tiếp qua Camera điện thoại hoặc kết nối máy quét mã vạch phần cứng chuyên dụng.
+    \item \textbf{Tích hợp Máy quét Barcode/QR Code phần cứng:} Tích hợp thư viện quét mã vạch trực tiếp qua Camera điện thoại hoặc kết nối máy quét mã vạch phần cứng chuyên dụng qua cổng USB/Bluetooth.
     \item \textbf{Mở rộng Phân hệ Bán hàng (POS):} Kết nối đồng bộ trực tiếp với hệ thống kho: Mỗi khi nhân viên xuất hóa đơn bán hàng, hệ thống tự động trừ tồn kho chi nhánh theo thời gian thực.
     \item \textbf{Cảnh báo tự động qua Telegram/Email:} Xây dựng Background Service tự động kiểm tra lượng tồn kho so với định mức tồn tối thiểu, gửi cảnh báo tự động về điện thoại của Quản lý khi mặt hàng chạm ngưỡng nguy hiểm.
     \item \textbf{Phát triển Ứng dụng Di động (Mobile App):} Đóng gói mã nguồn thành RESTful Web API độc lập và phát triển ứng dụng di động Native (Flutter hoặc .NET MAUI).
@@ -1777,7 +1984,7 @@ Sau quá trình nghiên cứu, phân tích nghiệp vụ và lập trình triể
 \section*{Phụ lục A: Hướng dẫn Cài đặt \& Build Cơ sở Dữ liệu}
 \begin{enumerate}
     \item \textbf{Bước 1:} Cài đặt .NET 10 SDK (\texttt{net10.0}) và Microsoft SQL Server 2019 trở lên.
-    \item \textbf{Bước 2:} Chạy lần lượt các script SQL trong thư mục \texttt{migrations/sql/} theo thứ tự từ \texttt{01\_init\_schema.sql} đến \texttt{14\_bo\_sung\_tra\_hang\_nhap.sql}, sau đó chạy script \texttt{docs/DuLieuMau.sql} để nạp dữ liệu mẫu.
+    \item \textbf{Bước 2:} Chạy lần lượt các script SQL trong thư mục \texttt{migrations/sql/} theo thứ tự từ \texttt{01\_init\_schema.sql} đến \texttt{18\_sua\_encoding\_khach\_hang\_data.sql}, sau đó chạy script \texttt{migrations/sql/15\_du\_lieu\_mau\_toan\_dien.sql} để nạp dữ liệu mẫu toàn diện.
     \item \textbf{Bước 3:} Mở file \texttt{appsettings.json}, kiểm tra và điều chỉnh chuỗi kết nối \texttt{QuanLyKhoPhuQuocLTW} cho khớp với tên Server SQL của máy bạn.
     \item \textbf{Bước 4:} Mở terminal tại thư mục gốc của dự án và chạy lệnh: \texttt{dotnet run} (hoặc mở file Solution trong Visual Studio 2024 / VS Code và nhấn F5).
     \item \textbf{Bước 5:} Đăng nhập với tài khoản Quản lý mặc định: Tên đăng nhập \texttt{quanly}, Mật khẩu \texttt{123456}.
@@ -1785,11 +1992,14 @@ Sau quá trình nghiên cứu, phân tích nghiệp vụ và lập trình triể
 
 \section*{Phụ lục B: Cấu trúc Thư mục và Ánh xạ Controller -- View}
 \begin{itemize}[leftmargin=1.5em]
-    \item \textbf{Xác thực \& Phân quyền:} \path{Controllers/AccountController.cs} $\rightarrow$ \path{Views/Account/Login.cshtml} (Phiên làm việc Cookie, chi nhánh).
-    \item \textbf{Danh mục Hàng hóa:} \path{Controllers/HangHoaController.cs} $\rightarrow$ \path{Views/HangHoa/Index.cshtml} (Hàng hóa, nhóm hàng, đơn vị tính).
-    \item \textbf{Nhập hàng NCC:} \path{Controllers/NhapHangController.cs} $\rightarrow$ \path{Views/NhapHang/Index.cshtml} (Phiếu nhập hàng nhà cung cấp).
-    \item \textbf{Điều chuyển kho:} \path{Controllers/ChuyenKhoController.cs} $\rightarrow$ \path{Views/ChuyenKho/Index.cshtml} (Phiếu chuyển kho liên chi nhánh).
-    \item \textbf{Kiểm kê \& Cân bằng:} \path{Controllers/PhieuKiemKeController.cs} $\rightarrow$ \path{Views/PhieuKiemKe/Index.cshtml} (Kiểm kê, cân bằng kho).
+    \item \textbf{Xác thực \& Phân quyền:} \path{Controllers/AccountController.cs} $\rightarrow$ \path{Views/Account/Login.cshtml} (Phiên làm việc Cookie, chi nhánh, đổi mật khẩu).
+    \item \textbf{Danh mục Hàng hóa \& Tem mã vạch:} \path{Controllers/HangHoaController.cs} $\rightarrow$ \path{Views/HangHoa/Index.cshtml}, \path{_HangHoaBarcodeModal.cshtml} (Hàng hóa, nhóm hàng, ĐVT, in tem nhiệt).
+    \item \textbf{Quản lý Khách hàng \& Xuất HĐ VAT:} \path{Controllers/KhachHangController.cs} $\rightarrow$ \path{Views/KhachHang/Index.cshtml} (Khách hàng, nhóm khách hàng, drawer chi tiết, thông tin MST/CCCD).
+    \item \textbf{Nhập hàng NCC:} \path{Controllers/NhapHangController.cs} $\rightarrow$ \path{Views/NhapHang/Index.cshtml}, \path{Print.cshtml}.
+    \item \textbf{Điều chuyển kho:} \path{Controllers/ChuyenKhoController.cs} $\rightarrow$ \path{Views/ChuyenKho/Index.cshtml}, \path{Print.cshtml} (Phiếu chuyển kho liên chi nhánh, in phiếu chuẩn).
+    \item \textbf{Xuất hủy hàng hóa:} \path{Controllers/XuatHuyController.cs} $\rightarrow$ \path{Views/XuatHuy/Index.cshtml}, \path{Print.cshtml}.
+    \item \textbf{Trả hàng nhập NCC:} \path{Controllers/TraHangNhapController.cs} $\rightarrow$ \path{Views/TraHangNhap/Index.cshtml}, \path{Print.cshtml}.
+    \item \textbf{Kiểm kê \& Cân bằng:} \path{Controllers/PhieuKiemKeController.cs} $\rightarrow$ \path{Views/PhieuKiemKe/Index.cshtml}, \path{Print.cshtml} (Kiểm kê, cân bằng kho, in phiếu kiểm).
     \item \textbf{Báo cáo Kho:} \path{Controllers/BaoCaoController.cs} $\rightarrow$ \path{Views/BaoCao/TonKho.cshtml}, \path{TheKho.cshtml} (Tồn kho Pivot, Thẻ kho).
 \end{itemize}
 

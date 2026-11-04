@@ -780,7 +780,7 @@ $(document).ready(function () {
         }
     });
 
-    // Modal Xóa
+    // Modal Xóa (chuẩn Nhà Cung Cấp)
     $(document).on('click', '.btn-delete-product', function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -788,6 +788,18 @@ $(document).ready(function () {
         const name = $(this).data('name') || '';
         if (typeof window.openDeleteProductModal === 'function') {
             window.openDeleteProductModal(id, name);
+        }
+    });
+
+    // Modal Khóa / Ngừng kinh doanh / Cho kinh doanh lại (chuẩn Nhà Cung Cấp)
+    $(document).on('click', '.btn-toggle-status-product', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = $(this).data('id');
+        const name = $(this).data('name') || '';
+        const status = $(this).data('status');
+        if (typeof window.openStatusConfirmProductModal === 'function') {
+            window.openStatusConfirmProductModal(id, name, status);
         }
     });
 

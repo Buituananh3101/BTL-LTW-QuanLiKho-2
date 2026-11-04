@@ -1,18 +1,91 @@
-﻿# Tiến độ dự án
+# Tiến độ dự án
 
-Cập nhật lần cuối: 2026-11-03 – Hoàn thiện nút Sửa & Xóa Đơn vị tính trực tiếp từ dropdown form Hàng hóa (Phiên 234)
+Cập nhật lần cuối: 2026-11-04 – Tự Động Hóa Chụp Mới Toàn Bộ Ảnh Giao Diện Hệ Thống & Đồng Bộ Báo Cáo LaTeX (Phiên 237)
 
 ---
 
 ## Đang làm
-- Hàng hóa (Product Catalog): Đã bổ sung đầy đủ nút Sửa ✎ và Xóa Đơn vị tính trực tiếp từ dropdown form Tạo/Sửa hàng hóa (tương tự như Nhóm hàng), sử dụng khối Lego chuẩn `AppPrompt`, kiểm tra trùng tên và ràng buộc sản phẩm.
-  + Kiểm tra biên dịch hệ thống `dotnet build -t:Compile` đạt **0 Errors**.
+- Báo cáo Đồ án LaTeX ([`docs/latex/main.tex`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/docs/latex/main.tex)): Đã hoàn thành 100% chụp mới và đồng bộ toàn bộ ảnh chụp giao diện hệ thống:
+  + Tự động hóa trình duyệt Microsoft Edge qua Playwright ở chuẩn độ phân giải **1440 × 900 px** để chụp mới toàn bộ các màn hình thực tế của ứng dụng.
+  + Cập nhật đồng bộ 9 ảnh giao diện chính trong `docs/latex/figures/` (Hình 3.1 đến 3.9) thay thế hoàn toàn các ảnh cũ:
+    * `hinh3_1_login.png`: Màn hình Đăng nhập & Lựa chọn chi nhánh kho.
+    * `hinh3_2_hanghoa.png`: Quản lý Danh mục Hàng hóa, Cây nhóm hàng & Cảnh báo tồn.
+    * `hinh3_6_nhaphang.png`: Quản lý Giao dịch Nhập hàng từ Nhà cung cấp.
+    * `hinh3_9_tra_hang.png`: Quản lý Giao dịch Trả hàng nhập cho NCC.
+    * `hinh3_7_chuyenkho.png`: Điều chuyển kho nội bộ liên chi nhánh.
+    * `hinh3_8_xuat_huy.png`: Quản lý Giao dịch Xuất hủy hàng hư hỏng/hết hạn.
+    * `hinh3_3_kiemkho.png`: Kiểm kho & Tự động cân bằng sai lệch tồn kho.
+    * `hinh3_4_bcton.png`: Báo cáo Tồn kho dạng Pivot đa chi nhánh & Thẻ KPI.
+    * `hinh3_5_thekho.png`: Báo cáo Thẻ kho biến động xuất nhập tồn lũy kế.
+  + Bổ sung 4 ảnh giao diện các phân hệ mở rộng vào thư viện ảnh: Khách hàng (`hinh3_10_khachhang.png`), Nhà cung cấp (`hinh3_11_nhacungcap.png`), Kho hàng (`hinh3_12_kho.png`), Người dùng (`hinh3_13_nguoidung.png`).
+  + Biên dịch XeLaTeX 2 lượt thành công tuyệt đối: **81 trang A4**, **0 Lỗi**, **0 Overfull `\hbox`**, đồng bộ mục lục và danh mục hình vẽ.
+  + Cập nhật gói nén nộp bài [`docs/BaoCao_LaTeX_Overleaf.zip`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/docs/BaoCao_LaTeX_Overleaf.zip) (4.86 MB).
+  + Khởi tạo tài liệu Artifact trực quan xem ảnh giao diện: [`bo-suu-tap-giao-dien-khopro.md`](file:///C:/Users/TuanAnh/.gemini/antigravity/brain/c2adadad-c808-4168-927c-59c12dee4538/bo-suu-tap-giao-dien-khopro.md).
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra trải nghiệm thực tế trên trình duyệt tại `http://localhost:7087` trên các màn hình Danh mục & Chứng từ.
-2. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
+1. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web và xem xét nộp báo cáo.
+2. Chuẩn bị slide thuyết trình bảo vệ đồ án.
+
+---
+
+- **Tự Động Hóa Chụp Mới Toàn Bộ Ảnh Giao Diện Hệ Thống & Đồng Bộ Báo Cáo LaTeX (Phiên 237)**:
+  - **Nhu cầu**: Người dùng yêu cầu: *"tôi đã sửa lại toàn bộ giao diện, bạn hãy chụy ảnh lại phần giao diện giúp tôi"*.
+  - **Giải pháp & Kết quả triển khai**:
+    1. **Thiết lập Tự động hóa Browser với Playwright**:
+       - Kết nối ứng dụng ASP.NET Core đang chạy (`https://localhost:7215`), kích hoạt trình duyệt Microsoft Edge (`channel="msedge"`) ở chế độ headless.
+       - Cấu hình viewport chuẩn đồ án `1440 × 900` điểm ảnh, tỷ lệ `device_scale_factor: 1`.
+       - Tự động đăng nhập tài khoản quản trị `quanly` / `123456`, lần lượt duyệt qua tất cả các trang, đợi tải hoàn tất mạng (`networkidle`) và lưu trữ ảnh chụp màn hình chất lượng cao.
+    2. **Đồng bộ Thư viện Ảnh và Báo cáo Đồ án**:
+       - Cập nhật đè 9 hình ảnh `hinh3_*.png` trong `docs/latex/figures/` tương ứng Hình 3.1 đến Hình 3.9 trong `main.tex`.
+       - Sao lưu bộ ảnh gốc vào `docs/latex/figures_backup/`.
+       - Mở rộng thêm 4 ảnh phân hệ: `shot_khachhang.png`, `shot_nhacungcap.png`, `shot_kho.png`, `shot_nguoidung.png`.
+    3. **Kiểm tra & Nghiệm thu**:
+       - Biên dịch XeLaTeX: **81 trang A4**, **0 Lỗi**, **0 Overfull `\hbox`**.
+       - Cập nhật gói nén [`docs/BaoCao_LaTeX_Overleaf.zip`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/docs/BaoCao_LaTeX_Overleaf.zip).
+       - Khởi tạo Artifact [`bo-suu-tap-giao-dien-khopro.md`](file:///C:/Users/TuanAnh/.gemini/antigravity/brain/c2adadad-c808-4168-927c-59c12dee4538/bo-suu-tap-giao-dien-khopro.md) để người dùng xem trực tiếp toàn bộ 13 màn hình.
+
+---
+
+- **Cập nhật Toàn diện Chuẩn hóa Thiết kế Giao diện Wireframe & Hệ thống UI KhoPro trong Báo cáo LaTeX (Phiên 236)**:
+  - **Nhu cầu**: Người dùng yêu cầu: *"tôi có sửa lại giao diện các thứ nữa, bạn hãy kiểm tra kĩ lại để sửa lại báo cáo giúp tôi"*.
+  - **Giải pháp & Kết quả triển khai**:
+    1. **Rà soát & Đối chiếu mã nguồn giao diện**:
+       - Khảo sát các thay đổi giao diện gần nhất: Layout 2 cột thu gọn F4, Topbar 42px tinh gọn, Custom Select Dropdown (`.hh-cs-wrap`), Căn giữa modal (`#userModalOv`, `#pwdModalOv`, `#khoModalOv`), Nút sửa/xóa ĐVT và nhóm hàng bằng `AppPrompt`, In ấn 5 chứng từ (`NhapHang`, `TraHangNhap`, `ChuyenKho`, `PhieuKiemKe`, `XuatHuy`), In tem mã vạch 4 kích thước.
+    2. **Cập nhật tài liệu Báo cáo `docs/latex/main.tex`**:
+       - *Chương 2 (Mục 2.6)*: Viết lại thành *"Thiết kế khung giao diện Wireframe và Chuẩn hóa Hệ thống UI KhoPro"*, trình bày chi tiết 7 khía cạnh kiến trúc UI/UX:
+         + Cấu trúc bố cục 2 cột (Sidebar 260px và Content Workspace).
+         + Thanh điều hướng Topbar và Toolbar thao tác đồng bộ.
+         + Chuẩn hóa cửa sổ tương tác (Modal Dialogs) căn giữa tuyệt đối viewport.
+         + Bộ điều khiển chọn tùy biến (Custom Select Dropdowns) tích hợp tìm kiếm nhanh và phím Esc.
+         + Cơ chế ngăn kéo hiển thị chi tiết (Expandable Row Drawer).
+         + Hệ thống màu sắc nhận diện trạng thái và cảnh báo ngưỡng tồn kho.
+         + Chuẩn hóa giao diện in ấn chứng từ khổ A4/A5 và tem nhãn mã vạch nhiệt.
+       - *Chương 3 (Mục 3.3.11)*: Mở rộng mô tả `_PrintLayout.cshtml` áp dụng cho đầy đủ 5 chứng từ giao dịch kho.
+       - *Phụ lục B*: Bổ sung file `Print.cshtml` vào cấu trúc Controller - View của `NhapHang` và `PhieuKiemKe`.
+       - Xử lý triệt để ký tự đặc biệt, soft-hyphenation các bảng CSDL (`MaNhom\-KhachHang`) tránh overfull `\hbox`.
+    3. **Kiểm tra & Nghiệm thu**:
+       - Biên dịch XeLaTeX 2 lượt: Đạt **81 trang A4**, **0 Error**, **0 Overfull `\hbox`**, 0 cảnh báo font.
+       - Đóng gói file zip Overleaf [`docs/BaoCao_LaTeX_Overleaf.zip`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/docs/BaoCao_LaTeX_Overleaf.zip).
+       - Biên dịch .NET: `dotnet build -t:Compile` hoàn tất với **0 Errors**.
+
+---
+
+- **Cập nhật và Chuẩn hóa Toàn diện Báo cáo LaTeX theo các Phân hệ & Tính năng Mới (Phiên 235)**:
+  - **Nhu cầu**: Người dùng yêu cầu: *"kiểm tra lại báo cáo, tôi vừa thay đổi và thêm nhiều thứ vào hệ thống, bạn hãy lên kế hoạch cập nhật vừa sửa báo cáo"*.
+  - **Giải pháp & Kết quả triển khai**:
+    1. **Rà soát & Đối chiếu**: Đối chiếu toàn bộ commit từ phiên 188 đến phiên 234; phát hiện các điểm mới lớn: Phân hệ Khách hàng (bảng `NhomKhachHang`, `KhachHang`), In ấn chứng từ `_PrintLayout`, In tem mã vạch nhiệt Code128, Đổi mật khẩu Topbar, Khối Lego UI KhoPro (`app-filter.js`), Chặn xóa danh mục an toàn dữ liệu, Modular ViewModels.
+    2. **Cập nhật nội dung `main.tex`**:
+       - *Chương 1*: Bổ sung REQ-F03 (In tem mã vạch), REQ-F09 (Khách hàng & VAT), REQ-F12 (Quản trị hệ thống & an toàn dữ liệu) vào Bảng 1.1; cập nhật Ma trận phân quyền Bảng 1.2; khử sạch từ khóa cũ tại dòng 447.
+       - *Chương 2*: Cập nhật số lượng bảng CSDL thành 23 bảng thực thể + 2 Views; cập nhật Lược đồ RM Nhóm 3 (bổ sung `NhomKhachHang` và các trường xuất HĐ VAT của `KhachHang`); bổ sung `FK_KhachHang_NhomKh` vào Bảng 2.2; bổ sung Bảng Từ điển dữ liệu `tab:dict_khachhang`; cập nhật Sitemap trang.
+       - *Chương 3*: Bổ sung 3 tiểu mục kiến trúc nền tảng (Khối Lego UI & `app-filter.js`, Cơ chế kiểm soát toàn vẹn dữ liệu chặn xóa, Tái cấu trúc Modular ViewModels) và 3 tiểu mục kết quả chức năng (Khách hàng & HĐ VAT, In chứng từ kho chuẩn `_PrintLayout`, In tem mã vạch nhiệt Code128, Đổi mật khẩu cá nhân).
+       - *Chương 4*: Bổ sung 3 kịch bản kiểm thử `TC-06`, `TC-07`, `TC-08`; cập nhật tổng kết 45/45 Test Cases PASS.
+       - *Chương 5 & Phụ lục*: Cập nhật tổng kết 234 phiên làm việc, 10 phân hệ nghiệp vụ; Phụ lục A hướng dẫn chạy các migration SQL 01-18 và dữ liệu mẫu 15; Phụ lục B bổ sung Khách hàng, Layout in và Barcode.
+    3. **Kiểm tra & Nghiệm thu**:
+       - Biên dịch XeLaTeX 2 lượt: Đạt chính xác **80 trang A4**, **0 Error**, **0 Overfull `\hbox`**, 0 cảnh báo font.
+       - Đóng gói file zip Overleaf `docs/BaoCao_LaTeX_Overleaf.zip`.
+       - Biên dịch .NET: `dotnet build -t:Compile` hoàn tất trong 1.25s với **0 Errors**.
 
 ---
 
