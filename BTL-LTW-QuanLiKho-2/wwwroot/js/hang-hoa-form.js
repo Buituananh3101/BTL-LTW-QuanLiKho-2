@@ -351,7 +351,7 @@
       doDelete();
     }
   }
-
+   
   $('#btnEditItemSave')?.addEventListener('click', handleEditItemSave);
   $('#btnEditItemDelete')?.addEventListener('click', handleEditItemDelete);
   $('#editItemInput')?.addEventListener('keydown', e => {
