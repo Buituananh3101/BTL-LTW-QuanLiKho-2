@@ -45,7 +45,7 @@
                     @if (!Model.IsReadOnly)
                     {
                         <button type="button" class="btn btn-tool" id="btnImportExcel" title="Nhập danh sách hàng từ file Excel/CSV">
-                            <i class="bi bi-box-arrow-in-down"></i>
+                            <i class="bi bi-box-arrow-in-down text-primary"></i>
                         </button>
                         <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" style="display: none;" />
                     }
@@ -136,7 +136,7 @@
                                         <td class="text-end">
                                             @if (!Model.IsReadOnly)
                                             {
-                                                <input type="text" class="inp text-end line-price kiot-num" value="@line.DonGiaTra.ToString("N0", viCulture)" inputmode="numeric" style="width: 105px; height: 32px;" />
+                                                <input type="text" class="inp text-end line-price kp-num" value="@line.DonGiaTra.ToString("N0", viCulture)" inputmode="numeric" style="width: 105px; height: 32px;" />
                                             }
                                             else
                                             {
@@ -274,7 +274,7 @@
                 <div class="pr">
                     <span class="l text-muted small">Trạng thái</span>
                     <div class="v">
-                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle">@Model.TenTrangThai</span>
+                        <span class="@Model.BadgeClass">@Model.TenTrangThai</span>
                     </div>
                 </div>
 
@@ -292,7 +292,7 @@
                             <button type="button" class="btn @(Model.LoaiGiamGia == "vnd" ? "btn-primary active" : "btn-outline-secondary")" id="btnDiscVnd" style="height: 34px; font-size: 12px; font-weight: 600; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center;">VND</button>
                             <button type="button" class="btn @(Model.LoaiGiamGia == "pct" ? "btn-primary active" : "btn-outline-secondary")" id="btnDiscPct" style="height: 34px; font-size: 12px; font-weight: 600; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center;">%</button>
                         </div>
-                        <input type="text" id="orderDiscountInput" class="inp kiot-num text-end" value="@Model.GiamGia.ToString("N0", viCulture)" @(Model.IsReadOnly ? "disabled" : "") style="max-width: 120px; height: 34px; font-size: 13.5px; text-align: right;" />
+                        <input type="text" id="orderDiscountInput" class="inp kp-num text-end" value="@Model.GiamGia.ToString("N0", viCulture)" @(Model.IsReadOnly ? "disabled" : "") style="max-width: 120px; height: 34px; font-size: 13.5px; text-align: right;" />
                     </div>
                 </div>
 
@@ -306,7 +306,7 @@
                 <div class="pr">
                     <span class="l text-muted small">Tiền NCC trả (F8)</span>
                     <div class="v">
-                        <input type="text" id="orderPaidInput" class="inp kiot-num text-end" value="@Model.DaThuNcc.ToString("N0", viCulture)" @(Model.IsReadOnly ? "disabled" : "") style="max-width: 185px; width: 185px; height: 34px; font-size: 14px; font-weight: 600; text-align: right;" />
+                        <input type="text" id="orderPaidInput" class="inp kp-num text-end" value="@Model.DaThuNcc.ToString("N0", viCulture)" @(Model.IsReadOnly ? "disabled" : "") style="max-width: 185px; width: 185px; height: 34px; font-size: 14px; font-weight: 600; text-align: right;" />
                     </div>
                 </div>
 
@@ -344,9 +344,7 @@
                 else
                 {
                     <div class="d-flex gap-2 mt-auto pt-2">
-                        <button type="button" class="btn btn-outline-secondary w-50 py-2" onclick="window.print();">
-                            <i class="bi bi-printer me-1"></i>In phiếu
-                        </button>
+                        <a href="@Url.Action("Print", "TraHangNhap", new { id = Model.MaPhieuTraHang })" target="_blank" class="btn btn-outline-secondary w-50 py-2"><i class="bi bi-printer me-1"></i>In phiếu</a>
                         <a href="@Url.Action("Index", "TraHangNhap")" class="btn btn-primary w-50 py-2">
                             Quay lại
                         </a>

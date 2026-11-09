@@ -1,4 +1,4 @@
-﻿@model BTL_LTW_QuanLiKho_2.ViewModels.XuatHuyFormVM
+@model BTL_LTW_QuanLiKho_2.ViewModels.XuatHuyFormVM
 
 <link href="~/css/kiem-kho.css" rel="stylesheet" asp-append-version="true" />
 <link href="~/css/xuat-huy.css" rel="stylesheet" asp-append-version="true" />
@@ -37,7 +37,7 @@
                     @if (!Model.IsReadOnly)
                     {
                         <label class="btn btn-tool mb-0" id="tImport" title="Nhập từ file Excel" style="cursor: pointer;">
-                            <i class="bi bi-box-arrow-in-down"></i>
+                            <i class="bi bi-box-arrow-in-down text-primary"></i>
                         </label>
                     }
                     <a href="@Url.Action("DownloadTemplate", "XuatHuy")" class="btn btn-tool" title="Tải về file Excel mẫu">

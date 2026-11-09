@@ -19,14 +19,14 @@
         noDen: null,
         trangThai: 'HOAT_DONG',
         daDanhDau: false,
-        sortBy: $('#kiotContainer').data('sort-by') || '',
-        sortDir: $('#kiotContainer').data('sort-dir') || '',
+        sortBy: $('#kpContainer').data('sort-by') || '',
+        sortDir: $('#kpContainer').data('sort-dir') || '',
         page: 1,
         pageSize: 15,
         expandedId: null
     };
 
-    const escapeHtml = KiotFilter.escapeHtml || function (s) {
+    const escapeHtml = AppFilter.escapeHtml || function (s) {
         if (!s) return '';
         return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     };
@@ -96,8 +96,8 @@
             },
             error: function () {
                 $container.css('opacity', '1');
-                if (window.KiotToast) {
-                    window.KiotToast.error('Không thể tải danh sách nhà cung cấp.');
+                if (window.AppToast) {
+                    window.AppToast.error('Không thể tải danh sách nhà cung cấp.');
                 }
             }
         });
@@ -108,15 +108,15 @@
        ========================================================================== */
     function initSidebarFilters() {
         // 3.1. Sidebar Toggle F4 & Mobile Drawer
-        KiotFilter.initSidebar({
-            containerSelector: '#kiotContainer',
+        AppFilter.initSidebar({
+            containerSelector: '#kpContainer',
             btnToggleSelector: '#btnToggleSidebar',
             iconSelector: '#sidebarToggleIcon',
             mobileBtnSelector: '#btnMobileFilter',
             mobileCloseSelector: '#btnCloseSidebarMobile',
             backdropSelector: '#sidebarBackdrop',
             sidebarColSelector: '#sidebarFilterCol',
-            storageKey: 'kiot_ncc_sidebar_state'
+            storageKey: 'kp_ncc_sidebar_state'
         });
 
         // 3.2. Khối 1: Nhóm nhà cung cấp (Multi-select)
@@ -126,39 +126,39 @@
         function renderNhomTags() {
             const items = state.nhom || [];
             $('#dotNhomNcc').toggleClass('active', items.length > 0);
-            KiotFilter.renderTagPills($boxNhom, items, 'Tất cả các nhóm', 2);
+            AppFilter.renderTagPills($boxNhom, items, 'Tất cả các nhóm', 2);
         }
 
         $boxNhom.on('click', function (e) {
             if ($(e.target).closest('.tag-remove').length) return;
             e.stopPropagation();
-            $('.kiot-ms-dropdown, .quick-date-popup, .dual-calendar-popup').not($ddNhom).removeClass('show drop-up');
-            KiotFilter.checkSidebarDropdownDirection($boxNhom, $ddNhom);
+            $('.kp-ms-dropdown, .quick-date-popup, .dual-calendar-popup').not($ddNhom).removeClass('show drop-up');
+            AppFilter.checkSidebarDropdownDirection($boxNhom, $ddNhom);
             $ddNhom.toggleClass('show');
             $boxNhom.toggleClass('open');
             if ($ddNhom.hasClass('show')) {
-                $ddNhom.find('.kiot-ms-search input').focus();
+                $ddNhom.find('.kp-ms-search input').focus();
             }
         });
 
         // Xóa tag từ pill
         $boxNhom.on('click', '.tag-remove', function (e) {
             e.stopPropagation();
-            const val = String($(this).closest('.kiot-pill-tag').data('val'));
+            const val = String($(this).closest('.kp-pill-tag').data('val'));
             state.nhom = state.nhom.filter(x => String(x.val) !== val);
-            $ddNhom.find(`.kiot-ms-item[data-val="${val}"]`).removeClass('selected').find('input[type="checkbox"]').prop('checked', false);
+            $ddNhom.find(`.kp-ms-item[data-val="${val}"]`).removeClass('selected').find('input[type="checkbox"]').prop('checked', false);
             renderNhomTags();
             state.page = 1;
             loadTable();
         });
 
         // Click chọn item trong dropdown
-        $ddNhom.on('click', '.kiot-ms-item', function (e) {
-            if ($(e.target).closest('.kiot-item-edit-btn').length) return;
+        $ddNhom.on('click', '.kp-ms-item', function (e) {
+            if ($(e.target).closest('.kp-item-edit-btn').length) return;
             e.stopPropagation();
             const $item = $(this);
             const val = String($item.data('val'));
-            const name = $item.data('name') || $item.find('.kiot-ms-text').text().trim();
+            const name = $item.data('name') || $item.find('.kp-ms-text').text().trim();
             const idx = state.nhom.findIndex(x => String(x.val) === val);
 
             if (idx >= 0) {
@@ -175,21 +175,21 @@
         });
 
         // Tìm kiếm con trong dropdown nhóm
-        $ddNhom.find('.kiot-ms-search input').on('input', function (e) {
+        $ddNhom.find('.kp-ms-search input').on('input', function (e) {
             e.stopPropagation();
             const term = $(this).val().trim().toLowerCase();
-            $ddNhom.find('.kiot-ms-item').each(function () {
+            $ddNhom.find('.kp-ms-item').each(function () {
                 const text = ($(this).data('name') || $(this).text()).toLowerCase();
                 $(this).toggle(!term || text.includes(term));
             });
         });
 
-        // Nút ✎ sửa / xóa nhóm nhà cung cấp dùng KiotPrompt
-        $ddNhom.on('click', '.kiot-item-edit-btn', function (e) {
+        // Nút ✎ sửa / xóa nhóm nhà cung cấp dùng AppPrompt
+        $ddNhom.on('click', '.kp-item-edit-btn', function (e) {
             e.preventDefault();
             e.stopPropagation();
             const id = $(this).data('id');
-            const oldName = $(this).data('name') || $(this).closest('.kiot-ms-item').find('.kiot-ms-text').text().trim();
+            const oldName = $(this).data('name') || $(this).closest('.kp-ms-item').find('.kp-ms-text').text().trim();
             handleEditGroupSupplier(id, oldName);
         });
 
@@ -200,16 +200,16 @@
             handleCreateGroupSupplier();
         });
 
-        // 3.3. Khối 2: Tổng mua (Khoảng giá trị dùng LEGO KiotFilter.initValueFilter)
-        KiotFilter.initValueFilter('TongMua', function (tu, den) {
+        // 3.3. Khối 2: Tổng mua (Khoảng giá trị dùng LEGO AppFilter.initValueFilter)
+        AppFilter.initValueFilter('TongMua', function (tu, den) {
             state.tongMuaTu = tu;
             state.tongMuaDen = den;
             state.page = 1;
             loadTable();
         });
 
-        // 3.4. Khối 3: Thời gian tạo (KiotDateFilter component)
-        KiotFilter.initDateFilter('date', function (from, to, text, val) {
+        // 3.4. Khối 3: Thời gian tạo (KhoProDateFilter component)
+        AppFilter.initDateFilter('date', function (from, to, text, val) {
             if (val === 'CUSTOM') {
                 state.thoiGian = 'CUSTOM';
                 state.fromDate = from;
@@ -223,16 +223,16 @@
             loadTable();
         });
 
-        // 3.5. Khối 4: Nợ hiện tại (Khoảng giá trị dùng LEGO KiotFilter.initValueFilter)
-        KiotFilter.initValueFilter('No', function (tu, den) {
+        // 3.5. Khối 4: Nợ hiện tại (Khoảng giá trị dùng LEGO AppFilter.initValueFilter)
+        AppFilter.initValueFilter('No', function (tu, den) {
             state.noTu = tu;
             state.noDen = den;
             state.page = 1;
             loadTable();
         });
 
-        // 3.6. Khối 5: Trạng thái (Dạng Pills chuẩn prototype qua LEGO KiotFilter.initStatusFilter)
-        KiotFilter.initStatusFilter('#pillsStatus', function (val) {
+        // 3.6. Khối 5: Trạng thái (Dạng Pills chuẩn prototype qua LEGO AppFilter.initStatusFilter)
+        AppFilter.initStatusFilter('#pillsStatus', function (val) {
             if (val === 'all' || val === '') {
                 state.trangThai = '';
             } else if (val === 'active' || val === 'HOAT_DONG') {
@@ -261,8 +261,8 @@
        4. QUẢN LÝ NHÓM NHÀ CUNG CẤP (QUICK CREATE / EDIT / DELETE)
        ========================================================================== */
     function handleCreateGroupSupplier() {
-        if (!window.KiotPrompt) return;
-        window.KiotPrompt.open({
+        if (!window.AppPrompt) return;
+        window.AppPrompt.open({
             title: 'Tạo mới nhóm nhà cung cấp',
             label: 'Tên nhóm nhà cung cấp',
             value: '',
@@ -279,15 +279,15 @@
                     data: JSON.stringify({ tenNhom: name.trim() }),
                     success: function (res) {
                         if (res.success) {
-                            window.KiotPrompt.close();
-                            if (window.KiotToast) window.KiotToast.success(`Tạo nhóm "${res.tenNhom}" thành công.`);
+                            window.AppPrompt.close();
+                            if (window.AppToast) window.AppToast.success(`Tạo nhóm "${res.tenNhom}" thành công.`);
 
                             // Bổ sung vào dropdown sidebar
                             const itemHtml = `
-                                <div class="kiot-ms-item selected" data-val="${res.maNhomNcc}" data-name="${escapeHtml(res.tenNhom)}">
+                                <div class="kp-ms-item selected" data-val="${res.maNhomNcc}" data-name="${escapeHtml(res.tenNhom)}">
                                     <input type="checkbox" class="form-check-input" checked />
-                                    <span class="kiot-ms-text">${escapeHtml(res.tenNhom)}</span>
-                                    <button type="button" class="kiot-item-edit-btn hh-item-edit-btn" data-id="${res.maNhomNcc}" data-name="${escapeHtml(res.tenNhom)}" title="Sửa nhóm">
+                                    <span class="kp-ms-text">${escapeHtml(res.tenNhom)}</span>
+                                    <button type="button" class="kp-item-edit-btn hh-item-edit-btn" data-id="${res.maNhomNcc}" data-name="${escapeHtml(res.tenNhom)}" title="Sửa nhóm">
                                         <i class="bi bi-pencil" style="font-size:12px;pointer-events:none;"></i>
                                     </button>
                                 </div>
@@ -299,7 +299,7 @@
 
                             state.nhom.push({ val: String(res.maNhomNcc), name: res.tenNhom });
                             $('#dotNhomNcc').addClass('active');
-                            KiotFilter.renderTagPills($('#boxNhomNcc'), state.nhom, 'Tất cả các nhóm', 2);
+                            AppFilter.renderTagPills($('#boxNhomNcc'), state.nhom, 'Tất cả các nhóm', 2);
                             state.page = 1;
                             loadTable();
                         }
@@ -314,8 +314,8 @@
     }
 
     function handleEditGroupSupplier(id, oldName) {
-        if (!window.KiotPrompt || !id) return;
-        window.KiotPrompt.open({
+        if (!window.AppPrompt || !id) return;
+        window.AppPrompt.open({
             title: 'Sửa nhóm nhà cung cấp',
             label: 'Tên nhóm nhà cung cấp',
             value: oldName,
@@ -326,7 +326,7 @@
                     return false;
                 }
                 if (newName.trim().toLowerCase() === oldName.toLowerCase()) {
-                    window.KiotPrompt.close();
+                    window.AppPrompt.close();
                     return false;
                 }
                 $.ajax({
@@ -336,14 +336,14 @@
                     data: JSON.stringify({ maNhomNcc: parseInt(id), tenNhom: newName.trim() }),
                     success: function (res) {
                         if (res.success) {
-                            window.KiotPrompt.close();
-                            if (window.KiotToast) window.KiotToast.success(`Đã đổi tên nhóm thành "${res.tenNhom}".`);
+                            window.AppPrompt.close();
+                            if (window.AppToast) window.AppToast.success(`Đã đổi tên nhóm thành "${res.tenNhom}".`);
 
                             // Cập nhật dropdown sidebar
-                            const $item = $(`#dropdownNhomNcc .kiot-ms-item[data-val="${id}"]`);
+                            const $item = $(`#dropdownNhomNcc .kp-ms-item[data-val="${id}"]`);
                             $item.attr('data-name', res.tenNhom);
-                            $item.find('.kiot-ms-text').text(res.tenNhom);
-                            $item.find('.kiot-item-edit-btn').attr('data-name', res.tenNhom);
+                            $item.find('.kp-ms-text').text(res.tenNhom);
+                            $item.find('.kp-item-edit-btn').attr('data-name', res.tenNhom);
 
                             // Cập nhật select modal
                             $(`#nccMaNhomNcc option[value="${id}"]`).text(res.tenNhom);
@@ -352,7 +352,7 @@
                             const target = state.nhom.find(x => String(x.val) === String(id));
                             if (target) {
                                 target.name = res.tenNhom;
-                                KiotFilter.renderTagPills($('#boxNhomNcc'), state.nhom, 'Tất cả các nhóm', 2);
+                                AppFilter.renderTagPills($('#boxNhomNcc'), state.nhom, 'Tất cả các nhóm', 2);
                             }
                             loadTable();
                         }
@@ -371,14 +371,14 @@
                     data: JSON.stringify({ maNhomNcc: parseInt(id) }),
                     success: function (res) {
                         if (res.success) {
-                            window.KiotPrompt.close();
-                            if (window.KiotToast) window.KiotToast.success(res.message);
+                            window.AppPrompt.close();
+                            if (window.AppToast) window.AppToast.success(res.message);
 
-                            $(`#dropdownNhomNcc .kiot-ms-item[data-val="${id}"]`).remove();
+                            $(`#dropdownNhomNcc .kp-ms-item[data-val="${id}"]`).remove();
                             $(`#nccMaNhomNcc option[value="${id}"]`).remove();
 
                             state.nhom = state.nhom.filter(x => String(x.val) !== String(id));
-                            KiotFilter.renderTagPills($('#boxNhomNcc'), state.nhom, 'Tất cả các nhóm', 2);
+                            AppFilter.renderTagPills($('#boxNhomNcc'), state.nhom, 'Tất cả các nhóm', 2);
                             state.page = 1;
                             loadTable();
                         }
@@ -393,8 +393,8 @@
     }
 
     function showPromptError(msg) {
-        const errEl = document.getElementById('kiotPromptErr');
-        const inputEl = document.getElementById('kiotPromptInput');
+        const errEl = document.getElementById('kpPromptErr');
+        const inputEl = document.getElementById('kpPromptInput');
         if (errEl) {
             errEl.textContent = msg;
             errEl.style.display = 'block';
@@ -453,9 +453,9 @@
     });
 
     /* ==========================================================================
-       5.1. TÙY CHỌN ẨN / HIỆN CỘT (COLUMN VISIBILITY) QUA LEGO KIOTFILTER
+       5.1. TÙY CHỌN ẨN / HIỆN CỘT (COLUMN VISIBILITY) QUA LEGO KHOPROFILTER
        ========================================================================== */
-    const STORAGE_COLS_KEY = 'kiot_ncc_columns_v2';
+    const STORAGE_COLS_KEY = 'kp_ncc_columns_v2';
 
     const DEFAULT_NCC_COLS = {
         ma: 1,
@@ -475,7 +475,7 @@
     let nccColumnToggler = null;
 
     function initColumnToggle() {
-        nccColumnToggler = KiotFilter.initColumnToggle({
+        nccColumnToggler = AppFilter.initColumnToggle({
             menuSelector: '#colMenu',
             tableSelector: '#supplierTable',
             storageKey: STORAGE_COLS_KEY,
@@ -533,8 +533,8 @@
             },
             error: function (xhr) {
                 console.error('Lỗi khi cập nhật đánh dấu sao:', xhr);
-                if (window.KiotToast) {
-                    window.KiotToast.error('Có lỗi khi cập nhật đánh dấu sao.');
+                if (window.AppToast) {
+                    window.AppToast.error('Có lỗi khi cập nhật đánh dấu sao.');
                 }
             }
         });
@@ -560,12 +560,12 @@
     });
 
     /* ==========================================================================
-       6. MASTER-DETAIL ACCORDION & TABS (CHUẨN HÓA QUA LEGO KIOTFILTER.INITROWDETAIL)
+       6. MASTER-DETAIL ACCORDION & TABS (CHUẨN HÓA QUA LEGO KHOPROFILTER.INITROWDETAIL)
        ========================================================================== */
     let nccRowDetailHandler = null;
 
     function initRowDetail() {
-        nccRowDetailHandler = KiotFilter.initRowDetail({
+        nccRowDetailHandler = AppFilter.initRowDetail({
             tableSelector: '#supplierTable',
             rowSelector: 'tr.product-row',
             wrapSelector: '.product-detail-panel-wrap',
@@ -649,11 +649,6 @@
         }
     });
 
-    // Accordion gập mở trong Modal chuẩn .hh-sec
-    $(document).on('click', '.hh-sec-h', function () {
-        $(this).closest('.hh-sec').toggleClass('open');
-    });
-
     // 7.1. Custom Combobox Nhóm nhà cung cấp trong Modal
     const nccGroupCombobox = (function () {
         const $wrap = $('#wrapMaNhomNcc');
@@ -666,8 +661,8 @@
 
         function open() {
             $('.hh-cs-wrap').not($wrap).removeClass('open').find('.hh-cs-dropdown').hide();
-            if (window.KiotFilter && window.KiotFilter.checkDropdownDirection && $wrap.length && $box.length && $dropdown.length) {
-                window.KiotFilter.checkDropdownDirection($wrap[0], $box[0], $dropdown[0]);
+            if (window.AppFilter && window.AppFilter.checkDropdownDirection && $wrap.length && $box.length && $dropdown.length) {
+                window.AppFilter.checkDropdownDirection($wrap[0], $box[0], $dropdown[0]);
             }
             $wrap.addClass('open');
             $dropdown.show();
@@ -828,7 +823,7 @@
             success: function (res) {
                 if (res.success) {
                     hideModal('nccPromptOv');
-                    if (window.KiotToast) window.KiotToast.success(`Tạo nhóm "${res.tenNhom}" thành công.`);
+                    if (window.AppToast) window.AppToast.success(`Tạo nhóm "${res.tenNhom}" thành công.`);
 
                     // Bổ sung vào select modal & combobox
                     if (!$(`#nccMaNhomNcc option[value="${res.maNhomNcc}"]`).length) {
@@ -838,12 +833,12 @@
                     nccGroupCombobox.select(res.maNhomNcc, res.tenNhom);
 
                     // Bổ sung vào dropdown sidebar nếu chưa có
-                    if (!$(`#dropdownNhomNcc .kiot-ms-item[data-val="${res.maNhomNcc}"]`).length) {
+                    if (!$(`#dropdownNhomNcc .kp-ms-item[data-val="${res.maNhomNcc}"]`).length) {
                         const itemHtml = `
-                            <div class="kiot-ms-item" data-val="${res.maNhomNcc}" data-name="${escapeHtml(res.tenNhom)}">
+                            <div class="kp-ms-item" data-val="${res.maNhomNcc}" data-name="${escapeHtml(res.tenNhom)}">
                                 <input type="checkbox" class="form-check-input" />
-                                <span class="kiot-ms-text">${escapeHtml(res.tenNhom)}</span>
-                                <button type="button" class="kiot-item-edit-btn hh-item-edit-btn" data-id="${res.maNhomNcc}" data-name="${escapeHtml(res.tenNhom)}" title="Sửa nhóm">
+                                <span class="kp-ms-text">${escapeHtml(res.tenNhom)}</span>
+                                <button type="button" class="kp-item-edit-btn hh-item-edit-btn" data-id="${res.maNhomNcc}" data-name="${escapeHtml(res.tenNhom)}" title="Sửa nhóm">
                                     <i class="bi bi-pencil" style="font-size:12px;pointer-events:none;"></i>
                                 </button>
                             </div>
@@ -895,7 +890,7 @@
             success: function (res) {
                 if (res.success) {
                     hideModal('nccEditGroupOv');
-                    if (window.KiotToast) window.KiotToast.success(`Đã đổi tên nhóm thành "${res.tenNhom}".`);
+                    if (window.AppToast) window.AppToast.success(`Đã đổi tên nhóm thành "${res.tenNhom}".`);
 
                     // Cập nhật select modal & combobox
                     $(`#nccMaNhomNcc option[value="${id}"]`).text(res.tenNhom);
@@ -905,17 +900,17 @@
                     }
 
                     // Cập nhật dropdown sidebar
-                    const $sItem = $(`#dropdownNhomNcc .kiot-ms-item[data-val="${id}"]`);
+                    const $sItem = $(`#dropdownNhomNcc .kp-ms-item[data-val="${id}"]`);
                     $sItem.attr('data-name', res.tenNhom);
-                    $sItem.find('.kiot-ms-text').text(res.tenNhom);
-                    $sItem.find('.kiot-item-edit-btn').attr('data-name', res.tenNhom);
+                    $sItem.find('.kp-ms-text').text(res.tenNhom);
+                    $sItem.find('.kp-item-edit-btn').attr('data-name', res.tenNhom);
 
                     // Cập nhật state nếu đang lọc nhóm này
                     const target = state.nhom.find(x => String(x.val) === String(id));
                     if (target) {
                         target.name = res.tenNhom;
                         $('#dotNhomNcc').addClass('active');
-                        KiotFilter.renderTagPills($('#boxNhomNcc'), state.nhom, 'Tất cả các nhóm', 2);
+                        AppFilter.renderTagPills($('#boxNhomNcc'), state.nhom, 'Tất cả các nhóm', 2);
                     }
                 }
             },
@@ -937,7 +932,7 @@
             success: function (res) {
                 if (res.success) {
                     hideModal('nccEditGroupOv');
-                    if (window.KiotToast) window.KiotToast.success(res.message);
+                    if (window.AppToast) window.AppToast.success(res.message);
 
                     // Gỡ bỏ khỏi select modal & combobox
                     $(`#nccMaNhomNcc option[value="${id}"]`).remove();
@@ -947,10 +942,10 @@
                     }
 
                     // Gỡ bỏ khỏi sidebar
-                    $(`#dropdownNhomNcc .kiot-ms-item[data-val="${id}"]`).remove();
+                    $(`#dropdownNhomNcc .kp-ms-item[data-val="${id}"]`).remove();
                     state.nhom = state.nhom.filter(x => String(x.val) !== String(id));
                     $('#dotNhomNcc').toggleClass('active', state.nhom.length > 0);
-                    KiotFilter.renderTagPills($('#boxNhomNcc'), state.nhom, 'Tất cả các nhóm', 2);
+                    AppFilter.renderTagPills($('#boxNhomNcc'), state.nhom, 'Tất cả các nhóm', 2);
                     state.page = 1;
                     loadTable();
                 }
@@ -1042,7 +1037,7 @@
                 }
             },
             error: function () {
-                if (window.KiotToast) window.KiotToast.error('Không thể lấy thông tin nhà cung cấp.');
+                if (window.AppToast) window.AppToast.error('Không thể lấy thông tin nhà cung cấp.');
             }
         });
     }
@@ -1095,7 +1090,7 @@
             success: function (res) {
                 $btn.prop('disabled', false);
                 if (res.success) {
-                    if (window.KiotToast) window.KiotToast.success(res.message);
+                    if (window.AppToast) window.AppToast.success(res.message);
 
                     if (isSaveAndNew) {
                         resetNccForm();
@@ -1109,8 +1104,8 @@
             error: function (xhr) {
                 $btn.prop('disabled', false);
                 const msg = xhr.responseJSON?.message || 'Có lỗi xảy ra khi lưu dữ liệu.';
-                if (window.KiotToast) {
-                    window.KiotToast.error(msg);
+                if (window.AppToast) {
+                    window.AppToast.error(msg);
                 } else {
                     alert(msg);
                 }
@@ -1156,7 +1151,7 @@
                 if (res.success) {
                     hideModal('nccDeleteOv');
                     hideModal('nccModalOv');
-                    if (window.KiotToast) window.KiotToast.success(res.message);
+                    if (window.AppToast) window.AppToast.success(res.message);
                     state.expandedId = null;
                     loadTable();
                 }
@@ -1170,7 +1165,7 @@
                     $('#delNccErrorBox').show();
                     $('#btnConfirmDeleteNcc').hide();
                 } else {
-                    if (window.KiotToast) window.KiotToast.error(res?.message || 'Không thể xóa nhà cung cấp.');
+                    if (window.AppToast) window.AppToast.error(res?.message || 'Không thể xóa nhà cung cấp.');
                     hideModal('nccDeleteOv');
                 }
             }
@@ -1219,9 +1214,9 @@
         showModal('nccStatusConfirmOv');
     }
 
-    // Khởi tạo các thao tác Thực thể qua LEGO KiotFilter.initEntityActions
+    // Khởi tạo các thao tác Thực thể qua LEGO AppFilter.initEntityActions
     function initEntityActions() {
-        KiotFilter.initEntityActions({
+        AppFilter.initEntityActions({
             containerSelector: document,
             editSelector: '.btn-edit-ncc',
             deleteSelector: '.btn-delete-ncc',
@@ -1251,14 +1246,14 @@
                 $btn.prop('disabled', false);
                 hideModal('nccStatusConfirmOv');
                 if (res.success) {
-                    if (window.KiotToast) window.KiotToast.success(res.message);
+                    if (window.AppToast) window.AppToast.success(res.message);
                     loadTable();
                 }
             },
             error: function (xhr) {
                 $btn.prop('disabled', false);
                 hideModal('nccStatusConfirmOv');
-                if (window.KiotToast) window.KiotToast.error(xhr.responseJSON?.message || 'Không thể đổi trạng thái.');
+                if (window.AppToast) window.AppToast.error(xhr.responseJSON?.message || 'Không thể đổi trạng thái.');
             }
         });
     });
@@ -1268,7 +1263,7 @@
        ========================================================================== */
     function bindPaginationEvents() {
         // Phân trang AJAX qua _Pagination.cshtml
-        KiotFilter.bindPagination('#tableContainer', function (page) {
+        AppFilter.bindPagination('#tableContainer', function (page) {
             state.page = page;
             loadTable();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1276,7 +1271,7 @@
     }
 
     // Tìm kiếm F3 Debounce
-    const debouncedSearch = KiotFilter.debounce(function () {
+    const debouncedSearch = AppFilter.debounce(function () {
         state.q = $('#keywordSearch').val();
         state.page = 1;
         loadTable();
@@ -1323,15 +1318,15 @@
         $('#keywordSearch').val('');
         $('#dotNhomNcc').removeClass('active');
         $('#dotTrangThai').removeClass('active');
-        KiotFilter.renderTagPills($('#boxNhomNcc'), [], 'Tất cả các nhóm', 2);
-        $('#dropdownNhomNcc .kiot-ms-item').removeClass('selected').find('input[type="checkbox"]').prop('checked', false);
+        AppFilter.renderTagPills($('#boxNhomNcc'), [], 'Tất cả các nhóm', 2);
+        $('#dropdownNhomNcc .kp-ms-item').removeClass('selected').find('input[type="checkbox"]').prop('checked', false);
         loadTable();
     });
 
     // Nút Xuất file Excel
     $('#btnExportExcel').on('click', function () {
-        if (window.KiotToast) {
-            window.KiotToast.info('Đang chuẩn bị file dữ liệu Excel...');
+        if (window.AppToast) {
+            window.AppToast.info('Đang chuẩn bị file dữ liệu Excel...');
         }
         const params = new URLSearchParams();
         if (state.q && state.q.trim()) params.append('Q', state.q.trim());

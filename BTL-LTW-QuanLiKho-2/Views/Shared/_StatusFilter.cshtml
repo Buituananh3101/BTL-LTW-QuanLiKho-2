@@ -1,12 +1,12 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.Common.KiotStatusFilterVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.Common.StatusFilterVM
 @{
     var title = Model?.Title ?? "Trạng thái";
     var dotId = Model?.DotId ?? "dotSt";
     var containerId = !string.IsNullOrEmpty(Model?.ContainerId) ? Model.ContainerId : "pillsStatus";
-    var isPills = Model?.RenderMode == BTL_LTW_QuanLiKho_2.ViewModels.Common.KiotStatusRenderMode.Pills;
+    var isPills = Model?.RenderMode == BTL_LTW_QuanLiKho_2.ViewModels.Common.StatusRenderMode.Pills;
 }
 
-<div class="f-block position-relative kiot-status-filter-block">
+<div class="f-block position-relative kp-status-filter-block">
     <h6>@title <span class="filter-dot" id="@dotId"></span></h6>
     @if (isPills)
     {

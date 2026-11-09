@@ -4,7 +4,7 @@
     var viCulture = CultureInfo.GetCultureInfo("vi-VN");
 }
 
-<div class="kiot-table-scroll-body">
+<div class="kp-table-scroll-body">
 <table class="tbl" id="productTable" style="width: max-content; min-width: 760px;">
     <thead>
         <tr>
@@ -229,7 +229,7 @@
                                 </div>
 
                                 <!-- Tabs Content -->
-                                <div class="product-detail-tab-content kiot-detail-fixed-wrap">
+                                <div class="product-detail-tab-content kp-detail-fixed-wrap">
                                     <!-- ================= TAB 1: THÔNG TIN ================= -->
                                     <div class="tab-pane-content tab-info">
                                         <div class="d-flex gap-4 align-items-start mb-4">
@@ -246,7 +246,7 @@
                                                     <div class="product-detail-attrs d-flex flex-wrap gap-1 mt-1">
                                                         @foreach (var attr in item.ThuocTinhs)
                                                         {
-                                                            <span class="kiot-attr-chip" title="@attr.Ten: @attr.GiaTri">
+                                                            <span class="kp-attr-chip" title="@attr.Ten: @attr.GiaTri">
                                                                 <span class="chip-label">@attr.Ten</span>
                                                                 <span class="chip-value">@attr.GiaTri</span>
                                                             </span>
@@ -328,6 +328,10 @@
                                                 <button type="button" class="btn btn-outline-secondary btn-sm btn-delete-product" data-id="@item.MaHang" data-name="@item.TenHang">
                                                     <i class="bi bi-trash me-1"></i> Xóa
                                                 </button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm btn-toggle-status-product" data-id="@item.MaHang" data-status="@item.TrangThai" data-name="@item.TenHang">
+                                                    <i class="bi @(item.TrangThai == "DANG_BAN" ? "bi-slash-circle" : "bi-check2-circle") me-1"></i>
+                                                    <span>@(item.TrangThai == "DANG_BAN" ? "Ngừng kinh doanh" : "Cho kinh doanh lại")</span>
+                                                </button>
                                                 <button type="button" class="btn btn-outline-secondary btn-sm btn-copy-product" data-id="@item.MaHang">
                                                     <i class="bi bi-copy me-1"></i> Sao chép
                                                 </button>
@@ -336,7 +340,7 @@
                                                 <button type="button" class="btn btn-primary btn-sm btn-edit-product" data-id="@item.MaHang">
                                                     <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
                                                 </button>
-                                                <button type="button" class="btn btn-outline-secondary btn-sm">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm btn-print-barcode" data-id="@item.MaHang" data-name="@item.TenHang" data-code="@(string.IsNullOrWhiteSpace(item.MaHangNoiBo) ? ("HH" + item.MaHang.ToString("D6")) : item.MaHangNoiBo)" data-price="@item.GiaBan" data-ton="@item.TonKho" title="In tem mã vạch dán hàng hóa">
                                                     <i class="bi bi-printer me-1"></i> In tem mã
                                                 </button>
                                                 <button type="button" class="btn btn-outline-secondary btn-sm">

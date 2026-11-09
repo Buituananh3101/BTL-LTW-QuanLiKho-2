@@ -1,4 +1,4 @@
-# 📦 KhoPro – Hệ Thống Quản Lý Kho Hàng Nội Bộ Đa Chi Nhánh
+﻿# 📦 KhoPro – Hệ Thống Quản Lý Kho Hàng Nội Bộ Đa Chi Nhánh
 
 > **Bài tập lớn môn Lập trình Web** – Xây dựng hệ thống quản trị kho hàng nội bộ chuyên nghiệp, chuẩn hóa theo mô hình thực tế cho chuỗi cung ứng và phân phối hàng hóa đa chi nhánh.
 
@@ -135,25 +135,26 @@ cd BTL-LTW-QuanLiKho-2
 
 ---
 
-### Bước 2: Thiết lập Cơ sở dữ liệu (Chọn 1 trong 2 cách)
+### Bước 2: Thiết lập Cơ sở dữ liệu (Chọn 1 trong 3 cách)
 
-#### 👉 Cách 1: Phục hồi từ file Backup (Nhanh nhất - Khuyên dùng)
-Dự án đã đính kèm sẵn file backup đầy đủ cấu trúc và dữ liệu mẫu kiểm thử:
-📁 `docs/QuanLyKhoPhuQuocLTW.bak`
+#### 👉 Cách 1: Chạy Script tự động 1-Click (Khuyên dùng - Nhanh nhất ⚡)
+Dự án đã tích hợp sẵn script tự động phát hiện SQL Server trên máy và khôi phục toàn bộ CSDL chỉ trong 5 giây:
+1. Mở thư mục `scripts/`
+2. Nhấp đúp chuột chạy file: **`scripts/1_KhoiPhuc_CSDL.bat`**
+3. Script sẽ tự động kết nối SQL Server (`.\SQLEXPRESS`, `.`, `localhost`), tạo CSDL và khôi phục toàn bộ 31 bảng + 2 view + dữ liệu mẫu đầy đủ.
 
-1. Mở **SQL Server Management Studio (SSMS)** và kết nối vào SQL Server của bạn.
+#### 👉 Cách 2: Phục hồi thủ công qua SSMS từ file Backup
+Nếu bạn dùng giao diện **SQL Server Management Studio (SSMS)**:
+1. Mở SSMS và kết nối vào máy chủ SQL Server của bạn.
 2. Click chuột phải vào **Databases** ➜ Chọn **Restore Database...**
-3. Ở mục **Source**, chọn **Device** ➜ Bấm dấu `...` ➜ Bấm **Add** và trỏ tới file `docs/QuanLyKhoPhuQuocLTW.bak`.
+3. Ở mục **Source**, chọn **Device** ➜ Bấm dấu `...` ➜ Bấm **Add** và trỏ tới file:
+   📁 **`docs/QuanLyKhoPhuQuocLTW.bak`**
 4. Bấm **OK**. Toàn bộ CSDL và dữ liệu mẫu sẽ được tạo xong trong 5 giây!
 
-#### 👉 Cách 2: Chạy file Script SQL trọn gói
-Nếu không dùng file backup, mở file sau trong SSMS và bấm **Execute (F5)**:
-📄 `docs/QuanLyKhoPhuQuocLTW_FullScript.sql`
-
-*Hoặc chạy nhanh qua PowerShell/CMD:*
-```powershell
-sqlcmd -S ".\SQLEXPRESS" -E -C -f 65001 -i "docs\QuanLyKhoPhuQuocLTW_FullScript.sql"
-```
+#### 👉 Cách 3: Chạy toàn bộ file Migration SQL tuần tự
+Nếu môi trường không cho phép khôi phục file `.bak`, bạn có thể chạy tuần tự 18 file migration trong thư mục `migrations/sql/`:
+- Nhấp đúp chuột chạy: **`scripts/3_Chay_TatCa_Migration_SQL.bat`**
+- Hoặc mở từng file từ `01_init_schema.sql` đến `18_...` trong SSMS và bấm Execute.
 
 ---
 
@@ -173,6 +174,11 @@ Mở file `BTL-LTW-QuanLiKho-2/appsettings.json`, kiểm tra chuỗi kết nối
 ---
 
 ### Bước 4: Khởi chạy ứng dụng
+
+#### 👉 Cách 1: Chạy bằng 1-Click
+Nhấp đúp chuột vào file: **`scripts/2_Chay_UngDung.bat`**
+
+#### 👉 Cách 2: Chạy bằng dòng lệnh Terminal
 Mở terminal tại thư mục gốc dự án:
 ```bash
 # Khôi phục package và biên dịch
@@ -183,7 +189,7 @@ dotnet run --project BTL-LTW-QuanLiKho-2/BTL-LTW-QuanLiKho-2.csproj
 ```
 
 Mở trình duyệt và truy cập:
-👉 **`https://localhost:5001`** hoặc **`http://localhost:5000`**
+👉 **`https://localhost:7215`** hoặc **`http://localhost:5258`**
 
 ---
 
@@ -239,11 +245,11 @@ BTL-LTW-QuanLiKho-2/
 2. **Tính toàn vẹn dữ liệu qua Transaction**: Mọi thao tác lưu chứng từ kèm chi tiết, chuyển kho 2 bước, cân bằng kho đều được bọc trong `BeginTransactionAsync()`.
 3. **Nguyên tắc bất biến của chứng từ**: Chứng từ đã hoàn thành (`DA_XAC_NHAN`, `DA_NHAN`, `DA_DIEU_CHINH`) bị khóa tuyệt đối, không cho phép sửa/xóa nhằm đảm bảo tính minh bạch kế toán kho.
 4. **Hệ thống Lego UI tái sử dụng**:
-   - Bộ lọc thời gian nhanh `_KiotDateFilter` (Hôm nay, Hôm qua, Tuần này, Tháng này, Tùy chỉnh).
-   - Combobox tìm kiếm và thêm nhanh đối tác `KiotFilter.initCombobox`.
+   - Bộ lọc thời gian nhanh `_DateFilter` (Hôm nay, Hôm qua, Tuần này, Tháng này, Tùy chỉnh).
+   - Combobox tìm kiếm và thêm nhanh đối tác `AppFilter.initCombobox`.
    - Phân trang phân đoạn `_Pagination` hỗ trợ nạp dữ liệu động qua AJAX.
-   - Hộp thoại xác nhận tương tác thay thế native alert `KiotPrompt`.
-   - Thông báo Toast góc màn hình `KiotToast`.
+   - Hộp thoại xác nhận tương tác thay thế native alert `AppPrompt`.
+   - Thông báo Toast góc màn hình `AppToast`.
 5. **Kiến trúc Z-Index 6 tầng**: Ngăn chặn triệt để tình trạng dropdown in-page đè lên Header hoặc Modal bị giam cầm trong Stacking Context cục bộ.
 
 ---

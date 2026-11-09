@@ -1,14 +1,9 @@
 @{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
-    var action = ViewContext.RouteData.Values["action"]?.ToString();
 }
 
 <nav class="mainnav d-none d-lg-flex">
   <ul>
-    <li class="@(controller == "Home" ? "active" : "")">
-      <a asp-controller="Home" asp-action="Index">Tổng quan</a>
-    </li>
-
     <li class="@(controller == "HangHoa" || controller == "PhieuKiemKe" || controller == "XuatHuy" || controller == "ChuyenKho" ? "active" : "")">
       <a href="javascript:void(0)" onclick="return false;">Hàng hóa</a>
       <div class="mega">
@@ -40,20 +35,11 @@
       </div>
     </li>
 
-    <li>
-      <a href="#" onclick="return false;">Đơn hàng</a>
+    <li class="@(controller == "KhachHang" ? "active" : "")">
+      <a href="/KhachHang">Khách hàng</a>
       <div class="mega">
         <div class="mega-col">
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Hóa đơn</a>
-        </div>
-      </div>
-    </li>
-
-    <li>
-      <a href="#" onclick="return false;">Khách hàng</a>
-      <div class="mega">
-        <div class="mega-col">
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Khách hàng</a>
+          <a href="/KhachHang">Khách hàng</a>
         </div>
       </div>
     </li>
@@ -64,8 +50,6 @@
         <div class="mega-col">
           <div class="mega-title">Kho</div>
           <a asp-controller="BaoCao" asp-action="TonKho">Tồn kho theo kho</a>
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Nhập - Xuất - Tồn</a>
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Hàng dưới định mức</a>
           <a asp-controller="BaoCao" asp-action="TheKho">Thẻ kho</a>
         </div>
       </div>
@@ -80,10 +64,8 @@
             <a asp-controller="Kho" asp-action="Index">Kho</a>
             <a asp-controller="NguoiDung" asp-action="Index">Người dùng</a>
           }
-          <a href="#" onclick="alert('Tính năng đang phát triển'); return false;">Nhật ký thao tác</a>
         </div>
       </div>
     </li>
   </ul>
-  <button class="btn-sell" onclick="alert('Màn hình Bán hàng / POS');"><i class="bi bi-cart3"></i>Bán hàng</button>
 </nav>

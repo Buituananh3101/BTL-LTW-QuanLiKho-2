@@ -15,17 +15,18 @@
     let currentPage = parseInt($cfg.data('page'), 10) || 1;
     let pageSize = parseInt($cfg.data('page-size'), 10) || 20;
     let searchDebounceTimer = null;
+    let currentProductText = $('#tkSearchProductInput').val().trim();
 
     // 2. Khởi tạo Sidebar thu gọn (F4)
-    if (window.KiotFilter && typeof KiotFilter.initSidebar === 'function') {
-        KiotFilter.initSidebar({
-            storageKey: 'kiot_thekho_sidebar'
+    if (window.AppFilter && typeof AppFilter.initSidebar === 'function') {
+        AppFilter.initSidebar({
+            storageKey: 'kp_thekho_sidebar'
         });
     }
 
-    // 3. Khởi tạo Bộ lọc Thời gian Lego (_KiotDateFilter)
-    if (window.KiotFilter && typeof KiotFilter.initDateFilter === 'function') {
-        KiotFilter.initDateFilter('thekho_date', function (from, to, text, val) {
+    // 3. Khởi tạo Bộ lọc Thời gian Lego (_KhoProDateFilter)
+    if (window.AppFilter && typeof AppFilter.initDateFilter === 'function') {
+        AppFilter.initDateFilter('thekho_date', function (from, to, text, val) {
             customTuNgay = from ? formatDateParam(from) : '';
             customDenNgay = to ? formatDateParam(to) : '';
             dateRange = val || 'CUSTOM';
@@ -34,11 +35,13 @@
     }
 
     // 4. Khởi tạo Tìm kiếm Mặt hàng Autocomplete F3 Lego (initProductSearch)
-    if (window.KiotFilter && typeof KiotFilter.initProductSearch === 'function') {
-        KiotFilter.initProductSearch({
+    if (window.AppFilter && typeof AppFilter.initProductSearch === 'function') {
+        AppFilter.initProductSearch({
             inputSelector: '#tkSearchProductInput',
             dropdownSelector: '#tkProductSuggestDropdown',
             apiUrl: '/BaoCao/SearchHangHoa',
+            clearOnSelect: false,
+            emptyThumbWhenNoImage: true,
             getWarehouseId: function () {
                 return $('#selectKhoLuuTru').val() || 0;
             },
@@ -54,42 +57,130 @@
         });
     }
 
-    // Cập nhật mặt hàng đang chọn trên sidebar và nạp lại Thẻ kho
+    // Đưa dropdown gợi ý ra body để thoát khỏi overflow: hidden của sidebar, giúp bung rộng to đẹp
+    if ($('#tkProductSuggestDropdown').length && $('#tkProductSuggestDropdown').parent()[0] !== document.body) {
+        $('#tkProductSuggestDropdown').appendTo('body');
+    }
+
+    // Hàm căn chỉnh vị trí động cho dropdown kết quả tìm kiếm hàng hóa
+    function updateSuggestDropdownPosition() {
+        const $inp = $('#tkSearchProductInput');
+        const $drop = $('#tkProductSuggestDropdown');
+        if (!$inp.length || !$drop.length) return;
+        const rect = $inp[0].getBoundingClientRect();
+
+        // Nếu input không còn hiển thị (bị ẩn hoặc cuộn khuất)
+        if (rect.width === 0 || rect.height === 0 || rect.bottom < 0 || rect.top > window.innerHeight) {
+            $drop.removeClass('show').hide();
+            return;
+        }
+
+        const isMobile = window.innerWidth < 640;
+        if (isMobile) {
+            $drop.css({
+                position: 'fixed',
+                top: (rect.bottom + 4) + 'px',
+                left: '10px',
+                right: '10px',
+                width: 'auto',
+                minWidth: '0',
+                maxWidth: 'calc(100vw - 20px)'
+            });
+        } else {
+            const availWidth = window.innerWidth - rect.left - 20;
+            const targetWidth = Math.min(540, Math.max(480, availWidth));
+            $drop.css({
+                position: 'fixed',
+                top: (rect.bottom + 4) + 'px',
+                left: rect.left + 'px',
+                right: 'auto',
+                width: targetWidth + 'px',
+                minWidth: '460px',
+                maxWidth: 'calc(100vw - ' + (rect.left + 16) + 'px)'
+            });
+        }
+    }
+
+    // Cập nhật mặt hàng đang chọn trên ô tìm kiếm và nạp lại Thẻ kho
     function applySelectedProduct(maHang, code, name, dvt, nhom) {
         if (!maHang) return;
         selectedMaHang = maHang;
         $('#selectedMaHang').val(maHang);
 
-        // Đóng dropdown tìm kiếm và xóa từ khóa input
+        // Đóng dropdown tìm kiếm và cập nhật tên hàng vào ô input
         $('#tkProductSuggestDropdown').removeClass('show').hide();
-        $('#tkSearchProductInput').val('');
-
-        // Cập nhật card trên sidebar
-        $('#tkCardProductCode').text(code);
-        $('#tkCardProductName').text(name).attr('title', name);
-        let subHtml = `ĐVT: <strong>${escapeHtml(dvt)}</strong>`;
-        if (nhom) {
-            subHtml += ` · ${escapeHtml(nhom)}`;
-        }
-        $('#tkCardProductSub').html(subHtml);
-        $('#tkSelectedProductCard').removeClass('d-none');
-        $('#tkNoProductHint').addClass('d-none');
+        const displayText = code ? `${code} - ${name}` : name;
+        currentProductText = displayText;
+        $('#tkSearchProductInput').val(displayText).attr('title', displayText);
+        $('#btnRemoveSelectedProduct').removeClass('d-none');
         $('#dotMatHang').addClass('active');
 
         // Tải lại bảng thẻ kho cho mặt hàng mới
         loadData(1);
     }
 
-    // Đảm bảo dropdown luôn cuộn về đầu và không bị kéo lệch
+    // Bôi đen toàn bộ chữ khi click vào ô tìm kiếm để người dùng dễ gõ tìm mặt hàng khác
+    $('#tkSearchProductInput').on('focus', function () {
+        const inp = this;
+        setTimeout(function () {
+            inp.select();
+        }, 50);
+    });
+
+    // Ẩn/hiện nút (x) theo nội dung gõ vào
+    $('#tkSearchProductInput').on('input', function () {
+        if ($(this).val().trim().length === 0) {
+            $('#btnRemoveSelectedProduct').addClass('d-none');
+        } else {
+            $('#btnRemoveSelectedProduct').removeClass('d-none');
+        }
+    });
+
+    // Khi người dùng click ra ngoài mà chưa chọn hàng mới, phục hồi lại tên mặt hàng đang theo dõi
+    $('#tkSearchProductInput').on('blur', function () {
+        setTimeout(function () {
+            if (!$('#tkProductSuggestDropdown').is(':visible')) {
+                if (selectedMaHang > 0 && currentProductText) {
+                    if ($('#tkSearchProductInput').val().trim() !== currentProductText) {
+                        $('#tkSearchProductInput').val(currentProductText);
+                        $('#btnRemoveSelectedProduct').removeClass('d-none');
+                    }
+                } else if (!selectedMaHang) {
+                    if ($('#tkSearchProductInput').val().trim().length > 0) {
+                        $('#tkSearchProductInput').val('');
+                        $('#btnRemoveSelectedProduct').addClass('d-none');
+                    }
+                }
+            }
+        }, 200);
+    });
+
+    // Đảm bảo dropdown luôn được định vị đúng, cuộn về đầu khi mở
     const suggestDropdownEl = document.getElementById('tkProductSuggestDropdown');
     if (suggestDropdownEl && window.MutationObserver) {
         const observer = new MutationObserver(function () {
-            if (suggestDropdownEl.classList.contains('show')) {
+            if (suggestDropdownEl.classList.contains('show') || $(suggestDropdownEl).is(':visible')) {
+                updateSuggestDropdownPosition();
                 suggestDropdownEl.scrollTop = 0;
             }
         });
-        observer.observe(suggestDropdownEl, { childList: true, attributes: true, attributeFilter: ['class'] });
+        observer.observe(suggestDropdownEl, { childList: true, attributes: true, attributeFilter: ['class', 'style'] });
     }
+
+    // Tự động căn lại vị trí khi người dùng gõ tìm kiếm, focus, resize màn hình hoặc cuộn sidebar
+    $('#tkSearchProductInput').on('input focus', function () {
+        updateSuggestDropdownPosition();
+    });
+    $(window).on('resize', function () {
+        if ($('#tkProductSuggestDropdown').hasClass('show') || $('#tkProductSuggestDropdown').is(':visible')) {
+            updateSuggestDropdownPosition();
+        }
+    });
+    $('#side, .kp-filter-box').on('scroll', function () {
+        if ($('#tkProductSuggestDropdown').hasClass('show') || $('#tkProductSuggestDropdown').is(':visible')) {
+            updateSuggestDropdownPosition();
+        }
+    });
 
     // Đóng dropdown tìm kiếm khi click ra ngoài hoặc nhấn phím Escape
     $(document).on('click', function (e) {
@@ -101,6 +192,9 @@
     $(document).on('keydown', function (e) {
         if (e.key === 'Escape') {
             $('#tkProductSuggestDropdown').removeClass('show').hide();
+        } else if (e.key === 'F3' || e.keyCode === 114) {
+            e.preventDefault();
+            $('#tkSearchProductInput').trigger('focus');
         }
     });
 
@@ -116,20 +210,20 @@
         }
     });
 
-    // Sự kiện bỏ chọn mặt hàng trên sidebar
+    // Sự kiện nút xóa (x) mặt hàng đã chọn
     $(document).on('click', '#btnRemoveSelectedProduct', function (e) {
         e.preventDefault();
         e.stopPropagation();
         selectedMaHang = 0;
+        currentProductText = '';
         $('#selectedMaHang').val(0);
-        $('#tkSelectedProductCard').addClass('d-none');
-        $('#tkNoProductHint').removeClass('d-none');
+        $('#btnRemoveSelectedProduct').addClass('d-none');
         $('#dotMatHang').removeClass('active');
-        $('#tkSearchProductInput').val('').focus();
+        $('#tkSearchProductInput').val('').removeAttr('title').focus();
         loadData(1);
     });
 
-    // 5. Khởi tạo Dropdown Single-Select Chi nhánh kho Lego (KiotFilter.initSingleSelect)
+    // 5. Khởi tạo Dropdown Single-Select Chi nhánh kho Lego (AppFilter.initSingleSelect)
     function updateKhoDot(val) {
         const khoId = parseInt(val, 10) || 0;
         const $dot = $('#dotKho');
@@ -140,18 +234,18 @@
         }
     }
 
-    if (window.KiotFilter && typeof KiotFilter.initSingleSelect === 'function') {
-        KiotFilter.initSingleSelect('#boxKho', '#dropdownKho', function (val, text) {
+    if (window.AppFilter && typeof AppFilter.initSingleSelect === 'function') {
+        AppFilter.initSingleSelect('#boxKho', '#dropdownKho', function (val, text) {
             $('#selectKhoLuuTru').val(val);
             selectedMaKho = parseInt(val, 10) || 0;
             updateKhoDot(val);
             loadData(1);
         });
     } else {
-        $('#dropdownKho .kiot-ss-item').on('click', function () {
+        $('#dropdownKho .kp-ss-item').on('click', function () {
             const val = $(this).data('val');
             const text = $(this).find('span').text().trim();
-            $('#dropdownKho .kiot-ss-item').removeClass('selected');
+            $('#dropdownKho .kp-ss-item').removeClass('selected');
             $(this).addClass('selected');
             $('#textKho').text(text);
             $('#selectKhoLuuTru').val(val);
@@ -162,7 +256,7 @@
         });
     }
 
-    // 6. Sự kiện lọc theo loại giao dịch (checkbox Lego _KiotStatusFilter)
+    // 6. Sự kiện lọc theo loại giao dịch (checkbox Lego _KhoProStatusFilter)
     $(document).on('change', 'input[data-s]', function () {
         updateStatusDot();
         loadData(1);
@@ -269,8 +363,8 @@
             },
             error: function () {
                 $content.css('opacity', '1');
-                if (window.KiotToast && typeof KiotToast.error === 'function') {
-                    KiotToast.error('Không thể tải dữ liệu Thẻ kho. Vui lòng thử lại.');
+                if (window.AppToast && typeof AppToast.error === 'function') {
+                    AppToast.error('Không thể tải dữ liệu Thẻ kho. Vui lòng thử lại.');
                 } else {
                     alert('Không thể tải dữ liệu Thẻ kho.');
                 }

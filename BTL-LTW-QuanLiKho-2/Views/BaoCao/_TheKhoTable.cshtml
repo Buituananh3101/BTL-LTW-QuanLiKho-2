@@ -1,23 +1,23 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.TheKhoIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.TheKhoIndexVM
 @{
     var viCulture = new System.Globalization.CultureInfo("vi-VN");
 }
 
 <div class="thekho-table-wrap mb-3">
-    <div class="kiot-table-scroll-body table-responsive">
-        <table class="thekho-table table table-hover align-middle mb-0" id="theKhoTable">
+    <div class="kp-table-scroll-body">
+        <table class="tbl thekho-table" id="theKhoTable" style="width: max-content; min-width: 100%;">
             <thead>
                 <tr>
-                    <th style="width: 45px;" class="text-center">STT</th>
-                    <th style="width: 140px;">Thời gian</th>
-                    <th style="width: 130px;">Mã chứng từ</th>
-                    <th style="width: 125px;">Loại giao dịch</th>
-                    <th style="min-width: 200px;">Đối tác / Diễn giải</th>
-                    <th style="width: 120px;" class="text-end">Đơn giá / Giá vốn</th>
-                    <th style="width: 110px;" class="text-end">Số lượng nhập</th>
-                    <th style="width: 110px;" class="text-end">Số lượng xuất</th>
-                    <th style="width: 110px;" class="text-end">Tồn cuối</th>
-                    <th style="width: 180px;">Ghi chú</th>
+                    <th style="width: 45px; min-width: 45px;" class="text-center">Stt</th>
+                    <th style="width: 140px; min-width: 140px;">Thời gian</th>
+                    <th style="width: 130px; min-width: 130px;">Mã chứng từ</th>
+                    <th style="width: 125px; min-width: 125px;">Loại giao dịch</th>
+                    <th style="width: 220px; min-width: 200px;">Đối tác / Diễn giải</th>
+                    <th style="width: 125px; min-width: 125px;" class="num">Đơn giá / Giá vốn</th>
+                    <th style="width: 110px; min-width: 110px;" class="num">Số lượng nhập</th>
+                    <th style="width: 110px; min-width: 110px;" class="num">Số lượng xuất</th>
+                    <th style="width: 110px; min-width: 110px;" class="num">Tồn cuối</th>
+                    <th style="width: 180px; min-width: 160px;">Ghi chú</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,19 +26,19 @@
                     <!-- 1. DÒNG ĐẶC BIỆT: TỒN ĐẦU KỲ -->
                     <tr class="row-ton-dau">
                         <td class="text-center text-muted">•</td>
-                        <td class="text-muted small">@Model.TongHop.TuNgay.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td class="text-muted small">-</td>
+                        <td class="text-muted text-nowrap">@Model.TongHop.TuNgay.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="text-muted">-</td>
                         <td>
                             <span class="badge-tk badge-kiem-ke">Tồn đầu kỳ</span>
                         </td>
-                        <td class="text-muted fw-semibold">Số dư tồn tính đến đầu kỳ</td>
-                        <td class="text-end text-muted">-</td>
-                        <td class="text-end text-muted">-</td>
-                        <td class="text-end text-muted">-</td>
-                        <td class="text-end fw-bold text-dark">
+                        <td class="text-dark text-nowrap" title="Số dư tồn tính đến đầu kỳ">Số dư tồn tính đến đầu kỳ</td>
+                        <td class="num text-muted">-</td>
+                        <td class="num text-muted">-</td>
+                        <td class="num text-muted">-</td>
+                        <td class="num text-dark fw-semibold">
                             @Model.TongHop.TonDauKy.ToString("#,##0.##", viCulture)
                         </td>
-                        <td class="text-muted small">-</td>
+                        <td class="text-muted">-</td>
                     </tr>
 
                     <!-- 2. CÁC DÒNG GIAO DỊCH BIẾN ĐỘNG TRONG KỲ -->
@@ -59,53 +59,53 @@
                             };
 
                             <tr>
-                                <td class="text-center text-muted small">@dong.Stt</td>
-                                <td class="small text-muted">@dong.NgayGiaoDich.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>
+                                <td class="text-center text-muted">@dong.Stt</td>
+                                <td class="text-muted text-nowrap">@dong.NgayGiaoDich.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-nowrap">
                                     @if (!string.IsNullOrEmpty(dong.UrlChiTiet))
                                     {
-                                        <a href="@dong.UrlChiTiet" class="fw-semibold text-primary text-decoration-none" title="Xem chi tiết chứng từ">
+                                        <a href="@dong.UrlChiTiet" class="text-primary text-decoration-none fw-medium" title="Xem chi tiết chứng từ">
                                             @dong.MaChungTuHienThi
                                         </a>
                                     }
                                     else
                                     {
-                                        <span class="fw-semibold text-dark">@dong.MaChungTuHienThi</span>
+                                        <span class="text-dark">@dong.MaChungTuHienThi</span>
                                     }
                                 </td>
                                 <td>
                                     <span class="badge-tk @badgeClass">@dong.TenLoaiChungTu</span>
                                 </td>
                                 <td>
-                                    <span class="text-dark" title="@dong.DoiTac">@dong.DoiTac</span>
+                                    <span class="text-dark text-truncate d-inline-block" style="max-width: 210px;" title="@dong.DoiTac">@(string.IsNullOrEmpty(dong.DoiTac) ? "-" : dong.DoiTac)</span>
                                 </td>
-                                <td class="text-end text-muted">
+                                <td class="num text-muted text-nowrap">
                                     @(dong.DonGia > 0 ? dong.DonGia.ToString("N0", viCulture) + " ₫" : "-")
                                 </td>
-                                <td class="text-end">
+                                <td class="num text-nowrap">
                                     @if (dong.SoLuongTang > 0)
                                     {
-                                        <span class="text-success fw-bold">+@dong.SoLuongTang.ToString("#,##0.##", viCulture)</span>
+                                        <span class="text-success fw-medium">+@dong.SoLuongTang.ToString("#,##0.##", viCulture)</span>
                                     }
                                     else
                                     {
                                         <span class="text-muted">-</span>
                                     }
                                 </td>
-                                <td class="text-end">
+                                <td class="num text-nowrap">
                                     @if (dong.SoLuongGiam > 0)
                                     {
-                                        <span class="text-danger fw-bold">-@dong.SoLuongGiam.ToString("#,##0.##", viCulture)</span>
+                                        <span class="text-danger fw-medium">-@dong.SoLuongGiam.ToString("#,##0.##", viCulture)</span>
                                     }
                                     else
                                     {
                                         <span class="text-muted">-</span>
                                     }
                                 </td>
-                                <td class="text-end fw-bold text-dark">
+                                <td class="num text-dark fw-semibold text-nowrap">
                                     @dong.TonLuyKe.ToString("#,##0.##", viCulture)
                                 </td>
-                                <td class="text-muted small text-truncate" style="max-width: 180px;" title="@dong.GhiChu">
+                                <td class="text-muted text-truncate" style="max-width: 180px;" title="@dong.GhiChu">
                                     @(dong.GhiChu ?? "-")
                                 </td>
                             </tr>
@@ -114,7 +114,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="10" class="text-center py-4 text-muted fst-italic">
+                            <td colspan="10" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-4 d-block mb-1 text-secondary"></i>
                                 Không phát sinh giao dịch nào trong khoảng thời gian đã chọn
                             </td>
@@ -124,23 +124,23 @@
                     <!-- 3. DÒNG ĐẶC BIỆT: TỒN CUỐI KỲ / TỔNG KẾT PHÁT SINH -->
                     <tr class="row-ton-cuoi">
                         <td class="text-center text-muted">•</td>
-                        <td class="small">@Model.TongHop.DenNgay.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>-</td>
+                        <td class="text-muted text-nowrap">@Model.TongHop.DenNgay.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="text-muted">-</td>
                         <td>
                             <span class="badge-tk badge-nhap">Tồn cuối kỳ</span>
                         </td>
-                        <td class="fw-bold">Tổng phát sinh & số dư cuối kỳ</td>
-                        <td class="text-end">-</td>
-                        <td class="text-end text-success fw-bold">
+                        <td class="text-dark fw-medium text-nowrap" title="Tổng phát sinh & số dư cuối kỳ">Tổng phát sinh & số dư cuối kỳ</td>
+                        <td class="num text-muted">-</td>
+                        <td class="num text-success text-nowrap">
                             +@Model.TongHop.TongNhapKy.ToString("#,##0.##", viCulture)
                         </td>
-                        <td class="text-end text-danger fw-bold">
+                        <td class="num text-danger text-nowrap">
                             -@Model.TongHop.TongXuatKy.ToString("#,##0.##", viCulture)
                         </td>
-                        <td class="text-end fw-bold fs-6">
+                        <td class="num text-dark fw-bold text-nowrap">
                             @Model.TongHop.TonCuoiKy.ToString("#,##0.##", viCulture)
                         </td>
-                        <td class="small">-</td>
+                        <td class="text-muted">-</td>
                     </tr>
                 }
                 else

@@ -1,4 +1,4 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.Common.KiotValueFilterVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.Common.ValueFilterVM
 @{
     var id = Model?.Id ?? "";
     var dotId = !string.IsNullOrEmpty(Model?.DotId) ? Model.DotId : ("dot" + id);
@@ -10,7 +10,7 @@
 
 @if (hasTitle)
 {
-    <div class="f-block position-relative kiot-value-filter-block">
+    <div class="f-block position-relative kp-value-filter-block">
         <h6>@Model!.Title <span class="filter-dot" id="@dotId"></span></h6>
         @if (hasSubTitle)
         {

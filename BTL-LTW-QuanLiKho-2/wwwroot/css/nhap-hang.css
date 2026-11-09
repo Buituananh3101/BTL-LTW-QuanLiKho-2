@@ -1,5 +1,5 @@
-/* ==========================================================================
-   CSS CHO MÔ-ĐUN NHẬP HÀNG (CHUẨN THỰC TẾ KIOTVIET)
+﻿/* ==========================================================================
+   CSS CHO MÔ-ĐUN NHẬP HÀNG (CHUẨN THỰC TẾ KHOPRO)
    ========================================================================== */
 
 /* 1. Master-Detail Inline Panel & Tabs */
@@ -28,7 +28,7 @@
     border-bottom: 2px solid #0070f4 !important;
 }
 
-/* 2. Container Bảng & Cuộn Nhập Hàng chuẩn KiotViet */
+/* 2. Container Bảng & Cuộn Nhập Hàng chuẩn KhoPro */
 #content {
     flex: 1;
     min-height: 0;
@@ -41,7 +41,7 @@
 }
 
 #tableContainer,
-.kiot-table-wrapper {
+.kp-table-wrapper {
     flex: 1 1 auto;
     min-height: 0;
     height: 100%;
@@ -52,7 +52,7 @@
     width: 100%;
 }
 
-.kiot-table-scroll-body {
+.kp-table-scroll-body {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto !important;

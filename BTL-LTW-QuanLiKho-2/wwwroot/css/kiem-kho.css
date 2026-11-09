@@ -1,4 +1,4 @@
-/* kiem-kho.css - KiotViet Standard Styling for Stock Take Module (Khớp 100% prototype-kiemkho-full.html) */
+﻿/* kiem-kho.css - KhoPro Standard Styling for Stock Take Module (Khớp 100% prototype-kiemkho-full.html) */
 :root {
   --nav: #0a66e8;
   --nav-d: #0852bd;
@@ -572,7 +572,7 @@ table.tbl { border-collapse: separate; border-spacing: 0; width: 100%; min-width
 }
 .dp-actions .sp { flex: 1; }
 
-/* Khối thông tin chi tiết phiếu kiểm kho có độ rộng cố định 992px chuẩn KiotViet & Nhà cung cấp */
+/* Khối thông tin chi tiết phiếu kiểm kho có độ rộng cố định 992px chuẩn KhoPro & Nhà cung cấp */
 .kk-detail-fixed-wrap {
   width: 992px;
   max-width: 100%;
@@ -1484,17 +1484,17 @@ table.tbl { border-collapse: separate; border-spacing: 0; width: 100%; min-width
 /* ==========================================================================
    CHUẨN HÓA GIAO DIỆN KIỂM KHO THEO KHUÔN MẪU DANH SÁCH HÀNG HÓA
    ========================================================================== */
-.kiot-filter-box .f-block {
+.kp-filter-box .f-block {
   margin-bottom: 14px;
   padding-bottom: 12px;
   border-bottom: 1px solid #f3f4f6;
   position: relative;
 }
-.kiot-filter-box .f-block:last-child {
+.kp-filter-box .f-block:last-child {
   border-bottom: none;
   margin-bottom: 0;
 }
-.kiot-filter-box .f-block h6 {
+.kp-filter-box .f-block h6 {
   font-weight: 700;
   font-size: 13px;
   margin: 0 0 8px;
@@ -1503,7 +1503,7 @@ table.tbl { border-collapse: separate; border-spacing: 0; width: 100%; min-width
   align-items: center;
   gap: 6px;
 }
-.kiot-filter-box .selbox {
+.kp-filter-box .selbox {
   height: 32px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -1514,22 +1514,22 @@ table.tbl { border-collapse: separate; border-spacing: 0; width: 100%; min-width
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-.kiot-filter-box .selbox:hover {
+.kp-filter-box .selbox:hover {
   border-color: #0a66e8;
 }
 
 /* Nút xoay spinning khi tải lại bảng */
 .btn-tool.spinning i {
   display: inline-block;
-  animation: kiotSpin 0.6s linear infinite;
+  animation: khoproSpin 0.6s linear infinite;
 }
-@keyframes kiotSpin {
+@keyframes khoproSpin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
 /* Khung bọc bảng chiếm trọn 100% flex column giống Hàng hóa */
-.kiot-table-wrapper {
+.kp-table-wrapper {
   flex: 1 1 auto;
   min-height: 0;
   height: 100%;
@@ -1540,7 +1540,7 @@ table.tbl { border-collapse: separate; border-spacing: 0; width: 100%; min-width
   position: relative;
 }
 
-/* Bảng Kiểm kho giữ độ rộng cột cố định chuẩn KiotViet & Nhà cung cấp */
+/* Bảng Kiểm kho giữ độ rộng cột cố định chuẩn KhoPro & Nhà cung cấp */
 #stockTakeTable {
   width: max-content !important;
   min-width: 760px !important;
@@ -1549,7 +1549,7 @@ table.tbl { border-collapse: separate; border-spacing: 0; width: 100%; min-width
   border-spacing: 0 !important;
 }
 
-.kiot-table-scroll-body {
+.kp-table-scroll-body {
   scrollbar-gutter: stable;
 }
 

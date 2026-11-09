@@ -1,10 +1,10 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.ChuyenKho.ChuyenKhoIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.ChuyenKho.ChuyenKhoIndexVM
 @using System.Globalization
 @{
     var viCulture = CultureInfo.GetCultureInfo("vi-VN");
 }
 
-<div class="kiot-table-scroll-body">
+<div class="kp-table-scroll-body">
     <table class="tbl" id="transferTable" style="width: max-content; min-width: 760px;">
         <thead>
             <tr>
@@ -201,7 +201,7 @@
                             <div class="product-detail-panel-wrap" style="display: none;">
                                 <div class="product-detail-panel dp" data-d="@item.MaPhieuChuyen">
                                     <div class="dp-tabs"><button type="button" class="dp-tab active" data-tab="info">Thông tin</button></div>
-                                    <div class="kk-detail-fixed-wrap kiot-detail-fixed-wrap">
+                                    <div class="kk-detail-fixed-wrap kp-detail-fixed-wrap">
                                         <h2 class="d-flex align-items-center gap-2">
                                             <span class="fw-bold" style="font-size: 18px; color: #1e293b;">@item.MaPhieuHienThi</span>
                                             @if (item.TrangThai == "DA_NHAN")
@@ -218,7 +218,7 @@
                                             }
                                             else
                                             {
-                                                <span class="badge bg-warning-subtle text-warning border-0 px-2 py-1 rounded-pill" style="font-weight: 500; font-size: 12px;">Phiếu tạm</span>
+                                                <span class="badge bg-primary-subtle text-primary border-0 px-2 py-1 rounded-pill" style="font-weight: 500; font-size: 12px;">Phiếu tạm</span>
                                             }
                                         </h2>
                                         <div class="meta text-muted small mt-2">
@@ -358,9 +358,7 @@
                                                     <i class="bi bi-floppy me-1"></i>Lưu
                                                 </button>
                                             }
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print();">
-                                                <i class="bi bi-printer me-1"></i>In
-                                            </button>
+                                            <a href="@Url.Action("Print", "ChuyenKho", new { id = item.MaPhieuChuyen })" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer me-1"></i>In</a>
                                             @if (item.TrangThai == "NHAP")
                                             {
                                                 bool canSend = Model.CurrentKhoId == item.MaKhoNguon || Model.CurrentKhoId == 0;

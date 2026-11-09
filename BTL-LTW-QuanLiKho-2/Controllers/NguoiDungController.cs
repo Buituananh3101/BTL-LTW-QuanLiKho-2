@@ -395,6 +395,153 @@ public class NguoiDungController : BaseKhoController
     }
 
     /// <summary>
+    /// Xóa người dùng chưa phát sinh giao dịch. Nếu đã có giao dịch, chỉ cho phép khóa tài khoản.
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> Delete(int id, bool chuyenKhoa = false)
+    {
+        if (id == CurrentUserId)
+        {
+            return Json(new { success = false, message = "Bạn không thể tự xóa tài khoản của chính mình." });
+        }
+
+        var taiKhoan = await _context.TaiKhoans
+            .Include(t => t.MaNvNavigation)
+            .Include(t => t.TaiKhoanKhos)
+            .FirstOrDefaultAsync(t => t.MaTaiKhoan == id);
+
+        if (taiKhoan == null)
+        {
+            return Json(new { success = false, message = "Không tìm thấy người dùng." });
+        }
+
+        // Không cho phép xóa hoặc khóa tài khoản admin gốc
+        if (taiKhoan.TenDangNhap.Equals("admin", StringComparison.OrdinalIgnoreCase) ||
+            taiKhoan.TenDangNhap.Equals("quanly", StringComparison.OrdinalIgnoreCase))
+        {
+            return Json(new { success = false, message = "Không thể thao tác trên tài khoản quản trị hệ thống gốc." });
+        }
+
+        int maNv = taiKhoan.MaNv;
+        bool hasTransaction = await KiemTraNhanVienCoGiaoDichAsync(maNv);
+
+        if (hasTransaction)
+        {
+            // Đã có giao dịch: Nếu người dùng xác nhận chuyển sang khóa tài khoản
+            if (chuyenKhoa)
+            {
+                if (taiKhoan.TrangThai == "KHOA")
+                {
+                    return Json(new { success = true, action = "ALREADY_LOCKED", message = $"Tài khoản '{taiKhoan.TenDangNhap}' vốn đã ở trạng thái khóa." });
+                }
+
+                taiKhoan.TrangThai = "KHOA";
+                if (taiKhoan.MaNvNavigation != null)
+                {
+                    taiKhoan.MaNvNavigation.TrangThai = "NGHI_VIEC";
+                }
+                await _context.SaveChangesAsync();
+
+                await _nhatKyService.GhiNhatKyAsync(
+                    CurrentUserId,
+                    "Khóa",
+                    "TaiKhoan",
+                    taiKhoan.MaTaiKhoan.ToString(),
+                    $"Khóa tài khoản '{taiKhoan.TenDangNhap}' do đã phát sinh chứng từ không thể xóa"
+                );
+
+                return Json(new
+                {
+                    success = true,
+                    action = "LOCKED",
+                    message = $"Người dùng '{taiKhoan.TenDangNhap}' đã phát sinh giao dịch. Đã chuyển trạng thái sang Khóa tài khoản thành công."
+                });
+            }
+
+            // Nếu chưa bấm xác nhận chuyển sang khóa -> báo về cho client biết để hỏi xác nhận
+            return Json(new
+            {
+                success = false,
+                hasTransaction = true,
+                isLocked = taiKhoan.TrangThai == "KHOA",
+                message = $"Người dùng '{taiKhoan.TenDangNhap}' đã phát sinh chứng từ trong hệ thống, không thể xóa vĩnh viễn."
+            });
+        }
+
+        // Chưa phát sinh giao dịch -> Cho phép xóa vĩnh viễn
+        using var trans = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            var username = taiKhoan.TenDangNhap;
+
+            // 1. Xóa phân quyền kho
+            if (taiKhoan.TaiKhoanKhos.Any())
+            {
+                _context.TaiKhoanKhos.RemoveRange(taiKhoan.TaiKhoanKhos);
+            }
+
+            // 2. Dọn nhật ký thao tác do người dùng này tạo nếu có
+            var nhatKyList = await _context.NhatKyThaoTacs.Where(n => n.MaTaiKhoan == id).ToListAsync();
+            if (nhatKyList.Any())
+            {
+                _context.NhatKyThaoTacs.RemoveRange(nhatKyList);
+            }
+
+            // 3. Xóa tài khoản
+            _context.TaiKhoans.Remove(taiKhoan);
+            await _context.SaveChangesAsync();
+
+            // 4. Xóa nhân viên nếu không còn tài khoản nào khác trỏ tới
+            if (taiKhoan.MaNvNavigation != null)
+            {
+                bool otherAccounts = await _context.TaiKhoans.AnyAsync(t => t.MaNv == maNv && t.MaTaiKhoan != id);
+                if (!otherAccounts)
+                {
+                    _context.NhanViens.Remove(taiKhoan.MaNvNavigation);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            await _nhatKyService.GhiNhatKyAsync(
+                CurrentUserId,
+                "Xóa",
+                "TaiKhoan",
+                id.ToString(),
+                $"Xóa vĩnh viễn người dùng '{username}' (chưa phát sinh giao dịch)"
+            );
+
+            await trans.CommitAsync();
+
+            return Json(new
+            {
+                success = true,
+                action = "DELETED",
+                message = $"Đã xóa vĩnh viễn người dùng '{username}' thành công."
+            });
+        }
+        catch (Exception ex)
+        {
+            await trans.RollbackAsync();
+            return Json(new { success = false, message = "Đã xảy ra lỗi khi xóa người dùng: " + ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Kiểm tra nhân viên đã phát sinh bất kỳ chứng từ/giao dịch nào trong hệ thống chưa
+    /// </summary>
+    private async Task<bool> KiemTraNhanVienCoGiaoDichAsync(int maNv)
+    {
+        return await _context.DonBans.AnyAsync(d => d.MaNvlap == maNv) ||
+               await _context.KhoanThus.AnyAsync(k => k.MaNvthu == maNv) ||
+               await _context.PhieuChuyenKhos.AnyAsync(p => p.MaNvlap == maNv || p.MaNvnhan == maNv || p.MaNvxuat == maNv) ||
+               await _context.PhieuDieuChinhs.AnyAsync(p => p.MaNvduyet == maNv || p.MaNvlap == maNv) ||
+               await _context.PhieuKiemKes.AnyAsync(p => p.MaNvlap == maNv) ||
+               await _context.PhieuNhaps.AnyAsync(p => p.MaNvlap == maNv || p.MaNvxacNhan == maNv) ||
+               await _context.PhieuXuats.AnyAsync(p => p.MaNvlap == maNv || p.MaNvxacNhan == maNv) ||
+               await _context.PhieuTraHangNhaps.AnyAsync(p => p.MaNvlap == maNv || p.MaNvtra == maNv);
+    }
+
+    /// <summary>
     /// Hàm xây dựng PagedResult phân trang và lọc cho danh sách người dùng
     /// </summary>
     private async Task<PagedResult<NguoiDungItemVM>> BuildPagedResultAsync(NguoiDungFilterParams filter)

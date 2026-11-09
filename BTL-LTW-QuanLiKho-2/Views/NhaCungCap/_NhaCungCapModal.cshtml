@@ -1,4 +1,4 @@
-﻿@using BTL_LTW_QuanLiKho_2.Models
+@using BTL_LTW_QuanLiKho_2.Models
 @using BTL_LTW_QuanLiKho_2.ViewModels.NhaCungCap
 @using BTL_LTW_QuanLiKho_2.ViewModels.NhapHang
 @model dynamic
@@ -218,7 +218,7 @@
     </div>
     <div class="hh-m-body">
       <div class="hh-f" id="nccPromptFld">
-        <label for="nccPromptInput" id="nccPromptLabel">Tên nhóm</label>
+        <label for="nccPromptInput" id="nccPromptLabel">Tên nhóm <span style="color:var(--hh-danger)">*</span></label>
         <input type="text" id="nccPromptInput" placeholder="Nhập tên nhóm nhà cung cấp..." autocomplete="off" />
         <span class="hh-err" id="nccPromptErr">Vui lòng nhập tên nhóm.</span>
       </div>
@@ -245,7 +245,7 @@
     <div class="hh-m-body">
       <input type="hidden" id="nccEditGroupId" value="0" />
       <div class="hh-f" id="nccEditGroupFld">
-        <label for="nccEditGroupInput">Tên nhóm</label>
+        <label for="nccEditGroupInput">Tên nhóm <span style="color:var(--hh-danger)">*</span></label>
         <input type="text" id="nccEditGroupInput" autocomplete="off" />
         <span class="hh-err" id="nccEditGroupErr">Vui lòng nhập tên nhóm.</span>
       </div>

@@ -41,7 +41,7 @@ $(function () {
 
     function p2(n) { return String(n).padStart(2, '0'); }
 
-    /* ===== 2. POPUP CHỌN NGÀY GIỜ (LEGO KIOTDATETIMEPICKER) ===== */
+    /* ===== 2. POPUP CHỌN NGÀY GIỜ (LEGO KHOPRODATETIMEPICKER) ===== */
     const $fDateIso = $('#fDateIso');
     function formatLocalIso(d) {
         if (!d || isNaN(d.getTime())) return '';
@@ -55,8 +55,8 @@ $(function () {
         if (!isNaN(d.getTime())) createdDate = d;
     }
 
-    const dtPicker = (window.KiotFilter && typeof KiotFilter.initDateTimePicker === 'function')
-        ? KiotFilter.initDateTimePicker({
+    const dtPicker = (window.AppFilter && typeof AppFilter.initDateTimePicker === 'function')
+        ? AppFilter.initDateTimePicker({
             inputSelector: '#fDateInp',
             popupSelector: '#dtPop',
             isReadOnly: isReadOnly,
@@ -166,7 +166,7 @@ $(function () {
             const newQty = digits($qtyInp.val()) + qty;
             $qtyInp.val(fmt(newQty));
             recalculateTotals();
-            if (window.KiotToast) KiotToast.info(`${p.name}: số lượng = ${newQty}`);
+            if (window.AppToast) AppToast.info(`${p.name}: số lượng = ${newQty}`);
             return;
         }
 
@@ -198,7 +198,7 @@ $(function () {
                     <span>${fmt(p.cost || 0)}</span>
                 </td>
                 <td class="text-end">
-                    <input type="text" class="inp text-end line-price kiot-num" value="${fmt(price)}" inputmode="numeric" style="width: 105px; height: 32px;" />
+                    <input type="text" class="inp text-end line-price kp-num" value="${fmt(price)}" inputmode="numeric" style="width: 105px; height: 32px;" />
                 </td>
                 <td class="text-end fw-bold text-dark line-total">
                     ${fmt(qty * price)}
@@ -231,9 +231,9 @@ $(function () {
         recalculateTotals();
     });
 
-    /* ===== 4. AUTOCOMPLETE HÀNG HÓA F3 DÙNG LEGO KIOTFILTER.INITPRODUCTSEARCH ===== */
-    if (!isReadOnly && window.KiotFilter && typeof KiotFilter.initProductSearch === 'function') {
-        KiotFilter.initProductSearch({
+    /* ===== 4. AUTOCOMPLETE HÀNG HÓA F3 DÙNG LEGO KHOPROFILTER.INITPRODUCTSEARCH ===== */
+    if (!isReadOnly && window.AppFilter && typeof AppFilter.initProductSearch === 'function') {
+        AppFilter.initProductSearch({
             inputSelector: '#productSearchInput',
             dropdownSelector: '#autocompleteDropdown',
             apiUrl: searchProductsUrl,
@@ -416,7 +416,7 @@ $(function () {
         formData.append('file', file);
         formData.append('warehouseId', warehouseId);
 
-        if (window.KiotToast) KiotToast.info('Đang đối soát dữ liệu file với hệ thống...');
+        if (window.AppToast) AppToast.info('Đang đối soát dữ liệu file với hệ thống...');
 
         $.ajax({
             url: importUrl,
@@ -431,18 +431,18 @@ $(function () {
                         addProductLine(item, item.qty, item.price);
                         importedCount++;
                     });
-                    if (window.KiotToast) {
-                        KiotToast.success(`Đã nạp thành công ${importedCount} mặt hàng từ file!`);
+                    if (window.AppToast) {
+                        AppToast.success(`Đã nạp thành công ${importedCount} mặt hàng từ file!`);
                     }
                 } else {
-                    if (window.KiotToast) {
-                        KiotToast.warning(res?.message || 'Không tìm thấy mặt hàng nào phù hợp trong file.');
+                    if (window.AppToast) {
+                        AppToast.warning(res?.message || 'Không tìm thấy mặt hàng nào phù hợp trong file.');
                     }
                 }
             },
             error: function (xhr) {
                 const msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Lỗi khi nhập file dữ liệu.';
-                if (window.KiotToast) KiotToast.error(msg);
+                if (window.AppToast) AppToast.error(msg);
             },
             complete: function () {
                 $('#excelFileInput').val('');
@@ -534,7 +534,7 @@ $(function () {
             data: JSON.stringify(payload),
             success: function (res) {
                 if (res?.success) {
-                    if (window.KiotToast) KiotToast.success(res.message);
+                    if (window.AppToast) AppToast.success(res.message);
                     setTimeout(function () {
                         window.location.href = indexUrl;
                     }, 500);

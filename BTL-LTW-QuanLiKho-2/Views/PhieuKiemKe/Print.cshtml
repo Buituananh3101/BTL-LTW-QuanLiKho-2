@@ -1,0 +1,132 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.PhieuKiemKeFormVM
+@{
+    Layout = "_PrintLayout";
+    ViewData["Title"] = $"Biên bản kiểm kê {Model.MaPhieuHienThi}";
+    var vi = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+    int stt = 1;
+    decimal tongSoTheoSo = Model.Lines.Sum(l => l.SoLuongTheoSo);
+    decimal tongSoThucTe = Model.Lines.Sum(l => l.SoLuongThucTe ?? l.SoLuongTheoSo);
+    decimal tongGiaTriLech = Model.Lines.Sum(l => l.GiaTriLech ?? 0);
+}
+
+<div class="voucher-title-wrap">
+    <div class="voucher-title">Biên Bản Kiểm Kê Kho Hàng</div>
+    <div class="voucher-code">Mã phiếu: @Model.MaPhieuHienThi</div>
+    <div class="voucher-date">Thời điểm chốt số liệu: @Model.ThoiDiemChot.ToString("dd/MM/yyyy HH:mm")</div>
+</div>
+
+<div class="voucher-meta-grid">
+    <div class="voucher-meta-item">
+        <span class="lbl">Chi nhánh kho kiểm kê:</span>
+        <span class="val">@Model.TenKho</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Người lập biên bản:</span>
+        <span class="val">@Model.TenNguoiLap</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Người duyệt cân bằng:</span>
+        <span class="val">@(Model.TenNguoiCanBang ?? "Chưa cân bằng")</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Thời điểm cân bằng:</span>
+        <span class="val">@(Model.NgayCanBang?.ToString("dd/MM/yyyy HH:mm") ?? "---")</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Trạng thái biên bản:</span>
+        <span class="val">@(Model.TrangThai == "DA_DIEU_CHINH" || Model.TrangThai == "DA_CAN_BANG" ? "Đã cân bằng kho" : (Model.TrangThai == "HUY" ? "Đã hủy bỏ" : "Đang kiểm kê (Phiếu tạm)"))</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Ghi chú đợt kiểm:</span>
+        <span class="val">@(string.IsNullOrEmpty(Model.GhiChu) ? "Không có" : Model.GhiChu)</span>
+    </div>
+</div>
+
+<table class="voucher-table">
+    <thead>
+        <tr>
+            <th style="width: 40px;" class="text-center">STT</th>
+            <th style="width: 110px;">Mã hàng</th>
+            <th>Tên hàng hóa</th>
+            <th style="width: 60px;" class="text-center">ĐVT</th>
+            <th style="width: 80px;" class="text-end">Tồn sổ sách</th>
+            <th style="width: 80px;" class="text-end">Tồn thực tế</th>
+            <th style="width: 75px;" class="text-end">Lệch (SL)</th>
+            <th style="width: 100px;" class="text-end">Đơn giá vốn</th>
+            <th style="width: 115px;" class="text-end">Giá trị lệch</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var line in Model.Lines)
+        {
+            var slThuc = line.SoLuongThucTe ?? line.SoLuongTheoSo;
+            var slLech = line.SlChenhLech ?? 0;
+            var gtLech = line.GiaTriLech ?? 0;
+            <tr>
+                <td class="text-center">@(stt++)</td>
+                <td class="barcode">@line.MaHangNoiBo</td>
+                <td><strong>@line.TenHang</strong></td>
+                <td class="text-center">@line.TenDvt</td>
+                <td class="text-end">@line.SoLuongTheoSo.ToString("N0", vi)</td>
+                <td class="text-end fw-bold">@(line.SoLuongThucTe.HasValue ? line.SoLuongThucTe.Value.ToString("N0", vi) : "Chưa kiểm")</td>
+                <td class="text-end @(slLech > 0 ? "text-success fw-bold" : (slLech < 0 ? "text-danger fw-bold" : ""))">
+                    @(slLech > 0 ? "+" + slLech.ToString("N0", vi) : slLech.ToString("N0", vi))
+                </td>
+                <td class="text-end">@line.DonGia.ToString("N0", vi) đ</td>
+                <td class="text-end @(gtLech > 0 ? "text-success fw-bold" : (gtLech < 0 ? "text-danger fw-bold" : ""))">
+                    @(gtLech > 0 ? "+" + gtLech.ToString("N0", vi) + " đ" : gtLech.ToString("N0", vi) + " đ")
+                </td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr class="fw-bold">
+            <td colspan="4" class="text-end">TỔNG CỘNG:</td>
+            <td class="text-end">@tongSoTheoSo.ToString("N0", vi)</td>
+            <td class="text-end">@tongSoThucTe.ToString("N0", vi)</td>
+            <td class="text-end">@((tongSoThucTe - tongSoTheoSo).ToString("N0", vi))</td>
+            <td></td>
+            <td class="text-end">@tongGiaTriLech.ToString("N0", vi) đ</td>
+        </tr>
+    </tfoot>
+</table>
+
+<div class="voucher-summary">
+    <div class="voucher-summary-box">
+        <div class="voucher-summary-row">
+            <span>Tổng tồn sổ sách:</span>
+            <span>@tongSoTheoSo.ToString("N0", vi)</span>
+        </div>
+        <div class="voucher-summary-row">
+            <span>Tổng tồn thực tế kiểm:</span>
+            <span>@tongSoThucTe.ToString("N0", vi)</span>
+        </div>
+        <div class="voucher-summary-row total-row">
+            <span>Tổng chênh lệch giá trị:</span>
+            <span>@tongGiaTriLech.ToString("N0", vi) đ</span>
+        </div>
+    </div>
+</div>
+
+<div class="voucher-signatures">
+    <div class="sig-col">
+        <div class="sig-title">Người lập biên bản</div>
+        <div class="sig-sub">(Ký, họ tên)</div>
+        <div class="sig-name">@Model.TenNguoiLap</div>
+    </div>
+    <div class="sig-col">
+        <div class="sig-title">Trưởng ban kiểm kê</div>
+        <div class="sig-sub">(Ký, họ tên)</div>
+        <div class="sig-name"></div>
+    </div>
+    <div class="sig-col">
+        <div class="sig-title">Thủ kho chịu trách nhiệm</div>
+        <div class="sig-sub">(Ký, họ tên)</div>
+        <div class="sig-name"></div>
+    </div>
+    <div class="sig-col">
+        <div class="sig-title">Giám đốc / Người phê duyệt</div>
+        <div class="sig-sub">(Ký, họ tên)</div>
+        <div class="sig-name">@(Model.TenNguoiCanBang ?? "")</div>
+    </div>
+</div>

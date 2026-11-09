@@ -1,4 +1,4 @@
-/* tra-hang-nhap.css - Định kiểu cho phân hệ Trả hàng nhập chuẩn KiotViet & Kiểm kho */
+﻿/* tra-hang-nhap.css - Định kiểu cho phân hệ Trả hàng nhập chuẩn KhoPro & Kiểm kho */
 
 /* 1. Bảng dữ liệu Trả hàng nhập */
 #receiptTable {
@@ -47,7 +47,7 @@
     border-right: 3px solid #0070f3 !important;
 }
 
-/* Khung chi tiết cố định 992px chuẩn Nhà cung cấp & KiotViet (không kéo dài theo độ rộng bảng) */
+/* Khung chi tiết cố định 992px chuẩn Nhà cung cấp & KhoPro (không kéo dài theo độ rộng bảng) */
 .thn-detail-fixed-wrap,
 .ncc-detail-fixed-wrap {
     width: 992px !important;
@@ -521,7 +521,7 @@
     background-color: #0852bd !important;
 }
 
-/* 7. Dropdown Người trả tùy chỉnh chuẩn Chuyển kho & KiotViet */
+/* 7. Dropdown Người trả tùy chỉnh chuẩn Chuyển kho & KhoPro */
 .payer-custom-select-btn,
 .wh-custom-select-btn {
     border: 1px solid #cbd5e1 !important;

@@ -12,8 +12,8 @@
 - **Service & Helper**: `IHangHoaExcelService.cs`, `HangHoaExcelService.cs`, `ExcelHelper.cs`, `ITonKhoService.cs`, `TonKhoService.cs`.
 - **ViewModel**: `ViewModels/HangHoa/` (`HangHoaForm.cs`, `HangHoaFilterParams.cs`, `ExportHangHoaRequest.cs`, `ImportHangHoaResult.cs`).
 - **View & Partial**: `Views/HangHoa/Index.cshtml`, `_HangHoaFilterSidebar.cshtml`, `_HangHoaExcelActions.cshtml`, `_HangHoaTable.cshtml` (+ `_Pagination.cshtml`).
-- **Modal Modun**: `_HangHoaModal.cshtml`, `_HangHoaExportModal.cshtml`, `_HangHoaImportModal.cshtml`.
-- **Styles & Scripts**: `kiot-filter.js`, `hang-hoa-index.js`, `hang-hoa-form.js`, `hang-hoa-excel.js`.
+- **Modal Modun**: `_HangHoaModal.cshtml`, `_HangHoaExportModal.cshtml`, `_HangHoaImportModal.cshtml`, `_HangHoaBarcodeModal.cshtml`.
+- **Styles & Scripts**: `app-filter.js`, `hang-hoa-index.js`, `hang-hoa-form.js`, `hang-hoa-excel.js`, `hang-hoa-barcode.js`, `hang-hoa-barcode.css`.
 - **DbContext & Entity**: `QuanLyKhoPhuQuocLtwContext`, Entity (`HangHoa`, `HinhAnhHangHoa`, `NhomHang`, `DonViTinh`, `NguongTonKho`, `VwTonKhoHienTai`).
 
 ### 1.2. Bảng CSDL tham gia:
@@ -34,9 +34,13 @@
 | **Thêm mới hàng** | "+ Thêm mới", nhập form, "Lưu" | JS gom form + Base64 ➜ `POST /HangHoa/Create` | `Create(...)` validate, sinh mã hàng | Lưu CSDL + PN đầu kỳ ➜ JSON `{success:true}` |
 | **Mở form Sửa** | Click Chỉnh sửa | JS AJAX `GET /HangHoa/GetItem?id=X` | `GetItem(id)` đọc hàng & tồn | Trả JSON ➜ điền modal sửa |
 | **Lưu Sửa hàng** | Sửa form, "Cập nhật" | JS gom form ➜ AJAX `POST /HangHoa/Edit?id=X` | `Edit(id, form)` validate & cập nhật | Lưu CSDL ➜ JSON `{success:true}` |
-| **Xóa hàng** | Click Xóa ➜ Xác nhận | Mở `#hhDeleteProductOv` ➜ AJAX `POST /HangHoa/Delete/{id}` | `Delete(id)` check 5 bảng GD, bọc Trans | Chưa GD: Xóa. Đã có: Báo chặn & gợi ý ngừng bán |
+| **Xóa hàng** | Click Xóa ➜ Xác nhận modal chuẩn Nhà Cung Cấp | Mở modal xác nhận thông thường. Khi bấm "Đồng ý xóa", gửi `POST /Delete` kiểm tra ràng buộc. Nếu đã có GD ➜ hiện hộp cảnh báo không thể xóa & nút chuyển Ngừng kinh doanh ngay | `Delete(id)` check 6 bảng GD, bọc Trans | Chưa GD: Xóa hoàn tất. Đã có GD: Chặn xóa vĩnh viễn, hướng dẫn ngừng kinh doanh |
+| **Khóa / Mở kinh doanh** | Click "Ngừng kinh doanh" / "Cho kinh doanh lại" | Mở modal `#hhStatusConfirmOv` xác nhận chuyển trạng thái | `POST /HangHoa/ToggleStatus?id=X` | Cập nhật `DANG_BAN` ↔ `NGUNG_BAN`, thông báo AppToast & reload bảng |
 | **Xuất file Excel** | Bấm "Xuất file" ➜ Chọn cột ➜ Bấm Xuất | Mở `#hhExportModalOv` ➜ `POST /HangHoa/ExportExcel` | ClosedXML xuất đúng cột chọn | Trả file `.xlsx` |
 | **Nhập file Excel** | Kéo thả file ➜ Thực hiện nhập | Mở `#hhImportModalOv` ➜ `POST /HangHoa/ImportExcel` | Validate, parse 16 trường, xử lý trùng mã | Commit Trans ➜ reload bảng |
+
+| **In tem mã** | Bấm "In tem mã" trên dòng chi tiết | Mở modal `#hhBarcodeModalOv`, live preview mã vạch SVG Code 128 | Client-side thuần JS (zero-dependency) | In qua `window.print()` khổ 35x22, 50x30, A4 |
+| **Sửa/Xóa nhanh ĐVT & Nhóm** | Hover item trong dropdown ĐVT/Nhóm ➜ Click icon ✎ | Mở Lego `AppPrompt` cho phép sửa tên hoặc xóa | `UpdateDvtQuick`, `DeleteDvtQuick`, `UpdateGroupQuick`, `DeleteGroupQuick` kiểm tra trùng tên & ràng buộc dữ liệu | Trả JSON, cập nhật DOM tức thì và reload bảng |
 
 ---
 
@@ -48,12 +52,12 @@
 3. **Dự kiến hết hàng**: Hôm nay, 3 ngày tới, 7 ngày tới, Trong tháng, > 30 ngày.
 4. **Nhà cung cấp**: Multi-select tag dropdown theo NCC đã từng nhập.
 5. **Loại hàng**: Hàng hóa / Dịch vụ / Combo đóng gói.
-6. **Vị trí**: Dropdown đa chọn kèm ô tìm kiếm nhanh `.kiot-ms-search`.
+6. **Vị trí**: Dropdown đa chọn kèm ô tìm kiếm nhanh `.kp-ms-search`.
 7. **Thời gian tạo**: Hôm nay, Hôm qua, 7 ngày, 30 ngày hoặc tùy chọn ngày (Dual Calendar).
 
 ### 3.2. Sắp xếp 3 trạng thái & Ẩn hiện cột:
 - **Sắp xếp 3 trạng thái**: Click header: Lần 1 ASC (`bi-arrow-up`) ➜ Lần 2 DESC (`bi-arrow-down`) ➜ Lần 3 Default. Cột căn trái dùng inline-flex chống tràn viền, cột số dùng padding-right 22px cố định icon.
-- **Tùy chọn hiển thị cột**: Nút `#btnColsDropdown` (`bi-view-list`), menu `#colMenu` 2 cột chuẩn chuyên nghiệp. Quản lý qua `KiotFilter.initColumnToggle` lưu `kiot_hang_hoa_cols_v1`. Quản lý 13 cột dữ liệu (`img`, `mahang`, `tenhang`, `nhomhang`, `dvt`, `giaban`, `giavon`, `tonkho`, `khachdat`, `vitri`, `ngaytao`, `dukienhethang`, `trangthai`) + 2 cột cố định. Tự động đồng bộ `colspan` và class `.last-visible-col`. Bảng `#productTable` áp dụng chuẩn `width: max-content; min-width: 760px; table-layout: fixed;` (chuẩn Kiểm tồn & Nhà cung cấp), khóa cố định `width`/`min-width` từng cột chống co rút khi thêm cột. Khung chi tiết `.kiot-detail-fixed-wrap` cố định 992px.
+- **Tùy chọn hiển thị cột**: Nút `#btnColsDropdown` (`bi-view-list`), menu `#colMenu` 2 cột chuẩn chuyên nghiệp. Quản lý qua `AppFilter.initColumnToggle` lưu `kp_hang_hoa_cols_v1`. Quản lý 13 cột dữ liệu (`img`, `mahang`, `tenhang`, `nhomhang`, `dvt`, `giaban`, `giavon`, `tonkho`, `khachdat`, `vitri`, `ngaytao`, `dukienhethang`, `trangthai`) + 2 cột cố định. Tự động đồng bộ `colspan` và class `.last-visible-col`. Bảng `#productTable` áp dụng chuẩn `width: max-content; min-width: 760px; table-layout: fixed;` (chuẩn Kiểm tồn & Nhà cung cấp), khóa cố định `width`/`min-width` từng cột chống co rút khi thêm cột. Khung chi tiết `.kp-detail-fixed-wrap` cố định 992px.
 
 ### 3.3. Tùy chọn Cột & Độ rộng Cố định (Fixed Columns & Horizontal Scroll):
 Nút `bi-grid-3x2-gap` mở popup 11 cột đồng bộ 100% với các trường dữ liệu của file xuất (Loại hàng, Nhóm hàng, Mã hàng, Tên hàng, Giá bán, Giá vốn, Tồn kho, Tồn nhỏ nhất, Tồn lớn nhất, Vị trí, Trạng thái). Dùng Dynamic CSS tức thì (0ms, không flicker), lưu vào `localStorage`. Toàn bộ cột được cố định chiều rộng (`table-layout: fixed; width: max-content; min-width: 100%;`), khi bật nhiều cột vượt màn hình sẽ xuất hiện thanh cuộn ngang mượt mà, không co ép méo mó cột.
@@ -62,7 +66,7 @@ Nút `bi-grid-3x2-gap` mở popup 11 cột đồng bộ 100% với các trườn
 
 ## 4. Các Quy tắc Nghiệp vụ Bất biến
 
-1. **BẢO TOÀN DỮ LIỆU & RÀNG BUỘC CHỨNG TỪ**: Kiểm tra cả 5 bảng: `ChiTietDonBan`, `ChiTietPhieuNhap`, `ChiTietPhieuXuat`, `ChiTietPhieuChuyenKho`, `ChiTietPhieuKiemKe`. Có giao dịch: chặn xóa, gợi ý chuyển `NGUNG_BAN`. Chưa có: xóa cascade ảnh và ngưỡng tồn trong Transaction.
+1. **BẢO TOÀN DỮ LIỆU & RÀNG BUỘC CHỨNG TỪ**: Kiểm tra cả 6 bảng: `ChiTietDonBan`, `ChiTietPhieuNhap`, `ChiTietPhieuXuat`, `ChiTietPhieuChuyenKho`, `ChiTietPhieuKiemKe`, `ChiTietPhieuTraHangNhap`. Có giao dịch: chặn xóa vĩnh viễn, ẩn nút 'Đồng ý xóa', chỉ cho phép chuyển sang `NGUNG_BAN` (Khóa hàng). Chưa có giao dịch: cho phép xóa cascade ảnh và ngưỡng tồn trong Transaction.
 2. **QUY CHUẨN XUẤT NHẬP EXCEL ĐỒNG BỘ 16 TRƯỜNG**:
    - 16 trường quản lý chuẩn: Loại hàng, Nhóm hàng, Mã hàng, Tên hàng (*), Giá bán, Giá vốn, Tồn kho, Tồn nhỏ nhất, Tồn lớn nhất, Đơn vị tính, Thuộc tính, Trọng lượng, Đơn vị TL, Vị trí, Mô tả, Trạng thái.
    - Khi xuất file, người bán được chọn cột muốn xuất. Có cảnh báo: Nếu bỏ chọn các cột thiết yếu (Tên hàng, Mã hàng, Loại hàng, ĐVT) thì file xuất ra KHÔNG THỂ làm file nhập ngược lại.

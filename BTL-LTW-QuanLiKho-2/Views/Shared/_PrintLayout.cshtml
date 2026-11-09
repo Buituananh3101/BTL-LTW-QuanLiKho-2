@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Quản Lý Kho Phú Quốc</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.css" />
+    <style>
+        @@page {
+            size: A4 portrait;
+            margin: 15mm 12mm 15mm 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #1e293b;
+            background: #f1f5f9;
+            margin: 0;
+            padding: 0;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        /* Thanh công cụ in nổi trên màn hình */
+        .print-action-bar {
+            position: sticky;
+            top: 0;
+            z-index: 9999;
+            background: #1e293b;
+            color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .print-action-bar .brand {
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .print-action-bar .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s ease;
+        }
+
+        .print-action-bar .btn-print {
+            background: #0284c7;
+            color: #fff;
+        }
+        .print-action-bar .btn-print:hover {
+            background: #0369a1;
+        }
+
+        .print-action-bar .btn-close-win {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+        }
+        .print-action-bar .btn-close-win:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* Khung trang giấy A4 */
+        .print-paper-page {
+            max-width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            background: #fff;
+            padding: 15mm 15mm 20mm 15mm;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            position: relative;
+        }
+
+        /* Header công ty */
+        .company-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 18px;
+        }
+
+        .company-header .company-info h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0 0 3px 0;
+            color: #0f172a;
+            text-transform: uppercase;
+        }
+
+        .company-header .company-info p {
+            margin: 0;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .company-header .warehouse-badge {
+            text-align: right;
+            font-size: 12px;
+            color: #475569;
+        }
+        .company-header .warehouse-badge strong {
+            font-size: 13px;
+            color: #0284c7;
+        }
+
+        /* Tiêu đề chứng từ */
+        .voucher-title-wrap {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .voucher-title {
+            font-size: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .voucher-code {
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .voucher-date {
+            font-size: 12px;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        /* Lưới thông tin phiếu */
+        .voucher-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 20px;
+            margin-bottom: 18px;
+            padding: 10px 14px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            font-size: 12.5px;
+        }
+
+        .voucher-meta-item {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .voucher-meta-item .lbl {
+            color: #64748b;
+            white-space: nowrap;
+        }
+
+        .voucher-meta-item .val {
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        /* Bảng chi tiết chứng từ */
+        .voucher-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 18px;
+        }
+
+        .voucher-table th,
+        .voucher-table td {
+            border: 1px solid #cbd5e1;
+            padding: 7px 8px;
+            font-size: 12px;
+        }
+
+        .voucher-table thead th {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-weight: 700;
+            text-align: left;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .voucher-table tfoot td {
+            background-color: #f8fafc;
+            font-weight: 700;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .voucher-table .barcode {
+            font-family: Consolas, "Courier New", monospace;
+            font-weight: 600;
+        }
+
+        /* Tóm tắt tiền tệ */
+        .voucher-summary {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 25px;
+        }
+
+        .voucher-summary-box {
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .voucher-summary-row {
+            display: flex;
+            justify-content: space-between;
+            color: #475569;
+        }
+
+        .voucher-summary-row.total-row {
+            border-top: 1px dashed #94a3b8;
+            padding-top: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        /* Chữ ký 4 bên */
+        .voucher-signatures {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            text-align: center;
+            margin-top: 20px;
+            page-break-inside: avoid;
+        }
+
+        .sig-col .sig-title {
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 2px;
+            font-size: 12.5px;
+        }
+
+        .sig-col .sig-sub {
+            font-size: 11px;
+            color: #64748b;
+            font-style: italic;
+            margin-bottom: 60px;
+        }
+
+        .sig-col .sig-name {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 12px;
+        }
+
+        /* In ấn: Ẩn thanh công cụ, mở toàn trang */
+        @@media print {
+            .print-action-bar {
+                display: none !important;
+            }
+
+            body {
+                background: #fff !important;
+                color: #000 !important;
+            }
+
+            .print-paper-page {
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+                min-height: auto !important;
+            }
+
+            .voucher-table th,
+            .voucher-table td {
+                border-color: #333 !important;
+            }
+
+            .voucher-meta-grid {
+                background: transparent !important;
+                border-color: #999 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Thanh thao tác trên màn hình (Ẩn khi in) -->
+    <div class="print-action-bar">
+        <div class="brand">
+            <i class="bi bi-printer fs-5"></i>
+            <span>Xem trước bản in phiếu</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn-action btn-print" onclick="window.print();">
+                <i class="bi bi-printer me-1"></i> In ngay (Ctrl+P)
+            </button>
+            <button type="button" class="btn-action btn-close-win" onclick="window.close();">
+                <i class="bi bi-x-lg me-1"></i> Đóng
+            </button>
+        </div>
+    </div>
+
+    <!-- Trang giấy A4 -->
+    <div class="print-paper-page">
+        <!-- Header đơn vị -->
+        <div class="company-header">
+            <div class="company-info">
+                <h3>Hệ Thống Quản Lý Kho Hàng Phú Quốc</h3>
+                <p><i class="bi bi-geo-alt me-1"></i>Địa chỉ: Số 123 Đường Trần Hưng Đạo, TP. Phú Quốc, Kiên Giang</p>
+                <p><i class="bi bi-telephone me-1"></i>Hotline: 1900 6522 - Website: quanlykho.phuquoc.vn</p>
+            </div>
+            <div class="warehouse-badge">
+                <div>Chi nhánh phát sinh:</div>
+                <strong>@(ViewBag.TenKho ?? "Chi nhánh trung tâm")</strong>
+            </div>
+        </div>
+
+        <!-- Nội dung phiếu in cụ thể -->
+        @RenderBody()
+    </div>
+
+    <script>
+        // Tự động mở hộp thoại in sau khi nạp xong trang
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                window.print();
+            }, 300);
+        });
+    </script>
+</body>
+</html>

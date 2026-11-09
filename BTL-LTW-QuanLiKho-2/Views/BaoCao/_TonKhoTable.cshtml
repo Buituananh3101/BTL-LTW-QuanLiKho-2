@@ -1,15 +1,16 @@
-@model BTL_LTW_QuanLiKho_2.ViewModels.BaoCaoTonKhoIndexVM
+﻿@model BTL_LTW_QuanLiKho_2.ViewModels.BaoCaoTonKhoIndexVM
 @{
-    var selectedKhos = Model.DanhSachKho.Where(k => Model.SelectedKhoIds.Contains(k.MaKho)).ToList();
+    var selectedKhos = (Model.SelectedKhoIds != null && Model.SelectedKhoIds.Count > 0) ? Model.DanhSachKho.Where(k => Model.SelectedKhoIds.Contains(k.MaKho)).ToList() : Model.DanhSachKho;
     var sortBy = Model.Filter.SortBy ?? "tenHang";
     var sortDir = Model.Filter.SortDir ?? "asc";
+    int totalCols = 8 + selectedKhos.Count;
 }
 
-<div class="table-responsive">
-    <table class="tbl tonkho-table mb-0" id="tableTonKho" style="width: max-content; min-width: 100%;">
+<div class="kp-table-scroll-body">
+    <table class="tbl mb-0" id="tableTonKho" style="width: max-content; min-width: 100%;">
         <thead>
             <tr>
-                <th class="text-center" style="width: 50px;">STT</th>
+                <th class="text-center" style="width: 44px; min-width: 44px;" data-col="stt">STT</th>
                 <th style="width: 120px; min-width: 120px;" class="sortable-th @(sortBy == "mahang" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="mahang" title="Nhấn để sắp xếp theo Mã hàng">
                     <div class="th-content">
                         <span class="th-title-wrap">
@@ -81,7 +82,7 @@
                 }
 
                 @* Cột Tổng tồn *@
-                <th style="width: 125px; min-width: 125px;" class="num sortable-th bg-light @(sortBy == "tongton" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="tongton" title="Nhấn để sắp xếp theo Tổng tồn">
+                <th style="width: 125px; min-width: 125px;" class="num sortable-th @(sortBy == "tongton" ? (sortDir == "asc" ? "is-sorted sorted-asc" : "is-sorted sorted-desc") : "")" data-col="tongton" title="Nhấn để sắp xếp theo Tổng tồn">
                     <div class="th-content">
                         <span class="th-title-wrap">
                             <span class="th-text">Tổng tồn</span>
@@ -90,14 +91,42 @@
                         </span>
                     </div>
                 </th>
-                <th class="text-center" style="width: 44px; min-width: 44px;"></th>
+                <th class="text-center" style="width: 36px; min-width: 36px;" data-col="action"></th>
             </tr>
         </thead>
         <tbody>
+            <!-- Dòng tổng hợp (Summary Row) chuẩn Danh sách Hàng hóa: Cuộn tự nhiên cùng bảng -->
+            <tr class="summary-row">
+                <td data-col="stt" class="text-center"></td>
+                <td data-col="mahang"></td>
+                <td data-col="tenhang">
+                    Tổng cộng: @Model.Summary.TongSoMatHang.ToString("N0") mặt hàng
+                </td>
+                <td data-col="dvt"></td>
+                <td data-col="nhomhang"></td>
+                <td data-col="giavon" class="num text-muted">-</td>
+                <td data-col="giatriton" class="num text-dark">
+                    @Model.Summary.TongGiaTriTon.ToString("N0") ₫
+                </td>
+                @foreach (var kho in selectedKhos)
+                {
+                    decimal tongKho = (Model.Summary.TongTonTheoKho != null && Model.Summary.TongTonTheoKho.TryGetValue(kho.MaKho, out var slKho))
+                        ? slKho
+                        : 0m;
+                    <td data-col="kho_@kho.MaKho" class="num @(tongKho < 0 ? "text-danger" : "text-dark")">
+                        @tongKho.ToString("N0")
+                    </td>
+                }
+                <td data-col="tongton" class="num text-dark">
+                    @Model.Summary.TongSoLuongTon.ToString("N0")
+                </td>
+                <td data-col="action" class="text-center"></td>
+            </tr>
+
             @if (Model.PagedData.Items.Count == 0)
             {
                 <tr>
-                    <td colspan="@(8 + selectedKhos.Count)" class="text-center py-5 text-muted">
+                    <td colspan="@totalCols" class="text-center py-5 text-muted">
                         <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary opacity-50"></i>
                         Không có mặt hàng nào phù hợp với điều kiện lọc hiện tại.
                     </td>
@@ -108,20 +137,26 @@
                 int stt = Model.PagedData.StartItemIndex;
                 foreach (var item in Model.PagedData.Items)
                 {
-                    <tr class="row-tonkho" data-id="@item.MaHang" style="cursor: pointer;">
-                        <td class="text-center text-muted" style="font-size: 12px;">@(stt++)</td>
-                        <td class="fw-semibold text-primary font-monospace">@item.MaHangNoiBo</td>
-                        <td>
-                            <div class="fw-bold text-dark">@item.TenHang</div>
+                    <tr class="product-row row-tonkho" data-id="@item.MaHang" title="Nhấn để xem chi tiết tồn kho & định mức" style="cursor: pointer;">
+                        <td data-col="stt" class="text-center text-muted">@(stt++)</td>
+                        <td data-col="mahang">
+                            <span class="text-break">@item.MaHangNoiBo</span>
+                        </td>
+                        <td data-col="tenhang" class="cell-product-name">
+                            <div class="product-name-text">@item.TenHang</div>
                             @if (!string.IsNullOrWhiteSpace(item.ViTri))
                             {
                                 <div class="text-muted small" style="font-size: 11px;"><i class="bi bi-geo-alt me-1"></i>@item.ViTri</div>
                             }
                         </td>
-                        <td><span class="badge bg-light text-secondary border">@item.TenDvt</span></td>
-                        <td class="text-secondary small">@item.TenNhom</td>
-                        <td class="text-end">@item.GiaVon.ToString("#,##0")</td>
-                        <td class="text-end fw-semibold text-dark">@item.GiaTriTon.ToString("#,##0")</td>
+                        <td data-col="dvt" class="text-center text-muted">
+                            @(string.IsNullOrWhiteSpace(item.TenDvt) ? "---" : item.TenDvt)
+                        </td>
+                        <td data-col="nhomhang">
+                            @(string.IsNullOrWhiteSpace(item.TenNhom) ? "---" : item.TenNhom)
+                        </td>
+                        <td data-col="giavon" class="num text-muted">@item.GiaVon.ToString("N0")</td>
+                        <td data-col="giatriton" class="num text-dark">@item.GiaTriTon.ToString("N0")</td>
 
                         @* Tồn kho từng chi nhánh *@
                         @foreach (var kho in selectedKhos)
@@ -132,33 +167,33 @@
                             bool isUnderMin = dm.Item1 > 0 && slKho < dm.Item1;
                             bool isOverMax = dm.Item2.HasValue && slKho > dm.Item2.Value;
 
-                            <td class="text-end position-relative">
+                            <td data-col="kho_@kho.MaKho" class="num position-relative">
                                 @if (slKho < 0)
                                 {
-                                    <span class="text-danger fw-bold">@slKho.ToString("#,##0.##")</span>
+                                    <span class="text-danger">@slKho.ToString("#,##0.##")</span>
                                 }
                                 else if (slKho == 0)
                                 {
-                                    <span class="text-muted opacity-75">0</span>
+                                    <span class="text-muted">0</span>
                                 }
                                 else
                                 {
-                                    <span class="text-dark">@slKho.ToString("#,##0.##")</span>
+                                    <span>@slKho.ToString("#,##0.##")</span>
                                 }
 
                                 @if (isUnderMin)
                                 {
-                                    <span class="badge rounded-pill bg-warning text-dark ms-1" title="Dưới định mức tối thiểu (@dm.Item1)" style="font-size: 9px; padding: 2px 4px;">▼</span>
+                                    <i class="bi bi-arrow-down ms-1 text-secondary" title="Dưới định mức tối thiểu (@dm.Item1)" style="font-size: 11px;"></i>
                                 }
                                 else if (isOverMax)
                                 {
-                                    <span class="badge rounded-pill bg-info text-dark ms-1" title="Vượt định mức tối đa (@dm.Item2)" style="font-size: 9px; padding: 2px 4px;">▲</span>
+                                    <i class="bi bi-arrow-up ms-1 text-secondary" title="Vượt định mức tối đa (@dm.Item2)" style="font-size: 11px;"></i>
                                 }
                             </td>
                         }
 
                         @* Tổng tồn *@
-                        <td class="text-end bg-light fw-bold">
+                        <td data-col="tongton" class="num">
                             @if (item.TongTon < 0)
                             {
                                 <span class="text-danger">@item.TongTon.ToString("#,##0.##")</span>
@@ -169,47 +204,162 @@
                             }
                             else
                             {
-                                <span class="text-primary">@item.TongTon.ToString("#,##0.##")</span>
+                                <span>@item.TongTon.ToString("#,##0.##")</span>
                             }
                         </td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-link text-secondary p-0 btn-view-drawer" data-id="@item.MaHang" title="Xem chi tiết định mức & tồn kho">
-                                <i class="bi bi-chevron-right"></i>
-                            </button>
+                        <td data-col="action" class="text-center">
+                            <i class="bi bi-chevron-right text-muted row-expand-chevron"></i>
+                        </td>
+                    </tr>
+
+                    <!-- DÒNG CHI TIẾT MỞ RỘNG INLINE ACCORDION CHUẨN DANH SÁCH HÀNG HÓA -->
+                    <tr class="product-detail-row tonkho-detail-row" id="detail-@item.MaHang" style="display: none;">
+                        <td colspan="@totalCols" class="p-0">
+                            <div class="product-detail-panel-wrap" style="display: none;">
+                                <div class="product-detail-panel">
+                                    <!-- Tabs Header Bar -->
+                                    <div class="product-detail-tabs">
+                                        <button type="button" class="product-detail-tab-btn active" data-tab="tonkho">Tồn kho chi nhánh & Định mức</button>
+                                        <button type="button" class="product-detail-tab-btn" data-tab="info">Thông tin hàng hóa</button>
+                                        <button type="button" class="product-detail-tab-btn" data-tab="thekho">Thẻ kho gần đây</button>
+                                    </div>
+
+                                    <!-- Tabs Content -->
+                                    <div class="product-detail-tab-content kp-detail-fixed-wrap p-3">
+                                        <!-- ================= TAB 1: TỒN KHO CHI NHÁNH & ĐỊNH MỨC ================= -->
+                                        <div class="tab-pane-content tab-tonkho">
+                                            <div class="table-responsive border rounded-2 mb-2 bg-white">
+                                                <table class="tonkho-table table table-sm table-hover mb-0" style="font-size: 13px;">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th class="ps-3">Chi nhánh kho</th>
+                                                            <th class="text-end" style="width: 140px;">Tồn hiện tại</th>
+                                                            <th class="text-end" style="width: 140px;">Tồn tối thiểu</th>
+                                                            <th class="text-end" style="width: 140px;">Tồn tối đa</th>
+                                                            <th class="text-center" style="width: 160px;">Trạng thái định mức</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var k in Model.DanhSachKho)
+                                                        {
+                                                            decimal slK = item.TonTheoKho.TryGetValue(k.MaKho, out var v) ? v : 0m;
+                                                            item.DinhMucTheoKho.TryGetValue(k.MaKho, out var dmK);
+                                                            decimal minK = dmK.Item1;
+                                                            decimal? maxK = dmK.Item2;
+
+                                                            string stLabel = "Bình thường";
+                                                            string badgeCls = "bg-success-subtle text-success border border-success-subtle";
+                                                            if (slK < 0) { stLabel = "Tồn âm"; badgeCls = "bg-danger-subtle text-danger border border-danger-subtle"; }
+                                                            else if (slK == 0) { stLabel = "Hết hàng"; badgeCls = "bg-secondary-subtle text-secondary border border-secondary-subtle"; }
+                                                            else if (minK > 0 && slK < minK) { stLabel = "Dưới định mức"; badgeCls = "bg-primary-subtle text-primary border border-primary-subtle"; }
+                                                            else if (maxK.HasValue && slK > maxK.Value) { stLabel = "Vượt định mức"; badgeCls = "bg-info-subtle text-info border border-info-subtle"; }
+
+                                                            <tr>
+                                                                <td class="ps-3 text-dark">@k.TenKho</td>
+                                                                <td class="text-end @(slK < 0 ? "text-danger" : slK == 0 ? "text-muted" : "text-dark")">@slK.ToString("#,##0.##")</td>
+                                                                <td class="text-end text-muted">@(minK > 0 ? minK.ToString("#,##0.##") : "-")</td>
+                                                                <td class="text-end text-muted">@(maxK.HasValue && maxK.Value < 999999999 ? maxK.Value.ToString("#,##0.##") : "-")</td>
+                                                                <td class="text-center"><span class="badge @badgeCls" style="font-size: 11px;">@stLabel</span></td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <!-- ================= TAB 2: THÔNG TIN HÀNG HÓA ================= -->
+                                        <div class="tab-pane-content tab-info" style="display: none;">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <table class="table table-sm table-borderless mb-0">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td class="text-muted" style="width: 140px;">Mã hàng nội bộ:</td>
+                                                                <td class="text-dark">@item.MaHangNoiBo</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="text-muted">Tên hàng hóa:</td>
+                                                                <td class="text-dark">@item.TenHang</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="text-muted">Nhóm hàng:</td>
+                                                                <td class="text-dark">@(!string.IsNullOrEmpty(item.TenNhom) ? item.TenNhom : "Chưa phân nhóm")</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="text-muted">Đơn vị tính:</td>
+                                                                <td class="text-dark">@(string.IsNullOrWhiteSpace(item.TenDvt) ? "---" : item.TenDvt)</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <table class="table table-sm table-borderless mb-0">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td class="text-muted" style="width: 140px;">Vị trí kệ kho:</td>
+                                                                <td class="text-dark">@(!string.IsNullOrEmpty(item.ViTri) ? item.ViTri : "Chưa thiết lập")</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="text-muted">Giá vốn:</td>
+                                                                <td class="text-dark">@item.GiaVon.ToString("N0") ₫</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="text-muted">Giá bán tham khảo:</td>
+                                                                <td class="text-dark">@item.GiaBanThamKhao.ToString("N0") ₫</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="text-muted">Tổng giá trị tồn:</td>
+                                                                <td class="text-dark">@item.GiaTriTon.ToString("N0") ₫</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- ================= TAB 3: THẺ KHO GẦN ĐÂY ================= -->
+                                        <div class="tab-pane-content tab-thekho" style="display: none;">
+                                            <div class="thekho-quick-box" data-ma-hang="@item.MaHang" data-loaded="false">
+                                                <div class="table-responsive border rounded-2 mb-2 bg-white">
+                                                    <table class="thekho-table table table-sm mb-0" style="font-size: 12px;">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th style="width: 140px;">Thời gian</th>
+                                                                <th style="width: 140px;">Mã chứng từ</th>
+                                                                <th style="width: 130px;">Loại giao dịch</th>
+                                                                <th class="text-end" style="width: 100px;">SL Nhập</th>
+                                                                <th class="text-end" style="width: 100px;">SL Xuất</th>
+                                                                <th class="text-end" style="width: 95px;">Tồn cuối</th>
+                                                                <th>Đối tác</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="thekho-quick-tbody">
+                                                            <tr>
+                                                                <td colspan="7" class="text-center py-3 text-muted">
+                                                                    <span class="spinner-border spinner-border-sm me-2"></span>Đang nạp dữ liệu thẻ kho...
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center pt-1">
+                                                    <a href="@Url.Action("TheKho", "BaoCao", new { maHang = item.MaHang })" class="btn btn-outline-primary btn-sm" title="Mở trang Báo cáo Thẻ kho chi tiết">
+                                                        <i class="bi bi-box-arrow-up-right me-1"></i> Xem toàn bộ lịch sử thẻ kho
+                                                    </a>
+                                                    <span class="text-muted small thekho-count-text">Hiển thị tối đa 10 giao dịch gần nhất</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 }
             }
         </tbody>
-        @if (Model.PagedData.Items.Count > 0)
-        {
-            <tfoot>
-                <tr class="fw-bold bg-light border-top-2">
-                    <td colspan="5" class="text-center py-2 text-uppercase small text-secondary">
-                        Tổng trang này (@Model.PagedData.Items.Count mặt hàng)
-                    </td>
-                    <td class="text-end text-muted small">-</td>
-                    <td class="text-end text-dark">
-                        @Model.PagedData.Items.Sum(x => x.GiaTriTon).ToString("#,##0")
-                    </td>
-                    @foreach (var kho in selectedKhos)
-                    {
-                        decimal tongKho = Model.PagedData.Items.Sum(x => x.TonTheoKho.TryGetValue(kho.MaKho, out var sl) ? sl : 0m);
-                        <td class="text-end @(tongKho < 0 ? "text-danger" : "text-dark")">
-                            @tongKho.ToString("#,##0.##")
-                        </td>
-                    }
-                    <td class="text-end text-primary bg-light">
-                        @Model.PagedData.Items.Sum(x => x.TongTon).ToString("#,##0.##")
-                    </td>
-                    <td></td>
-                </tr>
-            </tfoot>
-        }
     </table>
 </div>
 
-<!-- Khối Lego Phân trang AJAX -->
-<div class="px-3 py-2 border-top bg-white">
-    <partial name="_Pagination" model="Model.PagedData" />
-</div>
+<!-- Phân trang đáy bảng (dùng chung _Pagination.cshtml) -->
+@await Html.PartialAsync("_Pagination", Model.PagedData, new ViewDataDictionary(ViewData) { { "ItemLabel", "mặt hàng" } })

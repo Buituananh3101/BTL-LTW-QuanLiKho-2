@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -43,7 +43,7 @@ public class BaoCaoController : BaseKhoController
         return RedirectToAction(nameof(TonKho), filter);
     }
 
-    #region 1. BÁO CÁO TỒN KHO THEO KHO (PIVOT KHO KIOTVIET)
+    #region 1. BÁO CÁO TỒN KHO THEO KHO (PIVOT KHO KHOPRO)
 
     /// <summary>
     /// Màn hình chính Báo cáo Tồn kho theo kho (/BaoCao/TonKho)
@@ -79,7 +79,7 @@ public class BaoCaoController : BaseKhoController
     }
 
     /// <summary>
-    /// Xuất Báo cáo Tồn kho ra file Excel chuẩn ClosedXML (Header xanh KiotViet, format số lượng, tiền tệ)
+    /// Xuất Báo cáo Tồn kho ra file Excel chuẩn ClosedXML (Header xanh KhoPro, format số lượng, tiền tệ)
     /// </summary>
     [HttpGet]
     public async Task<IActionResult> ExportExcel([FromQuery] BaoCaoTonKhoFilterParams filter)
@@ -97,7 +97,7 @@ public class BaoCaoController : BaseKhoController
 
         var vm = await BuildTonKhoIndexVMAsync(filter);
         var items = vm.PagedData.Items;
-        var selectedKhos = vm.DanhSachKho.Where(k => vm.SelectedKhoIds.Contains(k.MaKho)).ToList();
+        var selectedKhos = (vm.SelectedKhoIds != null && vm.SelectedKhoIds.Count > 0) ? vm.DanhSachKho.Where(k => vm.SelectedKhoIds.Contains(k.MaKho)).ToList() : vm.DanhSachKho;
 
         using var workbook = new XLWorkbook();
         var ws = workbook.Worksheets.Add("TonKhoTheoKho");
@@ -139,7 +139,7 @@ public class BaoCaoController : BaseKhoController
         }
 
         var headerRange = ws.Range(headerRow, 1, headerRow, headers.Count);
-        ExcelHelper.ApplyKiotVietHeaderStyle(headerRange);
+        ExcelHelper.ApplyHeaderStyle(headerRange);
         ws.Row(headerRow).Height = 26;
 
         // 3. Đổ dữ liệu các dòng
@@ -324,6 +324,20 @@ public class BaoCaoController : BaseKhoController
             filter.MaKho = CurrentWarehouseId;
         }
 
+        // Nếu truy cập lần đầu và chưa chọn mặt hàng, mặc định nạp mặt hàng đang kinh doanh đầu tiên
+        if (!filter.MaHang.HasValue || filter.MaHang.Value <= 0)
+        {
+            var firstHang = await _context.HangHoas.AsNoTracking()
+                .Where(h => h.TrangThai == "DANG_BAN" || h.TrangThai == "DANG_KINH_DOANH")
+                .OrderBy(h => h.MaHang)
+                .FirstOrDefaultAsync();
+
+            if (firstHang != null)
+            {
+                filter.MaHang = firstHang.MaHang;
+            }
+        }
+
         var vm = await _theKhoService.LayBaoCaoTheKhoAsync(filter, CurrentWarehouseId, IsQuanLy);
         return View(vm);
     }
@@ -342,7 +356,7 @@ public class BaoCaoController : BaseKhoController
         }
 
         var vm = await _theKhoService.LayBaoCaoTheKhoAsync(filter, CurrentWarehouseId, IsQuanLy);
-        return PartialView("_TheKhoTable", vm);
+        return PartialView("_TheKhoContent", vm);
     }
 
     /// <summary>
@@ -411,6 +425,7 @@ public class BaoCaoController : BaseKhoController
 
         // Lấy tồn kho theo chi nhánh kho đã chọn
         var stockMap = new Dictionary<int, decimal>();
+        var setWithImage = new HashSet<int>();
         if (productIds.Any())
         {
             if (targetWhId > 0)
@@ -427,18 +442,37 @@ public class BaoCaoController : BaseKhoController
                     .Select(g => new { MaHang = g.Key, TongTon = g.Sum(x => x.SoLuongTon ?? 0) })
                     .ToDictionaryAsync(s => s.MaHang, s => s.TongTon);
             }
+
+            var imgIds = await _context.HinhAnhHangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang))
+                .Select(x => x.MaHang)
+                .Distinct()
+                .ToListAsync();
+
+            var legacyImgIds = await _context.HangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang) && x.HinhAnh != null)
+                .Select(x => x.MaHang)
+                .ToListAsync();
+
+            setWithImage = new HashSet<int>(imgIds.Concat(legacyImgIds));
         }
 
-        var items = products.Select(h => new
+        var items = products.Select(h =>
         {
-            id = h.MaHang,
-            maHang = h.MaHang,
-            maHangNoiBo = h.MaHangNoiBo,
-            tenHang = h.TenHang,
-            tenDvt = h.MaDvtNavigation != null ? h.MaDvtNavigation.TenDvt : "Cái",
-            tenNhom = h.MaNhomNavigation != null ? h.MaNhomNavigation.TenNhom : "",
-            gia = h.GiaVon > 0 ? h.GiaVon : (h.GiaBanThamKhao > 0 ? h.GiaBanThamKhao : 0),
-            tonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0
+            bool hasImg = setWithImage.Contains(h.MaHang);
+            return new
+            {
+                id = h.MaHang,
+                maHang = h.MaHang,
+                maHangNoiBo = h.MaHangNoiBo,
+                tenHang = h.TenHang,
+                tenDvt = h.MaDvtNavigation != null ? h.MaDvtNavigation.TenDvt : "Cái",
+                tenNhom = h.MaNhomNavigation != null ? h.MaNhomNavigation.TenNhom : "",
+                gia = h.GiaVon > 0 ? h.GiaVon : (h.GiaBanThamKhao > 0 ? h.GiaBanThamKhao : 0),
+                tonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0,
+                hasImage = hasImg,
+                hinhAnh = hasImg ? $"/HangHoa/GetImage/{h.MaHang}" : null
+            };
         }).ToList();
 
         return Json(items);
@@ -487,9 +521,10 @@ public class BaoCaoController : BaseKhoController
 
         // 1. Xác định danh sách kho được chọn
         List<int> selectedKhoIds;
-        if (filter.SelectedKhoIds != null && filter.SelectedKhoIds.Count > 0)
+        bool hasFilterKho = filter.SelectedKhoIds != null && filter.SelectedKhoIds.Count > 0;
+        if (hasFilterKho)
         {
-            selectedKhoIds = filter.SelectedKhoIds.Where(id => allowedKhoIds.Contains(id)).ToList();
+            selectedKhoIds = filter.SelectedKhoIds!.Where(id => allowedKhoIds.Contains(id)).ToList();
             if (selectedKhoIds.Count == 0) selectedKhoIds = allowedKhoIds;
         }
         else
@@ -507,11 +542,12 @@ public class BaoCaoController : BaseKhoController
         // Lọc trạng thái kinh doanh
         if (filter.SelectedTrangThais != null && filter.SelectedTrangThais.Count > 0)
         {
-            queryHangHoa = queryHangHoa.Where(h => filter.SelectedTrangThais.Contains(h.TrangThai));
+            queryHangHoa = queryHangHoa.Where(h => filter.SelectedTrangThais.Contains(h.TrangThai) || (filter.SelectedTrangThais.Contains("DANG_KINH_DOANH") && h.TrangThai == "DANG_BAN") || (filter.SelectedTrangThais.Contains("NGUNG_KINH_DOANH") && h.TrangThai == "NGUNG_BAN"));
         }
         else if (!string.IsNullOrWhiteSpace(filter.TrangThaiHang) && filter.TrangThaiHang != "ALL")
         {
-            queryHangHoa = queryHangHoa.Where(h => h.TrangThai == filter.TrangThaiHang);
+            string targetSt = (filter.TrangThaiHang == "DANG_BAN" || filter.TrangThaiHang == "DANG_KINH_DOANH") ? "DANG_BAN" : (filter.TrangThaiHang == "NGUNG_BAN" || filter.TrangThaiHang == "NGUNG_KINH_DOANH") ? "NGUNG_BAN" : filter.TrangThaiHang;
+            queryHangHoa = queryHangHoa.Where(h => h.TrangThai == targetSt);
         }
 
         // Lọc nhóm hàng (hỗ trợ cả SelectedNhomIds và MaNhom)
@@ -631,12 +667,20 @@ public class BaoCaoController : BaseKhoController
         var filteredList = filteredQuery.ToList();
 
         // 7. Thống kê KPI Summary trên toàn bộ tập dữ liệu đã lọc
+        var tongTonTheoKho = new Dictionary<int, decimal>();
+        foreach (var khoId in selectedKhoIds)
+        {
+            decimal sumKho = filteredList.Sum(x => x.TonTheoKho.TryGetValue(khoId, out var sl) ? sl : 0m);
+            tongTonTheoKho[khoId] = sumKho;
+        }
+
         var summary = new BaoCaoTonKhoSummaryVM
         {
             TongSoMatHang = filteredList.Count,
             TongSoLuongTon = filteredList.Sum(x => x.TongTon),
             TongGiaTriTon = filteredList.Sum(x => x.GiaTriTon),
-            SoMatHangCanLuuY = filteredList.Count(x => x.TongTon <= 0 || x.CoDuoiDinhMuc)
+            SoMatHangCanLuuY = filteredList.Count(x => x.TongTon <= 0 || x.CoDuoiDinhMuc),
+            TongTonTheoKho = tongTonTheoKho
         };
 
         // 8. Sắp xếp dữ liệu (SortBy, SortDir)
@@ -677,7 +721,7 @@ public class BaoCaoController : BaseKhoController
             PagedData = pagedResult,
             Summary = summary,
             DanhSachKho = allowedKhos,
-            SelectedKhoIds = selectedKhoIds,
+            SelectedKhoIds = hasFilterKho ? filter.SelectedKhoIds!.Where(id => allowedKhoIds.Contains(id)).ToList() : new List<int>(),
             DanhSachNhomHang = nhomHangs,
             Filter = filter
         };

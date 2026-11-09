@@ -1,5 +1,5 @@
-/* ==========================================================================
-   CSS CHO MÔ-ĐUN QUẢN LÝ NHÀ CUNG CẤP (CHUẨN KIOTVIET)
+﻿/* ==========================================================================
+   CSS CHO MÔ-ĐUN QUẢN LÝ NHÀ CUNG CẤP (CHUẨN KHOPRO)
    ========================================================================== */
 
 /* 1. Master-Detail Inline Panel */
@@ -74,32 +74,32 @@
     background-color: #f8fafc;
 }
 
-/* 3. Accordion Khối Lego (Chuẩn KiotViet) */
-.kiot-sec {
+/* 3. Accordion Khối Lego (Chuẩn KhoPro) */
+.kp-sec {
     background-color: #ffffff;
     transition: border-color 0.2s ease;
 }
 
-.kiot-sec:hover {
+.kp-sec:hover {
     border-color: #cbd5e1;
 }
 
-.kiot-sec-h {
+.kp-sec-h {
     user-select: none;
     transition: background-color 0.2s ease;
 }
 
-.kiot-sec-h:hover {
+.kp-sec-h:hover {
     background-color: #f1f5f9 !important;
 }
 
-.kiot-chev {
+.kp-chev {
     font-size: 12px;
     color: #64748b;
     transition: transform 0.25s ease;
 }
 
-.kiot-sec.open .kiot-chev {
+.kp-sec.open .kp-chev {
     transform: rotate(180deg);
 }
 
@@ -119,7 +119,7 @@
 }
 
 /* 5. Custom Scrollbar cho Modal & Table */
-.kiot-table-scroll-body {
+.kp-table-scroll-body {
     overflow-x: auto;
     position: relative;
     min-height: 250px;

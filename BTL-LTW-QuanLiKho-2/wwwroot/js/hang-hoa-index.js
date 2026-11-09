@@ -37,11 +37,11 @@ $(document).ready(function () {
     let productColumnToggler = null;
 
     function initColumnToggle() {
-        if (window.KiotFilter && typeof window.KiotFilter.initColumnToggle === 'function') {
-            productColumnToggler = window.KiotFilter.initColumnToggle({
+        if (window.AppFilter && typeof window.AppFilter.initColumnToggle === 'function') {
+            productColumnToggler = window.AppFilter.initColumnToggle({
                 menuSelector: '#colMenu',
                 tableSelector: '#productTable',
-                storageKey: 'kiot_hang_hoa_cols_v1',
+                storageKey: 'kp_hang_hoa_cols_v1',
                 defaultCols: DEFAULT_PRODUCT_COLS,
                 extraColsCount: 2 // checkbox + star
             });
@@ -57,7 +57,7 @@ $(document).ready(function () {
     // 1. Thu gọn / Mở rộng (Kéo vào / Kéo ra) sidebar bên trái
     let animTimer = null;
     function toggleSidebar(forceState) {
-        const container = $('#kiotContainer');
+        const container = $('#kpContainer');
         const isCollapsed = container.hasClass('sidebar-collapsed');
         const shouldCollapse = (typeof forceState === 'boolean') ? forceState : !isCollapsed;
 
@@ -71,16 +71,16 @@ $(document).ready(function () {
             container.addClass('sidebar-collapsed');
             $('#sidebarToggleIcon').removeClass('bi-chevron-left').addClass('bi-chevron-right');
             $('#btnToggleSidebar').attr('title', 'Mở rộng bộ lọc (F4)');
-            localStorage.setItem('kiot_sidebar_state', 'collapsed');
+            localStorage.setItem('kp_sidebar_state', 'collapsed');
         } else {
             container.removeClass('sidebar-collapsed');
             $('#sidebarToggleIcon').removeClass('bi-chevron-right').addClass('bi-chevron-left');
             $('#btnToggleSidebar').attr('title', 'Thu gọn bộ lọc (F4)');
-            localStorage.setItem('kiot_sidebar_state', 'expanded');
+            localStorage.setItem('kp_sidebar_state', 'expanded');
         }
     }
 
-    if (localStorage.getItem('kiot_sidebar_state') === 'collapsed') {
+    if (localStorage.getItem('kp_sidebar_state') === 'collapsed') {
         toggleSidebar(true);
     }
 
@@ -127,14 +127,14 @@ $(document).ready(function () {
         closeMobileSidebar();
     });
 
-    // Khởi tạo 2 bộ lọc ngày dùng KiotFilter.initDateFilter (Khối LEGO dùng chung)
-    KiotFilter.initDateFilter('dk', function (from, to, text, val) {
+    // Khởi tạo 2 bộ lọc ngày dùng AppFilter.initDateFilter (Khối LEGO dùng chung)
+    AppFilter.initDateFilter('dk', function (from, to, text, val) {
         activeDuKienVal = val || 'ALL';
         currentPage = 1;
         loadTable();
     });
 
-    KiotFilter.initDateFilter('tgt', function (from, to, text, val) {
+    AppFilter.initDateFilter('tgt', function (from, to, text, val) {
         activeTgTaoVal = val || 'ALL';
         activeTgTaoFrom = from || '';
         activeTgTaoTo = to || '';
@@ -151,9 +151,9 @@ $(document).ready(function () {
         loaihang: []
     };
 
-    /* ===== TIỆN ÍCH DÙNG CHUNG TỪ KIOTFILTER ===== */
-    const escapeHtml = KiotFilter.escapeHtml;
-    const checkSidebarDropdownDirection = KiotFilter.checkSidebarDropdownDirection;
+    /* ===== TIỆN ÍCH DÙNG CHUNG TỪ KHOPROFILTER ===== */
+    const escapeHtml = AppFilter.escapeHtml;
+    const checkSidebarDropdownDirection = AppFilter.checkSidebarDropdownDirection;
 
     const filterPlaceholders = {
         nhom: 'Chọn nhóm hàng',
@@ -185,14 +185,14 @@ $(document).ready(function () {
 
         dot.css('display', selected.length > 0 ? 'inline-block' : 'none');
 
-        dropdown.find('.kiot-ms-item').each(function () {
+        dropdown.find('.kp-ms-item').each(function () {
             const val = String($(this).data('val'));
             const isSel = selected.some(x => String(x.val) === val);
             $(this).toggleClass('selected', isSel);
             $(this).find('input[type="checkbox"]').prop('checked', isSel);
         });
 
-        KiotFilter.renderTagPills(box, selected, placeholder, 3);
+        AppFilter.renderTagPills(box, selected, placeholder, 3);
     }
 
     function setupMultiSelect(boxId, dropdownId, key) {
@@ -202,8 +202,8 @@ $(document).ready(function () {
         box.on('click', function (e) {
             if ($(e.target).closest('.tag-remove').length) return;
             e.stopPropagation();
-            $('.kiot-ms-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
-            $('.kiot-multiselect-box').not(box).removeClass('open');
+            $('.kp-ms-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
+            $('.kp-multiselect-box').not(box).removeClass('open');
             $('.quick-date-popup, .dual-calendar-popup').hide();
 
             const willShow = !dropdown.hasClass('show');
@@ -211,7 +211,7 @@ $(document).ready(function () {
                 checkSidebarDropdownDirection(box, dropdown);
                 dropdown.addClass('show');
                 box.addClass('open');
-                dropdown.find('.kiot-ms-search input').focus();
+                dropdown.find('.kp-ms-search input').focus();
             } else {
                 dropdown.removeClass('show drop-up').css('max-height', '');
                 box.removeClass('open');
@@ -220,34 +220,34 @@ $(document).ready(function () {
 
         box.on('click', '.tag-remove', function (e) {
             e.stopPropagation();
-            const val = String($(this).closest('.kiot-pill-tag').data('val'));
+            const val = String($(this).closest('.kp-pill-tag').data('val'));
             filterState[key] = (filterState[key] || []).filter(x => String(x.val) !== val);
             renderMultiSelectBox(key);
             currentPage = 1;
             loadTable();
         });
 
-        box.on('click', '.kiot-pill-more', function (e) {
+        box.on('click', '.kp-pill-more', function (e) {
             e.stopPropagation();
-            $('.kiot-ms-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
+            $('.kp-ms-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
             checkSidebarDropdownDirection(box, dropdown);
             dropdown.addClass('show');
             box.addClass('open');
         });
 
-        dropdown.on('click', '.kiot-item-edit-btn, .hh-item-edit-btn', function (e) {
+        dropdown.on('click', '.kp-item-edit-btn, .hh-item-edit-btn', function (e) {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            const id = $(this).data('id') || $(this).closest('.kiot-ms-item').data('val');
-            const oldName = $(this).data('name') || $(this).closest('.kiot-ms-item').find('.kiot-ms-text, span').first().text().trim();
+            const id = $(this).data('id') || $(this).closest('.kp-ms-item').data('val');
+            const oldName = $(this).data('name') || $(this).closest('.kp-ms-item').find('.kp-ms-text, span').first().text().trim();
             if (typeof window.handleEditNhomHang === 'function') {
                 window.handleEditNhomHang(id, oldName);
             }
         });
 
-        dropdown.on('click', '.kiot-ms-item', function (e) {
-            if ($(e.target).closest('.kiot-item-edit-btn, .hh-item-edit-btn').length) {
+        dropdown.on('click', '.kp-ms-item', function (e) {
+            if ($(e.target).closest('.kp-item-edit-btn, .hh-item-edit-btn').length) {
                 return;
             }
             e.stopPropagation();
@@ -266,10 +266,10 @@ $(document).ready(function () {
             loadTable();
         });
 
-        dropdown.find('.kiot-ms-search input').on('input', function (e) {
+        dropdown.find('.kp-ms-search input').on('input', function (e) {
             e.stopPropagation();
             const term = $(this).val().trim().toLowerCase();
-            dropdown.find('.kiot-ms-item').each(function () {
+            dropdown.find('.kp-ms-item').each(function () {
                 const text = ($(this).data('name') || $(this).text()).toLowerCase();
                 if (!term || text.includes(term)) {
                     $(this).show();
@@ -296,8 +296,8 @@ $(document).ready(function () {
         const box = $(this);
         const dropdown = $('#dropdownTonKho');
 
-        $('.kiot-ms-dropdown, .kiot-ss-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
-        $('.kiot-multiselect-box, .kiot-single-select-box').not(box).removeClass('open');
+        $('.kp-ms-dropdown, .kp-ss-dropdown').not(dropdown).removeClass('show drop-up').css('max-height', '');
+        $('.kp-multiselect-box, .kp-single-select-box').not(box).removeClass('open');
         $('.quick-date-popup, .dual-calendar-popup').hide();
 
         const willShow = !dropdown.hasClass('show');
@@ -311,13 +311,13 @@ $(document).ready(function () {
         }
     });
 
-    $('#dropdownTonKho').on('click', '.kiot-ss-item', function (e) {
+    $('#dropdownTonKho').on('click', '.kp-ss-item', function (e) {
         e.stopPropagation();
         const val = $(this).data('val');
         const text = $(this).find('span').text().trim();
 
         $('#textTonKho').text(text);
-        $('#dropdownTonKho .kiot-ss-item').removeClass('selected');
+        $('#dropdownTonKho .kp-ss-item').removeClass('selected');
         $(this).addClass('selected');
 
         $('#dropdownTonKho').removeClass('show drop-up').css('max-height', '');
@@ -326,10 +326,10 @@ $(document).ready(function () {
         $('#filterTonKho').val(val).trigger('change');
     });
 
-    $('.kiot-filter-box').on('scroll', function () {
-        const openDropdown = $('.kiot-ms-dropdown.show, .kiot-ss-dropdown.show');
+    $('.kp-filter-box').on('scroll', function () {
+        const openDropdown = $('.kp-ms-dropdown.show, .kp-ss-dropdown.show');
         if (openDropdown.length) {
-            const box = openDropdown.siblings('.kiot-multiselect-box, .kiot-single-select-box');
+            const box = openDropdown.siblings('.kp-multiselect-box, .kp-single-select-box');
             if (box.length) {
                 checkSidebarDropdownDirection(box, openDropdown);
             }
@@ -340,30 +340,30 @@ $(document).ready(function () {
         if (!document.contains(e.target)) return;
         if ($(e.target).closest('.dual-calendar-popup, .quick-date-popup').length) return;
         // Chặn đóng dropdown nếu click xảy ra bên trong bất kỳ modal nào hoặc đang có modal hiển thị
-        if ($(e.target).closest('#kiotPromptOv, #kiotConfirmOv, #quickGroupModal, #hhModalOv, #hhEditItemOv, .kiot-prompt-ov, .kiot-confirm-ov, .modal-box').length) return;
-        if ($('#kiotPromptOv.show, #kiotConfirmOv.show, #quickGroupModal.show, #hhModalOv.show, #hhEditItemOv.show, .kiot-prompt-ov.show, .kiot-confirm-ov.show').length) return;
+        if ($(e.target).closest('#kpPromptOv, #kpConfirmOv, #quickGroupModal, #hhModalOv, #hhEditItemOv, .kp-prompt-ov, .kp-confirm-ov, .modal-box').length) return;
+        if ($('#kpPromptOv.show, #kpConfirmOv.show, #quickGroupModal.show, #hhModalOv.show, #hhEditItemOv.show, .kp-prompt-ov.show, .kp-confirm-ov.show').length) return;
 
         const $targetBlock = $(e.target).closest('.f-block');
         if (!$targetBlock.length) {
             $('.quick-date-popup').hide();
             $('.dual-calendar-popup').hide();
-            $('.kiot-ms-dropdown, .kiot-ss-dropdown').removeClass('show drop-up').css('max-height', '');
-            $('.kiot-multiselect-box, .kiot-single-select-box').removeClass('open');
+            $('.kp-ms-dropdown, .kp-ss-dropdown').removeClass('show drop-up').css('max-height', '');
+            $('.kp-multiselect-box, .kp-single-select-box').removeClass('open');
         } else {
             $('.dual-calendar-popup').not($targetBlock.find('.dual-calendar-popup')).hide();
             $('.quick-date-popup').not($targetBlock.find('.quick-date-popup')).hide();
-            $('.kiot-ms-dropdown, .kiot-ss-dropdown').not($targetBlock.find('.kiot-ms-dropdown, .kiot-ss-dropdown')).removeClass('show drop-up').css('max-height', '');
-            $('.kiot-multiselect-box, .kiot-single-select-box').not($targetBlock.find('.kiot-multiselect-box, .kiot-single-select-box')).removeClass('open');
+            $('.kp-ms-dropdown, .kp-ss-dropdown').not($targetBlock.find('.kp-ms-dropdown, .kp-ss-dropdown')).removeClass('show drop-up').css('max-height', '');
+            $('.kp-multiselect-box, .kp-single-select-box').not($targetBlock.find('.kp-multiselect-box, .kp-single-select-box')).removeClass('open');
         }
     });
 
     $(document).on('keydown', function (e) {
         if (e.key === 'Escape') {
-            if ($('#kiotPromptOv.show, #kiotConfirmOv.show, #quickGroupModal.show, #hhModalOv.show, #hhEditItemOv.show, .kiot-prompt-ov.show, .kiot-confirm-ov.show').length) {
+            if ($('#kpPromptOv.show, #kpConfirmOv.show, #quickGroupModal.show, #hhModalOv.show, #hhEditItemOv.show, .kp-prompt-ov.show, .kp-confirm-ov.show').length) {
                 return;
             }
-            $('.kiot-ms-dropdown, .kiot-ss-dropdown').removeClass('show drop-up').css('max-height', '');
-            $('.kiot-multiselect-box, .kiot-single-select-box').removeClass('open');
+            $('.kp-ms-dropdown, .kp-ss-dropdown').removeClass('show drop-up').css('max-height', '');
+            $('.kp-multiselect-box, .kp-single-select-box').removeClass('open');
             $('.quick-date-popup, .dual-calendar-popup').hide();
         }
     });
@@ -391,10 +391,10 @@ $(document).ready(function () {
                 if (groupModal) groupModal.hide();
                 $('#formMaNhom').append(`<option value="${res.maNhom}">${res.tenNhom}</option>`);
 
-                const itemHtml = `<div class="kiot-ms-item selected" data-val="${res.maNhom}" data-name="${res.tenNhom}">
+                const itemHtml = `<div class="kp-ms-item selected" data-val="${res.maNhom}" data-name="${res.tenNhom}">
                     <input type="checkbox" class="form-check-input" checked />
-                    <span class="kiot-ms-text">${res.tenNhom}</span>
-                    <button type="button" class="kiot-item-edit-btn hh-item-edit-btn" data-id="${res.maNhom}" data-name="${res.tenNhom}" data-type="nhomhang" title="Sửa nhóm hàng" aria-label="Sửa ${res.tenNhom}">
+                    <span class="kp-ms-text">${res.tenNhom}</span>
+                    <button type="button" class="kp-item-edit-btn hh-item-edit-btn" data-id="${res.maNhom}" data-name="${res.tenNhom}" data-type="nhomhang" title="Sửa nhóm hàng" aria-label="Sửa ${res.tenNhom}">
                         <i class="bi bi-pencil" style="font-size:12px;pointer-events:none;"></i>
                     </button>
                 </div>`;
@@ -421,20 +421,20 @@ $(document).ready(function () {
         });
     });
 
-    // 4.1. Xử lý Sửa & Xóa Nhóm hàng dùng chung qua KiotPrompt
+    // 4.1. Xử lý Sửa & Xóa Nhóm hàng dùng chung qua AppPrompt
     window.handleEditNhomHang = function (id, oldName) {
         if (!id) return;
         oldName = (oldName || '').trim();
 
-        if (window.KiotPrompt) {
-            window.KiotPrompt.open({
+        if (window.AppPrompt) {
+            window.AppPrompt.open({
                 title: 'Sửa nhóm hàng',
                 label: 'Tên nhóm hàng',
                 value: oldName,
                 showDelete: true,
                 onSave: function (newName) {
-                    const errEl = document.getElementById('kiotPromptErr');
-                    const inputEl = document.getElementById('kiotPromptInput');
+                    const errEl = document.getElementById('kpPromptErr');
+                    const inputEl = document.getElementById('kpPromptInput');
 
                     if (!newName || newName.trim() === '') {
                         if (errEl) {
@@ -445,7 +445,7 @@ $(document).ready(function () {
                         return false;
                     }
                     if (newName.trim().toLowerCase() === oldName.toLowerCase()) {
-                        window.KiotPrompt.close();
+                        window.AppPrompt.close();
                         setTimeout(() => {
                             $('#dropdownNhomHang').addClass('show');
                             $('#boxNhomHang').addClass('open');
@@ -461,10 +461,10 @@ $(document).ready(function () {
                         success: function (res) {
                             if (res.success) {
                                 // 1. Cập nhật trong dropdown sidebar
-                                const $sidebarItem = $(`#dropdownNhomHang .kiot-ms-item[data-val="${id}"]`);
+                                const $sidebarItem = $(`#dropdownNhomHang .kp-ms-item[data-val="${id}"]`);
                                 $sidebarItem.attr('data-name', res.tenNhom);
-                                $sidebarItem.find('span.kiot-ms-text, span').first().text(res.tenNhom);
-                                $sidebarItem.find('.kiot-item-edit-btn').attr('data-name', res.tenNhom);
+                                $sidebarItem.find('span.kp-ms-text, span').first().text(res.tenNhom);
+                                $sidebarItem.find('.kp-item-edit-btn').attr('data-name', res.tenNhom);
 
                                 // 2. Cập nhật trong modal tạo/sửa hàng hóa
                                 const $formItem = $(`#listMaNhom .hh-cs-item[data-val="${id}"]`);
@@ -488,7 +488,7 @@ $(document).ready(function () {
                                 currentPage = 1;
                                 loadTable();
 
-                                window.KiotPrompt.close();
+                                window.AppPrompt.close();
 
                                 // Đảm bảo dropdown nhóm hàng giữ nguyên trạng thái mở
                                 setTimeout(() => {
@@ -520,7 +520,7 @@ $(document).ready(function () {
                         success: function (res) {
                             if (res.success) {
                                 // 1. Xóa khỏi dropdown sidebar
-                                $(`#dropdownNhomHang .kiot-ms-item[data-val="${id}"]`).remove();
+                                $(`#dropdownNhomHang .kp-ms-item[data-val="${id}"]`).remove();
 
                                 // 2. Xóa khỏi modal tạo/sửa hàng hóa
                                 $(`#listMaNhom .hh-cs-item[data-val="${id}"]`).remove();
@@ -552,8 +552,8 @@ $(document).ready(function () {
                         },
                         error: function (xhr) {
                             const msg = xhr.responseJSON?.message || 'Không thể xóa nhóm hàng vì đang có hàng hóa thuộc nhóm.';
-                            if (window.KiotConfirm) {
-                                window.KiotConfirm.show({
+                            if (window.AppConfirm) {
+                                window.AppConfirm.show({
                                     title: 'Không thể xóa nhóm hàng',
                                     icon: 'bi-exclamation-triangle',
                                     iconColor: '#eab308',
@@ -579,24 +579,182 @@ $(document).ready(function () {
         }
     };
 
-    // Bắt sự kiện click nút bút chì Sửa nhóm hàng từ dropdown sidebar & modal form
-    $(document).on('click', '.kiot-item-edit-btn, .hh-item-edit-btn', function (e) {
+    // 4.2. Xử lý Sửa & Xóa Đơn vị tính dùng chung qua AppPrompt
+    window.handleEditDonViTinh = function (id, oldName) {
+        if (!id) return;
+        oldName = (oldName || '').trim();
+
+        if (window.AppPrompt) {
+            window.AppPrompt.open({
+                title: 'Sửa đơn vị tính',
+                label: 'Tên đơn vị tính',
+                value: oldName,
+                showDelete: true,
+                onSave: function (newName) {
+                    const errEl = document.getElementById('kpPromptErr');
+                    const inputEl = document.getElementById('kpPromptInput');
+
+                    if (!newName || newName.trim() === '') {
+                        if (errEl) {
+                            errEl.textContent = 'Vui lòng nhập tên đơn vị tính.';
+                            errEl.style.display = 'block';
+                        }
+                        if (inputEl) inputEl.classList.add('is-invalid');
+                        return false;
+                    }
+                    if (newName.trim().toLowerCase() === oldName.toLowerCase()) {
+                        window.AppPrompt.close();
+                        setTimeout(() => {
+                            $('#dropdownMaDvt').show();
+                            $('#wrapMaDvt').addClass('open');
+                        }, 50);
+                        return false;
+                    }
+
+                    $.ajax({
+                        url: '/HangHoa/UpdateDvtQuick',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ maDvt: parseInt(id), tenDvt: newName.trim() }),
+                        success: function (res) {
+                            if (res.success) {
+                                // 1. Cập nhật trong modal tạo/sửa hàng hóa
+                                const $formItem = $(`#listMaDvt .hh-cs-item[data-val="${id}"]`);
+                                if ($formItem.length) {
+                                    $formItem.find('span').first().text(res.tenDvt);
+                                    $formItem.find('.hh-item-edit-btn').attr('data-val', res.tenDvt);
+                                }
+                                $(`#formMaDvt option[value="${id}"]`).text(res.tenDvt);
+                                if ($('#formMaDvt').val() == id) {
+                                    $('#inputMaDvt').val(res.tenDvt);
+                                }
+
+                                // 2. Tải lại bảng để đồng bộ dữ liệu
+                                currentPage = 1;
+                                loadTable();
+
+                                window.AppPrompt.close();
+
+                                // Đảm bảo dropdown ĐVT giữ nguyên trạng thái mở
+                                setTimeout(() => {
+                                    $('#dropdownMaDvt').show();
+                                    $('#wrapMaDvt').addClass('open');
+                                }, 50);
+
+                                if (typeof showToast === 'function') {
+                                    showToast('Đã cập nhật đơn vị tính: ' + res.tenDvt);
+                                }
+                            }
+                        },
+                        error: function (xhr) {
+                            if (errEl) {
+                                errEl.textContent = xhr.responseJSON?.message || 'Không thể cập nhật đơn vị tính.';
+                                errEl.style.display = 'block';
+                            }
+                            if (inputEl) inputEl.classList.add('is-invalid');
+                        }
+                    });
+                    return false;
+                },
+                onDelete: function () {
+                    $.ajax({
+                        url: '/HangHoa/DeleteDvtQuick',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ maDvt: parseInt(id) }),
+                        success: function (res) {
+                            if (res.success) {
+                                // 1. Xóa khỏi modal tạo/sửa hàng hóa
+                                $(`#listMaDvt .hh-cs-item[data-val="${id}"]`).remove();
+                                $(`#formMaDvt option[value="${id}"]`).remove();
+                                if ($('#formMaDvt').val() == id) {
+                                    $('#formMaDvt').val('');
+                                    $('#inputMaDvt').val('');
+                                }
+
+                                // 2. Tải lại bảng để đồng bộ dữ liệu
+                                currentPage = 1;
+                                loadTable();
+
+                                // Giữ dropdown mở để người dùng quan sát kết quả
+                                setTimeout(() => {
+                                    $('#dropdownMaDvt').show();
+                                    $('#wrapMaDvt').addClass('open');
+                                }, 50);
+
+                                if (typeof showToast === 'function') {
+                                    showToast(res.message || 'Đã xóa đơn vị tính.');
+                                }
+                            }
+                        },
+                        error: function (xhr) {
+                            const msg = xhr.responseJSON?.message || 'Không thể xóa đơn vị tính vì đang có sản phẩm sử dụng.';
+                            if (window.AppConfirm) {
+                                window.AppConfirm.show({
+                                    title: 'Không thể xóa đơn vị tính',
+                                    icon: 'bi-exclamation-triangle',
+                                    iconColor: '#eab308',
+                                    message: msg,
+                                    isAlert: true,
+                                    confirmText: 'Đã hiểu',
+                                    confirmClass: 'btn btn-primary'
+                                });
+                            } else if (typeof showToast === 'function') {
+                                showToast(msg, 'error');
+                            } else {
+                                alert(msg);
+                            }
+
+                            setTimeout(() => {
+                                $('#dropdownMaDvt').show();
+                                $('#wrapMaDvt').addClass('open');
+                            }, 50);
+                        }
+                    });
+                }
+            });
+        }
+    };
+
+    // Bắt sự kiện click nút bút chì Sửa nhóm hàng & Sửa đơn vị tính
+    $(document).on('click', '.kp-item-edit-btn, .hh-item-edit-btn', function (e) {
         const type = $(this).data('type');
-        if (type === 'nhomhang' || type === 'nhom' || $(this).closest('#dropdownNhomHang, #listMaNhom').length) {
+        if (type === 'dvt' || $(this).closest('#listMaDvt').length) {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
 
             const id = $(this).data('id') || $(this).closest('[data-val]').data('val');
-            const oldName = $(this).data('name') || $(this).data('val') || $(this).closest('.kiot-ms-item, .hh-cs-item').find('.kiot-ms-text, span').first().text().trim();
+            const oldName = $(this).data('val') || $(this).closest('.hh-cs-item').find('span').first().text().trim();
+            if (typeof window.handleEditDonViTinh === 'function') {
+                window.handleEditDonViTinh(id, oldName);
+            }
+        } else if (type === 'nhomhang' || type === 'nhom' || $(this).closest('#dropdownNhomHang, #listMaNhom').length) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            const id = $(this).data('id') || $(this).closest('[data-val]').data('val');
+            const oldName = $(this).data('name') || $(this).data('val') || $(this).closest('.kp-ms-item, .hh-cs-item').find('.kp-ms-text, span').first().text().trim();
             window.handleEditNhomHang(id, oldName);
         }
     });
 
-    $(document).on('click', '#kiotPromptCancel, #kiotPromptClose', function () {
+    $(document).on('click', '#kpPromptCancel, #kpPromptClose', function () {
         setTimeout(() => {
-            $('#dropdownNhomHang').addClass('show');
-            $('#boxNhomHang').addClass('open');
+            if ($('#modalCreateProduct').is(':visible')) {
+                if ($('#dropdownMaDvt').is(':visible')) {
+                    $('#dropdownMaDvt').show();
+                    $('#wrapMaDvt').addClass('open');
+                }
+                if ($('#dropdownMaNhom').is(':visible')) {
+                    $('#dropdownMaNhom').show();
+                    $('#wrapMaNhom').addClass('open');
+                }
+            } else {
+                $('#dropdownNhomHang').addClass('show');
+                $('#boxNhomHang').addClass('open');
+            }
         }, 50);
     });
 
@@ -622,7 +780,7 @@ $(document).ready(function () {
         }
     });
 
-    // Modal Xóa
+    // Modal Xóa (chuẩn Nhà Cung Cấp)
     $(document).on('click', '.btn-delete-product', function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -630,6 +788,18 @@ $(document).ready(function () {
         const name = $(this).data('name') || '';
         if (typeof window.openDeleteProductModal === 'function') {
             window.openDeleteProductModal(id, name);
+        }
+    });
+
+    // Modal Khóa / Ngừng kinh doanh / Cho kinh doanh lại (chuẩn Nhà Cung Cấp)
+    $(document).on('click', '.btn-toggle-status-product', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = $(this).data('id');
+        const name = $(this).data('name') || '';
+        const status = $(this).data('status');
+        if (typeof window.openStatusConfirmProductModal === 'function') {
+            window.openStatusConfirmProductModal(id, name, status);
         }
     });
 
@@ -748,13 +918,13 @@ $(document).ready(function () {
                     let html = '';
                     res.data.forEach(function (d) {
                         const codeHtml = d.urlChiTiet
-                            ? `<a href="${d.urlChiTiet}" class="text-primary text-decoration-none fw-semibold">${escapeHtml(d.maChungTuHienThi)}</a>`
-                            : `<span class="fw-semibold text-dark">${escapeHtml(d.maChungTuHienThi)}</span>`;
+                            ? `<a href="${d.urlChiTiet}" class="text-primary text-decoration-none">${escapeHtml(d.maChungTuHienThi)}</a>`
+                            : `<span class="text-dark">${escapeHtml(d.maChungTuHienThi)}</span>`;
 
                         const timeStr = d.ngayGiaoDich ? new Date(d.ngayGiaoDich).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
-                        const tang = d.soLuongTang > 0 ? `<span class="text-success fw-bold">+${d.soLuongTang.toLocaleString('vi-VN')}</span>` : '-';
-                        const giam = d.soLuongGiam > 0 ? `<span class="text-danger fw-bold">-${d.soLuongGiam.toLocaleString('vi-VN')}</span>` : '-';
-                        const ton = `<span class="fw-bold">${d.tonLuyKe.toLocaleString('vi-VN')}</span>`;
+                        const tang = d.soLuongTang > 0 ? `<span class="text-success">+${d.soLuongTang.toLocaleString('vi-VN')}</span>` : '-';
+                        const giam = d.soLuongGiam > 0 ? `<span class="text-danger">-${d.soLuongGiam.toLocaleString('vi-VN')}</span>` : '-';
+                        const ton = `<span class="text-dark">${d.tonLuyKe.toLocaleString('vi-VN')}</span>`;
                         const giaStr = d.donGia > 0 ? d.donGia.toLocaleString('vi-VN') + ' ₫' : '-';
 
                         // Chuẩn hóa badge class loại giao dịch đồng bộ chuyên nghiệp

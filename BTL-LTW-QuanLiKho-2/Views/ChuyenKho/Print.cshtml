@@ -1,0 +1,141 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.ChuyenKho.ChuyenKhoListItemVM
+@{
+    Layout = "_PrintLayout";
+    ViewData["Title"] = $"Phiếu chuyển kho {Model.MaPhieu}";
+    var vi = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+    int stt = 1;
+}
+
+<div class="voucher-title-wrap">
+    <div class="voucher-title">Phiếu Xuất Điều Chuyển Kho</div>
+    <div class="voucher-code">Mã phiếu: @Model.MaPhieu</div>
+    <div class="voucher-date">Ngày lập: @Model.NgayLap.ToString("dd/MM/yyyy HH:mm")</div>
+</div>
+
+<div class="voucher-meta-grid">
+    <div class="voucher-meta-item">
+        <span class="lbl">Kho xuất (nguồn):</span>
+        <span class="val">@Model.TenKhoNguon</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Kho nhận (đích):</span>
+        <span class="val">@Model.TenKhoDich</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Người lập phiếu:</span>
+        <span class="val">@Model.TenNguoiLap</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Người xuất hàng:</span>
+        <span class="val">@(Model.TenNguoiXuat ?? "Chưa xuất")</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Thời điểm xuất:</span>
+        <span class="val">@(Model.ThoiDiemXuat?.ToString("dd/MM/yyyy HH:mm") ?? "---")</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Người nhận hàng:</span>
+        <span class="val">@(Model.TenNguoiNhan ?? "Chưa nhận")</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Thời điểm nhận:</span>
+        <span class="val">@(Model.ThoiDiemNhan?.ToString("dd/MM/yyyy HH:mm") ?? "---")</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Trạng thái:</span>
+        <span class="val">@(Model.TrangThai == "DA_NHAN" ? "Đã nhận hàng" : (Model.TrangThai == "DA_XUAT" ? "Đang chuyển hàng" : "Phiếu tạm"))</span>
+    </div>
+    <div class="voucher-meta-item" style="grid-column: 1 / -1;">
+        <span class="lbl">Ghi chú xuất:</span>
+        <span class="val">@(string.IsNullOrEmpty(Model.GhiChu) ? "Không có" : Model.GhiChu)</span>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.GhiChuNhan))
+    {
+        <div class="voucher-meta-item" style="grid-column: 1 / -1;">
+            <span class="lbl">Ghi chú nhận:</span>
+            <span class="val">@Model.GhiChuNhan</span>
+        </div>
+    }
+</div>
+
+<table class="voucher-table">
+    <thead>
+        <tr>
+            <th style="width: 40px;" class="text-center">STT</th>
+            <th style="width: 120px;">Mã hàng</th>
+            <th>Tên hàng hóa</th>
+            <th style="width: 60px;" class="text-center">ĐVT</th>
+            <th style="width: 90px;" class="text-end">SL chuyển</th>
+            <th style="width: 90px;" class="text-end">SL nhận</th>
+            <th style="width: 105px;" class="text-end">Đơn giá vốn</th>
+            <th style="width: 120px;" class="text-end">Thành tiền</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var line in Model.Lines)
+        {
+            <tr>
+                <td class="text-center">@(stt++)</td>
+                <td class="barcode">@line.MaHangNoiBo</td>
+                <td><strong>@line.TenHang</strong></td>
+                <td class="text-center">@line.TenDvt</td>
+                <td class="text-end"><strong>@line.SoLuong.ToString("N0", vi)</strong></td>
+                <td class="text-end">@(line.SoLuongNhan.HasValue ? line.SoLuongNhan.Value.ToString("N0", vi) : "---")</td>
+                <td class="text-end">@line.DonGiaChuyen.ToString("N0", vi) đ</td>
+                <td class="text-end"><strong>@line.ThanhTien.ToString("N0", vi) đ</strong></td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr class="fw-bold">
+            <td colspan="4" class="text-end">TỔNG CỘNG:</td>
+            <td class="text-end">@Model.TongSoLuongChuyen.ToString("N0", vi)</td>
+            <td class="text-end">@(Model.TongSoLuongNhan > 0 ? Model.TongSoLuongNhan.ToString("N0", vi) : "---")</td>
+            <td></td>
+            <td class="text-end">@Model.TongGiaTriChuyen.ToString("N0", vi) đ</td>
+        </tr>
+    </tfoot>
+</table>
+
+<div class="voucher-summary">
+    <div class="voucher-summary-box">
+        <div class="voucher-summary-row">
+            <span>Tổng số lượng chuyển:</span>
+            <span>@Model.TongSoLuongChuyen.ToString("N0", vi)</span>
+        </div>
+        @if (Model.TongSoLuongNhan > 0)
+        {
+            <div class="voucher-summary-row">
+                <span>Tổng số lượng nhận:</span>
+                <span>@Model.TongSoLuongNhan.ToString("N0", vi)</span>
+            </div>
+        }
+        <div class="voucher-summary-row total-row">
+            <span>Tổng giá trị điều chuyển:</span>
+            <span>@Model.TongGiaTriChuyen.ToString("N0", vi) đ</span>
+        </div>
+    </div>
+</div>
+
+<div class="voucher-signatures">
+    <div class="sig-col">
+        <div class="sig-title">Người lập phiếu</div>
+        <div class="sig-sub">(Ký, họ tên)</div>
+        <div class="sig-name">@Model.TenNguoiLap</div>
+    </div>
+    <div class="sig-col">
+        <div class="sig-title">Thủ kho xuất</div>
+        <div class="sig-sub">(Ký, họ tên)</div>
+        <div class="sig-name">@(Model.TenNguoiXuat ?? "")</div>
+    </div>
+    <div class="sig-col">
+        <div class="sig-title">Người vận chuyển</div>
+        <div class="sig-sub">(Ký, họ tên)</div>
+        <div class="sig-name"></div>
+    </div>
+    <div class="sig-col">
+        <div class="sig-title">Thủ kho nhận</div>
+        <div class="sig-sub">(Ký, họ tên)</div>
+        <div class="sig-name">@(Model.TenNguoiNhan ?? "")</div>
+    </div>
+</div>

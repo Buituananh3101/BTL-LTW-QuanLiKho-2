@@ -12,9 +12,9 @@
     let currentSortDir = '';
 
     // 2. Khởi tạo Sidebar thu gọn (F4)
-    if (window.KiotFilter && typeof KiotFilter.initSidebar === 'function') {
-        KiotFilter.initSidebar({
-            storageKey: 'kiot_kho_sidebar'
+    if (window.AppFilter && typeof AppFilter.initSidebar === 'function') {
+        AppFilter.initSidebar({
+            storageKey: 'kp_kho_sidebar'
         });
     }
 
@@ -27,10 +27,20 @@
         }
     }
 
+    function resetUserDropdown() {
+        $('#khoUserSelectWrap').removeClass('open');
+        $('#khoUserDropdownMenu').hide();
+        $('#searchUserInDropdown').val('');
+        $('.kho-user-dropdown-item').show();
+    }
+
     function hideOverlay(id) {
         const ov = document.getElementById(id);
         if (ov) {
             ov.classList.remove('show');
+            if (id === 'khoModalOv') {
+                resetUserDropdown();
+            }
             if (!$('.hh-ov.show').length) {
                 document.body.classList.remove('noscroll');
             }
@@ -66,11 +76,6 @@
         $('#kho-pane-' + tab).addClass('on');
         const body = document.getElementById('khoModalBody');
         if (body) body.scrollTop = 0;
-    });
-
-    // 5. Khối gập mở Accordion (.hh-sec, .hh-sec-h)
-    $(document).on('click', '#khoModalOv .hh-sec-h', function () {
-        $(this).closest('.hh-sec').toggleClass('open');
     });
 
     // 6. RTE Toolbar các nút định dạng trong Tab Mô tả
@@ -119,7 +124,7 @@
             },
             error: function () {
                 $('#khoTableContainer').css('opacity', '1');
-                if (window.KiotToast) KiotToast.error('Không thể tải dữ liệu chi nhánh kho.');
+                if (window.AppToast) AppToast.error('Không thể tải dữ liệu chi nhánh kho.');
             }
         });
     }
@@ -148,7 +153,7 @@
     });
 
     // 8.2. Tìm kiếm F3 (Debounce 350ms)
-    $('#keywordSearch').on('input', KiotFilter.debounce(function () {
+    $('#keywordSearch').on('input', AppFilter.debounce(function () {
         loadTable(1);
     }, 350));
 
@@ -162,12 +167,12 @@
     // 8.3. Nút tải lại bảng
     $('#btnReloadTable').on('click', function () {
         loadTable(1);
-        if (window.KiotToast) KiotToast.info('Đã làm mới dữ liệu.');
+        if (window.AppToast) AppToast.info('Đã làm mới dữ liệu.');
     });
 
     // 8.4. Phân trang AJAX
-    if (window.KiotFilter && KiotFilter.bindPagination) {
-        KiotFilter.bindPagination('#khoTableContainer', function (page) {
+    if (window.AppFilter && AppFilter.bindPagination) {
+        AppFilter.bindPagination('#khoTableContainer', function (page) {
             loadTable(page);
         });
     } else {
@@ -188,22 +193,108 @@
         loadTable(1);
     });
 
-    // 10. Cập nhật số lượng nhân sự phụ trách được tick chọn
+    // 10. Quản lý Dropdown chọn nhân sự phụ trách kho
     function updateUserSelectionState() {
         let count = 0;
-        $('.kho-user-card-item').each(function () {
+        const selectedUsers = [];
+        $('.kho-user-dropdown-item').each(function () {
             const chk = $(this).find('.kho-user-chk');
+            const name = $(this).data('name') || '';
+            const role = $(this).data('role') || '';
+            const id = $(this).data('id');
+            const isManager = role === 'Quản lý' || chk.is(':disabled');
+
             if (chk.is(':checked')) {
                 $(this).addClass('selected');
                 count++;
+                selectedUsers.push({ id: id, name: name, role: role, isManager: isManager });
             } else {
                 $(this).removeClass('selected');
             }
         });
-        $('#selectedUserCount').text(count + ' nhân sự');
+
+        // Cập nhật badge số lượng
+        $('#selectedUserBadge').text(count + ' nhân sự');
+
+        // Cập nhật nội dung hiển thị trong Trigger Box
+        const displayBox = $('#khoUserSelectedDisplay');
+        if (count === 0) {
+            displayBox.html('<span class="text-muted">Chọn nhân sự phụ trách kho...</span>');
+        } else if (count <= 3) {
+            let html = '';
+            selectedUsers.forEach(function (u) {
+                html += `<span class="kho-user-chip" data-id="${u.id}">
+                            <i class="bi bi-person-fill text-primary" style="font-size: 11px;"></i>
+                            <span>${u.name}</span>
+                            ${!u.isManager ? `<button type="button" class="btn-remove-chip" data-id="${u.id}" title="Bỏ chọn">&times;</button>` : ''}
+                         </span>`;
+            });
+            displayBox.html(html);
+        } else {
+            let html = '';
+            // Hiện 2 người đầu kèm badge +X
+            selectedUsers.slice(0, 2).forEach(function (u) {
+                html += `<span class="kho-user-chip" data-id="${u.id}">
+                            <i class="bi bi-person-fill text-primary" style="font-size: 11px;"></i>
+                            <span>${u.name}</span>
+                            ${!u.isManager ? `<button type="button" class="btn-remove-chip" data-id="${u.id}" title="Bỏ chọn">&times;</button>` : ''}
+                         </span>`;
+            });
+            html += `<span class="badge bg-secondary-subtle text-secondary border ms-1" style="font-size: 11px; padding: 3px 6px;">+${count - 2} nhân sự khác</span>`;
+            displayBox.html(html);
+        }
     }
 
-    $(document).on('click', '.kho-user-card-item', function (e) {
+    // Mở / Đóng Dropdown
+    $('#khoUserDropdownTrigger').on('click', function (e) {
+        if ($(e.target).closest('.btn-remove-chip').length) return;
+        e.stopPropagation();
+        const wrap = $('#khoUserSelectWrap');
+        const menu = $('#khoUserDropdownMenu');
+        const isOpen = wrap.hasClass('open');
+
+        if (isOpen) {
+            wrap.removeClass('open');
+            menu.hide();
+        } else {
+            wrap.addClass('open');
+            menu.show();
+            $('#searchUserInDropdown').val('').trigger('input').focus();
+        }
+    });
+
+    // Bỏ chọn nhanh bằng nút X trên chip
+    $(document).on('click', '.btn-remove-chip', function (e) {
+        e.stopPropagation();
+        const id = $(this).data('id');
+        const chk = $(`#chkUser_${id}`);
+        if (chk.length && !chk.is(':disabled')) {
+            chk.prop('checked', false);
+            updateUserSelectionState();
+        }
+    });
+
+    // Đóng Dropdown khi click ra ngoài
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#khoUserSelectWrap').length) {
+            $('#khoUserSelectWrap').removeClass('open');
+            $('#khoUserDropdownMenu').hide();
+        }
+    });
+
+    // Tìm kiếm trong dropdown
+    $('#searchUserInDropdown').on('input', function () {
+        const kw = $(this).val().toLowerCase().trim();
+        $('.kho-user-dropdown-item').each(function () {
+            const name = String($(this).data('name') || '').toLowerCase();
+            const username = String($(this).data('username') || '').toLowerCase();
+            const match = !kw || name.includes(kw) || username.includes(kw);
+            $(this).toggle(match);
+        });
+    });
+
+    // Click chọn dòng trong dropdown
+    $(document).on('click', '.kho-user-dropdown-item', function (e) {
         if ($(e.target).is('input[type="checkbox"]')) {
             updateUserSelectionState();
             return;
@@ -218,12 +309,16 @@
         updateUserSelectionState();
     });
 
-    $('#btnSelectAllUsers').on('click', function () {
+    // Nút Chọn tất cả trong dropdown
+    $('#btnDropdownSelectAll').on('click', function (e) {
+        e.stopPropagation();
         $('.kho-user-chk').prop('checked', true);
         updateUserSelectionState();
     });
 
-    $('#btnDeselectAllUsers').on('click', function () {
+    // Nút Bỏ chọn trong dropdown
+    $('#btnDropdownDeselectAll').on('click', function (e) {
+        e.stopPropagation();
         $('.kho-user-chk:not(:disabled)').prop('checked', false);
         updateUserSelectionState();
     });
@@ -244,6 +339,7 @@
 
     // 11. Mở Modal Thêm mới chi nhánh kho
     $('#btnOpenCreateKhoModal').on('click', function () {
+        resetUserDropdown();
         $('#khoFormAlert').addClass('d-none').text('');
         $('.hh-f').removeClass('invalid');
         $('#khoMaKho').val('0');
@@ -274,6 +370,7 @@
     // 12. Mở Modal Cập nhật chi nhánh kho
     $(document).on('click', '.btn-edit-kho', function () {
         const id = $(this).data('id');
+        resetUserDropdown();
         $('#khoFormAlert').addClass('d-none').text('');
         $('.hh-f').removeClass('invalid');
 
@@ -282,7 +379,7 @@
             type: 'GET',
             success: function (res) {
                 if (!res.success) {
-                    if (window.KiotToast) KiotToast.error(res.message);
+                    if (window.AppToast) AppToast.error(res.message);
                     return;
                 }
                 const d = res.data;
@@ -312,7 +409,7 @@
                 setTimeout(() => $('#khoTenKho').focus(), 150);
             },
             error: function () {
-                if (window.KiotToast) KiotToast.error('Không thể lấy thông tin chi nhánh kho.');
+                if (window.AppToast) AppToast.error('Không thể lấy thông tin chi nhánh kho.');
             }
         });
     });
@@ -365,7 +462,7 @@
                 $('#btnSaveKhoAndNew, #btnSaveKhoCopy, #btnKhoCaret').prop('disabled', false);
 
                 if (res.success) {
-                    if (window.KiotToast) KiotToast.success(res.message);
+                    if (window.AppToast) AppToast.success(res.message);
                     loadTable(maKho === 0 ? 1 : currentPage);
 
                     if (actionType === 'again') {
@@ -427,13 +524,13 @@
         doSaveKho('copy');
     });
 
-    // 14. Chuyển đổi trạng thái nhanh (Kích hoạt / Ngừng hoạt động)
+    // 14. Chuyển đổi trạng thái nhanh (Kích hoạt / Ngừng hoạt động kho)
     $(document).on('click', '.btn-toggle-status', function () {
         const id = $(this).data('id');
         const name = $(this).data('name') || '';
         const currentStatus = $(this).data('status');
         const isDisabling = currentStatus === 'HOAT_DONG';
-        const actionTitle = isDisabling ? 'Ngừng hoạt động kho' : 'Kích hoạt lại kho';
+        const actionTitle = isDisabling ? 'Ngừng hoạt động (khóa) kho' : 'Kích hoạt lại kho';
         const safeName = $('<div>').text(name).html();
 
         const doToggle = function () {
@@ -442,25 +539,25 @@
                 type: 'POST',
                 success: function (res) {
                     if (res.success) {
-                        if (window.KiotToast) KiotToast.success(res.message);
+                        if (window.AppToast) AppToast.success(res.message);
                         loadTable(currentPage);
                     } else {
-                        if (window.KiotToast) KiotToast.error(res.message);
+                        if (window.AppToast) AppToast.error(res.message);
                     }
                 },
                 error: function (xhr) {
-                    if (window.KiotToast) KiotToast.error(xhr.responseJSON?.message || 'Không thể thực hiện thao tác.');
+                    if (window.AppToast) AppToast.error(xhr.responseJSON?.message || 'Không thể thực hiện thao tác.');
                 }
             });
         };
 
-        if (window.KiotConfirm && typeof window.KiotConfirm.show === 'function') {
-            window.KiotConfirm.show({
+        if (window.AppConfirm && typeof window.AppConfirm.show === 'function') {
+            window.AppConfirm.show({
                 title: actionTitle,
                 icon: isDisabling ? 'bi-lock-fill' : 'bi-unlock-fill',
                 iconColor: isDisabling ? '#dc2626' : '#0d6efd',
                 message: isDisabling
-                    ? `Bạn có chắc chắn muốn <strong>ngừng hoạt động chi nhánh kho</strong> <strong>${safeName}</strong> không?<br><span class="text-muted small mt-1 d-block">Sau khi ngừng hoạt động, nhân viên sẽ không thể tạo mới các chứng từ trên kho này.</span>`
+                    ? `Bạn có chắc chắn muốn <strong>ngừng hoạt động (khóa) chi nhánh kho</strong> <strong>${safeName}</strong> không?<br><span class="text-muted small mt-1 d-block">Sau khi ngừng hoạt động, nhân viên sẽ không thể tạo mới các chứng từ trên kho này.</span>`
                     : `Bạn có chắc chắn muốn <strong>kích hoạt chi nhánh kho</strong> <strong>${safeName}</strong> hoạt động trở lại không?`,
                 confirmText: isDisabling ? 'Đồng ý ngừng hoạt động' : 'Đồng ý kích hoạt',
                 confirmClass: isDisabling ? 'btn btn-danger' : 'btn btn-primary',
@@ -469,6 +566,73 @@
             });
         } else {
             doToggle();
+        }
+    });
+
+    // 15. Xóa chi nhánh kho (Nếu chưa có chứng từ -> Xóa vĩnh viễn; Nếu đã có chứng từ -> Chặn và hỏi chuyển sang Ngừng hoạt động / Khóa)
+    $(document).on('click', '.btn-delete-kho', function () {
+        const id = $(this).data('id');
+        const name = $(this).data('name') || '';
+        const safeName = $('<div>').text(name).html();
+
+        const executeDelete = function (chuyenKhoa = false) {
+            $.ajax({
+                url: '/Kho/Delete?id=' + id + (chuyenKhoa ? '&chuyenKhoa=true' : ''),
+                type: 'POST',
+                success: function (res) {
+                    if (res.success) {
+                        if (window.AppToast) AppToast.success(res.message);
+                        loadTable(currentPage);
+                    } else if (res.hasTransaction) {
+                        if (res.isLocked) {
+                            if (window.AppToast) {
+                                AppToast.warning(`Chi nhánh kho <b>${safeName}</b> đã phát sinh chứng từ và hiện đang ở trạng thái <b>Ngừng hoạt động</b>, không thể xóa vĩnh viễn.`);
+                            }
+                        } else {
+                            setTimeout(function () {
+                                if (window.AppConfirm && typeof window.AppConfirm.show === 'function') {
+                                    window.AppConfirm.show({
+                                        title: 'Không thể xóa chi nhánh kho',
+                                        icon: 'bi-shield-exclamation',
+                                        iconColor: '#f59e0b',
+                                        message: `Chi nhánh kho <strong>${safeName}</strong> đã phát sinh chứng từ trong hệ thống nên <strong>không thể xóa vĩnh viễn</strong> để bảo toàn lịch sử dữ liệu.<br><br>Bạn có muốn chuyển sang <strong>NGỪNG HOẠT ĐỘNG (KHÓA KHO)</strong> để ngừng phân bổ chứng từ mới không?`,
+                                        confirmText: 'Ngừng hoạt động kho',
+                                        confirmClass: 'btn btn-warning text-dark fw-semibold',
+                                        cancelText: 'Bỏ qua',
+                                        onConfirm: function () {
+                                            executeDelete(true);
+                                        }
+                                    });
+                                } else {
+                                    if (window.AppToast) AppToast.warning(res.message);
+                                }
+                            }, 200);
+                        }
+                    } else {
+                        if (window.AppToast) AppToast.error(res.message);
+                    }
+                },
+                error: function (xhr) {
+                    if (window.AppToast) AppToast.error(xhr.responseJSON?.message || 'Không thể thực hiện thao tác xóa.');
+                }
+            });
+        };
+
+        if (window.AppConfirm && typeof window.AppConfirm.show === 'function') {
+            window.AppConfirm.show({
+                title: 'Xóa chi nhánh kho',
+                icon: 'bi-trash3-fill',
+                iconColor: '#dc2626',
+                message: `Bạn có chắc chắn muốn xóa chi nhánh kho <strong>${safeName}</strong> không?<br><span class="text-muted small mt-1 d-block">Lưu ý: Chỉ chi nhánh kho chưa từng phát sinh chứng từ mới có thể xóa hoàn toàn khỏi hệ thống.</span>`,
+                confirmText: 'Đồng ý xóa',
+                confirmClass: 'btn btn-danger',
+                cancelText: 'Bỏ qua',
+                onConfirm: function () {
+                    executeDelete(false);
+                }
+            });
+        } else {
+            executeDelete(false);
         }
     });
 

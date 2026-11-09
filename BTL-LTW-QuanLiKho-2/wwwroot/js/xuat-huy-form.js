@@ -55,9 +55,9 @@
         recent: []
     };
 
-    // ===== CHỌN NGÀY GIỜ LẬP PHIẾU (LEGO KIOTDATETIMEPICKER) =====
-    if (window.KiotFilter && typeof KiotFilter.initDateTimePicker === 'function') {
-        KiotFilter.initDateTimePicker({
+    // ===== CHỌN NGÀY GIỜ LẬP PHIẾU (LEGO KHOPRODATETIMEPICKER) =====
+    if (window.AppFilter && typeof AppFilter.initDateTimePicker === 'function') {
+        AppFilter.initDateTimePicker({
             inputSelector: '#fDate',
             popupSelector: '#dtPop',
             initialDate: FM.created,
@@ -257,9 +257,9 @@
         });
     }
 
-    /* ===== AUTOCOMPLETE TÌM KIẾM HÀNG HÓA (F3) DÙNG LEGO KIOTPRODUCTSEARCH ===== */
-    if (!isReadOnly && window.KiotFilter && typeof KiotFilter.initProductSearch === 'function') {
-        KiotFilter.initProductSearch({
+    /* ===== AUTOCOMPLETE TÌM KIẾM HÀNG HÓA (F3) DÙNG LEGO KHOPROPRODUCTSEARCH ===== */
+    if (!isReadOnly && window.AppFilter && typeof AppFilter.initProductSearch === 'function') {
+        AppFilter.initProductSearch({
             inputSelector: '#fSearch',
             dropdownSelector: '#suggest',
             apiUrl: searchUrl,
@@ -499,8 +499,8 @@
     /* ===== TOAST THÔNG BÁO DÙNG CHUNG ===== */
     let toastTimer;
     function toast(msg, type) {
-        if (window.KiotToast) {
-            window.KiotToast.show(msg, type || 'info');
+        if (window.AppToast) {
+            window.AppToast.show(msg, type || 'info');
             return;
         }
         const t = $('#toast');

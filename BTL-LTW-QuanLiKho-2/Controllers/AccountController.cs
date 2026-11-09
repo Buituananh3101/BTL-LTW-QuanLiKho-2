@@ -25,7 +25,7 @@ public class AccountController : Controller
     {
         if (User.Identity?.IsAuthenticated == true)
         {
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "HangHoa");
         }
 
         ViewBag.ReturnUrl = returnUrl;
@@ -126,7 +126,7 @@ public class AccountController : Controller
             return Redirect(model.ReturnUrl);
         }
 
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "HangHoa");
     }
 
     [HttpGet]
@@ -153,5 +153,65 @@ public class AccountController : Controller
         }
         return Ok(new { success = true, warehouseId });
     }
-}
 
+    /// <summary>
+    /// Đổi mật khẩu cá nhân cho tài khoản đang đăng nhập
+    /// </summary>
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> DoiMatKhau([FromBody] DoiMatKhauCaNhanVM model)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+            return Json(new { success = false, message = string.Join("<br/>", errors) });
+        }
+
+        int maTaiKhoan = User.GetMaTaiKhoan();
+        var taiKhoan = await _context.TaiKhoans.FindAsync(maTaiKhoan);
+        if (taiKhoan == null)
+        {
+            return Json(new { success = false, message = "Không tìm thấy thông tin tài khoản." });
+        }
+
+        // 1. Kiểm tra mật khẩu hiện tại
+        if (!PasswordHelper.VerifyPassword(model.MatKhauHienTai, taiKhoan.MatKhauHash))
+        {
+            return Json(new { success = false, message = "Mật khẩu hiện tại không chính xác. Vui lòng kiểm tra lại." });
+        }
+
+        // 2. Kiểm tra mật khẩu mới không được trùng mật khẩu cũ
+        if (PasswordHelper.VerifyPassword(model.MatKhauMoi, taiKhoan.MatKhauHash))
+        {
+            return Json(new { success = false, message = "Mật khẩu mới không được trùng với mật khẩu hiện tại." });
+        }
+
+        // 3. Cập nhật mật khẩu mới (băm SHA-256)
+        taiKhoan.MatKhauHash = PasswordHelper.HashPassword(model.MatKhauMoi.Trim());
+        await _context.SaveChangesAsync();
+
+        // 4. Ghi nhật ký thao tác
+        try
+        {
+            _context.NhatKyThaoTacs.Add(new NhatKyThaoTac
+            {
+                MaTaiKhoan = taiKhoan.MaTaiKhoan,
+                ThoiDiem = DateTime.Now,
+                ThaoTac = "Đổi mật khẩu",
+                LoaiDoiTuong = "TaiKhoan",
+                MaDoiTuong = taiKhoan.MaTaiKhoan.ToString(),
+                NoiDung = $"Người dùng '{taiKhoan.TenDangNhap}' tự đổi mật khẩu cá nhân thành công."
+            });
+            await _context.SaveChangesAsync();
+        }
+        catch
+        {
+            // Bỏ qua lỗi log để không chặn luồng chính
+        }
+
+        return Json(new { success = true, message = "Đổi mật khẩu thành công! Vui lòng sử dụng mật khẩu mới cho lần đăng nhập sau." });
+    }
+}

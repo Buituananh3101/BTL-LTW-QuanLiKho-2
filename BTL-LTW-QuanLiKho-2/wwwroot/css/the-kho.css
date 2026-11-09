@@ -1,25 +1,22 @@
-/* ==========================================================================
-   CSS CHO BÁO CÁO THẺ KHO (THE-KHO.CSS) - CHUẨN GIAO DIỆN KIOTVIET
+﻿/* ==========================================================================
+   CSS CHO BÁO CÁO THẺ KHO (THE-KHO.CSS) - CHUẨN GIAO DIỆN KHOPRO
    ========================================================================== */
 
-/* 1. KHỐI CHỌN MẶT HÀNG TRÊN SIDEBAR (CHUẨN LEGO F3) */
+/* 1. KHỐI CHỌN MẶT HÀNG TRÊN SIDEBAR (CHUẨN LEGO F3 BUNG RỘNG THOẢI MÁI) */
 .tk-autocomplete-dropdown {
-    position: absolute !important;
-    top: calc(100% + 4px) !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
+    position: fixed !important;
+    width: 520px !important;
+    min-width: 480px !important;
+    max-width: 600px !important;
     background: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 8px !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
-    max-height: 220px !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    max-height: 380px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    z-index: 150 !important;
-    padding: 3px 0 !important;
+    z-index: 1080 !important;
+    padding: 4px 0 !important;
     display: none;
     box-sizing: border-box !important;
 }
@@ -28,108 +25,139 @@
     display: block !important;
 }
 
-/* Tinh chỉnh item autocomplete khi hiển thị trên sidebar */
+/* Item autocomplete hiển thị rộng rãi, rõ ràng, không bị co dúm */
 .tk-autocomplete-dropdown .kk-autocomplete-item {
-    padding: 6px 8px !important;
-    gap: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding: 9px 14px !important;
     border-bottom: 1px solid #f1f5f9 !important;
     cursor: pointer !important;
+    transition: background-color 0.15s ease !important;
+    background: #ffffff !important;
+}
+
+.tk-autocomplete-dropdown .kk-autocomplete-item:hover,
+.tk-autocomplete-dropdown .kk-autocomplete-item.active {
+    background-color: #eff6ff !important;
 }
 
 .tk-autocomplete-dropdown .kk-autocomplete-item:last-child {
     border-bottom: none !important;
 }
 
+.tk-autocomplete-dropdown .kk-item-main {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
 .tk-autocomplete-dropdown .kk-item-thumb {
-    width: 24px !important;
-    height: 24px !important;
-    font-size: 11px !important;
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 14px !important;
     font-weight: 700 !important;
-    border-radius: 4px !important;
+    border-radius: 6px !important;
+    background: #e0f2fe !important;
+    color: #0284c7 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     flex-shrink: 0 !important;
+    text-transform: uppercase !important;
+    overflow: hidden !important;
+}
+
+.tk-autocomplete-dropdown .kk-item-thumb.has-image {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+.tk-autocomplete-dropdown .kk-item-thumb.no-image {
+    background: transparent !important;
+    border: 1px dashed #cbd5e1 !important;
+}
+
+.tk-autocomplete-dropdown .kk-thumb-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+    border-radius: 5px !important;
+}
+
+.tk-autocomplete-dropdown .kk-item-info {
+    flex: 1 !important;
+    min-width: 0 !important;
 }
 
 .tk-autocomplete-dropdown .kk-item-name {
-    font-size: 12px !important;
-    line-height: 1.25 !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    line-height: 1.35 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
 }
 
 .tk-autocomplete-dropdown .kk-item-code {
-    font-size: 10.5px !important;
+    font-size: 12px !important;
     color: #64748b !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+    margin-top: 2px !important;
 }
 
 .tk-autocomplete-dropdown .kk-item-meta {
-    font-size: 11px !important;
-    line-height: 1.3 !important;
-    padding-left: 4px !important;
+    font-size: 12.5px !important;
+    line-height: 1.45 !important;
+    padding-left: 12px !important;
     text-align: right !important;
     flex-shrink: 0 !important;
     white-space: nowrap !important;
 }
 
+.tk-autocomplete-dropdown .kk-item-stock {
+    color: #64748b !important;
+}
+
 .tk-autocomplete-dropdown .kk-item-stock strong {
     color: #0070f4 !important;
+    font-weight: 600 !important;
+}
+
+.tk-autocomplete-dropdown .kk-item-price {
+    color: #475569 !important;
 }
 
 .tk-autocomplete-dropdown .kk-item-price b {
     color: #1e293b !important;
-    font-size: 11px !important;
+    font-weight: 600 !important;
+    font-size: 12.5px !important;
 }
 
-/* Thẻ hiển thị mặt hàng đang chọn trên sidebar */
-.tk-selected-card {
-    background: #f0f7ff;
-    border: 1px solid #bfdbfe;
-    border-radius: 6px;
-    padding: 8px 10px;
-    transition: all 0.2s ease;
-}
-
-.tk-selected-card .product-code-badge {
-    background: #0070f4;
-    color: #ffffff;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 1px 6px;
-    border-radius: 4px;
-    display: inline-block;
-    margin-bottom: 3px;
-}
-
-.tk-selected-card .product-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #0f172a;
-    line-height: 1.35;
-}
-
-.tk-selected-card .product-sub {
-    font-size: 11.5px;
-    color: #64748b;
-    margin-top: 3px;
-}
-
-.tk-selected-card .btn-remove-selected-product {
+/* Nút xóa mặt hàng đã chọn trong ô tìm kiếm F3 */
+.btn-remove-selected-product {
     background: transparent;
     border: none;
     color: #94a3b8;
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1;
     cursor: pointer;
-    padding: 0;
-    transition: color 0.15s ease, transform 0.15s ease;
+    padding: 2px;
+    transition: color 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.tk-selected-card .btn-remove-selected-product:hover {
+.btn-remove-selected-product:hover {
     color: #ef4444;
-    transform: scale(1.15);
 }
 
 /* 2. HEADER CARD CHI TIẾT MẶT HÀNG TRÊN CỘT CHÍNH */
@@ -151,6 +179,8 @@
     display: flex;
     align-items: center;
     gap: 14px;
+    flex: 1;
+    min-width: 0;
 }
 
 .thekho-product-banner .icon-box {
@@ -167,9 +197,9 @@
 }
 
 .thekho-product-banner .title-area h2 {
-    font-size: 17px;
-    font-weight: 700;
-    color: #0f172a;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
     margin: 0 0 4px 0;
 }
 
@@ -177,7 +207,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    font-size: 12px;
+    font-size: 12.5px;
     color: #475569;
 }
 
@@ -185,7 +215,7 @@
     background: #f1f5f9;
     padding: 2px 8px;
     border-radius: 4px;
-    font-weight: 500;
+    font-weight: 400;
 }
 
 /* 3. CÁC THẺ STAT SUMMARY KPI */
@@ -246,7 +276,7 @@
 
 .thekho-kpi-card .kpi-val {
     font-size: 18px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.2;
     color: #0f172a;
 }
@@ -255,85 +285,109 @@
 .thekho-kpi-card.xuat-ky .kpi-val { color: #dc2626; }
 .thekho-kpi-card.ton-cuoi .kpi-val { color: #0d6efd; }
 
-.thekho-kpi-card .kpi-lbl {
+.thekho-kpi-lbl {
     font-size: 12px;
     color: #64748b;
     margin-top: 2px;
 }
 
-/* 4. BẢNG THẺ KHO DÒNG BIẾN ĐỘNG */
+/* 4. BẢNG THẺ KHO DÒNG BIẾN ĐỘNG - ĐỒNG BỘ 100% THEO CHUẨN .tbl DANH SÁCH HÀNG HÓA */
 .thekho-table-wrap {
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     overflow: hidden;
-}
-
-.thekho-table {
-    margin-bottom: 0;
     width: 100%;
-    min-width: 860px;
+    display: flex;
+    flex-direction: column;
 }
 
-.thekho-table th {
-    background: #f8fafc;
-    font-weight: 600;
-    font-size: 12px;
-    color: #475569;
-    border-bottom: 1px solid #cbd5e1;
-    padding: 10px 8px;
-    white-space: nowrap;
+.thekho-table-wrap .kp-table-scroll-body {
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
 }
 
-.thekho-table td {
-    padding: 8px;
-    font-size: 13px;
-    vertical-align: middle;
-    border-bottom: 1px solid #f1f5f9;
+.thekho-table,
+#theKhoTable {
+    margin-bottom: 0;
+    width: max-content !important;
+    min-width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
 }
 
-.thekho-table tbody tr:hover {
+.thekho-table th,
+#theKhoTable th {
+    background: var(--brand-soft, #eef4fc) !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    color: #1e3a8a !important;
+    border-bottom: 1px solid var(--border, #dbeafe) !important;
+    padding: 10px 12px !important;
+    height: 40px !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+}
+
+.thekho-table td,
+#theKhoTable td {
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    vertical-align: middle !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+    color: #111827;
+}
+
+.thekho-table tbody tr:hover td {
     background-color: #f8fafc;
 }
 
-/* Dòng tồn đầu kỳ */
+/* Dòng tồn đầu kỳ - phong cách summary nhẹ nhàng như Danh sách hàng hóa */
 .thekho-table tr.row-ton-dau {
-    background-color: #f8fafc;
-    font-weight: 600;
-    border-top: 1px solid #cbd5e1;
-    border-bottom: 2px solid #cbd5e1;
+    background-color: #fafbfc;
 }
 
 .thekho-table tr.row-ton-dau td {
-    color: #334155;
-    padding: 10px 8px;
+    background-color: #fafbfc;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+    color: #374151;
+    font-weight: 400;
+    padding: 10px 12px;
 }
 
-/* Dòng tồn cuối kỳ / tổng kết */
+/* Dòng tồn cuối kỳ - phong cách summary chuẩn KhoPro */
 .thekho-table tr.row-ton-cuoi {
-    background-color: #f0fdf4;
-    font-weight: 700;
-    border-top: 2px solid #86efac;
+    background-color: #fafbfc;
 }
 
 .thekho-table tr.row-ton-cuoi td {
-    color: #166534;
-    padding: 10px 8px;
+    background-color: #fafbfc;
+    border-top: 2px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+    color: #111827;
+    font-weight: 400;
+    padding: 10px 12px;
 }
 
-/* Badges phân loại giao dịch */
+/* Badges phân loại giao dịch - font phẳng, nhẹ nhàng */
 .badge-tk {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 11.5px;
-    font-weight: 500;
-    line-height: 1.25;
-    padding: 3px 8px;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.3;
+    padding: 2px 7px;
     border-radius: 4px;
     white-space: nowrap;
-    letter-spacing: 0.01em;
+    letter-spacing: normal;
     box-sizing: border-box;
 }
 

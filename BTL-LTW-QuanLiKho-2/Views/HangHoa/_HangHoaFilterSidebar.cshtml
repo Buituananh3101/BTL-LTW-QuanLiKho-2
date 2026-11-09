@@ -2,24 +2,24 @@
 @using BTL_LTW_QuanLiKho_2.ViewModels.Common
 
 <!-- CỘT BÊN TRÁI: TIÊU ĐỀ "HÀNG HÓA" + BỘ LỌC 7 KHỐI chuyên nghiệp (MODULAR LEGO) -->
-<aside class="kiot-sidebar-col" id="sidebarFilterCol">
+<aside class="kp-sidebar-col" id="sidebarFilterCol">
     <!-- Header cho sidebar khi mở ở chế độ mobile/zoom in -->
-    <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+    <div class="kp-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
         <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc hàng hóa</div>
         <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
     </div>
 
-    <div class="kiot-sidebar-title d-none d-lg-flex">
+    <div class="kp-sidebar-title d-none d-lg-flex">
         Hàng hóa
     </div>
 
-    <div class="kiot-filter-box">
+    <div class="kp-filter-box">
         <!-- 1. Nhóm hàng -->
-        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("NhomHang", "nhom", "Nhóm hàng", "Chọn nhóm hàng", true) {
+        <partial name="_MultiSelectFilter" model='new MultiSelectVM("NhomHang", "nhom", "Nhóm hàng", "Chọn nhóm hàng", true) {
             HeaderActionText = "Tạo mới",
             HeaderActionId = "btnOpenQuickGroupModal",
             AllowEdit = true,
-            Items = Model.NhomHangs.Select(g => new KiotMultiSelectItemVM(g.MaNhom.ToString(), g.TenNhom)).ToList()
+            Items = Model.NhomHangs.Select(g => new MultiSelectItemVM(g.MaNhom.ToString(), g.TenNhom)).ToList()
         }' />
 
         <!-- 2. Tồn kho -->
@@ -27,28 +27,28 @@
             <h6>Tồn kho <span class="filter-dot" id="dotTonKho"></span></h6>
             <div class="text-muted small mb-1">Tiêu chí tồn</div>
             <div class="position-relative">
-                <div class="kiot-single-select-box" id="boxTonKho">
+                <div class="kp-single-select-box" id="boxTonKho">
                     <span id="textTonKho">
                         @(Model.TonKhoFilter == "CON_HANG" ? "Còn hàng trong kho" :
                           Model.TonKhoFilter == "HET_HANG" ? "Hết hàng trong kho" :
                           Model.TonKhoFilter == "DUOI_DINH_MUC" ? "Dưới định mức tồn" : "Tất cả")
                     </span>
-                    <i class="bi bi-chevron-down kiot-select-chevron"></i>
+                    <i class="bi bi-chevron-down kp-select-chevron"></i>
                 </div>
-                <div class="kiot-ss-dropdown shadow" id="dropdownTonKho">
-                    <div class="kiot-ss-item @(Model.TonKhoFilter == "ALL" || string.IsNullOrEmpty(Model.TonKhoFilter) ? "selected" : "")" data-val="ALL">
+                <div class="kp-ss-dropdown shadow" id="dropdownTonKho">
+                    <div class="kp-ss-item @(Model.TonKhoFilter == "ALL" || string.IsNullOrEmpty(Model.TonKhoFilter) ? "selected" : "")" data-val="ALL">
                         <span>Tất cả</span>
                         <i class="bi bi-check2 check-icon"></i>
                     </div>
-                    <div class="kiot-ss-item @(Model.TonKhoFilter == "CON_HANG" ? "selected" : "")" data-val="CON_HANG">
+                    <div class="kp-ss-item @(Model.TonKhoFilter == "CON_HANG" ? "selected" : "")" data-val="CON_HANG">
                         <span>Còn hàng trong kho</span>
                         <i class="bi bi-check2 check-icon"></i>
                     </div>
-                    <div class="kiot-ss-item @(Model.TonKhoFilter == "HET_HANG" ? "selected" : "")" data-val="HET_HANG">
+                    <div class="kp-ss-item @(Model.TonKhoFilter == "HET_HANG" ? "selected" : "")" data-val="HET_HANG">
                         <span>Hết hàng trong kho</span>
                         <i class="bi bi-check2 check-icon"></i>
                     </div>
-                    <div class="kiot-ss-item @(Model.TonKhoFilter == "DUOI_DINH_MUC" ? "selected" : "")" data-val="DUOI_DINH_MUC">
+                    <div class="kp-ss-item @(Model.TonKhoFilter == "DUOI_DINH_MUC" ? "selected" : "")" data-val="DUOI_DINH_MUC">
                         <span>Dưới định mức tồn</span>
                         <i class="bi bi-check2 check-icon"></i>
                     </div>
@@ -63,23 +63,23 @@
         </div>
 
         <!-- 3. Dự kiến hết hàng -->
-        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("dk", "Dự kiến hết hàng", true)' />
+        <partial name="_DateFilter" model='new DateFilterVM("dk", "Dự kiến hết hàng", true)' />
 
         <!-- 4. Thời gian tạo -->
-        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("tgt", "Thời gian tạo", false)' />
+        <partial name="_DateFilter" model='new DateFilterVM("tgt", "Thời gian tạo", false)' />
 
         <!-- 5. Nhà cung cấp -->
-        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("Ncc", "ncc", "Nhà cung cấp", "Chọn nhà cung cấp", true) {
-            Items = Model.DonViCapHangs.Select(s => new KiotMultiSelectItemVM(s.TenDonVi, s.TenDonVi)).ToList()
+        <partial name="_MultiSelectFilter" model='new MultiSelectVM("Ncc", "ncc", "Nhà cung cấp", "Chọn nhà cung cấp", true) {
+            Items = Model.DonViCapHangs.Select(s => new MultiSelectItemVM(s.TenDonVi, s.TenDonVi)).ToList()
         }' />
 
         <!-- 6. Vị trí -->
-        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("ViTri", "vitri", "Vị trí", "Chọn vị trí", true) {
-            Items = Model.ViTris.Select(vt => new KiotMultiSelectItemVM(vt, vt)).ToList()
+        <partial name="_MultiSelectFilter" model='new MultiSelectVM("ViTri", "vitri", "Vị trí", "Chọn vị trí", true) {
+            Items = Model.ViTris.Select(vt => new MultiSelectItemVM(vt, vt)).ToList()
         }' />
 
         <!-- 7. Loại hàng -->
-        <partial name="_KiotMultiSelectFilter" model='new KiotMultiSelectVM("LoaiHang", "loaihang", "Loại hàng", "Chọn loại hàng", false) {
+        <partial name="_MultiSelectFilter" model='new MultiSelectVM("LoaiHang", "loaihang", "Loại hàng", "Chọn loại hàng", false) {
             Items = new() {
                 new("Hàng hóa", "Hàng hóa"),
                 new("Dịch vụ", "Dịch vụ"),

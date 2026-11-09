@@ -526,19 +526,46 @@ public class TraHangNhapController : BaseKhoController
         var products = await query.Take(10).ToListAsync();
         var productIds = products.Select(p => p.MaHang).ToList();
 
+        var setWithImage = new HashSet<int>();
+        if (productIds.Any())
+        {
+            var imgIds = await _context.HinhAnhHangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang))
+                .Select(x => x.MaHang)
+                .Distinct()
+                .ToListAsync();
+
+            var legacyImgIds = await _context.HangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang) && x.HinhAnh != null)
+                .Select(x => x.MaHang)
+                .ToListAsync();
+
+            setWithImage = new HashSet<int>(imgIds.Concat(legacyImgIds));
+        }
+
         var stockMap = await _context.VwTonKhoHienTais
             .Where(s => s.MaKho == whId && productIds.Contains(s.MaHang))
             .ToDictionaryAsync(s => s.MaHang, s => s.SoLuongTon ?? 0);
 
-        var result = products.Select(p => new
+        var result = products.Select(p =>
         {
-            id = p.MaHang,
-            code = p.MaHangNoiBo,
-            name = p.TenHang,
-            unit = p.MaDvtNavigation?.TenDvt ?? "Cái",
-            cost = p.GiaVon,
-            price = p.GiaBanThamKhao,
-            stock = stockMap.TryGetValue(p.MaHang, out var ton) ? ton : 0
+            bool hasImg = setWithImage.Contains(p.MaHang);
+            return new
+            {
+                id = p.MaHang,
+                maHang = p.MaHang,
+                code = p.MaHangNoiBo,
+                maHangNoiBo = p.MaHangNoiBo,
+                name = p.TenHang,
+                tenHang = p.TenHang,
+                unit = p.MaDvtNavigation?.TenDvt ?? "Cái",
+                tenDvt = p.MaDvtNavigation?.TenDvt ?? "Cái",
+                cost = p.GiaVon,
+                price = p.GiaBanThamKhao,
+                stock = stockMap.TryGetValue(p.MaHang, out var ton) ? ton : 0,
+                hasImage = hasImg,
+                hinhAnh = hasImg ? $"/HangHoa/GetImage/{p.MaHang}" : null
+            };
         });
 
         return Json(result);
@@ -594,7 +621,7 @@ public class TraHangNhapController : BaseKhoController
             ws.Cell(1, i + 1).Value = headers[i];
         }
 
-        ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
+        ExcelHelper.ApplyHeaderStyle(ws.Range(1, 1, 1, headers.Length));
         ws.Row(1).Height = 26;
 
         // Dữ liệu mẫu
@@ -733,7 +760,7 @@ public class TraHangNhapController : BaseKhoController
         }
     }
 
-    // 14. Xuất file Excel danh sách hoặc chi tiết phiếu trả hàng nhập (Chuẩn KiotViet ClosedXML)
+    // 14. Xuất file Excel danh sách hoặc chi tiết phiếu trả hàng nhập (Chuẩn KhoPro ClosedXML)
     [HttpGet]
     public async Task<IActionResult> ExportExcel(string? type, TraHangNhapFilterVM filter, int? id = null)
     {
@@ -1092,4 +1119,62 @@ public class TraHangNhapController : BaseKhoController
     }
 
     #endregion
+
+    [HttpGet]
+    public async Task<IActionResult> Print(int id)
+    {
+        var phieu = await _context.PhieuTraHangNhaps
+            .Include(p => p.MaKhoNavigation)
+            .Include(p => p.MaNvlapNavigation)
+            .Include(p => p.MaNvtraNavigation)
+            .Include(p => p.MaDonViCapHangNavigation)
+            .Include(p => p.ChiTietPhieuTraHangNhaps)
+                .ThenInclude(ct => ct.MaHangNavigation)
+                    .ThenInclude(h => h.MaDvtNavigation)
+            .FirstOrDefaultAsync(p => p.MaPhieuTraHang == id);
+
+        if (phieu == null)
+        {
+            return NotFound("Không tìm thấy phiếu trả hàng nhập.");
+        }
+
+        ViewBag.TenKho = phieu.MaKhoNavigation?.TenKho;
+
+        var vm = new TraHangNhapFormVM
+        {
+            MaPhieuTraHang = phieu.MaPhieuTraHang,
+            MaPhieu = phieu.MaPhieu,
+            MaKho = phieu.MaKho,
+            TenKho = phieu.MaKhoNavigation?.TenKho ?? "",
+            NgayLap = phieu.NgayLap,
+            NgayTra = phieu.NgayTra,
+            MaNvlap = phieu.MaNvlap,
+            TenNguoiLap = phieu.MaNvlapNavigation?.HoTen ?? "",
+            MaNvtra = phieu.MaNvtra,
+            TenNguoiTra = phieu.MaNvtraNavigation?.HoTen,
+            MaDonViCapHang = phieu.MaDonViCapHang,
+            TenDonViCapHang = phieu.MaDonViCapHangNavigation?.TenDonVi,
+            MaNcc = phieu.MaDonViCapHangNavigation?.MaNcc,
+            GhiChu = phieu.GhiChu,
+            GiamGia = phieu.GiamGia,
+            TongTienHang = phieu.TongTienHang,
+            CanThuNcc = phieu.CanThuNcc,
+            DaThuNcc = phieu.DaThuNcc,
+            TrangThai = phieu.TrangThai,
+            IsReadOnly = true,
+            Lines = phieu.ChiTietPhieuTraHangNhaps.Select(ct => new TraHangNhapLineVM
+            {
+                MaHang = ct.MaHang,
+                MaHangNoiBo = ct.MaHangNavigation?.MaHangNoiBo ?? "",
+                TenHang = ct.MaHangNavigation?.TenHang ?? "",
+                TenDvt = ct.MaHangNavigation?.MaDvtNavigation?.TenDvt ?? "",
+                SoLuong = ct.SoLuong,
+                GiaVon = ct.GiaVon,
+                DonGiaTra = ct.DonGiaTra,
+                GhiChu = ct.GhiChu
+            }).ToList()
+        };
+
+        return View("Print", vm);
+    }
 }

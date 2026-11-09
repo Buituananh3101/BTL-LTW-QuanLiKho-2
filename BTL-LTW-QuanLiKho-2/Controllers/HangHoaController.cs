@@ -27,7 +27,7 @@ public class HangHoaController : BaseKhoController
     {
         filter ??= new HangHoaFilterParams();
         var vm = await BuildIndexVM(filter);
-        return View(vm);
+        return View(vm);    
     }
 
     // AJAX Action trả về Partial View danh sách bảng
@@ -457,7 +457,14 @@ public class HangHoaController : BaseKhoController
 
         return allItems;
     }
-
+    /*
+    Lấy kho làm việc: int whId = GetCurrentWarehouseId(); (Ví dụ: Kho 1).
+    Lấy hàng hóa: Đọc bảng HangHoas (tất cả các mặt hàng đang hoạt động).
+    Lấy tồn kho thực tế: Đọc Database View _context.VwTonKhoHienTais lọc theo MaKho == whId (dòng 265).
+    Cắt 15 món đầu tiên: Dùng lệnh LINQ .Skip(0).Take(15) để lấy đúng 15 sản phẩm của Trang 1.
+    Lấy danh mục lọc: Đọc danh sách Nhóm hàng (NhomHangs), Nhà cung cấp (DonViCapHangs) để chuẩn bị sẵn dữ liệu cho cột lọc bên trái.
+    Đóng tất cả vào một gói dữ liệu lớn là HangHoaIndexVM.
+     */
     private async Task<HangHoaIndexVM> BuildIndexVM(HangHoaFilterParams f)
     {
         return await BuildIndexVM(
@@ -623,6 +630,47 @@ public class HangHoaController : BaseKhoController
         _context.DonViTinhs.Add(dvt);
         await _context.SaveChangesAsync();
         return Json(new { success = true, maDvt = dvt.MaDvt, tenDvt = dvt.TenDvt });
+    }
+
+    // Cập nhật tên đơn vị tính trực tiếp từ dropdown
+    [HttpPost]
+    public async Task<IActionResult> UpdateDvtQuick([FromBody] UpdateDvtRequest req)
+    {
+        if (req == null || req.MaDvt <= 0) return BadRequest(new { message = "Mã đơn vị tính không hợp lệ." });
+        if (string.IsNullOrWhiteSpace(req.TenDvt)) return BadRequest(new { message = "Vui lòng nhập tên đơn vị tính." });
+
+        string trimmedName = req.TenDvt.Trim();
+        var dvt = await _context.DonViTinhs.FindAsync(req.MaDvt);
+        if (dvt == null) return NotFound(new { message = "Không tìm thấy đơn vị tính." });
+
+        // Kiểm tra trùng tên với đơn vị tính khác
+        bool isDuplicate = await _context.DonViTinhs.AnyAsync(d => d.MaDvt != req.MaDvt && d.TenDvt.ToLower() == trimmedName.ToLower());
+        if (isDuplicate) return BadRequest(new { message = $"Tên đơn vị tính \"{trimmedName}\" đã tồn tại trên hệ thống." });
+
+        dvt.TenDvt = trimmedName;
+        await _context.SaveChangesAsync();
+        return Json(new { success = true, maDvt = dvt.MaDvt, tenDvt = dvt.TenDvt });
+    }
+
+    // Xóa đơn vị tính trực tiếp từ dropdown
+    [HttpPost]
+    public async Task<IActionResult> DeleteDvtQuick([FromBody] DeleteDvtRequest req)
+    {
+        if (req == null || req.MaDvt <= 0) return BadRequest(new { message = "Mã đơn vị tính không hợp lệ." });
+
+        var dvt = await _context.DonViTinhs.FindAsync(req.MaDvt);
+        if (dvt == null) return NotFound(new { message = "Không tìm thấy đơn vị tính." });
+
+        // Kiểm tra ràng buộc xem có hàng hóa nào đang sử dụng đơn vị tính này không
+        bool hasProducts = await _context.HangHoas.AnyAsync(h => h.MaDvt == req.MaDvt);
+        if (hasProducts)
+        {
+            return BadRequest(new { message = $"Không thể xóa đơn vị tính \"{dvt.TenDvt}\" vì đang có sản phẩm sử dụng đơn vị tính này." });
+        }
+
+        _context.DonViTinhs.Remove(dvt);
+        await _context.SaveChangesAsync();
+        return Json(new { success = true, message = $"Đã xóa đơn vị tính \"{dvt.TenDvt}\" thành công." });
     }
 
     // Lấy thông tin 1 hàng hóa qua JSON cho Modal Sửa
@@ -991,6 +1039,41 @@ public class HangHoaController : BaseKhoController
         return Json(new { success = true, id = item.MaHang, message = $"Đã cập nhật hàng hóa {item.TenHang} thành công." });
     }
 
+    /// <summary>
+    /// Kiểm tra khả năng xóa hàng hóa (Pre-check trước khi mở modal xóa).
+    /// Nếu đã từng phát sinh bất kỳ giao dịch/chứng từ nào, chỉ cho phép khóa (Ngừng bán) chứ không cho xóa.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> CheckCanDelete(int id)
+    {
+        var item = await _context.HangHoas.FindAsync(id);
+        if (item == null) return NotFound(new { success = false, message = "Không tìm thấy hàng hóa." });
+
+        bool hasTransaction = await _context.ChiTietDonBans.AnyAsync(x => x.MaHang == id)
+            || await _context.ChiTietPhieuNhaps.AnyAsync(x => x.MaHang == id)
+            || await _context.ChiTietPhieuXuats.AnyAsync(x => x.MaHang == id)
+            || await _context.ChiTietPhieuChuyenKhos.AnyAsync(x => x.MaHang == id)
+            || await _context.ChiTietPhieuKiemKes.AnyAsync(x => x.MaHang == id)
+            || await _context.ChiTietPhieuTraHangNhaps.AnyAsync(x => x.MaHang == id);
+
+        bool isNgungBan = item.TrangThai == "NGUNG_BAN" || item.TrangThai == "NGUNG_KINH_DOANH";
+
+        return Json(new
+        {
+            success = true,
+            hasTransaction,
+            isNgungBan,
+            tenHang = item.TenHang,
+            maHangNoiBo = item.MaHangNoiBo,
+            trangThai = item.TrangThai,
+            message = hasTransaction
+                ? (isNgungBan
+                    ? $"Hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) đã phát sinh giao dịch trong hệ thống và hiện đã ở trạng thái 'Ngừng kinh doanh', không thể xóa để bảo toàn số liệu sổ sách."
+                    : $"Hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) đã phát sinh giao dịch/chứng từ trong hệ thống, không thể xóa để bảo toàn lịch sử sổ sách kế toán. Bạn chỉ có thể chuyển sang trạng thái 'Ngừng kinh doanh' để ẩn khỏi danh mục bán hàng.")
+                : $"Bạn có chắc chắn muốn xóa hàng hóa '{item.TenHang}' ({item.MaHangNoiBo})? Hàng hóa này chưa phát sinh giao dịch và sẽ bị xóa hoàn toàn khỏi hệ thống."
+        });
+    }
+
     [HttpPost]
     public async Task<IActionResult> Delete(int id)
     {
@@ -1001,7 +1084,8 @@ public class HangHoaController : BaseKhoController
             || await _context.ChiTietPhieuNhaps.AnyAsync(x => x.MaHang == id)
             || await _context.ChiTietPhieuXuats.AnyAsync(x => x.MaHang == id)
             || await _context.ChiTietPhieuChuyenKhos.AnyAsync(x => x.MaHang == id)
-            || await _context.ChiTietPhieuKiemKes.AnyAsync(x => x.MaHang == id);
+            || await _context.ChiTietPhieuKiemKes.AnyAsync(x => x.MaHang == id)
+            || await _context.ChiTietPhieuTraHangNhaps.AnyAsync(x => x.MaHang == id);
 
         if (used)
         {
@@ -1009,7 +1093,7 @@ public class HangHoaController : BaseKhoController
             {
                 success = false,
                 hasTransaction = true,
-                message = $"Hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) đã phát sinh giao dịch/chứng từ trong hệ thống, không thể xóa. Bạn có thể chuyển sang trạng thái 'Ngừng bán' để ẩn khỏi danh mục kinh doanh."
+                message = $"Hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) đã phát sinh giao dịch/chứng từ trong hệ thống, không thể xóa để bảo toàn số liệu sổ sách kế toán. Bạn có thể chuyển sang trạng thái 'Ngừng kinh doanh' để ẩn khỏi danh mục kinh doanh."
             });
         }
 
@@ -1050,7 +1134,29 @@ public class HangHoaController : BaseKhoController
         item.TrangThai = "NGUNG_BAN";
         await _context.SaveChangesAsync();
 
-        return Json(new { success = true, message = $"Đã chuyển hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) sang trạng thái 'Ngừng bán'." });
+        return Json(new { success = true, message = $"Đã chuyển hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) sang trạng thái 'Ngừng kinh doanh'." });
+    }
+
+    // Chuyển đổi trạng thái Đang kinh doanh <-> Ngừng kinh doanh (chuẩn như Nhà Cung Cấp)
+    [HttpPost]
+    public async Task<IActionResult> ToggleStatus(int id)
+    {
+        var item = await _context.HangHoas.FindAsync(id);
+        if (item == null) return NotFound(new { message = "Không tìm thấy hàng hóa." });
+
+        bool wasNgungBan = (item.TrangThai == "NGUNG_BAN" || item.TrangThai == "NGUNG_KINH_DOANH");
+        if (wasNgungBan)
+        {
+            item.TrangThai = "DANG_BAN";
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, isNgungBan = false, message = $"Đã cho phép hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) kinh doanh trở lại." });
+        }
+        else
+        {
+            item.TrangThai = "NGUNG_BAN";
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, isNgungBan = true, message = $"Đã chuyển hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) sang trạng thái 'Ngừng kinh doanh'." });
+        }
     }
 
     private static string DetectImageMime(byte[]? data)
@@ -1177,7 +1283,7 @@ public class HangHoaController : BaseKhoController
     }
 
     // ========================================================================
-    // PHÂN HỆ XUẤT & NHẬP FILE EXCEL (.XLSX) CHUẨN KIOTVIET (CLOSEDXML)
+    // PHÂN HỆ XUẤT & NHẬP FILE EXCEL (.XLSX) CHUẨN KHOPRO (CLOSEDXML)
     // ========================================================================
 
     /// <summary>

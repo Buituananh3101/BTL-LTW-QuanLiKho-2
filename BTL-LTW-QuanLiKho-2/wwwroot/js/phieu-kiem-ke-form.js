@@ -1,4 +1,4 @@
-/**
+﻿/**
  * phieu-kiem-ke-form.js - Quản lý form Lập / Sửa / Chi tiết phiếu kiểm kho
  * Khớp 100% logic, tương tác và phím tắt F3, F9, F10 từ prototype-kiemkho-full.html
  */
@@ -253,9 +253,9 @@
 
     /* ===== XỬ LÝ SỰ KIỆN FORM ===== */
     function bindFormEvents() {
-        // Tìm kiếm hàng hóa Autocomplete F3 dùng Lego KiotFilter.initProductSearch
-        if (!isReadOnly && window.KiotFilter && typeof KiotFilter.initProductSearch === 'function') {
-            KiotFilter.initProductSearch({
+        // Tìm kiếm hàng hóa Autocomplete F3 dùng Lego AppFilter.initProductSearch
+        if (!isReadOnly && window.AppFilter && typeof AppFilter.initProductSearch === 'function') {
+            AppFilter.initProductSearch({
                 inputSelector: '#fSearch',
                 dropdownSelector: '#suggest',
                 apiUrl: searchUrl,
@@ -387,9 +387,9 @@
         // Thu gọn / mở rộng panel phải
         $('#pTg')?.addEventListener('click', togglePanel);
 
-        // Chọn ngày giờ kiểm kho dùng Lego KiotFilter.initDateTimePicker
-        if (window.KiotFilter && typeof KiotFilter.initDateTimePicker === 'function') {
-            KiotFilter.initDateTimePicker({
+        // Chọn ngày giờ kiểm kho dùng Lego AppFilter.initDateTimePicker
+        if (window.AppFilter && typeof AppFilter.initDateTimePicker === 'function') {
+            AppFilter.initDateTimePicker({
                 inputSelector: '#fDate',
                 popupSelector: '#dtPop',
                 initialDate: FM.created,
@@ -690,8 +690,8 @@
     $('#mClose')?.addEventListener('click', () => $('#ov')?.classList.remove('show'));
 
     function toast(msg, type) {
-        if (window.KiotToast) {
-            window.KiotToast.show(msg, type || 'info');
+        if (window.AppToast) {
+            window.AppToast.show(msg, type || 'info');
             return;
         }
         const t = $('#toast');

@@ -1,11 +1,11 @@
 ﻿/**
  * chuyen-kho-index.js - Điều khiển giao diện Danh sách Chuyển kho chuẩn chuyên nghiệp
- * Tái sử dụng KiotFilter.createListPage (Lego Engine)
+ * Tái sử dụng AppFilter.createListPage (Lego Engine)
  */
 (function ($) {
     'use strict';
 
-    const $container = $('#kiotContainer');
+    const $container = $('#kpContainer');
     if (!$container.length) return;
 
     const urls = {
@@ -26,14 +26,14 @@
         initialStatuses.push($(this).val());
     });
 
-    // Khởi tạo trang bằng KiotFilter.createListPage
-    const listPage = (window.KiotFilter && typeof KiotFilter.createListPage === 'function')
-        ? KiotFilter.createListPage({
-            containerSelector: '#kiotContainer',
+    // Khởi tạo trang bằng AppFilter.createListPage
+    const listPage = (window.AppFilter && typeof AppFilter.createListPage === 'function')
+        ? AppFilter.createListPage({
+            containerSelector: '#kpContainer',
             tableSelector: '#transferTable',
             tableWrapperSelector: '#tableContainer',
             searchInputSelector: '#keywordSearch',
-            storageKeyCols: 'kiot_chuyen_kho_cols_v2',
+            storageKeyCols: 'kp_chuyen_kho_cols_v2',
             defaultCols: { maphieu: 1, ngaylap: 1, khonguon: 1, khodich: 1, ngaychuyen: 1, ngaynhan: 1, slchuyen: 1, slnhan: 1, giatri: 1, ghi: 1, st: 1 },
             extraColsCount: 2,
             initialState: {
@@ -97,9 +97,13 @@
 
     // Lưu nhanh ghi chú trong Drawer
     $(document).on('click', '.btn-save-note', function () {
-        const id = $(this).data('id');
-        const $panel = $(this).closest('.product-detail-panel');
-        const note = $panel.find('.dp-note').val();
+        const $btn = $(this);
+        const id = $btn.data('id');
+        const $panel = $btn.closest('.product-detail-panel');
+        const note = $panel.find('.dp-note').val() || '';
+
+        const origHtml = $btn.html();
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Lưu');
 
         $.ajax({
             url: urls.saveNote,
@@ -107,13 +111,24 @@
             contentType: 'application/json',
             data: JSON.stringify({ MaPhieuChuyen: id, GhiChu: note }),
             success: function (res) {
-                if (res && res.success && window.KiotToast) {
-                    KiotToast.success(res.message || 'Đã lưu ghi chú.');
+                $btn.prop('disabled', false).html(origHtml);
+                if (res && res.success && window.AppToast) {
+                    AppToast.success(res.message || 'Đã lưu ghi chú.');
+                }
+                // Cập nhật DOM cột ghi chú trên dòng bảng cha
+                const $parentRow = $(`tr.tbl-row[data-id="${id}"], tr[data-id="${id}"]`);
+                if ($parentRow.length) {
+                    const $noteCol = $parentRow.find('[data-col="ghi"]');
+                    if ($noteCol.length) {
+                        const trimmed = note.trim();
+                        $noteCol.text(trimmed ? trimmed : '---').attr('title', trimmed);
+                    }
                 }
             },
             error: function (xhr) {
+                $btn.prop('disabled', false).html(origHtml);
                 const msg = xhr.responseJSON?.message || 'Không thể lưu ghi chú.';
-                if (window.KiotToast) KiotToast.error(msg);
+                if (window.AppToast) AppToast.error(msg);
             }
         });
     });
@@ -132,19 +147,19 @@
         const doCancel = function () {
             $.post(urls.cancel, { id: id }, function (res) {
                 if (res && res.success) {
-                    if (window.KiotToast) KiotToast.success(res.message);
+                    if (window.AppToast) AppToast.success(res.message);
                     loadTable();
-                } else if (window.KiotToast) {
-                    KiotToast.error(res?.message || 'Không thể hủy phiếu.');
+                } else if (window.AppToast) {
+                    AppToast.error(res?.message || 'Không thể hủy phiếu.');
                 }
             }).fail(function (xhr) {
                 const m = xhr.responseJSON?.message || 'Đã xảy ra lỗi khi hủy phiếu.';
-                if (window.KiotToast) KiotToast.error(m);
+                if (window.AppToast) AppToast.error(m);
             });
         };
 
-        if (window.KiotConfirm && typeof KiotConfirm.show === 'function') {
-            KiotConfirm.show({
+        if (window.AppConfirm && typeof AppConfirm.show === 'function') {
+            AppConfirm.show({
                 title: 'Hủy phiếu chuyển hàng',
                 message: msg,
                 confirmText: 'Hủy phiếu',

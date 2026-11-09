@@ -1,5 +1,5 @@
--- Migration 12: Bổ sung MaPhieu, DaDanhDau, SoHoaDon, GiamGia, TongTien, CanTraNcc vào bảng PhieuNhap & ChiTietPhieuNhap
--- Phục vụ phân hệ Nhập hàng (KiotViet Goods Receipt)
+﻿-- Migration 12: Bổ sung MaPhieu, DaDanhDau, SoHoaDon, GiamGia, TongTien, CanTraNcc vào bảng PhieuNhap & ChiTietPhieuNhap
+-- Phục vụ phân hệ Nhập hàng (KhoPro Goods Receipt)
 -- Tuân thủ 3 nguyên tắc vàng CSDL trong AGENTS.md: Chỉ cộng thêm cột mới, không DROP/đổi tên cột cũ.
 
 USE [QuanLyKhoPhuQuocLTW];

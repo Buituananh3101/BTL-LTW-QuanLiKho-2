@@ -3,15 +3,15 @@ namespace BTL_LTW_QuanLiKho_2.ViewModels.Common;
 /// <summary>
 /// Đại diện cho 1 phần tử trong danh sách lựa chọn của Dropdown Multi-Select
 /// </summary>
-public class KiotMultiSelectItemVM
+public class MultiSelectItemVM
 {
     public string Value { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
     public bool Selected { get; set; } = false;
 
-    public KiotMultiSelectItemVM() { }
+    public MultiSelectItemVM() { }
 
-    public KiotMultiSelectItemVM(string value, string text, bool selected = false)
+    public MultiSelectItemVM(string value, string text, bool selected = false)
     {
         Value = value;
         Text = text;
@@ -20,9 +20,9 @@ public class KiotMultiSelectItemVM
 }
 
 /// <summary>
-/// KiotMultiSelectVM – ViewModel cho component Dropdown chọn nhiều (Multi-Select kèm ô tìm kiếm con) dùng chung trên Sidebar
+/// MultiSelectVM – ViewModel cho component Dropdown chọn nhiều (Multi-Select kèm ô tìm kiếm con) dùng chung trên Sidebar
 /// </summary>
-public class KiotMultiSelectVM
+public class MultiSelectVM
 {
     public string Id { get; set; } = string.Empty;
     public string DataFilter { get; set; } = string.Empty;
@@ -34,11 +34,11 @@ public class KiotMultiSelectVM
     public string? HeaderActionText { get; set; }
     public string? HeaderActionId { get; set; }
     public bool AllowEdit { get; set; } = false;
-    public List<KiotMultiSelectItemVM> Items { get; set; } = new();
+    public List<MultiSelectItemVM> Items { get; set; } = new();
 
-    public KiotMultiSelectVM() { }
+    public MultiSelectVM() { }
 
-    public KiotMultiSelectVM(string id, string dataFilter, string title, string placeholder, bool hasSearch = true, string? dotId = null)
+    public MultiSelectVM(string id, string dataFilter, string title, string placeholder, bool hasSearch = true, string? dotId = null)
     {
         Id = id;
         DataFilter = dataFilter;

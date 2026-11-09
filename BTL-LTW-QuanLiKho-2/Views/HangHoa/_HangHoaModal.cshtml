@@ -106,6 +106,9 @@
                       {
                         <div class="hh-cs-item" data-val="@u.MaDvt">
                           <span>@u.TenDvt</span>
+                          <button type="button" class="hh-item-edit-btn" data-type="dvt" data-id="@u.MaDvt" data-val="@u.TenDvt" title="Sửa đơn vị tính" aria-label="Sửa đơn vị tính @u.TenDvt">
+                            <svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>
+                          </button>
                           <svg class="hh-check-icon" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
                         </div>
                       }
@@ -317,7 +320,7 @@
     </div>
     <div class="hh-m-body">
       <div class="hh-f" id="pField">
-        <label for="pInput" id="pLabel">Tên</label>
+        <label for="pInput" id="pLabel">Tên <span style="color:var(--hh-danger)">*</span></label>
         <input type="text" id="pInput" autocomplete="off" />
         <span class="hh-err" id="pErr">Vui lòng nhập thông tin.</span>
       </div>
@@ -390,7 +393,7 @@
     </div>
     <div class="hh-m-body">
       <div class="hh-f" id="editItemField">
-        <label for="editItemInput" id="editItemLabel">Vị trí</label>
+        <label for="editItemInput" id="editItemLabel">Vị trí <span style="color:var(--hh-danger)">*</span></label>
         <input type="text" id="editItemInput" autocomplete="off" />
         <span class="hh-err" id="editItemErr">Vui lòng nhập thông tin.</span>
       </div>
@@ -408,7 +411,9 @@
   </div>
 </div>
 
-<!-- ===== MODAL CON 4: XÁC NHẬN XÓA HÀNG HÓA (chuẩn chuyên nghiệp) ===== -->
+<!-- ========================================================================
+     MODAL CON 4: XÁC NHẬN XÓA HÀNG HÓA (RÀNG BUỘC CHỨNG TỪ - CHUẨN NHÀ CUNG CẤP)
+     ======================================================================== -->
 <div class="hh-ov" id="hhDeleteProductOv">
   <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="delProdTitle" style="max-width: 480px;">
     <div class="hh-m-head" style="border-bottom: 1px solid var(--hh-line-l); padding-bottom: 12px;">
@@ -422,26 +427,54 @@
     </div>
     <div class="hh-m-body" style="padding: 20px 24px; font-size: 14.5px; line-height: 1.5;">
       <input type="hidden" id="delProdId" value="0" />
-      <div id="delProdConfirmMsg" style="color: #374151;">
-        Bạn có chắc chắn muốn xóa hàng hóa <strong id="delProdName" style="color: #111827;"></strong>? Thao tác này không thể hoàn tác.
+      <div id="delProdConfirmMsg" style="color: #374151; word-break: break-word; overflow-wrap: anywhere; line-height: 1.55;">
+        <div>Bạn có chắc chắn muốn xóa hàng hóa <strong id="delProdName" style="color: #111827;"></strong>?</div>
+        <div style="margin-top: 6px; color: #64748b; font-size: 13.5px;">Thao tác này không thể hoàn tác.</div>
       </div>
 
-      <!-- Khối cảnh báo khi hàng hóa đã phát sinh giao dịch không thể xóa -->
+      <!-- Cảnh báo khi đã phát sinh phiếu nhập / chứng từ -->
       <div id="delProdErrorBox" style="display: none; margin-top: 14px; padding: 12px 14px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #991b1b; font-size: 13.5px; line-height: 1.5;">
         <div style="display: flex; gap: 8px; align-items: flex-start;">
           <svg style="width:18px;height:18px;flex:none;stroke:#dc2626;fill:none;stroke-width:2;margin-top:2px;"><use href="#i-info"/></svg>
-          <div style="flex: 1;">
-            <div id="delProdErrorMsg" style="font-weight: 500; margin-bottom: 8px;"></div>
-            <button type="button" class="hh-btn" id="btnSwitchNgungBan" style="background:#fff;border-color:#fca5a5;color:#b91c1c;height:32px;font-size:13px;padding:0 12px;font-weight:600;">
-              Chuyển sang "Ngừng bán" ngay
+          <div style="flex: 1; min-width: 0;">
+            <div id="delProdErrorMsg" style="font-weight: 500; margin-bottom: 8px; word-break: break-word; overflow-wrap: anywhere;"></div>
+            <button type="button" class="hh-btn" id="btnSwitchNgungBanInDelModal" style="background:#fff;border-color:#fca5a5;color:#b91c1c;height:32px;font-size:13px;padding:0 12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;">
+              <i class="bi bi-slash-circle"></i> Chuyển sang "Ngừng kinh doanh" ngay
             </button>
           </div>
         </div>
       </div>
     </div>
     <div class="hh-m-foot" style="background: #f9fafb; border-top: 1px solid var(--hh-line-l); padding: 12px 24px; display: flex; justify-content: flex-end; gap: 10px;">
-      <button type="button" class="hh-btn" data-close="hhDeleteProductOv">Bỏ qua</button>
+      <button type="button" class="hh-btn" id="btnCancelDeleteProd" data-close="hhDeleteProductOv">Bỏ qua</button>
       <button type="button" class="hh-btn danger" id="btnConfirmDeleteProd">Đồng ý xóa</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================
+     MODAL CON 5: XÁC NHẬN CHUYỂN TRẠNG THÁI (NGỪNG KINH DOANH / KÍCH HOẠT LẠI)
+     ======================================================================== -->
+<div class="hh-ov" id="hhStatusConfirmOv">
+  <div class="hh-modal small" role="dialog" aria-modal="true" aria-labelledby="statusProdTitle" style="max-width: 480px;">
+    <div class="hh-m-head" style="border-bottom: 1px solid var(--hh-line-l); padding-bottom: 12px;">
+      <h2 id="statusProdTitle" style="color: #d97706; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 18px;">
+        <i class="bi bi-slash-circle" id="statusProdIcon" style="font-size: 20px;"></i>
+        <span id="statusProdTitleText">Ngừng kinh doanh hàng hóa</span>
+      </h2>
+      <button type="button" class="hh-x" data-close="hhStatusConfirmOv" aria-label="Đóng">
+        <svg style="width:18px;height:18px;"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div class="hh-m-body" style="padding: 20px 24px; font-size: 14.5px; line-height: 1.5;">
+      <input type="hidden" id="statusProdId" value="0" />
+      <div id="statusProdConfirmMsg" style="color: #374151; word-break: break-word; overflow-wrap: anywhere;">
+        Bạn có chắc chắn muốn chuyển hàng hóa <strong id="statusProdName" style="color: #111827;"></strong> sang trạng thái <strong id="statusProdTargetText" style="color: #d97706;">Ngừng kinh doanh</strong>?
+      </div>
+    </div>
+    <div class="hh-m-foot" style="background: #f9fafb; border-top: 1px solid var(--hh-line-l); padding: 12px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+      <button type="button" class="hh-btn" data-close="hhStatusConfirmOv">Bỏ qua</button>
+      <button type="button" class="hh-btn" id="btnConfirmStatusProd" style="background: #d97706; color: #fff; border: 1px solid #d97706; font-weight: 500;">Đồng ý</button>
     </div>
   </div>
 </div>

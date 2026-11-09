@@ -21,7 +21,7 @@
 - [`UpdateNoteRequest`](../../BTL-LTW-QuanLiKho-2/ViewModels/KiemKho/KiemKhoViewModels.cs): DTO cập nhật nhanh ghi chú inline.
 
 ### 1.3. Cấu trúc View & Script:
-- `Views/PhieuKiemKe/Index.cshtml`: Layout `.kiot-container`, `.kiot-main-col`, `.kiot-toolbar-row`, nút F4.
+- `Views/PhieuKiemKe/Index.cshtml`: Layout `.kp-container`, `.kp-main-col`, `.kp-toolbar-row`, nút F4.
 - `Views/PhieuKiemKe/_PhieuKiemKeFilterSidebar.cshtml`: Sidebar lọc thời gian, trạng thái, người tạo.
 - `Views/PhieuKiemKe/_PhieuKiemKeTable.cshtml`: Bảng phiếu, sao bookmark, chi tiết inline `tr.dtl`, phân trang qua `_Pagination.cshtml`.
 - `Views/PhieuKiemKe/Create.cshtml` & `Edit.cshtml`: Màn hình lập và sửa phiếu kiểm.
@@ -35,12 +35,12 @@
 ## 2. Luồng màn hình & Tương tác
 
 ### 2.1. Màn hình Danh sách (`Index`)
-- **Toolbar (`.kiot-toolbar-row`)**: Ô tìm kiếm `#keywordSearch` (F3 debounce), nút `+ Kiểm kho`, nút `Xuất file`, nút `Hiển thị cột`, tải lại bảng, trợ giúp.
-- **Sidebar (`.kiot-sidebar-col`)**:
+- **Toolbar (`.kp-toolbar-row`)**: Ô tìm kiếm `#keywordSearch` (F3 debounce), nút `+ Kiểm kho`, nút `Xuất file`, nút `Hiển thị cột`, tải lại bảng, trợ giúp.
+- **Sidebar (`.kp-sidebar-col`)**:
   - Tiêu đề "Phiếu kiểm kho", nút tròn F4 thu gọn/mở rộng sidebar.
   - Thời gian: 2 radio (Toàn thời gian / Tùy chỉnh), popup chọn nhanh 3 cột và popup lịch 2 tháng Dual Calendar.
   - Trạng thái: Checkbox Phiếu tạm (`NHAP`), Đã cân bằng (`DA_DIEU_CHINH`), Đã hủy (`HUY`).
-  - Người tạo: Multi-select chuẩn chuyên nghiệp (`.kiot-multiselect-box`, `.kiot-pill-tag`, `+N khác`, tìm kiếm sticky).
+  - Người tạo: Multi-select chuẩn chuyên nghiệp (`.kp-multiselect-box`, `.kp-pill-tag`, `+N khác`, tìm kiếm sticky).
 - **Đánh dấu Sao Bookmark (Chuẩn Hàng hóa)**:
   - Header bảng: Icon sao `.star-btn.star-header-filter` cho phép click lọc danh sách các phiếu có sao (`DaDanhDau`).
   - Dòng bảng: Nút sao `.star-btn` đổi màu cam `#f97316` và lưu trạng thái vào CSDL qua API `ToggleFavorite`.
@@ -52,7 +52,7 @@
 - **Bung mở chi tiết (`tr.dtl`) & Hiển thị ổn định không rung giật (Chuẩn Nhà cung cấp)**:
   - Bảng `#stockTakeTable` cấu hình `width: max-content; min-width: 760px; border-collapse: separate !important; border-spacing: 0 !important;` đồng bộ Nhà cung cấp (`#supplierTable`), không ép tràn cố định 1450px.
   - Tối ưu Drawer ổn định tuyệt đối: loại bỏ xung đột hoạt ảnh đồng thời khi đóng mở nhiều dòng, dùng `.stop(true, true)` chống hàng đợi click dồn dập, gán `.last-visible-col` trực tiếp không gây DOM layout thrashing, loại bỏ negative margin trên `.dp-tabs`, tích hợp `scrollbar-gutter: stable` ngăn co giật ngang khi thanh cuộn xuất hiện.
-  - Tái sử dụng khối Lego `KiotFilter.initEntityActions`: Nút Hủy (`.btn-cancel-doc`) qua modal xác nhận (chỉ hủy phiếu tạm). Các nút Sao chép, Xuất file, Mở phiếu, Lưu ghi chú, In.
+  - Tái sử dụng khối Lego `AppFilter.initEntityActions`: Nút Hủy (`.btn-cancel-doc`) qua modal xác nhận (chỉ hủy phiếu tạm). Các nút Sao chép, Xuất file, Mở phiếu, Lưu ghi chú, In.
 - **Xuất file Excel chuẩn chuyên nghiệp (`.xlsx`)**:
   - Hỗ trợ 2 chế độ qua `ClosedXML`:
     + **Xuất danh sách phiếu** (`type = "list"`): Xuất danh sách 13 cột theo bộ lọc hiện tại.

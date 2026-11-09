@@ -16,9 +16,9 @@
     let currentSortDir = '';
 
     // 2. Khởi tạo Sidebar thu gọn (F4)
-    if (window.KiotFilter) {
-        KiotFilter.initSidebar({
-            storageKey: 'kiot_user_sidebar'
+    if (window.AppFilter) {
+        AppFilter.initSidebar({
+            storageKey: 'kp_user_sidebar'
         });
     }
 
@@ -31,6 +31,12 @@
     function hideOverlay(id) {
         const ov = document.getElementById(id);
         if (ov) ov.classList.remove('show');
+        if (id === 'userModalOv') {
+            $('#dropdownUserKho').removeClass('show');
+            $('#boxUserKho').removeClass('open');
+            $('#wrapMaVaiTro').removeClass('open');
+            $('#dropdownMaVaiTro').hide();
+        }
     }
 
     // Đóng modal khi bấm nút [data-close] hoặc click nền mờ
@@ -47,6 +53,18 @@
 
     $(document).on('keydown', function (e) {
         if (e.key === 'Escape') {
+            if ($('#dropdownMaVaiTro').is(':visible')) {
+                $('#wrapMaVaiTro').removeClass('open');
+                $('#dropdownMaVaiTro').hide();
+                e.stopPropagation();
+                return;
+            }
+            if ($('#dropdownUserKho').hasClass('show')) {
+                $('#dropdownUserKho').removeClass('show');
+                $('#boxUserKho').removeClass('open');
+                e.stopPropagation();
+                return;
+            }
             $('.hh-ov.show').removeClass('show');
         }
     });
@@ -86,7 +104,7 @@
             },
             error: function () {
                 $('#userTableContainer').css('opacity', '1');
-                if (window.KiotToast) KiotToast.error('Không thể tải dữ liệu người dùng.');
+                if (window.AppToast) AppToast.error('Không thể tải dữ liệu người dùng.');
             }
         });
     }
@@ -115,7 +133,7 @@
     });
 
     // Tìm kiếm F3 (Debounce 350ms)
-    $('#keywordSearch').on('input', KiotFilter.debounce(function () {
+    $('#keywordSearch').on('input', AppFilter.debounce(function () {
         loadTable(1);
     }, 350));
 
@@ -129,12 +147,12 @@
     // Nút tải lại bảng
     $('#btnReloadTable').on('click', function () {
         loadTable(1);
-        if (window.KiotToast) KiotToast.info('Đã làm mới dữ liệu.');
+        if (window.AppToast) AppToast.info('Đã làm mới dữ liệu.');
     });
 
     // Phân trang AJAX
-    if (window.KiotFilter && KiotFilter.bindPagination) {
-        KiotFilter.bindPagination('#userTableContainer', function (page) {
+    if (window.AppFilter && AppFilter.bindPagination) {
+        AppFilter.bindPagination('#userTableContainer', function (page) {
             loadTable(page);
         });
     } else {
@@ -155,7 +173,7 @@
             $(dotSelector).toggleClass('active', selectedIds.length > 0);
         }
 
-        $dropdown.find('.kiot-ms-item').each(function () {
+        $dropdown.find('.kp-ms-item').each(function () {
             const val = parseInt($(this).data('val'), 10);
             const isSel = selectedIds.includes(val);
             $(this).toggleClass('selected', isSel);
@@ -167,18 +185,18 @@
             name: namesMap[id] || ('#' + id)
         }));
 
-        if (window.KiotFilter && typeof window.KiotFilter.renderTagPills === 'function') {
-            window.KiotFilter.renderTagPills($box, selectedItems, placeholder, 2);
+        if (window.AppFilter && typeof window.AppFilter.renderTagPills === 'function') {
+            window.AppFilter.renderTagPills($box, selectedItems, placeholder, 2);
         } else {
             if (selectedItems.length === 0) {
-                $box.html(`<span class="kiot-ms-placeholder">${placeholder}</span>`);
+                $box.html(`<span class="kp-ms-placeholder">${placeholder}</span>`);
             } else {
                 let html = '';
                 selectedItems.slice(0, 2).forEach(it => {
-                    html += `<span class="kiot-pill-tag" data-val="${it.val}">${it.name} <span class="tag-remove">&times;</span></span>`;
+                    html += `<span class="kp-pill-tag" data-val="${it.val}">${it.name} <span class="tag-remove">&times;</span></span>`;
                 });
                 if (selectedItems.length > 2) {
-                    html += `<span class="kiot-pill-more">+${selectedItems.length - 2}</span>`;
+                    html += `<span class="kp-pill-more">+${selectedItems.length - 2}</span>`;
                 }
                 $box.html(html);
             }
@@ -199,18 +217,18 @@
         if (!$box.length || !$dropdown.length) return;
 
         // Cache trước tên từ các mục trong dropdown HTML
-        $dropdown.find('.kiot-ms-item').each(function () {
+        $dropdown.find('.kp-ms-item').each(function () {
             const val = parseInt($(this).data('val'), 10);
-            const name = $(this).data('name') || $(this).find('.kiot-ms-text').text().trim() || $(this).find('span').text().trim();
+            const name = $(this).data('name') || $(this).find('.kp-ms-text').text().trim() || $(this).find('span').text().trim();
             if (!isNaN(val) && name) namesMap[val] = name;
         });
 
         // 1. Click vào box để mở / đóng dropdown
         $box.on('click', function (e) {
-            const $tagRemove = $(e.target).closest('.tag-remove, .kiot-tag-close');
+            const $tagRemove = $(e.target).closest('.tag-remove, .kp-tag-close');
             if ($tagRemove.length) {
                 e.stopPropagation();
-                const $pill = $tagRemove.closest('.kiot-pill-tag').length ? $tagRemove.closest('.kiot-pill-tag') : $tagRemove;
+                const $pill = $tagRemove.closest('.kp-pill-tag').length ? $tagRemove.closest('.kp-pill-tag') : $tagRemove;
                 const val = parseInt($pill.data('val'), 10);
                 const idx = selectedIds.indexOf(val);
                 if (idx !== -1) {
@@ -223,20 +241,20 @@
 
             e.stopPropagation();
 
-            $('.kiot-ms-dropdown').not($dropdown).removeClass('show drop-up').css('max-height', '');
-            $('.kiot-multiselect-box').not($box).removeClass('open');
+            $('.kp-ms-dropdown').not($dropdown).removeClass('show drop-up').css('max-height', '');
+            $('.kp-multiselect-box').not($box).removeClass('open');
 
             const willShow = !$dropdown.hasClass('show');
             if (willShow) {
-                if (window.KiotFilter && typeof window.KiotFilter.checkSidebarDropdownDirection === 'function') {
-                    window.KiotFilter.checkSidebarDropdownDirection($box[0], $dropdown[0]);
+                if (window.AppFilter && typeof window.AppFilter.checkSidebarDropdownDirection === 'function') {
+                    window.AppFilter.checkSidebarDropdownDirection($box[0], $dropdown[0]);
                 }
                 $dropdown.addClass('show');
                 $box.addClass('open');
                 const $searchInput = $dropdown.find('input[type="text"]');
                 if ($searchInput.length) {
                     $searchInput.val('');
-                    $dropdown.find('.kiot-ms-item').show();
+                    $dropdown.find('.kp-ms-item').show();
                     $searchInput.focus();
                 }
             } else {
@@ -246,15 +264,15 @@
         });
 
         // 2. Click chọn / bỏ chọn mục trong dropdown
-        $dropdown.on('click', '.kiot-ms-item', function (e) {
-            if ($(e.target).closest('.kiot-item-edit-btn, .hh-item-edit-btn').length) {
+        $dropdown.on('click', '.kp-ms-item', function (e) {
+            if ($(e.target).closest('.kp-item-edit-btn, .hh-item-edit-btn').length) {
                 return;
             }
             e.stopPropagation();
             const val = parseInt($(this).data('val'), 10);
             if (isNaN(val)) return;
 
-            const name = $(this).data('name') || $(this).find('.kiot-ms-text').text().trim() || $(this).find('span').text().trim();
+            const name = $(this).data('name') || $(this).find('.kp-ms-text').text().trim() || $(this).find('span').text().trim();
             const idx = selectedIds.indexOf(val);
             if (idx >= 0) {
                 selectedIds.splice(idx, 1);
@@ -268,15 +286,15 @@
         });
 
         // 3. Tìm kiếm nội bộ trong dropdown
-        $dropdown.on('click', '.kiot-ms-search input, input[type="text"]', function (e) {
+        $dropdown.on('click', '.kp-ms-search input, input[type="text"]', function (e) {
             e.stopPropagation();
         });
 
-        $dropdown.on('input', '.kiot-ms-search input, input[type="text"]', function (e) {
+        $dropdown.on('input', '.kp-ms-search input, input[type="text"]', function (e) {
             e.stopPropagation();
             const term = $(this).val().trim().toLowerCase();
-            $dropdown.find('.kiot-ms-item').each(function () {
-                const text = ($(this).data('name') || $(this).find('.kiot-ms-text').text() || $(this).text() || '').trim().toLowerCase();
+            $dropdown.find('.kp-ms-item').each(function () {
+                const text = ($(this).data('name') || $(this).find('.kp-ms-text').text() || $(this).text() || '').trim().toLowerCase();
                 $(this).toggle(!term || text.includes(term));
             });
         });
@@ -300,9 +318,9 @@
 
     // Đóng các dropdown khi click ra ngoài
     $(document).on('click', function (e) {
-        if (!$(e.target).closest('.kiot-multiselect-box, .kiot-ms-dropdown').length) {
-            $('.kiot-ms-dropdown').removeClass('show drop-up').css('max-height', '');
-            $('.kiot-multiselect-box').removeClass('open');
+        if (!$(e.target).closest('.kp-multiselect-box, .kp-ms-dropdown').length) {
+            $('.kp-ms-dropdown').removeClass('show drop-up').css('max-height', '');
+            $('.kp-multiselect-box').removeClass('open');
         }
     });
 
@@ -319,48 +337,181 @@
     setupPasswordToggle('#btnToggleUserPw', '#userMatKhau', '#iconUserPw');
     setupPasswordToggle('#btnToggleNewPw', '#pwdMatKhauMoi', '#iconNewPw');
 
-    // 8. Cập nhật số lượng kho được chọn & class selected
+    // 8. Cập nhật số lượng kho được chọn & class selected & render tag pills trong box dropdown
     function updateWarehouseSelectionState() {
-        let count = 0;
-        $('.kho-card-item').each(function () {
-            const chk = $(this).find('.user-kho-chk');
-            if (chk.is(':checked')) {
-                $(this).addClass('selected');
-                count++;
-            } else {
-                $(this).removeClass('selected');
+        const checkedItems = [];
+        $('.user-kho-chk').each(function () {
+            const isChecked = $(this).is(':checked');
+            const $item = $(this).closest('.user-kho-ms-item');
+            $item.toggleClass('selected', isChecked);
+            if (isChecked) {
+                const val = parseInt($(this).val(), 10);
+                const name = $item.data('name') || $item.find('.kp-ms-text').text().trim();
+                checkedItems.push({ id: val, name: name });
             }
         });
+
+        const count = checkedItems.length;
+        const totalCount = $('.user-kho-chk').length;
         $('#selectedWarehouseCount').text(count + ' kho');
+
+        const $box = $('#boxUserKho');
+        if (!$box.length) return;
+
+        if (count === 0) {
+            $box.html('<span class="kp-ms-placeholder" id="placeholderUserKho">Chọn chi nhánh kho</span><i class="bi bi-chevron-down kp-select-chevron ms-auto text-secondary"></i>');
+        } else if (count === totalCount && totalCount > 2) {
+            $box.html(`<span class="kp-pill-tag" data-val="all" style="background-color: var(--blue, #0070f4);"><span class="tag-text">Tất cả chi nhánh (${count} kho)</span></span><i class="bi bi-chevron-down kp-select-chevron ms-auto text-secondary"></i>`);
+        } else if (count <= 2) {
+            let html = '';
+            checkedItems.forEach(it => {
+                html += `<span class="kp-pill-tag" data-val="${it.id}"><span class="tag-text">${it.name}</span><span class="tag-remove" data-id="${it.id}" title="Bỏ chọn">&times;</span></span>`;
+            });
+            html += '<i class="bi bi-chevron-down kp-select-chevron ms-auto text-secondary"></i>';
+            $box.html(html);
+        } else {
+            let html = '';
+            checkedItems.slice(0, 2).forEach(it => {
+                html += `<span class="kp-pill-tag" data-val="${it.id}"><span class="tag-text">${it.name}</span><span class="tag-remove" data-id="${it.id}" title="Bỏ chọn">&times;</span></span>`;
+            });
+            html += `<span class="kp-pill-more">+${count - 2}</span>`;
+            html += '<i class="bi bi-chevron-down kp-select-chevron ms-auto text-secondary"></i>';
+            $box.html(html);
+        }
     }
 
-    $(document).on('click', '.kho-card-item', function (e) {
-        if ($(e.target).is('input[type="checkbox"]')) {
+    // Toggle mở/đóng dropdown kho trong modal người dùng
+    $('#boxUserKho').on('click', function (e) {
+        const $removeBtn = $(e.target).closest('.tag-remove');
+        if ($removeBtn.length) {
+            e.stopPropagation();
+            const id = $removeBtn.data('id');
+            $(`#chkKho_${id}`).prop('checked', false);
             updateWarehouseSelectionState();
             return;
         }
+
+        const $dd = $('#dropdownUserKho');
+        const isOpen = $dd.hasClass('show');
+        if (isOpen) {
+            $dd.removeClass('show');
+            $(this).removeClass('open');
+        } else {
+            $('.kp-ms-dropdown').not('#dropdownUserKho').removeClass('show');
+            $('.kp-multiselect-box').not('#boxUserKho').removeClass('open');
+            $dd.addClass('show');
+            $(this).addClass('open');
+            $('#searchUserKho').val('').trigger('input');
+            setTimeout(() => $('#searchUserKho').focus(), 100);
+        }
+    });
+
+    // Click vào item trong dropdown để toggle chọn kho
+    $(document).on('click', '.user-kho-ms-item', function (e) {
+        e.stopPropagation();
         const chk = $(this).find('.user-kho-chk');
-        chk.prop('checked', !chk.is(':checked'));
+        if (!$(e.target).is('input[type="checkbox"]') && !$(e.target).is('label')) {
+            chk.prop('checked', !chk.is(':checked'));
+        }
         updateWarehouseSelectionState();
+    });
+
+    // Ngăn đóng dropdown khi click vào ô tìm kiếm
+    $('#searchUserKho').on('click', function (e) {
+        e.stopPropagation();
+    });
+
+    // Tìm kiếm chi nhánh realtime trong dropdown
+    $('#searchUserKho').on('input', function () {
+        const kw = $(this).val().toLowerCase().trim();
+        let matched = 0;
+        $('.user-kho-ms-item').each(function () {
+            const name = ($(this).data('name') || $(this).text()).toLowerCase();
+            const match = !kw || name.includes(kw);
+            $(this).toggle(match);
+            if (match) matched++;
+        });
+        $('#emptyUserKho').toggleClass('d-none', matched > 0);
     });
 
     $(document).on('change', '.user-kho-chk', function () {
         updateWarehouseSelectionState();
     });
 
-    $('#btnSelectAllKho').on('click', function () {
+    $('#btnSelectAllKho').on('click', function (e) {
+        e.stopPropagation();
         $('.user-kho-chk').prop('checked', true);
         updateWarehouseSelectionState();
     });
 
-    $('#btnDeselectAllKho').on('click', function () {
+    $('#btnDeselectAllKho').on('click', function (e) {
+        e.stopPropagation();
         $('.user-kho-chk').prop('checked', false);
         updateWarehouseSelectionState();
     });
 
+    // Đóng dropdown khi click ra ngoài
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#boxUserKho, #dropdownUserKho').length) {
+            $('#dropdownUserKho').removeClass('show');
+            $('#boxUserKho').removeClass('open');
+        }
+    });
+
     const ADMIN_DEFAULT_NOTE = 'Tài khoản có vai trò Quản lý mặc định có toàn quyền thao tác trên toàn bộ các chi nhánh kho trong hệ thống.';
 
-    // 9. Cập nhật phân quyền theo Vai trò
+    // 9. Quản lý Dropdown Vai trò người dùng (Custom Select chuẩn Danh sách hàng hóa)
+    function setRoleDropdown(val) {
+        const $select = $('#userMaVaiTro');
+        $select.val(val);
+        const $opt = $select.find(`option[value="${val}"]`);
+        const roleText = $opt.data('name') || $opt.text() || 'Chọn vai trò';
+        $('#inputMaVaiTro').val(roleText);
+        $('#listMaVaiTro .hh-cs-item').removeClass('selected').filter(function () {
+            return String($(this).data('val')) === String(val);
+        }).addClass('selected');
+        updateRoleDescription();
+    }
+
+    // Mở / đóng dropdown Vai trò
+    $('#boxMaVaiTro').on('click', function (e) {
+        e.stopPropagation();
+        const $wrap = $('#wrapMaVaiTro');
+        const $dd = $('#dropdownMaVaiTro');
+        const isOpen = $wrap.hasClass('open');
+
+        // Đóng các dropdown khác nếu đang mở
+        $('#dropdownUserKho').removeClass('show');
+        $('#boxUserKho').removeClass('open');
+        $('.hh-cs-wrap').not($wrap).removeClass('open').find('.hh-cs-dropdown').hide();
+
+        if (isOpen) {
+            $wrap.removeClass('open');
+            $dd.hide();
+        } else {
+            $wrap.addClass('open');
+            $dd.show();
+        }
+    });
+
+    // Chọn item trong dropdown Vai trò
+    $(document).on('click', '#listMaVaiTro .hh-cs-item', function (e) {
+        e.stopPropagation();
+        const val = $(this).data('val');
+        setRoleDropdown(val);
+        $('#wrapMaVaiTro').removeClass('open');
+        $('#dropdownMaVaiTro').hide();
+    });
+
+    // Đóng dropdown Vai trò khi click ra ngoài
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#wrapMaVaiTro').length) {
+            $('#wrapMaVaiTro').removeClass('open');
+            $('#dropdownMaVaiTro').hide();
+        }
+    });
+
+    // Cập nhật phân quyền theo Vai trò
     function updateRoleDescription() {
         const sel = $('#userMaVaiTro');
         const roleText = sel.find('option:selected').data('name') || sel.find('option:selected').text();
@@ -405,7 +556,7 @@
         $('#iconUserPw').removeClass('bi-eye-slash').addClass('bi-eye');
         $('#userMatKhauRequired').show();
         $('#userMatKhauHint').text('(Tối thiểu 6 ký tự)');
-        $('#userMaVaiTro').val('2'); // Mặc định Thủ kho
+        setRoleDropdown('2'); // Mặc định Thủ kho
         $('#userTrangThaiChk').prop('checked', true);
         $('#userTrangThaiText').text('Đang hoạt động');
 
@@ -413,7 +564,6 @@
         $('.user-kho-chk').prop('checked', false);
         $('.user-kho-chk').first().prop('checked', true);
         updateWarehouseSelectionState();
-        updateRoleDescription();
 
         $('#userModalTitle').text('Thêm mới người dùng');
         showOverlay('userModalOv');
@@ -431,7 +581,7 @@
             type: 'GET',
             success: function (res) {
                 if (!res.success) {
-                    if (window.KiotToast) KiotToast.error(res.message);
+                    if (window.AppToast) AppToast.error(res.message);
                     return;
                 }
                 const d = res.data;
@@ -448,7 +598,7 @@
                 $('#iconUserPw').removeClass('bi-eye-slash').addClass('bi-eye');
                 $('#userMatKhauRequired').hide();
                 $('#userMatKhauHint').text('(Để trống nếu không đổi)');
-                $('#userMaVaiTro').val(d.maVaiTro);
+                setRoleDropdown(d.maVaiTro);
                 $('#userTrangThaiChk').prop('checked', d.trangThai === 'HOAT_DONG');
                 $('#userTrangThaiText').text(d.trangThai === 'HOAT_DONG' ? 'Đang hoạt động' : 'Khóa tài khoản');
 
@@ -460,14 +610,13 @@
                     });
                 }
                 updateWarehouseSelectionState();
-                updateRoleDescription();
 
                 $('#userModalTitle').text('Cập nhật người dùng: ' + d.tenDangNhap);
                 showOverlay('userModalOv');
                 setTimeout(() => $('#userHoTen').focus(), 150);
             },
             error: function () {
-                if (window.KiotToast) KiotToast.error('Không thể lấy thông tin người dùng.');
+                if (window.AppToast) AppToast.error('Không thể lấy thông tin người dùng.');
             }
         });
     });
@@ -561,7 +710,7 @@
                 btn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i>Lưu người dùng');
                 if (res.success) {
                     hideOverlay('userModalOv');
-                    if (window.KiotToast) KiotToast.success(res.message);
+                    if (window.AppToast) AppToast.success(res.message);
                     loadTable(maTaiKhoan === 0 ? 1 : currentPage);
                 } else {
                     alertBox.removeClass('d-none').html(res.message);
@@ -588,48 +737,85 @@
         });
     });
 
-    // 12. Khóa / Mở khóa tài khoản
-    $(document).on('click', '.btn-toggle-status', function () {
+    // 12. Xóa người dùng (Nếu chưa có giao dịch -> Xóa vĩnh viễn; Nếu đã có giao dịch -> Chỉ cho phép Khóa tài khoản)
+    $(document).on('click', '.btn-delete-user', function () {
         const id = $(this).data('id');
         const username = $(this).data('username') || '';
-        const currentStatus = $(this).data('status');
-        const isLocking = currentStatus === 'HOAT_DONG';
-        const actionTitle = isLocking ? 'Khóa tài khoản' : 'Mở khóa tài khoản';
         const safeUsername = $('<div>').text(username).html();
 
-        const doToggle = function () {
+        const executeDelete = function () {
             $.ajax({
-                url: '/NguoiDung/ToggleStatus?id=' + id,
+                url: '/NguoiDung/Delete?id=' + id,
                 type: 'POST',
                 success: function (res) {
                     if (res.success) {
-                        if (window.KiotToast) KiotToast.success(res.message);
+                        if (window.AppToast) AppToast.success(res.message);
                         loadTable(currentPage);
+                    } else if (res.hasTransaction) {
+                        // Đã phát sinh giao dịch: Chặn xóa và hỏi có muốn chuyển sang Khóa tài khoản không
+                        if (res.isLocked) {
+                            if (window.AppToast) {
+                                AppToast.warning(`Người dùng <b>${safeUsername}</b> đã phát sinh chứng từ và hiện đang ở trạng thái <b>Bị khóa</b>, không thể xóa vĩnh viễn.`);
+                            }
+                        } else {
+                            setTimeout(function () {
+                                if (window.AppConfirm && typeof window.AppConfirm.show === 'function') {
+                                    window.AppConfirm.show({
+                                        title: 'Không thể xóa người dùng',
+                                        icon: 'bi-shield-exclamation',
+                                        iconColor: '#f59e0b',
+                                        message: `Người dùng <strong>${safeUsername}</strong> đã phát sinh chứng từ trong hệ thống (nhập, xuất, kiểm kê hoặc bán hàng) nên <strong>không thể xóa vĩnh viễn</strong> để bảo toàn lịch sử dữ liệu.<br><br>Bạn có muốn chuyển sang <strong>KHÓA TÀI KHOẢN</strong> để ngừng quyền truy cập của người dùng này không?`,
+                                        confirmText: 'Khóa tài khoản',
+                                        confirmClass: 'btn btn-warning text-dark fw-semibold',
+                                        cancelText: 'Bỏ qua',
+                                        onConfirm: function () {
+                                            $.ajax({
+                                                url: '/NguoiDung/Delete?id=' + id + '&chuyenKhoa=true',
+                                                type: 'POST',
+                                                success: function (lockRes) {
+                                                    if (lockRes.success) {
+                                                        if (window.AppToast) AppToast.success(lockRes.message);
+                                                        loadTable(currentPage);
+                                                    } else {
+                                                        if (window.AppToast) AppToast.error(lockRes.message);
+                                                    }
+                                                },
+                                                error: function (xhr) {
+                                                    if (window.AppToast) AppToast.error(xhr.responseJSON?.message || 'Không thể khóa tài khoản.');
+                                                }
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    if (window.AppToast) AppToast.warning(res.message);
+                                }
+                            }, 200);
+                        }
                     } else {
-                        if (window.KiotToast) KiotToast.error(res.message);
+                        if (window.AppToast) AppToast.error(res.message || 'Không thể xóa người dùng.');
                     }
                 },
                 error: function (xhr) {
-                    if (window.KiotToast) KiotToast.error(xhr.responseJSON?.message || 'Không thể thực hiện thao tác.');
+                    if (window.AppToast) AppToast.error(xhr.responseJSON?.message || 'Đã xảy ra lỗi khi thực hiện thao tác.');
                 }
             });
         };
 
-        if (window.KiotConfirm && typeof window.KiotConfirm.show === 'function') {
-            window.KiotConfirm.show({
-                title: actionTitle,
-                icon: isLocking ? 'bi-lock-fill' : 'bi-unlock-fill',
-                iconColor: isLocking ? '#dc2626' : '#0d6efd',
-                message: isLocking
-                    ? `Bạn có chắc chắn muốn <strong>khóa tài khoản</strong> của người dùng <strong>${safeUsername}</strong> không?<br><span class="text-muted small mt-1 d-block">Sau khi khóa, người dùng này sẽ không thể đăng nhập vào hệ thống.</span>`
-                    : `Bạn có chắc chắn muốn <strong>mở khóa tài khoản</strong> của người dùng <strong>${safeUsername}</strong> không?<br><span class="text-muted small mt-1 d-block">Người dùng này sẽ có thể đăng nhập và tiếp tục thao tác trên hệ thống.</span>`,
-                confirmText: isLocking ? 'Đồng ý khóa' : 'Đồng ý mở khóa',
-                confirmClass: isLocking ? 'btn btn-danger' : 'btn btn-primary',
+        if (window.AppConfirm && typeof window.AppConfirm.show === 'function') {
+            window.AppConfirm.show({
+                title: 'Xác nhận xóa người dùng',
+                icon: 'bi-trash-fill',
+                iconColor: '#dc2626',
+                message: `Bạn có chắc chắn muốn xóa người dùng <strong>${safeUsername}</strong> không?<br><span class="text-muted small mt-1 d-block">Hệ thống sẽ kiểm tra giao dịch: nếu chưa phát sinh phiếu sẽ xóa vĩnh viễn, nếu đã có chứng từ sẽ yêu cầu chuyển sang khóa tài khoản.</span>`,
+                confirmText: 'Xóa người dùng',
+                confirmClass: 'btn btn-danger',
                 cancelText: 'Bỏ qua',
-                onConfirm: doToggle
+                onConfirm: executeDelete
             });
         } else {
-            doToggle();
+            if (confirm(`Bạn có chắc chắn muốn xóa người dùng "${username}" không?`)) {
+                executeDelete();
+            }
         }
     });
 
@@ -685,7 +871,7 @@
                 btn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i>Lưu mật khẩu');
                 if (res.success) {
                     hideOverlay('pwdModalOv');
-                    if (window.KiotToast) KiotToast.success(res.message);
+                    if (window.AppToast) AppToast.success(res.message);
                 } else {
                     alertBox.removeClass('d-none').html(res.message);
                 }

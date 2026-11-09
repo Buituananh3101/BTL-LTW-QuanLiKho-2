@@ -38,7 +38,7 @@
    - `SelectedKhoIds`: Danh sách mã kho đang chọn lọc (`List<int>`).
    - `MaNhom`: Mã nhóm hàng cần lọc (`int?`).
    - `TinhTrangTon`: Trạng thái tồn (`ALL`, `CON_TON`, `HET_HANG`, `TON_AM`, `DUOI_DINH_MUC`, `VUOT_DINH_MUC`).
-   - `TrangThaiHang`: Trạng thái kinh doanh (`DANG_KINH_DOANH`, `NGUNG_KINH_DOANH`, `ALL`).
+   - `TrangThaiHang`: Trạng thái kinh doanh (`DANG_BAN`, `NGUNG_BAN`, `ALL`).
 2. **`BaoCaoTonKhoItemVM`**:
    - `MaHang`, `MaHangNoiBo`, `TenHang`, `TenDvt`, `TenNhom`, `ViTri`.
    - `GiaVon`, `GiaTriTon` (`= TongTon * GiaVon`).
@@ -47,7 +47,7 @@
    - `CoDuoiDinhMuc`: Cờ bool báo hiệu mặt hàng bị dưới định mức ở ít nhất 1 kho.
    - `CoVuotDinhMuc`: Cờ bool báo hiệu mặt hàng bị vượt định mức ở ít nhất 1 kho.
 3. **`BaoCaoTonKhoSummaryVM`**:
-   - `TongSoMatHang`, `TongSoLuongTon`, `TongGiaTriTon`, `SoMatHangCanLuuY`.
+   - TongSoMatHang, TongSoLuongTon, TongGiaTriTon, SoMatHangCanLuuY, TongTonTheoKho (Dictionary<int, decimal> lưu tổng tồn từng kho trên toàn bộ tập dữ liệu đã lọc).
 4. **`BaoCaoTonKhoIndexVM`**:
    - `PagedData`: `PagedResult<BaoCaoTonKhoItemVM>`.
    - `Summary`: `BaoCaoTonKhoSummaryVM`.
@@ -61,20 +61,20 @@
 
 1. **Bố cục chính (`Views/BaoCao/TonKho.cshtml`)**:
    - Cột trái: Sidebar bộ lọc hệ thống (`_TonKhoFilterSidebar.cshtml`), nút gập mở F4.
-   - Cột phải: Topbar tìm kiếm F3 + 4 Thẻ Summary KPI + Bảng Pivot kho + Phân trang AJAX.
+   - Cột phải: Topbar tìm kiếm F3 + Nút ẩn/hiện cột + Nút tải lại bảng + Xuất Excel + In báo cáo + Bảng Pivot kho + Phân trang AJAX.
 2. **Bảng Pivot AJAX (`_TonKhoTable.cshtml`)**:
-   - Thead: Cố định thông tin mặt hàng, sinh động các cột `<th>` theo danh sách kho đang chọn lọc, cột cuối là `Tổng tồn`.
-   - Tbody: Từng dòng hàng hóa hiển thị số lượng tồn tại từng kho. Nếu tồn < 0 bôi đỏ, = 0 màu xám, dưới định mức có chấm cảnh báo vàng.
-   - Tfoot: Dòng Tổng cộng tích lũy tổng số lượng tồn của từng kho và toàn hệ thống.
-3. **Drawer chi tiết (`_TonKhoDetailDrawer.cshtml`)**:
-   - Hiển thị khi click vào dòng: Thẻ thông tin hàng hóa, bảng chi tiết định mức tối thiểu / tối đa và tồn thực tế từng kho, vị trí kệ hàng.
+   - Thead: Cố định thông tin mặt hàng, sinh động các cột `<th>` theo danh sách kho đang chọn lọc, cột cuối là `Tổng tồn`. Hỗ trợ sắp xếp 3 trạng thái.
+   - Dòng tổng hợp (Summary Row): Đặt ngay đầu bảng `<tbody>`, hiển thị tổng số mặt hàng, tổng giá trị tồn, tổng tồn từng kho và toàn hệ thống, cuộn tự nhiên cùng nội dung bảng (đồng bộ Danh sách Hàng hóa).
+   - Tbody: Từng dòng hàng hóa hiển thị số lượng tồn tại từng kho. Nếu tồn < 0 bôi đỏ, = 0 màu xám; cảnh báo định mức dùng mũi tên thanh cơ bản không màu: dưới định mức hiển thị mũi tên xuống ↓ (i-arrow-down text-secondary), vượt định mức hiển thị mũi tên lên ↑ (i-arrow-up text-secondary).
+3. **Chi tiết mở rộng Inline Subrow (Master - Detail)**:
+   - Hiển thị khi click vào dòng sản phẩm: Mở rộng dòng phụ dạng accordion ngay bên dưới gồm 3 tab: (1) Tồn kho chi nhánh & Định mức; (2) Thông tin hàng hóa; (3) Thẻ kho gần đây (nạp qua `/BaoCao/GetTheKhoQuick`).
 
 ### 4.1. Khối Lego tái sử dụng (Luật 10 AGENTS.md):
-- [x] Multi-select Dropdown Kho: `_KiotMultiSelectFilter.cshtml` + `KiotFilter.setupMultiSelectDropdown`.
-- [x] Phân trang AJAX: `_Pagination.cshtml` + `KiotFilter.createListPage`.
-- [x] Tree Combobox Nhóm hàng: `KiotFilter.initCombobox`.
-- [x] Status Filter Checkbox: `_KiotStatusFilter.cshtml`.
-- [x] Format số tiền & số lượng: class `.kiot-num` + format tiền tệ `#,##0`.
+- [x] Multi-select Dropdown Kho: `_MultiSelectFilter.cshtml` (mặc định "Tất cả các kho", chọn kho cụ thể thì sinh tag chip lọc và hiện nút "Bỏ chọn").
+- [x] Phân trang AJAX: `_Pagination.cshtml` + `AppFilter.createListPage`.
+- [x] Multi-select Dropdown Nhóm hàng: `_MultiSelectFilter.cshtml` (mặc định "Chọn nhóm hàng").
+- [x] Status Filter Checkbox: `_StatusFilter.cshtml`.
+- [x] Format số tiền & số lượng: class `.kp-num` + format tiền tệ `#,##0`.
 - [x] Xuất Excel ClosedXML: `ExcelHelper.ExportToExcel`.
 - [x] Hotkeys toàn cục: F3 (Tìm kiếm), F4 (Sidebar).
 

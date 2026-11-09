@@ -1,13 +1,13 @@
 ﻿/**
  * xuat-huy-index.js - Quản lý tương tác màn hình danh sách xuất hủy
- * Tái sử dụng trọn vẹn khối Lego KiotFilter & KiotConfirm
+ * Tái sử dụng trọn vẹn khối Lego AppFilter & AppConfirm
  */
 (function () {
     'use strict';
 
     const $ = (s, r = document) => r.querySelector(s);
     const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-    const app = $('#kiotContainer');
+    const app = $('#kpContainer');
     if (!app) return;
 
     const filterUrl = app.dataset.filterUrl || '/XuatHuy/Filter';
@@ -93,7 +93,7 @@
         const dot = $(dotId);
         if (dot) dot.style.display = selectedIds.length > 0 ? 'inline-block' : 'none';
 
-        $$('.kiot-ms-item', dropdown).forEach(item => {
+        $$('.kp-ms-item', dropdown).forEach(item => {
             const val = parseInt(item.dataset.val);
             const isSel = selectedIds.includes(val);
             item.classList.toggle('selected', isSel);
@@ -105,7 +105,7 @@
             val: id,
             name: namesMap[id] || ('NV ' + id)
         }));
-        KiotFilter.renderTagPills(box, selectedItems, placeholder, 3);
+        AppFilter.renderTagPills(box, selectedItems, placeholder, 3);
     }
 
     function renderCreatorMultiSelect() {
@@ -122,19 +122,19 @@
         if (!box || !dropdown) return;
 
         // Cache trước tên từ các mục trong dropdown HTML
-        $$('.kiot-ms-item', dropdown).forEach(item => {
+        $$('.kp-ms-item', dropdown).forEach(item => {
             const val = parseInt(item.dataset.val);
-            const name = item.dataset.name || $('.kiot-ms-text', item)?.textContent.trim() || item.querySelector('span')?.textContent.trim();
+            const name = item.dataset.name || $('.kp-ms-text', item)?.textContent.trim() || item.querySelector('span')?.textContent.trim();
             if (!isNaN(val) && name) namesMap[val] = name;
         });
 
         // 1. Click vào box để mở / đóng dropdown
         box.addEventListener('click', e => {
             // Nếu bấm vào nút xóa tag (dấu ×)
-            const tagRemove = e.target.closest('.tag-remove, .kiot-tag-close');
+            const tagRemove = e.target.closest('.tag-remove, .kp-tag-close');
             if (tagRemove) {
                 e.stopPropagation();
-                const pill = tagRemove.closest('.kiot-pill-tag') || tagRemove;
+                const pill = tagRemove.closest('.kp-pill-tag') || tagRemove;
                 const val = parseInt(pill.dataset.val);
                 const idx = selectedIds.indexOf(val);
                 if (idx !== -1) {
@@ -150,13 +150,13 @@
             e.stopPropagation();
 
             // Đóng các dropdown khác và calendar popups
-            $$('.kiot-ms-dropdown').forEach(d => {
+            $$('.kp-ms-dropdown').forEach(d => {
                 if (d !== dropdown) {
                     d.classList.remove('show', 'drop-up');
                     d.style.maxHeight = '';
                 }
             });
-            $$('.kiot-multiselect-box').forEach(b => {
+            $$('.kp-multiselect-box').forEach(b => {
                 if (b !== box) b.classList.remove('open');
             });
             if (window.jQuery) {
@@ -165,15 +165,15 @@
 
             const willShow = !dropdown.classList.contains('show');
             if (willShow) {
-                if (typeof KiotFilter.checkSidebarDropdownDirection === 'function') {
-                    KiotFilter.checkSidebarDropdownDirection(box, dropdown);
+                if (typeof AppFilter.checkSidebarDropdownDirection === 'function') {
+                    AppFilter.checkSidebarDropdownDirection(box, dropdown);
                 }
                 dropdown.classList.add('show');
                 box.classList.add('open');
                 const searchInput = $('input', dropdown);
                 if (searchInput) {
                     searchInput.value = '';
-                    $$('.kiot-ms-item', dropdown).forEach(it => it.style.display = '');
+                    $$('.kp-ms-item', dropdown).forEach(it => it.style.display = '');
                     searchInput.focus();
                 }
             } else {
@@ -185,13 +185,13 @@
 
         // 2. Click chọn / bỏ chọn mục trong dropdown
         dropdown.addEventListener('click', e => {
-            const item = e.target.closest('.kiot-ms-item');
+            const item = e.target.closest('.kp-ms-item');
             if (!item) return;
             e.stopPropagation();
             const val = parseInt(item.dataset.val);
             if (isNaN(val)) return;
 
-            const name = item.dataset.name || $('.kiot-ms-text', item)?.textContent.trim() || item.querySelector('span')?.textContent.trim();
+            const name = item.dataset.name || $('.kp-ms-text', item)?.textContent.trim() || item.querySelector('span')?.textContent.trim();
             const idx = selectedIds.indexOf(val);
             if (idx >= 0) {
                 selectedIds.splice(idx, 1);
@@ -207,14 +207,14 @@
         });
 
         // 3. Tìm kiếm nội bộ trong dropdown
-        const searchInput = $('.kiot-ms-search input', dropdown) || $('input[type="text"]', dropdown);
+        const searchInput = $('.kp-ms-search input', dropdown) || $('input[type="text"]', dropdown);
         if (searchInput) {
             searchInput.addEventListener('click', e => e.stopPropagation());
             searchInput.addEventListener('input', e => {
                 e.stopPropagation();
                 const term = searchInput.value.trim().toLowerCase();
-                $$('.kiot-ms-item', dropdown).forEach(item => {
-                    const text = (item.dataset.name || $('.kiot-ms-text', item)?.textContent || item.textContent || '').trim().toLowerCase();
+                $$('.kp-ms-item', dropdown).forEach(item => {
+                    const text = (item.dataset.name || $('.kp-ms-text', item)?.textContent || item.textContent || '').trim().toLowerCase();
                     item.style.display = (!term || text.includes(term)) ? '' : 'none';
                 });
             });
@@ -228,11 +228,11 @@
         p.set('DateFilterType', F.mode === 'preset' ? F.preset : 'CUSTOM');
         if (F.mode === 'custom') {
             if (F.from) {
-                const f = typeof F.from === 'string' ? F.from : KiotFilter.formatDateISO(F.from);
+                const f = typeof F.from === 'string' ? F.from : AppFilter.formatDateISO(F.from);
                 p.set('FromDate', f);
             }
             if (F.to) {
-                const t = typeof F.to === 'string' ? F.to : KiotFilter.formatDateISO(F.to);
+                const t = typeof F.to === 'string' ? F.to : AppFilter.formatDateISO(F.to);
                 p.set('ToDate', t);
             }
         }
@@ -270,14 +270,14 @@
             }
         } catch (err) {
             console.error('Lỗi khi tải bảng xuất hủy:', err);
-            if (window.KiotToast) KiotToast.error('Không thể tải dữ liệu bảng.');
+            if (window.AppToast) AppToast.error('Không thể tải dữ liệu bảng.');
         } finally {
             wrap.style.opacity = '1';
         }
     }
 
-    /* ===== QUẢN LÝ ẨN / HIỆN CỘT BẢNG (COLUMN VISIBILITY) QUA LEGO KIOTFILTER ===== */
-    const STORAGE_COLS_KEY = 'kiot_xuathuy_cols_v2';
+    /* ===== QUẢN LÝ ẨN / HIỆN CỘT BẢNG (COLUMN VISIBILITY) QUA LEGO KHOPROFILTER ===== */
+    const STORAGE_COLS_KEY = 'kp_xuathuy_cols_v2';
     const DEFAULT_XH_COLS = {
         ma: 1,
         gt: 1,
@@ -292,8 +292,8 @@
     let xhColumnToggler = null;
 
     function initColumnToggle() {
-        if (typeof KiotFilter !== 'undefined' && typeof KiotFilter.initColumnToggle === 'function') {
-            xhColumnToggler = KiotFilter.initColumnToggle({
+        if (typeof AppFilter !== 'undefined' && typeof AppFilter.initColumnToggle === 'function') {
+            xhColumnToggler = AppFilter.initColumnToggle({
                 menuSelector: '#colMenu',
                 tableSelector: '#xuatHuyTable',
                 storageKey: STORAGE_COLS_KEY,
@@ -309,12 +309,12 @@
         }
     }
 
-    /* ===== MASTER-DETAIL ACCORDION CHUẨN KIOTFILTER (THEO NHÀ CUNG CẤP) ===== */
+    /* ===== MASTER-DETAIL ACCORDION CHUẨN KHOPROFILTER (THEO NHÀ CUNG CẤP) ===== */
     let xhRowDetailHandler = null;
 
     function initRowDetail() {
-        if (typeof KiotFilter !== 'undefined' && typeof KiotFilter.initRowDetail === 'function') {
-            xhRowDetailHandler = KiotFilter.initRowDetail({
+        if (typeof AppFilter !== 'undefined' && typeof AppFilter.initRowDetail === 'function') {
+            xhRowDetailHandler = AppFilter.initRowDetail({
                 tableSelector: '#xuatHuyTable',
                 rowSelector: 'tr.product-row',
                 detailRowSelector: '#detail-{id}',
@@ -388,7 +388,7 @@
                 const id = parseInt(btn.dataset.id);
                 const dp = btn.closest('.dp');
                 const noteText = $('.dp-note', dp)?.value || '';
-                saveNote(id, noteText);
+                saveNote(id, noteText, btn);
             };
         });
 
@@ -419,7 +419,7 @@
         });
 
         // Click chuyển trang trong Pagination
-        $$('.page-ajax, .kiot-page-link', wrap).forEach(a => {
+        $$('.page-ajax, .kp-page-link', wrap).forEach(a => {
             a.onclick = e => {
                 e.preventDefault();
                 const p = parseInt(a.dataset.page);
@@ -447,8 +447,8 @@
                 if (icon) {
                     icon.className = data.isFavorite ? 'bi bi-star-fill' : 'bi bi-star';
                 }
-                if (window.KiotToast) {
-                    KiotToast.success(data.isFavorite ? 'Đã đánh dấu sao phiếu xuất hủy.' : 'Đã bỏ đánh dấu sao.');
+                if (window.AppToast) {
+                    AppToast.success(data.isFavorite ? 'Đã đánh dấu sao phiếu xuất hủy.' : 'Đã bỏ đánh dấu sao.');
                 }
             }
         } catch (err) {
@@ -470,7 +470,12 @@
     };
 
     /* ===== LƯU GHI CHÚ ===== */
-    async function saveNote(id, note) {
+    async function saveNote(id, note, btn) {
+        const origHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Lưu';
+        }
         try {
             const res = await fetch(noteUrl, {
                 method: 'POST',
@@ -482,34 +487,40 @@
             });
             const data = await res.json();
             if (data.success) {
-                if (window.KiotToast) KiotToast.success('Đã lưu ghi chú thành công!');
+                if (window.AppToast) AppToast.success('Đã lưu ghi chú thành công!');
                 const row = $(`.tbl-row[data-id="${id}"]`);
                 if (row) {
                     const noteTd = $('[data-col="ghi"]', row);
                     if (noteTd) {
-                        noteTd.textContent = note;
-                        noteTd.title = note;
+                        const trimmed = (note || '').trim();
+                        noteTd.textContent = trimmed ? trimmed : '---';
+                        noteTd.title = trimmed;
                     }
                 }
             } else {
-                if (window.KiotToast) KiotToast.error(data.message || 'Không thể lưu ghi chú.');
+                if (window.AppToast) AppToast.error(data.message || 'Không thể lưu ghi chú.');
             }
         } catch (err) {
             console.error(err);
-            if (window.KiotToast) KiotToast.error('Lỗi khi gửi yêu cầu lưu ghi chú.');
+            if (window.AppToast) AppToast.error('Lỗi khi gửi yêu cầu lưu ghi chú.');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
         }
     }
 
     /* ===== HỦY BỎ CHỨNG TỪ ===== */
     function confirmCancelDoc(id, code) {
-        const ov = $('#kiotConfirmOv');
+        const ov = $('#kpConfirmOv');
         if (!ov) return;
-        const msg = $('#kiotConfirmMsg');
+        const msg = $('#kpConfirmMsg');
         if (msg) msg.textContent = `Bạn có chắc chắn muốn hủy phiếu xuất hủy "${code}" không? Thao tác này sẽ hoàn lại số lượng tồn kho (nếu phiếu đã hoàn thành).`;
 
-        const okBtn = $('#kiotConfirmOkBtn');
-        const cancelBtn = $('#kiotConfirmCancelBtn');
-        const closeBtn = $('#kiotConfirmCloseBtn');
+        const okBtn = $('#kpConfirmOkBtn');
+        const cancelBtn = $('#kpConfirmCancelBtn');
+        const closeBtn = $('#kpConfirmCloseBtn');
 
         const close = () => ov.classList.remove('show');
         cancelBtn.onclick = close;
@@ -524,14 +535,14 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    if (window.KiotToast) KiotToast.success(data.message || 'Đã hủy phiếu xuất hủy.');
+                    if (window.AppToast) AppToast.success(data.message || 'Đã hủy phiếu xuất hủy.');
                     loadTable();
                 } else {
-                    if (window.KiotToast) KiotToast.error(data.message || 'Không thể hủy phiếu.');
+                    if (window.AppToast) AppToast.error(data.message || 'Không thể hủy phiếu.');
                 }
             } catch (err) {
                 console.error(err);
-                if (window.KiotToast) KiotToast.error('Lỗi khi hủy phiếu.');
+                if (window.AppToast) AppToast.error('Lỗi khi hủy phiếu.');
             }
         };
 
@@ -601,9 +612,9 @@
             });
         }
 
-        // 2. Khởi tạo Bộ lọc Thời gian dùng KiotFilter.initDateFilter
-        if (typeof KiotFilter !== 'undefined' && typeof KiotFilter.initDateFilter === 'function') {
-            KiotFilter.initDateFilter('date', function (from, to, text, val) {
+        // 2. Khởi tạo Bộ lọc Thời gian dùng AppFilter.initDateFilter
+        if (typeof AppFilter !== 'undefined' && typeof AppFilter.initDateFilter === 'function') {
+            AppFilter.initDateFilter('date', function (from, to, text, val) {
                 if (val === 'CUSTOM') {
                     F.mode = 'custom';
                     F.preset = 'CUSTOM';
@@ -641,13 +652,13 @@
         setupMultiSelectDropdown('#boxNguoiXuatHuy', '#dropdownNguoiXuatHuy', F.confirmerIds, F.confirmerNames, renderConfirmerMultiSelect);
 
         // 5. Đóng popup khi cuộn sidebar hoặc click ngoài hoặc nhấn Escape
-        $('.kiot-filter-box')?.addEventListener('scroll', function () {
+        $('.kp-filter-box')?.addEventListener('scroll', function () {
             if (window.jQuery) window.jQuery('.quick-date-popup, .dual-calendar-popup').hide();
-            const openDropdown = $('.kiot-ms-dropdown.show');
+            const openDropdown = $('.kp-ms-dropdown.show');
             if (openDropdown) {
-                const box = openDropdown.parentElement?.querySelector('.kiot-multiselect-box');
-                if (box && typeof KiotFilter.checkSidebarDropdownDirection === 'function') {
-                    KiotFilter.checkSidebarDropdownDirection(box, openDropdown);
+                const box = openDropdown.parentElement?.querySelector('.kp-multiselect-box');
+                if (box && typeof AppFilter.checkSidebarDropdownDirection === 'function') {
+                    AppFilter.checkSidebarDropdownDirection(box, openDropdown);
                 }
             }
         });
@@ -659,22 +670,22 @@
             const targetBlock = e.target.closest('.f-block');
             if (!targetBlock) {
                 if (window.jQuery) window.jQuery('.quick-date-popup, .dual-calendar-popup').hide();
-                $$('.kiot-ms-dropdown').forEach(d => {
+                $$('.kp-ms-dropdown').forEach(d => {
                     d.classList.remove('show', 'drop-up');
                     d.style.maxHeight = '';
                 });
-                $$('.kiot-multiselect-box').forEach(b => b.classList.remove('open'));
+                $$('.kp-multiselect-box').forEach(b => b.classList.remove('open'));
             } else {
                 if (window.jQuery) {
                     window.jQuery('.dual-calendar-popup, .quick-date-popup').not(window.jQuery(targetBlock).find('.dual-calendar-popup, .quick-date-popup')).hide();
                 }
-                $$('.kiot-ms-dropdown').forEach(d => {
+                $$('.kp-ms-dropdown').forEach(d => {
                     if (!targetBlock.contains(d)) {
                         d.classList.remove('show', 'drop-up');
                         d.style.maxHeight = '';
                     }
                 });
-                $$('.kiot-multiselect-box').forEach(b => {
+                $$('.kp-multiselect-box').forEach(b => {
                     if (!targetBlock.contains(b)) b.classList.remove('open');
                 });
             }
@@ -683,11 +694,11 @@
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 if (window.jQuery) window.jQuery('.quick-date-popup, .dual-calendar-popup').hide();
-                $$('.kiot-ms-dropdown').forEach(d => {
+                $$('.kp-ms-dropdown').forEach(d => {
                     d.classList.remove('show', 'drop-up');
                     d.style.maxHeight = '';
                 });
-                $$('.kiot-multiselect-box').forEach(b => b.classList.remove('open'));
+                $$('.kp-multiselect-box').forEach(b => b.classList.remove('open'));
             }
         });
 
@@ -713,7 +724,7 @@
         // 9. Nút F4 thu gọn / mở rộng sidebar
         const btnTg = $('#btnToggleSidebar');
         function toggleSidebar() {
-            const container = $('#kiotContainer');
+            const container = $('#kpContainer');
             if (container) {
                 container.classList.toggle('sidebar-collapsed');
                 const isCollapsed = container.classList.contains('sidebar-collapsed');

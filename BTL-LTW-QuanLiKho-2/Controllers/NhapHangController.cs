@@ -78,7 +78,7 @@ public class NhapHangController : BaseKhoController
     {
         int whId = GetCurrentWarehouseId();
         var kho = await _context.Khos.FindAsync(whId);
-        int currentNvId = CurrentNhanVienId;
+        int currentNvId = CurrentNhanVienId > 0 ? CurrentNhanVienId : 1;
         var nv = await _context.NhanViens.FindAsync(currentNvId);
 
         var vm = new NhapHangFormVM
@@ -272,13 +272,18 @@ public class NhapHangController : BaseKhoController
             return BadRequest(new { success = false, message = "Phiếu nhập phải có ít nhất 1 mặt hàng." });
         }
 
+        if (!req.MaDonViCapHang.HasValue || req.MaDonViCapHang.Value <= 0)
+        {
+            return BadRequest(new { success = false, message = "Vui lòng chọn nhà cung cấp cho phiếu nhập." });
+        }
+
         if (req.Lines.Any(l => l.SoLuong <= 0))
         {
             return BadRequest(new { success = false, message = "Số lượng hàng nhập phải lớn hơn 0." });
         }
 
         int whId = req.MaKho.HasValue && req.MaKho.Value > 0 ? req.MaKho.Value : GetCurrentWarehouseId();
-        int currentNvId = CurrentNhanVienId;
+        int currentNvId = CurrentNhanVienId > 0 ? CurrentNhanVienId : 1;
         bool isHoanThanh = string.Equals(req.ActionType, "HOAN_THANH", StringComparison.OrdinalIgnoreCase);
 
         using var trans = await _context.Database.BeginTransactionAsync();
@@ -308,7 +313,7 @@ public class NhapHangController : BaseKhoController
             else
             {
                 phieu = new PhieuNhap();
-                phieu.LoaiPhieuNhap = "NHAP_KHO";
+                phieu.LoaiPhieuNhap = "THONG_THUONG";
                 _context.PhieuNhaps.Add(phieu);
             }
 
@@ -333,13 +338,13 @@ public class NhapHangController : BaseKhoController
             decimal canTraNcc = Math.Max(0, tongTienHang - giamGiaPhieu);
 
             phieu.MaPhieu = maPhieu;
-            phieu.LoaiPhieuNhap = "NHAP_KHO";
+            phieu.LoaiPhieuNhap = "THONG_THUONG";
             phieu.MaKho = whId;
             phieu.NgayLap = req.NgayLap.HasValue 
                 ? (req.NgayLap.Value.Kind == DateTimeKind.Utc ? req.NgayLap.Value.ToLocalTime() : req.NgayLap.Value) 
                 : DateTime.Now;
             phieu.MaNvlap = req.MaNvlap.HasValue && req.MaNvlap.Value > 0 ? req.MaNvlap.Value : currentNvId;
-            phieu.MaDonViCapHang = req.MaDonViCapHang > 0 ? req.MaDonViCapHang : null;
+            phieu.MaDonViCapHang = req.MaDonViCapHang!.Value;
             phieu.SoHoaDon = string.IsNullOrWhiteSpace(req.SoHoaDon) ? null : req.SoHoaDon.Trim();
             phieu.MaDatHangNhap = string.IsNullOrWhiteSpace(req.MaDatHangNhap) ? null : req.MaDatHangNhap.Trim();
             phieu.GhiChu = string.IsNullOrWhiteSpace(req.GhiChu) ? null : req.GhiChu.Trim();
@@ -361,7 +366,17 @@ public class NhapHangController : BaseKhoController
             await _context.SaveChangesAsync();
 
             // Lưu các dòng chi tiết
-            foreach (var l in req.Lines)
+            var groupedLines = req.Lines
+                .GroupBy(l => l.MaHang)
+                .Select(g => new
+                {
+                    MaHang = g.Key,
+                    SoLuong = g.Sum(x => x.SoLuong),
+                    DonGiaNhap = g.Last().DonGiaNhap,
+                    GiamGia = g.Sum(x => x.GiamGia)
+                });
+
+            foreach (var l in groupedLines)
             {
                 decimal thanhTienLine = (l.SoLuong * l.DonGiaNhap) - l.GiamGia;
                 var ct = new ChiTietPhieuNhap
@@ -399,7 +414,8 @@ public class NhapHangController : BaseKhoController
         {
             await trans.RollbackAsync();
             _logger.LogError(ex, "Lỗi khi lưu phiếu nhập hàng");
-            return StatusCode(500, new { success = false, message = "Đã xảy ra lỗi khi lưu phiếu nhập: " + ex.Message });
+            string detailedMsg = ex.InnerException?.InnerException?.Message ?? ex.InnerException?.Message ?? ex.Message;
+            return StatusCode(500, new { success = false, message = "Đã xảy ra lỗi khi lưu phiếu nhập: " + detailedMsg });
         }
     }
 
@@ -464,7 +480,8 @@ public class NhapHangController : BaseKhoController
         {
             await trans.RollbackAsync();
             _logger.LogError(ex, "Lỗi khi hủy phiếu nhập hàng");
-            return StatusCode(500, new { success = false, message = "Lỗi khi hủy phiếu nhập: " + ex.Message });
+            string detailedMsg = ex.InnerException?.InnerException?.Message ?? ex.InnerException?.Message ?? ex.Message;
+            return StatusCode(500, new { success = false, message = "Lỗi khi hủy phiếu nhập: " + detailedMsg });
         }
     }
 
@@ -508,16 +525,40 @@ public class NhapHangController : BaseKhoController
         }
 
         var products = await query.Take(20).ToListAsync();
+        var productIds = products.Select(h => h.MaHang).ToList();
 
-        var result = products.Select(h => new
+        var setWithImage = new HashSet<int>();
+        if (productIds.Any())
         {
-            maHang = h.MaHang,
-            maHangNoiBo = h.MaHangNoiBo,
-            tenHang = h.TenHang,
-            tenDvt = h.MaDvtNavigation?.TenDvt ?? "",
-            tenNhom = h.MaNhomNavigation?.TenNhom ?? "",
-            gia = h.GiaVon > 0 ? h.GiaVon : (h.GiaBanThamKhao > 0 ? h.GiaBanThamKhao : 0),
-            tonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0
+            var imgIds = await _context.HinhAnhHangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang))
+                .Select(x => x.MaHang)
+                .Distinct()
+                .ToListAsync();
+
+            var legacyImgIds = await _context.HangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang) && x.HinhAnh != null)
+                .Select(x => x.MaHang)
+                .ToListAsync();
+
+            setWithImage = new HashSet<int>(imgIds.Concat(legacyImgIds));
+        }
+
+        var result = products.Select(h =>
+        {
+            bool hasImg = setWithImage.Contains(h.MaHang);
+            return new
+            {
+                maHang = h.MaHang,
+                maHangNoiBo = h.MaHangNoiBo,
+                tenHang = h.TenHang,
+                tenDvt = h.MaDvtNavigation?.TenDvt ?? "",
+                tenNhom = h.MaNhomNavigation?.TenNhom ?? "",
+                gia = h.GiaVon > 0 ? h.GiaVon : (h.GiaBanThamKhao > 0 ? h.GiaBanThamKhao : 0),
+                tonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0,
+                hasImage = hasImg,
+                hinhAnh = hasImg ? $"/HangHoa/GetImage/{h.MaHang}" : null
+            };
         }).ToList();
 
         return Json(result);
@@ -625,7 +666,7 @@ public class NhapHangController : BaseKhoController
             ws.Cell(1, i + 1).Value = headers[i];
         }
 
-        ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
+        ExcelHelper.ApplyHeaderStyle(ws.Range(1, 1, 1, headers.Length));
         ws.Row(1).Height = 26;
 
         // Dữ liệu mẫu
@@ -753,7 +794,7 @@ public class NhapHangController : BaseKhoController
 
         bool isDetail = string.Equals(type, "detail", StringComparison.OrdinalIgnoreCase);
 
-        // Mặc định xuất file Excel (.xlsx) chuẩn KiotViet bằng ClosedXML qua Lego ExcelHelper
+        // Mặc định xuất file Excel (.xlsx) chuẩn KhoPro bằng ClosedXML qua Lego ExcelHelper
         if (isDetail)
         {
             var detailRows = new List<(int Stt, NhapHangListItemVM Item, NhapHangLineVM? Line)>();
@@ -1081,4 +1122,59 @@ public class NhapHangController : BaseKhoController
     }
 
     #endregion
+
+    [HttpGet]
+    public async Task<IActionResult> Print(int id)
+    {
+        var phieu = await _context.PhieuNhaps
+            .Include(p => p.MaKhoNavigation)
+            .Include(p => p.MaNvlapNavigation)
+            .Include(p => p.MaNvxacNhanNavigation)
+            .Include(p => p.MaDonViCapHangNavigation)
+            .Include(p => p.ChiTietPhieuNhaps)
+                .ThenInclude(ct => ct.MaHangNavigation)
+                    .ThenInclude(h => h.MaDvtNavigation)
+            .FirstOrDefaultAsync(p => p.MaPhieuNhap == id);
+
+        if (phieu == null)
+        {
+            return NotFound("Không tìm thấy phiếu nhập cần in.");
+        }
+
+        ViewBag.TenKho = phieu.MaKhoNavigation?.TenKho;
+
+        var vm = new NhapHangFormVM
+        {
+            MaPhieuNhap = phieu.MaPhieuNhap,
+            MaPhieu = phieu.MaPhieu,
+            MaKho = phieu.MaKho,
+            TenKho = phieu.MaKhoNavigation?.TenKho ?? "",
+            NgayLap = phieu.NgayLap,
+            MaNvlap = phieu.MaNvlap,
+            TenNguoiLap = phieu.MaNvlapNavigation?.HoTen ?? "",
+            MaDonViCapHang = phieu.MaDonViCapHang,
+            TenDonViCapHang = phieu.MaDonViCapHangNavigation?.TenDonVi,
+            MaNcc = phieu.MaDonViCapHangNavigation?.MaNcc,
+            SoHoaDon = phieu.SoHoaDon,
+            MaDatHangNhap = phieu.MaDatHangNhap,
+            GhiChu = phieu.GhiChu,
+            GiamGia = phieu.GiamGia,
+            TongTien = phieu.TongTien,
+            CanTraNcc = phieu.CanTraNcc,
+            TrangThai = phieu.TrangThai,
+            IsReadOnly = true,
+            Lines = phieu.ChiTietPhieuNhaps.Select(ct => new NhapHangLineVM
+            {
+                MaHang = ct.MaHang,
+                MaHangNoiBo = ct.MaHangNavigation?.MaHangNoiBo ?? "",
+                TenHang = ct.MaHangNavigation?.TenHang ?? "",
+                TenDvt = ct.MaHangNavigation?.MaDvtNavigation?.TenDvt ?? "",
+                SoLuong = ct.SoLuong,
+                DonGiaNhap = ct.DonGiaNhap,
+                GiamGia = ct.GiamGia
+            }).ToList()
+        };
+
+        return View("Print", vm);
+    }
 }

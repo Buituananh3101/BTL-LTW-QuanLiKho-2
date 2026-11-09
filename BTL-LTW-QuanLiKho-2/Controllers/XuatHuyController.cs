@@ -110,7 +110,7 @@ public class XuatHuyController : BaseKhoController
             .Include(p => p.MaNvxacNhanNavigation)
             .Include(p => p.ChiTietPhieuXuats)
                 .ThenInclude(ct => ct.MaHangNavigation!)
-                    .ThenInclude(h => h.MaDvtNavigation)
+                    .ThenInclude(h => h!.MaDvtNavigation)
             .Where(p => p.LoaiPhieuXuat == "XUAT_HUY")
             .AsQueryable();
 
@@ -736,16 +736,40 @@ public class XuatHuyController : BaseKhoController
         }
 
         var products = await query.Take(25).ToListAsync();
+        var productIds = products.Select(h => h.MaHang).ToList();
 
-        var result = products.Select(h => new
+        var setWithImage = new HashSet<int>();
+        if (productIds.Any())
         {
-            maHang = h.MaHang,
-            maHangNoiBo = h.MaHangNoiBo,
-            tenHang = h.TenHang,
-            tenDvt = h.MaDvtNavigation?.TenDvt ?? "",
-            tenNhom = h.MaNhomNavigation?.TenNhom ?? "",
-            giaVon = h.GiaVon > 0 ? h.GiaVon : h.GiaBanThamKhao,
-            tonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0
+            var imgIds = await _context.HinhAnhHangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang))
+                .Select(x => x.MaHang)
+                .Distinct()
+                .ToListAsync();
+
+            var legacyImgIds = await _context.HangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang) && x.HinhAnh != null)
+                .Select(x => x.MaHang)
+                .ToListAsync();
+
+            setWithImage = new HashSet<int>(imgIds.Concat(legacyImgIds));
+        }
+
+        var result = products.Select(h =>
+        {
+            bool hasImg = setWithImage.Contains(h.MaHang);
+            return new
+            {
+                maHang = h.MaHang,
+                maHangNoiBo = h.MaHangNoiBo,
+                tenHang = h.TenHang,
+                tenDvt = h.MaDvtNavigation?.TenDvt ?? "",
+                tenNhom = h.MaNhomNavigation?.TenNhom ?? "",
+                giaVon = h.GiaVon > 0 ? h.GiaVon : h.GiaBanThamKhao,
+                tonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0,
+                hasImage = hasImg,
+                hinhAnh = hasImg ? $"/HangHoa/GetImage/{h.MaHang}" : null
+            };
         }).ToList();
 
         return Json(result);
@@ -764,7 +788,7 @@ public class XuatHuyController : BaseKhoController
             ws.Cell(1, i + 1).Value = headers[i];
         }
 
-        ExcelHelper.ApplyKiotVietHeaderStyle(ws.Range(1, 1, 1, headers.Length));
+        ExcelHelper.ApplyHeaderStyle(ws.Range(1, 1, 1, headers.Length));
         ws.Row(1).Height = 26;
 
         // Dữ liệu mẫu gợi ý cho người dùng
@@ -892,7 +916,7 @@ public class XuatHuyController : BaseKhoController
 
         bool isDetail = string.Equals(type, "detail", StringComparison.OrdinalIgnoreCase);
 
-        // Mặc định xuất file Excel (.xlsx) chuẩn KiotViet bằng ClosedXML qua Lego ExcelHelper
+        // Mặc định xuất file Excel (.xlsx) chuẩn KhoPro bằng ClosedXML qua Lego ExcelHelper
         if (isDetail)
         {
             var detailRows = new List<(int Stt, XuatHuyListItemVM Item, XuatHuyLineVM? Line)>();
@@ -949,5 +973,52 @@ public class XuatHuyController : BaseKhoController
 
             return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"DanhSachXuatHuy_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
+    }
+    [HttpGet]
+    public async Task<IActionResult> Print(int id)
+    {
+        var phieu = await _context.PhieuXuats
+            .Include(p => p.MaKhoNavigation)
+            .Include(p => p.MaNvlapNavigation)
+            .Include(p => p.MaNvxacNhanNavigation)
+            .Include(p => p.ChiTietPhieuXuats)
+                .ThenInclude(ct => ct.MaHangNavigation)
+                    .ThenInclude(h => h.MaDvtNavigation)
+            .FirstOrDefaultAsync(p => p.MaPhieuXuat == id);
+
+        if (phieu == null)
+        {
+            return NotFound("Không tìm thấy phiếu xuất hủy.");
+        }
+
+        ViewBag.TenKho = phieu.MaKhoNavigation?.TenKho;
+
+        var vm = new XuatHuyFormVM
+        {
+            MaPhieuXuat = phieu.MaPhieuXuat,
+            MaPhieu = phieu.MaPhieu,
+            MaKho = phieu.MaKho,
+            TenKho = phieu.MaKhoNavigation?.TenKho ?? "",
+            NgayLap = phieu.NgayLap,
+            NgayXacNhan = phieu.NgayXacNhan,
+            MaNvlap = phieu.MaNvlap,
+            TenNguoiLap = phieu.MaNvlapNavigation?.HoTen ?? "",
+            MaNvxacNhan = phieu.MaNvxacNhan,
+            TenNguoiXacNhan = phieu.MaNvxacNhanNavigation?.HoTen,
+            TrangThai = phieu.TrangThai,
+            GhiChu = phieu.GhiChu,
+            IsReadOnly = true,
+            Lines = phieu.ChiTietPhieuXuats.Select(ct => new XuatHuyLineVM
+            {
+                MaHang = ct.MaHang,
+                MaHangNoiBo = ct.MaHangNavigation?.MaHangNoiBo ?? "",
+                TenHang = ct.MaHangNavigation?.TenHang ?? "",
+                TenDvt = ct.MaHangNavigation?.MaDvtNavigation?.TenDvt ?? "",
+                SoLuongXuat = ct.SoLuongXuat,
+                DonGiaXuat = ct.DonGiaXuat
+            }).ToList()
+        };
+
+        return View("Print", vm);
     }
 }

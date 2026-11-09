@@ -18,7 +18,7 @@
 </svg>
 
 <div class="hh-ov" id="khoModalOv">
-  <div class="hh-modal main" role="dialog" aria-modal="true" aria-labelledby="khoModalTitle" style="max-width: 860px;">
+  <div class="hh-modal main" role="dialog" aria-modal="true" aria-labelledby="khoModalTitle" style="max-width: 900px; min-height: 680px;">
     <!-- Header Modal có Tabs chuyển đổi chuẩn Hàng Hóa -->
     <div class="hh-m-head">
       <h2 id="khoModalTitle">Thêm mới chi nhánh kho</h2>
@@ -32,7 +32,7 @@
     </div>
 
     <!-- Body Modal -->
-    <div class="hh-m-body" id="khoModalBody">
+    <div class="hh-m-body" id="khoModalBody" style="min-height: 540px;">
       <form id="khoForm" onsubmit="return false;" autocomplete="off">
         <input type="hidden" id="khoMaKho" value="0" />
 
@@ -66,60 +66,79 @@
               <label for="khoDiaChi">Địa chỉ kho</label>
               <input type="text" id="khoDiaChi" placeholder="Số nhà, đường phố, phường/xã, thành phố / huyện..." autocomplete="off" />
             </div>
-          </div>
 
-          <!-- KHỐI 2: ACCORDION PHÂN QUYỀN NHÂN SỰ PHỤ TRÁCH KHO -->
-          <section class="hh-sec open">
-            <div class="hh-sec-h">
-              <div>
-                <h3>Phân quyền nhân sự phụ trách kho</h3>
-                <p>Chỉ định các nhân viên có quyền truy cập, chuyển kho và kiểm kê tại chi nhánh này</p>
+            <!-- KHỐI 2: DROPDOWN CHỌN NHÂN SỰ PHỤ TRÁCH KHO -->
+            <div class="hh-f hh-span2" id="fldNhanSu">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label for="khoUserDropdownTrigger" class="mb-0" style="font-weight: 600;">
+                  <span>Nhân sự phụ trách kho</span>
+                  <span class="text-muted fw-normal small ms-1">(Nhân viên có quyền truy cập và thao tác tại chi nhánh này)</span>
+                </label>
+                <span class="badge bg-primary-subtle text-primary border" id="selectedUserBadge" style="font-size: 11px;">0 nhân sự</span>
               </div>
-              <svg class="hh-chev"><use href="#i-chev"/></svg>
-            </div>
-            <div class="hh-sec-b">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="small fw-semibold text-dark">
-                  Nhân sự được phân công: <span class="badge bg-primary-subtle text-primary border ms-1" id="selectedUserCount">0 nhân sự</span>
-                </span>
-                <div class="d-flex align-items-center gap-2">
-                  <button type="button" class="hh-link" id="btnSelectAllUsers" style="font-weight: 600;">Chọn tất cả</button>
-                  <span class="text-muted">|</span>
-                  <button type="button" class="hh-link text-muted" id="btnDeselectAllUsers">Bỏ chọn</button>
+
+              <!-- DROPDOWN MULTI-SELECT NHÂN SỰ CHUẨN KHOPRO -->
+              <div class="kho-user-select-wrap position-relative" id="khoUserSelectWrap">
+                <!-- Trigger box -->
+                <div class="kho-user-dropdown-box" id="khoUserDropdownTrigger" tabindex="0" role="button" aria-expanded="false" aria-haspopup="true">
+                  <div id="khoUserSelectedDisplay" class="kho-user-selected-display">
+                    <span class="text-muted">Chọn nhân sự phụ trách kho...</span>
+                  </div>
+                  <i class="bi bi-chevron-down kho-user-arrow" id="khoUserDropdownArrow"></i>
                 </div>
-              </div>
 
-              <!-- Lưới thẻ nhân sự trực quan chuẩn chuyên nghiệp -->
-              <div class="kho-user-card-grid" id="listUserCheckboxes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin-top: 6px;">
-                @foreach (var u in Model.DanhSachTaiKhoan)
-                {
-                  <div class="kho-user-card-item @(u.TenVaiTro == "Quản lý" ? "selected" : "")" data-id="@u.MaTaiKhoan" style="border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; background: #fff; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: flex-start; gap: 10px; user-select: none;">
-                    <input class="form-check-input kho-user-chk" type="checkbox" value="@u.MaTaiKhoan" id="chkUser_@u.MaTaiKhoan" @(u.TenVaiTro == "Quản lý" ? "checked disabled" : "") style="width: 17px; height: 17px; margin-top: 2px; cursor: pointer;" />
-                    <div style="flex: 1; min-width: 0;">
-                      <div style="font-size: 13.5px; font-weight: 600; color: #1e293b; display: flex; justify-content: space-between; align-items: center;">
-                        <label for="chkUser_@u.MaTaiKhoan" style="cursor: pointer; margin: 0;" class="text-truncate" title="@u.HoTen">@u.HoTen</label>
-                        @if (u.TenVaiTro == "Quản lý")
-                        {
-                          <span class="badge bg-primary text-white" style="font-size: 10px;">Quản lý</span>
-                        }
-                        else if (u.TenVaiTro.Contains("kho", StringComparison.OrdinalIgnoreCase))
-                        {
-                          <span class="badge bg-warning text-dark" style="font-size: 10px;">@u.TenVaiTro</span>
-                        }
-                        else
-                        {
-                          <span class="badge bg-success text-white" style="font-size: 10px;">@u.TenVaiTro</span>
-                        }
-                      </div>
-                      <div style="font-size: 12px; color: #64748b; line-height: 1.35; margin-top: 2px;">
-                        <i class="bi bi-person me-1 text-muted"></i>@u.TenDangNhap
-                      </div>
+                <!-- Dropdown menu popup -->
+                <div class="kho-user-dropdown-menu shadow" id="khoUserDropdownMenu">
+                  <!-- Header search + quick actions -->
+                  <div class="kho-user-dropdown-header">
+                    <div class="kho-user-search-wrap">
+                      <i class="bi bi-search kho-user-search-icon"></i>
+                      <input type="text" id="searchUserInDropdown" class="kho-user-search-input" placeholder="Tìm theo tên, tên đăng nhập..." autocomplete="off" />
+                    </div>
+                    <div class="kho-user-actions-quick">
+                      <button type="button" class="btn-quick-action text-primary" id="btnDropdownSelectAll">Chọn tất cả</button>
+                      <span class="action-sep">|</span>
+                      <button type="button" class="btn-quick-action text-muted" id="btnDropdownDeselectAll">Bỏ chọn</button>
                     </div>
                   </div>
-                }
+
+                  <!-- Danh sách nhân viên có thanh cuộn -->
+                  <div class="kho-user-dropdown-list" id="listUserDropdownItems">
+                    @foreach (var u in Model.DanhSachTaiKhoan)
+                    {
+                      <div class="kho-user-dropdown-item @(u.TenVaiTro == "Quản lý" ? "selected" : "")" data-id="@u.MaTaiKhoan" data-name="@u.HoTen" data-role="@u.TenVaiTro" data-username="@u.TenDangNhap">
+                        <div class="d-flex align-items-center gap-2 overflow-hidden flex-grow-1">
+                          <input class="form-check-input kho-user-chk m-0 flex-shrink-0" type="checkbox" value="@u.MaTaiKhoan" id="chkUser_@u.MaTaiKhoan" @(u.TenVaiTro == "Quản lý" ? "checked disabled" : "") />
+                          <div class="overflow-hidden">
+                            <label for="chkUser_@u.MaTaiKhoan" class="fw-semibold text-dark mb-0 d-block text-truncate" title="@u.HoTen">
+                              @u.HoTen
+                            </label>
+                            <div class="text-muted user-sub-text">
+                              <i class="bi bi-person me-1"></i>@u.TenDangNhap
+                            </div>
+                          </div>
+                        </div>
+                        <div class="ms-2 flex-shrink-0">
+                          @if (u.TenVaiTro == "Quản lý")
+                          {
+                            <span class="badge bg-primary text-white" style="font-size: 10px;">Quản lý</span>
+                          }
+                          else if (u.TenVaiTro.Contains("kho", StringComparison.OrdinalIgnoreCase))
+                          {
+                            <span class="badge bg-warning text-dark" style="font-size: 10px;">@u.TenVaiTro</span>
+                          }
+                          else
+                          {
+                            <span class="badge bg-success text-white" style="font-size: 10px;">@u.TenVaiTro</span>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
               </div>
             </div>
-          </section>
+          </div>
         </div>
 
         <!-- ==================== TAB 2: MÔ TẢ ==================== -->
@@ -130,7 +149,7 @@
             <button type="button" data-cmd="underline" title="Gạch chân"><u>U</u></button>
             <button type="button" data-cmd="insertUnorderedList" title="Danh sách dấu chấm">•</button>
           </div>
-          <div class="hh-rte" id="khoMoTaRte" contenteditable="true" data-ph="Nhập mô tả chi tiết chi nhánh kho, đặc điểm hàng hóa chứa, hướng dẫn đường đi hoặc quy định giao nhận..."></div>
+          <div class="hh-rte" id="khoMoTaRte" contenteditable="true" style="min-height: 380px;" data-ph="Nhập mô tả chi tiết chi nhánh kho, đặc điểm hàng hóa chứa, hướng dẫn đường đi hoặc quy định giao nhận..."></div>
         </div>
       </form>
     </div>

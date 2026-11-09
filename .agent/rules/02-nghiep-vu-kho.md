@@ -39,14 +39,14 @@ Các chứng từ trong hệ thống dùng mã chuỗi tiếng Việt không d�
 | | `'DA_XAC_NHAN'` | Đã xuất kho (ảnh hưởng tồn) | `bg-success` |
 | | `'HUY'` | Đã hủy | `bg-secondary` |
 | **`PhieuChuyenKho`** | `'NHAP'` | Phiếu tạm | `bg-primary` |
-| | `'DA_XUAT'` | Đang chuyển (đã trừ kho nguồn) | `bg-warning text-dark` |
+| | `'DA_XUAT'` | Đang chuyển (đã trừ kho nguồn) | `bg-primary` (Xanh dương) |
 | | `'DA_NHAN'` | Đã nhận (đã cộng kho đích) | `bg-success` |
 | | `'HUY'` | Đã hủy | `bg-secondary` |
 | **`PhieuKiemKe`** | `'NHAP'` | Phiếu tạm | `bg-primary` |
-| | `'DA_KIEM'` | Đã kiểm xong, chờ duyệt | `bg-info text-white` |
+| | `'DA_KIEM'` | Đã kiểm xong, chờ duyệt | `bg-primary` (Xanh dương) |
 | | `'DA_DIEU_CHINH'` | Đã cân bằng kho (khóa phiếu) | `bg-success` |
 | | `'HUY'` | Đã hủy | `bg-secondary` |
-| **`PhieuDieuChinh`** | `'CHO_DUYET'` | Chờ duyệt | `bg-warning text-dark` |
+| **`PhieuDieuChinh`** | `'CHO_DUYET'` | Chờ duyệt | `bg-primary` (Xanh dương) |
 | | `'DA_DUYET'` | Đã duyệt (ảnh hưởng tồn) | `bg-success` |
 | | `'HUY'` | Đã hủy | `bg-secondary` |
 

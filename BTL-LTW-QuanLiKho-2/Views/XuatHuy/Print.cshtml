@@ -1,0 +1,114 @@
+@model BTL_LTW_QuanLiKho_2.ViewModels.XuatHuyFormVM
+@{
+    Layout = "_PrintLayout";
+    ViewData["Title"] = $"Phiếu xuất hủy {Model.MaPhieuHienThi}";
+    var vi = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+    int stt = 1;
+    decimal tongSl = Model.Lines.Sum(l => l.SoLuongXuat);
+    decimal tongTien = Model.Lines.Sum(l => l.ThanhTien);
+}
+
+<div class="voucher-title-wrap">
+    <div class="voucher-title">Phiếu Xuất Hủy Hàng Hóa</div>
+    <div class="voucher-code">Mã phiếu: @Model.MaPhieuHienThi</div>
+    <div class="voucher-date">Ngày lập: @Model.NgayLap.ToString("dd/MM/yyyy HH:mm")</div>
+</div>
+
+<div class="voucher-meta-grid">
+    <div class="voucher-meta-item">
+        <span class="lbl">Chi nhánh kho xuất hủy:</span>
+        <span class="val">@Model.TenKho</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Người lập phiếu:</span>
+        <span class="val">@Model.TenNguoiLap</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Người xác nhận duyệt:</span>
+        <span class="val">@(Model.TenNguoiXacNhan ?? "Chưa duyệt")</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Thời điểm xác nhận:</span>
+        <span class="val">@(Model.NgayXacNhan?.ToString("dd/MM/yyyy HH:mm") ?? "---")</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Trạng thái:</span>
+        <span class="val">@(Model.TrangThai == "DA_XAC_NHAN" || Model.TrangThai == "HOAN_THANH" ? "Đã xuất hủy" : (Model.TrangThai == "HUY" ? "Đã hủy bỏ" : "Phiếu tạm"))</span>
+    </div>
+    <div class="voucher-meta-item">
+        <span class="lbl">Ghi chú lý do hủy:</span>
+        <span class="val">@(string.IsNullOrEmpty(Model.GhiChu) ? "Không có" : Model.GhiChu)</span>
+    </div>
+</div>
+
+<table class="voucher-table">
+    <thead>
+        <tr>
+            <th style="width: 40px;" class="text-center">STT</th>
+            <th style="width: 120px;">Mã hàng</th>
+            <th>Tên hàng hóa</th>
+            <th style="width: 70px;" class="text-center">ĐVT</th>
+            <th style="width: 100px;" class="text-end">Số lượng hủy</th>
+            <th style="width: 110px;" class="text-end">Đơn giá vốn</th>
+            <th style="width: 130px;" class="text-end">Giá trị hủy</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var line in Model.Lines)
+        {
+            <tr>
+                <td class="text-center">@(stt++)</td>
+                <td class="barcode">@line.MaHangNoiBo</td>
+                <td><strong>@line.TenHang</strong></td>
+                <td class="text-center">@line.TenDvt</td>
+                <td class="text-end"><strong>@line.SoLuongXuat.ToString("N0", vi)</strong></td>
+                <td class="text-end">@line.DonGiaXuat.ToString("N0", vi) đ</td>
+                <td class="text-end"><strong>@line.ThanhTien.ToString("N0", vi) đ</strong></td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr class="fw-bold">
+            <td colspan="4" class="text-end">TỔNG CỘNG:</td>
+            <td class="text-end">@tongSl.ToString("N0", vi)</td>
+            <td></td>
+            <td class="text-end">@tongTien.ToString("N0", vi) đ</td>
+        </tr>
+    </tfoot>
+</table>
+
+<div class="voucher-summary">
+    <div class="voucher-summary-box">
+        <div class="voucher-summary-row">
+            <span>Tổng số lượng xuất hủy:</span>
+            <span>@tongSl.ToString("N0", vi)</span>
+        </div>
+        <div class="voucher-summary-row total-row">
+            <span>Tổng giá trị hàng hủy:</span>
+            <span>@tongTien.ToString("N0", vi) đ</span>
+        </div>
+    </div>
+</div>
+
+<div class="voucher-signatures">
+    <div class="sig-col">
+        <div class="sig-title">Người lập phiếu</div>
+        <div class="sig-sub">(Ký, họ tên)</div>
+        <div class="sig-name">@Model.TenNguoiLap</div>
+    </div>
+    <div class="sig-col">
+        <div class="sig-title">Thủ kho</div>
+        <div class="sig-sub">(Ký, họ tên)</div>
+        <div class="sig-name"></div>
+    </div>
+    <div class="sig-col">
+        <div class="sig-title">Người kiểm định chất lượng</div>
+        <div class="sig-sub">(Ký, họ tên)</div>
+        <div class="sig-name"></div>
+    </div>
+    <div class="sig-col">
+        <div class="sig-title">Quản lý / Người duyệt</div>
+        <div class="sig-sub">(Ký, họ tên)</div>
+        <div class="sig-name">@(Model.TenNguoiXacNhan ?? "")</div>
+    </div>
+</div>

@@ -16,9 +16,9 @@ $(function () {
     const importUrl = $app.data('import-url') || '/NhapHang/ImportExcel';
     const templateUrl = $app.data('template-url') || '/NhapHang/DownloadTemplate';
 
-    // 1. Khởi tạo Autocomplete tìm kiếm hàng hóa F3 dùng Lego KiotFilter.initProductSearch
-    if (!isReadOnly && window.KiotFilter && typeof KiotFilter.initProductSearch === 'function') {
-        KiotFilter.initProductSearch({
+    // 1. Khởi tạo Autocomplete tìm kiếm hàng hóa F3 dùng Lego AppFilter.initProductSearch
+    if (!isReadOnly && window.AppFilter && typeof AppFilter.initProductSearch === 'function') {
+        AppFilter.initProductSearch({
             inputSelector: '#productSearchInput',
             dropdownSelector: '#autocompleteDropdown',
             apiUrl: $app.data('search-products-url') || '/NhapHang/SearchProducts',
@@ -29,7 +29,7 @@ $(function () {
         });
     }
 
-    // ===== CHỌN NGÀY GIỜ LẬP PHIẾU (LEGO KIOTDATETIMEPICKER) =====
+    // ===== CHỌN NGÀY GIỜ LẬP PHIẾU (LEGO KHOPRODATETIMEPICKER) =====
     function formatLocalIso(d) {
         if (!d || isNaN(d.getTime())) return null;
         const p2 = n => String(n).padStart(2, '0');
@@ -37,8 +37,8 @@ $(function () {
     }
 
     let createdDate = new Date();
-    const dtPicker = (window.KiotFilter && typeof KiotFilter.initDateTimePicker === 'function')
-        ? KiotFilter.initDateTimePicker({
+    const dtPicker = (window.AppFilter && typeof AppFilter.initDateTimePicker === 'function')
+        ? AppFilter.initDateTimePicker({
             inputSelector: '#fDate',
             popupSelector: '#dtPop',
             isReadOnly: isReadOnly,
@@ -123,10 +123,10 @@ $(function () {
                     <input type="number" class="qty line-qty" value="${qty}" min="1" step="any" style="width: 80px;" />
                 </td>
                 <td class="text-end">
-                    <input type="text" class="qty line-price kiot-num" value="${price.toLocaleString('vi-VN')}" style="width: 100px;" />
+                    <input type="text" class="qty line-price kp-num" value="${price.toLocaleString('vi-VN')}" style="width: 100px;" />
                 </td>
                 <td class="text-end col-giamgia">
-                    <input type="text" class="qty line-discount kiot-num" value="${discount.toLocaleString('vi-VN')}" style="width: 90px;" />
+                    <input type="text" class="qty line-discount kp-num" value="${discount.toLocaleString('vi-VN')}" style="width: 90px;" />
                 </td>
                 <td class="text-end fw-bold text-dark line-total">
                     ${((qty * price) - discount).toLocaleString('vi-VN')}
@@ -174,6 +174,21 @@ $(function () {
         recalcAll();
     });
 
+    // Format số khi rời khỏi ô nhập (blur) và chọn toàn bộ khi focus
+    $(document).on('blur', '.line-price, .line-discount', function () {
+        const val = parseFormattedNumber($(this).val());
+        $(this).val(val.toLocaleString('vi-VN'));
+    });
+
+    $(document).on('focus', '.line-price, .line-discount, .line-qty, #orderDiscountInput', function () {
+        $(this).select();
+    });
+
+    $('#orderDiscountInput').on('blur', function () {
+        const val = parseFormattedNumber($(this).val());
+        $(this).val(val.toLocaleString('vi-VN'));
+    });
+
     // 4. Tính toán toàn bộ phiếu nhập
     function recalcAll() {
         let totalItems = 0;
@@ -203,9 +218,42 @@ $(function () {
     }
 
     function parseFormattedNumber(val) {
-        if (!val) return 0;
-        const clean = val.toString().replace(/[^\d.-]/g, '');
-        return parseFloat(clean) || 0;
+        if (val === null || val === undefined || val === '') return 0;
+        if (typeof val === 'number') return isNaN(val) ? 0 : val;
+        let s = val.toString().trim();
+        if (!s) return 0;
+
+        // Bỏ ký tự tiền tệ và khoảng trắng
+        s = s.replace(/[\s\u00A0đ₫VNĐvnd$]/g, '');
+
+        if (s.includes('.') && s.includes(',')) {
+            const lastDot = s.lastIndexOf('.');
+            const lastComma = s.lastIndexOf(',');
+            if (lastDot > lastComma) {
+                // Định dạng US: 1,234.56 -> bỏ phẩy
+                s = s.replace(/,/g, '');
+            } else {
+                // Định dạng VN: 1.234,56 -> bỏ chấm, đổi phẩy thành chấm
+                s = s.replace(/\./g, '').replace(',', '.');
+            }
+        } else if (s.includes('.')) {
+            // Có dấu chấm. Trong tiếng Việt phân tách hàng nghìn bằng dấu chấm (VD: 11.111.110 hoặc 50.000)
+            const parts = s.split('.');
+            if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
+                s = s.replace(/\./g, '');
+            }
+        } else if (s.includes(',')) {
+            const parts = s.split(',');
+            if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
+                s = s.replace(/,/g, '');
+            } else {
+                s = s.replace(',', '.');
+            }
+        }
+
+        const clean = s.replace(/[^\d.-]/g, '');
+        const num = parseFloat(clean);
+        return isNaN(num) ? 0 : num;
     }
 
     // 5. Thu gọn / Mở rộng Panel bên phải (F4)
@@ -426,11 +474,6 @@ $(function () {
         }
     });
 
-    // Accordion Sections (.hh-sec)
-    $(document).on('click', '.hh-sec-h', function () {
-        $(this).closest('.hh-sec').toggleClass('open');
-    });
-
     // Custom Combobox Nhóm NCC trong Modal
     const nccGroupCombobox = (function () {
         const $wrap = $('#wrapMaNhomNcc');
@@ -599,7 +642,7 @@ $(function () {
             success: function (res) {
                 if (res.success) {
                     hideNccModal('nccPromptOv');
-                    if (window.KiotToast) window.KiotToast.success(`Tạo nhóm "${res.tenNhom}" thành công.`);
+                    if (window.AppToast) window.AppToast.success(`Tạo nhóm "${res.tenNhom}" thành công.`);
                     if (!$(`#nccMaNhomNcc option[value="${res.maNhomNcc}"]`).length) {
                         $('#nccMaNhomNcc').append(`<option value="${res.maNhomNcc}">${escapeHtml(res.tenNhom)}</option>`);
                     }
@@ -650,7 +693,7 @@ $(function () {
             success: function (res) {
                 if (res.success) {
                     hideNccModal('nccEditGroupOv');
-                    if (window.KiotToast) window.KiotToast.success(`Đã đổi tên nhóm thành "${res.tenNhom}".`);
+                    if (window.AppToast) window.AppToast.success(`Đã đổi tên nhóm thành "${res.tenNhom}".`);
                     $(`#nccMaNhomNcc option[value="${id}"]`).text(res.tenNhom);
                     nccGroupCombobox.sync();
                     if (String($('#nccMaNhomNcc').val()) === String(id)) {
@@ -676,7 +719,7 @@ $(function () {
             success: function (res) {
                 if (res.success) {
                     hideNccModal('nccEditGroupOv');
-                    if (window.KiotToast) window.KiotToast.success(res.message);
+                    if (window.AppToast) window.AppToast.success(res.message);
                     $(`#nccMaNhomNcc option[value="${id}"]`).remove();
                     nccGroupCombobox.sync();
                     if (String($('#nccMaNhomNcc').val()) === String(id)) {
@@ -765,7 +808,7 @@ $(function () {
             success: function (res) {
                 $btn.prop('disabled', false).html(oldHtml);
                 if (res.success) {
-                    if (window.KiotToast) KiotToast.success(res.message || 'Thêm nhà cung cấp thành công!');
+                    if (window.AppToast) AppToast.success(res.message || 'Thêm nhà cung cấp thành công!');
 
                     // Tự động gán NCC vừa tạo vào ô chọn NCC trên form Nhập hàng
                     const newId = res.id || res.supplier?.maDonViCapHang;
@@ -779,13 +822,13 @@ $(function () {
                         hideNccModal('nccModalOv');
                     }
                 } else {
-                    if (window.KiotToast) KiotToast.error(res.message || 'Lỗi khi lưu nhà cung cấp.');
+                    if (window.AppToast) AppToast.error(res.message || 'Lỗi khi lưu nhà cung cấp.');
                 }
             },
             error: function (xhr) {
                 $btn.prop('disabled', false).html(oldHtml);
                 const msg = xhr.responseJSON?.message || 'Không thể tạo nhà cung cấp.';
-                if (window.KiotToast) KiotToast.error(msg);
+                if (window.AppToast) AppToast.error(msg);
             }
         });
     }
@@ -857,7 +900,7 @@ $(function () {
         formData.append('file', file);
         formData.append('warehouseId', warehouseId);
 
-        if (window.KiotToast) KiotToast.info('Đang đối soát dữ liệu file Excel với hệ thống...');
+        if (window.AppToast) AppToast.info('Đang đối soát dữ liệu file Excel với hệ thống...');
 
         $.ajax({
             url: importUrl,
@@ -872,18 +915,18 @@ $(function () {
                         addProductLine(item, item.soLuong, item.donGia, item.giamGia);
                         importedCount++;
                     });
-                    if (window.KiotToast) {
-                        KiotToast.success(`Đã nạp thành công ${importedCount} mặt hàng từ file Excel!`);
+                    if (window.AppToast) {
+                        AppToast.success(`Đã nạp thành công ${importedCount} mặt hàng từ file Excel!`);
                     }
                 } else {
-                    if (window.KiotToast) {
-                        KiotToast.warning(res.message || 'Không tìm thấy mặt hàng nào phù hợp trong file.');
+                    if (window.AppToast) {
+                        AppToast.warning(res.message || 'Không tìm thấy mặt hàng nào phù hợp trong file.');
                     }
                 }
             },
             error: function (xhr) {
                 const msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Lỗi khi nhập file Excel.';
-                if (window.KiotToast) KiotToast.error(msg);
+                if (window.AppToast) AppToast.error(msg);
             },
             complete: function () {
                 $('#excelFileInput').val('');
@@ -919,12 +962,21 @@ $(function () {
         });
 
         if (lines.length === 0) {
-            if (window.KiotToast) KiotToast.error('Vui lòng thêm ít nhất 1 mặt hàng vào phiếu nhập.');
+            if (window.AppToast) AppToast.error('Vui lòng thêm ít nhất 1 mặt hàng vào phiếu nhập.');
             $('#productSearchInput').focus();
             return;
         }
 
         const supplierId = parseInt($('#selectedSupplierId').val() || '0', 10);
+        if (!supplierId || supplierId <= 0) {
+            if (window.AppToast) {
+                AppToast.error('Vui lòng chọn nhà cung cấp cho phiếu nhập.');
+            } else {
+                alert('Vui lòng chọn nhà cung cấp cho phiếu nhập.');
+            }
+            $('#supplierSearchInput').focus();
+            return;
+        }
 
         const payload = {
             MaPhieuNhap: docId,
@@ -950,19 +1002,19 @@ $(function () {
             data: JSON.stringify(payload),
             success: function (res) {
                 if (res.success) {
-                    if (window.KiotToast) KiotToast.success(res.message || 'Lưu phiếu nhập thành công!');
+                    if (window.AppToast) AppToast.success(res.message || 'Lưu phiếu nhập thành công!');
                     setTimeout(function () {
                         window.location.href = indexUrl;
                     }, 500);
                 } else {
                     $btn.prop('disabled', false).html(oldHtml);
-                    if (window.KiotToast) KiotToast.error(res.message || 'Lỗi khi lưu phiếu nhập.');
+                    if (window.AppToast) AppToast.error(res.message || 'Lỗi khi lưu phiếu nhập.');
                 }
             },
             error: function (xhr) {
                 $btn.prop('disabled', false).html(oldHtml);
                 const msg = xhr.responseJSON?.message || 'Đã xảy ra lỗi máy chủ khi lưu phiếu.';
-                if (window.KiotToast) KiotToast.error(msg);
+                if (window.AppToast) AppToast.error(msg);
             }
         });
     }

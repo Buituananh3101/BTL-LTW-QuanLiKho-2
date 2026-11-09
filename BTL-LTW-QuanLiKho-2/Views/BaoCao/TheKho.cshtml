@@ -17,48 +17,48 @@
      data-page-size="@Model.Filter.PageSize"
      style="display:none;"></div>
 
-<div class="kiot-container position-relative" id="kiotContainer">
+<div class="kp-container position-relative" id="kpContainer">
     <!-- 1. CỘT BÊN TRÁI: TIÊU ĐỀ + BỘ LỌC chuyên nghiệp (PARTIAL VIEW) -->
     <partial name="_TheKhoFilterSidebar" model="Model" />
 
     <!-- Backdrop che mờ khi mở bộ lọc trên mobile/zoom in -->
-    <div class="kiot-sidebar-backdrop" id="sidebarBackdrop"></div>
+    <div class="kp-sidebar-backdrop" id="sidebarBackdrop"></div>
 
     <!-- Nút tròn thu gọn / mở rộng ở ranh giới giữa sidebar và bảng (Phím tắt F4) -->
-    <button type="button" class="kiot-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
+    <button type="button" class="kp-sidebar-toggle-btn d-none d-lg-flex" id="btnToggleSidebar" title="Thu gọn bộ lọc (F4)">
         <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
     </button>
 
     <!-- 2. CỘT BÊN PHẢI: TOOLBAR + SUMMARY CARDS + BẢNG THẺ KHO -->
-    <main class="kiot-main-col">
+    <main class="kp-main-col">
         <!-- Toolbar trên cùng: Thanh tìm kiếm F3 + Xuất file + In thẻ kho -->
-        <div class="kiot-toolbar-row mb-3">
-            <div class="kiot-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
-                <span class="kiot-mobile-title fw-bold fs-6 text-dark">Thẻ kho</span>
-                <button type="button" class="btn btn-sm btn-outline-primary kiot-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc">
+        <div class="kp-toolbar-row mb-3">
+            <div class="kp-mobile-title-wrap d-lg-none d-flex align-items-center gap-2">
+                <span class="kp-mobile-title fw-bold fs-6 text-dark">Thẻ kho</span>
+                <button type="button" class="btn btn-sm btn-outline-primary kp-btn-funnel" id="btnMobileFilter" title="Mở bộ lọc">
                     <i class="bi bi-funnel"></i>
                 </button>
             </div>
 
             <!-- Ô tìm kiếm giao dịch trên bảng thẻ kho -->
-            <div class="kiot-search-box flex-grow-1" style="max-width: 420px;">
+            <div class="kp-search-box">
                 <i class="bi bi-search"></i>
                 <input type="text" id="keywordSearch" class="form-control"
-                       placeholder="Tìm theo mã chứng từ, đối tác, ghi chú..."
+                       placeholder="Theo mã chứng từ, đối tác, ghi chú"
                        value="@Model.Filter.TuKhoa" autocomplete="off" />
             </div>
 
-            <div class="kiot-actions-group ms-auto d-flex align-items-center gap-2">
+            <div class="kp-actions-group ms-auto d-flex align-items-center gap-2">
                 <!-- Nút Xuất file Excel -->
-                <button type="button" class="btn btn-outline-success d-inline-flex align-items-center gap-1" id="btnExportTheKho" title="Xuất file Excel thẻ kho">
-                    <i class="bi bi-file-earmark-excel"></i>
-                    <span class="d-none d-md-inline">Xuất file</span>
+                <button type="button" class="btn btn-tool" id="btnExportTheKho" title="Xuất thẻ kho ra Excel">
+                    <i class="bi bi-box-arrow-up me-1 text-success"></i>
+                    <span class="d-none d-sm-inline">Xuất file</span>
                 </button>
 
                 <!-- Nút In thẻ kho -->
-                <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1" id="btnPrintTheKho" title="In thẻ kho">
-                    <i class="bi bi-printer"></i>
-                    <span class="d-none d-md-inline">In</span>
+                <button type="button" class="btn btn-tool" id="btnPrintTheKho" title="In thẻ kho">
+                    <i class="bi bi-printer me-1 text-secondary"></i>
+                    <span class="d-none d-sm-inline">In</span>
                 </button>
 
                 <!-- Nút tải lại bảng -->
@@ -80,6 +80,6 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/kiot-filter.js" asp-append-version="true"></script>
+    <script src="~/js/app-filter.js" asp-append-version="true"></script>
     <script src="~/js/the-kho-index.js" asp-append-version="true"></script>
 }

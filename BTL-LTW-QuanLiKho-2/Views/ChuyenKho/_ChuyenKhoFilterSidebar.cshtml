@@ -2,24 +2,24 @@
 @using BTL_LTW_QuanLiKho_2.ViewModels.Common
 
 <!-- CỘT BÊN TRÁI: TIÊU ĐỀ "CHUYỂN HÀNG" + BỘ LỌC chuyên nghiệp (MODULAR LEGO) -->
-<aside class="kiot-sidebar-col" id="sidebarFilterCol">
+<aside class="kp-sidebar-col" id="sidebarFilterCol">
     <!-- Header cho sidebar khi mở ở mobile/zoom -->
-    <div class="kiot-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+    <div class="kp-sidebar-mobile-header d-lg-none d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
         <div class="fw-bold fs-6 text-dark"><i class="bi bi-funnel me-1 text-primary"></i> Bộ lọc chuyển hàng</div>
         <button type="button" class="btn-close" id="btnCloseSidebarMobile" aria-label="Đóng"></button>
     </div>
 
     <!-- Tiêu đề sidebar Desktop -->
-    <div class="kiot-sidebar-title d-none d-lg-flex">
+    <div class="kp-sidebar-title d-none d-lg-flex">
         Chuyển hàng
     </div>
 
-    <div class="kiot-filter-box" id="side">
+    <div class="kp-filter-box" id="side">
         <!-- 1. Hướng chuyển (Khối đặc thù Chuyển kho) -->
-        <div class="kiot-filter-group mb-3">
-            <div class="kiot-filter-header d-flex align-items-center justify-content-between mb-2">
+        <div class="kp-filter-group mb-3">
+            <div class="kp-filter-header d-flex align-items-center justify-content-between mb-2">
                 <span class="fw-bold text-dark small">
-                    Hướng chuyển <i class="kiot-filter-dot @(Model.Filter.Dir != "all" && Model.CurrentKhoId != 0 ? "on" : "")" id="dDir"></i>
+                    Hướng chuyển <i class="kp-filter-dot @(Model.Filter.Dir != "all" && Model.CurrentKhoId != 0 ? "on" : "")" id="dDir"></i>
                 </span>
             </div>
             <div class="d-flex flex-column gap-2 small">
@@ -44,15 +44,15 @@
             }
         </div>
 
-        <!-- 2. Trạng thái chứng từ (Lego KiotStatusFilter) -->
-        <partial name="_KiotStatusFilter" model='new KiotStatusFilterVM("Trạng thái", "dSt", new() {
+        <!-- 2. Trạng thái chứng từ (Lego KhoProStatusFilter) -->
+        <partial name="_StatusFilter" model='new StatusFilterVM("Trạng thái", "dSt", new() {
             new("NHAP", "Phiếu tạm", Model.Filter.Statuses.Contains("NHAP")),
             new("DA_XUAT", "Đang chuyển", Model.Filter.Statuses.Contains("DA_XUAT")),
             new("DA_NHAN", "Đã nhận", Model.Filter.Statuses.Contains("DA_NHAN")),
             new("HUY", "Đã hủy", Model.Filter.Statuses.Contains("HUY"))
         })' />
 
-        <!-- 3. Thời gian tạo phiếu (Lego KiotDateFilter) -->
-        <partial name="_KiotDateFilter" model='new KiotDateFilterVM("date", "Thời gian", false, "Tháng này")' />
+        <!-- 3. Thời gian tạo phiếu (Lego KhoProDateFilter) -->
+        <partial name="_DateFilter" model='new DateFilterVM("date", "Thời gian", false, "Tháng này")' />
     </div>
 </aside>

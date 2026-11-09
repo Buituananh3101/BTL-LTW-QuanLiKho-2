@@ -34,8 +34,8 @@
 
   let toastTimer;
   function showToast(msg, type) {
-    if (window.KiotToast) {
-      window.KiotToast.show(msg, type || 'success');
+    if (window.AppToast) {
+      window.AppToast.show(msg, type || 'success');
       return;
     }
     const t = $('#hhToast');
@@ -116,10 +116,6 @@
     };
   });
 
-  $$('.hh-sec-h').forEach(h => {
-    h.onclick = () => h.parentElement.classList.toggle('open');
-  });
-
   // Tab mô tả: các nút định dạng
   $$('.hh-rte-bar button').forEach(b => {
     b.onmousedown = e => {
@@ -128,9 +124,9 @@
     };
   });
 
-  /* ---------- Quản lý 5 ảnh sản phẩm (Đóng gói KiotFilter.initImageUploader) ---------- */
-  const imgUploader = (window.KiotFilter && typeof KiotFilter.initImageUploader === 'function')
-    ? KiotFilter.initImageUploader({
+  /* ---------- Quản lý 5 ảnh sản phẩm (Đóng gói AppFilter.initImageUploader) ---------- */
+  const imgUploader = (window.AppFilter && typeof AppFilter.initImageUploader === 'function')
+    ? AppFilter.initImageUploader({
         mainBoxSelector: '#hhImgMain',
         thumbsBoxSelector: '#hhThumbs',
         fileInputSelector: '#hhImgFile',
@@ -149,7 +145,7 @@
 
   function openPrompt(title, label, defaultVal, cb) {
     $('#pTitle').textContent = title;
-    $('#pLabel').textContent = label;
+    $('#pLabel').innerHTML = label + ' <span style="color:var(--hh-danger)">*</span>';
     promptLabel = label;
     $('#pInput').value = defaultVal || '';
     $('#pField').classList.remove('invalid');
@@ -197,7 +193,7 @@
     const err = $('#editItemErr');
 
     if (titleEl) titleEl.textContent = isVitri ? 'Sửa vị trí' : 'Sửa thuộc tính';
-    if (labelEl) labelEl.textContent = isVitri ? 'Vị trí' : 'Tên thuộc tính';
+    if (labelEl) labelEl.innerHTML = (isVitri ? 'Vị trí' : 'Tên thuộc tính') + ' <span style="color:var(--hh-danger)">*</span>';
     if (saveBtn) saveBtn.textContent = isVitri ? 'Lưu' : 'Xong';
 
     if (inp) inp.value = editItemOldVal;
@@ -281,7 +277,7 @@
       openLocationDropdown();
 
       // Đồng bộ nếu có item ở menu lọc cột trái
-      const sideItem = $(`#dropdownViTri .kiot-ms-item[data-val="${CSS.escape ? CSS.escape(editItemOldVal) : editItemOldVal}"]`);
+      const sideItem = $(`#dropdownViTri .kp-ms-item[data-val="${CSS.escape ? CSS.escape(editItemOldVal) : editItemOldVal}"]`);
       if (sideItem) {
         sideItem.dataset.val = newVal;
         sideItem.dataset.name = newVal;
@@ -327,7 +323,7 @@
         openLocationDropdown();
 
         // Đồng bộ nếu có item ở menu lọc cột trái
-        const sideItem = $(`#dropdownViTri .kiot-ms-item[data-val="${CSS.escape ? CSS.escape(editItemOldVal) : editItemOldVal}"]`);
+        const sideItem = $(`#dropdownViTri .kp-ms-item[data-val="${CSS.escape ? CSS.escape(editItemOldVal) : editItemOldVal}"]`);
         if (sideItem) sideItem.remove();
 
         hide($('#hhEditItemOv'));
@@ -345,8 +341,8 @@
       }
     };
 
-    if (window.KiotConfirm) {
-      window.KiotConfirm.show({
+    if (window.AppConfirm) {
+      window.AppConfirm.show({
         title: `Xóa ${itemLabel}`,
         message: `Bạn có chắc chắn muốn xóa ${itemLabel} <strong style="color: #111827;">${editItemOldVal}</strong> không? Thao tác này không thể hoàn tác.`,
         onConfirm: doDelete
@@ -355,7 +351,7 @@
       doDelete();
     }
   }
-
+   
   $('#btnEditItemSave')?.addEventListener('click', handleEditItemSave);
   $('#btnEditItemDelete')?.addEventListener('click', handleEditItemDelete);
   $('#editItemInput')?.addEventListener('keydown', e => {
@@ -389,12 +385,12 @@
           $('#hhFldNhom').classList.remove('invalid');
 
           const $sidebar = jQuery('#dropdownNhomHang');
-          if ($sidebar.length && !$sidebar.find(`.kiot-ms-item[data-val="${res.maNhom}"]`).length) {
+          if ($sidebar.length && !$sidebar.find(`.kp-ms-item[data-val="${res.maNhom}"]`).length) {
             $sidebar.append(`
-              <div class="kiot-ms-item" data-val="${res.maNhom}" data-name="${res.tenNhom}">
+              <div class="kp-ms-item" data-val="${res.maNhom}" data-name="${res.tenNhom}">
                 <input type="checkbox" class="form-check-input" />
-                <span class="kiot-ms-text">${res.tenNhom}</span>
-                <button type="button" class="kiot-item-edit-btn hh-item-edit-btn" data-id="${res.maNhom}" data-name="${res.tenNhom}" data-type="nhomhang" title="Sửa nhóm hàng" aria-label="Sửa ${res.tenNhom}">
+                <span class="kp-ms-text">${res.tenNhom}</span>
+                <button type="button" class="kp-item-edit-btn hh-item-edit-btn" data-id="${res.maNhom}" data-name="${res.tenNhom}" data-type="nhomhang" title="Sửa nhóm hàng" aria-label="Sửa ${res.tenNhom}">
                   <i class="bi bi-pencil" style="font-size:12px;pointer-events:none;"></i>
                 </button>
               </div>
@@ -636,13 +632,20 @@
     });
 
     list.addEventListener('click', e => {
-      const editBtn = e.target.closest('.hh-item-edit-btn, .kiot-item-edit-btn');
+      const editBtn = e.target.closest('.hh-item-edit-btn, .kp-item-edit-btn');
       if (editBtn) {
         e.stopPropagation();
         const id = editBtn.dataset.id || editBtn.closest('[data-val]')?.dataset.val;
         const val = editBtn.dataset.val || editBtn.closest('[data-val]')?.querySelector('span')?.textContent?.trim();
-        if (typeof window.handleEditNhomHang === 'function') {
-          window.handleEditNhomHang(id, val);
+        const type = editBtn.dataset.type || (editBtn.closest('#listMaDvt') ? 'dvt' : 'nhom');
+        if (type === 'dvt' || editBtn.closest('#listMaDvt')) {
+          if (typeof window.handleEditDonViTinh === 'function') {
+            window.handleEditDonViTinh(id, val);
+          }
+        } else {
+          if (typeof window.handleEditNhomHang === 'function') {
+            window.handleEditNhomHang(id, val);
+          }
         }
         return;
       }
@@ -661,6 +664,7 @@
     function syncOptions() {
       list.innerHTML = '';
       const isNhom = (wrap && wrap.id && wrap.id.includes('Nhom')) || (list && list.id && list.id.includes('Nhom'));
+      const isDvt = (wrap && wrap.id && wrap.id.includes('Dvt')) || (list && list.id && list.id.includes('Dvt'));
       Array.from(select.options).forEach(opt => {
         if (opt.value === '') return;
         const isSel = (String(select.value) === String(opt.value));
@@ -671,12 +675,21 @@
         if (level > 0) {
           it.style.paddingLeft = (12 + level * 16) + 'px';
         }
-        const treePrefix = level > 0 ? `<span class="kiot-tree-branch text-muted me-1" style="font-family:monospace;font-size:12px;">└─</span>` : '';
-        const editBtnHtml = isNhom ? `
-          <button type="button" class="hh-item-edit-btn" data-type="nhom" data-id="${opt.value}" data-val="${esc(opt.textContent.trim())}" title="Sửa nhóm hàng" aria-label="Sửa nhóm hàng ${esc(opt.textContent.trim())}">
-            <svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>
-          </button>
-        ` : '';
+        const treePrefix = level > 0 ? `<span class="kp-tree-branch text-muted me-1" style="font-family:monospace;font-size:12px;">└─</span>` : '';
+        let editBtnHtml = '';
+        if (isNhom) {
+          editBtnHtml = `
+            <button type="button" class="hh-item-edit-btn" data-type="nhom" data-id="${opt.value}" data-val="${esc(opt.textContent.trim())}" title="Sửa nhóm hàng" aria-label="Sửa nhóm hàng ${esc(opt.textContent.trim())}">
+              <svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>
+            </button>
+          `;
+        } else if (isDvt) {
+          editBtnHtml = `
+            <button type="button" class="hh-item-edit-btn" data-type="dvt" data-id="${opt.value}" data-val="${esc(opt.textContent.trim())}" title="Sửa đơn vị tính" aria-label="Sửa đơn vị tính ${esc(opt.textContent.trim())}">
+              <svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>
+            </button>
+          `;
+        }
         it.innerHTML = `
           <span>${treePrefix}${esc(opt.textContent.trim())}</span>
           ${editBtnHtml}
@@ -746,7 +759,7 @@
   ];
 
   // Tự động nạp thêm vị trí từ danh sách vị trí đã nạp trong DB nếu có
-  $$('#dropdownViTri .kiot-ms-item').forEach(el => {
+  $$('#dropdownViTri .kp-ms-item').forEach(el => {
     const v = el.dataset.val?.trim();
     if (v && !availableLocations.some(a => ci(a, v))) {
       availableLocations.push(v);
@@ -924,11 +937,11 @@
   // Đóng dropdown khi click ra ngoài (ngoại trừ khi đang thao tác trong modal sửa/prompt/confirm)
   document.addEventListener('click', e => {
     // 1. Không đóng dropdown nếu click xảy ra bên trong modal con (Sửa vị trí/thuộc tính, Prompt, Confirm, Delete, Pick...)
-    if (e.target.closest('#hhEditItemOv, #hhPromptOv, #kiotPromptOv, #kiotConfirmOv, #hhDeleteProductOv, #hhPickOv, .kiot-prompt-ov, .kiot-confirm-ov, .modal-box')) {
+    if (e.target.closest('#hhEditItemOv, #hhPromptOv, #kpPromptOv, #kpConfirmOv, #hhDeleteProductOv, #hhPickOv, .kp-prompt-ov, .kp-confirm-ov, .modal-box')) {
       return;
     }
     // 2. Không đóng dropdown nếu đang có bất kỳ modal con nào đang hiển thị
-    if (document.querySelector('#hhEditItemOv.show, #hhPromptOv.show, #kiotPromptOv.show, #kiotConfirmOv.show, #hhDeleteProductOv.show, #hhPickOv.show, .kiot-prompt-ov.show, .kiot-confirm-ov.show')) {
+    if (document.querySelector('#hhEditItemOv.show, #hhPromptOv.show, #kpPromptOv.show, #kpConfirmOv.show, #hhDeleteProductOv.show, #hhPickOv.show, .kp-prompt-ov.show, .kp-confirm-ov.show')) {
       return;
     }
 
@@ -1207,8 +1220,8 @@
         r.remove();
         refreshAttrDropdowns();
       };
-      if (window.KiotConfirm) {
-        window.KiotConfirm.show({
+      if (window.AppConfirm) {
+        window.AppConfirm.show({
           title: 'Xóa dòng thuộc tính',
           message: msg,
           onConfirm: doRemove
@@ -1596,24 +1609,31 @@
     });
   };
 
-  /* ---------- Xóa hàng hóa & Chuyển trạng thái Ngừng bán (chuẩn chuyên nghiệp) ---------- */
+  /* ---------- Xóa hàng hóa & Chuyển trạng thái (chuẩn Nhà Cung Cấp) ---------- */
   window.openDeleteProductModal = function (id, name) {
     if (!id) return;
     const hiddenId = $('#delProdId');
     const nameEl = $('#delProdName');
-    const errBox = $('#delProdErrorBox');
+    const errorBox = $('#delProdErrorBox');
     const btnDel = $('#btnConfirmDeleteProd');
+    const btnCancel = $('#btnCancelDeleteProd');
 
     if (hiddenId) hiddenId.value = id;
     if (nameEl) nameEl.textContent = name || ('Mã #' + id);
-    if (errBox) errBox.style.display = 'none';
+
+    // Trạng thái ban đầu: Chỉ hỏi xác nhận xóa, KHÔNG hiện "không thể xóa" trước
+    if (errorBox) errorBox.style.display = 'none';
     if (btnDel) {
+      btnDel.style.display = 'inline-flex';
       btnDel.disabled = false;
       btnDel.textContent = 'Đồng ý xóa';
     }
+    if (btnCancel) btnCancel.textContent = 'Bỏ qua';
+
     show($('#hhDeleteProductOv'));
   };
 
+  // Nút xóa trong modal Sửa
   $('#btnDeleteProductInModal')?.addEventListener('click', () => {
     const id = parseInt($('#formMaHang').value) || 0;
     const name = $('#formTenHang').value.trim();
@@ -1622,6 +1642,7 @@
     }
   });
 
+  // Xác nhận xóa trong modal #hhDeleteProductOv
   $('#btnConfirmDeleteProd')?.addEventListener('click', () => {
     const id = parseInt($('#delProdId').value) || 0;
     if (id <= 0) return;
@@ -1639,7 +1660,11 @@
         btn.textContent = origText;
         hide($('#hhDeleteProductOv'));
         hide($('#hangHoaModalOv'));
-        showToast(res.message || 'Đã xóa hàng hóa thành công.');
+        if (window.AppToast) {
+          window.AppToast.success(res.message || 'Đã xóa hàng hóa thành công.');
+        } else {
+          showToast(res.message || 'Đã xóa hàng hóa thành công.');
+        }
         if (typeof window.loadTable === 'function') {
           window.loadTable();
         }
@@ -1647,45 +1672,139 @@
       error: function (xhr) {
         btn.disabled = false;
         btn.textContent = origText;
-        const msg = xhr.responseJSON?.message || 'Không thể xóa hàng hóa do lỗi hệ thống.';
-        const errBox = $('#delProdErrorBox');
-        const errMsg = $('#delProdErrorMsg');
-        const btnNgung = $('#btnSwitchNgungBan');
-        if (errMsg) errMsg.textContent = msg;
-        if (errBox) errBox.style.display = 'block';
-        if (btnNgung) {
-          btnNgung.style.display = xhr.responseJSON?.hasTransaction ? 'inline-flex' : 'none';
+        const res = xhr.responseJSON;
+        if (res && res.hasTransaction) {
+          // Đã phát sinh giao dịch -> Chặn xóa và hiển thị cảnh báo
+          const errorBox = $('#delProdErrorBox');
+          const errorMsg = $('#delProdErrorMsg');
+          const btnSwitch = $('#btnSwitchNgungBanInDelModal');
+          const btnCancel = $('#btnCancelDeleteProd');
+          if (errorMsg) errorMsg.textContent = res.message || 'Mặt hàng đã phát sinh giao dịch/chứng từ, không thể xóa để bảo toàn lịch sử sổ sách kế toán.';
+          if (errorBox) errorBox.style.display = 'block';
+          btn.style.display = 'none';
+          if (btnSwitch) btnSwitch.style.display = 'inline-flex';
+          if (btnCancel) btnCancel.textContent = 'Đóng';
+        } else {
+          hide($('#hhDeleteProductOv'));
+          if (window.AppToast) {
+            window.AppToast.error(res?.message || 'Không thể xóa hàng hóa.');
+          } else {
+            showToast(res?.message || 'Không thể xóa hàng hóa.', 'error');
+          }
         }
       }
     });
   });
 
-  $('#btnSwitchNgungBan')?.addEventListener('click', () => {
+  // Chuyển sang Ngừng kinh doanh ngay từ modal xóa (chuẩn Nhà Cung Cấp)
+  $('#btnSwitchNgungBanInDelModal')?.addEventListener('click', () => {
     const id = parseInt($('#delProdId').value) || 0;
     if (id <= 0) return;
 
-    const btn = $('#btnSwitchNgungBan');
-    const origText = btn.textContent;
+    const btn = $('#btnSwitchNgungBanInDelModal');
     btn.disabled = true;
-    btn.textContent = 'Đang chuyển...';
 
     jQuery.ajax({
       url: '/HangHoa/NgungBan/' + id,
       type: 'POST',
       success: function (res) {
         btn.disabled = false;
-        btn.textContent = origText;
         hide($('#hhDeleteProductOv'));
         hide($('#hangHoaModalOv'));
-        showToast(res.message || 'Đã chuyển hàng hóa sang Ngừng bán.');
+        if (window.AppToast) {
+          window.AppToast.success(res.message || 'Đã chuyển hàng hóa sang Ngừng kinh doanh.');
+        } else {
+          showToast(res.message || 'Đã chuyển hàng hóa sang Ngừng kinh doanh.');
+        }
         if (typeof window.loadTable === 'function') {
           window.loadTable();
         }
       },
       error: function (xhr) {
         btn.disabled = false;
-        btn.textContent = origText;
-        alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể cập nhật trạng thái.'));
+        if (window.AppToast) {
+          window.AppToast.error(xhr.responseJSON?.message || 'Không thể cập nhật trạng thái.');
+        } else {
+          showToast(xhr.responseJSON?.message || 'Không thể cập nhật trạng thái.', 'error');
+        }
+      }
+    });
+  });
+
+  // Mở modal xác nhận đổi trạng thái Khóa / Mở khóa hàng hóa (chuẩn Nhà Cung Cấp)
+  window.openStatusConfirmProductModal = function (id, name, currentStatus) {
+    if (!id) return;
+    const isCurrentlyActive = (currentStatus === 'DANG_BAN');
+    const hiddenId = $('#statusProdId');
+    const titleEl = $('#statusProdTitle');
+    const titleText = $('#statusProdTitleText');
+    const iconEl = $('#statusProdIcon');
+    const msgEl = $('#statusProdConfirmMsg');
+    const btnConfirm = $('#btnConfirmStatusProd');
+
+    if (hiddenId) hiddenId.value = id;
+    const displayName = name || ('hàng hóa #' + id);
+
+    if (isCurrentlyActive) {
+      // Xác nhận Ngừng kinh doanh
+      if (titleEl) titleEl.style.color = '#d97706';
+      if (titleText) titleText.textContent = 'Ngừng kinh doanh hàng hóa';
+      if (iconEl) iconEl.className = 'bi bi-slash-circle text-warning';
+      if (msgEl) msgEl.innerHTML = `Bạn có chắc chắn muốn chuyển hàng hóa <strong style="color: #111827; word-break: break-word;">${esc(displayName)}</strong> sang trạng thái <strong style="color: #d97706;">Ngừng kinh doanh</strong>?`;
+      if (btnConfirm) {
+        btnConfirm.style.background = '#d97706';
+        btnConfirm.style.borderColor = '#d97706';
+        btnConfirm.style.color = '#fff';
+        btnConfirm.textContent = 'Đồng ý';
+      }
+    } else {
+      // Xác nhận Kích hoạt lại
+      if (titleEl) titleEl.style.color = '#0070F0';
+      if (titleText) titleText.textContent = 'Kích hoạt lại hàng hóa';
+      if (iconEl) iconEl.className = 'bi bi-check2-circle text-primary';
+      if (msgEl) msgEl.innerHTML = `Bạn có chắc chắn muốn cho hàng hóa <strong style="color: #111827; word-break: break-word;">${esc(displayName)}</strong> <strong style="color: #0070F0;">kinh doanh trở lại</strong>?`;
+      if (btnConfirm) {
+        btnConfirm.style.background = '#0070F0';
+        btnConfirm.style.borderColor = '#0070F0';
+        btnConfirm.style.color = '#fff';
+        btnConfirm.textContent = 'Đồng ý';
+      }
+    }
+    show($('#hhStatusConfirmOv'));
+  };
+
+  // Xác nhận đổi trạng thái trong modal #hhStatusConfirmOv
+  $('#btnConfirmStatusProd')?.addEventListener('click', () => {
+    const id = parseInt($('#statusProdId').value) || 0;
+    if (!id) return;
+    const btn = $('#btnConfirmStatusProd');
+    btn.disabled = true;
+
+    jQuery.ajax({
+      url: '/HangHoa/ToggleStatus?id=' + id,
+      type: 'POST',
+      success: function (res) {
+        btn.disabled = false;
+        hide($('#hhStatusConfirmOv'));
+        if (res.success) {
+          if (window.AppToast) {
+            window.AppToast.success(res.message);
+          } else {
+            showToast(res.message);
+          }
+          if (typeof window.loadTable === 'function') {
+            window.loadTable();
+          }
+        }
+      },
+      error: function (xhr) {
+        btn.disabled = false;
+        hide($('#hhStatusConfirmOv'));
+        if (window.AppToast) {
+          window.AppToast.error(xhr.responseJSON?.message || 'Không thể đổi trạng thái hàng hóa.');
+        } else {
+          showToast(xhr.responseJSON?.message || 'Không thể đổi trạng thái hàng hóa.', 'error');
+        }
       }
     });
   });

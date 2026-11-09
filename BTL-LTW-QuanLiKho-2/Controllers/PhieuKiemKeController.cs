@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BTL_LTW_QuanLiKho_2.Models;
@@ -818,16 +818,40 @@ public class PhieuKiemKeController : BaseKhoController
         }
 
         var products = await query.Take(20).ToListAsync();
+        var productIds = products.Select(h => h.MaHang).ToList();
 
-        var result = products.Select(h => new ProductSearchItemVM
+        var setWithImage = new HashSet<int>();
+        if (productIds.Any())
         {
-            MaHang = h.MaHang,
-            MaHangNoiBo = h.MaHangNoiBo,
-            TenHang = h.TenHang,
-            TenDvt = h.MaDvtNavigation?.TenDvt ?? "",
-            TenNhom = h.MaNhomNavigation?.TenNhom ?? "",
-            Gia = h.GiaVon > 0 ? h.GiaVon : h.GiaBanThamKhao,
-            TonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0
+            var imgIds = await _context.HinhAnhHangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang))
+                .Select(x => x.MaHang)
+                .Distinct()
+                .ToListAsync();
+
+            var legacyImgIds = await _context.HangHoas.AsNoTracking()
+                .Where(x => productIds.Contains(x.MaHang) && x.HinhAnh != null)
+                .Select(x => x.MaHang)
+                .ToListAsync();
+
+            setWithImage = new HashSet<int>(imgIds.Concat(legacyImgIds));
+        }
+
+        var result = products.Select(h =>
+        {
+            bool hasImg = setWithImage.Contains(h.MaHang);
+            return new ProductSearchItemVM
+            {
+                MaHang = h.MaHang,
+                MaHangNoiBo = h.MaHangNoiBo,
+                TenHang = h.TenHang,
+                TenDvt = h.MaDvtNavigation?.TenDvt ?? "",
+                TenNhom = h.MaNhomNavigation?.TenNhom ?? "",
+                Gia = h.GiaVon > 0 ? h.GiaVon : h.GiaBanThamKhao,
+                TonKho = stockMap.TryGetValue(h.MaHang, out var ton) ? ton : 0,
+                HasImage = hasImg,
+                HinhAnh = hasImg ? $"/HangHoa/GetImage/{h.MaHang}" : null
+            };
         }).ToList();
 
         return Json(result);
@@ -1041,7 +1065,7 @@ public class PhieuKiemKeController : BaseKhoController
             }
         }
 
-        // Mặc định xuất file Excel (.xlsx) chuẩn KiotViet bằng ClosedXML qua Lego ExcelHelper
+        // Mặc định xuất file Excel (.xlsx) chuẩn KhoPro bằng ClosedXML qua Lego ExcelHelper
         if (isDetail)
         {
             var detailRows = new List<(int Stt, PhieuKiemKeListItemVM Item, PhieuKiemKeLineVM? Line)>();
@@ -1109,6 +1133,58 @@ public class PhieuKiemKeController : BaseKhoController
     {
         if (string.IsNullOrEmpty(val)) return "";
         return val.Replace("\"", "\"\"").Replace("\r", " ").Replace("\n", " ");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Print(int id)
+    {
+        var pkk = await _context.PhieuKiemKes
+            .Include(p => p.MaKhoNavigation)
+            .Include(p => p.MaNvlapNavigation)
+            .Include(p => p.PhieuDieuChinh)
+                .ThenInclude(pdc => pdc!.MaNvduyetNavigation)
+            .Include(p => p.ChiTietPhieuKiemKes)
+                .ThenInclude(ct => ct.MaHangNavigation)
+                    .ThenInclude(h => h.MaDvtNavigation)
+            .Include(p => p.ChiTietPhieuKiemKes)
+                .ThenInclude(ct => ct.MaHangNavigation)
+                    .ThenInclude(h => h.MaNhomNavigation)
+            .FirstOrDefaultAsync(p => p.MaPhieuKiemKe == id);
+
+        if (pkk == null) return NotFound("Không tìm thấy phiếu kiểm kê.");
+
+        ViewBag.TenKho = pkk.MaKhoNavigation?.TenKho;
+
+        var lines = pkk.ChiTietPhieuKiemKes.Select(ct => new PhieuKiemKeLineVM
+        {
+            MaHang = ct.MaHang,
+            MaHangNoiBo = ct.MaHangNavigation?.MaHangNoiBo ?? "",
+            TenHang = ct.MaHangNavigation?.TenHang ?? "",
+            TenDvt = ct.MaHangNavigation?.MaDvtNavigation?.TenDvt ?? "",
+            TenNhom = ct.MaHangNavigation?.MaNhomNavigation?.TenNhom ?? "",
+            SoLuongTheoSo = ct.SoLuongTheoSo,
+            SoLuongThucTe = ct.SoLuongThucTe,
+            DonGia = ct.DonGia > 0 ? ct.DonGia : ((ct.MaHangNavigation != null && ct.MaHangNavigation.GiaVon > 0) ? ct.MaHangNavigation.GiaVon : (ct.MaHangNavigation?.GiaBanThamKhao ?? 0))
+        }).ToList();
+
+        var model = new PhieuKiemKeFormVM
+        {
+            MaPhieuKiemKe = pkk.MaPhieuKiemKe,
+            MaPhieu = pkk.MaPhieu,
+            MaKho = pkk.MaKho,
+            TenKho = pkk.MaKhoNavigation?.TenKho ?? $"Kho {pkk.MaKho}",
+            MaNvlap = pkk.MaNvlap,
+            TenNguoiLap = pkk.MaNvlapNavigation?.HoTen ?? $"NV {pkk.MaNvlap}",
+            ThoiDiemChot = pkk.ThoiDiemChot,
+            TrangThai = pkk.TrangThai,
+            GhiChu = pkk.GhiChu,
+            IsReadOnly = true,
+            NgayCanBang = pkk.PhieuDieuChinh?.NgayDuyet ?? (pkk.TrangThai == "DA_DIEU_CHINH" ? pkk.ThoiDiemChot : null),
+            TenNguoiCanBang = pkk.PhieuDieuChinh?.MaNvduyetNavigation?.HoTen ?? pkk.MaNvlapNavigation?.HoTen,
+            Lines = lines
+        };
+
+        return View("Print", model);
     }
 }
 

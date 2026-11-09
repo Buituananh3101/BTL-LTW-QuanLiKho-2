@@ -1,8 +1,8 @@
--- =====================================================================================
+﻿-- =====================================================================================
 -- KHO PRO - MIGRATION 15: DỮ LIỆU MẪU TOÀN DIỆN KIỂM THỬ TẤT CẢ CHỨC NĂNG
 -- File: migrations/sql/15_du_lieu_mau_toan_dien.sql
 -- Mục tiêu: Cung cấp tập dữ liệu mẫu phong phú, thực tế cho toàn bộ các chức năng:
---   1. Danh mục Khách hàng, Nhà cung cấp (kèm nhóm NCC chuẩn KiotViet)
+--   1. Danh mục Khách hàng, Nhà cung cấp (kèm nhóm NCC chuẩn KhoPro)
 --   2. Hàng hóa đa dạng (Bình gas, Bếp gas, Phụ kiện, Khí CN, Than/Cồn, Xe đẩy...)
 --   3. Cấp tồn dồi dào cho cả 3 kho: Kho trung tâm, Kho An Thới, Kho phụ kiện Tuna
 --   4. Đầy đủ các chứng từ với đa dạng trạng thái và mốc thời gian:
@@ -77,7 +77,7 @@ IF NOT EXISTS (SELECT 1 FROM DonViCapHang WHERE MaNcc = 'NCC00017')
     INSERT INTO DonViCapHang (MaNcc, TenDonVi, DienThoai, Email, DiaChi, KhuVuc, PhuongXa, MaNhomNcc, TenCongTy, MaSoThue, TrangThai, NgayTao, NguoiTao, DaDanhDau)
     VALUES ('NCC00017', N'Xưởng Cơ khí & Xe đẩy Hàng Hải Nam', '0918777888', N'xedayhainam@gmail.com', N'Cảng cá An Thới, Tổ 4', N'Kiên Giang - Phú Quốc', N'Phường An Thới', @nhomVanTai, N'Hộ kinh doanh Cơ khí Chế tạo Hải Nam', '8401239871', 'HOAT_DONG', DATEADD(DAY, -20, GETDATE()), N'Trần Thị Kho', 0);
 
-PRINT N'   [2/11] Đã bổ sung 6 Nhà cung cấp mới chuẩn KiotViet.';
+PRINT N'   [2/11] Đã bổ sung 6 Nhà cung cấp mới chuẩn KhoPro.';
 
 -- -------------------------------------------------------------------------------------
 -- PHẦN 3: BỔ SUNG KHÁCH HÀNG THỰC TẾ KHẮP PHÚ QUỐC (KhachHang)
@@ -384,7 +384,7 @@ BEGIN
     FROM HangHoa WHERE MaHangNoiBo = 'GAS-PETRO';
 END
 
-PRINT N'   [6/11] Đã bổ sung 6 Phiếu chuyển kho với đầy đủ luồng nghiệp vụ chuẩn KiotViet.';
+PRINT N'   [6/11] Đã bổ sung 6 Phiếu chuyển kho với đầy đủ luồng nghiệp vụ chuẩn KhoPro.';
 
 -- -------------------------------------------------------------------------------------
 -- PHẦN 7: BỔ SUNG PHIẾU TRẢ HÀNG NHẬP (PhieuTraHangNhap)

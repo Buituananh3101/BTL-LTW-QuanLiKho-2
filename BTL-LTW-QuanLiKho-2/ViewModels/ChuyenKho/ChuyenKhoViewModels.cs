@@ -43,7 +43,7 @@ public class ChuyenKhoListItemVM
     public string BadgeClass => TrangThai switch
     {
         "NHAP" or "PHIEU_TAM" => "badge bg-primary-subtle text-primary border border-primary-subtle",
-        "DA_XUAT" or "DANG_CHUYEN" => "badge bg-warning-subtle text-warning border border-warning-subtle",
+        "DA_XUAT" or "DANG_CHUYEN" => "badge bg-primary-subtle text-primary border border-primary-subtle",
         "DA_NHAN" => "badge bg-success-subtle text-success border border-success-subtle",
         _ => "badge bg-secondary-subtle text-secondary border border-secondary-subtle"
     };

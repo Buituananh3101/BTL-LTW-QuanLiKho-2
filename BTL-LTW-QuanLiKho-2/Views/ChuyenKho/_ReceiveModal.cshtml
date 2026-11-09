@@ -1,4 +1,4 @@
-<!-- Modal Nhận hàng & Quản lý Thất thoát chuyển kho -->
+﻿<!-- Modal Nhận hàng & Quản lý Thất thoát chuyển kho -->
 <div class="modal fade" id="receiveModal" tabindex="-1" aria-labelledby="receiveModalLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content shadow border-0" style="border-radius: 12px;">
@@ -154,7 +154,7 @@
                 success: function (res) {
                     $btn.prop('disabled', false);
                     modal.hide();
-                    if (window.KiotToast) KiotToast.success(res.message || 'Đã nhận hàng thành công.');
+                    if (window.AppToast) AppToast.success(res.message || 'Đã nhận hàng thành công.');
                     if (typeof onDone === 'function') onDone();
                 },
                 error: function (xhr) {
