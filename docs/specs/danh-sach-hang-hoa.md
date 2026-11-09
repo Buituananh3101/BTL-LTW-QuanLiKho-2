@@ -34,7 +34,8 @@
 | **Thêm mới hàng** | "+ Thêm mới", nhập form, "Lưu" | JS gom form + Base64 ➜ `POST /HangHoa/Create` | `Create(...)` validate, sinh mã hàng | Lưu CSDL + PN đầu kỳ ➜ JSON `{success:true}` |
 | **Mở form Sửa** | Click Chỉnh sửa | JS AJAX `GET /HangHoa/GetItem?id=X` | `GetItem(id)` đọc hàng & tồn | Trả JSON ➜ điền modal sửa |
 | **Lưu Sửa hàng** | Sửa form, "Cập nhật" | JS gom form ➜ AJAX `POST /HangHoa/Edit?id=X` | `Edit(id, form)` validate & cập nhật | Lưu CSDL ➜ JSON `{success:true}` |
-| **Xóa hàng** | Click Xóa ➜ Xác nhận | Pre-check `GET /HangHoa/CheckCanDelete/{id}`. Chưa GD: hiện nút Xóa. Đã có: ẩn nút Xóa, chỉ hiện nút Khóa | `Delete(id)` check 6 bảng GD, bọc Trans | Chưa GD: Xóa. Đã có GD: Chặn xóa vĩnh viễn, chỉ cho khóa |
+| **Xóa hàng** | Click Xóa ➜ Xác nhận modal chuẩn Nhà Cung Cấp | Mở modal xác nhận thông thường. Khi bấm "Đồng ý xóa", gửi `POST /Delete` kiểm tra ràng buộc. Nếu đã có GD ➜ hiện hộp cảnh báo không thể xóa & nút chuyển Ngừng kinh doanh ngay | `Delete(id)` check 6 bảng GD, bọc Trans | Chưa GD: Xóa hoàn tất. Đã có GD: Chặn xóa vĩnh viễn, hướng dẫn ngừng kinh doanh |
+| **Khóa / Mở kinh doanh** | Click "Ngừng kinh doanh" / "Cho kinh doanh lại" | Mở modal `#hhStatusConfirmOv` xác nhận chuyển trạng thái | `POST /HangHoa/ToggleStatus?id=X` | Cập nhật `DANG_BAN` ↔ `NGUNG_BAN`, thông báo AppToast & reload bảng |
 | **Xuất file Excel** | Bấm "Xuất file" ➜ Chọn cột ➜ Bấm Xuất | Mở `#hhExportModalOv` ➜ `POST /HangHoa/ExportExcel` | ClosedXML xuất đúng cột chọn | Trả file `.xlsx` |
 | **Nhập file Excel** | Kéo thả file ➜ Thực hiện nhập | Mở `#hhImportModalOv` ➜ `POST /HangHoa/ImportExcel` | Validate, parse 16 trường, xử lý trùng mã | Commit Trans ➜ reload bảng |
 

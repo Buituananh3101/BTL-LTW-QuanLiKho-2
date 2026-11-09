@@ -110,7 +110,9 @@
                 </td>
                 @foreach (var kho in selectedKhos)
                 {
-                    decimal tongKho = Model.PagedData.Items.Sum(x => x.TonTheoKho.TryGetValue(kho.MaKho, out var sl) ? sl : 0m);
+                    decimal tongKho = (Model.Summary.TongTonTheoKho != null && Model.Summary.TongTonTheoKho.TryGetValue(kho.MaKho, out var slKho))
+                        ? slKho
+                        : 0m;
                     <td data-col="kho_@kho.MaKho" class="num @(tongKho < 0 ? "text-danger" : "text-dark")">
                         @tongKho.ToString("N0")
                     </td>

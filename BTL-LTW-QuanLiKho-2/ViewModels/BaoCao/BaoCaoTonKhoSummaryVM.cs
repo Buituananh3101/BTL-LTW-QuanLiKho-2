@@ -24,4 +24,9 @@ public class BaoCaoTonKhoSummaryVM
     /// Số mặt hàng cần lưu ý (Dưới định mức tối thiểu hoặc hết hàng)
     /// </summary>
     public int SoMatHangCanLuuY { get; set; }
+
+    /// <summary>
+    /// Tổng tồn theo từng kho trên toàn bộ tập dữ liệu đã lọc (Key: MaKho, Value: Tổng tồn)
+    /// </summary>
+    public Dictionary<int, decimal> TongTonTheoKho { get; set; } = new();
 }

@@ -27,7 +27,7 @@ public class HangHoaController : BaseKhoController
     {
         filter ??= new HangHoaFilterParams();
         var vm = await BuildIndexVM(filter);
-        return View(vm);
+        return View(vm);    
     }
 
     // AJAX Action trả về Partial View danh sách bảng
@@ -1093,7 +1093,7 @@ public class HangHoaController : BaseKhoController
             {
                 success = false,
                 hasTransaction = true,
-                message = $"Hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) đã phát sinh giao dịch/chứng từ trong hệ thống, không thể xóa. Bạn có thể chuyển sang trạng thái 'Ngừng bán' để ẩn khỏi danh mục kinh doanh."
+                message = $"Hàng hóa '{item.TenHang}' ({item.MaHangNoiBo}) đã phát sinh giao dịch/chứng từ trong hệ thống, không thể xóa để bảo toàn số liệu sổ sách kế toán. Bạn có thể chuyển sang trạng thái 'Ngừng kinh doanh' để ẩn khỏi danh mục kinh doanh."
             });
         }
 

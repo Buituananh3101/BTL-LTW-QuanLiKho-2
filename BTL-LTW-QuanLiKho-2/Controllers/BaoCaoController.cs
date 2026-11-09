@@ -667,12 +667,20 @@ public class BaoCaoController : BaseKhoController
         var filteredList = filteredQuery.ToList();
 
         // 7. Thống kê KPI Summary trên toàn bộ tập dữ liệu đã lọc
+        var tongTonTheoKho = new Dictionary<int, decimal>();
+        foreach (var khoId in selectedKhoIds)
+        {
+            decimal sumKho = filteredList.Sum(x => x.TonTheoKho.TryGetValue(khoId, out var sl) ? sl : 0m);
+            tongTonTheoKho[khoId] = sumKho;
+        }
+
         var summary = new BaoCaoTonKhoSummaryVM
         {
             TongSoMatHang = filteredList.Count,
             TongSoLuongTon = filteredList.Sum(x => x.TongTon),
             TongGiaTriTon = filteredList.Sum(x => x.GiaTriTon),
-            SoMatHangCanLuuY = filteredList.Count(x => x.TongTon <= 0 || x.CoDuoiDinhMuc)
+            SoMatHangCanLuuY = filteredList.Count(x => x.TongTon <= 0 || x.CoDuoiDinhMuc),
+            TongTonTheoKho = tongTonTheoKho
         };
 
         // 8. Sắp xếp dữ liệu (SortBy, SortDir)

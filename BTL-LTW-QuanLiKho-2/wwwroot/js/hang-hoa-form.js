@@ -1615,15 +1615,13 @@
     const hiddenId = $('#delProdId');
     const nameEl = $('#delProdName');
     const errorBox = $('#delProdErrorBox');
-    const errorMsg = $('#delProdErrorMsg');
     const btnDel = $('#btnConfirmDeleteProd');
-    const btnSwitch = $('#btnSwitchNgungBanInDelModal');
     const btnCancel = $('#btnCancelDeleteProd');
 
     if (hiddenId) hiddenId.value = id;
     if (nameEl) nameEl.textContent = name || ('Mã #' + id);
 
-    // Trạng thái ban đầu chuẩn Nhà Cung Cấp
+    // Trạng thái ban đầu: Chỉ hỏi xác nhận xóa, KHÔNG hiện "không thể xóa" trước
     if (errorBox) errorBox.style.display = 'none';
     if (btnDel) {
       btnDel.style.display = 'inline-flex';
@@ -1633,31 +1631,6 @@
     if (btnCancel) btnCancel.textContent = 'Bỏ qua';
 
     show($('#hhDeleteProductOv'));
-
-    // Pre-check ràng buộc giao dịch / chứng từ
-    jQuery.ajax({
-      url: '/HangHoa/CheckCanDelete/' + id,
-      type: 'GET',
-      success: function (res) {
-        if (!res || !res.success) return;
-        const displayName = res.tenHang || name || ('Mã #' + id);
-        if (nameEl) nameEl.textContent = displayName;
-
-        if (res.hasTransaction) {
-          // Đã phát sinh giao dịch -> Chặn xóa và hiển thị nút chuyển Ngừng kinh doanh
-          if (errorMsg) errorMsg.textContent = res.message || 'Mặt hàng đã phát sinh giao dịch/chứng từ, không thể xóa để bảo toàn dữ liệu sổ sách kế toán.';
-          if (errorBox) errorBox.style.display = 'block';
-          if (btnDel) btnDel.style.display = 'none';
-          if (btnSwitch) {
-            btnSwitch.style.display = res.isNgungBan ? 'none' : 'inline-flex';
-          }
-          if (btnCancel) btnCancel.textContent = res.isNgungBan ? 'Đóng' : 'Bỏ qua';
-        } else {
-          if (errorBox) errorBox.style.display = 'none';
-          if (btnDel) btnDel.style.display = 'inline-flex';
-        }
-      }
-    });
   };
 
   // Nút xóa trong modal Sửa
@@ -1705,10 +1678,12 @@
           const errorBox = $('#delProdErrorBox');
           const errorMsg = $('#delProdErrorMsg');
           const btnSwitch = $('#btnSwitchNgungBanInDelModal');
+          const btnCancel = $('#btnCancelDeleteProd');
           if (errorMsg) errorMsg.textContent = res.message || 'Mặt hàng đã phát sinh giao dịch/chứng từ, không thể xóa để bảo toàn lịch sử sổ sách kế toán.';
           if (errorBox) errorBox.style.display = 'block';
           btn.style.display = 'none';
           if (btnSwitch) btnSwitch.style.display = 'inline-flex';
+          if (btnCancel) btnCancel.textContent = 'Đóng';
         } else {
           hide($('#hhDeleteProductOv'));
           if (window.AppToast) {

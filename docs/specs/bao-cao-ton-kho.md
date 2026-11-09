@@ -47,7 +47,7 @@
    - `CoDuoiDinhMuc`: Cờ bool báo hiệu mặt hàng bị dưới định mức ở ít nhất 1 kho.
    - `CoVuotDinhMuc`: Cờ bool báo hiệu mặt hàng bị vượt định mức ở ít nhất 1 kho.
 3. **`BaoCaoTonKhoSummaryVM`**:
-   - `TongSoMatHang`, `TongSoLuongTon`, `TongGiaTriTon`, `SoMatHangCanLuuY`.
+   - TongSoMatHang, TongSoLuongTon, TongGiaTriTon, SoMatHangCanLuuY, TongTonTheoKho (Dictionary<int, decimal> lưu tổng tồn từng kho trên toàn bộ tập dữ liệu đã lọc).
 4. **`BaoCaoTonKhoIndexVM`**:
    - `PagedData`: `PagedResult<BaoCaoTonKhoItemVM>`.
    - `Summary`: `BaoCaoTonKhoSummaryVM`.

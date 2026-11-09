@@ -1,35 +1,61 @@
-# Tiến độ dự án
+﻿# Tiến độ dự án
 
-Cập nhật lần cuối: 2026-11-04 – Tự Động Hóa Chụp Mới Toàn Bộ Ảnh Giao Diện Hệ Thống & Đồng Bộ Báo Cáo LaTeX (Phiên 237)
+Cập nhật lần cuối: 2026-11-04 – Sửa Lỗi Tính Lệch Tổng Tồn Từng Chi Nhánh So Với Cột Tổng Tồn Trong Báo Cáo Tồn Kho (Phiên 239)
 
 ---
 
 ## Đang làm
-- Báo cáo Đồ án LaTeX ([`docs/latex/main.tex`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/docs/latex/main.tex)): Đã hoàn thành 100% chụp mới và đồng bộ toàn bộ ảnh chụp giao diện hệ thống:
-  + Tự động hóa trình duyệt Microsoft Edge qua Playwright ở chuẩn độ phân giải **1440 × 900 px** để chụp mới toàn bộ các màn hình thực tế của ứng dụng.
-  + Cập nhật đồng bộ 9 ảnh giao diện chính trong `docs/latex/figures/` (Hình 3.1 đến 3.9) thay thế hoàn toàn các ảnh cũ:
-    * `hinh3_1_login.png`: Màn hình Đăng nhập & Lựa chọn chi nhánh kho.
-    * `hinh3_2_hanghoa.png`: Quản lý Danh mục Hàng hóa, Cây nhóm hàng & Cảnh báo tồn.
-    * `hinh3_6_nhaphang.png`: Quản lý Giao dịch Nhập hàng từ Nhà cung cấp.
-    * `hinh3_9_tra_hang.png`: Quản lý Giao dịch Trả hàng nhập cho NCC.
-    * `hinh3_7_chuyenkho.png`: Điều chuyển kho nội bộ liên chi nhánh.
-    * `hinh3_8_xuat_huy.png`: Quản lý Giao dịch Xuất hủy hàng hư hỏng/hết hạn.
-    * `hinh3_3_kiemkho.png`: Kiểm kho & Tự động cân bằng sai lệch tồn kho.
-    * `hinh3_4_bcton.png`: Báo cáo Tồn kho dạng Pivot đa chi nhánh & Thẻ KPI.
-    * `hinh3_5_thekho.png`: Báo cáo Thẻ kho biến động xuất nhập tồn lũy kế.
-  + Bổ sung 4 ảnh giao diện các phân hệ mở rộng vào thư viện ảnh: Khách hàng (`hinh3_10_khachhang.png`), Nhà cung cấp (`hinh3_11_nhacungcap.png`), Kho hàng (`hinh3_12_kho.png`), Người dùng (`hinh3_13_nguoidung.png`).
-  + Biên dịch XeLaTeX 2 lượt thành công tuyệt đối: **81 trang A4**, **0 Lỗi**, **0 Overfull `\hbox`**, đồng bộ mục lục và danh mục hình vẽ.
-  + Cập nhật gói nén nộp bài [`docs/BaoCao_LaTeX_Overleaf.zip`](file:///d:/CODE/BTL-LTW-QuanLiKho-2/docs/BaoCao_LaTeX_Overleaf.zip) (4.86 MB).
-  + Khởi tạo tài liệu Artifact trực quan xem ảnh giao diện: [`bo-suu-tap-giao-dien-khopro.md`](file:///C:/Users/TuanAnh/.gemini/antigravity/brain/c2adadad-c808-4168-927c-59c12dee4538/bo-suu-tap-giao-dien-khopro.md).
+- Báo cáo tồn kho (Pivot Kho): Đã xử lý triệt để lỗi dòng tổng hợp (Summary Row) tính lệch tổng tồn của từng chi nhánh so với cột Tổng tồn:
+  + Bổ sung thuộc tính `TongTonTheoKho` vào `BaoCaoTonKhoSummaryVM`.
+  + `BaoCaoController.cs`: Tính toán tổng tồn của từng chi nhánh kho trên toàn bộ tập dữ liệu đã lọc (`filteredList`) thay vì chỉ tính 15 dòng trên trang hiện tại.
+  + `_TonKhoTable.cshtml`: Hiển thị tổng tồn từng chi nhánh từ `Model.Summary.TongTonTheoKho`, đảm bảo tổng của các cột chi nhánh kho luôn cộng bằng 100% cột Tổng tồn.
+  + Kiểm tra biên dịch `dotnet build -t:CoreCompile` đạt **0 Errors**.
 
 ---
 
 ## Việc kế tiếp
-1. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web và xem xét nộp báo cáo.
-2. Chuẩn bị slide thuyết trình bảo vệ đồ án.
+1. Kiểm tra trải nghiệm thực tế trên trình duyệt tại `http://localhost:7087` trên các màn hình Danh mục & Chứng từ.
+2. Kiểm tra nghiệm thu tổng thể hệ thống Bài tập lớn Lập trình Web.
 
 ---
 
+- **Sửa Lỗi Tính Lệch Tổng Tồn Từng Chi Nhánh So Với Cột Tổng Tồn Trong Báo Cáo Tồn Kho (Phiên 239)**:
+  - **Nhu cầu**: Người dùng phản ánh *"bạn hãy xem tồn kho từng cộng vào sao lại ko bằng tổng tồn"* kèm ảnh chụp màn hình báo cáo tồn kho (/BaoCao/TonKho) có dòng tổng kết: Kho trung tâm = 1.080, Kho An Thới = 281, Kho phụ kiện Tuna = 73 (tổng 1.434), nhưng cột Tổng tồn lại hiển thị 2.724.
+  - **Nguyên nhân gốc rễ**:
+    + Trong `_TonKhoTable.cshtml`, các ô chi nhánh kho ở dòng Summary Row trước đó dùng `Model.PagedData.Items.Sum(...)` nên chỉ cộng 15 mặt hàng trên trang 1.
+    + Trong khi đó, cột `Tổng tồn` lại hiển thị `@Model.Summary.TongSoLuongTon` (tính trên toàn bộ mặt hàng thuộc tất cả các trang = 2.724).
+  - **Giải pháp & Kết quả triển khai**:
+    1. **ViewModel (`BaoCaoTonKhoSummaryVM.cs`)**:
+       - Thêm `public Dictionary<int, decimal> TongTonTheoKho { get; set; } = new();` lưu tổng tồn theo từng kho cho toàn bộ tập dữ liệu đã lọc.
+    2. **Backend Controller (`BaoCaoController.cs`)**:
+       - Trong `BuildTonKhoIndexVMAsync`: Lặp qua `selectedKhoIds` và tính `filteredList.Sum(...)` trên toàn bộ tập mặt hàng đã lọc, lưu vào `summary.TongTonTheoKho`.
+    3. **View bảng Pivot (`_TonKhoTable.cshtml`)**:
+       - Thay thế phép tính trên trang 1 bằng `Model.Summary.TongTonTheoKho.TryGetValue(...)`.
+       - Đảm bảo các ô chi nhánh kho hiển thị tổng tồn toàn hệ thống của từng kho, tổng hàng ngang bằng đúng cột Tổng tồn.
+    4. **Kiểm tra biên dịch**:
+       - `dotnet build -t:CoreCompile`: **0 Errors**, 4 Warnings NU1902/CS8602 không đổi.
+
+---
+
+- **Chuẩn Hóa Giao Diện Xóa & Khóa Hàng Hóa Theo Chuẩn Nhà Cung Cấp (Phiên 238)**:
+  - **Nhu cầu**: Người dùng phản ánh *"trong phần danh sách hàng hóa, nghiệp vụ xóa or khóa đang có giao diện rất xấu. bạn hãy sửa lại dựa trên giao diện xóa của nhà cung cấp"* kèm ảnh chụp modal xóa cũ bị lỗi layout và scrollbar ngang.
+  - **Giải pháp & Kết quả triển khai**:
+    1. **Tái thiết kế Modal Xóa & Modal Chuyển Trạng Thái (`_HangHoaModal.cshtml`)**:
+       - Thay thế modal cũ bằng `#hhDeleteProductOv` chuẩn Nhà Cung Cấp: Header với icon thùng rác đỏ SVG, câu hỏi xác nhận rõ ràng, box cảnh báo ràng buộc chứng từ `#fef2f2` có icon `#i-info` và nút `Chuyển sang "Ngừng kinh doanh" ngay`, footer chuẩn class `.hh-btn` và `.hh-btn.danger`.
+       - Bổ sung `#hhStatusConfirmOv`: Modal chuyên dụng xác nhận Ngừng kinh doanh / Cho kinh doanh lại với tiêu đề và icon màu cam/xanh đồng bộ Nhà Cung Cấp.
+       - Thêm `word-break: break-word; overflow-wrap: anywhere;` triệt tiêu 100% lỗi tràn chiều ngang và thanh cuộn ngang xám.
+    2. **Bổ sung Nút Chuyển Trạng Thái trên Bảng (`_HangHoaTable.cshtml`)**:
+       - Thêm nút `.btn-toggle-status-product` ở chân dòng chi tiết sản phẩm (`Ngừng kinh doanh` / `Cho kinh doanh lại`) hệt như Nhà Cung Cấp.
+    3. **Backend Controller (`HangHoaController.cs`)**:
+       - Bổ sung action `ToggleStatus(int id)` hỗ trợ chuyển đổi linh hoạt 2 chiều giữa `DANG_BAN` và `NGUNG_BAN`.
+    4. **Frontend JS (`hang-hoa-form.js` & `hang-hoa-index.js`)**:
+       - Điều chỉnh luồng modal xóa đúng chuẩn Nhà Cung Cấp: Khi mở modal xóa (`openDeleteProductModal`), luôn hiển thị xác nhận xóa thông thường ("Bạn có chắc chắn muốn xóa...?"). Chỉ khi người dùng bấm **"Đồng ý xóa"**, hệ thống mới gửi request `POST /Delete` kiểm tra ràng buộc; nếu phát hiện đã có giao dịch mới hiển thị hộp cảnh báo `#delProdErrorBox` ("Không thể xóa...") và nút `Chuyển sang "Ngừng kinh doanh" ngay`, đồng thời ẩn nút xóa và đổi nút Bỏ qua thành Đóng.
+       - Tích hợp hàm `openStatusConfirmProductModal` và bắt sự kiện `.btn-toggle-status-product`.
+    5. **Kiểm tra**:
+       - `dotnet build -t:Compile` đạt **0 Errors**.
+       - `node -c` trên các file JS đạt **0 Errors**.
+
+---
 - **Tự Động Hóa Chụp Mới Toàn Bộ Ảnh Giao Diện Hệ Thống & Đồng Bộ Báo Cáo LaTeX (Phiên 237)**:
   - **Nhu cầu**: Người dùng yêu cầu: *"tôi đã sửa lại toàn bộ giao diện, bạn hãy chụy ảnh lại phần giao diện giúp tôi"*.
   - **Giải pháp & Kết quả triển khai**:
